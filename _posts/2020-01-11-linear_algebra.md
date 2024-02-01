@@ -371,7 +371,7 @@ $$J(w) = \frac{\left | m_1 - m_2 \right |}{S_1^2 + S_2^2} = \frac{w^T S_b^{LDA}w
 
 $$S^{-1}_w S_b w = \lambda w$$
 
-식을 풀어내는 방식은 [이 곳](http://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)을 참조해서 보는 것을 추천한다.
+식을 풀어내는 방식은 [이 곳](https://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)을 참조해서 보는 것을 추천한다.
 
 ## 순서
 - 전체, 각 클래스의 평균을 계산한다.

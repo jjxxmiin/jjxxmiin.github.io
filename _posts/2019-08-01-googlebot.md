@@ -122,8 +122,8 @@ pip install pyaudio
 
 # 방법5 : 앱인벤터로 제어하기
 
-- 앱인벤터 : [http://appinventor.mit.edu/explore/](http://appinventor.mit.edu/explore/)
-- 사용법 : [http://blog.naver.com/PostView.nhn?blogId=edisondl&logNo=221090848876](http://blog.naver.com/PostView.nhn?blogId=edisondl&logNo=221090848876)
+- 앱인벤터 : [https://appinventor.mit.edu/explore/](https://appinventor.mit.edu/explore/)
+- 사용법 : [https://blog.naver.com/PostView.nhn?blogId=edisondl&logNo=221090848876](https://blog.naver.com/PostView.nhn?blogId=edisondl&logNo=221090848876)
 
 ---
 
@@ -343,4 +343,4 @@ sudo make install
 
 - snowboy : [https://blog.naver.com/chandong83/221130096432](https://blog.naver.com/chandong83/221130096432)
 
-- mjpg : [http://www.rasplay.org/?p=7174](http://www.rasplay.org/?p=7174)
+- mjpg : [https://www.rasplay.org/?p=7174](https://www.rasplay.org/?p=7174)

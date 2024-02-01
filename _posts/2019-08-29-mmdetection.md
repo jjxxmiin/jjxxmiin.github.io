@@ -176,9 +176,9 @@ mmdetection
 
 데이터셋을 다운로드하고 위와 같은 구조를 맞추어 주어야한다.
 
-- [COCO](http://cocodataset.org/#download)
-- [VOC2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/)
-- [VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/)
+- [COCO](https://cocodataset.org/#download)
+- [VOC2007](https://host.robots.ox.ac.uk/pascal/VOC/voc2007/)
+- [VOC2012](https://host.robots.ox.ac.uk/pascal/VOC/voc2012/)
 - [cityscapes](https://github.com/mcordts/cityscapesScripts)
 
 ```

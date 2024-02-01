@@ -236,8 +236,8 @@ print('inference time : ',end-start)
 - [https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/](https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/)
 - [https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase](https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase)
 - [https://software.intel.com/en-us/articles/OpenVINO-Using-TensorFlow#converting-a-darknet-yolo-model](https://software.intel.com/en-us/articles/OpenVINO-Using-TensorFlow#converting-a-darknet-yolo-model)
-- [http://cocodataset.org/#overview](http://cocodataset.org/#overview)
+- [https://cocodataset.org/#overview](https://cocodataset.org/#overview)
 
 
 ## 추론
-- [http://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html](http://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html)
+- [https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html](https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html)

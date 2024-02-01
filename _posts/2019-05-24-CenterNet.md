@@ -31,7 +31,7 @@ math: true
   + `DLA34` : 52FPS에서 37.4 AP
   + `Hourglass-104` : 1.4FPS에서 45.1 AP
 
-- [KITTI 벤치마크](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d)에서 3D bounding box를 추정하고 [COCO keypoint 데이터셋](http://cocodataset.org/#download)에서 사람의 자세를 계산하기 위해 동일한 접근법을 사용한다.
+- [KITTI 벤치마크](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d)에서 3D bounding box를 추정하고 [COCO keypoint 데이터셋](https://cocodataset.org/#download)에서 사람의 자세를 계산하기 위해 동일한 접근법을 사용한다.
 
 ---
 

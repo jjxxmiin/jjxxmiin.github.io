@@ -284,4 +284,4 @@ $$v_t$$ : 실제 적용되는 reward
 
 - [https://4four.us/article/2018/08/policy-gradient](https://4four.us/article/2018/08/policy-gradient)
 
-- [http://www.modulabs.co.kr/RL_library/3305](http://www.modulabs.co.kr/RL_library/3305)
+- [https://www.modulabs.co.kr/RL_library/3305](https://www.modulabs.co.kr/RL_library/3305)

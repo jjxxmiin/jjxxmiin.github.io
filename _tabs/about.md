@@ -167,7 +167,7 @@ stage classification
 
 # Competitions
 
-- [가속화 프로그래밍 겨울학교 3위 수상 (2019-01)](http://www.manycoresoft.co.kr/school/)
+- [가속화 프로그래밍 겨울학교 3위 수상 (2019-01)](https://www.manycoresoft.co.kr/school/)
 
 - [Dacon : 위성관측 데이터 활용 강수량 산출 AI 경진대회 2위 수상 (2020-05)](https://dacon.io/competitions/official/235591/leaderboard/)
 

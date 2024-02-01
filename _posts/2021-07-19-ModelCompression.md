@@ -203,7 +203,7 @@ latency를 개선하려면 고정 소수점 표현에서 수학 연산을 해야
 
 ## Quantization-Aware Training(QAT)
 
-[논문](http://audentia-gestion.fr/Recherche-Research-Google/37631.pdf)에서 훈련 후에 양자화 된 5계층 feed-forward network를 언급합니다.
+[논문](https://audentia-gestion.fr/Recherche-Research-Google/37631.pdf)에서 훈련 후에 양자화 된 5계층 feed-forward network를 언급합니다.
 
 하지만 아래 몇몇 연구에서 강조하는 것처럼 네트워크가 더 복잡해짐에 따라 훈련 후 양자화는 추론 성능을 좋지 않게 한다는 것을 보여줍니다. 이는 2가지 이유가 있는데..
 
@@ -213,7 +213,7 @@ latency를 개선하려면 고정 소수점 표현에서 수학 연산을 해야
 
 이러한 문제는 low-bit widths 에서 더 두드러질 수 있습니다.
 
-- [Towards Accurate Post-training Network Quantization via Bit-Split and Stitching](http://proceedings.mlr.press/v119/wang20c/wang20c.pdf) : 훈련 후 양자화를 유지하려 하지만 학습된 방식으로 precision bits를 할당하기 위한 새로운 방법을 사용
+- [Towards Accurate Post-training Network Quantization via Bit-Split and Stitching](https://proceedings.mlr.press/v119/wang20c/wang20c.pdf) : 훈련 후 양자화를 유지하려 하지만 학습된 방식으로 precision bits를 할당하기 위한 새로운 방법을 사용
 
 - [TFLite Converter](https://blog.tensorflow.org/2019/06/tensorflow-integer-quantization.html) : 양자화된 모델과 양자화되지 않은 모델 사이의 activations 간의 오류를 비교하여 능동적으로 수정
 

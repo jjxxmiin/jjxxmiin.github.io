@@ -145,7 +145,7 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 
 # LightGBM / XGBoost 파라미터
 
-[이 곳](http://machinelearningkorea.com/2019/09/29/lightgbm-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0/)에 잘 나와 있어서 참조하시면 될 것 같습니다.
+[이 곳](https://machinelearningkorea.com/2019/09/29/lightgbm-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0/)에 잘 나와 있어서 참조하시면 될 것 같습니다.
 
 - `max_depth / max_depth`: tree의 depth인데 이를 통해 overfitting과 underfitting을 조절
 

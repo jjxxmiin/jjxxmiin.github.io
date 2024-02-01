@@ -241,5 +241,5 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 
 
 # 참조
-- [http://research.sualab.com/review/2018/09/28/nasnet-review.html](http://research.sualab.com/review/2018/09/28/nasnet-review.html)
-- [http://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154](http://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154)
+- [https://research.sualab.com/review/2018/09/28/nasnet-review.html](https://research.sualab.com/review/2018/09/28/nasnet-review.html)
+- [https://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154](https://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154)

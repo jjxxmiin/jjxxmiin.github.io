@@ -92,7 +92,7 @@ wget https://dl.fbaipublicfiles.com/detectron2/COCO-Detection/faster_rcnn_R_101_
 - 테스트할 이미지 파일
 
 ```
-wget http://farm4.staticflickr.com/3775/9332963028_598bcb7aac_z.jpg
+wget https://farm4.staticflickr.com/3775/9332963028_598bcb7aac_z.jpg
 ```
 
 
