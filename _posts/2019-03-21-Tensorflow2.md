@@ -3,7 +3,7 @@ layout: post
 title:  "Tensorflow 2.0"
 summary: "텐서플로우 2.0 사용하기"
 date:   2019-03-21 22:00 -0400
-categories: tensorflow
+categories: opensource
 ---
 
 # TensorFlow 2.0 alpha

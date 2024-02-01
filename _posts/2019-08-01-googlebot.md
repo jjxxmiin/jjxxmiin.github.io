@@ -3,7 +3,7 @@ layout: post
 title:  "Google Assistant Robot"
 summary: "Google Assistant Robot 만들기"
 date:   2019-08-01 13:00 -0400
-categories: pi
+categories: edge
 ---
 
 # Google Assistant Robot

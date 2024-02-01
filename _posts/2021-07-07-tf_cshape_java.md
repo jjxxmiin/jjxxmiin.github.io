@@ -3,7 +3,7 @@ layout: post
 title:  "Tensorflow 1.13.1 에서 JAVA, C#에 포팅할 모델을 만드는 방법"
 summary: "Tensorflow 1.13.1 에서 JAVA, C#에 포팅할 모델을 만드는 방법"
 date:   2021-07-01 09:10 -0400
-categories: news
+categories: opensource
 ---
 
 > 보통 제가 읽으려고 글을 쓰는데 혹시 부족한게 있다면 댓글이나 메일을 부탁드립니다. 개선하겠습니다.

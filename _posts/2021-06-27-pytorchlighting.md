@@ -3,7 +3,7 @@ layout: post
 title:  "Pytorch lightning 사용하기"
 summary: "Pytorch lightning 사용하기"
 date:   2021-06-27 09:10 -0400
-categories: pytorch
+categories: opensource
 ---
 
 > 조금씩이라도 자주 써야겠다.

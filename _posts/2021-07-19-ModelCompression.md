@@ -3,7 +3,7 @@ layout: post
 title:  "2021 Efficient Deep Learning!!"
 summary: "Efficient Deep Learning: A Survey on Making Deep Learning Models Smaller, Faster, and Better"
 date:   2021-07-19 09:10 -0400
-categories: news
+categories: paper
 math: true
 ---
 

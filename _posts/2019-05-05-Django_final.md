@@ -3,7 +3,7 @@ layout: post
 title:  "Django 분석하기"
 summary: "Django 분석하기"
 date:   2019-05-16 12:00 -0400
-categories: django
+categories: opensource
 ---
 
 # Django를 제대로 알아보자

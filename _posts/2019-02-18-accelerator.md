@@ -3,7 +3,7 @@ layout: post
 title:  "가속기 프로그래밍 겨울학교"
 summary: "2019 가속기 프로그래밍 겨울학교"
 date:   2019-02-18 09:00 -0400
-categories: gpu
+categories: review
 math: true
 ---
 

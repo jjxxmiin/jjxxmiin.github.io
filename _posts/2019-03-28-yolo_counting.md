@@ -3,7 +3,7 @@ layout: post
 title:  "YOLO People counting"
 summary: "라즈베리파이에서 NCS2를 이용해 yolo people counting"
 date:   2019-03-28 13:00 -0400
-categories: yolo
+categories: opensource
 ---
 
 # YOLO People Counting

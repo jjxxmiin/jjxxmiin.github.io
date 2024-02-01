@@ -3,7 +3,7 @@ layout: post
 title:  "딥러닝 공부할 때 알면 좋은 Linear Algebra"
 summary: "훑어보기 위해 적어본 선형 대수학 기초 + PCA, LDA"
 date:   2020-01-11 16:00 -0400
-categories: math
+categories: concept
 math: true
 ---
 

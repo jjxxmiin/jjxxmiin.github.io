@@ -3,7 +3,7 @@ layout: post
 title:  "LightGBM 그리고 XGBoost"
 summary: "LightGBM 그리고 XGBoost"
 date:   2021-06-29 09:10 -0400
-categories: machinelearning
+categories: concept
 ---
 
 > Competitions에서 맨날 사용되는 LightGBM과 XGBoost 그에 대해서 알아보자
