@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "HazardNet"
+title:  "HazardNet [진행중]"
 summary: "도로위에 위험물을 감지하는 방법에 대한 논문"
 date:   2024-02-10 16:00 -0400
 categories: paper
