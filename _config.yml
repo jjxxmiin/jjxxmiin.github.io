@@ -23,7 +23,7 @@ description: >- # used by seo meta and the atom feed
 
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
-url: "https://jjeamin.github.io"
+url: "https://jjxxmiin.github.io"
 
 github:
   username: jjxxmiin # change to your github username
@@ -44,7 +44,7 @@ social:
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
 
-google_site_verification: lhxQiy2vplw4RmXWDFj6urNmjVdWKYWIbiHdCUlGVzg # fill in to your verification string
+google_site_verification: Hsc9x9iX6CxzYYn7dBkfON10hNB0ShN1AXbwRBP2SOg # fill in to your verification string
 
 # ↑ --------------------------
 # The end of `jekyll-seo-tag` settings
