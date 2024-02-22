@@ -102,6 +102,6 @@ DarkNet53을 다른 모델과 비교합니다. 데이터셋은 ImageNet을 사�
 
 ## What This All Means
 
-YOLOv3는 정확하고 빠릅니다. 하지만 COCO metric(0.5 \~ 0.95까지 조금씩 늘리면서 평가하는 방법)으로는 좋지 않지만 AP50 metric은 좋습니다. [Russakovsky et al.](http://ai.stanford.edu/\~olga/papers/RussakovskyCVPR15.pdf)은 사람들에게 IOU가 0.3, 0.5인 bounding box를 구분하도록 하게 했지만 구분을 잘 못했다고 합니다. 그 말은 즉슨 COCO metric처럼 세밀한 평가 방법이 정말 좋은지에 대한 의견을 말합니다.
+YOLOv3는 정확하고 빠릅니다. 하지만 COCO metric(0.5 \~ 0.95까지 조금씩 늘리면서 평가하는 방법)으로는 좋지 않지만 AP50 metric은 좋습니다. [Russakovsky et al.](https://ai.stanford.edu/\~olga/papers/RussakovskyCVPR15.pdf)은 사람들에게 IOU가 0.3, 0.5인 bounding box를 구분하도록 하게 했지만 구분을 잘 못했다고 합니다. 그 말은 즉슨 COCO metric처럼 세밀한 평가 방법이 정말 좋은지에 대한 의견을 말합니다.
 
 Rebutter는 YOLO benchmarking의 위치, COCO metric이 약한 이유를 더 세밀하게 풀어내지만 직접적으로 다루지 않겠습니다.
