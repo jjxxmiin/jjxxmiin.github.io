@@ -3,7 +3,7 @@ layout: post
 title:  "StyleBland + StyleTransfer 톺아보기"
 summary: "StyleBland + StyleTransfer 톺아보기"
 date:   2021-12-15 09:10 -0400
-categories: gan
+categories: paper
 ---
 
 근래 StyleGAN에 푹 빠져서 관련자료를 쭉 읽어보았다.
