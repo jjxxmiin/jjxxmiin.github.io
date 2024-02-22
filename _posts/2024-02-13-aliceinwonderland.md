@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Alice in Wonderland 원서 읽기 1주차 [진행중]"
+title:  "Alice in Wonderland 원서 읽기 1주차"
 summary: "Alice in Wonderland 원서로 영어 공부하기 1주차"
 date:   2024-02-13 16:00 -0400
 categories: english
