@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Diffusion"
+title:  "Diffusion 톺아보기"
 summary: "Long time no see"
 date:   2023-03-06 16:00 -0400
 categories: diffusion

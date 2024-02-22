@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "MMDetection"
+title:  "MMDetection 톺아보기"
 summary: "MMDetection 논문 읽어보기 / 사용하기"
 date:   2019-08-29 13:00 -0400
 categories: paper

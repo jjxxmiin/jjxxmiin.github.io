@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Google Assistant Robot"
+title:  "구글 어시스턴트 로봇 만들기"
 summary: "Google Assistant Robot 만들기"
 date:   2019-08-01 13:00 -0400
 categories: edge

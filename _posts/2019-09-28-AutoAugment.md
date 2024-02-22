@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "AutoAugment"
+title:  "AutoAugment 톺아보기"
 summary: "AutoAugment 논문 읽어보기"
 date:   2019-09-28 13:00 -0400
 categories: paper

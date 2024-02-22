@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "CenterNet"
+title:  "CenterNet 톺아보기"
 summary: "CenterNet 논문 읽어보기"
 date:   2019-05-19 13:00 -0400
 categories: paper

@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "YOLO openvino NCS2"
-summary: "NCS2에서 YOLO실행 using Raspberry"
+title:  "라즈베리파이에서 Openvino 끄적이기"
+summary: "라즈베리파이에서 YOLOv3를 Openvino를 활용하여 실행하기"
 date:   2019-03-30 13:00 -0400
 categories: edge
 ---

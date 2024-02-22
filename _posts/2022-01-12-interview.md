@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Deep Learning Interviews 정리"
-summary: "Deep Learning Interviews 정리"
+title:  "Deep Learning Interviews 끄적이기"
+summary: "Deep Learning Interviews 끄적이기"
 date:   2022-01-12 09:10 -0400
 categories: concept
 math: true

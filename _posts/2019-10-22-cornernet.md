@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "CornerNet"
+title:  "CornerNet 톺아보기"
 summary: "CornerNet 논문 읽어보기"
 date:   2019-10-22 13:00 -0400
 categories: paper

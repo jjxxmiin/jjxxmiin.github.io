@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Pytorch lightning 사용하기"
-summary: "Pytorch lightning 사용하기"
+title:  "Pytorch lightning 끄적이기"
+summary: "Pytorch lightning 끄적이기"
 date:   2021-06-27 09:10 -0400
 categories: opensource
 ---

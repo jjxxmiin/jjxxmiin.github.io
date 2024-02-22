@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "Serialization"
+title:  "Serialization 끄적이기"
 summary: "Serialization JSON, Protobuf"
 date:   2020-06-09 09:10 -0400
-categories: concept
+categories: python
 ---
 
 # Serialization

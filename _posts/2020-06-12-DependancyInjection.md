@@ -1,8 +1,8 @@
 ---
-title:  "Dependancy Injection"
-summary: "의존성 주입"
+title:  "Dependancy Injection 끄적이기"
+summary: "의존성 주입 끄적이기"
 date:   2020-06-13 09:10 -0400
-categories: concept
+categories: python
 ---
 
 # Dependancy Injection

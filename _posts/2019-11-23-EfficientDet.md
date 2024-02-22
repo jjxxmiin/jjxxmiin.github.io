@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "EfficientDet-1"
+title:  "EfficientDet 톺아보기 1"
 summary: "EfficientNet 논문 읽어보기"
 date:   2019-11-23 13:00 -0400
 categories: paper

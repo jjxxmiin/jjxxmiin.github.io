@@ -1,13 +1,11 @@
 ---
 layout: post
-title:  "Detectron"
+title:  "Detectron 끄적이기"
 summary: "Pytorch Detectron 사용하기"
 date:   2020-04-04 13:00 -0400
-categories: paper
+categories: opensource
 use_math: true
 ---
-
-*오랜만에 포스트를 작성한다. 핑계를 말하자면.. 요즘 논문 작성 때문에 논문 읽기와 아이디어 생산에 집중하였다.. 결과는 좋지 않아 답답한 마음에 오랜만에 포스팅을 한다. 후에 논문을 쓰면서 했던 내 생각들을 딱 한편의 글로 작성할 예정이다. 다른 이들에게 도움이 되길..*
 
 # Detectron
 페이스북에서 개발한 `object detection`, `segmentation` 프레임워크다.

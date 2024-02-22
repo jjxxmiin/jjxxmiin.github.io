@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Xception MobileNet"
+title:  "Xception MobileNet 톺아보기"
 summary: "Xception MobileNet"
 date:   2019-07-07 13:00 -0400
 categories: paper
@@ -129,7 +129,6 @@ key : `depthwise separable convolution`
 # 결론
 계산량이 9배정도 줄어들고 accuracy는 약 1% 밖에 떨어지지 않았다.
 
----
 ---
 
 # VGG

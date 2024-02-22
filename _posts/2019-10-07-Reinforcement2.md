@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Reinforcement Learning"
-summary: "Reinforcement Learning(Q-learning 부터 policy gradient 까지)"
+title:  "강화학습 끄적이기 2"
+summary: "모두의 딥러닝 강화학습"
 date:   2019-10-07 16:00 -0400
 categories: reinforcement
 math: true

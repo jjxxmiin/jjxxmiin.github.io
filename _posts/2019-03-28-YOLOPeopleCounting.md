@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "YOLO People counting"
-summary: "라즈베리파이에서 NCS2를 이용해 yolo people counting"
+title:  "YOLO로 사람 수 세기"
+summary: "라즈베리파이에서 YOLO를 Neural Compute Sticks를 활용하여 실행하기"
 date:   2019-03-28 13:00 -0400
-categories: opensource
+categories: edge
 ---
 
 # YOLO People Counting

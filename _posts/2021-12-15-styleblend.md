@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "StyleBland + StyleTransfer"
-summary: "StyleBland + StyleTransfer"
+title:  "StyleBland + StyleTransfer 톺아보기"
+summary: "StyleBland + StyleTransfer 톺아보기"
 date:   2021-12-15 09:10 -0400
 categories: gan
 ---

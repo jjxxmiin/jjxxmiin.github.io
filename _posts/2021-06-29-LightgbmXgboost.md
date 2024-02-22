@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "LightGBM 그리고 XGBoost"
-summary: "LightGBM 그리고 XGBoost"
+title:  "LightGBM 그리고 XGBoost 끄적이기"
+summary: "LightGBM 그리고 XGBoost 끄적이기"
 date:   2021-06-29 09:10 -0400
 categories: concept
 ---

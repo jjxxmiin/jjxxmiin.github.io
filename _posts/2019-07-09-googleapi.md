@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Google Assistant API"
-summary: "라즈베리파이에서 google API 실행하기"
+title:  "구글 어시스턴트 끄적이기"
+summary: "라즈베리파이에서 google Assistant API 실행하기"
 date:   2019-07-09 13:00 -0400
 categories: edge
 ---

@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Replicate 사용법"
+title:  "Replicate 끄적이기"
 summary: "자신의 인공지능 모델을 Replicate로 배포하기"
 date:   2024-02-01 16:00 -0400
 categories: review
