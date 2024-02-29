@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Alice in Wonderland 원서 읽기 - 2주차"
-summary: "Alice in Wonderland 원서를 통한 영어 학습 - 2주차"
+title:  "Alice in Wonderland 원서 읽기 - 챕터 2"
+summary: "Alice in Wonderland 원서를 통한 영어 학습 - 챕터 2"
 date:   2024-02-22 16:00 -0400
 categories: english
 math: true
