@@ -11,6 +11,23 @@ math: true
 
 한 번씩 읽으면서 이야기를 읽어만 봐도 도움이 많이된다. 읽으면서 이해할 때는 영어를 정확히 번역하지 않고 한번 마무리하고 그다음 천천히 이해하면 좋다.
 
+오늘은 "Roget's Thesaurus" 라는 것에 대해서 이야기를 해주셨다. 이는 동의어 사전이라고 생각하면 된다. 예를 들어서 'happy'를 찾으면 'joyful', 'content', 'pleased' 등과 같은 동의어를 찾을 수 있다. 또한 반대 의미의 단어도 제공이 되는데 'happy'의 경우 'unhappy', 'sad', 'miserable' 등의 단어를 찾을 수 있다.
+
+이는 논문을 쓸 때도 도움이 많이 될 것 같다.
+
+이야기를 하다가 헤어질 때 어떻게 해야하는지도 배웠다. 한국의 경우 보통 연세가 높은 사람이 먼저 오늘은 여기까지라고 한다면 여기에서는 젊은사람이 먼저 오늘은 여기까지 한다고 한다.
+
+> Well, I think it's time I should get going.
+> Gambits
+> Strategies
+> Ways of doing something
+
+중간에 이상한 전화가 왔는데 이상한 전화를 거절 할 때는 아래와 같은 표현으로 정중하게 거절해보자.
+
+> I'm sorry, This is an unsolicited call.
+
+이 문단에서 배울 수 있는 것은 사람은 각자 다르고, 사람의 말에 귀를 기울이는 등 사람과 사람과의 관계를 나타내는 문단이라고 볼 수 있다. 메들린이 말하기를.. 이 저자는 모든 문장과 단어에 한땀 한땀 신중을 기울였다고 한다.
+
 ---
 
 **English**: A CAUCUS-RACE AND A LONG TALE
@@ -40,6 +57,8 @@ math: true
 **English**: Alice kept her eyes anxiously fixed on it, for she felt sure she would catch a bad cold if she did not get dry very soon. "Ahem!" said the Mouse with an important air, "are you all ready? This is the driest thing I know. Silence all round, if you please! 'William the Conqueror, whose cause was favoured by the pope, was soon submitted to by the English, who wanted leaders, and had been of late much accustomed to usurpation and conquest. Edwin and Morear, the earls of Mercia and Northumbria-'"
 
 **Korean**: “에헴!” 생쥐가 젠체하며 이야기를 시작했다. “준비되셨나요? 이건 제가 아는 가장 매마른 이야기입니다. 정숙해 주시길 부탁드립니다! ‘교황의 총애로 명분을 얻은 정복자 윌리엄에게, 지도자를 원했고 약탈당하고 정복당하는데 너무나 익숙했던 잉글랜드 사람들은 곧바로 복종했습니다. 메르시아와 노섬브리아의 백작 에드윈과 모르카르는 -- ’”
+
+> 과연 이런 이야기는 왜 나온 것인가? 싱겁고 재미없는 이야기는 dry하다고 한다. 그렇기에 여기서 재미없는 이야기를 말하기 시작하는 부분은 젖은 이들을 dry 시키기 위해서다.
 
 ---
 
@@ -130,6 +149,8 @@ math: true
 **English**: First it marked out a race-course, in a sort of circle, ("the exact shape doesn't matter," it said,) and then all the party were placed along the course, here and there. There was no "One, two, three, and away," but they began running when they liked, and left off when they liked, so that it was not easy to know when the race was over. However, when they had been running half-an-hour or so, and were quite dry again, the Dodo suddenly called out, "The race is over!" and they all crowded round it, panting, and asking, "But who has won?"
 
 **Korean**: 도도새는 먼저 원 비스무리한 것을 그려서 경주로를 만들었다.(도도새는 “꼭 정확한 원은 아니어도 돼.”라고 했다.) 그리고 저마다 경주로 이 곳 저 곳에 자리 잡았다. “준비, 출발”은 없고 각자 출발하고 싶은 때 출발해서 나오고 싶을 때 나오면 되었는데, 당연히 언제 경주가 끝나는지 알기가 어려웠다. 하지만, 삼십 분 정도 달리자 도도새가 갑자기 “경주 끝!”이라고 외쳤고 그 즈음에는 꽤나 몸이 말라 있었다. 경주로에 모인 동물들은 헐떡이면서“그런데, 누가 이겼지?”하고 물었다.
+
+> 코커스 경주란 어쩌면 의미없는 경쟁이다. 이는 실제 우리가 현실에서 마주치는 문제와 같다. 정답도 없고 방법도 없는 경주...
 
 ---
 
