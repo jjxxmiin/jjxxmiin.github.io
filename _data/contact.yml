@@ -3,6 +3,10 @@
 - type: github
   icon: "fab fa-github"
 
+- type: instagram
+  icon: 'fa-brands fa-instagram'   # icons powered by <https://fontawesome.com/>
+  url:  'https://www.instagram.com/fit.anything/'                  # Fill with your Mastodon account page, rel="me" will be applied for verification
+
 - type: twitter
   icon: "fa-brands fa-x-twitter"
 
