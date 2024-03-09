@@ -16,10 +16,10 @@ timezone: Asia/Seoul
 
 title: Jaemin Jeong # the main title
 
-tagline: JUST DO IT # it will display as the sub-title
+tagline: DO OR DO NOT, THERE IS NO TRY # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  You can get a open source information.
+  인공지능 오픈소스 분석 및 리뷰 그리고 개인 공부 자료를 공유합니다.
 
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
