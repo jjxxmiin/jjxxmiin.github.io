@@ -76,12 +76,12 @@ order: 2
 
 
 
-![darknet](/assets/img/post_img/about/darknet.PNG)
+![darknet](/assets/img/post_img/about/darknet.png)
 
 
 
-- [Demo Page](https://www.opensource-book.kro.kr/)
-- [Github](https://github.com/jjxxmiin/darknet_book_public)
+- [Demo Page](https://opensource-book.gitbook.io/darknet-book-2)
+- [Github](https://github.com/jjxxmiin/darknet_book_2)
 - Requirements
   - GitBook
 
