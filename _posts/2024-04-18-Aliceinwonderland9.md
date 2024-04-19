@@ -142,7 +142,7 @@ Alice was very nearly getting up and saying, “Thank you, sir, for your interes
 
 “We called him Tortoise because he taught us,” said the Mock Turtle angrily; “really you are very dull!”
 
-“You ought to be ashamed of yourself for asking such a simple question,” added the Gryphon; and then they both sat silent and looked at poor Alice, who felt ready to sink into the earth. At last the Gryphon said to the Mock Turtle, “Drive on, old fellow ! Don’t be all day about it!” and he went on in these words.
+“You ought to be ashamed of yourself for asking such a simple question,” added the Gryphon; and then they both sat silent and looked at poor Alice, who felt ready to sink into the earth. At last the Gryphon said to the Mock Turtle, “Drive on, old fellow! Don’t be all day about it!” and he went on in these words.
 
 “Yes, we went to school in the sea, though you mayn’t believe it—”
 
@@ -150,7 +150,7 @@ Alice was very nearly getting up and saying, “Thank you, sir, for your interes
 
 “You did,” said the Mock Turtle.
 
-“Hold your tongue !” added the Gryphon, before Alice could speak again. The Mock Turtle went on.
+“Hold your tongue!” added the Gryphon, before Alice could speak again. The Mock Turtle went on.
 
 “We had the best of educations—in fact, we went to school every day—”
 
@@ -166,21 +166,21 @@ Alice was very nearly getting up and saying, “Thank you, sir, for your interes
 
 “Ah! Then yours wasn’t a really good school,” said the Mock Turtle in a tone of great relief, “now at ours they had at the end of the bill, ‘French, music, and washing—extra.’”
 
-“You couldn’t have wanted it much,” said Alice; “ living at the bottom of the sea.”
+“You couldn’t have wanted it much,” said Alice; “living at the bottom of the sea.”
 
-“I couldn’t afford to learn it,” said the Mock Turtle with a sigh. “ I only took the regular course.”
+“I couldn’t afford to learn it,” said the Mock Turtle with a sigh. “I only took the regular course.”
 
 “What was that?” enquired Alice.
 
 “Reeling and Writhing, of course, to begin with,” the Mock Turtle replied : “and then the different branches of Arithmetic—Ambition, Distraction, Uglification, and Derision.”
 
-“I never heard of ‘Uglification,’ ” Alice ventured to say. “What is it?”
+“I never heard of ‘Uglification,’” Alice ventured to say. “What is it?”
 
 The Gryphon lifted up both its paws in surprise. “Never heard of uglifying!” it exclaimed. “You know what to beautify is, I suppose?”
 
-“Yes,” said Alice, doubtfully : “ it means—to—make—anything—prettier.”
+“Yes,” said Alice, doubtfully : “it means—to—make—anything—prettier.”
 
-“Well then,” the Gryphon went on, “if you don ’t know what to uglify is, you are a simpleton.”
+“Well then,” the Gryphon went on, “if you don’t know what to uglify is, you are a simpleton.”
 
 Alice did not feel encouraged to ask any more questions about it, so she turned to the Mock Turtle, and said “What else had you to learn?”
 
@@ -192,7 +192,7 @@ Alice did not feel encouraged to ask any more questions about it, so she turned 
 
 “Hadn’t time,” said the Gryphon : “I went to the Classical master, though. He was an old crab, he was.”
 
-“I never went to him,” the Mock Turtle said with a sigh : “ he taught Laughing and Grief, they used to say.”
+“I never went to him,” the Mock Turtle said with a sigh : “he taught Laughing and Grief, they used to say.”
 
 “So he did, so he did,” said the Gryphon, sighing in his turn, and both creatures hid their faces in their paws.
 
@@ -200,14 +200,14 @@ Alice did not feel encouraged to ask any more questions about it, so she turned 
 
 “Ten hours the first day,” said the Mock Turtle: “nine the next, and so on.”
 
-“What a curious plan !” exclaimed Alice.
+“What a curious plan!” exclaimed Alice.
 
-“That ’s the reason they ’re called lessons,” the Gryphon remarked : “ because they lessen from day to day.”
+“That’s the reason they’re called lessons,” the Gryphon remarked: “ because they lessen from day to day.”
 
-This was quite a new idea to Alice, and she thought it over a little before she made her next remark. “Then the eleventh day must have been a holiday ?”
+This was quite a new idea to Alice, and she thought it over a little before she made her next remark. “Then the eleventh day must have been a holiday?”
 
 “Of course it was,” said the Mock Turtle.
 
 “And how did you manage on the twelfth ?” Alice went on eagerly.
 
-“That’s enough about lessons,” the Gryphon interrupted in a very decided tone : “ tell her something about the games now.”
+“That’s enough about lessons,” the Gryphon interrupted in a very decided tone: “tell her something about the games now.”
