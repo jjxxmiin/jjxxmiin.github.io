@@ -3,11 +3,18 @@ icon: fa-regular fa-folder
 order: 2
 ---
 
+# Doing
+
+**Road Debris Detection**
+
 # AI Tools
 
 **FIT ANYTHING**
 
-- [BETA](https://fitanything.com/)
+
+
+![face_swap](/assets/img/post_img/about/fitanything.png)
+
 
 
 # AI for Face Beauty
