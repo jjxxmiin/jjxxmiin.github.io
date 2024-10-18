@@ -2,7 +2,7 @@
 
 - type: website
   icon: 'fa-regular fa-browser'
-  url: 'www.opsoai.com'
+  url: 'https://www.opsoai.com'
 
 - type: github
   icon: "fab fa-github"
