@@ -1,9 +1,9 @@
 #  The contact options.
 
 - type: website
-  icon: 'fa-solid fa-browser'
+  icon: 'fa-solid fa-pen-nib'
   url: 'https://www.opsoai.com'
-
+  
 - type: github
   icon: "fab fa-github"
 
