@@ -2,7 +2,7 @@
 layout: post
 title:  "UCNCTrack 톺아보기"
 summary: "객체 추적을 위한 최신 논문"
-date:   2025-01-10 16:00 -0400
+date:   2025-01-09 16:00 -0400
 categories: paper
 math: true
 ---
@@ -21,12 +21,45 @@ UCMCTrack은 2024년 AAAI에서 발표된 다중 객체 추적(Multi-Object Trac
 
 #### Motion Modeling on Ground Plane
 
+탐지된 객체의 경계 상자를 **호모그래피 변환**을 이용해 이미지 평면에서 지면 평면으로 매핑하고, 이를 통해 카메라 움직임이 있는 경우에도 객체의 실제 움직임을 정확히 반영한다.
+
+- **변환 공식**: [ u v 1 ]ᵀ = γ * A * [ x y 1 ]ᵀ
+- `u`, `v`: 이미지 평면 좌표.
+- `x`, `y`: 지면 평면 좌표.
+- `A`: 카메라의 투영 행렬.
+- `γ`: 스케일 팩터.
+
 #### Correlated Measurement Distribution
+지면 평면으로 매핑된 객체는 측정 오차가 상관성을 갖게 되며, **CMD**는 이를 반영하여 객체 위치 추정의 신뢰도를 높인다.
+
+- **주요 계산**:
+1. 탐지 오차 공분산 행렬 계산:
+   ```
+   Ruv_k = [ (σmw)²   0
+              0    (σmh)² ]
+   ```
+2. 지면 평면에서 노이즈 행렬 계산:
+   ```
+   Rk = C * Ruv_k * Cᵀ
+   ```
 
 #### Mapped Mahalanobis Distance
+객체 매칭에 IoU 대신 **마할라노비스 거리**를 사용하여 신뢰도 높은 매칭을 제공한다.
+
+- **계산 공식**:
+D = ϵᵀ * S⁻¹ * ϵ + ln|S|
+
+yaml
+Copy code
+- `ϵ`: 잔차 (측정값 - 예측값).
+- `S`: 잔차 공분산 행렬.
 
 #### Process Noise Compensation
+칼만 필터를 사용해 객체의 이동을 모델링하며, 카메라 움직임으로 인한 노이즈를 보상한다.
 
+- **노이즈 보상 모델**: ∆x = 0.5 * σ * (∆t)² ∆v = σ * ∆t
+- `∆t`: 프레임 간 시간 간격.
+- `σ`: 카메라의 가속도 변화.
 
 ## 실행하기
 
@@ -35,7 +68,22 @@ UCMCTrack은 2024년 AAAI에서 발표된 다중 객체 추적(Multi-Object Trac
 - Ultralytics for YOLO
 - Download weight file [yolov8x.pt](https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8x.pt) to folder `pretrained`
 
+#### 저장소 가져오기
 
 ```bash
 git clone https://github.com/corfyi/UCMCTrack.git
+cd UCMCTrack
 ```
+
+#### 패키지 설치하기
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 데모 실행하기
+
+```bash
+python demo.py
+```
+
