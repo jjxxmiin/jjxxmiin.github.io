@@ -87,3 +87,8 @@ pip install -r requirements.txt
 python demo.py
 ```
 
+### 카메라 매개변수 추정하기
+
+```bash
+python util/estimate_cam_para.py --img demo/demo.jpg --cam_para demo/cam_para_test.txt
+```
