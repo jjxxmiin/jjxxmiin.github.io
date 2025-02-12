@@ -43,13 +43,17 @@ Especially...
 
 **Journal**
 
+- Explainable vision transformer for automatic visual sleep staging on multimodal PSG signals
+  + Hyojin Lee, You Rim Choi, Hyun Kyung Lee, **Jaemin Jeong**, Joopyo Hong, Hyun-Woo Shin, Hyung-Sin Kim
+  + Accepted in the Journal of npj Digital Medicine (SCI), 2025
+
 - Standardized Image-Based Polysomnography Database and Deep Learning Algorithm for Sleep Stage Classification
   + **Jaemin Jeong**, Wonhyuck Yoon, Jeong-Gun Lee, Dongyoung Kim, Yunhee Woo, Dong-Kyu Kim, Hyun-Woo Shin
   + Accepted in the Journal of Oxford SLEEP (SCI), 2023
 
-- Filter Combination Learning for CNN model compression
-  + **Jaemin Jeong**, Jiho Cho, Jeong-Gun Lee
-  + Accepted in the Journal of ICT-Express (SCIE), 2021
+- Automatic Sleep Stage Classification Using Deep Learning Algorithm for Multi-Institutional Database
+  + Automatic Sleep Stage Classification Using Deep Learning Algorithm for Multi-Institutional Database
+  + Accepted in the Journal of IEEE Access, 2023
 
 - Deep learning application to clinical decision support system in sleep
 stage classification
@@ -60,11 +64,15 @@ stage classification
   + Yunhee Woo, Dongyoung Kim, **Jaemin Jeong**, Young-Woong Ko, Jeong-Gun Lee
   + Accepted in the Journal of Electronics (SCIE), 2021
 
+- Filter Combination Learning for CNN model compression
+  + **Jaemin Jeong**, Jiho Cho, Jeong-Gun Lee
+  + Accepted in the Journal of ICT-Express (SCIE), 2021
+
 **Conference paper**
 
-- Image-based Frequency Classifications for 1-Dimensional Signal Data Using DNNs
-  + **Jaemin Jeong**, Yunhee Woo, Dongyoung Kim, Taewoon Kim and Jeong-Gun Lee
-  + we are preparing to submit.
+- Optimized Road Damage Detection Using Enhanced Deep Learning Architectures for Improved Inference Speed and Accuracy
+  + **Jaemin Jeong**, Jiho Cho, Jeong-Gun Lee
+  + 2024 IEEE International Conference on Big Data (BigData)
 
 - Shaped Pruning for Efficient Memory Addressing in DNN Accelerators
   + Yunhee Woo, Dongyoung Kim, **Jaemin Jeong**, Jeong-Gun Lee
