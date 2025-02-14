@@ -3,21 +3,30 @@ icon: fa-regular fa-folder
 order: 2
 ---
 
-# Doing
+## Projects
+
+### AI for Real World
 
 **Road Debris Detection**
 
-# AI Tools
+
+
+![rdd](/assets/img/post_img/about/road-hazard-detection-demo1.mp4)
+
+
+
+---
+
+### AI for Virtual World
 
 **FIT ANYTHING**
 
 
 
-![face_swap](/assets/img/post_img/about/fitanything.png)
+![fa](/assets/img/post_img/about/fa.png)
 
 
 
-# AI for Face Beauty
 
 **Face Swap**
 
@@ -45,7 +54,7 @@ order: 2
 
 ---
 
-## AI for Image-based Sleep Stage Classification
+### AI for Medical
 
 
 
@@ -151,7 +160,7 @@ order: 2
 
 ---
 
-# Paper Code Implementations
+## Paper Code Implementations
 
 ### MCCNN
 
