@@ -11,7 +11,10 @@ order: 2
 
 
 
-![rdd](/assets/img/post_img/about/road-hazard-detection-demo1.mp4)
+<video width="640" height="360" controls>
+  <source src="/assets/img/post_img/about/road-hazard-detection-demo1.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 
 
