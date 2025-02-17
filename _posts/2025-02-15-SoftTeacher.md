@@ -2,13 +2,15 @@
 layout: post  
 title: "Soft Teacher 톺아보기: 반지도 객체 탐지의 새로운 기준"  
 summary: "Soft Teacher는 반지도 학습을 활용한 객체 탐지 기법으로, 라벨이 부족한 데이터에서도 높은 성능을 달성하는 엔드-투-엔드 학습 방식"  
-date: 2025-02-13 16:00 -0400  
+date: 2025-02-14 16:00 -0400  
 categories: AI, Object Detection  
 math: true  
 ---
 
 - **논문**: [End-to-End Semi-Supervised Object Detection with Soft Teacher](https://arxiv.org/abs/2106.09018)  
+
 - **GitHub 코드**: [SoftTeacher 공식 저장소](https://github.com/microsoft/SoftTeacher)  
+
 - **Papers with Code Benchmarks**:  
   - [COCO 1%](https://paperswithcode.com/sota/semi-supervised-object-detection-on-coco-1?p=end-to-end-semi-supervised-object-detection)  
   - [COCO 5%](https://paperswithcode.com/sota/semi-supervised-object-detection-on-coco-5?p=end-to-end-semi-supervised-object-detection)  
@@ -129,20 +131,20 @@ bash tools/dist_train_partially.sh semi 1 10 8
 
 ## **📌 모델 평가 (Evaluation)**
 
-```
+```bash
 bash tools/dist_test.sh <CONFIG_FILE_PATH> <CHECKPOINT_PATH> <NUM_GPUS> --eval bbox
 ```
 
 ## **📌 객체 탐지 결과 시각화 (Inference & Visualization)**
 
-```
+```bash
 python demo/image_demo.py /path/to/image.png configs/soft_teacher_faster_rcnn_r50.py work_dirs/checkpoint.pth --output work_dirs/
 ```
 
 💡 실제 이미지에 대해 학습된 모델을 적용하여 탐지 결과를 확인 가능
 
 # **🎯 결론: Soft Teacher, 반지도 객체 탐지의 새로운 표준!**
-💡 Soft Teacher가 특별한 이유  
+## 💡 Soft Teacher가 특별한 이유  
 ✔ 엔드-투-엔드 학습 → 다단계 학습 없이 최적의 성능 제공  
 ✔ 반지도 학습 활용 → 라벨이 부족한 데이터에서도 강한 성능 유지  
 ✔ COCO 데이터셋 실험에서 기존 방법 대비 최대 +6.5 mAP 향상  
