@@ -22,7 +22,7 @@ math: true
 
 ---
 
-# 🔍 InternVideo란?  
+## 🔍 InternVideo란?  
 InternVideo는 **Generative (생성적) 학습과 Discriminative (판별적) 학습을 결합하여 강력한 비디오 이해 능력을 갖춘 Video Foundation Model**입니다.  
 영상 데이터는 이미지보다 훨씬 복잡하고 **시간적 정보(Temporal Information)** 를 포함하고 있기 때문에 기존 이미지 기반 AI 모델을 그대로 사용할 수 없습니다.  
 
@@ -40,7 +40,7 @@ InternVideo는 다음과 같은 문제를 해결합니다.
 
 ---
 
-# 🏆 InternVideo의 주요 기여점  
+## 🏆 InternVideo의 주요 기여점  
 1. **Masked Video Modeling (MVM)** → 비디오의 시공간 정보를 학습하는 효율적인 방법  
 2. **Video-Language Contrastive Learning (VLC)** → CLIP 방식으로 텍스트-비디오 관계 학습  
 3. **Cross-Model Attention (CMA)** → 생성적 학습과 판별적 학습을 결합하여 모델 성능 극대화  
@@ -55,7 +55,7 @@ InternVideo는 다음과 같은 문제를 해결합니다.
 
 
 
-# 1️⃣ 핵심 기술 1: Masked Video Modeling (MVM) 🎭  
+## 1️⃣ 핵심 기술 1: Masked Video Modeling (MVM) 🎭  
 
 InternVideo는 **Masked Autoencoder (MAE)** 방식의 **Masked Video Modeling** 기법을 활용합니다.  
 즉, 비디오의 일부 패치를 **랜덤하게 마스킹(masking)** 하고, 이를 복원하는 과정을 통해 학습합니다.  
@@ -71,7 +71,7 @@ InternVideo는 **Masked Autoencoder (MAE)** 방식의 **Masked Video Modeling** 
 
 ---
 
-# 2️⃣ 핵심 기술 2: Video-Language Contrastive Learning (VLC) 📝📹  
+## 2️⃣ 핵심 기술 2: Video-Language Contrastive Learning (VLC) 📝📹  
 
 InternVideo는 CLIP(Contrastive Language-Image Pretraining)에서 확장된 **Video-Language Contrastive Learning (VLC)** 방식을 사용합니다.  
 
@@ -91,7 +91,7 @@ InternVideo는 CLIP(Contrastive Language-Image Pretraining)에서 확장된 **Vi
 
 
 
-# 3️⃣ 핵심 기술 3: Cross-Model Attention (CMA) 🎯  
+## 3️⃣ 핵심 기술 3: Cross-Model Attention (CMA) 🎯  
 
 InternVideo는 **MVM과 VLC의 장점을 결합**하기 위해 **Cross-Model Attention (CMA)** 을 도입했습니다.  
 
@@ -104,11 +104,11 @@ InternVideo는 **MVM과 VLC의 장점을 결합**하기 위해 **Cross-Model Att
 
 ---
 
-# 📊 InternVideo 성능 분석  
+## 📊 InternVideo 성능 분석  
 
 InternVideo는 **다양한 비디오 관련 태스크에서 최고 성능을 달성**했습니다.  
 
-## 🎥 **액션 인식 (Action Recognition) 성능 비교**  
+### 🎥 **액션 인식 (Action Recognition) 성능 비교**  
 
 
 
@@ -126,9 +126,9 @@ InternVideo는 **다양한 비디오 관련 태스크에서 최고 성능을 달
 
 ---
 
-# 🚀 InternVideo 실전 사용법  
+## 🚀 InternVideo 실전 사용법  
 
-## 🔧 **설치 방법**  
+### 🔧 **설치 방법**  
 ```bash
 git clone https://github.com/OpenGVLab/InternVideo
 cd InternVideo
@@ -137,7 +137,7 @@ pip install -r requirements.txt
 
 ## 🎬 **모델 다운로드 및 실행**
 
-1️⃣ Kinetics-400에서 액션 인식 실행
+### 1️⃣ Kinetics-400에서 액션 인식 실행
 
 ```
 python demo/classification.py \
@@ -145,7 +145,7 @@ python demo/classification.py \
     --model_path "checkpoints/internvideo_kinetics400.pth"
 ```
 
-2️⃣ 비디오-텍스트 검색 실행
+### 2️⃣ 비디오-텍스트 검색 실행
 
 ```
 python demo/retrieval.py \
@@ -155,7 +155,7 @@ python demo/retrieval.py \
 
 💡 InternVideo를 활용하면 다양한 태스크를 손쉽게 수행 가능!
 
-# 🏆 결론
+## 🏆 결론
 💡 InternVideo가 특별한 이유  
 ✔ Masked Video Modeling을 활용한 효율적인 비디오 표현 학습  
 ✔ CLIP 방식의 Video-Language Contrastive Learning 적용  

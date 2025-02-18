@@ -1,24 +1,25 @@
 #  The contact options.
 
+- type: github
+  icon: "fab fa-github"
+  url: 'https://github.com/jjxxmiin'
+
 - type: website
   icon: 'fa-solid fa-pen-nib'
   url: 'https://www.opsoai.com'
   
-- type: github
-  icon: "fab fa-github"
+- type: twitter
+  icon: "fa-brands fa-x-twitter"
+  url: 'https://x.com/jeongjaemi74200'
 
-- type: instagram
-  icon: 'fa-brands fa-instagram'   # icons powered by <https://fontawesome.com/>
-  url:  'https://www.instagram.com/jjxxmiin/'                  # Fill with your Mastodon account page, rel="me" will be applied for verification
-
-- type: email
-  icon: "fas fa-envelope"
-  noblank: true # open link in current tab
+- type: threads
+  icon: 'fa-brands fa-threads'
+  url: 'https://www.threads.net/@opsoai'                   # Fill with your Threads profile link
 
 - type: rss
   icon: "fas fa-rss"
   noblank: true
-
+  
 # Uncomment and complete the url below to enable more contact options
 #
 # - type: mastodon
@@ -32,3 +33,15 @@
 # - type: stack-overflow
 #   icon: 'fab fa-stack-overflow'
 #   url:  ''                  # Fill with your stackoverflow homepage
+#
+# - type: bluesky
+#   icon: 'fa-brands fa-bluesky'
+#   url: ''                   # Fill with your Bluesky profile link
+#
+# - type: reddit
+#   icon: 'fa-brands fa-reddit'
+#   url: ''                   # Fill with your Reddit profile link
+#
+# - type: threads
+#   icon: 'fa-brands fa-threads'
+#   url: ''                   # Fill with your Threads profile link

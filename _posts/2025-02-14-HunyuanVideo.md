@@ -14,11 +14,11 @@ math: true
 
 ---
 
-# 🎥 HunyuanVideo란?  
+## 🎥 HunyuanVideo란?  
 HunyuanVideo는 **130억 개의 파라미터를 갖춘 오픈소스 비디오 생성 모델**입니다.  
 Runway Gen-3, Luma 1.6 등 최신 폐쇄형 모델과 경쟁할 수 있는 성능을 제공합니다.  
 
-## 📌 **HunyuanVideo의 특징**
+### 📌 **HunyuanVideo의 특징**
 ✔ **130억 개의 파라미터** → 최대 규모 오픈소스 비디오 생성 모델  
 ✔ **최적화된 데이터 전처리** → 고품질 데이터 필터링 적용  
 ✔ **효율적인 학습 기법** → 기존 대비 5배 적은 연산 자원으로 학습  
@@ -38,7 +38,7 @@ Runway Gen-3, Luma 1.6 등 최신 폐쇄형 모델과 경쟁할 수 있는 성�
 
 ---
 
-# **📂 데이터 전처리 (Data Preprocessing)**  
+## **📂 데이터 전처리 (Data Preprocessing)**  
 HunyuanVideo의 성능을 극대화하기 위해, **다단계 데이터 필터링**을 적용합니다.  
 
 
@@ -47,15 +47,16 @@ HunyuanVideo의 성능을 극대화하기 위해, **다단계 데이터 필터�
 
 
 
-## **1️⃣ 계층적 데이터 필터링 시스템**
+### **1️⃣ 계층적 데이터 필터링 시스템**
 HunyuanVideo는 **저품질 데이터를 제거하고, 학습 데이터의 질을 극대화**하기 위해 여러 단계의 필터링을 수행합니다.  
-### 🔹 **영상 품질 필터링**
+
+#### 🔹 **영상 품질 필터링**
 ✔ 해상도 기반 필터링: **256p → 360p → 540p → 720p → 수작업 검수(SFT)**  
 ✔ OpenCV Laplacian Operator로 **흐림(Blur) 검출**  
 ✔ YOLOX를 활용해 **워터마크, 로고 제거**  
 ✔ OCR 모델로 **과도한 텍스트 포함된 영상 필터링**  
 
-### 🔹 **텍스트-비디오 정렬 개선**
+#### 🔹 **텍스트-비디오 정렬 개선**
 ✔ Vision-Language Model(VLM) 기반 **자동 캡션 생성**  
 ✔ JSON 형식의 **구조화된 캡션** 활용 (장면 설명, 스타일, 촬영 기법 포함)  
 
@@ -70,21 +71,22 @@ HunyuanVideo는 **효율적인 데이터 압축, 강력한 텍스트 인코딩, 
 
 
 
-## **1️⃣ 3D VAE 기반의 효율적인 데이터 압축**
+### **1️⃣ 3D VAE 기반의 효율적인 데이터 압축**
 HunyuanVideo는 **Causal 3D Variational Autoencoder (VAE)** 를 사용하여 **고해상도 비디오를 압축**합니다.  
-### 🎯 **왜 압축이 중요한가?**
+
+#### 🎯 **왜 압축이 중요한가?**
 - **원본 비디오 데이터는 용량이 매우 큼** → 처리 비용이 증가  
 - **3D VAE를 사용하면** → 비디오의 핵심 정보를 유지하면서 **4×(시간), 8×(공간), 16×(채널)로 압축**  
 - **Perceptual Loss & GAN Loss 적용** → 원본 품질을 유지하며 복원 성능 강화  
 
-## **2️⃣ Transformer 기반 Diffusion 모델 적용**
+### **2️⃣ Transformer 기반 Diffusion 모델 적용**
 - **텍스트 인코딩**: **MLLM (Multimodal Large Language Model)** 사용  
 - **Full Attention 기법 적용** → 비디오 & 이미지 생성 성능 향상  
 - **RoPE (Rotary Position Embedding) 확장** → 시간-공간 정보를 효과적으로 반영  
 
 ---
 
-# **📈 학습 과정 (Training Process)**
+## **📈 학습 과정 (Training Process)**
 HunyuanVideo는 **점진적 학습 전략 (Progressive Training)** 을 적용하여 학습합니다.  
 
 ### 🔹 **단계별 학습 과정**
@@ -172,7 +174,7 @@ python3 gradio_server.py
 
 
 
-# 📈 결론: HunyuanVideo, 차세대 비디오 생성 모델!
+## 📈 결론: HunyuanVideo, 차세대 비디오 생성 모델!
 
 💡 HunyuanVideo가 특별한 이유.  
 ✔ 오픈소스 최초의 130억 파라미터 비디오 생성 모델,  

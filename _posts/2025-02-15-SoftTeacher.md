@@ -3,7 +3,7 @@ layout: post
 title: "Soft Teacher 톺아보기: 반지도 객체 탐지의 새로운 기준"  
 summary: "Soft Teacher는 반지도 학습을 활용한 객체 탐지 기법으로, 라벨이 부족한 데이터에서도 높은 성능을 달성하는 엔드-투-엔드 학습 방식"  
 date: 2025-02-14 16:00 -0400  
-categories: AI, Object Detection  
+categories: paper
 math: true  
 ---
 
@@ -18,7 +18,7 @@ math: true
 
 ---
 
-# 🎯 Soft Teacher란?  
+## 🎯 Soft Teacher란?  
 Soft Teacher는 **반지도 학습(Semi-Supervised Learning, SSL)** 을 활용한 **객체 탐지(Object Detection) 모델**입니다.  
 객체 탐지는 많은 데이터가 필요하지만 **라벨링(Labeling) 비용이 매우 높음** → 반지도 학습이 해결책!  
 
@@ -38,7 +38,7 @@ Soft Teacher는 **반지도 학습(Semi-Supervised Learning, SSL)** 을 활용�
 
 ---
 
-# **📂 데이터 전처리 (Data Preprocessing)**  
+## **📂 데이터 전처리 (Data Preprocessing)**  
 ### **COCO 데이터셋 구성**
 Soft Teacher는 **COCO 데이터셋**을 기반으로 학습되며,  
 라벨이 있는 데이터와 없는 데이터를 함께 활용하는 것이 특징입니다.  
@@ -58,10 +58,10 @@ Soft Teacher는 **COCO 데이터셋**을 기반으로 학습되며,
 
 ---
 
-# **🛠️ 모델 아키텍처 (Model Architecture)**  
+## **🛠️ 모델 아키텍처 (Model Architecture)**  
 Soft Teacher는 **기존 반지도 객체 탐지 모델보다 더 정교한 Teacher-Student 구조**를 사용합니다.  
 
-## **1️⃣ Teacher-Student 구조**  
+### **1️⃣ Teacher-Student 구조**  
 ✔ **Teacher 모델**  
    - 기존에 학습된 모델을 기반으로 **라벨이 없는 데이터에서 예측 수행**  
    - 신뢰도가 높은 예측 결과만 **Pseudo Label**로 생성  
@@ -74,7 +74,7 @@ Soft Teacher는 **기존 반지도 객체 탐지 모델보다 더 정교한 Teac
 
 ---
 
-# **📈 학습 과정 (Training Process)**
+## **📈 학습 과정 (Training Process)**
 Soft Teacher는 **반지도 객체 탐지를 위해 아래와 같은 학습 전략을 사용**합니다.  
 
 ### **🔹 학습 단계**
@@ -88,10 +88,10 @@ Soft Teacher는 **반지도 객체 탐지를 위해 아래와 같은 학습 전�
 
 ---
 
-# **🛠️ 실험 결과 (Experiments & Results)**  
+## **🛠️ 실험 결과 (Experiments & Results)**  
 논문에서는 **COCO 데이터셋에서 Soft Teacher의 성능을 검증**하였습니다.  
 
-## 📊 **라벨 데이터 비율별 성능 비교**  
+### 📊 **라벨 데이터 비율별 성능 비교**  
 | 라벨 데이터 비율 | 기존 방법 (STAC) | Soft Teacher (제안 기법) | 성능 향상 |
 |----------------|----------------|----------------|-----------|
 | 1% | 13.97 mAP | **20.46 mAP** | **+6.5 mAP** |
@@ -102,9 +102,9 @@ Soft Teacher는 **반지도 객체 탐지를 위해 아래와 같은 학습 전�
 
 ---
 
-# **🚀 학습 & 추론 방법 (Training & Inference)**  
+## **🚀 학습 & 추론 방법 (Training & Inference)**  
 
-## **🔧 설치 (Installation)**
+### **🔧 설치 (Installation)**
 
 ```bash
 git clone https://github.com/microsoft/SoftTeacher
@@ -112,7 +112,7 @@ cd SoftTeacher
 make install
 ```
 
-## **📂 데이터 준비 (Data Preparation)**
+### **📂 데이터 준비 (Data Preparation)**
 
 ```bash
 ln -s ${YOUR_COCO_DATASET} data
@@ -121,7 +121,7 @@ bash tools/dataset/prepare_coco_data.sh conduct
 
 💡 COCO 데이터셋을 다운로드 후, 적절한 형식으로 변환
 
-## **📌 모델 학습 (Training)**
+### **📌 모델 학습 (Training)**
 
 ```bash
 bash tools/dist_train_partially.sh semi 1 10 8
@@ -129,13 +129,13 @@ bash tools/dist_train_partially.sh semi 1 10 8
 
 💡 10% 라벨 데이터로 학습을 진행하며, 8개의 GPU 사용
 
-## **📌 모델 평가 (Evaluation)**
+### **📌 모델 평가 (Evaluation)**
 
 ```bash
 bash tools/dist_test.sh <CONFIG_FILE_PATH> <CHECKPOINT_PATH> <NUM_GPUS> --eval bbox
 ```
 
-## **📌 객체 탐지 결과 시각화 (Inference & Visualization)**
+### **📌 객체 탐지 결과 시각화 (Inference & Visualization)**
 
 ```bash
 python demo/image_demo.py /path/to/image.png configs/soft_teacher_faster_rcnn_r50.py work_dirs/checkpoint.pth --output work_dirs/
@@ -143,8 +143,8 @@ python demo/image_demo.py /path/to/image.png configs/soft_teacher_faster_rcnn_r5
 
 💡 실제 이미지에 대해 학습된 모델을 적용하여 탐지 결과를 확인 가능
 
-# **🎯 결론: Soft Teacher, 반지도 객체 탐지의 새로운 표준!**
-## 💡 Soft Teacher가 특별한 이유  
+## **🎯 결론: Soft Teacher, 반지도 객체 탐지의 새로운 표준!**
+### 💡 Soft Teacher가 특별한 이유  
 ✔ 엔드-투-엔드 학습 → 다단계 학습 없이 최적의 성능 제공  
 ✔ 반지도 학습 활용 → 라벨이 부족한 데이터에서도 강한 성능 유지  
 ✔ COCO 데이터셋 실험에서 기존 방법 대비 최대 +6.5 mAP 향상  
