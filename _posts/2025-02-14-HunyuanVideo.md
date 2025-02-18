@@ -168,7 +168,7 @@ python3 gradio_server.py
 
 
 
-![hunyuanvideo](/assets/img/post_img/hunyuanvideo/1.mp4)
+<video src="/assets/img/post_img/hunyuanvideo/1.mp4" width="100%" height="auto" controls></video>
 
 
 
