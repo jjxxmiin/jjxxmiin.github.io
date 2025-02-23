@@ -17,6 +17,12 @@ math: true
 > **✍️ 저자:** Yadong Lu, Jianwei Yang, Yelong Shen, Ahmed Awadallah  
 > **📅 논문 발표:** 2025년 2월 12일  
 
+
+
+<video src="/assets/img/post_img/omniparser/0.mp4" width="100%" height="auto" controls></video>
+
+
+
 ## 🎯 OmniParser란?
 
 OmniParser는 **GUI(그래픽 사용자 인터페이스) 자동화를 위한 최첨단 AI 모델**입니다.  
