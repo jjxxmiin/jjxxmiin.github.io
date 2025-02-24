@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# box
+## box
 
-## nms\_comparator
+### nms\_comparator
 
 ```c
 int nms_comparator(const void *pa, const void *pb)
@@ -49,7 +49,7 @@ int nms_comparator(const void *pa, const void *pb)
 
 
 
-## do\_nms\_obj
+### do\_nms\_obj
 
 ```c
 void do_nms_obj(detection *dets, int total, int classes, float thresh)
@@ -115,7 +115,7 @@ void do_nms_obj(detection *dets, int total, int classes, float thresh)
 
 
 
-## do\_nms\_sort
+### do\_nms\_sort
 
 ```c
 void do_nms_sort(detection *dets, int total, int classes, float thresh)
@@ -175,7 +175,7 @@ void do_nms_sort(detection *dets, int total, int classes, float thresh)
 
 
 
-## float\_to\_box
+### float\_to\_box
 
 ```c
 box float_to_box(float *f, int stride)
@@ -211,7 +211,7 @@ box float_to_box(float *f, int stride)
 
 
 
-## overlap
+### overlap
 
 ```c
 float overlap(float x1, float w1, float x2, float w2)
@@ -245,7 +245,7 @@ float overlap(float x1, float w1, float x2, float w2)
 
 
 
-## box\_intersection
+### box\_intersection
 
 ```c
 float box_intersection(box a, box b)
@@ -275,7 +275,7 @@ float box_intersection(box a, box b)
 
 
 
-## box\_union
+### box\_union
 
 ```c
 float box_union(box a, box b)
@@ -304,7 +304,7 @@ float box_union(box a, box b)
 
 
 
-## box\_iou
+### box\_iou
 
 ```c
 float box_iou(box a, box b)
@@ -315,7 +315,7 @@ float box_iou(box a, box b)
 
 * IOU를 계산합니다.
 
-## box\_rmse
+### box\_rmse
 
 ```c
 float box_rmse(box a, box b)
@@ -345,7 +345,7 @@ float box_rmse(box a, box b)
 
 
 
-## derivative
+### derivative
 
 ```c
 dbox derivative(box a, box b)
@@ -419,7 +419,7 @@ dbox derivative(box a, box b)
 
 
 
-## dintersect
+### dintersect
 
 ```c
 dbox dintersect(box a, box b)
@@ -456,7 +456,7 @@ dbox dintersect(box a, box b)
 
 
 
-## dunion
+### dunion
 
 ```c
 dbox dunion(box a, box b)
@@ -489,7 +489,7 @@ dbox dunion(box a, box b)
 
 
 
-## test
+### test
 
 ```c
 void test_dunion()
@@ -609,7 +609,7 @@ IOU manual -0.390865 0.001386 -0.156757 0.039369
 
 
 
-## diou
+### diou
 
 ```c
 dbox diou(box a, box b)
@@ -655,7 +655,7 @@ dbox diou(box a, box b)
 
 
 
-## do\_nms
+### do\_nms
 
 ```c
 void do_nms(box *boxes, float **probs, int total, int classes, float thresh)
@@ -702,7 +702,7 @@ void do_nms(box *boxes, float **probs, int total, int classes, float thresh)
 
 
 
-## encode\_box
+### encode\_box
 
 ```c
 box encode_box(box b, box anchor)
@@ -737,7 +737,7 @@ box encode_box(box b, box anchor)
 
 
 
-## decode\_box
+### decode\_box
 
 ```c
 box decode_box(box b, box anchor)

@@ -28,7 +28,7 @@ categories: concept
 
 이 정도 알면.. 설명은 가능하겠지?
 
-# Decision Tree
+## Decision Tree
 
 Decision Tree는 꽤 쉬울 것이다. 예를 들어 쉽게 물과 커피를 분류하는 Decision Tree 모델이 필요하다고 생각해보자
 
@@ -51,7 +51,7 @@ Decision Tree는 꽤 쉬울 것이다. 예를 들어 쉽게 물과 커피를 분
 
 이정도만 알고 Random Forest로 넘어가자
 
-# Random Forest
+## Random Forest
 
 직역하면 무작위의 숲인데 숲에는 나무가 많다. 보통 나무가 많은 곳이 숲이되는데 여기 Random Forest의 나무는 Decisin Tree가 된다.
 
@@ -79,7 +79,7 @@ Forest를 구성하는 방법은 여러 특징을 Random으로 Sampling하여 �
 5. 트리의 개수는 데이터 사이언티스트가 원하는 만큼 생성이 가능합니다.
 울창한 숲이 완성되었습니다. 숲에게 어느 한 사람에 대한 정보를 준다면, 나무들이 투표해서 한가지 의견으로 통합하여 결과를 알려줍니다.
 
-# 앙상블
+## 앙상블
 
 Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 후에 모든 분류기가 voting하는 방식으로 최종 결과를 예측한다. Random Forest는 이 Bagging에 속하는 알고리즘이라고 할 수 있다.
 
@@ -93,18 +93,18 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 - variance가 크고 bias가 작으면 overfitting
 - variance가 작고 bias가 크면 underfitting
 
-## 보팅(Voting)
+### 보팅(Voting)
 
 - 하드 보팅: 다양한 모델에서 예측된 **결과**들의 개수로 최종 예측
 - 소프트 보팅: 다양한 모델에서 예측된 **확률**들의 평균으로 최종 예측
 
 각 모델에 전체 데이터 셋을 학습한다
 
-## 배깅(Bagging)
+### 배깅(Bagging)
 
 모델마다 전체 데이터에서 샘플링을 통해 추출 된 샘플 데이터 셋으로 학습한다. 이때 샘플링 된 데이터를 bootstrap sample이라고 하며 내부적으로 중복 될 수 있다는 특징을 가진다.
 
-## 부스팅(boosting)
+### 부스팅(boosting)
 
 약한 모델 여러 개 연결시켜서 강한 모델을 만드는 방법
 
@@ -112,7 +112,7 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 - Gradient Boosting: AdaBoost는 **오답 샘플**을 보완하는 대신 Gradient Boosting은 **오차**를 보완하도록 학습시킨다.
 - 뒤에 설명할 LightGBM과 XGBoost는 여기에 속한다.
 
-## 스태킹(stacking)
+### 스태킹(stacking)
 
 각 모델이 예측한 값을 다시 학습 데이터로 사용하는 방법입니다.
 
@@ -122,7 +122,7 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 
 ---
 
-# XGBoost(Extreme Gradient Boosting)
+## XGBoost(Extreme Gradient Boosting)
 
 - Boosting보다 빠르게 만들기 위해 병렬 학습을 지원하는 XGBoost 라이브러리
 - 성능이 좋다.
@@ -132,7 +132,7 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 ---
 
 
-# LightGBM
+## LightGBM
 
 - 수평적인 Tree 확장 알고리즘이다.
 - 작은 데이터에서 과적합이 쉽다.
@@ -143,7 +143,7 @@ Random Forest는 bagging 방식으로 각자 데이터를 샘플링하고 그 �
 
 ---
 
-# LightGBM / XGBoost 파라미터
+## LightGBM / XGBoost 파라미터
 
 [이 곳](https://machinelearningkorea.com/2019/09/29/lightgbm-%ED%8C%8C%EB%9D%BC%EB%AF%B8%ED%84%B0/)에 잘 나와 있어서 참조하시면 될 것 같습니다.
 

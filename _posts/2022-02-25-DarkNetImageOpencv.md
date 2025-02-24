@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# image\_opencv
+## image\_opencv
 
-## image\_to\_ipl
+### image\_to\_ipl
 
 ```c
 #ifdef OPENCV
@@ -53,7 +53,7 @@ IplImage *image_to_ipl(image im)
 
 
 
-## ipl\_to\_image
+### ipl\_to\_image
 
 ```c
 image ipl_to_image(IplImage* src)
@@ -99,7 +99,7 @@ image ipl_to_image(IplImage* src)
 
 
 
-## image\_to\_mat
+### image\_to\_mat
 
 ```c
 Mat image_to_mat(image im)
@@ -140,7 +140,7 @@ Mat image_to_mat(image im)
 
 
 
-## mat\_to\_image
+### mat\_to\_image
 
 ```c
 image mat_to_image(Mat m)
@@ -170,7 +170,7 @@ image mat_to_image(Mat m)
 
 
 
-## open\_video\_stream
+### open\_video\_stream
 
 ```c
 void *open_video_stream(const char *f, int c, int w, int h, int fps)
@@ -210,7 +210,7 @@ void *open_video_stream(const char *f, int c, int w, int h, int fps)
 
 
 
-## get\_image\_from\_stream
+### get\_image\_from\_stream
 
 ```c
 image get_image_from_stream(void *p)
@@ -243,7 +243,7 @@ image get_image_from_stream(void *p)
 
 
 
-## load\_image\_cv
+### load\_image\_cv
 
 ```c
 image load_image_cv(char *filename, int channels)
@@ -291,7 +291,7 @@ image load_image_cv(char *filename, int channels)
 
 
 
-## show\_image\_cv
+### show\_image\_cv
 
 ```c
 int show_image_cv(image im, const char* name, int ms)
@@ -325,7 +325,7 @@ int show_image_cv(image im, const char* name, int ms)
 
 
 
-## make\_window
+### make\_window
 
 ```c
 void make_window(char *name, int w, int h, int fullscreen)

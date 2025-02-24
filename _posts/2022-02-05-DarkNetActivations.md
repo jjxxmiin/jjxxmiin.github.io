@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# activation\_layer
+## activation\_layer
 
-### make\_activation\_layer
+#### make\_activation\_layer
 
 ```c
 layer make_activation_layer(int batch, int inputs, ACTIVATION activation)
@@ -54,7 +54,7 @@ layer make_activation_layer(int batch, int inputs, ACTIVATION activation)
 
 
 
-### forward\_activation\_layer
+#### forward\_activation\_layer
 
 ```c
 void forward_activation_layer(layer l, network net)
@@ -83,7 +83,7 @@ void forward_activation_layer(layer l, network net)
 
 
 
-### backward\_activation\_layer
+#### backward\_activation\_layer
 
 ```c
 void backward_activation_layer(layer l, network net)
@@ -114,9 +114,9 @@ void backward_activation_layer(layer l, network net)
 
 ---
 
-# activations\_1
+## activations\_1
 
-## Activation Function 이란?
+### Activation Function 이란?
 
 Activation Function(활성화 함수)은 인공신경망에서 입력 신호를 처리한 후, 출력 신호를 만들어내는 함수입니다. 즉, 입력값에 대한 결과값을 결정하는 함수입니다.
 
@@ -159,7 +159,7 @@ typedef enum{
 
 
 
-### get\_activation\_string
+#### get\_activation\_string
 
 ```c
 char *get_activation_string(ACTIVATION a)
@@ -218,7 +218,7 @@ char *get_activation_string(ACTIVATION a)
 
 
 
-### get\_activation
+#### get\_activation
 
 ```c
 ACTIVATION get_activation(char *s)
@@ -260,7 +260,7 @@ ACTIVATION get_activation(char *s)
 
 
 
-### activate
+#### activate
 
 <pre class="language-c"><code class="lang-c"><strong>float activate(float x, ACTIVATION a)
 </strong>{
@@ -317,7 +317,7 @@ ACTIVATION get_activation(char *s)
 
 
 
-### activate\_array
+#### activate\_array
 
 ```c
 void activate_array(float *x, const int n, const ACTIVATION a)
@@ -348,7 +348,7 @@ void activate_array(float *x, const int n, const ACTIVATION a)
 * 배열 x의 각 원소에 대해 activate 함수를 호출하여 활성화된 값을 다시 배열 x의 해당 원소에 저장합니다.&#x20;
 * 이 과정을 배열 x의 모든 원소에 대해 반복하면, 입력값 배열 x에 활성화 함수 a를 적용한 결과를 얻을 수 있습니다.
 
-### gradient
+#### gradient
 
 ```c
 float gradient(float x, ACTIVATION a)
@@ -403,7 +403,7 @@ float gradient(float x, ACTIVATION a)
 * 신경망에서 역전파(backpropagation) 알고리즘을 적용할 때, 오차(error)를 최소화하기 위해 가중치(weight)를 조절해야 하는데, 이를 위해 각 노드의 입력 값이 활성화 함수를 거쳐 출력 값으로 변환되는 과정에서 해당 활성화 함수의 도함수(gradient)를 구해야 한다.
 * gradient 함수는 입력 값 x와 적용할 활성화 함수 a를 받아 해당 활성화 함수의 도함수를 계산하여 반환하는 함수로, switch문을 사용하여 입력으로 받은 활성화 함수 a에 따라 해당 도함수를 계산하여 반환한다.
 
-### gradient\_array
+#### gradient\_array
 
 ```c
 void gradient_array(const float *x, const int n, const ACTIVATION a, float *delta)
@@ -436,11 +436,11 @@ void gradient_array(const float *x, const int n, const ACTIVATION a, float *delt
 
 ---
 
-# activations\_2
+## activations\_2
 
 activation function
 
-## linear
+### linear
 
 ```c
 static inline float linear_activate(float x){return x;}
@@ -471,7 +471,7 @@ $$Linear(x) = x$$
 
 
 
-## logistic
+### logistic
 
 ```c
 static inline float logistic_activate(float x){return 1./(1. + exp(-x));}
@@ -499,7 +499,7 @@ static inline float logistic_gradient(float x){return (1-x)*x;}
 
 
 
-## loggy
+### loggy
 
 ```c
 static inline float loggy_activate(float x){return 2./(1. + exp(-x)) - 1;}
@@ -530,7 +530,7 @@ static inline float loggy_gradient(float x)
 
 
 
-## relu
+### relu
 
 ```c
 static inline float relu_activate(float x){return x*(x>0);}
@@ -565,7 +565,7 @@ $$
 
 
 
-## elu
+### elu
 
 ```c
 static inline float elu_activate(float x){return (x >= 0)*x + (x < 0)*(exp(x)-1);}
@@ -597,7 +597,7 @@ $$
 
 
 
-## selu
+### selu
 
 ```c
 static inline float selu_activate(float x){return (x >= 0)*1.0507*x + (x < 0)*1.0507*1.6732*(exp(x)-1);}
@@ -633,7 +633,7 @@ $$
 
 
 
-#### lecun normal
+##### lecun normal
 
 $$
 W ~ N(0, Var(W))
@@ -643,7 +643,7 @@ $$
 Var(W) = \sqrt{\frac{1}{n_{in}}}
 $$
 
-## relie
+### relie
 
 ```c
 static inline float relie_activate(float x){return (x>0) ? x : .01*x;}
@@ -676,7 +676,7 @@ $$
 
 
 
-## ramp
+### ramp
 
 ```c
 static inline float ramp_activate(float x){return x*(x>0)+.1*x;}
@@ -708,7 +708,7 @@ $$
 
 
 
-## leaky relu
+### leaky relu
 
 ```c
 static inline float leaky_activate(float x){return (x>0) ? x : .1*x;}
@@ -745,7 +745,7 @@ $$
 
 
 
-## tanh
+### tanh
 
 ```c
 static inline float tanh_activate(float x){return (exp(2*x)-1)/(exp(2*x)+1);}
@@ -778,7 +778,7 @@ $$
 
 
 
-## plse
+### plse
 
 ```c
 static inline float plse_activate(float x)
@@ -817,7 +817,7 @@ $$
 
 
 
-## stair
+### stair
 
 ```c
 static inline float stair_activate(float x)
@@ -862,7 +862,7 @@ $$
 
 
 
-## hardtan
+### hardtan
 
 ```c
 static inline float hardtan_activate(float x)
@@ -902,7 +902,7 @@ $$
 
 
 
-## lhtan
+### lhtan
 
 ```c
 static inline float lhtan_activate(float x)
@@ -948,6 +948,6 @@ $$
 
 
 
-## Reference
+### Reference
 
 * [https://mlfromscratch.com/activation-functions-explained/#/](https://mlfromscratch.com/activation-functions-explained/#/)

@@ -7,14 +7,14 @@ categories: paper
 math: true
 ---
 
-# CornerNet
+## CornerNet
 
 (CornerNet: Detecting Objects as Paired Keypoints)
 
 - CornerNet Paper : [Here](https://arxiv.org/abs/1808.01244)
 - Official Code : [Here](https://github.com/princeton-vl/CornerNet)
 
-# Abstract
+## Abstract
 
 CornerNet은 bounding box를 왼쪽 위(top-left)와 오른쪽 아래(bottom-right)의 한 쌍의 keypoint로 감지하는 object detection에 대한 새로운 접근방법을 제안한다.
 
@@ -24,7 +24,7 @@ corner의 localize하는데 도움이 되는 새로운 유형의 corner pooling�
 
 성능이 MS COCO에서 42.2% AP를 달성하여 기존 one-stage 검출기보다 성능이 뛰어나다.
 
-# Introduction
+## Introduction
 
 SOTA의 기본적인 구성 요소는 다양한 크기와 종횡비를 가지는 anchor box다. one-stage detector는 이미지 위에 anchor box를 밀집시킨뒤 anchor box를 계산하고 box regression을 통해 coordinates를 수정해서 최종 bounding box를 만들어낸다.
 
@@ -75,9 +75,9 @@ object의 가장 위쪽 경계를 pixel 위치에서 가로 오른쪽으로 보�
 3. 각 pixel 위치에서 두 번째 feature map에서 아래의 모든 feature 벡터를 max pooling한다.
 4. 두개의 결과를 더한다.
 
-# CornerNet
+## CornerNet
 
-## Overview
+### Overview
 Convolution Network는 서로 다른 object categories의 corner의 위치를 나타내는 2개의 heatmap set(top-left, bottom-right)를 예측한다.
 Network는 또한 동일한 object로 부터 두개의 corner의 임베딩 사이의 거리가 작도록 검출 된 각 corner에 대한 임베딩 벡터를 예측한다.
 더 정교한 bounding box를 예측하기 위해서 Network는 corner의 위치를 약간씩 조정하기 위해서 offset을 예측한다.
@@ -92,7 +92,7 @@ backbone으로 `Hourglass network`를 사용한다. 두 개의 예측 모듈(top
 
 
 
-## Detecting Corners
+### Detecting Corners
 2개의 heatmap sets를 예측하자
 
 각 heatmap에는 C(categories)개의 channel이 있고 크기는 $$H * W$$다. background에는 channel이 존재하지 않는다.
@@ -105,7 +105,7 @@ backbone으로 `Hourglass network`를 사용한다. 두 개의 예측 모듈(top
 
 
 
-### Loss
+#### Loss
 
 
 
@@ -141,7 +141,7 @@ backbone으로 `Hourglass network`를 사용한다. 두 개의 예측 모듈(top
 
 
 
-## Grouping Corners
+### Grouping Corners
 이미지에는 여러개의 object가 있고 그로인해서 여러개의 corner가 검출된다. 보통 인간의 joint을 검출하는데 각 joint에 대해서 embedding을 생성하고 그 거리를 기준으로 joint를 그룹화 한다. CornerNet도 이러한 개념을 적용한다.
 
 각각의 corner에 대해서 embedding vector를 예측해서 top-left와 bottom-right가 동일한 bounding box에 속하는 경우 embedding vector 사이의 거리가 작아야한다. 그리고 corner사이의 거리를 기준으로 그룹화를 할 수 있다. embedding의 실제값은 중요하지 않고 embedding 사이의 거리만 중요하다. 1차원 embedding을 사용한다.
@@ -157,7 +157,7 @@ backbone으로 `Hourglass network`를 사용한다. 두 개의 예측 모듈(top
 - $$e_k$$ : $$e_{t_k}, e_{b_k}$$의 평균
 - $$∆$$ : 1
 
-## Corner Pooling
+### Corner Pooling
 
 
 
@@ -188,7 +188,7 @@ $$H * W$$ feature map을 사용하기 때문에
 
 
 
-## Hourglass Network
+### Hourglass Network
 
 
 
@@ -206,15 +206,15 @@ $$H * W$$ feature map을 사용하기 때문에
 
 - Hourglass Network를 통과하기 전에 stride 2, 128 channel을 가지는 7x7 convolution과 stride 2, 256 channel을 가지는 residual module을 사용하여 이미지의 해상도를 4배 줄이고 학습을 시작한다.
 
-### Intermediate Supervision
+#### Intermediate Supervision
 Hourglass에서는 Intermediate Supervision를 사용하는데 말 그대로 중간 감독을 진행하는 방법이고, 중간중간에 얻어지는 예측값에 대해서 loss function을 적용할 수 있다.
 하지만 성능이 저하되기 때문에 사용하지 않는다고 한다.
 
 첫 번째 Hourglass module의 입력과 출력 모두에 1x1 Conv-BN를 적용한다. 그리고 relu와 256 channel residual block을 병합해서 두 번째 Hourglass module의 입력으로 사용한다. Hourglass-104를 사용하고 다른 SOTA detector와 달리 전체 Network에 마지막 계층의 feature만 사용해서 예측한다.
 
-# Experiments
+## Experiments
 
-## Training Details
+### Training Details
 - 입력 해상도 : 511 x 511
 - 출력 해상도 : 128 x 128
 - Augmentation : `random horizontal flipping`,`random scaling`,`random cropping`,`random color jittering`
@@ -230,7 +230,7 @@ $$\alpha,\beta = 0.1 , \gamma = 1$$
 - Batch Size : 49
 - learning rate : 250k = $$2.5 * 10^{-4}$$, 50k = $$2.5 * 10^{-5}$$
 
-## Testing Details
+### Testing Details
 - 후처리로 heatmap, embedding, offset으로 bounding box 생성
 - NMS
 - heatmap에서 top-left 100개 bottom-right 100개 선택
@@ -241,9 +241,9 @@ $$\alpha,\beta = 0.1 , \gamma = 1$$
 - 멘헤튼 거리라고 불린다.
 - 두 점의 세로축의 차이와 가로축의 차이를 더하는 것
 
-# Benchmark
+## Benchmark
 
-## CornerNet
+### CornerNet
 
 
 
@@ -265,7 +265,7 @@ $$\alpha,\beta = 0.1 , \gamma = 1$$
 
 
 
-## Detection Benchmark
+### Detection Benchmark
 
 
 
@@ -273,6 +273,6 @@ $$\alpha,\beta = 0.1 , \gamma = 1$$
 
 
 
-# Reference
+## Reference
 - PR12 : [https://www.youtube.com/watch?v=6OYmOtivQY8](https://www.youtube.com/watch?v=6OYmOtivQY8)
 - Hourglass : [https://curt-park.github.io/2018-07-03/stacked-hourglass-networks-for-human-pose-estimation/](https://curt-park.github.io/2018-07-03/stacked-hourglass-networks-for-human-pose-estimation/)

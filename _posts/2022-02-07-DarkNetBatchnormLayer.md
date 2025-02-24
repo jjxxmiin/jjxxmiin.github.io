@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# batchnorm\_layer
+## batchnorm\_layer
 
-## Batch Normalization 이란?
+### Batch Normalization 이란?
 
 Paper : [https://arxiv.org/abs/1502.03167](https://arxiv.org/abs/1502.03167)
 
@@ -45,7 +45,7 @@ Paper : [https://arxiv.org/abs/1502.03167](https://arxiv.org/abs/1502.03167)
 
 CNN의 경우 bias의 역할을 $$\beta$$가 대신 하기 때문에 bias를 제거합니다. 그리고 컨볼루션 연산을 통해 출력되는 특징 맵으로 각 채널마다 평균과 분산을 계산하고 $$\gamma, \beta$$를 만듭니다. 즉, 채널의 개수 만큼 $$\gamma, \beta$$가 생겨납니다.
 
-### 장점
+#### 장점
 
 * internal covariate shift 문제를 해결한다.
 * learning rate를 크게 해도 된다.
@@ -54,7 +54,7 @@ CNN의 경우 bias의 역할을 $$\beta$$가 대신 하기 때문에 bias를 제
 
 
 
-### forward\_batchnorm\_layer
+#### forward\_batchnorm\_layer
 
 ```c
 void forward_batchnorm_layer(layer l, network net)
@@ -101,7 +101,7 @@ void forward_batchnorm_layer(layer l, network net)
 
 
 
-### backward\_batchnorm\_layer
+#### backward\_batchnorm\_layer
 
 ```c
 void backward_batchnorm_layer(layer l, network net)
@@ -151,7 +151,7 @@ void backward_batchnorm_layer(layer l, network net)
 
 
 
-### make\_batchnorm\_layer
+#### make\_batchnorm\_layer
 
 ```c
 layer make_batchnorm_layer(int batch, int w, int h, int c)
@@ -215,7 +215,7 @@ layer make_batchnorm_layer(int batch, int w, int h, int c)
 
 
 
-### backward\_scale\_cpu
+#### backward\_scale\_cpu
 
 ```c
 void backward_scale_cpu(float *x_norm, float *delta, int batch, int n, int size, float *scale_updates)
@@ -257,7 +257,7 @@ void backward_scale_cpu(float *x_norm, float *delta, int batch, int n, int size,
 
 
 
-### mean\_delta\_cpu
+#### mean\_delta\_cpu
 
 ```c
 void mean_delta_cpu(float *delta, float *variance, int batch, int filters, int spatial, float *mean_delta)
@@ -302,7 +302,7 @@ void mean_delta_cpu(float *delta, float *variance, int batch, int filters, int s
 
 
 
-### variance\_delta\_cpu
+#### variance\_delta\_cpu
 
 ```c
 void  variance_delta_cpu(float *x, float *delta, float *mean, float *variance, int batch, int filters, int spatial, float *variance_delta)
@@ -350,7 +350,7 @@ void  variance_delta_cpu(float *x, float *delta, float *mean, float *variance, i
 
 
 
-### normalize\_delta\_cpu
+#### normalize\_delta\_cpu
 
 ```c
 void normalize_delta_cpu(float *x, float *mean, float *variance, float *mean_delta, float *variance_delta, int batch, int filters, int spatial, float *delta)

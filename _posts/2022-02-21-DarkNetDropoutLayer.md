@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# dropout\_layer
+## dropout\_layer
 
-## Dropout Layer란?
+### Dropout Layer란?
 
 Dropout Layer는 딥러닝에서 오버피팅을 방지하기 위한 regularization 기법 중 하나입니다. 이 레이어는 학습 중에 일부 뉴런을 무작위로 선택하여 출력을 0으로 만드는 과정을 수행합니다. 이렇게 함으로써 네트워크가 특정 뉴런에 과도하게 의존하지 않도록 하고, 뉴런의 가중치가 전체 데이터셋에 대해 일반화되도록 합니다.
 
@@ -18,7 +18,7 @@ Dropout Layer의 사용 여부와 dropout 비율은 하이퍼파라미터로써 
 
 
 
-## forward\_dropout\_layer
+### forward\_dropout\_layer
 
 ```c
 void forward_dropout_layer(dropout_layer l, network net)
@@ -57,7 +57,7 @@ void forward_dropout_layer(dropout_layer l, network net)
 
 
 
-## backward\_dropout\_layer
+### backward\_dropout\_layer
 
 ```c
 void backward_dropout_layer(dropout_layer l, network net)
@@ -92,7 +92,7 @@ void backward_dropout_layer(dropout_layer l, network net)
 
 
 
-## resize\_dropout\_layer
+### resize\_dropout\_layer
 
 ```c
 void resize_dropout_layer(dropout_layer *l, int inputs)
@@ -127,7 +127,7 @@ void resize_dropout_layer(dropout_layer *l, int inputs)
 
 
 
-## make\_dropout\_layer
+### make\_dropout\_layer
 
 ```c
 dropout_layer make_dropout_layer(int batch, int inputs, float probability)

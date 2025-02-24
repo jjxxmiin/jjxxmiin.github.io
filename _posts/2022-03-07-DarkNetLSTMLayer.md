@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# lstm\_layer
+## lstm\_layer
 
-### LSTM Layer란?
+#### LSTM Layer란?
 
 LSTM은 Long Short Term Memory networks의 약자입니다. RNN과 같이 자연어처리, 음성처리 등 Sequential 데이터를 처리하기 위해 많이 사용되는 layer입니다.
 
@@ -25,7 +25,7 @@ LSTM의 핵심적인 요소는 `cell state` 입니다. LSTM의 `cell state`는 �
 
 ***
 
-### increment\_layer
+#### increment\_layer
 
 ```c
 static void increment_layer(layer *l, int steps)
@@ -58,7 +58,7 @@ static void increment_layer(layer *l, int steps)
 
 
 
-### forward\_lstm\_layer
+#### forward\_lstm\_layer
 
 ```c
 void forward_lstm_layer(layer l, network state)
@@ -172,7 +172,7 @@ void forward_lstm_layer(layer l, network state)
 
 
 
-### backward\_lstm\_layer
+#### backward\_lstm\_layer
 
 ```c
 void backward_lstm_layer(layer l, network state)
@@ -350,7 +350,7 @@ void backward_lstm_layer(layer l, network state)
 
 
 
-### update\_lstm\_layer
+#### update\_lstm\_layer
 
 ```c
 void update_lstm_layer(layer l, update_args a)

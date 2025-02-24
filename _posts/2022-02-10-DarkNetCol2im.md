@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# col2im
+## col2im
 
 * columns을 이미지로 변환해주는 것을 말합니다.
 
-## col2im\_add\_pixel
+### col2im\_add\_pixel
 
 ```c
 void col2im_add_pixel(float *im, int height, int width, int channels,
@@ -56,7 +56,7 @@ void col2im_add_pixel(float *im, int height, int width, int channels,
 
 
 
-## col2im\_cpu
+### col2im\_cpu
 
 ```c
 //This one might be too, can't remember.

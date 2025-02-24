@@ -8,7 +8,7 @@ categories: opensource
 
 > 조금씩이라도 자주 써야겠다.
 
-# Pytorch Lighting
+## Pytorch Lighting
 
 항상 이런게 있구나 써봐야지 하면서 이제 써보는 Pytorch Lighting.. 진작 써볼껄.. 너무 편한거 같은 생김새와 실제로 사용할 때 매력적인 snippet들!
 
@@ -50,7 +50,7 @@ pip install pytorch-lightning
 
 이 예제를 보면 좋겠습니다. Pytorch를 사용하시는 분들에게 설명할게 없습니다 ㅜ 그냥 코드가 간단한것만 보고 넘어가겠습니다.
 
-## 라이브러리 import
+### 라이브러리 import
 
 ```python
 import os
@@ -67,7 +67,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import MNIST
 ```
 
-## Hyperparameters 셋팅
+### Hyperparameters 셋팅
 
 ```python
 PATH_DATASETS = os.environ.get('PATH_DATASETS', '.')
@@ -76,7 +76,7 @@ BATCH_SIZE = 256 if AVAIL_GPUS else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
 ```
 
-## DataLoader
+### DataLoader
 
 ```python
 class MNISTDataModule(LightningDataModule):
@@ -101,7 +101,7 @@ class MNISTDataModule(LightningDataModule):
         self.num_classes = 10
 
     def prepare_data(self):
-        # download
+        ## download
         MNIST(self.data_dir, train=True, download=True)
         MNIST(self.data_dir, train=False, download=True)
 
@@ -130,7 +130,7 @@ class MNISTDataModule(LightningDataModule):
 0DataModule이 어색할 수 있지만 이는 기존 pytorch dataloader와 동일합니다. DataLoader를 처리할 때 사용되는 코드를 모아놓은 클래스입니다.
 
 
-## Model 정의하기
+### Model 정의하기
 
 ```python
 class Generator(nn.Module):
@@ -184,7 +184,7 @@ class Discriminator(nn.Module):
 
 모델 정의는 그대로 하시면 됩니다. 이 부분은 변하지 않습니다.
 
-## Train / Test
+### Train / Test
 
 ```python
 class GAN(LightningModule):
@@ -204,7 +204,7 @@ class GAN(LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # networks
+        ## networks
         data_shape = (channels, width, height)
         self.generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=data_shape)
         self.discriminator = Discriminator(img_shape=data_shape)
@@ -222,49 +222,49 @@ class GAN(LightningModule):
     def training_step(self, batch, batch_idx, optimizer_idx):
         imgs, _ = batch
 
-        # sample noise
+        ## sample noise
         z = torch.randn(imgs.shape[0], self.hparams.latent_dim)
         z = z.type_as(imgs)
 
-        # train generator
+        ## train generator
         if optimizer_idx == 0:
 
-            # generate images
+            ## generate images
             self.generated_imgs = self(z)
 
-            # log sampled images
+            ## log sampled images
             sample_imgs = self.generated_imgs[:6]
             grid = torchvision.utils.make_grid(sample_imgs)
             self.logger.experiment.add_image('generated_images', grid, 0)
 
-            # ground truth result (ie: all fake)
-            # put on GPU because we created this tensor inside training_loop
+            ## ground truth result (ie: all fake)
+            ## put on GPU because we created this tensor inside training_loop
             valid = torch.ones(imgs.size(0), 1)
             valid = valid.type_as(imgs)
 
-            # adversarial loss is binary cross-entropy
+            ## adversarial loss is binary cross-entropy
             g_loss = self.adversarial_loss(self.discriminator(self(z)), valid)
             tqdm_dict = {'g_loss': g_loss}
             output = OrderedDict({'loss': g_loss, 'progress_bar': tqdm_dict, 'log': tqdm_dict})
             return output
 
-        # train discriminator
+        ## train discriminator
         if optimizer_idx == 1:
-            # Measure discriminator's ability to classify real from generated samples
+            ## Measure discriminator's ability to classify real from generated samples
 
-            # how well can it label as real?
+            ## how well can it label as real?
             valid = torch.ones(imgs.size(0), 1)
             valid = valid.type_as(imgs)
 
             real_loss = self.adversarial_loss(self.discriminator(imgs), valid)
 
-            # how well can it label as fake?
+            ## how well can it label as fake?
             fake = torch.zeros(imgs.size(0), 1)
             fake = fake.type_as(imgs)
 
             fake_loss = self.adversarial_loss(self.discriminator(self(z).detach()), fake)
 
-            # discriminator loss is the average of these
+            ## discriminator loss is the average of these
             d_loss = (real_loss + fake_loss) / 2
             tqdm_dict = {'d_loss': d_loss}
             output = OrderedDict({'loss': d_loss, 'progress_bar': tqdm_dict, 'log': tqdm_dict})
@@ -282,7 +282,7 @@ class GAN(LightningModule):
     def on_epoch_end(self):
         z = self.validation_z.type_as(self.generator.model[0].weight)
 
-        # log sampled images
+        ## log sampled images
         sample_imgs = self(z)
         grid = torchvision.utils.make_grid(sample_imgs)
         self.logger.experiment.add_image('generated_images', grid, self.current_epoch)
@@ -290,7 +290,7 @@ class GAN(LightningModule):
 
 이 부분이 pytorch lightening의 매력입니다. 모든 학습 절차를 깔끔하게 클래스로 만들어 사용하면 됩니다.
 
-## Main
+### Main
 
 ```python
 dm = MNISTDataModule()
@@ -299,7 +299,7 @@ trainer = Trainer(gpus=AVAIL_GPUS, max_epochs=5, progress_bar_refresh_rate=20)
 trainer.fit(model, dm)
 ```
 
-### Early Stopping, Model Checkpoint
+#### Early Stopping, Model Checkpoint
 
 ```python
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -324,16 +324,16 @@ early_stopping = EarlyStopping(
 trainer = pl.Trainer(..., callback=[checkpoint_callback, early_stopping])
 ```
 
-### Multi GPU, Mixed Precision
+#### Multi GPU, Mixed Precision
 
 ```python
-# before lightning
+## before lightning
 def forward(self, x):
     x = x.cuda(0)
     layer_1.cuda(0)
     x_hat = layer_1(x)
 
-# after lightning
+## after lightning
 def forward(self, x):
     x_hat = layer_1(x)
 ```
@@ -347,7 +347,7 @@ trainer = pl.Trainer(gpus=gpus,
                      ...)
 ```
 
-### Visualization
+#### Visualization
 
 ```python
 from pytorch_lightning import Trainer

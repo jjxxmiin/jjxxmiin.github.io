@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# data
+## data
 
-## get\_paths
+### get\_paths
 
 ```c
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -50,7 +50,7 @@ list *get_paths(char *filename)
 
 
 
-## get\_random\_paths
+### get\_random\_paths
 
 ```c
 char **get_random_paths(char **paths, int n, int m)
@@ -93,7 +93,7 @@ char **get_random_paths(char **paths, int n, int m)
 
 
 
-## find\_replace\_paths
+### find\_replace\_paths
 
 ```c
 char **find_replace_paths(char **paths, int n, char *find, char *replace)
@@ -132,7 +132,7 @@ char **find_replace_paths(char **paths, int n, char *find, char *replace)
 
 
 
-## load\_image\_paths\_gray
+### load\_image\_paths\_gray
 
 ```c
 matrix load_image_paths_gray(char **paths, int n, int w, int h)
@@ -179,7 +179,7 @@ matrix load_image_paths_gray(char **paths, int n, int w, int h)
 
 
 
-## load\_image\_paths
+### load\_image\_paths
 
 ```c
 matrix load_image_paths(char **paths, int n, int w, int h)
@@ -220,7 +220,7 @@ matrix load_image_paths(char **paths, int n, int w, int h)
 
 
 
-## load\_image\_augment\_paths
+### load\_image\_augment\_paths
 
 ```c
 matrix load_image_augment_paths(char **paths, int n, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
@@ -287,7 +287,7 @@ matrix load_image_augment_paths(char **paths, int n, int min, int max, int size,
 
 
 
-## read\_boxes
+### read\_boxes
 
 ```c
 box_label *read_boxes(char *filename, int *n)
@@ -344,7 +344,7 @@ box_label *read_boxes(char *filename, int *n)
 
 
 
-## randomize\_boxes
+### randomize\_boxes
 
 ```c
 void randomize_boxes(box_label *b, int n)
@@ -377,7 +377,7 @@ void randomize_boxes(box_label *b, int n)
 
 
 
-## correct\_boxes
+### correct\_boxes
 
 ```c
 void correct_boxes(box_label *boxes, int n, float dx, float dy, float sx, float sy, int flip)
@@ -444,7 +444,7 @@ void correct_boxes(box_label *boxes, int n, float dx, float dy, float sx, float 
 
 
 
-## fill\_truth\_swag
+### fill\_truth\_swag
 
 ```c
 void fill_truth_swag(char *path, float *truth, int classes, int flip, float dx, float dy, float sx, float sy)
@@ -515,7 +515,7 @@ void fill_truth_swag(char *path, float *truth, int classes, int flip, float dx, 
 
 
 
-## fill\_truth\_region
+### fill\_truth\_region
 
 ```c
 void fill_truth_region(char *path, float *truth, int classes, int num_boxes, int flip, float dx, float dy, float sx, float sy)
@@ -593,7 +593,7 @@ void fill_truth_region(char *path, float *truth, int classes, int num_boxes, int
 
 
 
-## load\_rle
+### load\_rle
 
 ```c
 void load_rle(image im, int *rle, int n)
@@ -634,7 +634,7 @@ void load_rle(image im, int *rle, int n)
 
 
 
-## or\_image
+### or\_image
 
 ```c
 void or_image(image src, image dest, int c)
@@ -666,7 +666,7 @@ void or_image(image src, image dest, int c)
 
 
 
-## exclusive\_image
+### exclusive\_image
 
 ```c
 void exclusive_image(image src)
@@ -703,7 +703,7 @@ void exclusive_image(image src)
 
 
 
-## bound\_image
+### bound\_image
 
 ```c
 box bound_image(image im)
@@ -747,7 +747,7 @@ box bound_image(image im)
 
 
 
-## fill\_truth\_iseg
+### fill\_truth\_iseg
 
 ```c
 void fill_truth_iseg(char *path, int num_boxes, float *truth, int classes, int w, int h, augment_args aug, int flip, int mw, int mh)
@@ -823,7 +823,7 @@ void fill_truth_iseg(char *path, int num_boxes, float *truth, int classes, int w
 
 
 
-## fill\_truth\_mask
+### fill\_truth\_mask
 
 ```c
 void fill_truth_mask(char *path, int num_boxes, float *truth, int classes, int w, int h, augment_args aug, int flip, int mw, int mh)
@@ -904,7 +904,7 @@ void fill_truth_mask(char *path, int num_boxes, float *truth, int classes, int w
 
 
 
-## fill\_truth\_detection
+### fill\_truth\_detection
 
 ```c
 void fill_truth_detection(char *path, int num_boxes, float *truth, int classes, int flip, float dx, float dy, float sx, float sy)
@@ -976,7 +976,7 @@ void fill_truth_detection(char *path, int num_boxes, float *truth, int classes, 
 
 
 
-## print\_letters
+### print\_letters
 
 ```c
 #define NUMCHARS 37
@@ -1013,7 +1013,7 @@ void print_letters(float *pred, int n)
 
 
 
-## fill\_truth\_captcha
+### fill\_truth\_captcha
 
 ```c
 void fill_truth_captcha(char *path, int n, float *truth)
@@ -1055,7 +1055,7 @@ void fill_truth_captcha(char *path, int n, float *truth)
 
 
 
-## load\_data\_captcha
+### load\_data\_captcha
 
 ```c
 data load_data_captcha(char **paths, int n, int m, int k, int w, int h)
@@ -1102,7 +1102,7 @@ data load_data_captcha(char **paths, int n, int m, int k, int w, int h)
 
 
 
-## load\_data\_captcha\_encode
+### load\_data\_captcha\_encode
 
 ```c
 data load_data_captcha_encode(char **paths, int n, int m, int w, int h)
@@ -1140,7 +1140,7 @@ data load_data_captcha_encode(char **paths, int n, int m, int w, int h)
 
 
 
-## fill\_truth
+### fill\_truth
 
 ```c
 void fill_truth(char *path, char **labels, int k, float *truth)
@@ -1182,7 +1182,7 @@ void fill_truth(char *path, char **labels, int k, float *truth)
 
 
 
-## fill\_hierarchy
+### fill\_hierarchy
 
 ```c
 void fill_hierarchy(float *truth, int k, tree *hierarchy)
@@ -1238,7 +1238,7 @@ void fill_hierarchy(float *truth, int k, tree *hierarchy)
 
 
 
-## load\_regression\_labels\_paths
+### load\_regression\_labels\_paths
 
 ```c
 matrix load_regression_labels_paths(char **paths, int n, int k)
@@ -1293,7 +1293,7 @@ matrix load_regression_labels_paths(char **paths, int n, int k)
 
 
 
-## load\_labels\_paths
+### load\_labels\_paths
 
 ```c
 matrix load_labels_paths(char **paths, int n, char **labels, int k, tree *hierarchy)
@@ -1333,7 +1333,7 @@ matrix load_labels_paths(char **paths, int n, char **labels, int k, tree *hierar
 
 
 
-## load\_tags\_paths
+### load\_tags\_paths
 
 ```c
 matrix load_tags_paths(char **paths, int n, int k)
@@ -1383,7 +1383,7 @@ matrix load_tags_paths(char **paths, int n, int k)
 
 
 
-## get\_labels
+### get\_labels
 
 ```c
 char **get_labels(char *filename)
@@ -1414,7 +1414,7 @@ char **get_labels(char *filename)
 
 
 
-## free\_data
+### free\_data
 
 ```c
 void free_data(data d)
@@ -1450,7 +1450,7 @@ void free_data(data d)
 
 
 
-## get\_segmentation\_image
+### get\_segmentation\_image
 
 ```c
 image get_segmentation_image(char *path, int w, int h, int classes)
@@ -1517,7 +1517,7 @@ image get_segmentation_image(char *path, int w, int h, int classes)
 
 
 
-## get\_segmentation\_image2
+### get\_segmentation\_image2
 
 ```c
 image get_segmentation_image2(char *path, int w, int h, int classes)
@@ -1559,7 +1559,7 @@ image get_segmentation_image2(char *path, int w, int h, int classes)
 
 
 
-## load\_data\_seg
+### load\_data\_seg
 
 ```
 data load_data_seg(int n, char **paths, int m, int w, int h, int classes, int min, int max, float angle, float aspect, float hue, float saturation, float exposure, int div)
@@ -1615,7 +1615,7 @@ data load_data_seg(int n, char **paths, int m, int w, int h, int classes, int mi
 
 
 
-## load\_data\_iseg
+### load\_data\_iseg
 
 ```
 data load_data_iseg(int n, char **paths, int m, int w, int h, int classes, int boxes, int div, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
@@ -1663,7 +1663,7 @@ data load_data_iseg(int n, char **paths, int m, int w, int h, int classes, int b
 
 
 
-## load\_data\_mask
+### load\_data\_mask
 
 ```c
 data load_data_mask(int n, char **paths, int m, int w, int h, int classes, int boxes, int coords, int min, int max, float angle, float aspect, float hue, float saturation, float exposure)
@@ -1742,7 +1742,7 @@ data load_data_mask(int n, char **paths, int m, int w, int h, int classes, int b
 
 
 
-## load\_data\_region
+### load\_data\_region
 
 ```c
 data load_data_region(int n, char **paths, int m, int w, int h, int size, int classes, float jitter, float hue, float saturation, float exposure)
@@ -1831,7 +1831,7 @@ data load_data_region(int n, char **paths, int m, int w, int h, int size, int cl
 
 
 
-## load\_data\_compare
+### load\_data\_compare
 
 ```c
 data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
@@ -1927,7 +1927,7 @@ data load_data_compare(int n, char **paths, int m, int classes, int w, int h)
 
 
 
-## load\_data\_swag
+### load\_data\_swag
 
 ```c
 data load_data_swag(char **paths, int n, int classes, float jitter)
@@ -2011,7 +2011,7 @@ data load_data_swag(char **paths, int n, int classes, float jitter)
 
 
 
-## load\_data\_detection
+### load\_data\_detection
 
 ```c
 data load_data_detection(int n, char **paths, int m, int w, int h, int boxes, int classes, float jitter, float hue, float saturation, float exposure)
@@ -2104,7 +2104,7 @@ data load_data_detection(int n, char **paths, int m, int w, int h, int boxes, in
 
 
 
-## load\_thread
+### load\_thread
 
 ```c
 void *load_thread(void *ptr)
@@ -2174,7 +2174,7 @@ void *load_thread(void *ptr)
 
 
 
-## load\_data\_in\_thread
+### load\_data\_in\_thread
 
 ```c
 pthread_t load_data_in_thread(load_args args)
@@ -2205,7 +2205,7 @@ pthread_t load_data_in_thread(load_args args)
 
 
 
-## load\_threads
+### load\_threads
 
 ```c
 void *load_threads(void *ptr)
@@ -2262,7 +2262,7 @@ void *load_threads(void *ptr)
 
 
 
-## load\_data\_blocking
+### load\_data\_blocking
 
 ```c
 void load_data_blocking(load_args args)
@@ -2291,7 +2291,7 @@ void load_data_blocking(load_args args)
 
 
 
-## load\_data
+### load\_data
 
 ```c
 pthread_t load_data(load_args args)
@@ -2326,7 +2326,7 @@ pthread_t load_data(load_args args)
 
 
 
-## load\_data\_writing
+### load\_data\_writing
 
 ```c
 data load_data_writing(char **paths, int n, int m, int w, int h, int out_w, int out_h)
@@ -2372,7 +2372,7 @@ data load_data_writing(char **paths, int n, int m, int w, int h, int out_w, int 
 
 
 
-## load\_data\_old
+### load\_data\_old
 
 ```c
 data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int h)
@@ -2413,7 +2413,7 @@ data load_data_old(char **paths, int n, int m, char **labels, int k, int w, int 
 
 
 
-## load\_data\_super
+### load\_data\_super
 
 ```c
 data load_data_super(char **paths, int n, int m, int w, int h, int scale)
@@ -2476,7 +2476,7 @@ data load_data_super(char **paths, int n, int m, int w, int h, int scale)
 
 
 
-## load\_data\_regression
+### load\_data\_regression
 
 ```c
 data load_data_regression(char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
@@ -2520,7 +2520,7 @@ data load_data_regression(char **paths, int n, int m, int k, int min, int max, i
 
 
 
-## select\_data
+### select\_data
 
 ```c
 data select_data(data *orig, int *inds)
@@ -2571,7 +2571,7 @@ data select_data(data *orig, int *inds)
 
 
 
-## tile\_data
+### tile\_data
 
 ```c
 data *tile_data(data orig, int divs, int size)
@@ -2606,7 +2606,7 @@ data *tile_data(data orig, int divs, int size)
 
 
 
-## resize\_data
+### resize\_data
 
 ```c
 data resize_data(data orig, int w, int h)
@@ -2653,7 +2653,7 @@ data resize_data(data orig, int w, int h)
 
 
 
-## load\_data\_augment
+### load\_data\_augment
 
 ```c
 data load_data_augment(char **paths, int n, int m, char **labels, int k, tree *hierarchy, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure, int center)
@@ -2707,7 +2707,7 @@ data load_data_augment(char **paths, int n, int m, char **labels, int k, tree *h
 
 
 
-## load\_data\_tag
+### load\_data\_tag
 
 ```c
 data load_data_tag(char **paths, int n, int m, int k, int min, int max, int size, float angle, float aspect, float hue, float saturation, float exposure)
@@ -2756,7 +2756,7 @@ data load_data_tag(char **paths, int n, int m, int k, int min, int max, int size
 
 
 
-## concat\_matrix
+### concat\_matrix
 
 ```c
 matrix concat_matrix(matrix m1, matrix m2)
@@ -2795,7 +2795,7 @@ matrix concat_matrix(matrix m1, matrix m2)
 
 
 
-## concat\_data
+### concat\_data
 
 ```c
 data concat_data(data d1, data d2)
@@ -2833,7 +2833,7 @@ data concat_data(data d1, data d2)
 
 
 
-## concat\_datas
+### concat\_datas
 
 ```c
 data concat_datas(data *d, int n)
@@ -2872,7 +2872,7 @@ data concat_datas(data *d, int n)
 
 
 
-## load\_categorical\_data\_csv
+### load\_categorical\_data\_csv
 
 ```c
 data load_categorical_data_csv(char *filename, int target, int k)
@@ -2921,7 +2921,7 @@ data load_categorical_data_csv(char *filename, int target, int k)
 
 
 
-## load\_cifar10\_data
+### load\_cifar10\_data
 
 ```c
 data load_cifar10_data(char *filename)
@@ -2978,7 +2978,7 @@ data load_cifar10_data(char *filename)
 
 
 
-## get\_random\_batch
+### get\_random\_batch
 
 ```c
 void get_random_batch(data d, int n, float *X, float *y)
@@ -3012,7 +3012,7 @@ void get_random_batch(data d, int n, float *X, float *y)
 
 
 
-## get\_next\_batch
+### get\_next\_batch
 
 ```c
 void get_next_batch(data d, int n, int offset, float *X, float *y)
@@ -3051,7 +3051,7 @@ void get_next_batch(data d, int n, int offset, float *X, float *y)
 
 
 
-## smooth\_data
+### smooth\_data
 
 ```c
 void smooth_data(data d)
@@ -3085,7 +3085,7 @@ void smooth_data(data d)
 
 
 
-## load\_all\_cifar10
+### load\_all\_cifar10
 
 ```c
 data load_all_cifar10()
@@ -3148,7 +3148,7 @@ data load_all_cifar10()
 
 
 
-## load\_go
+### load\_go
 
 ```c
 data load_go(char *filename)
@@ -3232,7 +3232,7 @@ data load_go(char *filename)
 
 
 
-## randomize\_data
+### randomize\_data
 
 ```c
 void randomize_data(data d)
@@ -3269,7 +3269,7 @@ void randomize_data(data d)
 
 
 
-## scale\_data\_rows
+### scale\_data\_rows
 
 ```c
 void scale_data_rows(data d, float s)
@@ -3301,7 +3301,7 @@ void scale_data_rows(data d, float s)
 
 
 
-## translate\_data\_rows
+### translate\_data\_rows
 
 ```c
 void translate_data_rows(data d, float s)
@@ -3333,7 +3333,7 @@ void translate_data_rows(data d, float s)
 
 
 
-## copy\_data
+### copy\_data
 
 ```c
 data copy_data(data d)
@@ -3368,7 +3368,7 @@ data copy_data(data d)
 
 
 
-## normalize\_data\_rows
+### normalize\_data\_rows
 
 ```c
 void normalize_data_rows(data d)
@@ -3400,7 +3400,7 @@ void normalize_data_rows(data d)
 
 
 
-## get\_data\_part
+### get\_data\_part
 
 ```c
 data get_data_part(data d, int part, int total)
@@ -3438,7 +3438,7 @@ data get_data_part(data d, int part, int total)
 
 
 
-## get\_random\_data
+### get\_random\_data
 
 ```c
 data get_random_data(data d, int num)
@@ -3486,7 +3486,7 @@ data get_random_data(data d, int num)
 
 
 
-## split\_data
+### split\_data
 
 ```c
 data *split_data(data d, int part, int total)

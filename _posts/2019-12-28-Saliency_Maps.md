@@ -7,24 +7,24 @@ categories: paper
 math: true
 ---
 
-## Visualising Image Classification Models and Saliency Maps
+### Visualising Image Classification Models and Saliency Maps
 
 (Deep Inside Convolutional Networks: Visualising Image Classification Models and Saliency Maps)
 
 - paper : [https://arxiv.org/abs/1312.6034](https://arxiv.org/abs/1312.6034)
 
-## Saliency Maps란?
+### Saliency Maps란?
 - 돌출맵
 - Saliency Maps은 일종의 이미지를 분할이다. 어떠한 관심 영역을 추출하는 것을 말한다.
 
-# Abstract
+## Abstract
 이 논문은 image classification model의 visualization에 대한 내용이다. input image에 대한 class score에 gradient를 계산하는 데 기반한 두 가지 시각화 기술을 기반으로 한다.
 
 1. image를 생성해서 class score를 최대화 시키고 CNN에 의해 캡쳐 된 class의 concept을 시각화 한다.
 
 2. 주어진 image와 class의 class saliency map을 계산한다.(weakly supervised learning에 사용할 수 있다.)
 
-# Introduction
+## Introduction
 
 이전 연구에서는 image space에서 gradient ascent를 사용해 최적화를 해서 모델이 관심을 가지는 뉴런을 최대화하는 input image를 찾아서 시각화 하였다. 이 방법은 DBN(Deep Belief Network)과 같은 unsupervised 방식으로 hidden feature layers를 시각화 하는 데 사용하였고 나중에 auto-encoder로 시각화 하는데 사용된다.
 
@@ -39,7 +39,7 @@ math: true
 3. gradient-based 시각화 방법이 deconvolution network를 재구성하는 절차를 일반화 하는 것을 보여준다. **논문 참고**
 
 
-# Class Model Visualization
+## Class Model Visualization
 
 이 section에서는 CNN에서 학습한 class models을 시각화하는 기술에 대해 설명한다. 학습이 된 모델과 관심 class가 주어지면 이미지를 수치적으로 생성하는 것으로 구성된다.
 
@@ -63,7 +63,7 @@ backpropagation을 이용해서 **locally optimal $$I$$** 를 찾을 수 있다.
 
 
 
-# Image-Specific Class Saliency Visualisation
+## Image-Specific Class Saliency Visualisation
 
 In this section we describe how a classification ConvNet can be queried about the spatial support of a particular class in a given image.
 
@@ -85,7 +85,7 @@ $$w = \frac{\partial S_c}{\partial I} $$
 
 무한히 미분되는 미지의 함수를 근사 다항 함수로 표현하는 것
 
-## Class Saliency Extraction
+### Class Saliency Extraction
 
 Saliency Maps를 계산하려면 먼저 derivative weights를 backpropagation을 통해서 구한다. 그리고 weights를 재배열해서 Saliency Maps을 얻는다.($$M \in R^{m \times n}$$)
 
@@ -99,7 +99,7 @@ RGB image의 경우는 단일 class의 Saliency Maps를 얻기 위해서 모든 
 
 
 
-## Weakly supervised Object Localisation
+### Weakly supervised Object Localisation
 
 Saliency Maps은 image의 위치를 encoding하기 때문에 object의 위치를 찾는 곳에서도 사용할 수 있다.
 
@@ -129,7 +129,7 @@ colour segmentation을 사용하면 Saliency Maps이 object와 가장 차별적�
 
 pixel을 Graph로 연결해서 cut해서 segmentation 하는 방법론
 
-# Code
+## Code
 
 위에 Saliency Maps은 backpropagation 할 때 score만 backpropagation 해주면 될 것 같다.. 하지만 이미지를 수치적으로 생성하는 부분이 이해가 안간다.
 
@@ -137,7 +137,7 @@ pixel을 Graph로 연결해서 cut해서 segmentation 하는 방법론
 
 - 참조 : [pytorch-cnn-visualizations GitHub](https://github.com/utkuozbulak/pytorch-cnn-visualizations/blob/4473bc24276d13f8b64088087257045938da5f4c/src/generate_class_specific_samples.py)
 
-### Import
+#### Import
 
 ```python
 import os
@@ -150,7 +150,7 @@ from torch.autograd import Variable
 from torch.optim import SGD
 ```
 
-### CPU / GPU 설정
+#### CPU / GPU 설정
 
 ```python
 if torch.cuda.is_available():
@@ -161,7 +161,7 @@ else:
     torch.set_default_tensor_type('torch.FloatTensor')
 ```
 
-### Model Load
+#### Model Load
 
 자신이 학습시킨 모델을 넣거나 pytorch 기본 모델을 넣어도 좋다. class number만 기억하면 된다. 나는 CIFAR10 데이터셋으로 미리 학습 시켜놓은 모델을 사용하였다.
 
@@ -169,11 +169,11 @@ else:
 model = YOUR_MODEL().to(device)
 
 model.load_state_dict(torch.load('MODEL_PATH'))
-# evaluation
+## evaluation
 model.eval()
 ```
 
-### preprocessing
+#### preprocessing
 
 정규화하고 image를 tensor 형태로 변환시켜주는 함수
 
@@ -185,13 +185,13 @@ def preprocess_image(img):
     im_as_arr = np.float32(img)
     im_as_arr = im_as_arr.transpose(2, 0, 1)
 
-    # 채널 정규화
+    ## 채널 정규화
     for channel, _ in enumerate(im_as_arr):
         im_as_arr[channel] /= 255
         im_as_arr[channel] -= mean[channel]
         im_as_arr[channel] /= std[channel]
 
-    # tensor
+    ## tensor
     im_as_ten = torch.from_numpy(im_as_arr).float()
     im_as_ten.unsqueeze_(0)
     im_as_var = Variable(im_as_ten, requires_grad=True)
@@ -199,7 +199,7 @@ def preprocess_image(img):
     return im_as_var
 ```
 
-### recreate
+#### recreate
 
 최적화 시킨 이미지를 다시 재구축해서 다시 학습에 쓸수 있도록 한다.
 
@@ -220,7 +220,7 @@ def recreate_image(im_as_var):
     return recreated_im
 ```
 
-### save image
+#### save image
 
 ```python
 def save_image(im, path):
@@ -231,14 +231,14 @@ def save_image(im, path):
     im.save(path)
 ```
 
-### main
+#### main
 
 1. class score를 loss 함수로 정의한다.
 2. input image를 최적화 시킨다.
 3. 반복
 
 ```python
-target_class = 5 # 5th class is dog in cifar10
+target_class = 5 ## 5th class is dog in cifar10
 created_image = np.uint8(np.random.uniform(0, 255, (224, 224, 3)))
 
 if not os.path.exists('../generated'):
@@ -255,16 +255,16 @@ for i in range(1, 150):
     model.zero_grad()
 
     class_loss.backward()
-    # Update image
+    ## Update image
     optimizer.step()
-    # Recreate image
+    ## Recreate image
     created_image = recreate_image(processed_image)
     if i % 10 == 0:
-        # Save image
+        ## Save image
         im_path = '../generated/c_specific_iteration_'+str(i)+'.jpg'
         save_image(created_image, im_path)
 ```
 
 
-# Reference
+## Reference
 - [https://github.com/utkuozbulak/pytorch-cnn-visualizations/tree/4473bc24276d13f8b64088087257045938da5f4c](https://github.com/utkuozbulak/pytorch-cnn-visualizations/tree/4473bc24276d13f8b64088087257045938da5f4c)

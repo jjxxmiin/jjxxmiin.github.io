@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# tree
+## tree
 
-## change\_leaves
+### change\_leaves
 
 ```c
 void change_leaves(tree *t, char *leaf_list)
@@ -54,7 +54,7 @@ void change_leaves(tree *t, char *leaf_list)
 
 
 
-## get\_hierarchy\_probability
+### get\_hierarchy\_probability
 
 ```c
 float get_hierarchy_probability(float *x, tree *hier, int c, int stride)
@@ -92,7 +92,7 @@ float get_hierarchy_probability(float *x, tree *hier, int c, int stride)
 
 
 
-## hierarchy\_predictions
+### hierarchy\_predictions
 
 ```c
 void hierarchy_predictions(float *predictions, int n, tree *hier, int only_leaves, int stride)
@@ -137,7 +137,7 @@ void hierarchy_predictions(float *predictions, int n, tree *hier, int only_leave
 
 
 
-## hierarchy\_top\_prediction
+### hierarchy\_top\_prediction
 
 ```c
 int hierarchy_top_prediction(float *predictions, tree *hier, float thresh, int stride)
@@ -200,7 +200,7 @@ int hierarchy_top_prediction(float *predictions, tree *hier, float thresh, int s
 
 
 
-## read\_tree
+### read\_tree
 
 ```c
 tree *read_tree(char *filename)

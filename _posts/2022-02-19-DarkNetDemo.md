@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# demo
+## demo
 
-## parameter
+### parameter
 
 ```c
 #define DEMO 1
@@ -81,7 +81,7 @@ detection *get_network_boxes(network *net, int w, int h, float thresh, float hie
 
 
 
-## size\_network
+### size\_network
 
 ```c
 int size_network(network *net)
@@ -116,7 +116,7 @@ int size_network(network *net)
 
 
 
-## remember\_network
+### remember\_network
 
 ```c
 void remember_network(network *net)
@@ -155,7 +155,7 @@ void remember_network(network *net)
 
 
 
-## avg\_predictions
+### avg\_predictions
 
 ```c
 detection *avg_predictions(network *net, int *nboxes)
@@ -199,7 +199,7 @@ detection *avg_predictions(network *net, int *nboxes)
 
 
 
-## detect\_in\_thread
+### detect\_in\_thread
 
 ```c
 void *detect_in_thread(void *ptr)
@@ -281,7 +281,7 @@ void *detect_in_thread(void *ptr)
 
 
 
-## fetch\_in\_thread
+### fetch\_in\_thread
 
 ```c
 void *fetch_in_thread(void *ptr)
@@ -314,7 +314,7 @@ void *fetch_in_thread(void *ptr)
 
 
 
-## display\_in\_thread
+### display\_in\_thread
 
 ```c
 void *display_in_thread(void *ptr)
@@ -358,7 +358,7 @@ void *display_in_thread(void *ptr)
 
 
 
-## display\_loop
+### display\_loop
 
 ```c
 void *display_loop(void *ptr)
@@ -387,7 +387,7 @@ void *display_loop(void *ptr)
 
 
 
-## detect\_loop
+### detect\_loop
 
 ```c
 
@@ -416,7 +416,7 @@ void *detect_loop(void *ptr)
 
 
 
-## demo
+### demo
 
 ```c
 void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const char *filename, char **names, int classes, int delay, char *prefix, int avg_frames, float hier, int w, int h, int frames, int fullscreen)
@@ -526,7 +526,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
 
 
 
-## demo error
+### demo error
 
 ```c
 #else

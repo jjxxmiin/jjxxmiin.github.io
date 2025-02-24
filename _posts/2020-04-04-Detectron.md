@@ -7,7 +7,7 @@ categories: opensource
 use_math: true
 ---
 
-# Detectron
+## Detectron
 페이스북에서 개발한 `object detection`, `segmentation` 프레임워크다.
 
 Pytorch로 구현된 Detectron 오픈소스가 2가지가 있다.
@@ -30,7 +30,7 @@ pip install cython; pip install -U 'git+https://github.com/cocodataset/cocoapi.g
 
 가 필요하다.
 
-## 설치
+### 설치
 
 공식 설치하는데 문제가 많아 한줄씩 해결한 방법이다.
 
@@ -65,7 +65,7 @@ cd detectron2 && python -m pip install -e .
 rm -rf build/ **/*.so
 ```
 
-## Demo
+### Demo
 
 간단한 예제를 실행시켜보자
 
@@ -132,7 +132,7 @@ python setup.py build install
 기본에 충실하자.
 
 
-## 결과
+### 결과
 
 
 
@@ -143,7 +143,7 @@ python setup.py build install
 잘나올것이다 ㅎㅎ
 
 
-## 가벼운 API 사용법
+### 가벼운 API 사용법
 
 - [Document](https://detectron2.readthedocs.io/)를 참고하면 도움이 될것 같다.
 
@@ -156,20 +156,20 @@ from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 import cv2
 
-# load image
+## load image
 img = cv2.imread('./detectron2/1.jpg')
 
-# set config
+## set config
 cfg = get_cfg()
 cfg.merge_from_file("./detectron2/configs/COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
 cfg.MODEL.WEIGHTS = "./detectron2/model_final_f6e8b1.pkl"
 
-# predict
+## predict
 predictor = DefaultPredictor(cfg)
 outputs = predictor(img)
 
-# visualization
+## visualization
 v = Visualizer(img[:,:,::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=1.2)
 v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
@@ -178,7 +178,7 @@ cv2.imwrite('output.jpg',v.get_image()[:,:,::-1])
 
 위에 Demo와 같게 출력된다.
 
-## 참조
+### 참조
 - [https://detectron2.readthedocs.io/](https://detectron2.readthedocs.io/)
 - [https://gilberttanner.com/blog/detectron-2-object-detection-with-pytorch](https://gilberttanner.com/blog/detectron-2-object-detection-with-pytorch)
 - [https://github.com/facebookresearch/detectron2](https://github.com/facebookresearch/detectron2)

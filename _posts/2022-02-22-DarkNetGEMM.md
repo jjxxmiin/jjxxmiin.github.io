@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# gemm
+## gemm
 
-## GEMM 이란?
+### GEMM 이란?
 
 참고 자료 : [https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/](https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/)
 
@@ -18,11 +18,11 @@ math: true
 
 딥러닝에서 대부분의 연산은 `output = input * weight + bias`로 표현이 됩니다. 여기서 `input`, `output`, `weight`를 행렬로 표현해서 GEMM을 사용해 연산할 수 있습니다.
 
-### Fully Connected Layer
+#### Fully Connected Layer
 
 `fully connected layer`는 위와 같이 표현할 수 있습니다.
 
-### Convolutional Layer
+#### Convolutional Layer
 
 * `im2col` : 3차원 이미지 배열을 2차원 배열로 변환합니다.
 
@@ -30,9 +30,9 @@ math: true
 
 ***
 
-## gemm.c
+### gemm.c
 
-### gemm
+#### gemm
 
 gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
 
@@ -77,7 +77,7 @@ void gemm(int TA, int TB, int M, int N, int K, float ALPHA,
 
 
 
-### gemm\_cpu
+#### gemm\_cpu
 
 ```c
 void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA,
@@ -138,7 +138,7 @@ void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA,
 
 
 
-### gemm\_nn
+#### gemm\_nn
 
 ```c
 void gemm_nn(int M, int N, int K, float ALPHA,
@@ -188,7 +188,7 @@ void gemm_nn(int M, int N, int K, float ALPHA,
 
 
 
-### gemm\_nt
+#### gemm\_nt
 
 ```c
 void gemm_nt(int M, int N, int K, float ALPHA,
@@ -238,7 +238,7 @@ void gemm_nt(int M, int N, int K, float ALPHA,
 
 
 
-### gemm\_tn
+#### gemm\_tn
 
 ```c
 void gemm_tn(int M, int N, int K, float ALPHA,
@@ -286,7 +286,7 @@ void gemm_tn(int M, int N, int K, float ALPHA,
 
 
 
-### gemm\_tt
+#### gemm\_tt
 
 ```c
 void gemm_tt(int M, int N, int K, float ALPHA,

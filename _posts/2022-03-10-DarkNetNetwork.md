@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# network
+## network
 
-## get\_base\_args
+### get\_base\_args
 
 ```c
 load_args get_base_args(network *net)
@@ -48,7 +48,7 @@ load_args get_base_args(network *net)
 
 
 
-## load\_network
+### load\_network
 
 ```c
 network *load_network(char *cfg, char *weights, int clear)
@@ -89,7 +89,7 @@ network *load_network(char *cfg, char *weights, int clear)
 
 
 
-## get\_current\_batch
+### get\_current\_batch
 
 ```c
 size_t get_current_batch(network *net)
@@ -116,7 +116,7 @@ size_t get_current_batch(network *net)
 
 
 
-## get\_current\_rate
+### get\_current\_rate
 
 ```c
 float get_current_rate(network *net)
@@ -173,7 +173,7 @@ float get_current_rate(network *net)
 
 
 
-## get\_layer\_string
+### get\_layer\_string
 
 ```c
 char *get_layer_string(LAYER_TYPE a)
@@ -252,7 +252,7 @@ char *get_layer_string(LAYER_TYPE a)
 
 
 
-## make\_network
+### make\_network
 
 ```c
 network *make_network(int n)
@@ -284,7 +284,7 @@ network *make_network(int n)
 
 
 
-## forward\_network
+### forward\_network
 
 ```c
 void forward_network(network *netp)
@@ -330,7 +330,7 @@ void forward_network(network *netp)
 
 
 
-## update\_network
+### update\_network
 
 ```c
 void update_network(network *netp)
@@ -388,7 +388,7 @@ void update_network(network *netp)
 
 
 
-## calc\_network\_cost
+### calc\_network\_cost
 
 ```c
 void calc_network_cost(network *netp)
@@ -426,7 +426,7 @@ void calc_network_cost(network *netp)
 
 
 
-## get\_predicted\_class\_network
+### get\_predicted\_class\_network
 
 ```c
 int get_predicted_class_network(network *net)
@@ -454,7 +454,7 @@ int get_predicted_class_network(network *net)
 
 
 
-## backward\_network
+### backward\_network
 
 ```c
 void backward_network(network *netp)
@@ -499,7 +499,7 @@ void backward_network(network *netp)
 
 
 
-## train\_network\_datum
+### train\_network\_datum
 
 ```c
 float train_network_datum(network *net)
@@ -536,7 +536,7 @@ float train_network_datum(network *net)
 
 
 
-## train\_network\_sgd
+### train\_network\_sgd
 
 ```c
 float train_network_sgd(network *net, data d, int n)
@@ -575,7 +575,7 @@ float train_network_sgd(network *net, data d, int n)
 
 
 
-## train\_network
+### train\_network
 
 ```c
 float train_network(network *net, data d)
@@ -618,7 +618,7 @@ float train_network(network *net, data d)
 
 
 
-## set\_temp\_network
+### set\_temp\_network
 
 ```c
 void set_temp_network(network *net, float t)
@@ -648,7 +648,7 @@ void set_temp_network(network *net, float t)
 
 
 
-## set\_batch\_network
+### set\_batch\_network
 
 ```c
 void set_batch_network(network *net, int b)
@@ -682,7 +682,7 @@ void set_batch_network(network *net, int b)
 
 
 
-## resize\_network
+### resize\_network
 
 ```c
 int resize_network(network *net, int w, int h)
@@ -786,7 +786,7 @@ int resize_network(network *net, int w, int h)
 
 
 
-## get\_network\_detection\_layer
+### get\_network\_detection\_layer
 
 ```c
 layer get_network_detection_layer(network *net)
@@ -823,7 +823,7 @@ layer get_network_detection_layer(network *net)
 
 
 
-## get\_network\_image\_layer
+### get\_network\_image\_layer
 
 ```c
 image get_network_image_layer(network *net, int i)
@@ -857,7 +857,7 @@ image get_network_image_layer(network *net, int i)
 
 
 
-## get\_network\_image
+### get\_network\_image
 
 ```c
 image get_network_image(network *net)
@@ -889,7 +889,7 @@ image get_network_image(network *net)
 
 
 
-## visualize\_network
+### visualize\_network
 
 ```c
 void visualize_network(network *net)
@@ -927,7 +927,7 @@ void visualize_network(network *net)
 
 ##
 
-## top\_predictions
+### top\_predictions
 
 ```c
 void top_predictions(network *net, int k, int *index)
@@ -954,7 +954,7 @@ void top_predictions(network *net, int k, int *index)
 
 
 
-## network\_predict
+### network\_predict
 
 ```c
 float *network_predict(network *net, float *input)
@@ -995,7 +995,7 @@ float *network_predict(network *net, float *input)
 
 
 
-## num\_detections
+### num\_detections
 
 ```c
 int num_detections(network *net, float thresh)
@@ -1032,7 +1032,7 @@ int num_detections(network *net, float thresh)
 
 
 
-## make\_network\_boxes
+### make\_network\_boxes
 
 ```c
 detection *make_network_boxes(network *net, float thresh, int *num)
@@ -1075,7 +1075,7 @@ detection *make_network_boxes(network *net, float thresh, int *num)
 
 
 
-## fill\_network\_boxes
+### fill\_network\_boxes
 
 ```c
 void fill_network_boxes(network *net, int w, int h, float thresh, float hier, int *map, int relative, detection *dets)
@@ -1125,7 +1125,7 @@ void fill_network_boxes(network *net, int w, int h, float thresh, float hier, in
 
 
 
-## get\_network\_boxes
+### get\_network\_boxes
 
 ```c
 detection *get_network_boxes(network *net, int w, int h, float thresh, float hier, int *map, int relative, int *num)
@@ -1163,7 +1163,7 @@ detection *get_network_boxes(network *net, int w, int h, float thresh, float hie
 
 
 
-## free\_detections
+### free\_detections
 
 ```c
 void free_detections(detection *dets, int n)
@@ -1196,7 +1196,7 @@ void free_detections(detection *dets, int n)
 
 
 
-## network\_predict\_image
+### network\_predict\_image
 
 ```c
 float *network_predict_image(network *net, image im)
@@ -1230,7 +1230,7 @@ float *network_predict_image(network *net, image im)
 
 
 
-## network\_width, network\_height
+### network\_width, network\_height
 
 ```c
 int network_width(network *net){return net->w;}
@@ -1255,7 +1255,7 @@ int network_height(network *net){return net->h;}
 
 
 
-## network\_predict\_data\_multi
+### network\_predict\_data\_multi
 
 ```c
 matrix network_predict_data_multi(network *net, data test, int n)
@@ -1308,7 +1308,7 @@ matrix network_predict_data_multi(network *net, data test, int n)
 
 
 
-## network\_predict\_data
+### network\_predict\_data
 
 ```c
 matrix network_predict_data(network *net, data test)
@@ -1362,7 +1362,7 @@ matrix network_predict_data(network *net, data test)
 
 
 
-## print\_network
+### print\_network
 
 ```c
 void print_network(network *net)
@@ -1401,7 +1401,7 @@ void print_network(network *net)
 
 
 
-## compare\_networks
+### compare\_networks
 
 ```c
 void compare_networks(network *n1, network *n2, data test)
@@ -1455,7 +1455,7 @@ void compare_networks(network *n1, network *n2, data test)
 
 
 
-## network\_accuracy
+### network\_accuracy
 
 ```c
 float network_accuracy(network *net, data d)
@@ -1485,7 +1485,7 @@ float network_accuracy(network *net, data d)
 
 
 
-## network\_accuracies
+### network\_accuracies
 
 ```c
 float *network_accuracies(network *net, data d, int n)
@@ -1522,7 +1522,7 @@ float *network_accuracies(network *net, data d, int n)
 
 
 
-## get\_network\_output\_layer
+### get\_network\_output\_layer
 
 ```c
 layer get_network_output_layer(network *net)
@@ -1553,7 +1553,7 @@ layer get_network_output_layer(network *net)
 
 
 
-## network\_accuracy\_multi
+### network\_accuracy\_multi
 
 ```c
 float network_accuracy_multi(network *net, data d, int n)
@@ -1585,7 +1585,7 @@ float network_accuracy_multi(network *net, data d, int n)
 
 
 
-## free\_network
+### free\_network
 
 ```c
 void free_network(network *net)
@@ -1620,7 +1620,7 @@ void free_network(network *net)
 
 
 
-## network\_output\_layer
+### network\_output\_layer
 
 ```c
 layer network_output_layer(network *net)
@@ -1652,7 +1652,7 @@ layer network_output_layer(network *net)
 
 
 
-## network\_inputs
+### network\_inputs
 
 ```c
 int network_inputs(network *net)
@@ -1678,7 +1678,7 @@ int network_inputs(network *net)
 
 
 
-## network\_outputs
+### network\_outputs
 
 ```c
 int network_outputs(network *net)
@@ -1704,7 +1704,7 @@ int network_outputs(network *net)
 
 
 
-## network\_output
+### network\_output
 
 ```c
 float *network_output(network *net)

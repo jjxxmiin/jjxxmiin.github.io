@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# deconvolutional\_layer
+## deconvolutional\_layer
 
-## Deconvolutional Layer 란?
+### Deconvolutional Layer 란?
 
 deconvolution은 convolution을 반대로 연산합니다.
 
@@ -23,7 +23,7 @@ deconvolution은 convolution을 반대로 연산합니다.
 
 추가적으로 dilated convolution은 연산량을 늘리지 않고 receptive field를 크게 만드는 효과적인 방법입니다.
 
-## get\_workspace\_size
+### get\_workspace\_size
 
 ```c
 static size_t get_workspace_size(layer l){
@@ -42,7 +42,7 @@ static size_t get_workspace_size(layer l){
 
 
 
-## bilinear\_init
+### bilinear\_init
 
 ```c
 void bilinear_init(layer l)
@@ -82,7 +82,7 @@ void bilinear_init(layer l)
 
 
 
-## forward\_deconvolutional\_layer
+### forward\_deconvolutional\_layer
 
 ```c
 void forward_deconvolutional_layer(const layer l, network net)
@@ -138,7 +138,7 @@ void forward_deconvolutional_layer(const layer l, network net)
 
 
 
-## backward\_deconvolutional\_layer
+### backward\_deconvolutional\_layer
 
 ```c
 void backward_deconvolutional_layer(layer l, network net)
@@ -207,7 +207,7 @@ void backward_deconvolutional_layer(layer l, network net)
 
 
 
-## update\_deconvolutional\_layer
+### update\_deconvolutional\_layer
 
 ```c
 void update_deconvolutional_layer(layer l, update_args a)
@@ -255,7 +255,7 @@ void update_deconvolutional_layer(layer l, update_args a)
 
 
 
-## resize\_deconvolutional\_layer
+### resize\_deconvolutional\_layer
 
 ```c
 void resize_deconvolutional_layer(layer *l, int h, int w)
@@ -300,7 +300,7 @@ void resize_deconvolutional_layer(layer *l, int h, int w)
 
 
 
-## make\_deconvolutional\_layer
+### make\_deconvolutional\_layer
 
 ```c
 layer make_deconvolutional_layer(int batch, int h, int w, int c, int n, int size, int stride, int padding, ACTIVATION activation, int batch_normalize, int adam)
@@ -419,7 +419,7 @@ layer make_deconvolutional_layer(int batch, int h, int w, int c, int n, int size
 
 
 
-## denormalize\_deconvolutional\_layer
+### denormalize\_deconvolutional\_layer
 
 ```c
 void denormalize_deconvolutional_layer(layer l)

@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# connected\_layer
+## connected\_layer
 
-## Fully Connected Layer 란?
+### Fully Connected Layer 란?
 
 이전 Layer의 모든 노드가 다음 Layer의 모든 노드에 각각 하나씩 연결되어있는 Layer 입니다.
 
@@ -25,7 +25,7 @@ output을 계산하기 위해서 각자의 id를 가지고 있는 weight가 사�
 
 ***
 
-### forward\_connected\_layer
+#### forward\_connected\_layer
 
 ```c
 void forward_connected_layer(layer l, network net)
@@ -72,7 +72,7 @@ void forward_connected_layer(layer l, network net)
 
 
 
-### backward\_connected\_layer
+#### backward\_connected\_layer
 
 ```c
 void backward_connected_layer(layer l, network net)
@@ -121,7 +121,7 @@ void backward_connected_layer(layer l, network net)
 
 
 
-### update\_connected\_layer
+#### update\_connected\_layer
 
 ```c
 void update_connected_layer(layer l, update_args a)
@@ -178,7 +178,7 @@ void update_connected_layer(layer l, update_args a)
 
 
 
-### make\_connected\_layer
+#### make\_connected\_layer
 
 ```c
 layer make_connected_layer(int batch, int inputs, int outputs, ACTIVATION activation, int batch_normalize, int adam)

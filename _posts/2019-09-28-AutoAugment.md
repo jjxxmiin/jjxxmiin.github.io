@@ -7,12 +7,12 @@ categories: paper
 math: true
 ---
 
-# AutoAugment
+## AutoAugment
 
 - AutoAugment Paper : [Here](https://arxiv.org/abs/1805.09501)
 - Official Code : [Here](https://github.com/tensorflow/models/tree/master/research/autoaugment)
 
-# Abstract
+## Abstract
 - 수동으로 설계되는 data augmentation을 자동으로 검색하기 위해서 AutoAugment를 제안했다.
 
 - 여러가지 sub policies로 구성된 설계 공간을 탐색하고 각 미니 배치의 각각 이미지에 대해 랜덤으로 선택되었다.
@@ -23,7 +23,7 @@ math: true
 
 - 검색알고리즘을 사용한다.
 
-# Introduction
+## Introduction
 - data augmentation은 data domain의 불일치에 대하여 모델을 학습시키기 위해 사용한다. 객체 분류는 종종 수평으로 뒤집거나 변환하는 것에 영향을 받지 않는다.
 
 - 현재 머신러닝과 컴퓨터 비전의 커다란 초점은 더 나은 네트워크 구조를 설계하는 것이다. 더 많은 불변량을 포함하는 더 나은 data augmentation을 찾는데는 관심이 별로 없었다.
@@ -37,7 +37,7 @@ math: true
 1. 최상의 data augmentation을 찾을 수 있다.
 2. 학습 된 보강 정책을 새로운 데이터 셋에 전송 할 수 있다.
 
-# Related Work
+## Related Work
 image augmentation은 수동으로 설계되었고 데이터 셋 별로 최상의 성능을 가진다.
 
 - MNIST : `Elastic Distortions(탄성 왜곡)`,`Scale`,`Translation`,`Rotation`을 보통 사용한다.
@@ -50,7 +50,7 @@ image augmentation은 수동으로 설계되었고 데이터 셋 별로 최상�
 - DeVries와 Taylor : 학습 된 형상 공간에서 간단한 변형을 사용해 data augmentation을 하였다.
 - GAN을 자주 사용하였다.
 
-# AutoAugment
+## AutoAugment
 - Searching for best Augmentation policies Directly on the Dataset of Interest
 
 최상의 보강 정책을 찾는 문제를 개별 탐색 문제로 공식화한다. 이 방법은 **탐색 알고리즘** 과 **탐색 공간** 이라는 두 가지 구성 요소로 구성된다.
@@ -63,7 +63,7 @@ image augmentation은 수동으로 설계되었고 데이터 셋 별로 최상�
 
 
 
-## NASNet
+### NASNet
 위 그림을 이해하기 위해서는 NAS와 NASNet을 알아야한다. NAS는 딥러닝 모델의 구조를 학습해서 구조를 생성하는 모델이다.
 
 
@@ -132,7 +132,7 @@ identity
 위와 같은 구조로 만들어 준다.
 
 
-## controller RNN of AutoAugment
+### controller RNN of AutoAugment
 최종적으로 AutoAugment의 RNN controller는 아래와 같은 구조를 가진다.
 
 
@@ -141,7 +141,7 @@ identity
 
 
 
-## search space detail
+### search space detail
 보강 정책은 5개의 하위 정책으로 구성되며 각 하위 정책은 2개의 보강 방법으로 구성되어 순서대로 적용된다. 그리고 수치 두가지를 나타낸다.
 
 - 1. 보강 방법이 적용될 확률
@@ -161,18 +161,18 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 
 탐색 공간에는 총 16개의 작업이 있다. 탐색 알고리즘을 사용해서 크기를 찾을 수 있도록 크기 범위를 10개의 값(균일한 간격)으로 이산화한다. 11개의 값으로 적용 할 확률도 이산화한다. 즉, $$(16*10*12)^{2}$$ 에서의 탐색 문제다. 그러나 다양성을 높이기 위해서 5개의 하위 정책을 동시에 찾는 것이다. 그래서 $$(16 * 10 * 12)^{10} \approx 2.9 * 10^{32}$$의 엄청나게 많은 가능성을 가진다.
 
-## search algorithm detail
+### search algorithm detail
 탐색 알고리즘은 RNN 컨트롤러와 `Proximal Policy Optimization algorithm`으로 구성된다. 각 단계에서 컨트롤러는 softmax로 예측한다. 그리고 다음 예측은 다음 단계로 포함된다. 컨트롤러에는 총 2개의 보강 연산이 있는 5개의 하위 정책과 그에 해당하는 크기 및 확률을 예측하기 위해 총 30개의 softmax의 예측이 있다.
 
 ```
 5(하위 정책)*(2(보강 방법) + 2(확률) + 2(크기)) = 30
 ```
 
-### The training of controller RNN
+#### The training of controller RNN
 어떠한 보강 정책이 `childmodel`의 일반화를 개선하는데 얼마나 좋은지에 대해서 학습한다. 이 실험에서는 `childmodel`의 일반화를 측정하기 위해서 검증 세트를 따로 보관했다. `childmodel`은 학습할 데이터 셋에 5개의 하위 정책을 적용하여 생성 된 데이터로 훈련된다. 그런 다음 검증 셋에서 `childmodel`을 평가하여 정확도를 측정한다. ward signal로 사용된다. 각 데이터 셋은 약 15000개의 보강 정책을 샘플링한다.
 
 
-### Architecture of controller RNN and training hyperparameters
+#### Architecture of controller RNN and training hyperparameters
 
 논문 : B. Zoph, V. Vasudevan, J. Shlens, and Q. V. Le. Learning transferable architectures for scalable image recognition. In Proceedings of IEEE Conference on Computer Vision and Pattern Recognition, 2017
 
@@ -189,9 +189,9 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 5(보강 정책) * 5(하위 정책) * (2(보강 방법) + 2(확률) + 2(크기))
 ```
 
-# Experiments and Results
+## Experiments and Results
 
-## CIFAR10
+### CIFAR10
 - 4000개 추출 사용
 - WideResNet-40-2(layer : 40, widening factor : 2) 모델을 사용
 - 120 epoch
@@ -200,14 +200,14 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 - cosine learning decay with one annealing cycle
 
 
-## CIFAR100
+### CIFAR100
 - CIFAR10과 같다.
 
-## SVHN
+### SVHN
 - 1000개 추출 사용
 - 나머지는 CIFAR10과 동일
 
-# Augmentation
+## Augmentation
 
 
 
@@ -215,7 +215,7 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 
 
 
-# Final Policy
+## Final Policy
 - CIFAR10
 
 
@@ -240,6 +240,6 @@ ShearX/Y, TranslateX/Y, Rotate, AutoContrast, Invert, Equalize, Solarize, Poster
 
 
 
-# 참조
+## 참조
 - [https://research.sualab.com/review/2018/09/28/nasnet-review.html](https://research.sualab.com/review/2018/09/28/nasnet-review.html)
 - [https://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154](https://openresearch.ai/t/nas-learning-transferable-architectures-for-scalable-image-recognition/154)

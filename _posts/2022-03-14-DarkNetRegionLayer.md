@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# region\_layer
+## region\_layer
 
-## forward\_region\_layer
+### forward\_region\_layer
 
 ```c
 void forward_region_layer(const layer l, network net)
@@ -176,7 +176,7 @@ void forward_region_layer(const layer l, network net)
 
 
 
-## backward\_region\_layer
+### backward\_region\_layer
 
 ```c
 void backward_region_layer(const layer l, network net)
@@ -212,7 +212,7 @@ void backward_region_layer(const layer l, network net)
 
 
 
-## resize\_reorg\_layer
+### resize\_reorg\_layer
 
 ```c
 void resize_region_layer(layer *l, int w, int h)
@@ -252,7 +252,7 @@ void resize_region_layer(layer *l, int w, int h)
 
 
 
-## make\_region\_layer
+### make\_region\_layer
 
 ```c
 layer make_region_layer(int batch, int w, int h, int n, int classes, int coords)
@@ -324,7 +324,7 @@ layer make_region_layer(int batch, int w, int h, int n, int classes, int coords)
 
 
 
-## get\_region\_box
+### get\_region\_box
 
 ```c
 box get_region_box(float *x, float *biases, int n, int index, int i, int j, int w, int h, int stride)
@@ -366,7 +366,7 @@ box get_region_box(float *x, float *biases, int n, int index, int i, int j, int 
 
 
 
-## delta\_region\_box
+### delta\_region\_box
 
 ```c
 float delta_region_box(box truth, float *x, float *biases, int n, int index, int i, int j, int w, int h, float *delta, float scale, int stride)
@@ -418,7 +418,7 @@ float delta_region_box(box truth, float *x, float *biases, int n, int index, int
 
 
 
-## delta\_region\_mask
+### delta\_region\_mask
 
 ```c
 void delta_region_mask(float *truth, float *x, int n, int index, float *delta, int stride, int scale)
@@ -455,7 +455,7 @@ void delta_region_mask(float *truth, float *x, int n, int index, float *delta, i
 
 
 
-## delta\_region\_class
+### delta\_region\_class
 
 ```c
 void delta_region_class(float *output, float *delta, int index, int class, int classes, tree *hier, float scale, int stride, float *avg_cat, int tag)
@@ -515,7 +515,7 @@ void delta_region_class(float *output, float *delta, int index, int class, int c
 
 
 
-## logit
+### logit
 
 ```c
 float logit(float x)
@@ -546,7 +546,7 @@ float logit(float x)
 
 
 
-## tisnan
+### tisnan
 
 ```c
 float tisnan(float x)
@@ -574,7 +574,7 @@ float tisnan(float x)
 
 
 
-## entry\_index
+### entry\_index
 
 ```c
 int entry_index(layer l, int batch, int location, int entry)
@@ -608,7 +608,7 @@ int entry_index(layer l, int batch, int location, int entry)
 
 
 
-## correct\_region\_boxes
+### correct\_region\_boxes
 
 ```c
 void correct_region_boxes(detection *dets, int n, int w, int h, int netw, int neth, int relative)
@@ -666,7 +666,7 @@ void correct_region_boxes(detection *dets, int n, int w, int h, int netw, int ne
 
 
 
-## get\_region\_detections
+### get\_region\_detections
 
 ```c
 void get_region_detections(layer l, int w, int h, int netw, int neth, float thresh, int *map, float tree_thresh, int relative, detection *dets)
@@ -788,7 +788,7 @@ void get_region_detections(layer l, int w, int h, int netw, int neth, float thre
 
 
 
-## zero\_objectness
+### zero\_objectness
 
 ```c
 void zero_objectness(layer l)

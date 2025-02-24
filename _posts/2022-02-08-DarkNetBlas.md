@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# blas
+## blas
 
-## blas 란?
+### blas 란?
 
 벡터의 덧셈, 내적, 선형 조합, 행렬 곱셈과 같은 일반적인 선형 대수 연산을 수행하기 위한 역할을 합니다.
 
@@ -17,7 +17,7 @@ math: true
 
 ***
 
-### copy\_cpu
+#### copy\_cpu
 
 ```c
 void copy_cpu(int N, float *X, int INCX, float *Y, int INCY)
@@ -47,7 +47,7 @@ void copy_cpu(int N, float *X, int INCX, float *Y, int INCY)
 * 위 코드는 copy\_cpu 함수입니다. 이 함수는 X 포인터가 가리키는 데이터를 Y 포인터가 가리키는 위치에 복사합니다. 이때 INCX와 INCY를 이용하여 X와 Y의 요소 간격을 조절할 수 있습니다.&#x20;
 * 이 함수는 주로 딥 러닝에서 사용되는 배열 연산에서 많이 활용됩니다.
 
-### mean\_cpu
+#### mean\_cpu
 
 ```c
 void mean_cpu(float *x, int batch, int filters, int spatial, float *mean)
@@ -90,7 +90,7 @@ void mean_cpu(float *x, int batch, int filters, int spatial, float *mean)
 
 
 
-### variance\_cpu
+#### variance\_cpu
 
 ```c
 void variance_cpu(float *x, float *mean, int batch, int filters, int spatial, float *variance)
@@ -132,7 +132,7 @@ void variance_cpu(float *x, float *mean, int batch, int filters, int spatial, fl
 
 
 
-### normalize\_cpu
+#### normalize\_cpu
 
 ```c
 void normalize_cpu(float *x, float *mean, float *variance, int batch, int filters, int spatial)
@@ -173,7 +173,7 @@ void normalize_cpu(float *x, float *mean, float *variance, int batch, int filter
 
 
 
-### axpy\_cpu
+#### axpy\_cpu
 
 ```c
 void axpy_cpu(int N, float ALPHA, float *X, int INCX, float *Y, int INCY)
@@ -206,7 +206,7 @@ void axpy_cpu(int N, float ALPHA, float *X, int INCX, float *Y, int INCY)
 
 
 
-### scal\_cpu
+#### scal\_cpu
 
 ```c
 void scal_cpu(int N, float ALPHA, float *X, int INCX)
@@ -236,7 +236,7 @@ void scal_cpu(int N, float ALPHA, float *X, int INCX)
 
 
 
-### fill\_cpu
+#### fill\_cpu
 
 ```c
 void fill_cpu(int N, float ALPHA, float *X, int INCX)
@@ -267,7 +267,7 @@ void fill_cpu(int N, float ALPHA, float *X, int INCX)
 
 
 
-### mul\_cpu
+#### mul\_cpu
 
 ```c
 void mul_cpu(int N, float *X, int INCX, float *Y, int INCY)
@@ -297,7 +297,7 @@ void mul_cpu(int N, float *X, int INCX, float *Y, int INCY)
 * 위 코드는 mul\_cpu 함수입니다. 이 함수는 X 포인터가 가리키는 데이터와 Y 포인터가 가리키는 대상 데이터를 요소별로 곱합니다. 이때 INCX와 INCY를 이용하여 X와 Y의 요소 간격을 조절할 수 있습니다.&#x20;
 * 이 함수는 주로 딥 러닝에서 사용되는 배열 연산에서 많이 활용됩니다.
 
-### pow\_cpu
+#### pow\_cpu
 
 ```c
 void pow_cpu(int N, float ALPHA, float *X, int INCX, float *Y, int INCY)
@@ -327,7 +327,7 @@ void pow_cpu(int N, float ALPHA, float *X, int INCX, float *Y, int INCY)
 * pow\_cpu 함수는 입력 데이터 배열 X에서 원소를 ALPHA 지수만큼 거듭제곱하여 출력 데이터 배열 Y에 저장하는 함수입니다.&#x20;
 * 이 함수는 N 개의 원소를 처리하며, INCX와 INCY를 이용해 X와 Y 배열의 포인터를 이동하면서 원소에 접근합니다.
 
-### deinter\_cpu
+#### deinter\_cpu
 
 ```c
 void deinter_cpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
@@ -372,7 +372,7 @@ void deinter_cpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
 
 
 
-### inter\_cpu
+#### inter\_cpu
 
 ```c
 void inter_cpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
@@ -417,7 +417,7 @@ void inter_cpu(int NX, float *X, int NY, float *Y, int B, float *OUT)
 
 
 
-### mult\_add\_into\_cpu
+#### mult\_add\_into\_cpu
 
 ```c
 void mult_add_into_cpu(int N, float *X, float *Y, float *Z)
@@ -448,7 +448,7 @@ void mult_add_into_cpu(int N, float *X, float *Y, float *Z)
 
 
 
-### smooth\_l1\_cpu
+#### smooth\_l1\_cpu
 
 ```c
 void smooth_l1_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -492,7 +492,7 @@ void smooth_l1_cpu(int n, float *pred, float *truth, float *delta, float *error)
 
 
 
-### l1\_cpu
+#### l1\_cpu
 
 ```c
 void l1_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -529,7 +529,7 @@ void l1_cpu(int n, float *pred, float *truth, float *delta, float *error)
 
 
 
-### softmax\_x\_ent\_cpu
+#### softmax\_x\_ent\_cpu
 
 ```c
 void softmax_x_ent_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -566,7 +566,7 @@ void softmax_x_ent_cpu(int n, float *pred, float *truth, float *delta, float *er
 
 
 
-### logistic\_x\_ent\_cpu
+#### logistic\_x\_ent\_cpu
 
 ```c
 void logistic_x_ent_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -607,7 +607,7 @@ void logistic_x_ent_cpu(int n, float *pred, float *truth, float *delta, float *e
 
 
 
-### l2\_cpu
+#### l2\_cpu
 
 ```c
 void l2_cpu(int n, float *pred, float *truth, float *delta, float *error)
@@ -643,7 +643,7 @@ void l2_cpu(int n, float *pred, float *truth, float *delta, float *error)
 
 
 
-### dot\_cpu
+#### dot\_cpu
 
 ```c
 float dot_cpu(int N, float *X, int INCX, float *Y, int INCY)
@@ -676,7 +676,7 @@ float dot_cpu(int N, float *X, int INCX, float *Y, int INCY)
 
 
 
-### softmax
+#### softmax
 
 ```c
 void softmax(float *input, int n, float temp, int stride, float *output)
@@ -726,7 +726,7 @@ void softmax(float *input, int n, float temp, int stride, float *output)
 
 
 
-### softmax\_cpu
+#### softmax\_cpu
 
 ```c
 void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output)
@@ -768,7 +768,7 @@ void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, i
 
 
 
-### upsample\_cpu
+#### upsample\_cpu
 
 ```c
 void upsample_cpu(float *in, int w, int h, int c, int batch, int stride, int forward, float scale, float *out)
@@ -822,7 +822,7 @@ void upsample_cpu(float *in, int w, int h, int c, int batch, int stride, int for
 
 
 
-### reorg\_cpu
+#### reorg\_cpu
 
 ```c
 void reorg_cpu(float *x, int w, int h, int c, int batch, int stride, int forward, float *out)
@@ -891,7 +891,7 @@ void reorg_cpu(float *x, int w, int h, int c, int batch, int stride, int forward
 
 
 
-### flatten
+#### flatten
 
 ```c
 void flatten(float *x, int size, int layers, int batch, int forward)
@@ -940,7 +940,7 @@ void flatten(float *x, int size, int layers, int batch, int forward)
 
 
 
-### weighted\_sum\_cpu
+#### weighted\_sum\_cpu
 
 ```c
 void weighted_sum_cpu(float *a, float *b, float *s, int n, float *c)
@@ -975,7 +975,7 @@ void weighted_sum_cpu(float *a, float *b, float *s, int n, float *c)
 
 
 
-### weighted\_delta\_cpu
+#### weighted\_delta\_cpu
 
 ```c
 void weighted_delta_cpu(float *a, float *b, float *s, float *da, float *db, float *ds, int n, float *dc)
@@ -1016,7 +1016,7 @@ void weighted_delta_cpu(float *a, float *b, float *s, float *da, float *db, floa
 
 
 
-### shortcut\_cpu
+#### shortcut\_cpu
 
 ```c
 void shortcut_cpu(int batch, int w1, int h1, int c1, float *add, int w2, int h2, int c2, float s1, float s2, float *out)
@@ -1073,7 +1073,7 @@ void shortcut_cpu(int batch, int w1, int h1, int c1, float *add, int w2, int h2,
 
 
 
-### softmax\_x\_ent\_cpu
+#### softmax\_x\_ent\_cpu
 
 ```c
 void softmax_x_ent_cpu(int n, float *pred, float *truth, float *delta, float *error)

@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# cost\_layer
+## cost\_layer
 
 Loss를 구하기 위한 layer입니다.
 
-## COST\_TYPE
+### COST\_TYPE
 
 ```c
 typedef enum{
@@ -31,7 +31,7 @@ typedef enum{
 
 
 
-## get\_cost\_type
+### get\_cost\_type
 
 ```c
 COST_TYPE get_cost_type(char *s)
@@ -67,7 +67,7 @@ COST_TYPE get_cost_type(char *s)
 
 
 
-## get\_cost\_string
+### get\_cost\_string
 
 ```c
 char *get_cost_string(COST_TYPE a)
@@ -108,7 +108,7 @@ char *get_cost_string(COST_TYPE a)
 
 
 
-## forward\_cost\_layer
+### forward\_cost\_layer
 
 ```c
 void forward_cost_layer(cost_layer l, network net)
@@ -156,7 +156,7 @@ void forward_cost_layer(cost_layer l, network net)
 
 .
 
-## backward\_cost\_layer
+### backward\_cost\_layer
 
 ```c
 void backward_cost_layer(const cost_layer l, network net)
@@ -186,7 +186,7 @@ void backward_cost_layer(const cost_layer l, network net)
 
 
 
-## resize\_cost\_layer
+### resize\_cost\_layer
 
 ```c
 void resize_cost_layer(cost_layer *l, int inputs)
@@ -218,7 +218,7 @@ void resize_cost_layer(cost_layer *l, int inputs)
 
 
 
-## make\_cost\_layer
+### make\_cost\_layer
 
 ```c
 cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float scale)

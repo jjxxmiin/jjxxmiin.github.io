@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# maxpool
+## maxpool
 
-### Max Pooling Layer 란?
+#### Max Pooling Layer 란?
 
 Max Pooling Layer는 Convolutional Neural Network(CNN)의 구성 요소 중 하나입니다. CNN은 이미지, 음성 또는 비디오와 같은 입력 데이터를 처리할 때 사용됩니다. 이전의 Convolutional Layer에서 생성된 feature map을 다운 샘플링하여 공간 해상도를 줄이는 역할을 합니다. 이를 통해 네트워크가 과적합되는 것을 방지하고 연산 속도를 높일 수 있습니다.
 
@@ -18,7 +18,7 @@ Max Pooling Layer는 각 feature map에서 가장 큰 값을 선택하여 출력
 
 
 
-### make\_maxpool\_layer
+#### make\_maxpool\_layer
 
 ```c
 maxpool_layer make_maxpool_layer(int batch, int h, int w, int c, int size, int stride, int padding)
@@ -82,7 +82,7 @@ maxpool_layer make_maxpool_layer(int batch, int h, int w, int c, int size, int s
 
 
 
-### forward\_maxpool\_layer
+#### forward\_maxpool\_layer
 
 ```c
 void forward_maxpool_layer(const maxpool_layer l, network net) {
@@ -141,7 +141,7 @@ void forward_maxpool_layer(const maxpool_layer l, network net) {
 
 
 
-### backward\_maxpool\_layer
+#### backward\_maxpool\_layer
 
 ```c
 void backward_maxpool_layer(const maxpool_layer l, network net)
@@ -177,7 +177,7 @@ void backward_maxpool_layer(const maxpool_layer l, network net)
 
 
 
-### get\_maxpool\_image
+#### get\_maxpool\_image
 
 ```c
 image get_maxpool_image(maxpool_layer l)
@@ -206,7 +206,7 @@ image get_maxpool_image(maxpool_layer l)
 
 
 
-### get\_maxpool\_delta
+#### get\_maxpool\_delta
 
 ```c
 image get_maxpool_delta(maxpool_layer l)
@@ -237,7 +237,7 @@ image get_maxpool_delta(maxpool_layer l)
 
 
 
-### resize\_maxpool\_layer
+#### resize\_maxpool\_layer
 
 ```c
 void resize_maxpool_layer(maxpool_layer *l, int w, int h)

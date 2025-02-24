@@ -5,7 +5,7 @@ date:   2020-06-13 09:10 -0400
 categories: python
 ---
 
-# Dependancy Injection
+## Dependancy Injection
 
 ```python
 class Book:

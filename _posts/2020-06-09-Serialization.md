@@ -6,7 +6,7 @@ date:   2020-06-09 09:10 -0400
 categories: python
 ---
 
-# Serialization
+## Serialization
 
 - 데이터 구조를 바이트 스트림으로 인코딩하는 것
 
@@ -21,7 +21,7 @@ categories: python
 
 ```
 
-# Protobuf
+## Protobuf
 
 - `.proto`
 
@@ -32,7 +32,7 @@ categories: python
 - 공식 문서 예제 : [https://developers.google.com/protocol-buffers/docs/pythontutorial](https://developers.google.com/protocol-buffers/docs/pythontutorial)
 
 
-## Window 설치
+### Window 설치
 
 - [https://github.com/protocolbuffers/protobuf/releases](https://github.com/protocolbuffers/protobuf/releases)
 
@@ -48,9 +48,9 @@ categories: python
 protoc --version
 ```
 
-## Tutorial
+### Tutorial
 
-#### `addressbook.proto` 작성
+##### `addressbook.proto` 작성
 
 ```proto2
 syntax = "proto2";
@@ -87,7 +87,7 @@ message AddressBook {
 
 \+ repeated : 값이 여러번 반복된다.
 
-#### Complie
+##### Complie
 
 ```shell
 protoc -I=. --python_out=. ./addressbook.proto
@@ -95,13 +95,13 @@ protoc -I=. --python_out=. ./addressbook.proto
 
 - 자세한 입력 형식은 [공식 문서](https://developers.google.com/protocol-buffers/docs)를 읽어보시면 됩니다.
 
-#### writing.py
+##### writing.py
 
 ```python
 import addressbook_pb2
 import sys
 
-# This function fills in a Person message based on user input.
+## This function fills in a Person message based on user input.
 def PromptForAddress(person):
   person.id = int(input("Enter person ID number: "))
   person.name = input("Enter name: ")
@@ -128,16 +128,16 @@ def PromptForAddress(person):
     else:
       print("Unknown phone type; leaving as default value.")
 
-# Main procedure:  Reads the entire address book from a file,
-#   adds one person based on user input, then writes it back out to the same
-#   file.
+## Main procedure:  Reads the entire address book from a file,
+##   adds one person based on user input, then writes it back out to the same
+##   file.
 if len(sys.argv) != 2:
   print("Usage:", sys.argv[0], "ADDRESS_BOOK_FILE")
   sys.exit(-1)
 
 address_book = addressbook_pb2.AddressBook()
 
-# Read the existing address book.
+## Read the existing address book.
 try:
   f = open(sys.argv[1], "rb")
   address_book.ParseFromString(f.read())
@@ -145,28 +145,28 @@ try:
 except IOError:
   print(sys.argv[1] + ": Could not open file.  Creating a new one.")
 
-# Add an address.
+## Add an address.
 PromptForAddress(address_book.people.add())
 
-# Write the new address book back to disk.
+## Write the new address book back to disk.
 f = open(sys.argv[1], "wb")
 f.write(address_book.SerializeToString())
 f.close()
 ```
 
-#### 실행
+##### 실행
 
 ```shell
 python writing.py person.data
 ```
 
-#### reading.py
+##### reading.py
 
 ```python
 import addressbook_pb2
 import sys
 
-# Iterates though all people in the AddressBook and prints info about them.
+## Iterates though all people in the AddressBook and prints info about them.
 def ListPeople(address_book):
   for person in address_book.people:
     print("Person ID:", person.id)
@@ -183,15 +183,15 @@ def ListPeople(address_book):
         print("  Work phone #: "),
       print(phone_number.number)
 
-# Main procedure:  Reads the entire address book from a file and prints all
-#   the information inside.
+## Main procedure:  Reads the entire address book from a file and prints all
+##   the information inside.
 if len(sys.argv) != 2:
   print("Usage:", sys.argv[0], "ADDRESS_BOOK_FILE")
   sys.exit(-1)
 
 address_book = addressbook_pb2.AddressBook()
 
-# Read the existing address book.
+## Read the existing address book.
 f = open(sys.argv[1], "rb")
 address_book.ParseFromString(f.read())
 f.close()
@@ -199,7 +199,7 @@ f.close()
 ListPeople(address_book)
 ```
 
-#### 읽기
+##### 읽기
 
 ```shell
 python reading.py person.data
@@ -207,7 +207,7 @@ python reading.py person.data
 
 ---
 
-## JSON
+### JSON
 
 - JavaScript Object Notation
 
@@ -220,7 +220,7 @@ python reading.py person.data
 - 쉼표(,)로 나열된다.
 
 
-#### Object
+##### Object
 
 ```json
 {
@@ -229,7 +229,7 @@ python reading.py person.data
 }
 ```
 
-#### Array
+##### Array
 
 ```json
 "array": [
@@ -248,7 +248,7 @@ python reading.py person.data
 ]
 ```
 
-#### Serialization
+##### Serialization
 
 JSON -> String
 
@@ -263,7 +263,7 @@ var jsonText = JSON.stringify(person);
 
 출력 : `"{"name":"JJM","age":26}"`
 
-#### DeSerialization
+##### DeSerialization
 
 String -> JSON
 

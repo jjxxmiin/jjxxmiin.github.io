@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# yolo\_layer
+## yolo\_layer
 
 ### forward\_yolo\_layer
 

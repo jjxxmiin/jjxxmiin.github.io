@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# route\_layer
+## route\_layer
 
-## forward\_route\_layer
+### forward\_route\_layer
 
 ```c
 void forward_route_layer(const route_layer l, network net)
@@ -50,7 +50,7 @@ void forward_route_layer(const route_layer l, network net)
 
 
 
-## backward\_route\_layer
+### backward\_route\_layer
 
 ```c
 void backward_route_layer(const route_layer l, network net)
@@ -90,7 +90,7 @@ void backward_route_layer(const route_layer l, network net)
 
 
 
-## resize\_route\_layer
+### resize\_route\_layer
 
 ```c
 void resize_route_layer(route_layer *l, network *net)
@@ -145,7 +145,7 @@ void resize_route_layer(route_layer *l, network *net)
 
 
 
-## make\_route\_layer
+### make\_route\_layer
 
 ```c
 route_layer make_route_layer(int batch, int n, int *input_layers, int *input_sizes)

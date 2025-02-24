@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# utils
+## utils
 
 * `rand()` : 0 \~ 32767 사이의 랜덤한 값을 반환합니다.
 
-## what\_time\_is\_it\_now
+### what\_time\_is\_it\_now
 
 ```c
 double what_time_is_it_now()
@@ -38,7 +38,7 @@ double what_time_is_it_now()
 
 
 
-## read\_intlist
+### read\_intlist
 
 ```c
 int *read_intlist(char *gpu_list, int *ngpus, int d)
@@ -85,7 +85,7 @@ int *read_intlist(char *gpu_list, int *ngpus, int d)
 * read\_intlist 함수는 char 형식의 문자열인 gpu\_list를 파싱하여 정수형 배열인 gpus를 생성하고 이를 반환한다. gpu\_list는 쉼표로 구분된 GPU 번호 목록을 문자열로 갖는다. 이 함수는 gpu\_list가 NULL일 경우, 1개의 GPU 번호를 갖는 배열을 생성하고 d 값을 이용하여 GPU 번호를 저장한다.&#x20;
 * 그렇지 않은 경우, gpu\_list 문자열을 파싱하여 ','로 구분된 GPU 번호를 추출하여 gpus 배열에 저장한다. 이때, gpus 배열의 크기는 gpu\_list에 포함된 GPU의 개수와 동일하게 할당된다. 함수는 gpus 배열을 반환하며, GPU의 개수는 ngpus 포인터 변수를 통해 저장된다.
 
-## read\_map
+### read\_map
 
 ```c
 int *read_map(char *filename)
@@ -126,7 +126,7 @@ int *read_map(char *filename)
 
 
 
-## sorta\_shuffle
+### sorta\_shuffle
 
 ```c
 void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
@@ -163,7 +163,7 @@ void sorta_shuffle(void *arr, size_t n, size_t size, size_t sections)
 
 
 
-## shuffle
+### shuffle
 
 ```c
 void shuffle(void *arr, size_t n, size_t size)
@@ -200,7 +200,7 @@ void shuffle(void *arr, size_t n, size_t size)
 
 
 
-## random\_index\_order
+### random\_index\_order
 
 ```c
 int *random_index_order(int min, int max)
@@ -240,7 +240,7 @@ int *random_index_order(int min, int max)
 
 
 
-## del\_arg
+### del\_arg
 
 ```c
 void del_arg(int argc, char **argv, int index)
@@ -272,7 +272,7 @@ void del_arg(int argc, char **argv, int index)
 
 
 
-## find\_arg
+### find\_arg
 
 ```c
 int find_arg(int argc, char* argv[], char *arg)
@@ -312,7 +312,7 @@ int find_arg(int argc, char* argv[], char *arg)
 
 
 
-## find\_int\_arg
+### find\_int\_arg
 
 ```c
 int find_int_arg(int argc, char **argv, char *arg, int def)
@@ -353,7 +353,7 @@ int find_int_arg(int argc, char **argv, char *arg, int def)
 
 
 
-## find\_float\_arg
+### find\_float\_arg
 
 ```c
 float find_float_arg(int argc, char **argv, char *arg, float def)
@@ -395,7 +395,7 @@ float find_float_arg(int argc, char **argv, char *arg, float def)
 
 
 
-## find\_char\_arg
+### find\_char\_arg
 
 ```c
 char *find_char_arg(int argc, char **argv, char *arg, char *def)
@@ -437,7 +437,7 @@ char *find_char_arg(int argc, char **argv, char *arg, char *def)
 
 
 
-## basecfg
+### basecfg
 
 ```c
 char *basecfg(char *cfgfile)
@@ -474,7 +474,7 @@ char *basecfg(char *cfgfile)
 
 
 
-## alphanum\_to\_int
+### alphanum\_to\_int
 
 ```c
 int alphanum_to_int(char c)
@@ -499,7 +499,7 @@ int alphanum_to_int(char c)
 
 
 
-## int\_to\_alphanum
+### int\_to\_alphanum
 
 ```c
 char int_to_alphanum(int i)
@@ -527,7 +527,7 @@ char int_to_alphanum(int i)
 
 
 
-## pm
+### pm
 
 ```c
 void pm(int M, int N, float *A)
@@ -566,7 +566,7 @@ void pm(int M, int N, float *A)
 
 
 
-## find\_replace
+### find\_replace
 
 ```c
 void find_replace(char *str, char *orig, char *rep, char *output)
@@ -610,7 +610,7 @@ void find_replace(char *str, char *orig, char *rep, char *output)
 
 
 
-## sec
+### sec
 
 ```c
 float sec(clock_t clocks)
@@ -637,7 +637,7 @@ float sec(clock_t clocks)
 
 
 
-## top\_k
+### top\_k
 
 ```c
 void top_k(float *a, int n, int k, int *index)
@@ -682,7 +682,7 @@ void top_k(float *a, int n, int k, int *index)
 
 
 
-## error
+### error
 
 ```c
 void error(const char *s)
@@ -711,7 +711,7 @@ void error(const char *s)
 
 
 
-## read\_file
+### read\_file
 
 ```c
 unsigned char *read_file(char *filename)
@@ -751,7 +751,7 @@ unsigned char *read_file(char *filename)
 
 
 
-## malloc\_error
+### malloc\_error
 
 ```c
 void malloc_error()
@@ -779,7 +779,7 @@ void malloc_error()
 
 
 
-## file\_error
+### file\_error
 
 ```c
 void file_error(char *s)
@@ -809,7 +809,7 @@ void file_error(char *s)
 
 
 
-## split\_str
+### split\_str
 
 ```c
 list *split_str(char *s, char delim)
@@ -849,7 +849,7 @@ list *split_str(char *s, char delim)
 
 
 
-## strip
+### strip
 
 ```c
 void strip(char *s)
@@ -886,7 +886,7 @@ void strip(char *s)
 
 
 
-## strip\_char
+### strip\_char
 
 ```c
 void strip_char(char *s, char bad)
@@ -924,7 +924,7 @@ void strip_char(char *s, char bad)
 
 
 
-## free\_ptrs
+### free\_ptrs
 
 ```c
 void free_ptrs(void **ptrs, int n)
@@ -954,7 +954,7 @@ void free_ptrs(void **ptrs, int n)
 
 
 
-## fgetl
+### fgetl
 
 ```c
 char *fgetl(FILE *fp)
@@ -1008,7 +1008,7 @@ char *fgetl(FILE *fp)
 
 
 
-## read\_int
+### read\_int
 
 ```c
 int read_int(int fd)
@@ -1038,7 +1038,7 @@ int read_int(int fd)
 
 
 
-## write\_int
+### write\_int
 
 ```c
 void write_int(int fd, int n)
@@ -1066,7 +1066,7 @@ void write_int(int fd, int n)
 
 
 
-## read\_all\_fail
+### read\_all\_fail
 
 ```c
 int read_all_fail(int fd, char *buffer, size_t bytes)
@@ -1102,7 +1102,7 @@ int read_all_fail(int fd, char *buffer, size_t bytes)
 
 
 
-## write\_all\_fail
+### write\_all\_fail
 
 ```c
 int write_all_fail(int fd, char *buffer, size_t bytes)
@@ -1139,7 +1139,7 @@ int write_all_fail(int fd, char *buffer, size_t bytes)
 
 
 
-## read\_all
+### read\_all
 
 ```c
 void read_all(int fd, char *buffer, size_t bytes)
@@ -1174,7 +1174,7 @@ void read_all(int fd, char *buffer, size_t bytes)
 
 
 
-## write\_all
+### write\_all
 
 ```c
 void write_all(int fd, char *buffer, size_t bytes)
@@ -1209,7 +1209,7 @@ void write_all(int fd, char *buffer, size_t bytes)
 
 
 
-## copy\_string
+### copy\_string
 
 ```c
 char *copy_string(char *s)
@@ -1242,7 +1242,7 @@ char *copy_string(char *s)
 
 
 
-## parse\_csv\_line
+### parse\_csv\_line
 
 ```c
 list *parse_csv_line(char *line)
@@ -1285,7 +1285,7 @@ list *parse_csv_line(char *line)
 
 
 
-## count\_fields
+### count\_fields
 
 ```c
 int count_fields(char *line)
@@ -1322,7 +1322,7 @@ int count_fields(char *line)
 
 
 
-## parse\_fields
+### parse\_fields
 
 ```c
 float *parse_fields(char *line, int n)
@@ -1370,7 +1370,7 @@ float *parse_fields(char *line, int n)
 
 
 
-## sum\_array
+### sum\_array
 
 ```c
 float sum_array(float *a, int n)
@@ -1404,7 +1404,7 @@ float sum_array(float *a, int n)
 
 
 
-## mean\_array
+### mean\_array
 
 ```c
 float mean_array(float *a, int n)
@@ -1431,7 +1431,7 @@ float mean_array(float *a, int n)
 
 
 
-## mean\_arrays
+### mean\_arrays
 
 ```c
 void mean_arrays(float **a, int n, int els, float *avg)
@@ -1471,7 +1471,7 @@ void mean_arrays(float **a, int n, int els, float *avg)
 
 
 
-## print\_statistics
+### print\_statistics
 
 ```c
 void print_statistics(float *a, int n)
@@ -1501,7 +1501,7 @@ void print_statistics(float *a, int n)
 
 
 
-## variance\_array
+### variance\_array
 
 ```c
 float variance_array(float *a, int n)
@@ -1537,7 +1537,7 @@ float variance_array(float *a, int n)
 
 
 
-## constrain\_int
+### constrain\_int
 
 ```c
 int constrain_int(int a, int min, int max)
@@ -1568,7 +1568,7 @@ int constrain_int(int a, int min, int max)
 
 
 
-## constrain
+### constrain
 
 ```c
 float constrain(float min, float max, float a)
@@ -1598,7 +1598,7 @@ float constrain(float min, float max, float a)
 
 
 
-## dist\_array
+### dist\_array
 
 ```c
 float dist_array(float *a, float *b, int n, int sub)
@@ -1632,7 +1632,7 @@ float dist_array(float *a, float *b, int n, int sub)
 
 
 
-## mse\_array
+### mse\_array
 
 ```c
 float mse_array(float *a, int n)
@@ -1664,7 +1664,7 @@ float mse_array(float *a, int n)
 
 
 
-## normalize\_array
+### normalize\_array
 
 ```c
 void normalize_array(float *a, int n)
@@ -1701,7 +1701,7 @@ void normalize_array(float *a, int n)
 
 
 
-## translate\_array
+### translate\_array
 
 ```c
 void translate_array(float *a, int n, float s)
@@ -1730,7 +1730,7 @@ void translate_array(float *a, int n, float s)
 * translate는 "이동하다"라는 뜻을 가지고 있으며, 이 함수는 배열을 이동시키는 것과 같은 효과를 가진다.&#x20;
 * 즉, 주어진 배열의 모든 요소를 s만큼 이동시킨다. 예를 들어, 배열 \[1, 2, 3]에 2를 더하면 \[3, 4, 5]가 된다.
 
-## mag\_array
+### mag\_array
 
 ```c
 float mag_array(float *a, int n)
@@ -1764,7 +1764,7 @@ float mag_array(float *a, int n)
 
 
 
-## scale\_array
+### scale\_array
 
 ```c
 void scale_array(float *a, int n, float s)
@@ -1795,7 +1795,7 @@ void scale_array(float *a, int n, float s)
 
 
 
-## sample\_array
+### sample\_array
 
 ```c
 int sample_array(float *a, int n)
@@ -1836,7 +1836,7 @@ int sample_array(float *a, int n)
 
 
 
-## max\_int\_index
+### max\_int\_index
 
 ```c
 int max_int_index(int *a, int n)
@@ -1872,7 +1872,7 @@ int max_int_index(int *a, int n)
 
 
 
-## max\_index
+### max\_index
 
 ```c
 int max_index(float *a, int n)
@@ -1910,7 +1910,7 @@ int max_index(float *a, int n)
 
 
 
-## int\_index
+### int\_index
 
 ```c
 int int_index(int *a, int val, int n)
@@ -1943,7 +1943,7 @@ int int_index(int *a, int val, int n)
 
 
 
-## rand\_int
+### rand\_int
 
 ```c
 int rand_int(int min, int max)
@@ -1976,7 +1976,7 @@ int rand_int(int min, int max)
 
 
 
-## rand\_normal
+### rand\_normal
 
 ```c
 // From http://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
@@ -2021,7 +2021,7 @@ float rand_normal()
 
 
 
-## rand\_size\_t
+### rand\_size\_t
 
 ```c
 size_t rand_size_t()
@@ -2055,7 +2055,7 @@ size_t rand_size_t()
 
 
 
-## rand\_uniform
+### rand\_uniform
 
 ```c
 float rand_uniform(float min, float max)
@@ -2088,7 +2088,7 @@ float rand_uniform(float min, float max)
 
 
 
-## rand\_scale
+### rand\_scale
 
 ```c
 float rand_scale(float s)
@@ -2116,7 +2116,7 @@ float rand_scale(float s)
 * 스케일 값은 보통 0에서 1 사이의 값을 갖는데, 이 함수는 이 값을 무작위로 조정하여 초기 가중치를 다양하게 설정할 수 있게 해준다.&#x20;
 * 이렇게 함으로써 모델이 다양한 초기 가중치를 가지게 되어, 더욱 다양한 데이터에 대해 더욱 좋은 결과를 얻을 수 있다.
 
-## one\_hot\_encode
+### one\_hot\_encode
 
 ```c
 float **one_hot_encode(float *a, int n, int k)
@@ -2154,7 +2154,7 @@ float **one_hot_encode(float *a, int n, int k)
 
 
 
-## sum\_array
+### sum\_array
 
 ```c
 float sum_array(float *a, int n)
@@ -2184,7 +2184,7 @@ float sum_array(float *a, int n)
 
 
 
-## mean\_array
+### mean\_array
 
 ```c
 float mean_array(float *a, int n)

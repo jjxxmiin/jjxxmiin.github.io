@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# reorg\_layer
+## reorg\_layer
 
-## forward\_reorg\_layer
+### forward\_reorg\_layer
 
 ```c
 void forward_reorg_layer(const layer l, network net)
@@ -51,7 +51,7 @@ void forward_reorg_layer(const layer l, network net)
 
 
 
-## backward\_reorg\_layer
+### backward\_reorg\_layer
 
 ```c
 void backward_reorg_layer(const layer l, network net)
@@ -94,7 +94,7 @@ void backward_reorg_layer(const layer l, network net)
 * l.extra가 참일 경우, l.delta에서 net.delta로 데이터를 복사합니다.
 * 그렇지 않으면, reorg\_cpu(l.delta, l.w, l.h, l.c, l.batch, l.stride, 1, net.delta)를 호출합니다.
 
-## resize\_reorg\_layer
+### resize\_reorg\_layer
 
 ```c
 void resize_reorg_layer(layer *l, int w, int h)
@@ -145,7 +145,7 @@ void resize_reorg_layer(layer *l, int w, int h)
 
 
 
-## make\_reorg\_layer
+### make\_reorg\_layer
 
 ```c
 layer make_reorg_layer(int batch, int w, int h, int c, int stride, int reverse, int flatten, int extra)

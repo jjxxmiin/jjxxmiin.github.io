@@ -6,23 +6,23 @@ date:   2019-07-09 13:00 -0400
 categories: edge
 ---
 
-# API vs SDK
+## API vs SDK
 - `API` : Application Programming Interface
 - `SDK` : Software Development Kit
 
-## API
+### API
 응용 프로그램 간에 연동을 위해 사용되는 개념으로 기능을 공유 할 수 있다.
 
-## SDK
+### SDK
 소프트웨어 개발 도구 모음, 거의 API와 같은 의미로 사용된다.
 
 ---
 
-# Google API
+## Google API
 
 Google Assistant API를 사용하는 방법에 대해서 리뷰 할 것이다.
 
-# Google action console
+## Google action console
 - [https://console.actions.google.com/](https://console.actions.google.com/)
 
 1. 프로젝트를 생성한다.
@@ -34,14 +34,14 @@ Google Assistant API를 사용하는 방법에 대해서 리뷰 할 것이다.
 
 
 
-# Google cloud
+## Google cloud
 - [https://console.cloud.google.com/home/dashboard](https://console.cloud.google.com/home/dashboard) 접속
 
 1. API 및 서비스 -> 대시보드
 2. API 및 서비스 사용설정 클릭
 3. Google Assistant API를 검색하고 활성화를 누른다.
 
-# OAuth Client ID 생성
+## OAuth Client ID 생성
 1. API 및 서비스 -> 사용자 인증 정보 -> 사용자 인증 정보 만들기 -> OAuth 클라이언트 ID
 
 2. 기타 선택 후 생성
@@ -52,11 +52,11 @@ Google Assistant API를 사용하는 방법에 대해서 리뷰 할 것이다.
 
 ---
 
-# Raspberry pi
+## Raspberry pi
 
 라즈베리파이에 접속해서 작업을 시작하는 부분이다.
 
-## 스피커 설정
+### 스피커 설정
 
 ```
 // 마이크
@@ -91,7 +91,7 @@ pcm.speaker {
 }
 ```
 
-## 마이크/스피커 테스트
+### 마이크/스피커 테스트
 
 - 마이크
 
@@ -109,7 +109,7 @@ aplay --format=S16_LE --rate=16000 out.raw
 speaker-test -t wav
 ```
 
-## 사운드 조절
+### 사운드 조절
 
 ```
 alsamixer
@@ -117,7 +117,7 @@ alsamixer
 
 ---
 
-## 라이브러리 설치
+### 라이브러리 설치
 
 ```
 $ sudo apt-get update
@@ -125,7 +125,7 @@ $ sudo apt-get install portaudio19-dev libffi-dev libssl-dev
 ```
 
 
-## 가상환경 설정
+### 가상환경 설정
 
 ```
 $ sudo apt-get install python3-dev python3-venv
@@ -134,7 +134,7 @@ $ py3/bin/python -m pip install --upgrade pip setuptools
 $ source py3/bin/activate
 ```
 
-## Google Assistant 설치
+### Google Assistant 설치
 
 ```
 $ python -m pip install --upgrade google-assistant-library
@@ -145,7 +145,7 @@ $ python -m pip install --upgrade google-assistant-sdk[samples]
 $ python -m pip install --upgrade google-auth-oauthlib[tool]
 ```
 
-## Credential 생성
+### Credential 생성
 
 ```
 $ google-oauthlib-tool --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless --client-secrets /path/to/client/json
@@ -158,7 +158,7 @@ $ google-oauthlib-tool --scope https://www.googleapis.com/auth/assistant-sdk-pro
 
 ---
 
-# 실행
+## 실행
 
 - Library
 
@@ -181,13 +181,13 @@ $ googlesamples-assistant-pushtotalk --project-id "INPUT/project-id" --device_mo
 
 ---
 
-# 부록 : 한국어로 대화하기
+## 부록 : 한국어로 대화하기
 
 ```
 $ googlesamples-assistant-pushtotalk  --lang ko-KR
 ```
 
-# 부록 : 디바이스 등록[명령어]
+## 부록 : 디바이스 등록[명령어]
 
 *위에 디바이스 등록을 했으면 안해도 된다.*
 
@@ -197,7 +197,7 @@ $ googlesamples-assistant-devicetool register-model --manufacturer "INPUT/manufa
 
 ---
 
-# 참조
+## 참조
 - [https://ukayzm.github.io/installing-google-assistant/](https://ukayzm.github.io/installing-google-assistant/)
 - [https://diy-project.tistory.com/88](https://diy-project.tistory.com/88)
 - [https://diy-project.tistory.com/89](https://diy-project.tistory.com/89)

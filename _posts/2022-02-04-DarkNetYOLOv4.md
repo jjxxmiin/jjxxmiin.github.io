@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# YOLOv4
+## YOLOv4
 
 * Paper : [https://arxiv.org/abs/2004.10934](https://arxiv.org/abs/2004.10934)
 
@@ -35,11 +35,11 @@ YOLOv4는 다양한 기법들을 2가지 범주로 묶어서 설명합니다.
 * BOF(Bag Of Freebies)
 * BOS(Bag Of Specials)
 
-### Bag Of Freebies
+#### Bag Of Freebies
 
 추론속도는 유지하지만 학습 전략을 바꾸거나 학습 비용을 증가시켜 정확도를 높이는 방법
 
-#### Data Augmentation
+##### Data Augmentation
 
 원본 데이터셋의 과적합을 막고 적은 데이터셋의 효과를 극대화하기 위한 방법
 
@@ -59,7 +59,7 @@ YOLOv4는 다양한 기법들을 2가지 범주로 묶어서 설명합니다.
 
 여기서 Random Erase는 CutOut과 비슷한데 CutOut은 제거한 영역을 0으로 채우는 반면, Random Erase는 랜덤한 값으로 채웁니다.
 
-#### Semantic Distribution Bias
+##### Semantic Distribution Bias
 
 데이터셋에 특정 라벨이 많거나 하는 경우에 대한 불균형을 해결하기위한 방법
 
@@ -92,7 +92,7 @@ IF 0.2인 경우
 0 * (1 - 0.2) + 0.2 / 2 = 0.1
 ```
 
-#### Bounding Box Regression
+##### Bounding Box Regression
 
 * GIOU(Generalized Intersection over Union)
 * CIOU(Complete Intersection over Union)
@@ -104,27 +104,27 @@ IF 0.2인 경우
 
 
 
-### Bag Of Specials
+#### Bag Of Specials
 
 약간의 추론 속도 증가를 통해 정확도를 높이는 방법
 
-#### SPP
+##### SPP
 
 SPM(Spatial Pytamid Matching)에 의해 개발 된 모듈입니다. 원래 SPM 방법은 특징 맵을 동일한 d x d 블록으로 나눈 뒤, spatial pyramid를 형성하고 bag-of-word를 사용해 features를 추출합니다.
 
 SPP는 딥러닝에 최적화 하기 위해 CNN와 SPM을 결합하고 bag-of word 대신 maxpooling을 사용합니다.
 
-#### ASPP
+##### ASPP
 
 ASPP(Atrous Spatial Pyramid Pooling)은 향상된 SPP로 DeepLapV3에서 제안된 방법입니다. 다양한 dilated ratio(6, 12, 18, 24)를 가지고 합성곱 연산을 한 뒤 concat하여 연산합니다.
 
 약 7% 추론시간이 증가하지만 5.7% 정확도가 향상됩니다.
 
-#### RFB
+##### RFB
 
 RFB(Receptive Field Block Net)
 
-#### SE
+##### SE
 
 SE(Squeeze-and-Excitation)
 
@@ -136,7 +136,7 @@ SE(Squeeze-and-Excitation)
 
 약 2% 연산량이 증가지만 1% 정확도가 향상 된다. 하지만 GPU에서 추론시간이 10% 증가한다.
 
-#### SAM
+##### SAM
 
 SAM(Spatial Attention module) 0.1% 연산량이 증가하고 0.5% 정확도가 향상된다. GPU 추론시간에 영향이 없다.
 
@@ -146,7 +146,7 @@ SAM(Spatial Attention module) 0.1% 연산량이 증가하고 0.5% 정확도가 �
 
 
 
-#### SFAM
+##### SFAM
 
 SPAM(Scale-wise Feature Aggregation Module)은 SE 모듈을 사용해 multi scale이 연결 된 특징 맵에서 channelwise level re-weighting을 합니다.
 
@@ -174,7 +174,7 @@ SFAM 논문에서 사용 된 모델의 전체적인 흐름을 나타냅니다.
 
 SFAM을 묘사한 그림입니다.
 
-#### ASFF
+##### ASFF
 
 ASFF(Adaptively Spatial Feature Fusion)
 
@@ -184,7 +184,7 @@ ASFF(Adaptively Spatial Feature Fusion)
 
 
 
-#### BiFPN
+##### BiFPN
 
 multi input weighted residual connections는 scale-wise level re-weighting을 실행한 다음 다른 스케일의 특징 맵을 추가하기 위해서 제안됩니다.
 
@@ -194,7 +194,7 @@ multi input weighted residual connections는 scale-wise level re-weighting을 �
 
 
 
-#### Activation Function
+##### Activation Function
 
 * LReLU, PReLU : ReLU가 0보다 작은 경우 기울기가 0이라는 문제를 해결
 * ReLU6 ,Hard-Swish : Quantization network를 위해 설계됨
@@ -204,7 +204,7 @@ multi input weighted residual connections는 scale-wise level re-weighting을 �
 
 활성화 함수는 ReLU나 기존 활성화 함수 조합으로 생겨난 것이 많고 궁금한 내용만 찾아보시면 될 것 같습니다.
 
-#### NMS
+##### NMS
 
 * NMS
 * Soft NMS
@@ -217,7 +217,7 @@ multi input weighted residual connections는 scale-wise level re-weighting을 �
 
 겹치는 bouning box를 후처리 해주는 작업은 위에 식으로 표현할 수 있습니다.
 
-### Selection of Architecture
+#### Selection of Architecture
 
 * Objective
   * Input Network Resolution
@@ -315,7 +315,7 @@ CSP(Cross-Stage-Partial-Connections)
 * Multi-input weighted residual connections
 * Cross stage partial connections (CSP)
 
-### YOLOv4
+#### YOLOv4
 
 * Backbone : CSPDarkNet53
 * Neck : SPP, PAN
@@ -325,7 +325,7 @@ CSP(Cross-Stage-Partial-Connections)
 * Bag of Freebies for detector : CIoU, CmBN, DropBlock, Mosaic, Self Adversarial Training, Eliminate grid sensitivity, Using multiple anchors for a single ground truth, Cosine anneling scheduler, Optimal hyper parameters, Random training shapes
 * Bag of Specials for detector : Mish, SPP, SAM, PAN, DIoU NMS
 
-### Experiments
+#### Experiments
 
 * training steps : 8,000,000
 * batch size : 128 / mini batch size 32
@@ -378,7 +378,7 @@ CSP(Cross-Stage-Partial-Connections)
 * BOF, BOS를 추가한 뒤 mini batch size가 성능에 거의 영향을 미치지 않습니다.
   * 즉, 고가의 GPU는 불필요합니다.
 
-### Result
+#### Result
 
 
 

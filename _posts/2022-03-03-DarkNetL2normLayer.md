@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# l2norm\_layer
+## l2norm\_layer
 
-## forward\_l2norm\_layer
+### forward\_l2norm\_layer
 
 ```c
 void forward_l2norm_layer(const layer l, network net)
@@ -38,7 +38,7 @@ void forward_l2norm_layer(const layer l, network net)
 
 
 
-## backward\_l2norm\_layer
+### backward\_l2norm\_layer
 
 ```c
 void backward_l2norm_layer(const layer l, network net)
@@ -67,7 +67,7 @@ void backward_l2norm_layer(const layer l, network net)
 
 
 
-## make\_l2norm\_layer
+### make\_l2norm\_layer
 
 ```c
 layer make_l2norm_layer(int batch, int inputs)

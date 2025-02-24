@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# gru\_layer
+## gru\_layer
 
-### GRU layer 란?
+#### GRU layer 란?
 
 GRU (Gated Recurrent Unit) 레이어는 반복 신경망 (Recurrent Neural Network, RNN)의 한 종류로, 긴 시퀀스를 처리하는 데에 사용됩니다.
 
@@ -22,7 +22,7 @@ GRU 레이어는 주로 시퀀스 데이터를 다루는 자연어 처리(NLP) �
 
 ***
 
-### increment\_layer
+#### increment\_layer
 
 ```c
 static void increment_layer(layer *l, int steps)
@@ -62,7 +62,7 @@ static void increment_layer(layer *l, int steps)
 
 
 
-### forward\_gru\_layer
+#### forward\_gru\_layer
 
 ```c
 void forward_gru_layer(layer l, network net)
@@ -168,7 +168,7 @@ void forward_gru_layer(layer l, network net)
 
 
 
-### backward\_gru\_layer
+#### backward\_gru\_layer
 
 ```c
 void backward_gru_layer(layer l, network net)
@@ -197,7 +197,7 @@ void backward_gru_layer(layer l, network net)
 
 
 
-### update\_gru\_layer
+#### update\_gru\_layer
 
 ```c
 void update_gru_layer(layer l, update_args a)
@@ -229,7 +229,7 @@ void update_gru_layer(layer l, update_args a)
 
 
 
-### make\_gru\_layer
+#### make\_gru\_layer
 
 ```c
 layer make_gru_layer(int batch, int inputs, int outputs, int steps, int batch_normalize, int adam)

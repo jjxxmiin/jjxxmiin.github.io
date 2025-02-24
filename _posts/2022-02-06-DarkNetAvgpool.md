@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# avgpool
+## avgpool
 
-## Average Pooling Layer 란?
+### Average Pooling Layer 란?
 
 Feature Map의 평균 값을 계산해 전파시키는 Layer 입니다.
 
@@ -18,7 +18,7 @@ Feature Map의 평균 값을 계산해 전파시키는 Layer 입니다.
 typedef layer avgpool_layer;
 ```
 
-### make\_avgpool\_layer
+#### make\_avgpool\_layer
 
 ```c
 avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
@@ -68,7 +68,7 @@ avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
 
 
 
-### forward\_avgpool\_layer
+#### forward\_avgpool\_layer
 
 <pre class="language-c"><code class="lang-c"><strong>void forward_avgpool_layer(const avgpool_layer l, network net)
 </strong>{
@@ -107,7 +107,7 @@ avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
 
 
 
-### backward\_avgpool\_layer
+#### backward\_avgpool\_layer
 
 ```c
 void backward_avgpool_layer(const avgpool_layer l, network net)
@@ -151,7 +151,7 @@ void backward_avgpool_layer(const avgpool_layer l, network net)
 
 
 
-### resize\_avgpool\_layer
+#### resize\_avgpool\_layer
 
 ```c
 void resize_avgpool_layer(avgpool_layer *l, int w, int h)

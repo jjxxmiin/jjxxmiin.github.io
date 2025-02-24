@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# layer
+## layer
 
 ```c
 // darknet.h
@@ -84,7 +84,7 @@ typedef enum {
 
 
 
-## free\_layer
+### free\_layer
 
 ```c
 void free_layer(layer l)

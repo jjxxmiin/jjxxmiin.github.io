@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# normalize layer
+## normalize layer
 
-## forward\_normalization\_layer
+### forward\_normalization\_layer
 
 ```c
 void forward_normalization_layer(const layer layer, network net)
@@ -76,7 +76,7 @@ void forward_normalization_layer(const layer layer, network net)
 
 
 
-## backward\_normalization\_layer
+### backward\_normalization\_layer
 
 ```c
 void backward_normalization_layer(const layer layer, network net)
@@ -113,7 +113,7 @@ void backward_normalization_layer(const layer layer, network net)
 
 
 
-## resize\_normalization\_layer
+### resize\_normalization\_layer
 
 ```c
 void resize_normalization_layer(layer *layer, int w, int h)
@@ -157,7 +157,7 @@ void resize_normalization_layer(layer *layer, int w, int h)
 
 
 
-## make\_normalization\_layer
+### make\_normalization\_layer
 
 ```c
 layer make_normalization_layer(int batch, int w, int h, int c, int size, float alpha, float beta, float kappa)

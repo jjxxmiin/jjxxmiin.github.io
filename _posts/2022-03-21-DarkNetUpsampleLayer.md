@@ -6,17 +6,17 @@ categories: darknet
 math: true
 ---
 
-# upsample\_layer
+## upsample\_layer
 
-## Upsample Layer란?
+### Upsample Layer란?
 
 Upsample Layer는 Feature Maps의 크기를 키우는 Layer입니다.
 
 ***
 
-## upsample\_layer.c
+### upsample\_layer.c
 
-### forward\_upsample\_layer
+#### forward\_upsample\_layer
 
 ```c
 void forward_upsample_layer(const layer l, network net)
@@ -51,7 +51,7 @@ void forward_upsample_layer(const layer l, network net)
 
 
 
-### backward\_upsample\_layer
+#### backward\_upsample\_layer
 
 ```c
 void backward_upsample_layer(const layer l, network net)
@@ -86,7 +86,7 @@ void backward_upsample_layer(const layer l, network net)
 
 
 
-### resize\_upsample\_layer
+#### resize\_upsample\_layer
 
 ```c
 void resize_upsample_layer(layer *l, int w, int h)
@@ -130,7 +130,7 @@ void resize_upsample_layer(layer *l, int w, int h)
 * 그리고 l->outputs 값도 이에 맞게 계산된다. l->outputs는 upsample 레이어의 출력 채널 수에 맞게 출력 이미지의 픽셀 수를 나타낸다.&#x20;
 * 마지막으로 delta와 output을 업데이트하여 메모리를 할당한다.
 
-### make\_upsample\_layer
+#### make\_upsample\_layer
 
 ```c
 layer make_upsample_layer(int batch, int w, int h, int c, int stride)

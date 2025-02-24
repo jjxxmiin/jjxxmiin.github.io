@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# list
+## list
 
 ```c
 // darknet.h
@@ -31,7 +31,7 @@ typedef struct list{
 
 
 
-## make\_list
+### make\_list
 
 ```c
 list *make_list()
@@ -62,7 +62,7 @@ list *make_list()
 
 
 
-## list\_pop
+### list\_pop
 
 ```c
 void *list_pop(list *l){
@@ -97,7 +97,7 @@ void *list_pop(list *l){
 
 
 
-## list\_insert
+### list\_insert
 
 ```c
 void list_insert(list *l, void *val)
@@ -140,7 +140,7 @@ void list_insert(list *l, void *val)
 
 
 
-## free\_node
+### free\_node
 
 ```c
 void free_node(node *n)
@@ -172,7 +172,7 @@ void free_node(node *n)
 
 
 
-## free\_list
+### free\_list
 
 ```c
 void free_list(list *l)
@@ -200,7 +200,7 @@ void free_list(list *l)
 
 
 
-## free\_list\_contents
+### free\_list\_contents
 
 ```c
 void free_list_contents(list *l)
@@ -231,7 +231,7 @@ void free_list_contents(list *l)
 
 
 
-## list\_to\_array
+### list\_to\_array
 
 ```c
 void **list_to_array(list *l)

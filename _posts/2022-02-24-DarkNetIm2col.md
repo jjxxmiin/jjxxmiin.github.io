@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# im2col
+## im2col
 
 * 이미지를 columns으로 변환해주는 것을 말합니다.
 
-## im2col\_get\_pixel
+### im2col\_get\_pixel
 
 ```c
 float im2col_get_pixel(float *im, int height, int width, int channels,
@@ -53,7 +53,7 @@ float im2col_get_pixel(float *im, int height, int width, int channels,
 
 
 
-## im2col\_cpu
+### im2col\_cpu
 
 ```c
 //From Berkeley Vision's Caffe!

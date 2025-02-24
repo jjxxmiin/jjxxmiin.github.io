@@ -6,13 +6,13 @@ categories: darknet
 math: true
 ---
 
-# crnn\_layer
+## crnn\_layer
 
 cnn과 rnn을 결합한 layer 입니다.
 
 rnn에서 fully connected 연산을 convolutional 연산으로 바뀌어진 것 외에 딱히 변화가 없습니다.
 
-## increment\_layer
+### increment\_layer
 
 ```c
 static void increment_layer(layer *l, int steps)
@@ -44,7 +44,7 @@ static void increment_layer(layer *l, int steps)
 
 
 
-## forward\_crnn\_layer
+### forward\_crnn\_layer
 
 ```c
 void forward_crnn_layer(layer l, network net)
@@ -114,7 +114,7 @@ void forward_crnn_layer(layer l, network net)
 
 
 
-## backward\_crnn\_layer
+### backward\_crnn\_layer
 
 ```c
 void backward_crnn_layer(layer l, network net)
@@ -191,7 +191,7 @@ void backward_crnn_layer(layer l, network net)
 
 
 
-## update\_crnn\_layer
+### update\_crnn\_layer
 
 ```c
 void update_crnn_layer(layer l, update_args a)
@@ -224,7 +224,7 @@ void update_crnn_layer(layer l, update_args a)
 
 
 
-## make\_crnn\_layer
+### make\_crnn\_layer
 
 ```c
 layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int output_filters, int steps, ACTIVATION activation, int batch_normalize)

@@ -6,17 +6,17 @@ categories: darknet
 math: true
 ---
 
-# shortcut\_layer
+## shortcut\_layer
 
-## shortcut layer 란?
+### shortcut layer 란?
 
 ResNet에서 제안된 skip connection과 유사합니다.
 
 잠시 출력을 저장하고 그 후에 layer의 출력과 합치는 작업에서 사용 됩니다.
 
-## shortcut.c
+### shortcut.c
 
-### forward\_shortcut\_layer
+#### forward\_shortcut\_layer
 
 ```c
 void forward_shortcut_layer(const layer l, network net)
@@ -47,7 +47,7 @@ void forward_shortcut_layer(const layer l, network net)
 
 
 
-### backward\_shortcut\_layer
+#### backward\_shortcut\_layer
 
 ```c
 void backward_shortcut_layer(const layer l, network net)
@@ -79,7 +79,7 @@ void backward_shortcut_layer(const layer l, network net)
 
 
 
-### resize\_shortcut\_layer
+#### resize\_shortcut\_layer
 
 ```c
 void resize_shortcut_layer(layer *l, int w, int h)
@@ -123,7 +123,7 @@ void resize_shortcut_layer(layer *l, int w, int h)
 
 
 
-### make\_shortcut\_layer
+#### make\_shortcut\_layer
 
 ```c
 layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int h2, int c2)

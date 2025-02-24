@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# matrix
+## matrix
 
-## free\_matrix
+### free\_matrix
 
 ```c
 void free_matrix(matrix m)
@@ -38,7 +38,7 @@ void free_matrix(matrix m)
 
 
 
-## matrix\_topk\_accuracy
+### matrix\_topk\_accuracy
 
 ```c
 float matrix_topk_accuracy(matrix truth, matrix guess, int k)
@@ -85,7 +85,7 @@ float matrix_topk_accuracy(matrix truth, matrix guess, int k)
 
 
 
-## scale\_matrix
+### scale\_matrix
 
 ```c
 void scale_matrix(matrix m, float scale)
@@ -118,7 +118,7 @@ void scale_matrix(matrix m, float scale)
 
 
 
-## resize\_matrix
+### resize\_matrix
 
 ```c
 matrix resize_matrix(matrix m, int size)
@@ -162,7 +162,7 @@ matrix resize_matrix(matrix m, int size)
 
 
 
-## matrix\_add\_matrix
+### matrix\_add\_matrix
 
 ```c
 void matrix_add_matrix(matrix from, matrix to)
@@ -195,7 +195,7 @@ void matrix_add_matrix(matrix from, matrix to)
 
 
 
-## copy\_matrix
+### copy\_matrix
 
 ```c
 matrix copy_matrix(matrix m)
@@ -232,7 +232,7 @@ matrix copy_matrix(matrix m)
 
 
 
-## make\_matrix
+### make\_matrix
 
 ```c
 matrix make_matrix(int rows, int cols)
@@ -266,7 +266,7 @@ matrix make_matrix(int rows, int cols)
 
 
 
-## hold\_out\_matrix
+### hold\_out\_matrix
 
 ```c
 matrix hold_out_matrix(matrix *m, int n)
@@ -304,7 +304,7 @@ matrix hold_out_matrix(matrix *m, int n)
 
 
 
-## pop\_column
+### pop\_column
 
 ```c
 float *pop_column(matrix *m, int c)
@@ -341,7 +341,7 @@ float *pop_column(matrix *m, int c)
 
 
 
-## csv\_to\_matrix
+### csv\_to\_matrix
 
 ```c
 matrix csv_to_matrix(char *filename)
@@ -394,7 +394,7 @@ matrix csv_to_matrix(char *filename)
 
 
 
-## matrix\_to\_csv
+### matrix\_to\_csv
 
 ```c
 void matrix_to_csv(matrix m)
@@ -435,7 +435,7 @@ void matrix_to_csv(matrix m)
 
 
 
-## print\_matrix
+### print\_matrix
 
 ```c
 void print_matrix(matrix m)

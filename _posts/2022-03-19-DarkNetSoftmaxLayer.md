@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# softmax\_layer
+## softmax\_layer
 
 ### softmax란?
 

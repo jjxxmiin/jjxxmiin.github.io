@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# compare
+## compare
 
-## train\_compare
+### train\_compare
 
 ```c
 void train_compare(char *cfgfile, char *weightfile)
@@ -116,7 +116,7 @@ void train_compare(char *cfgfile, char *weightfile)
 
 
 
-## validate\_compare
+### validate\_compare
 
 ```c
 void validate_compare(char *filename, char *weightfile)
@@ -210,7 +210,7 @@ void validate_compare(char *filename, char *weightfile)
 
 
 
-## sortable\_bbox
+### sortable\_bbox
 
 ```c
 typedef struct {
@@ -234,7 +234,7 @@ typedef struct {
 
 
 
-## elo\_comparator
+### elo\_comparator
 
 ```c
 int total_compares = 0;
@@ -273,7 +273,7 @@ int elo_comparator(const void*a, const void *b)
 
 
 
-## bbox\_comparator
+### bbox\_comparator
 
 ```c
 int bbox_comparator(const void *a, const void *b)
@@ -326,7 +326,7 @@ int bbox_comparator(const void *a, const void *b)
 
 
 
-## bbox\_update
+### bbox\_update
 
 ```c
 void bbox_update(sortable_bbox *a, sortable_bbox *b, int class, int result)
@@ -362,7 +362,7 @@ void bbox_update(sortable_bbox *a, sortable_bbox *b, int class, int result)
 
 
 
-## bbox\_fight
+### bbox\_fight
 
 ```c
 void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, int class)
@@ -412,7 +412,7 @@ void bbox_fight(network net, sortable_bbox *a, sortable_bbox *b, int classes, in
 
 
 
-## SortMaster3000
+### SortMaster3000
 
 ```c
 void SortMaster3000(char *filename, char *weightfile)
@@ -471,7 +471,7 @@ void SortMaster3000(char *filename, char *weightfile)
 
 
 
-## BattleRoyaleWithCheese
+### BattleRoyaleWithCheese
 
 ```c
 void BattleRoyaleWithCheese(char *filename, char *weightfile)
@@ -573,7 +573,7 @@ void BattleRoyaleWithCheese(char *filename, char *weightfile)
 
 
 
-## run\_compare
+### run\_compare
 
 ```c
 void run_compare(int argc, char **argv)

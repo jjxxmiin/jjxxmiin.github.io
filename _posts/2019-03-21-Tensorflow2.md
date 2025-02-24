@@ -6,33 +6,33 @@ date:   2019-03-21 22:00 -0400
 categories: opensource
 ---
 
-# TensorFlow 2.0 alpha
+## TensorFlow 2.0 alpha
 이번에 tensorflow에서 2.0 alpha 버전이 새로 릴리즈 되었습니다. 케라스과 연동을 더욱 더 강화했다고 하는데 설치하면서 알아보겠습니다.
 
 ---
 
-# 설치
+## 설치
 ```
 conda create -n alpha python=3.5
 
 pip install -q tensorflow==2.0.0-alpha0
 ```
 
-# 바뀐부분
+## 바뀐부분
 
 - session을 경량화 했다.
 
 ```python
-# TensorFlow 1.x
+## TensorFlow 1.x
 outputs = session.run(f(placeholder), feed_dict={placeholder: input})
 
-# TensorFlow 2.0
+## TensorFlow 2.0
 outputs = f(input)
 ```
 
 - model을 keras에 중점을 맞추었다.
 
-# 바뀐거 맛만 보기
+## 바뀐거 맛만 보기
 
 - TensorFlow 1.x [Before]
 
@@ -78,7 +78,7 @@ regularizer = tf.keras.regularizers.l2(0.02)
 reg_loss = regularizer(W)
 ```
 
-# 간단한 ML
+## 간단한 ML
 
 - 이미지 픽셀 범위 확인
 
@@ -98,7 +98,7 @@ train_images = train_images / 255.0
 test_images = test_images / 255.0
 ```
 
-# Classification(분류)
+## Classification(분류)
 ```python
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -141,49 +141,49 @@ def plot_value_array(i, predictions_array, true_label):
     thisplot[predicted_label].set_color('red')
     thisplot[true_label].set_color('blue')
 
-# Dataset
+## Dataset
 fashion_mnist = keras.datasets.fashion_mnist.load_data()
 
-# fashion Dataset
+## fashion Dataset
 (train_images, train_labels), (test_images,test_labels) = fashion_mnist
 
-# Class
+## Class
 class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
-# Shape, Label
+## Shape, Label
 print("Train Shape : " ,train_images.shape)
 print("Train Label : " ,len(train_labels))
 
 print("Test Shape : " ,test_images.shape)
 print("Test Label : " ,len(test_labels))
 
-# Preprossing
+## Preprossing
 train_images = train_images / 255.0
 
 test_images = test_images / 255.0
 
-# model
+## model
 model = keras.Sequential([
     keras.layers.Flatten(input_shape=(28, 28)),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(10, activation='softmax')
 ])
 
-# compile
+## compile
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-# train
+## train
 model.fit(train_images, train_labels, epochs=5)
 
-# accuracy
+## accuracy
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('\n테스트 정확도:', test_acc)
 
-# predictions
+## predictions
 predictions = model.predict(test_images)
 
 i = 11
@@ -191,12 +191,12 @@ i = 11
 print('prediction[Argmax] : ', np.argmax(predictions[i]))
 print('ground-truth : ',test_labels[i])
 
-# batch make
+## batch make
 img = (np.expand_dims(test_images[i],0))
 
 print(img.shape)
 
-# batch prediction
+## batch prediction
 predictions_single = model.predict(img)
 
 plt.subplot(1,2,1)
@@ -211,7 +211,7 @@ print('prediction[Argmax] : ', np.argmax(predictions_single[0]))
 print('ground-truth : ',test_labels[i])
 ```
 
-# 결과
+## 결과
 
 
 

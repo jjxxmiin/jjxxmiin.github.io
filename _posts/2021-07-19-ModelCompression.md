@@ -7,7 +7,7 @@ categories: paper
 math: true
 ---
 
-# 2021 Efficient Deep Learning
+## 2021 Efficient Deep Learning
 
 - Efficient Deep Learning: A Survey on Making Deep Learning Models Smaller, Faster, and Better
   + [paper](https://arxiv.org/abs/2106.08962)
@@ -21,7 +21,7 @@ math: true
 
 처음에는 그냥 모델압축 연구 관련 논문인 줄 알았지만 읽어보니 실제 현업과 더 관련있는 논문입니다.
 
-# Abstract
+## Abstract
 
 - modeling
 - spanning
@@ -31,7 +31,7 @@ math: true
 
 위에 5가지 핵심 영역으로 survey를 진행합니다.
 
-# Introduction
+## Introduction
 
 Deep Learning with neural networks has been the dominant methodology of training new machine learning models for the past decades.
 
@@ -55,7 +55,7 @@ Deep Learning with neural networks has been the dominant methodology of training
 실제 서비스 측면에서 생각하는 논문이라는 것을 알 수 있다. 매우 좋은 듯 ㅎㅎ
 ---
 
-# Efficient Deep Learning
+## Efficient Deep Learning
 
 `Efficiency!!`
 
@@ -83,7 +83,7 @@ Deep Learning with neural networks has been the dominant methodology of training
 
 ---
 
-# A Mental Model
+## A Mental Model
 
 
 
@@ -104,11 +104,11 @@ Deep Learning with neural networks has been the dominant methodology of training
 
 ---
 
-# Compression Techniques
+## Compression Techniques
 
 만약 model이 over-parameter를 가지면 일반화에도 도움이 된다.
 
-## Pruning
+### Pruning
 
 프루닝은 가지치키를 뜻하며 특정 threshold 보다 작은 weights를 제거하거나 0으로 만들어 파라미터를 줄일 수 있는 기술입니다.
 
@@ -145,13 +145,13 @@ OBD는 2차 미분($$\frac{\partial^2 L}{\partial w^2_i}$$)을 사용하여 sali
 
 
 
-### Beyond Model Optimization
+#### Beyond Model Optimization
 
 근래 Lottery Ticket Hypothesis는 다른 관점의 pruning이며 큰 네트워크안에는 작은 네트워크가 존재한다는 가설을 설정했습니다.
 
 이건 미리 모델을 학습시키고 프루닝한 다음 미리 학습시킨 모델의 초기화 값을 그대로 옮겨서 재학습 시키는 방법입니다. 여러 데이터셋에서 결과를 보여주었지만 실제 ImageNet 같은 큰 데이터셋에서는 잘 동작하지 않는다고 하며 오히려 무작위 초기화가 더 좋다는 것을 보여주는 논문도 있습니다.
 
-### Discussion
+#### Discussion
 
 실제 unstructured pruning의 경우 이론적으로는 감소한다고 보여주지만(0으로 처리해서 사실상 연산에는 포함 됨) 어떻게 개선해야할지 명확하지 않습니다.
 
@@ -159,7 +159,7 @@ structured pruning은 실제 0으로 처리하지 않고 제거가능하기에 �
 
 ---
 
-## Quantization
+### Quantization
 
 대부분 파라미터는 32bit 부동소수점 입니다. Quantization은 lower-precision datatype으로(즉, 32bit -> 8bit) quantizing하여 모델을 최적화 하는 방법입니다. 이로 인해 lower model size와 lower inference latency를 얻을 수 있습니다. 그런 다음 아래 그림처럼 그 사이의 모든 값을 정수 값으로 linearly extrapolate 할 수 있습니다.
 
@@ -169,7 +169,7 @@ structured pruning은 실제 0으로 처리하지 않고 제거가능하기에 �
 
 
 
-### Weight Quantization
+#### Weight Quantization
 
 모델의 32bit 부동소수점 weights matrix가 주어지면 최소 가중치를 0, 최대 가중치를 $$2^b - 1$$로 매핑합니다. 합리적인 b의 값은 8입니다.(32 -> 8로 4배가 줄어들고 uint8_t, int8_t를 지원하기 때문)
 
@@ -197,11 +197,11 @@ $$dequantize(x_q) = \hat{x} = s(x_q - z)$$
 
 위에 그림으로 양자화 및 역양자화가 표현됩니다. 사전 훈련 된 모델의 가중치를 양자화 하는 것을 post-training quantization이라고 합니다.
 
-### Activation Quantization
+#### Activation Quantization
 
 latency를 개선하려면 고정 소수점 표현에서 수학 연산을 해야합니다. 이는 모든 중간 layers의 입력과 출력은 고정 소수점이라는 것과 역양자화를 하지 안하도 된다는 것을 의미합니다.
 
-## Quantization-Aware Training(QAT)
+### Quantization-Aware Training(QAT)
 
 [논문](https://audentia-gestion.fr/Recherche-Research-Google/37631.pdf)에서 훈련 후에 양자화 된 5계층 feed-forward network를 언급합니다.
 
@@ -234,19 +234,19 @@ $$= s(round(\frac{s}{clamp(X, X_{min}, X_{max})}) + z) - z$$
 $$= s(round(\frac{s}{clamp(X, X_{min}, X_{max})}))$$
 
 
-### Other Notable Works
+#### Other Notable Works
 
 - [Model compression via distillation and quantization](https://arxiv.org/abs/1802.05668) : 양자화 포인트 $$p$$를 학습하고 손실을 줄이기 위해 knowledge Distillation을 사용합니다.
 
 - etc..
 
-### Result
+#### Result
 
 훈련 후 양자화가 적용되는 모델은 정확도 차이가 상당합니다. 모델의 크기는 4배 작아지지만 추론하는 동안 가중치를 역양자화해야 하기 때문에 latency가 높습니다.
 
 8-bit QAT는 정확도는 기존 모델과 매우 근접하여 디스크 공간이 4배 적게 필요하고 1.64배 빠릅니다!
 
-### Discussion
+#### Discussion
 
 - Quantization은 잘 연구된 기술로 model size를 많이 줄일 수 있습니다.
 
@@ -260,7 +260,7 @@ $$= s(round(\frac{s}{clamp(X, X_{min}, X_{max})}))$$
 
 ---
 
-## Other Compression Techniques
+### Other Compression Techniques
 
 - Low-Rank Matrix Factorization, K-Means Clustering, Weight-Sharing
 
@@ -268,11 +268,11 @@ $$= s(round(\frac{s}{clamp(X, X_{min}, X_{max})}))$$
 
 ---
 
-# Learning Techniques
+## Learning Techniques
 
 Learning Techniques는 더 나은 정확도를 얻기 위해 기존 학습 방법과 다르게 학습하는 방법 입니다. 모델의 파라미터와 레이어의 수를 줄인 작은 모델이 기존의 큰 모델과 동등한 성능을 달성하게 합니다. 학습하는 방법에 초점을 맞추기 때문에 추론에는 영향을 주지 않습니다.
 
-## Distillation
+### Distillation
 
 Ensemble은 일반화를 돕는데 잘 알려진 방법입니다. 이는 단일 가설 보다 다중 독립 가설이 좀 더 나은 성능을 가진다는 직관에서 시작됩니다.
 
@@ -314,13 +314,13 @@ $$  = \lambda_1 \cdot CrossEntropy(Y, Y^{(s)}; \theta) + \lambda_2 \cdot CrossEn
 
 - [Combining labeled and unlabeled data with co-training](https://www.cs.cmu.edu/~avrim/Papers/cotrain.pdf) : 학습된 분류기를 사용하여 생성된 pseudo-labels의 subset을 재학습하여 classifier의 에러율을 줄입니다.
 
-### Discussion
+#### Discussion
 
 - labeled data에서 성능을 향상시키는 증거가 많다. 게다가 unlabeled data로 teacher 모델의 pseudo-labels을 생성하여 성능 향상에 많은 기여를 합니다.
 
 - 복잡한 모델에도 효과적이며 일부 중간 부분에서 출력간의 차이를 최소화하는 새로운 손실 함수가 필요합니다.
 
-## Data Augmentation
+### Data Augmentation
 
 labeled 데이터가 많을수록 모델의 성능은 좋아지지만 labeling 작업은 많은 노동으로 이루어집니다. 이를 완화하기 위해 data augmentation 방법을 사용하는데.. 실제 강아지 사진이 있을 때 강아지는 수직, 수평으로 뒤집거나 회전해도 강아지입니다. 대부분 모든 사람이 튜토리얼을 통해 모델을 학습할 때 기본적으로 사용되어지는 방법입니다.
 
@@ -344,7 +344,7 @@ labeled 데이터가 많을수록 모델의 성능은 좋아지지만 labeling �
 
 Data Augmentation은 Optimizer 논문 보듯 정말 다양한데 지금까지 나온 방법들에서 그렇게 큰 변화를 주거나 그렇지는 않습니다(제 생각에는...?). 각 방법론 main 논문에서 방법만 훑어도 무방할 것 같습니다.
 
-## Self-Supervised Learning
+### Self-Supervised Learning
 
 이 분야도 재미있는 분야인데 이번에 좀 보게되어 좋습니다.
 
@@ -364,17 +364,17 @@ Supervied Learning은 데이터에 크게 의존합니다. 위에 Distillation�
 
 
 
-### Discussion
+#### Discussion
 
 실생활에 넘쳐나는 unlabeled data를 통해 적은 labeled data로 좋은 성능의 모델을 얻을 수 있으며 이는 ML 실무자에게 중요한 역할을 할 것이라 믿습니다.
 
 ---
 
-# Automation
+## Automation
 
 실제 사람이 직접 해야하는 작업을 줄이기 위해 systematically 그리고 automatically하게 최적의 solutions을 찾는 방법입니다. **이는 많은 시간을 소비하기에 신중하게 선택해야합니다.**
 
-## Hyper-Parameter Optimization
+### Hyper-Parameter Optimization
 
 Automation에서 가장 흔한 방법은 Hyper-Parameter Optimization(HPO) 입니다. learning rate, weght decay와 같은 hyper parameters는 빠르게 수렴하기 위해서 신중하게 설정해야합니다. 이 값은 fully connected layer의 수, convolutional layer filter의 수와 같은 모델의 구조를 통해 결정할 수 있습니다.
 
@@ -402,7 +402,7 @@ $$\lambda^{*} \approx argmin_{\lambda \in \left \{ \lambda^{(1)}, \lambda^{(2)},
 
 - Multi-Armed Bandit Algorithms : [Successive Halving(SHA)](https://arxiv.org/abs/1502.07943), [Hyper-Band](https://arxiv.org/abs/1603.06560)와 같은 방법은 random search와 유사합니다. 그러나 더 좋은 성능을 가지는 trials에 좀 더 많은 자원을 할당합니다. 사용자가 search를 위한 budget B(예를 들어, 총 에폭 수)를 설정합니다. 그리고 무작위로 hyper-parameters를 설정하고 학습합니다. B가 소진되면 낮은 성능의 trials가 제거되고 나머지 trials의 B에 $$\lambda$$가 곱해지게 됩니다. 그리고 반복합니다.
 
-### HPO Toolkits
+#### HPO Toolkits
 
 몇몇 software toolkits이 존재합니다.
 
@@ -412,7 +412,7 @@ $$\lambda^{*} \approx argmin_{\lambda \in \left \{ \lambda^{(1)}, \lambda^{(2)},
 
 - NNI, Tune, Advisor 그리고 다양한 오픈소스는 local에서 사용할 수 있습니다.
 
-## Neural Architecture Search
+### Neural Architecture Search
 
 말 그대로 모델의 architecture를 찾는 알고리즘 입니다. NAS는
 
@@ -424,11 +424,11 @@ $$\lambda^{*} \approx argmin_{\lambda \in \left \{ \lambda^{(1)}, \lambda^{(2)},
 
 ---
 
-# Efficient Architectures
+## Efficient Architectures
 
 기존 모델을 유지하는게 아니라 새롭게 모듈을 만들고 모델을 구성하는 방법
 
-## Vision
+### Vision
 
 Vision 도메인에서는 Fully Connected Layer, Convolutional Layer를 효과적으로 하는 방법이 주된 목적이고 Fully Connected Layer는 2가지 주요 문제점을 가집니다.
 
@@ -437,7 +437,7 @@ Vision 도메인에서는 Fully Connected Layer, Convolutional Layer를 효과�
 
 Convolutional Layer는 filter를 학습하기 때문에 위에 같은 문제점이 없습니다. 대게 입력 feature map과 filter를 통해 그 다음 feature map을 생성합니다. 앞부분 layer는 edge를 학습하며 뒤에서는 texture와 shape을 학습합니다. (컨볼루션의 자세한 설명이 있지만 기본적인? 것이라 생략합니다.)
 
-### Depth-Separable Convolutional Layers
+#### Depth-Separable Convolutional Layers
 
 이것도 Efficient Modeling에서 흔한 방법론이며 아래그림으로 설명됩니다.
 
@@ -464,7 +464,7 @@ $$(1 × 1 × input_channels × output_channels) + (s_x × s_y × output_channels
 
 ---
 
-# Infrastructure
+## Infrastructure
 
 보통 딥러닝을 학습하거나 추론할 때 framework를 사용합니다. 이번 파트에서는 하트웨어와 소프트웨어의 상호작용에 대한 survey를 합니다.
 
@@ -474,11 +474,11 @@ $$(1 × 1 × input_channels × output_channels) + (s_x × s_y × output_channels
 
 
 
-## Tensorflow Ecosystem
+### Tensorflow Ecosystem
 
 Tensorflow는 인기있는 머신러닝 framework로 가장 확장성이 좋고 효율적인 방법들을 제공합니다.
 
-### Tensorflow Lite for On-Device Usecases
+#### Tensorflow Lite for On-Device Usecases
 
 Tensorflow Lite는 적은 resource을 가지는 환경을 위해 디자인 된 라이브러리와 도구의 집합입니다.
 
@@ -486,7 +486,7 @@ Tensorflow Lite는 적은 resource을 가지는 환경을 위해 디자인 된 �
 
 - **Converter** : TFLite Converter는 주어진 TF models를 interpreter가 추론할 수 있도록 single flatbuffter file로 변환하는 데 유용합니다. 양자화를 위한 다양한 것도 제공합니다.
 
-### Other Tools for On-Device Inference
+#### Other Tools for On-Device Inference
 
 - TF Micro는 slimmed down interpreter와 매우 작은 resource microcontrollers에 대한 추론을 위해 더 작은 연산 집합으로 구성됩니다.
 
@@ -494,7 +494,7 @@ Tensorflow Lite는 적은 resource을 가지는 환경을 위해 디자인 된 �
 
 - TensorflowJS는 Node.js와 브라우저 내에서 신경망을 학습하거나 추론하는데 사용할 수 있는 Ecosystem 라이브러리 입니다.
 
-### XLA for Server-Side Acceleration
+#### XLA for Server-Side Acceleration
 
 일반적인 TF model graph는 TF's executor process으로 실행되고 이는 CPU, GPU에서 실행하기 위해 표준 최적화 커널을 사용됩니다.
 
@@ -504,11 +504,11 @@ For example, certain operations which can be fused together are combined in a si
 
 This avoids having to do multiple costly writes to RAM, when the operands can directly be operated on while they are still in cheaper caches.
 
-## Pytorch Ecosystem
+### Pytorch Ecosystem
 
 Pytorch는 인기있는 머신러닝 framework로 산업과 연구에 많이 사용됩니다.
 
-### General Model Optimization
+#### General Model Optimization
 
 Pytorchg에서는 Just-in-Time(JIT) compilation을 제공합니다.
 TorchScript(모델을 직렬화하고 최적화하기 위해 사용)에 속해있습니다.
@@ -517,9 +517,9 @@ TorchScript(모델을 직렬화하고 최적화하기 위해 사용)에 속해�
 
 - buffer checkpoint를 활성화하면 특정 레이어의 출력만 메모리에 유지하고 나머지는 backward에서 계산가능합니다. 이는 특히 activation과 같은 큰 출력을 가지지만 계산량이 적은 layer에 도움이 됩니다.
 
-## Hardware
+### Hardware
 
-### GPU
+#### GPU
 
 Graphics Processing Units(GPUs)는 computer graphics를 가속화하기 위해서 만들어졌습니다.
 
@@ -540,7 +540,7 @@ Tensor Core는 표준 MAC 연산을 최적화 합니다. 여기서 B와 C는 fp1
 
 
 
-### TPU
+#### TPU
 
 
 
@@ -552,14 +552,14 @@ TPU는 Goopgle이 Tensorflow로 딥러닝 어플리케이션을 가속화하기 
 범용 목적인 장치가 아니기 때문에 ML이 아닌 다른 응용 프로그램을 고려할 필요가 없기 때문에 linear algebra 연산을 병렬화하고 가속화하도록 미세 조정됩니다.
 핵심 architecture는 Systolic Array를 활용하는 것입니다.
 
-### EdgeTPU
+#### EdgeTPU
 
 EdgeTPU는 낮은 전력을 사용하는 Edge Device에서 추론을 하기 위한 맞춤형 ASIC입니다.
 TPU와 같이 linear algebra 연산을 가속화하는데 특화되어 있지만 추론에만 사용되며 더 낮은 비용을 가집니다.
 Tensorflow Lite 모델에서만 동작하며 Coral 플랫폼을 사용합니다.
 
 
-### Jetson
+#### Jetson
 
 Jetson은 임베디드 및 IoT 장치에 딥러닝 어플리케이션을 동작시키기 위해서 사용되는 Nvidia 가속기 제품입니다.
 lightweight 배포를 위해서 설계된 **저전력 system on a module(SoM)인 Nano** 그리고
@@ -567,7 +567,7 @@ lightweight 배포를 위해서 설계된 **저전력 system on a module(SoM)인
 
 ---
 
-# A PRACTITIONER’S GUIDE TO EFFICIENCY
+## A PRACTITIONER’S GUIDE TO EFFICIENCY
 
 
 
@@ -592,7 +592,7 @@ lightweight 배포를 위해서 설계된 **저전력 system on a module(SoM)인
 
 - **Grow-Improve-and-Shrink for Quality-Sensitive Models** : 동일한 footprint를 가지면서 더 좋은 quality를 얻고자 한다면 learning techniques, automation을 사용해야합니다.
 
-## Experiments
+### Experiments
 
 1. efficiency techniques를 사용하여 pareto-frontier를 달성합니다.
 

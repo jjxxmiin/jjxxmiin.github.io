@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# parser\_1
+## parser\_1
 
 `parser`는 compiler, interpreter의 구성 요소 중 하나로 입력 token에 포함 된 자료 구조를 구성하고 문법을 검사합니다. `darknet`에서는 `cfg`로 네트워크의 구조를 구성하고 문법을 검사하는데 사용 됩니다. 매우 중요하고 잘 짜여진 알고리즘 입니다.
 
@@ -37,7 +37,7 @@ param2=value2
 
 라고 이해하고 읽어봅시다.
 
-## parse\_network\_cfg
+### parse\_network\_cfg
 
 ```c
 network *parse_network_cfg(char *filename)
@@ -198,7 +198,7 @@ network *parse_network_cfg(char *filename)
 
 
 
-## read\_cfg
+### read\_cfg
 
 ```c
 list *read_cfg(char *filename)
@@ -260,7 +260,7 @@ list *read_cfg(char *filename)
 
 
 
-## parse\_net\_options
+### parse\_net\_options
 
 ```c
 void parse_net_options(list *options, network *net)
@@ -366,9 +366,9 @@ void parse_net_options(list *options, network *net)
 
 ---
 
-# parser\_2
+## parser\_2
 
-### free\_section
+#### free\_section
 
 ```c
 void free_section(section *s)
@@ -412,7 +412,7 @@ void free_section(section *s)
 
 
 
-### parse\_data
+#### parse\_data
 
 ```c
 void parse_data(char *data, float *a, int n)
@@ -455,7 +455,7 @@ void parse_data(char *data, float *a, int n)
 
 
 
-### parse\_local
+#### parse\_local
 
 ```c
 local_layer parse_local(list *options, size_params params)
@@ -504,7 +504,7 @@ local_layer parse_local(list *options, size_params params)
 
 
 
-### parse\_deconvolutional
+#### parse\_deconvolutional
 
 ```c
 layer parse_deconvolutional(list *options, size_params params)
@@ -554,7 +554,7 @@ layer parse_deconvolutional(list *options, size_params params)
 
 
 
-### parse\_convolutional
+#### parse\_convolutional
 
 ```c
 convolutional_layer parse_convolutional(list *options, size_params params)
@@ -624,7 +624,7 @@ convolutional_layer parse_convolutional(list *options, size_params params)
 
 
 
-### parse\_crnn
+#### parse\_crnn
 
 ```c
 layer parse_crnn(list *options, size_params params)
@@ -666,7 +666,7 @@ layer parse_crnn(list *options, size_params params)
 
 
 
-### parse\_rnn
+#### parse\_rnn
 
 ```c
 layer parse_rnn(list *options, size_params params)
@@ -707,7 +707,7 @@ layer parse_rnn(list *options, size_params params)
 
 
 
-### parse\_gru
+#### parse\_gru
 
 ```c
 layer parse_gru(list *options, size_params params)
@@ -744,7 +744,7 @@ layer parse_gru(list *options, size_params params)
 
 
 
-### parse\_lstm
+#### parse\_lstm
 
 ```c
 layer parse_lstm(list *options, size_params params)
@@ -780,7 +780,7 @@ layer parse_lstm(list *options, size_params params)
 
 
 
-### parse\_connected
+#### parse\_connected
 
 ```c
 layer parse_connected(list *options, size_params params)
@@ -816,7 +816,7 @@ layer parse_connected(list *options, size_params params)
 
 
 
-### parse\_softmax
+#### parse\_softmax
 
 ```c
 layer parse_softmax(list *options, size_params params)
@@ -855,7 +855,7 @@ layer parse_softmax(list *options, size_params params)
 
 
 
-### parse\_yolo\_mask
+#### parse\_yolo\_mask
 
 ```c
 int *parse_yolo_mask(char *a, int *num)
@@ -902,7 +902,7 @@ int *parse_yolo_mask(char *a, int *num)
 
 
 
-### parse\_yolo
+#### parse\_yolo
 
 ```c
 layer parse_yolo(list *options, size_params params)
@@ -974,7 +974,7 @@ layer parse_yolo(list *options, size_params params)
 
 
 
-### parse\_iseg
+#### parse\_iseg
 
 ```c
 layer parse_iseg(list *options, size_params params)
@@ -1009,7 +1009,7 @@ layer parse_iseg(list *options, size_params params)
 
 
 
-### parse\_region
+#### parse\_region
 
 ```c
 layer parse_region(list *options, size_params params)
@@ -1105,7 +1105,7 @@ layer parse_region(list *options, size_params params)
 
 
 
-### parse\_detection
+#### parse\_detection
 
 ```c
 detection_layer parse_detection(list *options, size_params params)
@@ -1166,7 +1166,7 @@ detection_layer parse_detection(list *options, size_params params)
 
 
 
-### parse\_cost
+#### parse\_cost
 
 ```c
 cost_layer parse_cost(list *options, size_params params)
@@ -1206,7 +1206,7 @@ cost_layer parse_cost(list *options, size_params params)
 
 
 
-### parse\_crop
+#### parse\_crop
 
 ```c
 crop_layer parse_crop(list *options, size_params params)
@@ -1258,7 +1258,7 @@ crop_layer parse_crop(list *options, size_params params)
 
 
 
-### parse\_reorg
+#### parse\_reorg
 
 ```c
 layer parse_reorg(list *options, size_params params)
@@ -1299,7 +1299,7 @@ layer parse_reorg(list *options, size_params params)
 
 
 
-### parse\_maxpool
+#### parse\_maxpool
 
 ```c
 maxpool_layer parse_maxpool(list *options, size_params params)
@@ -1340,7 +1340,7 @@ maxpool_layer parse_maxpool(list *options, size_params params)
 
 
 
-### parse\_avgpool
+#### parse\_avgpool
 
 ```c
 avgpool_layer parse_avgpool(list *options, size_params params)
@@ -1377,7 +1377,7 @@ avgpool_layer parse_avgpool(list *options, size_params params)
 
 
 
-### parse\_dropout
+#### parse\_dropout
 
 ```c
 dropout_layer parse_dropout(list *options, size_params params)
@@ -1411,7 +1411,7 @@ dropout_layer parse_dropout(list *options, size_params params)
 
 
 
-### parse\_normalization
+#### parse\_normalization
 
 ```c
 layer parse_normalization(list *options, size_params params)
@@ -1444,7 +1444,7 @@ layer parse_normalization(list *options, size_params params)
 
 
 
-### parse\_batchnorm
+#### parse\_batchnorm
 
 ```c
 layer parse_batchnorm(list *options, size_params params)
@@ -1473,7 +1473,7 @@ layer parse_batchnorm(list *options, size_params params)
 
 
 
-### parse\_shortcut
+#### parse\_shortcut
 
 ```c
 layer parse_shortcut(list *options, size_params params, network *net)
@@ -1517,7 +1517,7 @@ layer parse_shortcut(list *options, size_params params, network *net)
 
 
 
-### parse\_l2norm
+#### parse\_l2norm
 
 ```c
 layer parse_l2norm(list *options, size_params params)
@@ -1549,7 +1549,7 @@ layer parse_l2norm(list *options, size_params params)
 
 
 
-### parse\_logistic
+#### parse\_logistic
 
 ```c
 layer parse_logistic(list *options, size_params params)
@@ -1581,7 +1581,7 @@ layer parse_logistic(list *options, size_params params)
 
 
 
-### parse\_activation
+#### parse\_activation
 
 ```c
 layer parse_activation(list *options, size_params params)
@@ -1620,7 +1620,7 @@ layer parse_activation(list *options, size_params params)
 
 
 
-### parse\_upsample
+#### parse\_upsample
 
 ```c
 layer parse_upsample(list *options, size_params params, network *net)
@@ -1657,7 +1657,7 @@ layer parse_upsample(list *options, size_params params, network *net)
 
 
 
-### parse\_route
+#### parse\_route
 
 ```c
 route_layer parse_route(list *options, size_params params, network *net)
@@ -1724,7 +1724,7 @@ route_layer parse_route(list *options, size_params params, network *net)
 
 
 
-### get\_policy
+#### get\_policy
 
 ```c
 typedef enum {
@@ -1762,7 +1762,7 @@ learning_rate_policy get_policy(char *s)
 
 
 
-### is\_network
+#### is\_network
 
 ```c
 int is_network(section *s)
@@ -1788,7 +1788,7 @@ int is_network(section *s)
 
 
 
-### load\_weights
+#### load\_weights
 
 ```c
 void load_weights(network *net, char *filename)
@@ -1912,7 +1912,7 @@ void load_weights_upto(network *net, char *filename, int start, int cutoff)
 
 
 
-### load\_convolutional\_weights
+#### load\_convolutional\_weights
 
 ```c
 void load_convolutional_weights(layer l, FILE *fp)
@@ -1986,7 +1986,7 @@ void load_convolutional_weights(layer l, FILE *fp)
 
 
 
-### load\_batchnorm\_weights
+#### load\_batchnorm\_weights
 
 ```c
 void load_batchnorm_weights(layer l, FILE *fp)
@@ -2016,7 +2016,7 @@ void load_batchnorm_weights(layer l, FILE *fp)
 
 
 
-### load\_connected\_weights
+#### load\_connected\_weights
 
 ```c
 void load_connected_weights(layer l, FILE *fp, int transpose)
@@ -2061,7 +2061,7 @@ void load_connected_weights(layer l, FILE *fp, int transpose)
 
 
 
-### transpose\_matrix
+#### transpose\_matrix
 
 ```c
 void transpose_matrix(float *a, int rows, int cols)
@@ -2111,7 +2111,7 @@ void transpose_matrix(float *a, int rows, int cols)
 
 
 
-### save\_weights
+#### save\_weights
 
 ```c
 void save_weights(network *net, char *filename)
@@ -2212,7 +2212,7 @@ void save_weights_upto(network *net, char *filename, int cutoff)
 
 
 
-### save\_connected\_weights
+#### save\_connected\_weights
 
 ```c
 void save_connected_weights(layer l, FILE *fp)
@@ -2247,7 +2247,7 @@ void save_connected_weights(layer l, FILE *fp)
 
 
 
-### save\_batchnorm\_weights
+#### save\_batchnorm\_weights
 
 ```c
 void save_batchnorm_weights(layer l, FILE *fp)
@@ -2276,7 +2276,7 @@ void save_batchnorm_weights(layer l, FILE *fp)
 
 
 
-### save\_convolutional\_weights
+#### save\_convolutional\_weights
 
 ```c
 void save_convolutional_weights(layer l, FILE *fp)

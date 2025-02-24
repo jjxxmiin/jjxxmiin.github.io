@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# convolutional\_layer
+## convolutional\_layer
 
-## Convolutional Layer 란?
+### Convolutional Layer 란?
 
 Convolution은 합성곱으로 2가지 연산을 사용합니다.
 
@@ -35,7 +35,7 @@ output을 계산하기 위해서 각자의 id를 가지고 있는 weight가 사�
 
 ***
 
-### forward\_convolutional\_layer
+#### forward\_convolutional\_layer
 
 ```c
 void forward_convolutional_layer(convolutional_layer l, network net)
@@ -106,7 +106,7 @@ void forward_convolutional_layer(convolutional_layer l, network net)
 
 
 
-### backward\_convolutional\_layer
+#### backward\_convolutional\_layer
 
 ```c
 void backward_convolutional_layer(convolutional_layer l, network net)
@@ -186,7 +186,7 @@ void backward_convolutional_layer(convolutional_layer l, network net)
 
 
 
-### update\_convolutional\_layer
+#### update\_convolutional\_layer
 
 ```c
 void update_convolutional_layer(convolutional_layer l, update_args a)
@@ -230,7 +230,7 @@ void update_convolutional_layer(convolutional_layer l, update_args a)
 
 
 
-### resize\_convolutional\_layer
+#### resize\_convolutional\_layer
 
 ```c
 void resize_convolutional_layer(convolutional_layer *l, int w, int h)
@@ -280,7 +280,7 @@ void resize_convolutional_layer(convolutional_layer *l, int w, int h)
 
 
 
-### make\_convolutional\_layer
+#### make\_convolutional\_layer
 
 ```c
 convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int n, int groups, int size, int stride, int padding, ACTIVATION activation, int batch_normalize, int binary, int xnor, int adam)
@@ -419,7 +419,7 @@ convolutional_layer make_convolutional_layer(int batch, int h, int w, int c, int
 
 
 
-### denormalize\_convolutional\_layer
+#### denormalize\_convolutional\_layer
 
 ```c
 void denormalize_convolutional_layer(convolutional_layer l)
@@ -460,7 +460,7 @@ void denormalize_convolutional_layer(convolutional_layer l)
 
 
 
-### add\_bias
+#### add\_bias
 
 ```c
 void add_bias(float *output, float *biases, int batch, int n, int size)
@@ -499,7 +499,7 @@ void add_bias(float *output, float *biases, int batch, int n, int size)
 
 
 
-### scale\_bias
+#### scale\_bias
 
 ```c
 void scale_bias(float *output, float *scales, int batch, int n, int size)
@@ -539,7 +539,7 @@ void scale_bias(float *output, float *scales, int batch, int n, int size)
 
 
 
-### backward\_bias
+#### backward\_bias
 
 ```c
 void backward_bias(float *bias_updates, float *delta, int batch, int n, int size)
@@ -578,7 +578,7 @@ void backward_bias(float *bias_updates, float *delta, int batch, int n, int size
 
 
 
-### swap\_binary
+#### swap\_binary
 
 ```c
 void swap_binary(convolutional_layer *l)
@@ -607,7 +607,7 @@ void swap_binary(convolutional_layer *l)
 
 
 
-### binarize\_weights
+#### binarize\_weights
 
 ```c
 void binarize_weights(float *weights, int n, int size, float *binary)
@@ -648,7 +648,7 @@ void binarize_weights(float *weights, int n, int size, float *binary)
 
 
 
-### binarize\_cpu
+#### binarize\_cpu
 
 ```c
 void binarize_cpu(float *input, int n, float *binary)
@@ -682,7 +682,7 @@ void binarize_cpu(float *input, int n, float *binary)
 
 
 
-### binarize\_input
+#### binarize\_input
 
 ```c
 void binarize_input(float *input, int n, int size, float *binary)
@@ -721,7 +721,7 @@ void binarize_input(float *input, int n, int size, float *binary)
 
 
 
-### convolutional\_out\_height
+#### convolutional\_out\_height
 
 ```c
 int convolutional_out_height(convolutional_layer l)
@@ -748,7 +748,7 @@ int convolutional_out_height(convolutional_layer l)
 
 
 
-### convolutional\_out\_width
+#### convolutional\_out\_width
 
 ```c
 int convolutional_out_width(convolutional_layer l)
@@ -775,7 +775,7 @@ int convolutional_out_width(convolutional_layer l)
 
 
 
-### get\_convolutional\_image
+#### get\_convolutional\_image
 
 ```c
 image get_convolutional_image(convolutional_layer l)
@@ -801,7 +801,7 @@ image get_convolutional_image(convolutional_layer l)
 
 
 
-### get\_convolutional\_delta
+#### get\_convolutional\_delta
 
 ```c
 image get_convolutional_delta(convolutional_layer l)
@@ -828,7 +828,7 @@ image get_convolutional_delta(convolutional_layer l)
 
 
 
-### get\_convolutional\_weight
+#### get\_convolutional\_weight
 
 ```c
 image get_convolutional_weight(convolutional_layer l, int i)
@@ -858,7 +858,7 @@ image get_convolutional_weight(convolutional_layer l, int i)
 
 
 
-### rgbgr\_weights
+#### rgbgr\_weights
 
 ```c
 void rgbgr_weights(convolutional_layer l)
@@ -896,7 +896,7 @@ void rgbgr_weights(convolutional_layer l)
 
 
 
-### rescale\_weights
+#### rescale\_weights
 
 ```c
 void rescale_weights(convolutional_layer l, float scale, float trans)
@@ -933,7 +933,7 @@ void rescale_weights(convolutional_layer l, float scale, float trans)
 
 
 
-### get\_weights
+#### get\_weights
 
 ```c
 image *get_weights(convolutional_layer l)
@@ -974,7 +974,7 @@ image *get_weights(convolutional_layer l)
 
 
 
-### visualize\_convolutional\_layer
+#### visualize\_convolutional\_layer
 
 ```c
 image *visualize_convolutional_layer(convolutional_layer l, char *window, image *prev_weights)

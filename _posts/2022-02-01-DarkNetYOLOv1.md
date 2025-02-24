@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# YOLOv1
+## YOLOv1
 
 * Paper : [https://arxiv.org/abs/1506.02640](https://arxiv.org/abs/1506.02640)
 
@@ -15,7 +15,7 @@ Object Detection에 대한 새로운 접근법(one stage object detection) YOLO(
 * 통합된 구조(bounding box + class probability)를 가지기 때문에 빠릅니다.
 * `45 FPS / 155 FPS(Fast)`
 
-### Unified Detection
+#### Unified Detection
 
 
 
@@ -49,7 +49,7 @@ $$Pr(Class_i | Object) * Pr(Object) * IOU^{truth}_{pred} = Pr(Class_i) * IOU^{tr
 
 
 
-### Network Design
+#### Network Design
 
 
 
@@ -61,7 +61,7 @@ $$Pr(Class_i | Object) * Pr(Object) * IOU^{truth}_{pred} = Pr(Class_i) * IOU^{tr
 * Convolution Layer : 24개, 9개(Fast)
 * Fully Connected Layer : 2개
 
-### Loss Function
+#### Loss Function
 
 
 
@@ -86,7 +86,7 @@ $$Pr(Class_i | Object) * Pr(Object) * IOU^{truth}_{pred} = Pr(Class_i) * IOU^{tr
 4. confidence score의 loss를 구합니다. ($$C_i = 0$$)
 5. conditional class probability의 loss를 구합니다.
 
-### Training
+#### Training
 
 * ImageNet 1000-class competition dataset으로 20개의 convolution layer, avg pooling layer, fully connected layer를 가진 모델에 pretraining 합니다. 합니다.
 * randomly initialized weights를 가지는 4개의 convolution layer와 2개의 fully connected layer를 추가합니다.
@@ -109,19 +109,19 @@ $$Pr(Class_i | Object) * Pr(Object) * IOU^{truth}_{pred} = Pr(Class_i) * IOU^{tr
   * random scaling
   * HSV 색상 공간에서 최대 1.5배 까지 exposure과 saturation을 임의로 조정합니다.
 
-### Inference
+#### Inference
 
 * one stage라서 매우 빠릅니다.
 * 이미지당 98개의 bounding box와 각 box에 대한 class probability를 예측합니다.
 * 각 object당 하나의 bounding box로 예측한다.
 * 큰 object나 여러개의 셀의 테두리에 근처에 있는 물체는 예측하기 어렵습니다. NMS로 해결할 수 있지만 R-CNN 만큼 성능에 크게 영향을 미치지는 않습니다.
 
-### Limitation
+#### Limitation
 
 * Small Object가 모여 있으면 잘 검출하지 못합니다.
 * Localization Error가 높습니다.
 
-### Benchmark
+#### Benchmark
 
 
 

@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# detection\_layer
+## detection\_layer
 
-## forward\_detection\_layer
+### forward\_detection\_layer
 
 ```c
 void forward_detection_layer(const detection_layer l, network net)
@@ -207,7 +207,7 @@ void forward_detection_layer(const detection_layer l, network net)
 
 
 
-## backward\_detection\_layer
+### backward\_detection\_layer
 
 ```c
 void backward_detection_layer(const detection_layer l, network net)
@@ -239,7 +239,7 @@ void backward_detection_layer(const detection_layer l, network net)
 
 
 
-## make\_detection\_layer
+### make\_detection\_layer
 
 ```c
 detection_layer make_detection_layer(int batch, int inputs, int n, int side, int classes, int coords, int rescore)
@@ -300,7 +300,7 @@ detection_layer make_detection_layer(int batch, int inputs, int n, int side, int
 
 
 
-## get\_detection\_detections
+### get\_detection\_detections
 
 ```c
 void get_detection_detections(layer l, int w, int h, float thresh, detection *dets)

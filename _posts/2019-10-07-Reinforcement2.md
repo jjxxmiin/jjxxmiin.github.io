@@ -7,7 +7,7 @@ categories: reinforcement
 math: true
 ---
 
-# Reinforcement
+## Reinforcement
 
 강화학습의 개념을 순차적으로 정리
 
@@ -17,7 +17,7 @@ math: true
 - Policy Gradient
 
 
-# 강화학습의 개념
+## 강화학습의 개념
 머신러닝의 한 영역으로 미래의 보상을 위해서 스스로 의사결정 할 수 있게 하는 학습방법이다.
 
 
@@ -34,7 +34,7 @@ math: true
 
 환경(E)이 존재하고 그 환경에는 어떠한 보상(R)이 존재한다. 그 보상을 얻기 위해서는 어떠한 행동(A)를 취해야 한다. 위와 같은 환경에서는 오른쪽으로 갔을때 보상을 얻을 수 있다. 하지만 이것은 우리가 눈으로 볼때는 알 수 있지만 컴퓨터 자체는 안에 있는 값만을 이용해서 알아야 한다.그 때문에 컴퓨터가 스스로 어떠한 정책(P)을 학습하게 하는 것이 강화학습이다.
 
-# Q-learning
+## Q-learning
 
 ```
 
@@ -99,7 +99,7 @@ Q(s,a) = r + (GAMMA)*maxQ(s`,a`)
 
 $$Q(s,a) = (1-\alpha)Q(s,a) + \alpha[r + \gamma maxQ(s^{\prime},a^{\prime})]$$
 
-# Q-Network
+## Q-Network
 Q-table은 너무 많은 행동이 있고 환경이 하나의 이미지로 있는 경우에 Q-tabel이 기하급수적으로 커지는 현상이 발생해 아예 접근조차 못하는 경우가 있다.(예를 들어 Atari game) 그래서 이러한 모든 경우의 수를 전부 고려하기 어려운 문제를 Neural Network를 이용해서 표현한다.
 
 ```
@@ -123,7 +123,7 @@ $$min \sum_{t=0}^{T}[\hat{Q}(s,a | \theta) - \gamma max \hat{Q}(s^{\prime},a^{\p
 3. action을 통해서 다음 state와 reward를 받는다.
 4. 위에 정의한 공식을 통해 보상을 최대로하는 $$\theta$$를 업데이트 한다.
 
-# DQN
+## DQN
 위에서 설명한 Q-Network에는 두가지 문제점이 있다.
 
 1. 현재 행동과 다음 행동이 유사한 경우에 학습이 잘되지않는다.
@@ -152,7 +152,7 @@ $$min \sum_{t=0}^{T}[\hat{Q}(s,a | \theta) - \gamma max \hat{Q}(s^{\prime},a^{\p
 
 5. C스탭후에 $$\bar\theta$$에 $$\theta$$를 복사한다.
 
-# Policy Gradient
+## Policy Gradient
 여태까지는 네트워크에서 state를 입력으로 받고 Q의 value값이 출력이었다. 그리고 그 Q-value값으로 보상을 최대로 하는 action을 선택했다. 이러한 방식을 value-based reinforcement라고 한다. value-based reinforcement에서는 2가지 단점이있다.
 
 1. value function이 약간만 달라져도 policy 자체는 왼쪽으로 가다가 오른쪽으로 간다던지 크게 변화한다. 그래서 최적값에 수렴하는데 불안정하다.
@@ -202,7 +202,7 @@ P(비,맑음 | 맑음)
 
 
 
-## Finite Difference Policy Gradient
+### Finite Difference Policy Gradient
 numerical한 방법을 사용한다. 조금씩 값을 바꾸어 보면서 gradient를 구하는 방법이고 하나하나씩 천천히 최적의값을 찾는 방법이다. 매우 비효율적이다. 하지만 미분법을 이용하지 않더라도 동작한다.
 
 $$\frac{\partial J(\theta)}{\partial \theta_k} \approx \frac{J(\theta + \epsilon u_k) - J(\theta))}{\epsilon}$$
@@ -212,12 +212,12 @@ $$\frac{\partial J(\theta)}{\partial \theta_k} \approx \frac{J(\theta + \epsilon
 
 
 
-## Monte Carlo Policy Gradient : REINFORCE 알고리즘
+### Monte Carlo Policy Gradient : REINFORCE 알고리즘
 이 방법은 object function의 gradient를 구해서 업데이트 시켜주는 방법이다. gradient descent와 같은 개념이라고 생각하면 될것같다. gradient를 구하는 방법은 아래와 같다.
 
 
 
-### score function
+#### score function
 
 
 
@@ -238,7 +238,7 @@ $$\pi_{\theta}(s,a) = \frac{1}{\sigma\sqrt{2\pi}}e(-\frac{(a-\mu(s))^2}{2\sigma^
 
 $$\phi_sa$$ : 어떠한 상태에서의 행동의 대한 value값 Q function 개념
 
-### policy gradient theorem
+#### policy gradient theorem
 output이 바로 보상으로 추출되는 것 말고 Q function을 사용해서 연산할 수 있다.
 
 
@@ -247,7 +247,7 @@ output이 바로 보상으로 추출되는 것 말고 Q function을 사용해서
 
 
 
-### REINFORCE
+#### REINFORCE
 monte carlo policy gradient를 REINFORCE 알고리즘이라고 부른다.
 
 이 알고리즘을 표현하면
@@ -279,7 +279,7 @@ $$v_t$$ : 실제 적용되는 reward
 --> state`
 ```
 
-# 참조
+## 참조
 - Markov chain : [https://4four.us/article/2014/11/markov-chain-monte-carlo](https://4four.us/article/2014/11/markov-chain-monte-carlo)
 
 - [https://4four.us/article/2018/08/policy-gradient](https://4four.us/article/2018/08/policy-gradient)

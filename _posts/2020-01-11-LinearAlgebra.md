@@ -11,7 +11,7 @@ math: true
 
 기하학적인 정의는 [Here](https://www.youtube.com/watch?v=jNwf-JUGWgg) 유튜브에 알기 쉽게 나와 있었다.
 
-# 벡터
+## 벡터
 
 - vector = 크기 + 방향
 - **순서가 정해져 있다.**
@@ -21,12 +21,12 @@ math: true
 
 ---
 
-# 행렬
+## 행렬
 - row vector, column vertor
 - 행렬곱 : $$AB \neq BA$$
 - uppercase
 
-### 정방행렬
+#### 정방행렬
 
 $$
 \begin{pmatrix}
@@ -38,7 +38,7 @@ $$
 
 - 행과 열의 길이가 같은 정사각 행렬
 
-### 항등 행렬(Identity Matrix)
+#### 항등 행렬(Identity Matrix)
 
 $$
 \begin{bmatrix}
@@ -53,7 +53,7 @@ $$
 - 행렬 x 역행렬 = 항등행렬
 - 직사각행렬은 안된다.
 
-### 전치행렬
+#### 전치행렬
 
 $$
 \begin{pmatrix}
@@ -68,7 +68,7 @@ $$
 
 - transpose matrix
 
-### 대각행렬
+#### 대각행렬
 
 $$
 diag(x_1, x_2, x_3) = \begin{pmatrix}
@@ -93,7 +93,7 @@ $$
 $$Tr(X) = x_1 + x_2 +x_3$$
 
 ---
-## linear equation
+### linear equation
 
 $$a_1 x_1 + a_2 x_2 + \cdots + a_n x_n = b$$
 
@@ -103,7 +103,7 @@ $$a^T x = b$$ 위에 식과 같은식인데 transpose를 해주는 이유는 sha
 
 ---
 
-## linear combination
+### linear combination
 `span` : 벡터 v1, v2의 선형 조합으로 만들어지는 space
 
 
@@ -165,7 +165,7 @@ $$
 
 ---
 
-## 선형 독립 / 선형 종속
+### 선형 독립 / 선형 종속
 
 - linearly independent, linearly dependent
 
@@ -213,7 +213,7 @@ $$
 
 ---
 
-## Basis
+### Basis
 - 벡터공간의 축들을 만들 수 있는 벡터들의 집합
 - 공간을 구성하는 벡터
 - 벡터의 집합이 linearly independent하고 그 벡터의 집합이 전체 벡터의 space를 span하는 것이 basis다.
@@ -241,7 +241,7 @@ $$
 
 ---
 
-## 고유값 / 고유벡터
+### 고유값 / 고유벡터
 - eigenvalue, eigenvector
 
 
@@ -259,7 +259,7 @@ $$Ax = \lambda x$$
 
 ---
 
-## Orthogonal / Orthonormal
+### Orthogonal / Orthonormal
 
 **Orthogonal**
 - 기호 : $$\perp$$
@@ -273,7 +273,7 @@ $$Ax = \lambda x$$
 
 ---
 
-# PCA(Principal Component Analysis)
+## PCA(Principal Component Analysis)
 - 주성분 분석
 - 차원 축소(dimensionality reduction), 변수 추출(feature extraction)
 - 공분산 행렬의 eigenvector
@@ -291,7 +291,7 @@ $$Ax = \lambda x$$
 
 - 2차원 벡터를 1차원 벡터로 축소시키는 최적의 방법은 variance를 최대로 만들어주는 eigenvector에 정사영 시키는 것
 
-## 순서
+### 순서
 1. 공분산 행렬을 구한다.
 2. 공분산 행렬을 eigendecomposition 한다.
 3. eigenvalue가 큰 순서대로 정렬한다.
@@ -299,7 +299,7 @@ $$Ax = \lambda x$$
 
 ---
 
-# 공분산 행렬
+## 공분산 행렬
 - feature들의 상관관계의 정도(커지면 작아지고, 작아지면 커지고, 커지면 커지고, 작아지면 작아지는 정도)
 
 - 상관관계를 알기 위해서 각 feature를 내적해서 유사성을 찾는다.
@@ -310,7 +310,7 @@ $$A \cdot B = \left | A \right | \left | B \right | \cos \theta$$
 
 - 각도에 따라서 A와 B가 얼마나 유사 한지 알 수 있다. 각도가 90도라면 연관성이 없고 0도라면 방향이 같기 때문에 유사하다는 것을 알 수 있다.
 
-## 순서
+### 순서
 - 각 행 별로 평균을 구한 뒤 빼준다.
 
 $$X' = X - m$$
@@ -333,7 +333,7 @@ $$
 
 ---
 
-# 고유값 분해(eigendecomposition)
+## 고유값 분해(eigendecomposition)
 
 1. 주어진 데이터 $$A$$
 2. $$det(A - \lambda I) = 0$$를 만족하는 $$\lambda$$를 찾는다.
@@ -344,7 +344,7 @@ $$
 
 ---
 
-# LDA(Linear Discriminant analysis)
+## LDA(Linear Discriminant analysis)
 - dimension 축소가 아닌 dimension 분리의 목적
 - 각 클래스의 집단 내부의 분산은 작다.
 - 서로 다른 클래스 사이의 분산은 커야한다.
@@ -357,7 +357,7 @@ $$
 
 - [https://www.youtube.com/watch?v=M4HpyJHPYBY](https://www.youtube.com/watch?v=M4HpyJHPYBY)
 
-## Fisher linear discriminant
+### Fisher linear discriminant
 
 Fisher가 제안한 linear discriminant의 목적함수
 
@@ -373,7 +373,7 @@ $$S^{-1}_w S_b w = \lambda w$$
 
 식을 풀어내는 방식은 [이 곳](https://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)을 참조해서 보는 것을 추천한다.
 
-## 순서
+### 순서
 - 전체, 각 클래스의 평균을 계산한다.
 
 $$m_1 = \frac{1}{N_1} \sum_{x \in w_1} x$$
@@ -398,6 +398,6 @@ $$S_w^{-1} S_b w = \lambda w$$
 
 - 관심이 있는 dimension까지만 사용하고 $$X$$와 eigenvector를 내적한다.
 
-# Reference
+## Reference
 - [https://www.edwith.org/linearalgebra4ai/joinLectures/14072](https://www.edwith.org/linearalgebra4ai/joinLectures/14072)
 - [https://www.youtube.com/watch?v=jNwf-JUGWgg](https://www.youtube.com/watch?v=jNwf-JUGWgg)

@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# option\_list
+## option\_list
 
-## read\_data\_cfg
+### read\_data\_cfg
 
 ```c
 list *read_data_cfg(char *filename)
@@ -58,7 +58,7 @@ list *read_data_cfg(char *filename)
 
 
 
-## get\_metadata
+### get\_metadata
 
 ```c
 metadata get_metadata(char *file)
@@ -99,7 +99,7 @@ metadata get_metadata(char *file)
 
 
 
-## read\_option
+### read\_option
 
 ```c
 int read_option(char *s, list *options)
@@ -140,7 +140,7 @@ int read_option(char *s, list *options)
 
 
 
-## option\_insert
+### option\_insert
 
 ```c
 void option_insert(list *l, char *key, char *val)
@@ -173,7 +173,7 @@ void option_insert(list *l, char *key, char *val)
 
 
 
-## option\_unused
+### option\_unused
 
 ```c
 void option_unused(list *l)
@@ -212,7 +212,7 @@ void option_unused(list *l)
 
 
 
-## option\_find
+### option\_find
 
 ```c
 char *option_find(list *l, char *key)
@@ -249,7 +249,7 @@ char *option_find(list *l, char *key)
 
 
 
-## option\_find\_str
+### option\_find\_str
 
 ```c
 char *option_find_str(list *l, char *key, char *def)
@@ -283,7 +283,7 @@ char *option_find_str(list *l, char *key, char *def)
 
 
 
-## option\_find\_int
+### option\_find\_int
 
 ```c
 int option_find_int(list *l, char *key, int def)
@@ -317,7 +317,7 @@ int option_find_int(list *l, char *key, int def)
 
 
 
-## option\_find\_int\_quiet
+### option\_find\_int\_quiet
 
 ```c
 int option_find_int_quiet(list *l, char *key, int def)
@@ -355,7 +355,7 @@ int option_find_int_quiet(list *l, char *key, int def)
 
 
 
-## option\_find\_float\_quiet
+### option\_find\_float\_quiet
 
 ```c
 float option_find_float_quiet(list *l, char *key, float def)
@@ -393,7 +393,7 @@ float option_find_float_quiet(list *l, char *key, float def)
 
 
 
-## option\_find\_float
+### option\_find\_float
 
 ```c
 float option_find_float(list *l, char *key, float def)

@@ -6,28 +6,28 @@ date:   2019-03-30 13:00 -0400
 categories: edge
 ---
 
-## Dependency
+### Dependency
 - raspberry pi 3
 - Neural Compute Stick 2
 - WebCam
 
-## requirement
+### requirement
 - opencv 4.0.0
 - [openvino](https://jjxxmiin.github.io/pi/2019/03/08/NCS2/)
 
 ---
 
-# YOLOv3
+## YOLOv3
 yolov3를 사용할 경우에 보기
 
-## YOLOv3 모델 다운로드 받기
+### YOLOv3 모델 다운로드 받기
 - [YOLOv3 weight](https://pjreddie.com/media/files/yolov3.weights)
 
 - [YOLOv3-tiny weight](https://pjreddie.com/media/files/yolov3-tiny.weights)
 
 - [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names)
 
-## pb 변환기 실행
+### pb 변환기 실행
 
 1. [깃허브](https://github.com/mystic123/tensorflow-yolo-v3) 다운로드
 ```
@@ -60,7 +60,7 @@ python convert_weights_pb.py
 --tiny
 ```
 
-## 변환하고 summary 확인
+### 변환하고 summary 확인
 
 
 
@@ -68,7 +68,7 @@ python convert_weights_pb.py
 
 
 
-## IR 변환기 실행
+### IR 변환기 실행
 
 ```
 python mo_tf.py
@@ -85,11 +85,11 @@ python mo_tf.py
 ---
 
 
-# YOLOv1,v2
+## YOLOv1,v2
 yolov1,v2를 사용하고 싶을때 보기
 
 
-## YOLOv1,v2 모델 다운로드 받기
+### YOLOv1,v2 모델 다운로드 받기
 
 - [YOLOv1](https://pjreddie.com/darknet/yolov1/)
 - [YOLOv2](https://pjreddie.com/darknet/yolov2/)
@@ -97,7 +97,7 @@ yolov1,v2를 사용하고 싶을때 보기
 - [Config File](https://github.com/pjreddie/darknet) : 여기서 cfg폴더를 가져오면 됩니다.
 
 
-## pb 변환기 실행
+### pb 변환기 실행
 1. [깃허브](https://github.com/thtrieu/darkflow#dependencies) 다운로드
 ```
 git clone https://github.com/thtrieu/darkflow.git
@@ -122,7 +122,7 @@ python ./flow
 --savepb
 ```
 
-## IR 변환기 실행
+### IR 변환기 실행
 ```
 python ./mo_tf.py
 --input_model <path_to_model>/<model_name>.pb       \
@@ -135,7 +135,7 @@ python ./mo_tf.py
 
 이제 라즈베리파이에 올려서 실행을 시켜보도록 하자. 라즈베리파이에 올리기 위한 `.xml`,`.bin`을 라즈베리파이로 옮기고 그 후에 간단한 테스트를 진행해볼것이다.
 
-## 단순 opencv를 이용한 테스트
+### 단순 opencv를 이용한 테스트
 
 ```python
 import cv2 as cv
@@ -144,17 +144,17 @@ import time
 xml_path = '/home/pi/workspace/IR/tiny-yolov3.xml'
 bin_path = '/home/pi/workspace/IR/tiny-yolov3.bin'
 
-# Load the model
+## Load the model
 net = cv.dnn.readNet(xml_path, bin_path)
-# Specify target device
+## Specify target device
 net.setPreferableTarget(cv.dnn.DNN_TARGET_MYRIAD)
 
 
-# Read an image
+## Read an image
 frame = cv.imread('test.jpeg')
 frame = cv.resize(frame,(416,416))
 
-# Prepare input blob and perform an inference
+## Prepare input blob and perform an inference
 blob = cv.dnn.blobFromImage(frame, size=(416, 416), ddepth=cv.CV_8U)
 net.setInput(blob)
 start = time.time()
@@ -166,7 +166,7 @@ print("inference time : ",(end - start))
 
 ---
 
-## openvino IE엔진을 이용한 테스트
+### openvino IE엔진을 이용한 테스트
 
 **MYRIAD.. NCS2는 FP32는 지원하지 않습니다..**
 inference를 NCS2로 진행하기 위해서는 `data_type`이 FP16이어야 한다. FP32는 지원을 하지 않기 때문에 꼭 `.xml`,`.bin`으로 변환시킬때 `data_type`을 FP16으로 해야합니다. 이것때문에 귀찮은 일을 반복했네요..
@@ -180,7 +180,7 @@ import time
 xml_path = '/home/pi/workspace/IR/tiny-yolov3.xml'
 bin_path = '/home/pi/workspace/IR/tiny-yolov3.bin'
 
-# network 생성
+## network 생성
 net = IENetwork(model = xml_path,weights = bin_path)
 '''
 print("input : ",net.inputs)
@@ -191,7 +191,7 @@ print("output shape :",net.outputs['detector/yolo-v3-tiny/Conv_12/BiasAdd/YoloRe
 
 print("net layer :",*list(net.layers.keys()),sep='\n')
 '''
-# device에
+## device에
 plugin = IEPlugin(device='MYRIAD')
 exec_net = plugin.load(net)
 
@@ -199,9 +199,9 @@ start = time.time()
 
 frame = cv.imread('test.jpeg')
 resized_image = cv.resize(frame, (416, 416), interpolation = cv.INTER_CUBIC)
-prepimg = resized_image[np.newaxis, :, :, :]     # Batch size axis add
-# position trans
-prepimg = prepimg.transpose((0, 3, 1, 2))  # NHWC to NCHW
+prepimg = resized_image[np.newaxis, :, :, :]     ## Batch size axis add
+## position trans
+prepimg = prepimg.transpose((0, 3, 1, 2))  ## NHWC to NCHW
 
 end = time.time()
 
@@ -209,7 +209,7 @@ print('image process time : ',end - start)
 
 start = time.time()
 
-# inference
+## inference
 res = exec_net.infer({'inputs':prepimg})
 
 end = time.time()
@@ -217,7 +217,7 @@ end = time.time()
 print('inference time : ',end-start)
 ```
 
-## 결과
+### 결과
 
 
 
@@ -229,9 +229,9 @@ print('inference time : ',end-start)
 
 ---
 
-# 참조
+## 참조
 
-## YOLO 모델 생성
+### YOLO 모델 생성
 - [https://github.com/PINTO0309/OpenVINO-YoloV3](https://github.com/PINTO0309/OpenVINO-YoloV3)
 - [https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/](https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/)
 - [https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase](https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase)
@@ -239,5 +239,5 @@ print('inference time : ',end-start)
 - [https://cocodataset.org/#overview](https://cocodataset.org/#overview)
 
 
-## 추론
+### 추론
 - [https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html](https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html)

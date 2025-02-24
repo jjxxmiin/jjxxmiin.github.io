@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# crop\_layer
+## crop\_layer
 
 input(image, feature map)을 crop하기 위한 layer입니다.
 
-## get\_crop\_image
+### get\_crop\_image
 
 ```c
 image get_crop_image(crop_layer l)
@@ -40,7 +40,7 @@ image get_crop_image(crop_layer l)
 
 
 
-## forward\_crop\_layer
+### forward\_crop\_layer
 
 ```c
 void forward_crop_layer(const crop_layer l, network net)
@@ -103,7 +103,7 @@ void forward_crop_layer(const crop_layer l, network net)
 
 
 
-## backward\_crop\_layer
+### backward\_crop\_layer
 
 ```c
 void backward_crop_layer(const crop_layer l, network net){}
@@ -130,7 +130,7 @@ void backward_crop_layer(const crop_layer l, network net){}
 
 
 
-## resize\_crop\_layer
+### resize\_crop\_layer
 
 ```c
 void resize_crop_layer(layer *l, int w, int h)
@@ -167,7 +167,7 @@ void resize_crop_layer(layer *l, int w, int h)
 
 
 
-## make\_crop\_layer
+### make\_crop\_layer
 
 ```c
 crop_layer make_crop_layer(int batch, int h, int w, int c, int crop_height, int crop_width, int flip, float angle, float saturation, float exposure)

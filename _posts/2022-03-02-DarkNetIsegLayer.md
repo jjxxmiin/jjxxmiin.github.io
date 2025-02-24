@@ -6,11 +6,11 @@ categories: darknet
 math: true
 ---
 
-# iseg\_layer
+## iseg\_layer
 
 instance segmentation을 위한 layer입니다.
 
-## forward\_iseg\_layer
+### forward\_iseg\_layer
 
 ```c
 void forward_iseg_layer(const layer l, network net)
@@ -146,7 +146,7 @@ void forward_iseg_layer(const layer l, network net)
 
 
 
-## backward\_iseg\_layer
+### backward\_iseg\_layer
 
 ```c
 void backward_iseg_layer(const layer l, network net)
@@ -175,7 +175,7 @@ void backward_iseg_layer(const layer l, network net)
 
 
 
-## resize\_iseg\_layer
+### resize\_iseg\_layer
 
 ```c
 void resize_iseg_layer(layer *l, int w, int h)
@@ -212,7 +212,7 @@ void resize_iseg_layer(layer *l, int w, int h)
 
 
 
-## make\_iseg\_layer
+### make\_iseg\_layer
 
 ```c
 layer make_iseg_layer(int batch, int w, int h, int classes, int ids)

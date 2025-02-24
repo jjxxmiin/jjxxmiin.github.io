@@ -6,18 +6,18 @@ date:   2019-03-28 13:00 -0400
 categories: edge
 ---
 
-# YOLO People Counting
+## YOLO People Counting
 
 GitHub : [https://github.com/jjxxmiin/People_counting_yolo](https://github.com/jjxxmiin/People_counting_yolo)
 
 ---
 
-# 구성
+## 구성
 - raspberry pi 3 (rasbian)
 - webcam
 - NCS2
 
-# requirement
+## requirement
 - openvino toolkit
 - opencvs
 - sklearn
@@ -25,14 +25,14 @@ GitHub : [https://github.com/jjxxmiin/People_counting_yolo](https://github.com/j
 - imutils
 - sort
 
-# 필독!!
+## 필독!!
 - [라즈베리파이에서 openvino 사용하기](https://jjxxmiin.github.io/pi/2019/03/08/NCS2/)
 - [IR](https://jjxxmiin.github.io/pi/2019/03/08/NCS2_IR/)
 - [IR - YOLO](https://jjxxmiin.github.io/openvino/2019/03/30/yolo-openvino/)
 
 ---
 
-## SORT requirement 설치 (numba 설치가 안될 때 보세요)
+### SORT requirement 설치 (numba 설치가 안될 때 보세요)
 
 ```
 sudo apt install libblas-dev llvm python3-pip python3-scipy
@@ -62,12 +62,12 @@ python3 -m pip install sklearn tqdm imutils
 
 ---
 
-# 사용법
+## 사용법
 
 1. 위에 xml_path와 bin_path를 xml,bin 파일 경로로 바꾸어준다.
 2. capture function에서 아래 코드 주석처리
 ```
-# cv2.imwrite('test2.jpg',frame)
+## cv2.imwrite('test2.jpg',frame)
 ```
 3. 스케쥴러를 이용해서 웹캠으로 10초에 한번씩 사람의 수를 counting한다.
 
@@ -81,7 +81,7 @@ python3 main.py
 
 ---
 
-# Citation
+## Citation
 
 **YOLO**
 
@@ -105,7 +105,7 @@ python3 main.py
     }
 
 
-# Reference
+## Reference
 - [https://github.com/guillelopez/python-traffic-counter-with-yolo-and-sort](https://github.com/guillelopez/python-traffic-counter-with-yolo-and-sort)
 - [https://github.com/jjxxmiin/OpenVINO-YoloV3](https://github.com/jjxxmiin/OpenVINO-YoloV3)
 - [https://github.com/abewley/sort](https://github.com/abewley/sort)

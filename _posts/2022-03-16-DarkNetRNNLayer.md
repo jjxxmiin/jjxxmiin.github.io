@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# rnn\_layer
+## rnn\_layer
 
-## RNN Layer란?
+### RNN Layer란?
 
 RNN (Recurrent Neural Network) Layer는 순환 신경망 모델 중 하나로, 입력 데이터의 순서와 상태 정보를 모델링하는 데에 적합한 모델입니다. RNN은 이전에 계산된 값을 다시 현재 계산에 활용하기 때문에 이전의 입력에 대한 정보를 기억하고 이를 다음 계산에 활용합니다. 이전 입력에 대한 정보를 현재 계산에 활용하기 때문에 시계열 데이터와 같이 입력 간의 순서가 중요한 데이터를 다룰 때 매우 유용합니다.
 
@@ -22,7 +22,7 @@ RNN Layer는 다양한 종류가 있으며, 대표적으로 Simple RNN, LSTM(Lon
 
 ***
 
-### increment\_layer
+#### increment\_layer
 
 ```c
 static void increment_layer(layer *l, int steps)
@@ -55,7 +55,7 @@ static void increment_layer(layer *l, int steps)
 
 
 
-### forward\_rnn\_layer
+#### forward\_rnn\_layer
 
 ```c
 void forward_rnn_layer(layer l, network net)
@@ -126,7 +126,7 @@ void forward_rnn_layer(layer l, network net)
 
 
 
-### backward\_rnn\_layer
+#### backward\_rnn\_layer
 
 ```c
 void backward_rnn_layer(layer l, network net)
@@ -212,7 +212,7 @@ void backward_rnn_layer(layer l, network net)
 
 
 
-### update\_rnn\_layer
+#### update\_rnn\_layer
 
 ```c
 void update_rnn_layer(layer l, update_args a)
@@ -242,7 +242,7 @@ void update_rnn_layer(layer l, update_args a)
 
 
 
-### make\_rnn\_layer
+#### make\_rnn\_layer
 
 ```c
 layer make_rnn_layer(int batch, int inputs, int outputs, int steps, ACTIVATION activation, int batch_normalize, int adam)

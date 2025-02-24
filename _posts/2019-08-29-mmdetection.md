@@ -6,7 +6,7 @@ date:   2019-08-29 13:00 -0400
 categories: paper
 ---
 
-# MMDetection
+## MMDetection
 
 (object detection tool box and benchmark)
 
@@ -15,11 +15,11 @@ categories: paper
 
 object detection tool box인 MMDetection과 MMDetection이 지원하는 프레임워크들의 benchmark를 알아보자
 
-# Frameworks
+## Frameworks
 
 지원하는 프레임워크 KeyPoint
 
-## Single stage
+### Single stage
 
 `input` -> `feature extraction` -> `detection`(`Localization`, `Classification `) -> `output`(`multi class classification`,`bounding box regression`)
 
@@ -34,7 +34,7 @@ Localization, Classification 을 동시에 해결
 | `FSAF` | `fully convolutional` ,**`anchor-free`** | 2019 |
 
 
-## Two stage
+### Two stage
 
 `input` -> `region proposal`(`Localization`) -> `Classification ` -> `output`(`multi class classification`,`bounding box regression`)
 
@@ -52,7 +52,7 @@ Localization, Classification 을 순차적으로 해결
 
 
 
-## Multi Stage
+### Multi Stage
 
 | Name | Content | Year |
 | :------------ | :-----------: | -------------------: |
@@ -61,7 +61,7 @@ Localization, Classification 을 순차적으로 해결
 
 
 
-## General Modules and Methods
+### General Modules and Methods
 
 
 | Name | Content | Year |
@@ -85,9 +85,9 @@ Localization, Classification 을 순차적으로 해결
 
 
 
-# Architecture
+## Architecture
 
-## Model Representations
+### Model Representations
 
 - `Backbone` : fully connected layer가 없는 resnet-50
 
@@ -105,7 +105,7 @@ Localization, Classification 을 순차적으로 해결
 
 
 
-## Training Pipeline
+### Training Pipeline
 - `hooking` :  함수 호출, 메시지, 이벤트 등을 중간에서 바꾸거나 가로채는 명령, 방법, 기술이나 행위를 말한다.
 
 hooking mechanism을 가지고 있는 pipeline
@@ -116,9 +116,9 @@ hooking mechanism을 가지고 있는 pipeline
 
 
 
-# Benchmark
+## Benchmark
 
-## Dataset
+### Dataset
 - VOC
 - COCO
 
@@ -128,11 +128,11 @@ hooking mechanism을 가지고 있는 pipeline
 
 
 
-# 부록 : 사용하기
+## 부록 : 사용하기
 
 참조 : [깃허브](https://github.com/open-mmlab/mmdetection)
 
-## 환경 설치하기
+### 환경 설치하기
 
 ```
 conda create -n open-mmlab python=3.7 -y
@@ -146,13 +146,13 @@ cd mmdetection
 pip install mmcv
 
 python setup.py develop
-# or "pip install -v -e ."
+## or "pip install -v -e ."
 
 mkdir data
 ln -s $COCO_ROOT data
 ```
 
-## 데이터셋 준비하기
+### 데이터셋 준비하기
 
 ```
 mmdetection
@@ -186,7 +186,7 @@ cd data/cityscapes/
 mv train/*/* train/
 ```
 
-## 모델 준비하기
+### 모델 준비하기
 
 다운로드 : [https://github.com/open-mmlab/mmdetection/blob/master/docs/MODEL_ZOO.md](https://github.com/open-mmlab/mmdetection/blob/master/docs/MODEL_ZOO.md)
 

@@ -6,7 +6,7 @@ categories: darknet
 math: true
 ---
 
-# YOLOv2
+## YOLOv2
 
 * Paper : [https://arxiv.org/abs/1612.08242](https://arxiv.org/abs/1612.08242)
 
@@ -18,25 +18,25 @@ math: true
 
 
 
-## Better
+### Better
 
 `YOLOv2`
 
-### Batch Normalization
+#### Batch Normalization
 
 모든 Convolution Layer에 기존에 사용한 Dropout을 제거하고 Batch Normalization을 추가함으로 mAP가 2% 향상됩니다.
 
-### High Resolution Classifier
+#### High Resolution Classifier
 
 먼저 Classifier Network를 448x448 해상도로 10 epoch동안 fine-tuning 시킵니다. 그리고 마지막 Convolutional Layer와 Avgpooling Layer, Softmax Layer를 없애고 Detectionㅇ을 위한 Layer 4개를 추가함으로 mAP가 4% 향상됩니다.
 
-### Convolutional
+#### Convolutional
 
 기존의 Yolo는 마지막 Layer로 Fully Connected Layer를 사용하여 Bounding Box를 예측합니다. 이것을 Convolutional Layer로 바꾸었습니다.
 
 최종 Feature Map을 홀수로 만들기 위해서 448x448 입력 이미지를 416x416으로 만듭니다. 이렇게 홀수로 만듦으로 인해서 중심점은 하나만 존재합니다.(짝수인 경우 중심점이 4개 입니다.) 중심점이 여러개라면 작은 Object의 검출이 어려울 수 있습니다. 최종적으로 13x13의 크기를 갖는 Feature Map을 얻습니다.
 
-### Anchor Boxes
+#### Anchor Boxes
 
 기존 YOLO와 다르게(objectness, x, y, w, h, c, x, y, w, h, c) YOLOv2에서는 Anchor Box의 개수만큼(objectness, x, y, w, h, c, objectness, x, y, w, h, c, ...) 클래스, 객체의 유무를 예측합니다.
 
@@ -45,7 +45,7 @@ Anchor box를 사용함으로써 mAP는 살짝 감소하지만 recall이 높아�
 * no anchor box = mAP : 69.5 | recall : 81%
 * anchor box = mAP : 69.2 | recall : 88%
 
-### New Network
+#### New Network
 
 DarkNet 19를 새롭게 제안합니다.
 
@@ -54,7 +54,7 @@ DarkNet 19를 새롭게 제안합니다.
 ![1](/assets/img/post_img/darknetbook/darknet.PNG)
 
 
-### Dimension Clusters
+#### Dimension Clusters
 
 
 
@@ -74,7 +74,7 @@ k가 커지면 clustering의 결과와 label사이의 IOU가 커지기 때문에
 
 
 
-### Direct location prediction
+#### Direct location prediction
 
 Anchor Box를 사용하면 학습 초기에 모델이 불안정해지는 문제를 해결할 수 있었는데 그 원인은 Box의 좌표가 랜덤하게 예측되기 때문입니다. 그래서 RPN종류의 모델은 $$t_x, t_y$$를 예측하고 중심 좌표를 아래와 같이 계산합니다.
 
@@ -104,7 +104,7 @@ $$t_x, t_y$$는 0의 값을 가져 $$b_x, b_y$$가 중심 좌표(0.5)가 되기�
 
 Dimension Cluster, Direct location prediction을 적용하는 경우 mAP가 5% 상승합니다.
 
-### Fine-Grained Feature
+#### Fine-Grained Feature
 
 Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하는데 충분하지만 작은 object를 검출하는데 좀 더 세밀한 특징을 원합니다. 이러한 문제를 해결하기 위해서 SSD같은 경우는 여러 level의 특징 맵에서 검출을 합니다. YOLOv2의 경우 26x26 feature map을 그대로 가져오는 방법을 사용합니다.
 
@@ -120,15 +120,15 @@ Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하�
 
 
 
-### Multi-Scale Training
+#### Multi-Scale Training
 
 * 416x416 입력 이미지를 사용합니다. fully connected layer를 제거했기 때문에 입력 크기는 어떤 것이 들어와도 문제가 없습니다.
 * 다양한 해상도를 가지는 이미지에서 동작하기 원하기 때문에 다양한 해상도를 학습시킵니다. 10번 배치마다 32배수로 resize 됩니다.(320, 352, 608) 가장 작은 때는 320x320이고 가장 클 때는 608x608입니다.
 * 낮은 해상도의 경우 성능이 꽤 좋습니다. 228x228 입력 이미지의 경우 초당 90 프레임이 나오며 mAP는 Fast R-CNN과 비슷합니다.
 
-## Faster
+### Faster
 
-### Darknet
+#### Darknet
 
 * 3x3 filter를 사용하고 모든 pooling 이후 channel 수를 2배로 합니다.
 * 19개의 convolutional layer
@@ -136,7 +136,7 @@ Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하�
 * batch normalization
 * Imagenet Top-1 : 72.9% Top-5 : 91.2%
 
-### Training for classification
+#### Training for classification
 
 * 160 epoch
 * SGD(learning rate = 0.1)
@@ -145,7 +145,7 @@ Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하�
 * momentum : 0.9
 * 처음에 224x224로 finetuning하고 448x448 fine tuning
 
-### Training for detection
+#### Training for detection
 
 * 마지막 convolutional layer를 제거하고 3x3x1024 convolutional layer 추가
 * 그 뒤에 1x1 convolutional layer 추가
@@ -168,7 +168,7 @@ Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하�
 
 
 
-## Stronger
+### Stronger
 
 `YOLO9000`
 
@@ -180,7 +180,7 @@ Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하�
 
 보통 Classification을 하는 경우에는 Softmax를 사용하는데 Softmax는 각 클래스가 상호 배타적이라고 가정합니다. 하지만 Norfolk terrier, Yorkshire terrier는 개로 분류되야 합니다. 그래서 YOLO9000을 만들기 위해서 라벨이 상호 배타적이지 않다는 가정을 한 Multi-label model을 사용합니다.
 
-### Hierachical classification
+#### Hierachical classification
 
 ImageNet의 라벨은 WordNet기반으로 구성됩니다. WordNet은 Language Dataset로 개념과 단어 사이의 관계를 표현합니다. 예를 들어 Yorkshire terrier는 terrier의 하의어고 terrier는 hunting dog 타입이며 hunting dog는 dog 타입입니다. YOLO9000은 ImageNet이 가지는 개념으로부터 계층적 트리(WordTree)를 만들어서 문제를 단순화 시킵니다.
 
@@ -215,7 +215,7 @@ WordTree를 만들기 위해서 1000개의 클래스를 가지고 있는 ImageNe
 
 Classification의 경우 개의 종류가 불분명하다면 개에 대해서는 높은 신뢰도를 전파하지만 하의어에는 낮은 신뢰도를 전파합니다. Detection의 경우 bounding box에 있는 object가 무엇인지 높은 신뢰도를 갖는 경로를 따라가고 threshold가 나오기 전까지 계속 내려갑니다.
 
-### Dataset combination with WordTree
+#### Dataset combination with WordTree
 
 
 
@@ -225,7 +225,7 @@ Classification의 경우 개의 종류가 불분명하다면 개에 대해서는
 
 COCO와 ImageNet을 합쳐서 WordTree를 만듭니다.
 
-### Joint classification and detection
+#### Joint classification and detection
 
 * COCO와 ImageNet의 상위 9000개의 클래스 데이터 셋을 조합해 매우 큰 Detector를 학습시켰습니다.
 * WordTree는 총 9418개의 클래스를 갖고 ImageNet의 데이터 수가 COCO보다 많기 때문에 COCO를 4배 over sampling합니다.

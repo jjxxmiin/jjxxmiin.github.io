@@ -6,7 +6,7 @@ date:   2020-01-06 16:00 -0400
 categories: python
 ---
 
-# Decorator
+## Decorator
 
 가끔 프로젝트나 오픈 소스를 보면 함수 위에 `@`가 특정한 이름과 함께 붙어 있는 것을 볼 수 있다. 이런 것을 데코레이터라고 한다. 즉, 꾸며주는 놈이라는 뜻이다.
 
@@ -22,10 +22,10 @@ def func():
 
 이러한 형태로 되어있다. 일단 왜 쓰는지에 대해서 간단하게 알아보자.
 
-## 왜 쓸까??
+### 왜 쓸까??
 코드에서 중복을 제거하기 위해서 사용한다. 반복적인 작업을 해결하기 위해서 사용하는 매크로 같은 역할을 해주는데 모든 함수에 공통적으로 들어가야하는 구문이 있다면 이 것을 줄여주기 위해 사용한다.
 
-## Example
+### Example
 예를 들어보면 **모든 함수** 를 실행시키기 전에 함수의 이름이 어떤 것인지에 대해서 출력을 하고 싶다고 하면
 
 ```python
@@ -74,7 +74,7 @@ func3()
 
 ---
 
-# Magic Method
+## Magic Method
 
 파이썬으로 코드를 작성할 때 클래스를 사용하면 한번 쯤은 `__init__`으로 초기화 하는 것을 해보았을 것이다. 이름 양 옆에 `__`가 붙어있는 함수를 매직 메소드라고 부른다.
 
@@ -119,7 +119,7 @@ calc class를 int를 상속 받아서 초기화 되므로 class에 int값을 넣
 종류에는 여러가지가 있는데 이것저것 많이 해볼 수 있지만 직접 다 찾아보기는 어렵고 [여기](https://ziwon.dev/post/python_magic_methods/)에 파이썬 문서를 번역한 자료를 올려놓아 주셨다. 개념만 알아두고 사용할 때 찾아보자
 
 
-# Reference
+## Reference
 - [https://schoolofweb.net/blog/posts/%ED%8C%8C%EC%9D%B4%EC%8D%AC-oop-part-6-%EB%A7%A4%EC%A7%81-%EB%A9%94%EC%86%8C%EB%93%9C-magic-method/](https://schoolofweb.net/blog/posts/%ED%8C%8C%EC%9D%B4%EC%8D%AC-oop-part-6-%EB%A7%A4%EC%A7%81-%EB%A9%94%EC%86%8C%EB%93%9C-magic-method/)
 
 - [https://ziwon.dev/post/python_magic_methods/](https://ziwon.dev/post/python_magic_methods/)

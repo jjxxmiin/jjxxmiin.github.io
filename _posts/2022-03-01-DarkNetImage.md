@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# image
+## image
 
-## get\_color
+### get\_color
 
 ```c
 float colors[6][3] = { {1,0,1}, {0,0,1},{0,1,1},{0,1,0},{1,1,0},{1,0,0} }; // BGR순서
@@ -46,7 +46,7 @@ float get_color(int c, int x, int max)
 
 
 
-## mask\_to\_rgb
+### mask\_to\_rgb
 
 ```c
 image mask_to_rgb(image mask)
@@ -92,7 +92,7 @@ image mask_to_rgb(image mask)
 
 
 
-## get\_pixel
+### get\_pixel
 
 ```c
 static float get_pixel(image m, int x, int y, int c)
@@ -121,7 +121,7 @@ static float get_pixel(image m, int x, int y, int c)
 
 
 
-## get\_pixel\_extend
+### get\_pixel\_extend
 
 ```c
 static float get_pixel_extend(image m, int x, int y, int c)
@@ -155,7 +155,7 @@ static float get_pixel_extend(image m, int x, int y, int c)
 
 
 
-## set\_pixel
+### set\_pixel
 
 ```c
 static void set_pixel(image m, int x, int y, int c, float val)
@@ -188,7 +188,7 @@ static void set_pixel(image m, int x, int y, int c, float val)
 
 
 
-## add\_pixel
+### add\_pixel
 
 ```c
 static void add_pixel(image m, int x, int y, int c, float val)
@@ -221,7 +221,7 @@ static void add_pixel(image m, int x, int y, int c, float val)
 
 
 
-## bilinear\_interpolate
+### bilinear\_interpolate
 
 ```c
 static float bilinear_interpolate(image im, float x, float y, int c)
@@ -261,7 +261,7 @@ static float bilinear_interpolate(image im, float x, float y, int c)
 
 
 
-## composite\_image
+### composite\_image
 
 ```c
 void composite_image(image source, image dest, int dx, int dy)
@@ -300,7 +300,7 @@ void composite_image(image source, image dest, int dx, int dy)
 
 
 
-## border\_image
+### border\_image
 
 ```c
 
@@ -341,7 +341,7 @@ image border_image(image a, int border)
 
 
 
-## tile\_images
+### tile\_images
 
 ```c
 image tile_images(image a, image b, int dx)
@@ -380,7 +380,7 @@ image tile_images(image a, image b, int dx)
 
 
 
-## get\_label
+### get\_label
 
 ```c
 image get_label(image **characters, char *string, int size)
@@ -433,7 +433,7 @@ image get_label(image **characters, char *string, int size)
 
 
 
-## draw\_label
+### draw\_label
 
 ```c
 void draw_label(image a, int r, int c, image label, const float *rgb)
@@ -478,7 +478,7 @@ void draw_label(image a, int r, int c, image label, const float *rgb)
 
 
 
-## draw\_box
+### draw\_box
 
 ```c
 void draw_box(image a, int x1, int y1, int x2, int y2, float r, float g, float b)
@@ -542,7 +542,7 @@ void draw_box(image a, int x1, int y1, int x2, int y2, float r, float g, float b
 
 
 
-## draw\_box\_width
+### draw\_box\_width
 
 ```c
 void draw_box_width(image a, int x1, int y1, int x2, int y2, int w, float r, float g, float b)
@@ -579,7 +579,7 @@ void draw_box_width(image a, int x1, int y1, int x2, int y2, int w, float r, flo
 
 
 
-## draw\_bbox
+### draw\_bbox
 
 ```c
 void draw_bbox(image a, box bbox, int w, float r, float g, float b)
@@ -621,7 +621,7 @@ void draw_bbox(image a, box bbox, int w, float r, float g, float b)
 
 
 
-## load\_alphabet
+### load\_alphabet
 
 ```c
 image **load_alphabet()
@@ -660,7 +660,7 @@ image **load_alphabet()
 
 
 
-## draw\_detections
+### draw\_detections
 
 ```c
 void draw_detections(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes)
@@ -763,7 +763,7 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
 
 
 
-## transpose\_image
+### transpose\_image
 
 ```c
 void transpose_image(image im)
@@ -811,7 +811,7 @@ void transpose_image(image im)
 
 
 
-## flip\_images
+### flip\_images
 
 ```c
 void flip_image(image a)
@@ -849,7 +849,7 @@ void flip_image(image a)
 
 
 
-## rotate\_image\_cw
+### rotate\_image\_cw
 
 ```c
 void rotate_image_cw(image im, int times)
@@ -897,7 +897,7 @@ void rotate_image_cw(image im, int times)
 
 
 
-## image\_distance
+### image\_distance
 
 ```c
 image image_distance(image a, image b)
@@ -937,7 +937,7 @@ image image_distance(image a, image b)
 
 
 
-## ghost\_image
+### ghost\_image
 
 ```c
 void ghost_image(image source, image dest, int dx, int dy)
@@ -986,7 +986,7 @@ void ghost_image(image source, image dest, int dx, int dy)
 
 
 
-## blocky\_image
+### blocky\_image
 
 ```c
 void blocky_image(image im, int s)
@@ -1023,7 +1023,7 @@ void blocky_image(image im, int s)
 
 
 
-## censor\_image
+### censor\_image
 
 ```c
 void censor_image(image im, int dx, int dy, int w, int h)
@@ -1067,7 +1067,7 @@ void censor_image(image im, int dx, int dy, int w, int h)
 
 
 
-## embed\_image
+### embed\_image
 
 ```c
 void embed_image(image source, image dest, int dx, int dy)
@@ -1109,7 +1109,7 @@ void embed_image(image source, image dest, int dx, int dy)
 
 
 
-## collapse\_image\_layers
+### collapse\_image\_layers
 
 ```c
 image collapse_image_layers(image source, int border)
@@ -1155,7 +1155,7 @@ image collapse_image_layers(image source, int border)
 
 
 
-## constrain\_image
+### constrain\_image
 
 ```c
 void constrain_image(image im)
@@ -1189,7 +1189,7 @@ void constrain_image(image im)
 
 
 
-## normalize\_image
+### normalize\_image
 
 ```c
 void normalize_image(image p)
@@ -1233,7 +1233,7 @@ void normalize_image(image p)
 
 
 
-## normalize\_image2
+### normalize\_image2
 
 ```c
 void normalize_image2(image p)
@@ -1292,7 +1292,7 @@ void normalize_image2(image p)
 
 
 
-## copy\_image\_into
+### copy\_image\_into
 
 ```c
 void copy_image_into(image src, image dest)
@@ -1319,7 +1319,7 @@ void copy_image_into(image src, image dest)
 
 
 
-## copy\_image
+### copy\_image
 
 ```c
 image copy_image(image p)
@@ -1351,7 +1351,7 @@ image copy_image(image p)
 
 
 
-## rgbgr\_image
+### rgbgr\_image
 
 ```c
 void rgbgr_image(image im)
@@ -1384,7 +1384,7 @@ void rgbgr_image(image im)
 
 
 
-## show\_image
+### show\_image
 
 ```c
 int show_image(image p, const char *name, int ms)
@@ -1423,7 +1423,7 @@ int show_image(image p, const char *name, int ms)
 
 
 
-## save\_image\_options
+### save\_image\_options
 
 ```c
 void save_image_options(image im, const char *name, IMTYPE f, int quality)
@@ -1475,7 +1475,7 @@ void save_image_options(image im, const char *name, IMTYPE f, int quality)
 
 
 
-## save\_image
+### save\_image
 
 ```c
 void save_image(image im, const char *name)
@@ -1504,7 +1504,7 @@ void save_image(image im, const char *name)
 
 
 
-## show\_image\_layers
+### show\_image\_layers
 
 ```c
 void show_image_layers(image p, char *name)
@@ -1539,7 +1539,7 @@ void show_image_layers(image p, char *name)
 
 
 
-## show\_image\_collapsed
+### show\_image\_collapsed
 
 ```c
 void show_image_collapsed(image p, char *name)
@@ -1569,7 +1569,7 @@ void show_image_collapsed(image p, char *name)
 
 
 
-## make\_empty\_image
+### make\_empty\_image
 
 ```c
 image make_empty_image(int w, int h, int c)
@@ -1603,7 +1603,7 @@ image make_empty_image(int w, int h, int c)
 
 
 
-## make\_image
+### make\_image
 
 ```c
 image make_image(int w, int h, int c)
@@ -1633,7 +1633,7 @@ image make_image(int w, int h, int c)
 
 
 
-## make\_random\_image
+### make\_random\_image
 
 ```c
 image make_random_image(int w, int h, int c)
@@ -1667,7 +1667,7 @@ image make_random_image(int w, int h, int c)
 
 
 
-## float\_to\_image
+### float\_to\_image
 
 ```c
 image float_to_image(int w, int h, int c, float *data)
@@ -1698,7 +1698,7 @@ image float_to_image(int w, int h, int c, float *data)
 
 
 
-## place\_image
+### place\_image
 
 ```c
 void place_image(image im, int w, int h, int dx, int dy, image canvas)
@@ -1741,7 +1741,7 @@ void place_image(image im, int w, int h, int dx, int dy, image canvas)
 
 
 
-## center\_crop\_image
+### center\_crop\_image
 
 ```c
 image center_crop_image(image im, int w, int h)
@@ -1773,7 +1773,7 @@ image center_crop_image(image im, int w, int h)
 
 
 
-## rotate\_crop\_image
+### rotate\_crop\_image
 
 ```c
 image rotate_crop_image(image im, float rad, float s, int w, int h, float dx, float dy, float aspect)
@@ -1819,7 +1819,7 @@ image rotate_crop_image(image im, float rad, float s, int w, int h, float dx, fl
 
 
 
-## rotate\_image
+### rotate\_image
 
 ```c
 image rotate_image(image im, float rad)
@@ -1862,7 +1862,7 @@ image rotate_image(image im, float rad)
 
 
 
-## fill\_image
+### fill\_image
 
 ```c
 void fill_image(image m, float s)
@@ -1891,7 +1891,7 @@ void fill_image(image m, float s)
 
 
 
-## translate\_image
+### translate\_image
 
 ```c
 void translate_image(image m, float s)
@@ -1919,7 +1919,7 @@ void translate_image(image m, float s)
 
 
 
-## scale\_image
+### scale\_image
 
 ```c
 void scale_image(image m, float s)
@@ -1947,7 +1947,7 @@ void scale_image(image m, float s)
 
 
 
-## crop\_image
+### crop\_image
 
 ```c
 image crop_image(image im, int dx, int dy, int w, int h)
@@ -1995,7 +1995,7 @@ image crop_image(image im, int dx, int dy, int w, int h)
 
 
 
-## best\_3d\_shift\_r
+### best\_3d\_shift\_r
 
 ```c
 int best_3d_shift_r(image a, image b, int min, int max)
@@ -2036,7 +2036,7 @@ int best_3d_shift_r(image a, image b, int min, int max)
 
 
 
-## best\_3d\_shift
+### best\_3d\_shift
 
 ```c
 int best_3d_shift(image a, image b, int min, int max)
@@ -2080,7 +2080,7 @@ int best_3d_shift(image a, image b, int min, int max)
 
 
 
-## composite\_3d
+### composite\_3d
 
 ```c
 void composite_3d(char *f1, char *f2, char *out, int delta)
@@ -2141,7 +2141,7 @@ void composite_3d(char *f1, char *f2, char *out, int delta)
 
 
 
-## letterbox\_image\_into
+### letterbox\_image\_into
 
 ```c
 void letterbox_image_into(image im, int w, int h, image boxed)
@@ -2184,7 +2184,7 @@ void letterbox_image_into(image im, int w, int h, image boxed)
 
 
 
-## letterbox\_image
+### letterbox\_image
 
 ```c
 image letterbox_image(image im, int w, int h)
@@ -2232,7 +2232,7 @@ image letterbox_image(image im, int w, int h)
 
 
 
-## resize\_max
+### resize\_max
 
 ```c
 image resize_max(image im, int max)
@@ -2273,7 +2273,7 @@ image resize_max(image im, int max)
 
 
 
-## resize\_min
+### resize\_min
 
 ```c
 image resize_min(image im, int min)
@@ -2313,7 +2313,7 @@ image resize_min(image im, int min)
 
 
 
-## random\_crop\_image
+### random\_crop\_image
 
 ```c
 image random_crop_image(image im, int w, int h)
@@ -2344,7 +2344,7 @@ image random_crop_image(image im, int w, int h)
 
 
 
-## random\_augment\_args
+### random\_augment\_args
 
 ```c
 augment_args random_augment_args(image im, float angle, float aspect, int low, int high, int w, int h)
@@ -2400,7 +2400,7 @@ augment_args random_augment_args(image im, float angle, float aspect, int low, i
 
 
 
-## random\_augment\_image
+### random\_augment\_image
 
 ```c
 image random_augment_image(image im, float angle, float aspect, int low, int high, int w, int h)
@@ -2434,7 +2434,7 @@ image random_augment_image(image im, float angle, float aspect, int low, int hig
 
 
 
-## three\_way\_max
+### three\_way\_max
 
 ```c
 float three_way_max(float a, float b, float c)
@@ -2462,7 +2462,7 @@ float three_way_max(float a, float b, float c)
 
 
 
-## three\_way\_min
+### three\_way\_min
 
 ```c
 float three_way_min(float a, float b, float c)
@@ -2490,7 +2490,7 @@ float three_way_min(float a, float b, float c)
 
 
 
-## yuv\_to\_rgb
+### yuv\_to\_rgb
 
 ```c
 void yuv_to_rgb(image im)
@@ -2536,7 +2536,7 @@ void yuv_to_rgb(image im)
 
 
 
-## rgb\_to\_yuv
+### rgb\_to\_yuv
 
 ```c
 void rgb_to_yuv(image im)
@@ -2583,7 +2583,7 @@ void rgb_to_yuv(image im)
 
 
 
-## rgb\_to\_hsv
+### rgb\_to\_hsv
 
 ```c
 void rgb_to_hsv(image im)
@@ -2643,7 +2643,7 @@ void rgb_to_hsv(image im)
 
 
 
-## hsv\_to\_rgb
+### hsv\_to\_rgb
 
 ```c
 void hsv_to_rgb(image im)
@@ -2706,7 +2706,7 @@ void hsv_to_rgb(image im)
 
 
 
-## grayscale\_image\_3c
+### grayscale\_image\_3c
 
 ```c
 void grayscale_image_3c(image im)
@@ -2744,7 +2744,7 @@ void grayscale_image_3c(image im)
 
 
 
-## grayscale\_image
+### grayscale\_image
 
 ```c
 image grayscale_image(image im)
@@ -2784,7 +2784,7 @@ image grayscale_image(image im)
 
 
 
-## threshold\_image
+### threshold\_image
 
 ```c
 image threshold_image(image im, float thresh)
@@ -2817,7 +2817,7 @@ image threshold_image(image im, float thresh)
 
 
 
-## blend\_image
+### blend\_image
 
 ```c
 image blend_image(image fore, image back, float alpha)
@@ -2858,7 +2858,7 @@ image blend_image(image fore, image back, float alpha)
 
 
 
-## scale\_image\_channel
+### scale\_image\_channel
 
 ```c
 void scale_image_channel(image im, int c, float v)
@@ -2893,7 +2893,7 @@ void scale_image_channel(image im, int c, float v)
 
 
 
-## translate\_image\_channel
+### translate\_image\_channel
 
 ```c
 void translate_image_channel(image im, int c, float v)
@@ -2928,7 +2928,7 @@ void translate_image_channel(image im, int c, float v)
 
 
 
-## binarize\_image
+### binarize\_image
 
 ```c
 image binarize_image(image im)
@@ -2961,7 +2961,7 @@ image binarize_image(image im)
 
 
 
-## saturate\_image
+### saturate\_image
 
 ```c
 void saturate_image(image im, float sat)
@@ -2992,7 +2992,7 @@ void saturate_image(image im, float sat)
 
 
 
-## hue\_image
+### hue\_image
 
 ```c
 void hue_image(image im, float hue)
@@ -3030,7 +3030,7 @@ void hue_image(image im, float hue)
 
 
 
-## exposure\_image
+### exposure\_image
 
 ```c
 void exposure_image(image im, float sat)
@@ -3061,7 +3061,7 @@ void exposure_image(image im, float sat)
 
 
 
-## distort\_image
+### distort\_image
 
 ```c
 void distort_image(image im, float hue, float sat, float val)
@@ -3103,7 +3103,7 @@ void distort_image(image im, float hue, float sat, float val)
 
 
 
-## random\_distort\_image
+### random\_distort\_image
 
 ```c
 void random_distort_image(image im, float hue, float saturation, float exposure)
@@ -3137,7 +3137,7 @@ void random_distort_image(image im, float hue, float saturation, float exposure)
 
 
 
-## saturate\_exposure\_image
+### saturate\_exposure\_image
 
 ```c
 void saturate_exposure_image(image im, float sat, float exposure)
@@ -3174,7 +3174,7 @@ void saturate_exposure_image(image im, float sat, float exposure)
 
 
 
-## resize\_image
+### resize\_image
 
 ```c
 image resize_image(image im, int w, int h)
@@ -3245,7 +3245,7 @@ image resize_image(image im, int w, int h)
 
 
 
-## test\_resize
+### test\_resize
 
 ```c
 void test_resize(char *filename)
@@ -3324,7 +3324,7 @@ void test_resize(char *filename)
 
 
 
-## load\_image\_stb
+### load\_image\_stb
 
 ```c
 image load_image_stb(char *filename, int channels)
@@ -3373,7 +3373,7 @@ image load_image_stb(char *filename, int channels)
 
 
 
-## load\_image
+### load\_image
 
 ```c
 image load_image(char *filename, int w, int h, int c)
@@ -3419,7 +3419,7 @@ image load_image(char *filename, int w, int h, int c)
 
 
 
-## load\_image\_color
+### load\_image\_color
 
 ```c
 image load_image_color(char *filename, int w, int h)
@@ -3448,7 +3448,7 @@ image load_image_color(char *filename, int w, int h)
 
 
 
-## get\_image\_layer
+### get\_image\_layer
 
 ```c
 image get_image_layer(image m, int l)
@@ -3482,7 +3482,7 @@ image get_image_layer(image m, int l)
 
 
 
-## print\_image
+### print\_image
 
 ```c
 void print_image(image m)
@@ -3522,7 +3522,7 @@ void print_image(image m)
 
 
 
-## collapse\_images\_vert
+### collapse\_images\_vert
 
 ```c
 image collapse_images_vert(image *ims, int n)
@@ -3585,7 +3585,7 @@ image collapse_images_vert(image *ims, int n)
 
 
 
-## collapse\_images\_horz
+### collapse\_images\_horz
 
 ```c
 image collapse_images_horz(image *ims, int n)
@@ -3651,7 +3651,7 @@ image collapse_images_horz(image *ims, int n)
 
 
 
-## show\_image\_normalized
+### show\_image\_normalized
 
 ```c
 void show_image_normalized(image im, const char *name)
@@ -3686,7 +3686,7 @@ void show_image_normalized(image im, const char *name)
 
 
 
-## show\_images
+### show\_images
 
 ```c
 void show_images(image *ims, int n, char *window)
@@ -3723,7 +3723,7 @@ void show_images(image *ims, int n, char *window)
 
 
 
-## free\_image
+### free\_image
 
 ```c
 void free_image(image m)

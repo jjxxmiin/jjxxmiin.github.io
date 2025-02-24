@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# local\_layer
+## local\_layer
 
-## local\_out\_height
+### local\_out\_height
 
 ```c
 int local_out_height(local_layer l)
@@ -39,7 +39,7 @@ int local_out_height(local_layer l)
 
 
 
-## local\_out\_width
+### local\_out\_width
 
 ```c
 int local_out_width(local_layer l)
@@ -68,7 +68,7 @@ int local_out_width(local_layer l)
 
 
 
-## forward\_local\_layer
+### forward\_local\_layer
 
 ```c
 void forward_local_layer(const local_layer l, network net)
@@ -135,7 +135,7 @@ void forward_local_layer(const local_layer l, network net)
 
 
 
-## backward\_local\_layer
+### backward\_local\_layer
 
 ```c
 void backward_local_layer(local_layer l, network net)
@@ -213,7 +213,7 @@ void backward_local_layer(local_layer l, network net)
 
 
 
-## update\_local\_layer
+### update\_local\_layer
 
 ```c
 void update_local_layer(local_layer l, update_args a)
@@ -256,7 +256,7 @@ void update_local_layer(local_layer l, update_args a)
 
 
 
-## make\_local\_layer
+### make\_local\_layer
 
 ```c
 local_layer make_local_layer(int batch, int h, int w, int c, int n, int size, int stride, int pad, ACTIVATION activation)

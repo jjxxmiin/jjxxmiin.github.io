@@ -12,11 +12,11 @@ Deep Learning Interviews 정리
 - 딥러닝의 기초를 생각날때 마다 공부해주기
 - 현재 저자분이 계속 업데이트 중 -> [Here](https://github.com/BoltzmannEntropy/interviews.ai)
 
-# Kindergarten
+## Kindergarten
 
-## LOGISTIC REGRESSION
+### LOGISTIC REGRESSION
 
-### General Concepts
+#### General Concepts
 
 **Question**
 
@@ -118,7 +118,7 @@ Minimizing the negative log likelihood also means maximizing the **likelihood** 
 
 ---
 
-### Odds, Log-odds
+#### Odds, Log-odds
 
 **Question**
 
@@ -200,7 +200,7 @@ $$\theta_0 + \theta^T X = 0$$
 
 ---
 
-### The Sigmoid
+#### The Sigmoid
 
 **Question**
 
@@ -261,7 +261,7 @@ $$odds = \frac{P(y = 1)}{P(y = 0)}$$
 
 ---
 
-### Truly Understanding Logistic Regression
+#### Truly Understanding Logistic Regression
 
 **Question**
 
@@ -450,7 +450,7 @@ $$exp(\hat{\beta}) = exp(0.0258) = 1.0504$$
 
 ---
 
-### The Logit Function and Entropy
+#### The Logit Function and Entropy
 
 **Question**
 
@@ -472,13 +472,13 @@ $$\frac{dH(p)}{dp} = -logit(p)$$
 
 ---
 
-### Python/PyTorch/CPP
+#### Python/PyTorch/CPP
 
 **Question**
 
 ```c++
 #include ...
-std::vector<double> theta {-6,0.05,1.0};           # 2
+std::vector<double> theta {-6,0.05,1.0};           ## 2
 
 double sigmoid(double x) {
   double tmp =1.0 / (1.0 + exp(-x));
@@ -488,14 +488,14 @@ double sigmoid(double x) {
 
 double hypothesis(std::vector<double> x){
   double z;
-  z=std::inner_product(std::begin(x), std::end(x), # 10
+  z=std::inner_product(std::begin(x), std::end(x), ## 10
     → std::begin(theta), 0.0);
   std::cout << "inner_product=" << z<<std::endl;
   return sigmoid(z);
 }
 
 int classify(std::vector<double> x){
-  int hypo=hypothesis(x) > 0.5f;                   # 15
+  int hypo=hypothesis(x) > 0.5f;                   ## 15
   std::cout << "hypo=" << hypo<<std::endl;
   return hypo;
 }
@@ -634,7 +634,7 @@ def Ver003(x):
 
 ---
 
-## 정리
+### 정리
 
 odds = 실패 대비 성공 확인
 
@@ -702,9 +702,9 @@ p value = p-value란 뽑은 데이터가 얼마나 실제로 그럴듯한 데이
 
 ---
 
-## PROBABILISTIC PROGRAMMING & BAYESIAN DL
+### PROBABILISTIC PROGRAMMING & BAYESIAN DL
 
-### Expectation and Variance
+#### Expectation and Variance
 
 **Question**
 
@@ -830,7 +830,7 @@ Again, the outcome shows the likelihood that the radiologist was wrong approache
 
 ---
 
-### Conditional Probability
+#### Conditional Probability
 
 **Question**
 
@@ -908,7 +908,7 @@ independent?
 
 ---
 
-### Rayes Rule
+#### Rayes Rule
 
 **Question**
 
@@ -961,7 +961,7 @@ A person is chosen at random and that person has the Dercum disease. Calculate t
 
 ---
 
-## 정리
+### 정리
 
 - [참조](https://angeloyeo.github.io/2021/04/23/binomial_distribution.html)
 
@@ -969,9 +969,9 @@ A person is chosen at random and that person has the Dercum disease. Calculate t
 
 가령, 100회 동전을 던졌을 때 50번은 앞면이 나올 것이라고 보는 것이 상식적이다.
 
-## HIGH SCHOOL
+### HIGH SCHOOL
 
-### Logarithms in Information Theory
+#### Logarithms in Information Theory
 
 
 **Question**
@@ -1004,7 +1004,7 @@ $$log_e 15 - log_e 3$$
 
 ---
 
-### Shannon's Entropy
+#### Shannon's Entropy
 
 **Question**
 

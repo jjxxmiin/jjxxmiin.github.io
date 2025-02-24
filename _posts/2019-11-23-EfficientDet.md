@@ -7,7 +7,7 @@ categories: paper
 math: true
 ---
 
-# EfficientDet
+## EfficientDet
 
 (EfficientDet: Scalable and Efﬁcient Object Detection)
 
@@ -15,7 +15,7 @@ math: true
 - EfficientNet Paper : [Here](https://arxiv.org/abs/1905.11946)
 - EfficientNet Official Code : [Here](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet)
 
-# EfficientNet
+## EfficientNet
 EfficientNet을 보기전에 EfficientNet의 핵심 concept을 빠르게 보고 넘어가는게 좋을 것 같다.
 
 이진원님의 [pr12 논문 읽기](https://www.youtube.com/watch?v=Vhz0quyvR7I)를 참조 했다.
@@ -42,7 +42,7 @@ EfficientNet은 Convolution Neural Network를 속도나 정확도 측면에서 n
 
 위에 compound scaling이 이 논문이 원하는 것이고 이것을 위해 해결해야하는 문제를 아래와 같이 정의한다.
 
-### CNN
+#### CNN
 
 
 
@@ -58,7 +58,7 @@ EfficientNet은 Convolution Neural Network를 속도나 정확도 측면에서 n
 
 ResNet으로 예를들면 ResNet은 5stage가 있고 각 stage는 downsampling을 하는 것 빼고는 동일한 convolution type을 갖는다. 그래서 위와 같이 정의할 수 있는 것이다.
 
-### Problem
+#### Problem
 
 
 
@@ -77,7 +77,7 @@ ResNet으로 예를들면 ResNet은 5stage가 있고 각 stage는 downsampling�
 
 이 그래프는 depth, width, resolution을 각자 올려보면서 성능을 평가한 것이다. 커질수록 올라가지만 어느지점에서 한계가 보인다.
 
-## Compound Scaling
+### Compound Scaling
 
 
 
@@ -101,7 +101,7 @@ $$\alpha , \beta , \gamma$$는 grid search를 통해서 찾은 값.
 
 $$\phi$$는 직접 결정하는 값
 
-## Base Model
+### Base Model
 
 
 
@@ -114,7 +114,7 @@ MBConv는 MobileNetv2에서 나온 inverted bottleneck 구조다.
 
 처음에는 $$\phi$$값을 1로하고 $$\alpha,\beta,\gamma$$값을 grid search로 찾은 뒤 고정시키고 $$\phi$$를 조금씩 올리는 방법을 사용한다.
 
-## Benchmark
+### Benchmark
 
 
 
@@ -132,7 +132,7 @@ ImageNet에서의 performance다. 파라미터수가 기존 모델에 비해 작
 
 데이터셋 별로 비교한 표
 
-## CAM
+### CAM
 
 
 
@@ -146,5 +146,5 @@ CAM에 대해서는 흥미가 있어서 포스트를 작성해볼 예정이다.
 
 적다보니 길어져서 EfficientDet은 그 다음 포스트로 미뤄야 할 것 같다.
 
-## Reference
+### Reference
 - [https://www.youtube.com/watch?v=Vhz0quyvR7I](https://www.youtube.com/watch?v=Vhz0quyvR7I)

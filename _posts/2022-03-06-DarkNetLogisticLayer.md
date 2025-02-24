@@ -6,9 +6,9 @@ categories: darknet
 math: true
 ---
 
-# logistic\_layer
+## logistic\_layer
 
-## forward\_logistic\_layer
+### forward\_logistic\_layer
 
 ```c
 void forward_logistic_layer(const layer l, network net)
@@ -43,7 +43,7 @@ void forward_logistic_layer(const layer l, network net)
 
 
 
-## backward\_logistic\_layer
+### backward\_logistic\_layer
 
 ```c
 void backward_logistic_layer(const layer l, network net)
@@ -72,7 +72,7 @@ void backward_logistic_layer(const layer l, network net)
 
 
 
-## make\_logistic\_layer
+### make\_logistic\_layer
 
 ```c
 layer make_logistic_layer(int batch, int inputs)
