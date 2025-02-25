@@ -21,7 +21,7 @@ order: 1
 
 ------
 
-# *Research Interest*
+## *Research Interest*
 
 I LOVE DEEP LEARNING
 
@@ -32,14 +32,14 @@ Especially...
 
 ------
 
-# *Skills*
+## *Skills*
 
 - **PYTHON**
   + **Pytorch**
 
 ------
 
-# *Publications*
+## *Publications*
 
 **Journal**
 
@@ -106,7 +106,7 @@ stage classification
 
 ------
 
-# Domestic Patents
+## Domestic Patents
   - "기계학습모델 공유 또는 판매를 위한 시스템 및 시스템의 동작 방법," 특허등록 제 10-2020-2453673 호 (2022.10.06)
   - "헤어 스타일 추천 장치 및 방법," 특허등록 제 10-2022-0122740 호 (2023.01.18)
   - "헤어 스타일링 가상 체험용 인공 신경망의 학습을  위한 학습 데이터 생성 장치 및 방법, 및 이를 이용한 헤어 스타일링 가상 체험 장치 및 방법" 특허등록 제 10-2022-0029790 호 (2023.03.15)
@@ -116,7 +116,7 @@ stage classification
 
 ------
 
-# Experiences
+## Experiences
 
 - [FrontU](https://frontu2.modoo.at/) (2018-07 ~ 2018-08)
   + Development for Smart Toy
@@ -162,7 +162,7 @@ stage classification
 
 ------
 
-# Open source contributions
+## Open source contributions
 
 - [파이토치 한글 문서 번역](https://github.com/9bow/PyTorch-tutorials-kr)
   + **Captum을 사용하여 모델 해석하기** 번역
@@ -173,7 +173,7 @@ stage classification
 
 ------
 
-# Competitions
+## Competitions
 
 - [가속화 프로그래밍 겨울학교 3위 수상 (2019-01)](https://www.manycoresoft.co.kr/school/)
 
@@ -187,6 +187,6 @@ stage classification
 
 ------
 
-# Certificate
+## Certificate
 
 - 정보처리기사
