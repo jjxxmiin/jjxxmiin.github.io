@@ -3,7 +3,7 @@ layout: post
 title:  "HunyuanVideo 톺아보기: 오픈소스 비디오 생성 모델의 새로운 기준"  
 summary: "HunyuanVideo는 130억 개의 파라미터를 가진 오픈소스 비디오 생성 모델로, Runway Gen-3, Luma 1.6 등의 폐쇄형 모델과 경쟁할 수 있는 성능을 제공합니다."  
 date:   2025-02-13 16:00 -0400  
-categories: AI, Video Generation  
+categories: paper  
 math: true  
 ---
 
