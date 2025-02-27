@@ -7,7 +7,7 @@ categories: paper
 math: true
 ---
 
-## 🚀 OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트
+## **OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트**
 
 - 📖 논문: [https://arxiv.org/abs/2408.00203v1](https://arxiv.org/abs/2408.00203v1)  
 - 🖥️ 깃허브: [https://github.com/microsoft/OmniParser](https://github.com/microsoft/OmniParser)  

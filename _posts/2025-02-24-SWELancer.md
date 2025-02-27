@@ -7,7 +7,7 @@ categories: paper
 math: true
 ---
 
-# 🦾 SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까?
+# **SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까?**
 
 - 📖 논문: [https://arxiv.org/abs/2502.12115v2](https://arxiv.org/abs/2502.12115v2)  
 - 🖥️ 깃허브: [https://github.com/openai/SWELancer-Benchmark](https://github.com/openai/SWELancer-Benchmark)  
