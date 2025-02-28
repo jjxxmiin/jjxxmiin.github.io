@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- 배경 -->
+  <rect width="800" height="400" fill="#f8f9fa" rx="10" ry="10"/>
+  
+  <!-- 중앙 원 - RailSem19 -->
+  <circle cx="400" cy="200" r="90" fill="#4285f4" opacity="0.9"/>
+  <text x="400" y="200" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">RailSem19</text>
+  <text x="400" y="225" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle" dominant-baseline="middle">철도 의미론적 데이터셋</text>
+  
+  <!-- 응용 분야 1: 의미론적 분할 -->
+  <circle cx="200" cy="100" r="70" fill="#ea4335" opacity="0.9"/>
+  <text x="200" y="85" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">의미론적 분할</text>
+  <text x="200" y="110" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">철로, 노반, 플랫폼</text>
+  <text x="200" y="130" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">픽셀 단위 분류</text>
+  
+  <!-- 응용 분야 2: 객체 탐지 -->
+  <circle cx="600" cy="100" r="70" fill="#fbbc05" opacity="0.9"/>
+  <text x="600" y="85" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">객체 탐지</text>
+  <text x="600" y="110" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">기차, 트램, 장애물</text>
+  <text x="600" y="130" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">실시간 인식</text>
+  
+  <!-- 응용 분야 3: 신호 인식 -->
+  <circle cx="200" cy="300" r="70" fill="#34a853" opacity="0.9"/>
+  <text x="200" y="285" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">신호 인식</text>
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">철도 신호등, 표지판</text>
+  <text x="200" y="330" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">안전 운행 보장</text>
+  
+  <!-- 응용 분야 4: 자율주행 철도 -->
+  <circle cx="600" cy="300" r="70" fill="#673ab7" opacity="0.9"/>
+  <text x="600" y="285" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">자율주행 철도</text>
+  <text x="600" y="310" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">선로 추적, 장애물 회피</text>
+  <text x="600" y="330" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">자동 운행 시스템</text>
+  
+  <!-- 연결선 -->
+  <line x1="290" y1="140" x2="330" y2="170" stroke="#4285f4" stroke-width="3" opacity="0.7"/>
+  <line x1="510" y1="170" x2="550" y2="140" stroke="#4285f4" stroke-width="3" opacity="0.7"/>
+  <line x1="290" y1="260" x2="330" y2="230" stroke="#4285f4" stroke-width="3" opacity="0.7"/>
+  <line x1="510" y1="230" x2="550" y2="260" stroke="#4285f4" stroke-width="3" opacity="0.7"/>
+</svg>
