@@ -23,7 +23,7 @@ description: >- # used by seo meta and the atom feed
 
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
-url: "https://jjxxmiin.github.io"
+url: "https://blog.opsoai.com"
 
 github:
   username: jjxxmiin # change to your github username
@@ -42,7 +42,7 @@ social:
     
 # Site Verification Settings
 webmaster_verifications:
-  google: lhxQiy2vplw4RmXWDFj6urNmjVdWKYWIbiHdCUlGVzg # fill in your Google verification code
+  google: RmHH7ZVM5HWLY9Rgx30gxw2oQQ7rxO95FTFnUdTPYTU # fill in your Google verification code
   bing: 9C97FED110BDDB86D67F63F37218C901 # fill in your Bing verification code
   alexa: # fill in your Alexa verification code
   yandex: # fill in your Yandex verification code
