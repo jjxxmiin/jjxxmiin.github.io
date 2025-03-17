@@ -3,7 +3,7 @@ layout: post
 title: "🔥 MotionFollower: GPU 메모리 80% 절약하면서 비디오 모션 완벽 편집하는 혁신 기술"
 summary: "80% 적은 GPU로 더 높은 품질의 비디오 모션 편집이 가능한 MotionFollower 기술을 소개합니다. 복잡한 배경, 급격한 카메라 움직임에서도 자연스러운 모션 편집을 구현하는 혁신적 확산 모델의 모든 것."
 date: 2025-03-14
-categories: AI, 비디오 편집, 딥러닝
+categories: paper
 math: true
 ---
 
