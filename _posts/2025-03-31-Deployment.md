@@ -3,7 +3,7 @@ layout: post
 title: 프로덕션 환경에서의 인공지능 모델 배포 완벽 가이드
 summary: 모델 훈련부터 프로덕션 배포까지 인공지능 시스템 구축의 모든 것
 date: 2025-03-31  
-categories: AI DevOps MLOps
+categories: mlops
 math: true  
 ---
 
