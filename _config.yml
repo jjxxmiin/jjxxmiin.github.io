@@ -14,7 +14,7 @@ timezone: Asia/Seoul
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: OPSOBLOG - 인공지능 오픈소스 요약, 리뷰 및 최신 뉴스 분석 # the main title
+title: OPSOAI - 인공지능 오픈소스 요약 # the main title
 
 tagline: THERE IS NO TRY # it will display as the sub-title
 
@@ -22,7 +22,7 @@ description: >- # used by seo meta and the atom feed
   인공지능 최신 논문 요약, 리뷰 및 최신 뉴스와 함께 오픈소스 분석, 머신러닝, 딥러닝, 인공지능 연구 동향, 알고리즘 개발, 데이터 사이언스, AI 인사이트, 기술 혁신 등 폭넓은 정보를 제공합니다. 연구자, 개발자, AI 관심자 모두를 위한 전문 학습 자료와 커뮤니티 블로그입니다.
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
-url: "https://blog.opsoai.com"
+url: "https://www.opsoai.com"
 
 github:
   username: jjxxmiin # change to your github username
@@ -30,11 +30,11 @@ github:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: OPSOBLOG - 인공지능 오픈소스 요약, 리뷰 및 최신 뉴스 분석
+  name: OPSOAI - 인공지능 오픈소스 요약
   email: common.jaemin@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://www.opsoai.com # change to your twitter homepage
+    # - https://www.opsoai.com # change to your twitter homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -90,7 +90,7 @@ theme_mode: light # [light|dark]
 # will be added to all image (site avatar & posts' images) paths starting with '/'
 #
 # e.g. 'https://cdn.com'
-cdn: "https://blog.opsoai.com"
+cdn: "https://www.opsoai.com"
 
 # the avatar on sidebar, support local or CORS resources
 avatar: /assets/img/logo.png
