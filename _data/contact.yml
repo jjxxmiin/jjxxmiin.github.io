@@ -1,5 +1,17 @@
 #  The contact options.
 
+- type: website
+  icon: 'fa-solid fa-rocket'
+  url: 'https://www.opsoai.com'
+  
+- type: website
+  icon: 'fa-solid fa-video'
+  url: 'https://vida.opsoai.com'
+  
+- type: twitter
+  icon: 'fa-brands fa-x-twitter'
+  url: 'https://x.com/jeongjaemi74200'                   # Fill with your Threads profile link
+
 - type: threads
   icon: 'fa-brands fa-threads'
   url: 'https://www.threads.net/@opsoai'                   # Fill with your Threads profile link
