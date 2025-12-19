@@ -74,40 +74,48 @@ def generate_blog_post(paper):
     model_id = "gemini-3-flash-preview"
 
     prompt_text = f"""
-    You are an expert Computer Vision researcher and technical blog writer.
-    Please write a **comprehensive and detailed technical blog post** in Korean about the following paper.
-    The content should be **in-depth**, substantial, and sufficient for a serious researcher to understand the core contributions without reading the full paper immediately.
+    You are an expert Computer Vision researcher and technical tech blogger.
+    Please write a **highly detailed, comprehensive, and engaging technical blog post** in Korean about the following paper.
+    The goal is to create high-quality content optimized for **Google AdSense** and **SEO**.
     
     Paper Title: {paper['title']}
     Paper Abstract: {paper['summary']}
     Paper URL: https://huggingface.co/papers/{paper['id']}
     
-    Structure your response in Markdown with the following sections. Ensure each section is detailed:
-
-    1. **Title**: Catchy Korean title (translated or adapted).
-    2. **One-line Summary**: A single sentence summarizing the key contribution.
-    3. **Introduction**:
-        - What is the problem being solved?
-        - Why is this challenging?
-        - What are the limitations of existing approaches?
-    4. **Methodology (In-Depth)**:
-        - Explain the core architecture and algorithms in detail.
-        - Describe key components (e.g., loss functions, modules, training strategies).
-        - Use bullet points or numbered lists for clarity but maintain detailed explanations.
-    5. **Experiments & Results**:
-        - What datasets were used?
-        - How does it compare to SOTA (State of the Art) methods?
-        - Highlight key quantitative metrics.
-    6. **Discussion**:
-        - What are the main strengths of this work?
-        - What are the limitations or potential weaknesses?
-    7. **Conclusion**: Summary and future impact.
+    **Requirements:**
+    1.  **Length**: The post MUST be very long and detailed (aim for **2000+ words**). Do not summarize briefly. Expand on every point.
+    2.  **Structure**: Use a clear, logical structure with H2 and H3 headers.
+    3.  **Tone**: Professional yet accessible, engaging, and authoritative.
+    4.  **SEO**: Include relevant keywords naturally throughout the text.
+    5.  **AdSense Optimization**:
+        -   Write a compelling Introduction that hooks the reader immediately.
+        -   Use short paragraphs for readability.
+        -   Include "Key Takeaways" or "Why This Matters" sections.
     
-    **Tone**: Professional, technical, yet accessible to AI engineers.
-    **Length**: Aim for a long, rich post (not just a brief summary).
+    **Structure:**
     
-    Do NOT include the Front Matter (YAML) in the output, I will add it programmatically.
-    Just return the Markdown content.
+    1.  **Title**: Catchy, SEO-friendly Korean title.
+    2.  **One-line Summary**: A punchy, single-sentence summary.
+    3.  **Introduction**:
+        -   Hook: Why is this topic hot right now?
+        -   Problem: What specific issue does this paper solve?
+        -   Context: Briefly mention previous approaches (and their failures).
+    4.  **In-Depth Methodology (The Core)**:
+        -   Dedicate significant length to this.
+        -   Explain the architecture step-by-step.
+        -   Explain *why* certain design choices were made.
+        -   Define technical terms clearly.
+    5.  **Experiments & Critical Analysis**:
+        -   Detailed breakdown of datasets and metrics.
+        -   Compare with SOTA models (tables/lists preferred).
+        -   Analyze *why* it performs better (or worse).
+    6.  **Discussion & Future Impact**:
+        -   Practical applications (Where can we use this?).
+        -   Limitations (Be honest about what it can't do).
+        -   Future research directions.
+    7.  **Conclusion**: A strong closing statement summarizing the value.
+    
+    Do NOT include the Front Matter (YAML) in the output. Just return the Markdown content.
     """
 
     tools = [

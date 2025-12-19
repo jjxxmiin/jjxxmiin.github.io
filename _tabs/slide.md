@@ -3,317 +3,204 @@ icon: fa-solid fa-tv
 order: 3
 ---
 
-<!--  -->
-
-<details><summary>Simple Copy-Paste </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/MQrw7GtbBlPVQq" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2023-07-01-Simple_Copy_Paste.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Rethinking Bisenet </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/33XhDfU3ncGu2A" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2022-01-17-Rethinking_Bisenet.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Swin Transformer </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/kOypABCY8PhjCP" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-06-03-SwinTransformer.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Semantic Image Synthesis & Image Inpainting </summary>
-
-<p>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/semantic_image_synthesis.pdf"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>TabNet </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/jixasnLuMgoTRh" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-06-02-Tabnet.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>U^2 Net </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/tEtjgtkeqt0dGV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-05-04-U2-Net.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Google NMT </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/1ToBfRGxbKP9XN" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-04-04-GoogleNMT.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>SEAN </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/dTn5HPfrN4g3tQ" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-04-03-SEAN.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Zero-Shot Text-to-Image Generation </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/CYOe0zvxwWta2G" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-04-01-DALLE.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>SPADE: Semantic Image Synthesis with Spatially-Adaptive Normalization </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/pj1VvB1QyflIRr" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-03-02-SPADE.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Distributed Representations of Words and Phrases </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/aQtqxLpQRAB39C" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-03-02-Distributed_Representations_of_Words_and_Phrases.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Transformer Interpretability Beyond Attention Visualization </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/BZJ1LyAhQGlIwf" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-03-02-Transformer_Interpretability.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>On the Relationship between Self-Attention and Convolutional Layers </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/LAzU6duNh58EX3" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-03-01-On_the_Relationship_between_Self-Attention_and_Convolutional_Layers.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Learning Filter Basis </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/pYBvUKlfV4iCWt" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-01-04-Learning_Filter_Basis.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Linformer </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/z94hbVkfakfZLN" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2021-01-02-Linformer.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Shake Shake Regularization </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/1Dl7PnQTgLj41s" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-12-04-ShakeShake.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>ViT </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/fnCtd2Jr2MtsUA" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-12-03-VIT.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>DETR </summary>
-
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/rTZQUGskukEEVq" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-12-02-DETR.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>AdamW</summary>
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/8y7B1AHbdf2BuW" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-12-01-AdamW.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Bag of Tricks</summary>
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/JuZklgApJaP7zx" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-11-04-Bag_of_Tricks.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Face Detection</summary>
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/eFTFudb9FO1vXc" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-11-03-Face.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>Automated sleep stage scoring of the sleep heart</summary>
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/lnQPyQg3tIHQUn" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-11-02-Auto_sleep.pptx"> Download </a>
-
-</p>
-
-</details>
-
-<!--  -->
-
-<details><summary>SleepNet</summary>
-<p>
-
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/zjdwedg0uY5XcZ" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; width: 100%;" allowfullscreen> </iframe>
-
-<a class="btn btn-light btn-block" href="https://jjeamin.github.io/assets/slide/2020-11-01-SleepNet.pptx"> Download </a>
-
-</p>
-
-</details>
+---
+icon: fa-solid fa-tv
+order: 3
+---
+
+<style>
+.slide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+.slide-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+.dark .slide-card {
+    background: #1e1e1e;
+    border-color: #333;
+}
+
+.slide-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.slide-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    background: #000;
+}
+
+.slide-iframe-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.slide-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.slide-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #333;
+    line-height: 1.4;
+}
+.dark .slide-title { color: #eee; }
+
+.slide-btn {
+    margin-top: auto;
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f1f3f5;
+    color: #333;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.dark .slide-btn { background: #333; color: #fff; }
+.slide-btn:hover { background: #e9ecef; text-decoration: none; }
+.dark .slide-btn:hover { background: #444; }
+
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+.dark .page-header { border-bottom-color: #333; }
+.page-title { font-size: 2rem; font-weight: 800; margin-bottom: 10px; }
+.page-desc { color: #666; }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Presentation Slides</h1>
+    <p class="page-desc">Archive of my technical presentations and research slides.</p>
+</div>
+
+<div class="slide-grid">
+
+    <!-- Simple Copy-Paste -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+             <iframe src="//www.slideshare.net/slideshow/embed_code/key/MQrw7GtbBlPVQq" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Simple Copy-Paste</div>
+            <a href="https://jjeamin.github.io/assets/slide/2023-07-01-Simple_Copy_Paste.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- Rethinking Bisenet -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/33XhDfU3ncGu2A" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Rethinking Bisenet</div>
+            <a href="https://jjeamin.github.io/assets/slide/2022-01-17-Rethinking_Bisenet.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- Swin Transformer -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/kOypABCY8PhjCP" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Swin Transformer</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-06-03-SwinTransformer.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- TabNet -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/jixasnLuMgoTRh" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">TabNet</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-06-02-Tabnet.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- U^2 Net -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/tEtjgtkeqt0dGV" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">U^2 Net</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-05-04-U2-Net.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- Google NMT -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/1ToBfRGxbKP9XN" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Google NMT</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-04-04-GoogleNMT.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- SEAN -->
+    <div class="slide-card">
+        <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/dTn5HPfrN4g3tQ" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">SEAN</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-04-03-SEAN.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+    
+    <!-- DALL-E -->
+    <div class="slide-card">
+         <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/CYOe0zvxwWta2G" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Zero-Shot Text-to-Image Generation (DALL-E)</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-04-01-DALLE.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+    <!-- SPADE -->
+    <div class="slide-card">
+         <div class="slide-iframe-wrapper">
+            <iframe src="//www.slideshare.net/slideshow/embed_code/key/pj1VvB1QyflIRr" scrolling="no" allowfullscreen></iframe>
+        </div>
+        <div class="slide-content">
+            <div class="slide-title">Semantic Image Synthesis (SPADE)</div>
+            <a href="https://jjeamin.github.io/assets/slide/2021-03-02-SPADE.pptx" class="slide-btn"><i class="fa-solid fa-download"></i> Download</a>
+        </div>
+    </div>
+
+</div>

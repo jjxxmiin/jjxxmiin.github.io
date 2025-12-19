@@ -4,189 +4,326 @@ icon: fa-regular fa-user
 order: 1
 ---
 
-> 언제든 연락주세요
-{: .prompt-tip }
+<style>
+/* Modern Reset & Base */
+.profile-container {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+.dark .profile-container { color: #e0e0e0; }
 
-- `Name` : `Jaemin Jeong`
+/* Hero Section */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 60px;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.dark .hero-section {
+    background: linear-gradient(135deg, #2d3436 0%, #000000 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
 
-| NAME | URL |
-|:----------|:----------:|
-| E-mail | common.jaemin@gmail.com |
-| CV[KR] | [PDF](https://jjxxmiin.github.io/assets/cv/CV_korean.pdf) *no-updated* |
-| CV[EN] | [PDF](https://jjxxmiin.github.io/assets/cv/CV_english.pdf) *no-updated* |
-| GitHub | [https://github.com/jjxxmiin](https://github.com/jjxxmiin) |
-| Lab    | [https://sites.google.com/site/embeddedsochallymuniv/](https://sites.google.com/site/embeddedsochallymuniv/) |
-| Google Scholar | [https://scholar.google.com/citations?user=_GXtE-IAAAAJ&hl=ko](https://scholar.google.com/citations?user=_GXtE-IAAAAJ&hl=ko) |
-| Slide Share | [https://www.slideshare.net/JAEMINJEONG5/presentations](https://www.slideshare.net/JAEMINJEONG5/presentations) |
+.hero-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 15px 0 5px;
+    background: linear-gradient(90deg, #007cf0, #00dfd8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: 500;
+}
+.dark .hero-subtitle { color: #aaa; }
 
-------
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px 24px;
+    background: #000;
+    color: #fff;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.dark .contact-btn { background: #fff; color: #000; }
+.contact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-decoration: none;
+    color: inherit;
+}
 
-## *Research Interest*
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.social-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: #444;
+    text-decoration: none;
+    transition: all 0.2s;
+    backdrop-filter: blur(5px);
+}
+.dark .social-item {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+    color: #ccc;
+}
+.social-item:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #007cf0;
+}
+.dark .social-item:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
-I LOVE DEEP LEARNING
+/* Section Styles */
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 60px 0 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    position: relative;
+}
+.dark .section-title { border-bottom-color: #333; }
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: #007cf0;
+}
 
-Especially...
-- Vision(GAN, Segmentation, Object Detection ...)
-- Model Compression
-- Medical
+/* Grid Layouts */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
 
-------
+.interest-card {
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+.dark .interest-card { background: #1a1a1a; border-color: #333; }
+.interest-card:hover { border-color: #007cf0; transform: translateY(-3px); }
+.interest-icon { font-size: 1.5rem; color: #007cf0; margin-bottom: 10px; }
+.interest-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 5px; }
 
-## *Skills*
+/* Timeline for Experience */
+.timeline { position: relative; padding-left: 20px; border-left: 2px solid #eee; }
+.dark .timeline { border-left-color: #333; }
+.timeline-item { margin-bottom: 40px; position: relative; }
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -27px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    background: #007cf0;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #eee;
+}
+.dark .timeline-item::before { background: #00dfd8; border-color: #1a1a1a; box-shadow: 0 0 0 1px #333; }
 
-- **PYTHON**
-  + **Pytorch**
+.timeline-date {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.timeline-company { font-size: 1.3rem; font-weight: 700; margin-bottom: 5px; }
+.timeline-company a { color: inherit; text-decoration: none; border-bottom: 1px dashed #ccc; }
+.timeline-role { font-size: 1rem; font-weight: 500; color: #555; margin-bottom: 10px; font-style: italic; }
+.dark .timeline-role { color: #bbb; }
+.timeline-desc { font-size: 0.95rem; color: #666; }
+.dark .timeline-desc { color: #999; }
 
-------
+/* Publications */
+.pub-item {
+    margin-bottom: 25px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border-left: 4px solid #007cf0;
+}
+.dark .pub-item { background: #222; }
+.pub-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; line-height: 1.4; }
+.pub-authors { font-size: 0.9rem; color: #555; margin-bottom: 5px; }
+.dark .pub-authors { color: #aaa; }
+.pub-venue { font-size: 0.85rem; color: #007cf0; font-weight: 600; }
+.pub-me { font-weight: 800; color: #000; }
+.dark .pub-me { color: #fff; }
 
-## *Publications*
+</style>
 
-**Journal**
+<div class="profile-container">
 
-- Explainable vision transformer for automatic visual sleep staging on multimodal PSG signals
-  + Hyojin Lee, You Rim Choi, Hyun Kyung Lee, **Jaemin Jeong**, Joopyo Hong, Hyun-Woo Shin, Hyung-Sin Kim
-  + Accepted in the Journal of npj Digital Medicine (SCI), 2025
+    <!-- Hero -->
+    <div class="hero-section">
+        <!-- Avatar can go here if provided, otherwise simple icon -->
+        <i class="fa-solid fa-circle-user" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
+        <h1 class="hero-name">Jaemin Jeong</h1>
+        <p class="hero-subtitle">Visual AI Researcher & Deep Learning Engineer</p>
+        
+        <a href="mailto:common.jaemin@gmail.com" class="contact-btn">
+            <i class="fa-solid fa-envelope"></i> Contact Me
+        </a>
+        
+        <div class="social-links">
+            <a href="https://www.threads.com/@camorix.official" target="_blank" class="social-item">
+                <i class="fa-brands fa-threads"></i> Threads
+            </a>
+            <a href="https://www.instagram.com/camorix.official/" target="_blank" class="social-item">
+                <i class="fa-brands fa-instagram"></i> Instagram
+            </a>
+            <a href="https://github.com/jjxxmiin" target="_blank" class="social-item">
+                <i class="fa-brands fa-github"></i> GitHub
+            </a>
+            <a href="https://scholar.google.com/citations?user=_GXtE-IAAAAJ&hl=ko" target="_blank" class="social-item">
+                <i class="fa-solid fa-graduation-cap"></i> Scholar
+            </a>
+            <a href="https://www.slideshare.net/JAEMINJEONG5/presentations" target="_blank" class="social-item">
+                <i class="fa-brands fa-slideshare"></i> Slides
+            </a>
+        </div>
+    </div>
 
-- Standardized Image-Based Polysomnography Database and Deep Learning Algorithm for Sleep Stage Classification
-  + **Jaemin Jeong**, Wonhyuck Yoon, Jeong-Gun Lee, Dongyoung Kim, Yunhee Woo, Dong-Kyu Kim, Hyun-Woo Shin
-  + Accepted in the Journal of Oxford SLEEP (SCI), 2023
+    <!-- Research Interest -->
+    <h2 class="section-title">Research Interests</h2>
+    <div class="grid-container">
+        <div class="interest-card">
+            <div class="interest-icon"><i class="fa-solid fa-eye"></i></div>
+            <div class="interest-title">Computer Vision</div>
+            <p>Object Detection, Segmentation, GANs, and Video Understanding.</p>
+        </div>
+        <div class="interest-card">
+            <div class="interest-icon"><i class="fa-solid fa-compress"></i></div>
+            <div class="interest-title">Model Compression</div>
+            <p>Pruning, Quantization, and efficient architecture design for edge devices.</p>
+        </div>
+        <div class="interest-card">
+            <div class="interest-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="interest-title">Medical AI</div>
+            <p>Sleep stage classification using PSG signals and multi-modal analysis.</p>
+        </div>
+    </div>
 
-- Automatic Sleep Stage Classification Using Deep Learning Algorithm for Multi-Institutional Database
-  + Automatic Sleep Stage Classification Using Deep Learning Algorithm for Multi-Institutional Database
-  + Accepted in the Journal of IEEE Access, 2023
+    <!-- Skills -->
+    <h2 class="section-title">Technical Skills</h2>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <span class="social-item">Python</span>
+        <span class="social-item">PyTorch</span>
+        <span class="social-item">TensorFlow</span>
+        <span class="social-item">OpenCV</span>
+        <span class="social-item">Docker</span>
+        <span class="social-item">Git</span>
+        <span class="social-item">Raspberry Pi</span>
+    </div>
 
-- Deep learning application to clinical decision support system in sleep
-stage classification
-  + Dongyoung Kim, Jeong-Gun Lee, Yunhee Woo, **Jaemin Jeong**, Chulho Kim, Dong-Kyu Kim
-  + Accepted In the Journal of Personalized Medicine (SCIE), 2021
+    <!-- Publications -->
+    <h2 class="section-title">Selected Publications</h2>
+    
+    <div class="pub-item">
+        <div class="pub-title">Explainable vision transformer for automatic visual sleep staging on multimodal PSG signals</div>
+        <div class="pub-authors">Hyojin Lee, You Rim Choi, Hyun Kyung Lee, <span class="pub-me">Jaemin Jeong</span>, et al.</div>
+        <div class="pub-venue">Journal of npj Digital Medicine (SCI), 2025</div>
+    </div>
+    
+    <div class="pub-item">
+        <div class="pub-title">Optimized Road Damage Detection Using Enhanced Deep Learning Architectures</div>
+        <div class="pub-authors"><span class="pub-me">Jaemin Jeong</span>, Jiho Cho, Jeong-Gun Lee</div>
+        <div class="pub-venue">2024 IEEE International Conference on Big Data</div>
+    </div>
 
-- Zero-Keep Filter Pruning for Energy/Power Efficient Deep Neural Networks
-  + Yunhee Woo, Dongyoung Kim, **Jaemin Jeong**, Young-Woong Ko, Jeong-Gun Lee
-  + Accepted in the Journal of Electronics (SCIE), 2021
+    <div class="pub-item">
+        <div class="pub-title">Standardized Image-Based Polysomnography Database and Deep Learning Algorithm</div>
+        <div class="pub-authors"><span class="pub-me">Jaemin Jeong</span>, Wonhyuck Yoon, et al.</div>
+        <div class="pub-venue">Journal of Oxford SLEEP (SCI), 2023</div>
+    </div>
+    
+    <div style="text-align: right; margin-top: 10px;">
+        <a href="https://scholar.google.com/citations?user=_GXtE-IAAAAJ&hl=ko" style="font-weight: 600;">View Full List on Google Scholar &rarr;</a>
+    </div>
 
-- Filter Combination Learning for CNN model compression
-  + **Jaemin Jeong**, Jiho Cho, Jeong-Gun Lee
-  + Accepted in the Journal of ICT-Express (SCIE), 2021
+    <!-- Experience -->
+    <h2 class="section-title">Experience</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-date">2023.03 - Present</div>
+            <div class="timeline-company">Mirrorroid</div>
+            <div class="timeline-role">R&D / Outsourcing</div>
+            <div class="timeline-desc">Developing Beauty Smart Mirror solutions (Face/Hair analysis).</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-date">2023.03 - Present</div>
+            <div class="timeline-company">University of Ottawa</div>
+            <div class="timeline-role">Visiting Research Student (PhD Program)</div>
+            <div class="timeline-desc">Researching Model Compression & Sleep Staging.</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-date">2022.03 - 2023.03</div>
+            <div class="timeline-company">Mirrorroid</div>
+            <div class="timeline-role">Senior Researcher (Full-time)</div>
+            <div class="timeline-desc">Led the R&D team for smart beauty technologies.</div>
+        </div>
+         <div class="timeline-item">
+            <div class="timeline-date">2021.03 - 2022.03</div>
+            <div class="timeline-company">Hallym University</div>
+            <div class="timeline-role">PhD Candidate</div>
+            <div class="timeline-desc">Research on deep learning model optimization.</div>
+        </div>
+    </div>
 
-**Conference paper**
+    <!-- Honors -->
+    <h2 class="section-title">Honors & Awards</h2>
+    <div style="display: grid; gap: 15px;">
+        <div class="pub-item" style="border-left-color: #ff9f43; background: transparent; border: 1px solid #eee;">
+            <div class="pub-title">2021 AI+X R&D Challenge Grand Prize (1st)</div>
+            <div class="pub-venue">Hallym University</div>
+        </div>
+         <div class="pub-item" style="border-left-color: #ff9f43; background: transparent; border: 1px solid #eee;">
+            <div class="pub-title">2020 NIPA AI Competition 1st Place</div>
+            <div class="pub-venue">NIPA (Cybercrime detection model)</div>
+        </div>
+    </div>
 
-- Optimized Road Damage Detection Using Enhanced Deep Learning Architectures for Improved Inference Speed and Accuracy
-  + **Jaemin Jeong**, Jiho Cho, Jeong-Gun Lee
-  + 2024 IEEE International Conference on Big Data (BigData)
-
-- Shaped Pruning for Efficient Memory Addressing in DNN Accelerators
-  + Yunhee Woo, Dongyoung Kim, **Jaemin Jeong**, Jeong-Gun Lee
-  + 2021 IEEE International Conference on Consumer Electronics-Asia (ICCE-Asia)
-
-- Filter Combination Learning for Convolutional Neural Network
-  + [Github](https://github.com/jjxxmiin/Filter_Generation_Network)
-  + **Jaemin Jeong**, DongYoung Kim, Yunhee Woo and Jeong-Gun Lee
-  + 2020 International Conference on Information and Communication Technology Convergence (ICTC)
-  + ==> “Special Issue on Selected Papers from ICTC 2020”
-
-- Deep learning CAM-based interpretation-possible image visualization Development of open source software tools
-  + **Jaemin Jeong**, Seo-Eun Ham, Joo-Hyun Son, Jeong-Gun Lee
-  + 2020 신호처리합동학술대회, 197-199
-
-- Image-based Sleep Stage Classification Model for Multi-Institutional Dataset
-  + Yunhee Woo, Dongyoung Kim, **Jaemin Jeong**, Dong-Kyu Kim, Jeong-Gun Lee
-  + 2021 International Conference on Information and Communication Technology Convergence (ICTC)
-
-- Sleep Stage Classification for Inter-institutional Transfer Learning
-  + Dongyoung Kim, Yunhee Woo, **Jaemin Jeong**, Dong-Kyu Kim, Jeong-Gun Lee
-  + 2021 International Conference on Information and Communication Technology Convergence (ICTC)
-
-- Zero-Keep Filter Pruning for Energy Efficient Deep Neural Network
-  + Yunhee Woo, DongYoung Kim, **Jaemin Jeong**, Young Woong Ko, Jeong-Gun Lee.
-  + 2020 International Conference on Information and Communication Technology Convergence (ICTC)
-
-- Parameter Optimization of Deep Neural Network: MNIST Case Study
-  + Min-Jeong Kim, Byungjoon Lim, Seunghyun Lim, **Jaemin Jeong**, Jong-Hak Lee, JeongGun Lee
-  + 2018 대한전자공학회 학술대회, 923-925.
-
-------
-
-## Domestic Patents
-  - "기계학습모델 공유 또는 판매를 위한 시스템 및 시스템의 동작 방법," 특허등록 제 10-2020-2453673 호 (2022.10.06)
-  - "헤어 스타일 추천 장치 및 방법," 특허등록 제 10-2022-0122740 호 (2023.01.18)
-  - "헤어 스타일링 가상 체험용 인공 신경망의 학습을  위한 학습 데이터 생성 장치 및 방법, 및 이를 이용한 헤어 스타일링 가상 체험 장치 및 방법" 특허등록 제 10-2022-0029790 호 (2023.03.15)
-  - "다채널의 생체 신호들을 포함하는 이미지를 기반으로 수면 단계를 분류하는 전자 장치, 및 수면 단계 분류 방법" 특허등록 제 10-2021-0060653 호 (2023.04.21)
-  - "가상 헤어 스타일링 체험을 위한 민머리 인물 이미지 생성 장치 및 방법" 특허등록 제 10-2538783 호 (2023.05.26)
-  - "인공지능 모델의 파라미터 저장을 위한 필터 조합 학습 네트워크 시스템의 제어 방법, 장치 및 프로그램" 특허등록 제 10-2020-0140315 호 (2023.06.12)
-
-------
-
-## Experiences
-
-- [FrontU](https://frontu2.modoo.at/) (2018-07 ~ 2018-08)
-  + Development for Smart Toy
-  + Arduino
-
-- [FrontU](https://frontu2.modoo.at/) (2019-01 ~ 2019-02)
-  + Development for Smart Toy
-  + Raspberry Pi
-  + Vision
-
-- [FrontU](https://frontu2.modoo.at/) (2019-07 ~ 2019-08)
-  + Development for Smart Toy
-  + Raspberry Pi
-  + Google Assistant
-
-- Master's Degree (2019-09 ~ 2021-03)
-  + Hallym University
-  + Department of Computer Engineering
-  + Research of Model Compression
-
-- PhD Degree (2021-03 ~ 2022-03)
-  + Hallym University
-  + Department of Computer Engineering
-  + Research of Model Compression
-  + Research of Image-based Sleep Staging  
-  + [Mirrorroid](https://www.mirrorroid.co.kr/) (2021-01 ~ 2022-03)
-    + Outsourcing
-    + Research and Development for Beauty Smart Mirror (Hair)
-
-- [Mirrorroid](https://www.mirrorroid.co.kr/) (2022-03 ~ 2023-03)
-  + Full Time JOB
-  + Senior Researcher
-  + Research and Development for Beauty Smart Mirror (Face, Hair etc.)
-
-- PhD Degree - Program of Visiting Research Student (2023-03 ~ )
-  + University of Ottawa
-  + Department of Computer Engineering
-  + Research of Model Compression
-  + Research of Image-based Sleep Staging
-  + [Mirrorroid](https://www.mirrorroid.co.kr/) (2023-03 ~ )
-    + Outsourcing
-    + Research and Development for Beauty Smart Mirror (Face, Hair etc.)
-
-------
-
-## Open source contributions
-
-- [파이토치 한글 문서 번역](https://github.com/9bow/PyTorch-tutorials-kr)
-  + **Captum을 사용하여 모델 해석하기** 번역
-  + **컴퓨터 비전 튜토리얼을 위한 양자화된 전이학습** 번역
-  + **Pytorch를 사용하여 뉴럴 변환** 번역
-  + 그 외 번역 리뷰 6개
-  + **장려상 수상**
-
-------
-
-## Competitions
-
-- [가속화 프로그래밍 겨울학교 3위 수상 (2019-01)](https://www.manycoresoft.co.kr/school/)
-
-- [Dacon : 위성관측 데이터 활용 강수량 산출 AI 경진대회 2위 수상 (2020-05)](https://dacon.io/competitions/official/235591/leaderboard/)
-
-- [Dacon : 산업제어시스템 보안위협 탐지 AI 경진대회 상위 10% (2020-09)](https://dacon.io/competitions/official/235624/leaderboard/)
-
-- [NIPA : 2020 인공지능 문제해결 경진대회 (얼굴 합성 사이버범죄 방지를 위한 탐지모델 개발) 1위 수상 (2020-12)](https://ai-korea.kr/main/main.do)
-
-- [Hallym : 2020 AI+X R&D 챌린지 전체 1위 (대상) 수상 (2021-01)](https://aix.hallym.ac.kr/aix/administration/notice.do?mode=view&articleNo=37119)
-
-------
-
-## Certificate
-
-- 정보처리기사
+</div>
