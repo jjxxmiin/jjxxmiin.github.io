@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.opsoai.com/sitemap.xml
+
+Disallow: /404.html
+Disallow: /assets/js/
+Disallow: /assets/css/
+Disallow: /tools/

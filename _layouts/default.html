@@ -17,6 +17,7 @@ layout: compress
   {% include head.html %}
 
   <body>
+    {% include font-pretendard.html %}
     {% include sidebar.html lang=lang %}
 
     <div id="main-wrapper" class="d-flex justify-content-center">
@@ -39,19 +40,7 @@ layout: compress
               {% include_cached trending-tags.html lang=lang %}
             </div>
             
-            <div class="google-ad">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2217162208301474" crossorigin="anonymous"></script>
-                <!-- sidebar -->
-                <ins class="adsbygoogle"
-                    style="display:block"
-                    data-ad-client="ca-pub-2217162208301474"
-                    data-ad-slot="7022562168"
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
+            {% include google-ad-sidebar.html %}
 
             {% for _include in layout.panel_includes %}
               {% assign _include_path = _include | append: '.html' %}

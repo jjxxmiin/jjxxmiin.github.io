@@ -16,7 +16,7 @@ script_includes:
 
 <article class="px-1" data-toc="{{ enable_toc }}">
   <header>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2217162208301474" crossorigin="anonymous"></script>
+    {% include google-ad-script.html %}
     
     <h1 data-toc-skip>{{ page.title }}</h1>
     {% if page.description %}
@@ -128,17 +128,7 @@ script_includes:
     {{ content }}
   </div>
 
-  <div class="google-ad">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2217162208301474" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-format="autorelaxed"
-        data-ad-client="ca-pub-2217162208301474"
-        data-ad-slot="4435927275"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
+  {% include google-ad-post-bottom.html %}
     
   <div class="post-tail-wrapper text-muted">
     <!-- categories -->
