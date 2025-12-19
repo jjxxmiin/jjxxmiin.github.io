@@ -162,8 +162,11 @@ def generate_blog_post(paper):
 
 def save_post(paper, content):
     """Saves the blog post to the _posts directory."""
-    today = datetime.date.today()
-    date_str = today.strftime("%Y-%m-%d")
+    # Use US Eastern Time (UTC-5)
+    # This prevents "future date" issues if the blog is deployed on US servers
+    utc_now = datetime.datetime.now(datetime.timezone.utc)
+    us_time = utc_now - datetime.timedelta(hours=5) # approximated EST
+    date_str = us_time.strftime("%Y-%m-%d")
     
     # Sanitize title for filename
     safe_title = "".join([c if c.isalnum() else "-" for c in paper['title']]).strip("-")
