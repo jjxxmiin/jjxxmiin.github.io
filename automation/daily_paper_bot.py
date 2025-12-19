@@ -170,26 +170,72 @@ def save_post(paper, content):
     filename = f"{date_str}-{safe_title}.md"
     filepath = os.path.join(POSTS_DIR, filename)
     
+    # Extract summary from content
+    summary = "최신 Computer Vision 논문 리뷰" # Default
+    try:
+        import re
+        # Look for: 2. **One-line Summary**: ... or similar
+        # Also look for Korean header: ### 한 줄 요약
+        # We search for the header, then capture the next non-empty line
+        
+        # Regex for "### 한 줄 요약" or "### **One-line Summary**" followed by content
+        # Robust regex: Find line with "One-line Summary" or "한 줄 요약", then capture the next non-empty line
+        summary_match = re.search(r"(?:One-line Summary|한 줄 요약).*?\n+(.+)", content)
+        if summary_match:
+             # Remove bolding ** if present
+             clean_summary = summary_match.group(1).replace("**", "").strip()
+             if clean_summary:
+                 summary = clean_summary
+        else:
+             # Fallback to previous pattern
+             match = re.search(r"One-line Summary\*\*:\s*(.*)", content)
+             if match:
+                summary = match.group(1).strip()
+    except Exception as e:
+        print(f"Warning: Could not extract summary: {e}")
+
     # Front Matter
     front_matter = {
         "layout": "post",
-        "title": f"[Review] {paper['title']}",
-        "date": f"{date_str} 09:00:00 +0900",
-        "categories": ["AI", "Computer Vision"],
-        "tags": ["paper-review", "cv", "huggingface-daily"],
-        "author": "OPSOAI" 
+        "title": f"[{paper.get('publishedAt', date_str)[:10]}] {paper['title']}", # Fallback
+        "date": date_str, # YYYY-MM-DD
+        "categories": "tech", 
+        "math": True,
+        "summary": summary
     }
     
-    # Add image if available
+    # Extract Korean title from H1 (# Title)
+    try:
+        # Search for first line starting with #
+        h1_match = re.search(r"^#\s+(.*)", content, re.MULTILINE)
+        if h1_match:
+             korean_title = h1_match.group(1).strip()
+             if korean_title:
+                 front_matter['title'] = korean_title
+        else:
+             # Fallback to **Title**: pattern
+             title_match = re.search(r"Title\*\*:\s*(.*)", content)
+             if title_match:
+                 korean_title = title_match.group(1).strip()
+                 if korean_title:
+                     front_matter['title'] = korean_title
+    except:
+        pass
+
+    # Add image if available (Preserving this feature)
     if 'thumbnail' in paper:
-        front_matter['image'] = {
+         # Check if user wants image in this specific format or just standard?
+         # User didn't show image in example, but previous request was important.
+         # I'll keep it but maybe as a clear 'image' param if Jekyll theme supports it.
+         # Chirpy theme (detected in config) supports 'image' with 'path' and 'alt'.
+         front_matter['image'] = {
             "path": paper['thumbnail'],
             "alt": "Paper Thumbnail"
         }
     
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("---\n")
-        yaml.dump(front_matter, f, allow_unicode=True)
+        yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False) # sort_keys=False to keep order roughly
         f.write("---\n\n")
         f.write(content)
         f.write(f"\n\n[Original Paper Link](https://huggingface.co/papers/{paper['id']})")
