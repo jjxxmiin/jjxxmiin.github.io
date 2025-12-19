@@ -14,7 +14,7 @@ timezone: Asia/Seoul
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: OPSOAI - 인공지능 오픈소스 요약 # the main title
+title: OPSOAI # the main title
 
 tagline: THERE IS NO TRY # it will display as the sub-title
 
@@ -30,7 +30,7 @@ github:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: OPSOAI - 인공지능 오픈소스 요약
+  name: OPSOAI
   email: common.jaemin@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
