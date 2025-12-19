@@ -242,37 +242,85 @@ def save_post(paper, content):
 
     print(f"Saved post to {filepath}")
 
+def get_posted_paper_ids():
+    """Scans existing posts to find IDs of papers already posted."""
+    posted_ids = set()
+    if not os.path.exists(POSTS_DIR):
+        print(f"Warning: Posts directory {POSTS_DIR} does not exist.")
+        return posted_ids
+
+    print("Checking for existing papers...")
+    for filename in os.listdir(POSTS_DIR):
+        if filename.endswith(".md"):
+            filepath = os.path.join(POSTS_DIR, filename)
+            try:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    # Look for the link pattern we add at the bottom
+                    # [Original Paper Link](https://huggingface.co/papers/{id})
+                    # Or just search for huggingface.co/papers/id
+                    import re
+                    match = re.search(r"huggingface\.co/papers/(\S+?)\)", content)
+                    if match:
+                        posted_ids.add(match.group(1))
+            except Exception as e:
+                print(f"Error reading {filename}: {e}")
+    
+    print(f"Found {len(posted_ids)} already posted papers.")
+    return posted_ids
+
 def main():
     print("Fetching papers...")
     papers = fetch_daily_papers()
     print(f"Fetched {len(papers)} papers.")
     
     cv_papers = filter_cv_papers(papers)
+    posted_ids = get_posted_paper_ids()
     
     target_paper = None
     
-    # Sort CV papers by upvotes if available
+    # Sort CV papers by upvotes
     if cv_papers:
+        # Sort based on inner upvotes
         cv_papers.sort(key=lambda x: x.get('upvotes', 0), reverse=True)
-        target_paper = cv_papers[0]
-        print(f"Top CV Paper: {target_paper['title']} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
-    elif papers:
-        print("No CV papers found. Falling back to top trending paper.")
-        # We need to sort based on the upvotes inside the 'paper' object
-        # papers is a list of items where item['paper'] has the details
+        
+        # Iterate and find first one not posted
+        for paper_item in cv_papers:
+            # We already unwrapped details in filter_cv_papers so 'paper_item' here IS the details dict
+            # Wait, let's double check filter_cv_papers logic.
+            # In validation step 204: "cv_papers.append(paper_details)"
+            # So cv_papers contains the inner dictionaries.
+            pid = paper_item.get('id')
+            if pid not in posted_ids:
+                target_paper = paper_item
+                print(f"Selected Top Unposted Paper: {target_paper['title']} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
+                break
+            else:
+                print(f"Skipping duplicate: {paper_item.get('title')} (ID: {pid})")
+                
+    if not target_paper and papers:
+        # Fallback logic also needs duplicate check
+        print("No new CV papers found. Checking trending papers...")
+        # papers list items still have 'paper' wrapper? 
+        # Yes, fetch_daily_papers result is passed to filter_cv_papers but 'papers' var is original list.
         papers.sort(key=lambda x: x.get('paper', {}).get('upvotes', 0), reverse=True)
-        target_paper = papers[0].get('paper', {})
-        print(f"Top Paper (Fallback): {target_paper.get('title', 'Unknown')} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
-
+        
+        for paper_wrapper in papers:
+            paper_details = paper_wrapper.get('paper', {})
+            pid = paper_details.get('id')
+            if pid and pid not in posted_ids:
+                target_paper = paper_details
+                print(f"Top Paper (Fallback): {target_paper.get('title', 'Unknown')} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
+                break
+    
     if target_paper:
-        # print(f"Selected paper: {target_paper['title']}") # Already printed above
         try:
             content = generate_blog_post(target_paper)
             save_post(target_paper, content)
         except Exception as e:
             print(f"Failed to generate/save post: {e}")
     else:
-        print("No papers found.")
+        print("No new papers found to post.")
 
 if __name__ == "__main__":
     main()
