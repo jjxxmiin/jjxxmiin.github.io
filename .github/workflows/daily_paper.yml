@@ -1,0 +1,41 @@
+name: Daily CV Paper Post
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at 00:00 UTC (09:00 KST)
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd automation
+          pip install -r requirements.txt
+
+      - name: Run Daily Paper Bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          cd automation
+          python daily_paper_bot.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'OPSOAI Bot'
+          git config --global user.email 'bot@opsoai.com'
+          git add _posts/
+          git commit -m "Auto-generated blog post for $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push
