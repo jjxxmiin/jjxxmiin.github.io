@@ -65,58 +65,52 @@ def filter_cv_papers(papers):
     return cv_papers
 
 def generate_blog_post(paper):
-    """Generates a blog post using Gemini."""
+    """Generates a blog post using Gemini with JSON structured output."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY not found in environment variables")
     
     client = genai.Client(api_key=api_key)
-    model_id = "gemini-3-flash-preview"
+    model_id = "gemini-3-flash-preview" 
 
     prompt_text = f"""
-    You are an expert Computer Vision researcher and technical tech blogger.
-    Please write a **highly detailed, comprehensive, and engaging technical blog post** in Korean about the following paper.
-    The goal is to create high-quality content optimized for **Google AdSense** and **SEO**.
-    
-    Paper Title: {paper['title']}
-    Paper Abstract: {paper['summary']}
-    Paper URL: https://huggingface.co/papers/{paper['id']}
-    
-    **Requirements:**
-    1.  **Length**: The post MUST be very long and detailed (aim for **2000+ words**). Do not summarize briefly. Expand on every point.
-    2.  **Structure**: Use a clear, logical structure with H2 and H3 headers.
-    3.  **Tone**: Professional yet accessible, engaging, and authoritative.
-    4.  **SEO**: Include relevant keywords naturally throughout the text.
-    5.  **AdSense Optimization**:
-        -   Write a compelling Introduction that hooks the reader immediately.
-        -   Use short paragraphs for readability.
-        -   Include "Key Takeaways" or "Why This Matters" sections.
-    
-    **Structure:**
-    
-    1.  **Title**: Catchy, SEO-friendly Korean title.
-    2.  **One-line Summary**: A punchy, single-sentence summary.
-    3.  **Introduction**:
-        -   Hook: Why is this topic hot right now?
-        -   Problem: What specific issue does this paper solve?
-        -   Context: Briefly mention previous approaches (and their failures).
-    4.  **In-Depth Methodology (The Core)**:
-        -   Dedicate significant length to this.
-        -   Explain the architecture step-by-step.
-        -   Explain *why* certain design choices were made.
-        -   Define technical terms clearly.
-    5.  **Experiments & Critical Analysis**:
-        -   Detailed breakdown of datasets and metrics.
-        -   Compare with SOTA models (tables/lists preferred).
-        -   Analyze *why* it performs better (or worse).
-    6.  **Discussion & Future Impact**:
-        -   Practical applications (Where can we use this?).
-        -   Limitations (Be honest about what it can't do).
-        -   Future research directions.
-    7.  **Conclusion**: A strong closing statement summarizing the value.
-    
-    Do NOT include the Front Matter (YAML) in the output. Just return the Markdown content.
-    """
+**Role & Persona:**
+You are a Senior Chief AI Scientist and a renowned Technical Columnist for a top-tier tech blog.
+Your goal is to write a **comprehensive, authoritative, and deeply technical analysis** of the provided research paper in **Korean**.
+
+**Input Data:**
+- Paper Title: {paper['title']}
+- Paper Abstract: {paper['summary']}
+- Paper URL: https://huggingface.co/papers/{paper['id']}
+
+**Critical Constraints & Guidelines:**
+1.  **Extreme Depth & Length**: Aim for **3,000+ words**.
+2.  **Professional Tone**: Use a formal, expert tone (e.g., "~합니다/습니다" style).
+3.  **Detailed Structure**:
+    -   **SEO-Optimized Title**: A compelling Korean title.
+    -   **Front Matter Summary**: A concise (under 50 chars), catchy, and suitable summary for the blog post preview (Front Matter).
+    -   **Content**: The full blog post content in Markdown, following the structure:
+        1.  Executive Summary (핵심 요약)
+        2.  Introduction & Problem Statement (연구 배경 및 문제 정의)
+        3.  Core Methodology (핵심 기술 및 아키텍처 심층 분석)
+        4.  Implementation Details & Experiment Setup (구현 및 실험 환경)
+        5.  Comparative Analysis (성능 평가 및 비교)
+        6.  Discussion: Limitations & Future Work (한계점 및 향후 과제)
+        7.  Conclusion (결론 및 인사이트)
+
+**Action:**
+Generate the blog post adhering to the JSON schema provided.
+"""
+
+    response_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "title": {"type": "STRING", "description": "The SEO-optimized Korean title of the blog post."},
+            "summary": {"type": "STRING", "description": "A concise, catchy summary (under 50 chars) for the front matter."},
+            "content": {"type": "STRING", "description": "The full blog post content in Markdown format."}
+        },
+        "required": ["title", "summary", "content"]
+    }
 
     tools = [
         types.Tool(google_search=types.GoogleSearch())
@@ -124,29 +118,13 @@ def generate_blog_post(paper):
     
     generate_content_config = types.GenerateContentConfig(
         thinking_config=types.ThinkingConfig(
-            include_thoughts=False, # We don't want thoughts in the final blog post file usually, unless user wants to see them.
-            # User snippet had `thinking_level="HIGH"`. This param might not be in the SDK yet or varies.
-            # The SDK usually takes `include_thoughts=True/False`.
-            # I will omit specific thinking_level if not sure, or check snippets.
-            # Actually current SDK `types.ThinkingConfig` might not take `thinking_level`. 
-            # I will omit strict config and just leave it default if I use a thinking model.
-            # Wait, `gemini-2.0-flash-thinking-exp-1219` automatically thinks.
-            # If I use `google-genai` SDK, I should follow its structure.
+            thinking_level="HIGH",
         ),
         tools=tools,
-        temperature=0.7 # standard
+        response_mime_type="application/json",
+        response_schema=response_schema
     )
     
-    # User snippet used:
-    # generate_content_config = types.GenerateContentConfig(
-    #    thinking_config=types.ThinkingConfig(
-    #        thinking_level="HIGH",
-    #    ),
-    #    tools=tools,
-    # )
-    # I will try to match that, assuming they know the SDK version they are asking for.
-    
-    # Construct contents
     contents = [
         types.Content(
             role="user",
@@ -156,22 +134,34 @@ def generate_blog_post(paper):
         ),
     ]
 
-    response_text = ""
-    # Use streaming as requested/shown
-    for chunk in client.models.generate_content_stream(
+    print("Generating content with Gemini (JSON mode)...")
+    # Non-streaming for JSON usually safer to ensure complete valid JSON, but stream is fine if we concat.
+    # However, for JSON mode, non-streaming is often simpler.
+    response = client.models.generate_content(
         model=model_id,
         contents=contents,
         config=generate_content_config,
-    ):
-        if chunk.text:
-            response_text += chunk.text
-            
-    return response_text
+    )
+    
+    # Check if response has text (it should be JSON string)
+    if response.text:
+        import json
+        try:
+             # Parse JSON
+             return json.loads(response.text)
+        except json.JSONDecodeError as e:
+             print(f"Failed to parse JSON response: {e}")
+             print(f"Raw response: {response.text[:200]}...")
+             return None
+    return None
 
-def save_post(paper, content):
+def save_post(paper, post_data):
     """Saves the blog post to the _posts directory."""
+    if not post_data:
+        print("No post data to save.")
+        return
+
     # Use US Eastern Time (UTC-5)
-    # This prevents "future date" issues if the blog is deployed on US servers
     utc_now = datetime.datetime.now(datetime.timezone.utc)
     us_time = utc_now - datetime.timedelta(hours=5) # approximated EST
     date_str = us_time.strftime("%Y-%m-%d")
@@ -181,77 +171,39 @@ def save_post(paper, content):
     filename = f"{date_str}-{safe_title}.md"
     filepath = os.path.join(POSTS_DIR, filename)
     
-    # Extract summary from content
-    summary = "최신 Computer Vision 논문 리뷰" # Default
-    try:
-        import re
-        # Look for: 2. **One-line Summary**: ... or similar
-        # Also look for Korean header: ### 한 줄 요약
-        # We search for the header, then capture the next non-empty line
-        
-        # Regex for "### 한 줄 요약" or "### **One-line Summary**" followed by content
-        # Robust regex: Find line with "One-line Summary" or "한 줄 요약", then capture the next non-empty line
-        summary_match = re.search(r"(?:One-line Summary|한 줄 요약).*?\n+(.+)", content)
-        if summary_match:
-             # Remove bolding ** if present
-             clean_summary = summary_match.group(1).replace("**", "").strip()
-             if clean_summary:
-                 summary = clean_summary
-        else:
-             # Fallback to previous pattern
-             match = re.search(r"One-line Summary\*\*:\s*(.*)", content)
-             if match:
-                summary = match.group(1).strip()
-    except Exception as e:
-        print(f"Warning: Could not extract summary: {e}")
+    # Extract fields from JSON
+    # post_data is expected to be a dict: {'title': ..., 'summary': ..., 'content': ...}
+    korean_title = post_data.get('title', paper['title'])
+    summary = post_data.get('summary', '최신 Computer Vision 논문 리뷰')
+    content_body = post_data.get('content', '')
 
     # Front Matter
     front_matter = {
         "layout": "post",
-        "title": f"[{paper.get('publishedAt', date_str)[:10]}] {paper['title']}", # Fallback
+        "title": f"[{paper.get('publishedAt', date_str)[:10]}] {korean_title}",
         "date": date_str, # YYYY-MM-DD
         "categories": "tech", 
         "math": True,
         "summary": summary
     }
-    
-    # Extract Korean title from H1 (# Title)
-    try:
-        # Search for first line starting with #
-        h1_match = re.search(r"^#\s+(.*)", content, re.MULTILINE)
-        if h1_match:
-             korean_title = h1_match.group(1).strip()
-             if korean_title:
-                 front_matter['title'] = korean_title
-        else:
-             # Fallback to **Title**: pattern
-             title_match = re.search(r"Title\*\*:\s*(.*)", content)
-             if title_match:
-                 korean_title = title_match.group(1).strip()
-                 if korean_title:
-                     front_matter['title'] = korean_title
-    except:
-        pass
 
-    # Add image if available (Preserving this feature)
+    # Add image if available
     if 'thumbnail' in paper:
-         # Check if user wants image in this specific format or just standard?
-         # User didn't show image in example, but previous request was important.
-         # I'll keep it but maybe as a clear 'image' param if Jekyll theme supports it.
-         # Chirpy theme (detected in config) supports 'image' with 'path' and 'alt'.
          front_matter['image'] = {
             "path": paper['thumbnail'],
             "alt": "Paper Thumbnail"
         }
     
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write("---\n")
-        yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False) # sort_keys=False to keep order roughly
-        f.write("---\n\n")
-        f.write(content)
-        f.write(f"\n\n[Original Paper Link](https://huggingface.co/papers/{paper['id']})")
-
-    print(f"Saved post to {filepath}")
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write("---\n")
+            yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
+            f.write("---\n\n")
+            f.write(content_body)
+            f.write(f"\n\n[Original Paper Link](https://huggingface.co/papers/{paper['id']})")
+        print(f"Saved post to {filepath}")
+    except Exception as e:
+        print(f"Error writing file {filepath}: {e}")
 
 def get_posted_paper_ids():
     """Scans existing posts to find IDs of papers already posted."""

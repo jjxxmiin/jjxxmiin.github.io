@@ -4,8 +4,7 @@ title: AI가 만든 ASMR, 인간과 VLM을 속일 수 있을까? Video Reality T
 date: '2025-12-18'
 categories: tech
 math: true
-summary: Video Reality Test는 정교한 시청각 결합이 요구되는 ASMR 도메인을 활용하여, 최신 비디오 생성 모델(Generative
-  Models)의 현실성과 시각-언어 모델(VLMs)의 위조 탐지 능력을 정밀하게 평가하는 새로운 벤치마크 프토토콜입니다.
+summary: Video Reality Test는 정교한 시청각 결합이 요구되는 ASMR 도메인을 활용하여, 최신 비디오 생성 모델(Generative Models)의 현실성과 시각-언어 모델(VLMs)의 위조 탐지 능력을 정밀하게 평가하는 새로운 벤치마크 프토토콜입니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.13281.png
   alt: Paper Thumbnail
