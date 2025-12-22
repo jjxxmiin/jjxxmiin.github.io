@@ -118,7 +118,7 @@ Generate the blog post adhering to the JSON schema provided.
     
     generate_content_config = types.GenerateContentConfig(
         thinking_config=types.ThinkingConfig(
-            thinking_level="HIGH",
+            include_thoughts=True,
         ),
         tools=tools,
         response_mime_type="application/json",
