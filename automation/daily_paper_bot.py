@@ -176,6 +176,11 @@ def save_post(paper, post_data):
     korean_title = post_data.get('title', paper['title'])
     summary = post_data.get('summary', '최신 Computer Vision 논문 리뷰')
     content_body = post_data.get('content', '')
+    
+    # Fix double-escaped newlines from Gemini API JSON response
+    # The API sometimes returns \\n instead of actual newlines
+    if '\\n' in content_body:
+        content_body = content_body.replace('\\n', '\n')
 
     # Front Matter
     front_matter = {

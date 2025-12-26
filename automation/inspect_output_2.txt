@@ -1,0 +1,4 @@
+Trying thinking_level='HIGH'
+Success thinking_level
+Trying include_thoughts=True
+Success include_thoughts

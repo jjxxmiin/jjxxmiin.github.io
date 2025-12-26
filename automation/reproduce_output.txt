@@ -1,0 +1,6 @@
+Attempting to create ThinkingConfig with thinking_level='HIGH'
+Created: include_thoughts=None thinking_budget=None thinking_level=<ThinkingLevel.HIGH: 'HIGH'>
+Attempting to create GenerateContentConfig with thinking_config
+Created Config: http_options=None should_return_http_response=None system_instruction=None temperature=None top_p=None top_k=None candidate_count=None max_output_tokens=None stop_sequences=None response_logprobs=None logprobs=None presence_penalty=None frequency_penalty=None seed=None response_mime_type='application/json' response_schema=None response_json_schema=None routing_config=None model_selection_config=None safety_settings=None tools=None tool_config=None labels=None cached_content=None response_modalities=None media_resolution=None speech_config=None audio_timestamp=None automatic_function_calling=None thinking_config=ThinkingConfig(
+  thinking_level=<ThinkingLevel.HIGH: 'HIGH'>
+) image_config=None enable_enhanced_civic_answers=None
