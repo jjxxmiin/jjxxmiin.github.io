@@ -1,8 +1,11 @@
+---
+layout: home
+# Index page
+---
 User-agent: *
 Allow: /
 Sitemap: https://www.opsoai.com/sitemap.xml
 
 Disallow: /404.html
-Disallow: /assets/js/
-Disallow: /assets/css/
 Disallow: /tools/
+google.com, pub-2217162208301474, DIRECT, f08c47fec0942fa0

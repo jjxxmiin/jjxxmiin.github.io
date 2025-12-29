@@ -8,6 +8,8 @@ import yaml
 # Configuration
 HF_DAILY_PAPERS_URL = "https://huggingface.co/api/daily_papers"
 POSTS_DIR = "../_posts"
+FALLBACK_THUMBNAIL = "/assets/img/logo.png"
+
 
 def fetch_daily_papers():
     """Fetches daily papers from Hugging Face API."""
@@ -95,11 +97,14 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
         3.  Core Methodology (핵심 기술 및 아키텍처 심층 분석)
         4.  Implementation Details & Experiment Setup (구현 및 실험 환경)
         5.  Comparative Analysis (성능 평가 및 비교)
-        6.  Discussion: Limitations & Future Work (한계점 및 향후 과제)
-        7.  Conclusion (결론 및 인사이트)
+        6.  Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력) - **Crucial Section**: Discuss practical use cases.
+        7.  Discussion: Limitations & Critical Critique (한계점 및 기술적 비평) - **Be critical**.
+        8.  Conclusion (결론 및 인사이트)
 
 **Action:**
-Generate the blog post adhering to the JSON schema provided.
+1.  **Be Opinionated**: Don't just translate/summarize. Add your expert insight ("This is similar to X, but better because Y").
+2.  **Add Value**: Explain *why* this matters to a developer or business.
+3.  Generate the blog post adhering to the JSON schema provided.
 """
 
     response_schema = {
@@ -192,10 +197,11 @@ def save_post(paper, post_data):
         "summary": summary
     }
 
-    # Add image if available
-    if 'thumbnail' in paper:
+    # Add image if available or fallback
+    image_path = paper.get('thumbnail', FALLBACK_THUMBNAIL)
+    if image_path:
          front_matter['image'] = {
-            "path": paper['thumbnail'],
+            "path": image_path,
             "alt": "Paper Thumbnail"
         }
     
