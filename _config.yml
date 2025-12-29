@@ -34,7 +34,7 @@ social:
   email: common.jaemin@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://opsoai.com # change to your twitter homepage
+    - https://www.opsoai.com # change to your twitter homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -90,7 +90,7 @@ theme_mode: light # [light|dark]
 # will be added to all image (site avatar & posts' images) paths starting with '/'
 #
 # e.g. 'https://cdn.com'
-cdn: "https://opsoai.com"
+cdn: "https://www.opsoai.com"
 
 # the avatar on sidebar, support local or CORS resources
 avatar: /assets/img/logo.png
