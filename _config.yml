@@ -16,10 +16,11 @@ timezone: Asia/Seoul
 
 title: OPSOAI # the main title
 
-tagline: THERE IS NO TRY # it will display as the sub-title
+tagline: 매일 매일 무료 논문 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   인공지능 최신 논문 요약, 리뷰 및 최신 뉴스와 함께 오픈소스 분석, 머신러닝, 딥러닝, 인공지능 연구 동향, 알고리즘 개발, 데이터 사이언스, AI 인사이트, 기술 혁신 등 폭넓은 정보를 제공합니다. 연구자, 개발자, AI 관심자 모두를 위한 전문 학습 자료와 커뮤니티 블로그입니다.
+keywords: [인공지능, AI, 논문, 딥러닝, 머신러닝, 무료 논문, OPSOAI, 논문 리뷰, 최신 기술, 연구 동향]
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
 url: "https://www.opsoai.com"

@@ -1,8 +1,16 @@
 #  The contact options.
 
+- type: website
+  icon: 'fas fa-globe'
+  url: 'https://www.camorix.com'
+
 - type: threads
   icon: 'fa-brands fa-threads'
   url: 'https://www.threads.net/@opsoai'                   # Fill with your Threads profile link
+
+- type: link
+  icon: 'fas fa-user-shield'
+  url: '/privacy/'
 
 - type: rss
   icon: "fas fa-rss"

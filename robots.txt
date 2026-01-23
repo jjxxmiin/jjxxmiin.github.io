@@ -1,7 +1,9 @@
 ---
-layout: home
-# Index page
+layout: null
+permalink: /robots.txt
 ---
+User-agent: Yeti
+Allow: /
 User-agent: *
 Allow: /
 Sitemap: https://www.opsoai.com/sitemap.xml
