@@ -1,5 +1,7 @@
 import os
 import datetime
+import shutil
+from bs4 import BeautifulSoup
 import requests
 from google import genai
 from google.genai import types
@@ -7,7 +9,9 @@ import yaml
 
 # Configuration
 HF_DAILY_PAPERS_URL = "https://huggingface.co/api/daily_papers"
+ARXIV_HTML_URL = "https://arxiv.org/html"
 POSTS_DIR = "../_posts"
+IMAGE_DIR = "../assets/img/papers"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
 
 
@@ -66,7 +70,90 @@ def filter_cv_papers(papers):
     print(f"Found {len(cv_papers)} CV papers.")
     return cv_papers
 
-def generate_blog_post(paper):
+def extract_arxiv_info(paper_id):
+    """Extracts figures and captions from Arxiv HTML page."""
+    url = f"{ARXIV_HTML_URL}/{paper_id}"
+    try:
+        print(f"Fetching Arxiv page: {url}")
+        response = requests.get(url)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        figures = []
+        
+        # Arxiv HTML usually puts figures in <figure class="ltx_figure">
+        for fig in soup.find_all('figure', class_='ltx_figure'):
+            img_tag = fig.find('img')
+            if not img_tag:
+                continue
+                
+            img_src = img_tag.get('src')
+            if not img_src:
+                continue
+            
+            # Construct absolute URL
+            # img_src is usually relative like 'x1.png'
+            full_img_url = f"{url}/{img_src}"
+            
+            caption_tag = fig.find('figcaption')
+            caption = caption_tag.get_text(strip=True) if caption_tag else ""
+            
+            figures.append({
+                'url': full_img_url,
+                'src_filename': img_src,
+                'caption': caption
+            })
+            
+        print(f"Found {len(figures)} figures.")
+        return figures
+        
+    except Exception as e:
+        print(f"Error extracting Arxiv info: {e}")
+        return []
+
+def download_images(images, paper_id):
+    """Downloads images to local assets directory."""
+    local_images = []
+    
+    # Create target directory
+    target_dir = os.path.join(IMAGE_DIR, paper_id)
+    os.makedirs(target_dir, exist_ok=True)
+    
+    for i, img_data in enumerate(images):
+        # Limit to top 3 images to avoid clutter
+        if i >= 3:
+            break
+            
+        img_url = img_data['url']
+        src_filename = img_data['src_filename']
+        
+        # Ensure filename is safe or just use index if weird
+        # Arxiv usually names them x1.png, x2.png etc. 
+        # But let's prefix with paper_id just in case or keep structure
+        filename = f"{src_filename}"
+        save_path = os.path.join(target_dir, filename)
+        
+        # Web accessible path for Jekyll
+        web_path = f"/assets/img/papers/{paper_id}/{filename}"
+        
+        try:
+            print(f"Downloading {img_url} to {save_path}...")
+            r = requests.get(img_url, stream=True)
+            r.raise_for_status()
+            with open(save_path, 'wb') as f:
+                r.raw.decode_content = True
+                shutil.copyfileobj(r.raw, f)
+            
+            local_images.append({
+                'path': web_path,
+                'caption': img_data['caption']
+            })
+        except Exception as e:
+            print(f"Failed to download image: {e}")
+            
+    return local_images
+
+def generate_blog_post(paper, images=None):
     """Generates a blog post using Gemini with JSON structured output."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -74,6 +161,13 @@ def generate_blog_post(paper):
     
     client = genai.Client(api_key=api_key)
     model_id = "gemini-3-flash-preview" 
+
+    # Format images for the prompt
+    images_text = "No images available."
+    if images:
+        images_text = "Available Images (You MUST use these in the blog post where contextually appropriate using the format `![Caption](Path)`):\n"
+        for img in images:
+            images_text += f"- Caption: {img['caption']}\n  Path: {img['path']}\n"
 
     prompt_text = f"""
 **Role & Persona:**
@@ -84,6 +178,7 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
 - Paper Title: {paper['title']}
 - Paper Abstract: {paper['summary']}
 - Paper URL: https://huggingface.co/papers/{paper['id']}
+- {images_text}
 
 **Critical Constraints & Guidelines:**
 1.  **Extreme Depth & Length**: Aim for **3,000+ words**.
@@ -100,6 +195,13 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
         6.  Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력) - **Crucial Section**: Discuss practical use cases.
         7.  Discussion: Limitations & Critical Critique (한계점 및 기술적 비평) - **Be critical**.
         8.  Conclusion (결론 및 인사이트)
+
+**Image Placement Instructions:**
+-   You have been provided with a list of available images with their local paths.
+-   **CRITICAL**: You MUST insert these images into the **Content** body where they are most relevant to the text.
+-   Do not dump them all at the beginning or end. Place them near the text that describes them.
+-   Use the exact path provided. Format: `![Caption](Path)`
+-   Add a short italicized caption below the image as well.
 
 **Action:**
 1.  **Be Opinionated**: Don't just translate/summarize. Add your expert insight ("This is similar to X, but better because Y").
@@ -160,7 +262,7 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
              return None
     return None
 
-def save_post(paper, post_data):
+def save_post(paper, post_data, images=None):
     """Saves the blog post to the _posts directory."""
     if not post_data:
         print("No post data to save.")
@@ -210,7 +312,18 @@ def save_post(paper, post_data):
             f.write("---\n")
             yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
             f.write("---\n\n")
+            
             f.write(content_body)
+            
+            # Check if images were used in the content, if not, add them at the bottom
+            if images:
+                unused_images = [img for img in images if img['path'] not in content_body]
+                if unused_images:
+                    f.write("\n\n## Additional Figures\n")
+                    for img in unused_images:
+                        f.write(f"\n![{img['caption']}]({img['path']})\n")
+                        f.write(f"*{img['caption']}*\n")
+
             f.write(f"\n\n[Original Paper Link](https://huggingface.co/papers/{paper['id']})")
         print(f"Saved post to {filepath}")
     except Exception as e:
@@ -289,8 +402,16 @@ def main():
     
     if target_paper:
         try:
-            content = generate_blog_post(target_paper)
-            save_post(target_paper, content)
+            # Extract and download images
+            images = []
+            pid = target_paper['id']
+            print(f"Attempting to extract images for {pid}...")
+            extracted_images = extract_arxiv_info(pid)
+            if extracted_images:
+                images = download_images(extracted_images, pid)
+                
+            content = generate_blog_post(target_paper, images)
+            save_post(target_paper, content, images)
         except Exception as e:
             print(f"Failed to generate/save post: {e}")
     else:
