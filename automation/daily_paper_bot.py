@@ -120,8 +120,8 @@ def download_images(images, paper_id):
     os.makedirs(target_dir, exist_ok=True)
     
     for i, img_data in enumerate(images):
-        # Limit to top 3 images to avoid clutter
-        if i >= 3:
+        # Limit to top 5 images to avoid clutter
+        if i >= 5:
             break
             
         img_url = img_data['url']

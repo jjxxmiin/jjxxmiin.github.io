@@ -2,7 +2,7 @@ name: Daily CV Paper Post
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC (09:00 KST)
+    - cron: '0 0,9 * * *' # Runs at 00:00 UTC (09:00 KST) and 09:00 UTC (18:00 KST)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
