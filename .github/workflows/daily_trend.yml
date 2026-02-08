@@ -1,0 +1,41 @@
+name: Daily AI Trend Post
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # Runs at 07:00 UTC (16:00 KST)
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd automation
+          pip install -r requirements.txt
+
+      - name: Run Daily Trend Bot
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          cd automation
+          python daily_trend_bot.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'OPSOAI Bot'
+          git config --global user.email 'bot@opsoai.com'
+          git add _posts/
+          git commit -m "Auto-generated trend post for $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push
