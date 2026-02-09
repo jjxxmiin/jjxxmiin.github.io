@@ -15,6 +15,21 @@ def get_gemini_client():
         raise ValueError("GEMINI_API_KEY not found in environment variables")
     return genai.Client(api_key=api_key)
 
+def get_thinking_config(thinking_level="HIGH"):
+    """
+    Helper to create ThinkingConfig with fallback for compatibility.
+    Some environments might have different validation/version for google-genai.
+    """
+    try:
+        if thinking_level == "HIGH":
+            # Try to use the enum if possible, or string
+            return types.ThinkingConfig(thinking_level="HIGH")
+        return types.ThinkingConfig(thinking_level=thinking_level)
+    except Exception as e:
+        print(f"Warning: ThinkingConfig validation failed ({e}). Fallback to include_thoughts=True.")
+        # Fallback for older versions or validation issues
+        return types.ThinkingConfig(include_thoughts=True)
+
 def find_trending_topic(client):
     """
     Uses Gemini with Google Search to find today's trending AI topics.
@@ -52,9 +67,7 @@ def find_trending_topic(client):
         contents=prompt,
         config=types.GenerateContentConfig(
             tools=tools,
-            thinking_config=types.ThinkingConfig(
-                thinking_level="HIGH",
-            ),
+            thinking_config=get_thinking_config("HIGH"),
         )
     )
     
@@ -162,9 +175,7 @@ def generate_blog_post(client, topic_data):
         contents=prompt_text,
         config=types.GenerateContentConfig(
             tools=tools,
-            thinking_config=types.ThinkingConfig(
-                thinking_level="HIGH",
-            ),
+            thinking_config=get_thinking_config("HIGH"),
         )
     )
     
