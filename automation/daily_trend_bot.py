@@ -243,7 +243,7 @@ def save_post(post_data):
     front_matter = {
         "layout": "post",
         "title": post_data.get('title_korean', post_data.get('title', 'Untitled')),
-        "date": f"{date_str} 16:00:00 +0900",
+        "date": f"{date_str}",
         "categories": "Tech", # Single category
         "summary": post_data['summary'],
         "author": "AI Trend Bot"
