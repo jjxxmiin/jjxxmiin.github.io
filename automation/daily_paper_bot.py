@@ -109,7 +109,7 @@ def extract_arxiv_info(paper_id):
         
     except Exception as e:
         print(f"Error extracting Arxiv info: {e}")
-        return []
+        return None
 
 def download_images(images, paper_id):
     """Downloads images to local assets directory."""
@@ -202,6 +202,10 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
 -   Do not dump them all at the beginning or end. Place them near the text that describes them.
 -   Use the exact path provided. Format: `![Caption](Path)`
 -   Add a short italicized caption below the image as well.
+
+**Negative Constraints (CRITICAL):**
+1.  **Final Polish Only**: The output must be the final, publication-ready article, not a draft or a thinking process.
+2.  **Math Formatting**: If using mathematical notation, use standard LaTeX within dollar signs (e.g., $E = mc^2$) so it renders correctly if supported, or use clear text representation. Avoid raw, broken LaTeX syntax.
 
 **Action:**
 1.  **Be Opinionated**: Don't just translate/summarize. Add your expert insight ("This is similar to X, but better because Y").
@@ -365,48 +369,63 @@ def main():
     posted_ids = get_posted_paper_ids()
     
     target_paper = None
+    extracted_images = [] # Store extracted images to pass later
     
     # Sort CV papers by upvotes
     if cv_papers:
         # Sort based on inner upvotes
         cv_papers.sort(key=lambda x: x.get('upvotes', 0), reverse=True)
         
-        # Iterate and find first one not posted
+        # Iterate and find first one not posted AND accessible
         for paper_item in cv_papers:
-            # We already unwrapped details in filter_cv_papers so 'paper_item' here IS the details dict
-            # Wait, let's double check filter_cv_papers logic.
-            # In validation step 204: "cv_papers.append(paper_details)"
-            # So cv_papers contains the inner dictionaries.
             pid = paper_item.get('id')
             if pid not in posted_ids:
+                print(f"Checking candidate: {paper_item['title']} (Upvotes: {paper_item.get('upvotes', 'N/A')})")
+                
+                # Check accessibility first!
+                print(f"Attempting to verify Arxiv for {pid}...")
+                current_extracted_images = extract_arxiv_info(pid)
+                
+                if current_extracted_images is None:
+                    print(f"Skipping {pid}: Cannot access Arxiv HTML (404/Error).")
+                    continue
+                
+                # If valid, select this paper
                 target_paper = paper_item
-                print(f"Selected Top Unposted Paper: {target_paper['title']} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
+                extracted_images = current_extracted_images
+                print(f"Selected Paper: {target_paper['title']}")
                 break
             else:
                 print(f"Skipping duplicate: {paper_item.get('title')} (ID: {pid})")
                 
     if not target_paper and papers:
-        # Fallback logic also needs duplicate check
-        print("No new CV papers found. Checking trending papers...")
-        # papers list items still have 'paper' wrapper? 
-        # Yes, fetch_daily_papers result is passed to filter_cv_papers but 'papers' var is original list.
+        # Fallback logic also needs accessibility check
+        print("No new CV papers found (or all failed). Checking all trending papers...")
         papers.sort(key=lambda x: x.get('paper', {}).get('upvotes', 0), reverse=True)
         
         for paper_wrapper in papers:
             paper_details = paper_wrapper.get('paper', {})
             pid = paper_details.get('id')
             if pid and pid not in posted_ids:
+                print(f"Checking fallback candidate: {paper_details.get('title', 'Unknown')} (Upvotes: {paper_details.get('upvotes', 'N/A')})")
+                
+                # Check accessibility
+                current_extracted_images = extract_arxiv_info(pid)
+                
+                if current_extracted_images is None:
+                    print(f"Skipping {pid}: Cannot access Arxiv HTML (404/Error).")
+                    continue
+                
                 target_paper = paper_details
-                print(f"Top Paper (Fallback): {target_paper.get('title', 'Unknown')} (Upvotes: {target_paper.get('upvotes', 'N/A')})")
+                extracted_images = current_extracted_images
+                print(f"Selected Fallback Paper: {target_paper.get('title', 'Unknown')}")
                 break
     
     if target_paper:
         try:
-            # Extract and download images
+            # Download images if any
             images = []
             pid = target_paper['id']
-            print(f"Attempting to extract images for {pid}...")
-            extracted_images = extract_arxiv_info(pid)
             if extracted_images:
                 images = download_images(extracted_images, pid)
                 
@@ -415,7 +434,7 @@ def main():
         except Exception as e:
             print(f"Failed to generate/save post: {e}")
     else:
-        print("No new papers found to post.")
+        print("No accessible new papers found to post.")
 
 if __name__ == "__main__":
     main()

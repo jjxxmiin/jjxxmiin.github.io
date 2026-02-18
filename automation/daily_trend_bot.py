@@ -139,7 +139,7 @@ def generate_blog_post(client, topic_data):
     3.  **Scope**: Cover **EVERYTHING** in the README. If the README is long, summarize all sections (Features, Installation, Usage, Configuration, Architecture, Contributing, etc.). Do not miss major details.
     
     **Content Structure:**
-    1.  **Title (Korean)**: Catchy, Viral, and "Click-worthy" (e.g., "Developer jobs in danger? This AI Agent is crazy...").
+    1.  **Title (Korean)**: Catchy, Viral, and "Click-worthy". **IMPORTANT: Do NOT start with "Developer..." or "개발자..." every time. Vary the structure.** (e.g., "Is this usage real?", "Why [Topic] is trending...", "Finally, an AI that...").
     2.  **Title (English)**: Simple, descriptive title for the filename (e.g., "OpenClaw-The-AI-Agent").
     3.  **Introduction**: Hook the reader. Explain the unique value.
     4.  **Key Features**: Comprehensive breakdown of ALL features mentioned in README.
