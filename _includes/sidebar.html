@@ -133,9 +133,8 @@
       }
     </style>
 
-    <!-- Hidden data element for liquid URL -->
-    <div id="sponsorData" style="display:none;" data-qr="{{ '/assets/img/sponsor-qr.png' | relative_url }}"></div>
-
+    <!-- Hidden data element for liquid URL - No longer needed for lazy load but keeping structure simple -->
+    
     <!-- Sponsor Icon Button in Footer -->
     <a href="javascript:;" aria-label="sponsor" onclick="openSponsorModal()">
       <i class="fas fa-heart" style="color: #ff6b6b;"></i>
@@ -147,26 +146,19 @@
         <button class="sponsor-modal-close" onclick="closeSponsorModal()">&times;</button>
         <h3 class="sponsor-modal-title">Support OPSOAI ☕</h3>
         <p class="sponsor-modal-desc">QR code scan</p>
-        <img id="qrImage" src="" alt="Sponsorship QR Code" class="sponsor-qr-image">
+        <img id="qrImage" src="{{ '/assets/img/sponsor-qr.png' | relative_url }}" alt="Sponsorship QR Code" class="sponsor-qr-image">
       </div>
     </div>
 
     <script>
       function openSponsorModal() {
         var modal = document.getElementById('sponsorModal');
-        var dataEl = document.getElementById('sponsorData');
-        var img = document.getElementById('qrImage');
         
         // Move modal to body to avoid stacking context issues
         if (modal.parentNode !== document.body) {
             document.body.appendChild(modal);
         }
 
-        // Lazy load the image
-        if (!img.src || img.src === window.location.href) {
-            img.src = dataEl.getAttribute('data-qr');
-        }
-        
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden'; // Prevent scrolling background
       }
