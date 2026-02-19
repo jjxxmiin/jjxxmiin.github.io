@@ -136,7 +136,7 @@
     <!-- Hidden data element for liquid URL - No longer needed for lazy load but keeping structure simple -->
     
     <!-- Sponsor Icon Button in Footer -->
-    <a href="javascript:;" aria-label="sponsor" onclick="openSponsorModal()">
+    <a href="#" aria-label="sponsor" onclick="event.preventDefault(); openSponsorModal();">
       <i class="fas fa-heart" style="color: #ff6b6b;"></i>
     </a>
 
@@ -151,30 +151,34 @@
     </div>
 
     <script>
-      function openSponsorModal() {
+      window.openSponsorModal = function() {
         var modal = document.getElementById('sponsorModal');
         
         // Move modal to body to avoid stacking context issues
-        if (modal.parentNode !== document.body) {
+        if (modal && modal.parentNode !== document.body) {
             document.body.appendChild(modal);
         }
 
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Prevent scrolling background
-      }
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+      };
 
-      function closeSponsorModal(event) {
+      window.closeSponsorModal = function(event) {
         // If event is present, it means it's a click on the overlay
         // We verify that the click wasn't on the content (handled by stopPropagation on content)
         var modal = document.getElementById('sponsorModal');
-        modal.style.display = 'none';
-        document.body.style.overflow = ''; // Restore scrolling
-      }
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+      };
 
       // Close on Escape key
       document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
-          closeSponsorModal();
+          window.closeSponsorModal();
         }
       });
     </script>
