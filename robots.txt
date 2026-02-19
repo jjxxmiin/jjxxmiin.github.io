@@ -1,13 +1,5 @@
----
-layout: null
-permalink: /robots.txt
----
 User-agent: Yeti
 Allow: /
 
 User-agent: *
 Allow: /
-Disallow: /404.html
-Disallow: /tools/
-
-Sitemap: https://www.opsoai.com/sitemap.xml

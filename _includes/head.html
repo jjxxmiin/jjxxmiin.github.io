@@ -10,9 +10,7 @@
   >
 
   {%- capture seo_tags -%}
-    {% assign seo_description = page.description | default: page.summary %}
-    <!-- DEBUG: seo_description value: {{ seo_description | strip_html | truncate: 50 }} -->
-    {% seo title=false description=seo_description %}
+    {% seo title=false %}
   {%- endcapture -%}
 
   <!-- Setup Open Graph image -->
@@ -48,6 +46,28 @@
     {% assign old_meta_clip = '<meta name="twitter:card" content="summary" />' %}
     {% assign new_meta_clip = og_image | append: twitter_image %}
     {% assign seo_tags = seo_tags | replace: old_meta_clip, new_meta_clip %}
+  {% endif %}
+
+  <!-- Manual Meta Description Override (since jekyll-seo-tag ignores params sometimes) -->
+  {% assign seo_description = page.description | default: page.summary %}
+  {% if seo_description %}
+    {% assign seo_description_stripped = seo_description | strip_html | strip_newlines | truncate: 160 %}
+    <meta name="description" content="{{ seo_description_stripped }}">
+    <meta property="og:description" content="{{ seo_description_stripped }}">
+    <meta property="twitter:description" content="{{ seo_description_stripped }}">
+    <!-- Remove default description tags from seo_tags to avoid duplicates -->
+    {% assign description_regex = '<meta (name|property)="description" content="[^"]*" />' %}
+    {% assign og_description_regex = '<meta (name|property)="og:description" content="[^"]*" />' %}
+    {% assign twitter_description_regex = '<meta (name|property)="twitter:description" content="[^"]*" />' %}
+    
+    {% assign seo_tags = seo_tags | replace: description_regex, '' %}
+    {% assign seo_tags = seo_tags | replace: og_description_regex, '' %}
+    {% assign seo_tags = seo_tags | replace: twitter_description_regex, '' %}
+  {% endif %}
+
+  <!-- Naver Verification -->
+  {% if site.webmaster_verifications.naver %}
+    <meta name="naver-site-verification" content="{{ site.webmaster_verifications.naver }}" />
   {% endif %}
 
   {{ seo_tags }}
