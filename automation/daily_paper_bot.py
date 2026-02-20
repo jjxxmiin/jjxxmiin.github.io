@@ -195,6 +195,10 @@ Your goal is to write a **comprehensive, authoritative, and deeply technical ana
         6.  Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력) - **Crucial Section**: Discuss practical use cases.
         7.  Discussion: Limitations & Critical Critique (한계점 및 기술적 비평) - **Be critical**.
         8.  Conclusion (결론 및 인사이트)
+        9.  Expert's Touch (전문가의 시선) - **CRUCIAL NEW SECTION**: Add an "Expert's Touch" section. It must contain a sharp 1-line comment, technical limitations, and practical/open-source application points from a computer engineering researcher's perspective.
+
+**High CPC Keyword Optimization (CRITICAL):**
+- Naturally integrate high-value computing and business keywords throughout the text. These keywords must sound completely natural in the context of the paper's application and system architecture.
 
 **Image Placement Instructions:**
 -   You have been provided with a list of available images with their local paths.

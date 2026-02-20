@@ -2,7 +2,7 @@ name: Daily AI Trend Post
 
 on:
   schedule:
-    - cron: '0 7 * * *' # Runs at 07:00 UTC (16:00 KST)
+    - cron: '0 11,23 * * *' # Runs at 23:00 UTC (08:00 KST) and 11:00 UTC (20:00 KST)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -38,4 +38,5 @@ jobs:
           git config --global user.email 'bot@opsoai.com'
           git add _posts/
           git commit -m "Auto-generated trend post for $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git pull --rebase
           git push
