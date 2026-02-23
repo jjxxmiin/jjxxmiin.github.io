@@ -85,5 +85,113 @@ layout: compress
     {% endfor %}
 
     {% include_cached search-loader.html lang=lang %}
+
+    <!-- Sponsor Modal -->
+    <style>
+      .sponsor-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+        backdrop-filter: blur(5px);
+        animation: fadeIn 0.3s ease;
+      }
+      .sponsor-modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 90%;
+        width: 320px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .sponsor-modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 5px;
+        line-height: 1;
+      }
+      .sponsor-qr-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        display: block;
+      }
+      .sponsor-modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #333 !important;
+      }
+      .sponsor-modal-desc {
+        color: #666 !important;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      html[data-mode='dark'] .sponsor-modal-content {
+        background: #2b2b2b;
+      }
+      html[data-mode='dark'] .sponsor-modal-title {
+        color: #fff !important;
+      }
+      html[data-mode='dark'] .sponsor-modal-desc {
+        color: #aaa !important;
+      }
+    </style>
+
+    <div id="sponsorModal" class="sponsor-modal-overlay" onclick="closeSponsorModal(event)">
+      <div class="sponsor-modal-content" onclick="event.stopPropagation()">
+        <button class="sponsor-modal-close" onclick="closeSponsorModal()">&times;</button>
+        <h3 class="sponsor-modal-title">Support OPSOAI ☕</h3>
+        <p class="sponsor-modal-desc">QR code scan</p>
+        <img src="{{ '/assets/img/sponsor-qr.png' | relative_url }}" alt="Sponsorship QR Code" class="sponsor-qr-image">
+      </div>
+    </div>
+
+    <script>
+      function openSponsorModal(event) {
+        if (event) event.preventDefault();
+        const modal = document.getElementById('sponsorModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+      }
+
+      function closeSponsorModal(event) {
+        const modal = document.getElementById('sponsorModal');
+        if (modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") closeSponsorModal();
+      });
+    </script>
   </body>
 </html>

@@ -43,145 +43,14 @@
 
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
     
-    <style>
-      /* Modal Styles */
-      .sponsor-modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: none; /* Hidden by default */
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        backdrop-filter: blur(5px);
-        animation: fadeIn 0.3s ease;
-      }
-      .sponsor-modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 20px;
-        text-align: center;
-        max-width: 90%;
-        width: 320px;
-        position: relative;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      .sponsor-modal-close {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: #666;
-        transition: color 0.2s;
-        padding: 5px;
-        line-height: 1;
-      }
-      .sponsor-modal-close:hover {
-        color: #000;
-        transform: scale(1.1);
-      }
-      .sponsor-qr-image {
-        width: 100%;
-        height: auto;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        display: block; /* Ensure it takes up space */
-      }
-      .sponsor-modal-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #333;
-      }
-      .sponsor-modal-desc {
-        color: #666;
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      @keyframes scaleIn {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-      }
-      /* Dark mode support */
-      html[data-mode='dark'] .sponsor-modal-content {
-        background: #2b2b2b;
-        color: #e0e0e0;
-      }
-      html[data-mode='dark'] .sponsor-modal-title {
-        color: #fff;
-      }
-      html[data-mode='dark'] .sponsor-modal-desc {
-        color: #aaa;
-      }
-      html[data-mode='dark'] .sponsor-modal-close {
-        color: #aaa;
-      }
-      html[data-mode='dark'] .sponsor-modal-close:hover {
-        color: #fff;
-      }
-    </style>
 
     <!-- Hidden data element for liquid URL - No longer needed for lazy load but keeping structure simple -->
     
     <!-- Sponsor Icon Button in Footer -->
-    <a href="#" aria-label="sponsor" onclick="event.preventDefault(); openSponsorModal();">
+    <a href="#" aria-label="sponsor" onclick="openSponsorModal(event);">
       <i class="fas fa-heart" style="color: #ff6b6b;"></i>
     </a>
 
-    <!-- Modal HTML -->
-    <div id="sponsorModal" class="sponsor-modal-overlay" onclick="closeSponsorModal(event)">
-      <div class="sponsor-modal-content" onclick="event.stopPropagation()">
-        <button class="sponsor-modal-close" onclick="closeSponsorModal()">&times;</button>
-        <h3 class="sponsor-modal-title">Support OPSOAI ☕</h3>
-        <p class="sponsor-modal-desc">QR code scan</p>
-        <img id="qrImage" src="{{ '/assets/img/sponsor-qr.png' | relative_url }}" alt="Sponsorship QR Code" class="sponsor-qr-image">
-      </div>
-    </div>
-
-    <script>
-      window.openSponsorModal = function() {
-        var modal = document.getElementById('sponsorModal');
-        
-        // Move modal to body to avoid stacking context issues
-        if (modal && modal.parentNode !== document.body) {
-            document.body.appendChild(modal);
-        }
-
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent scrolling background
-        }
-      };
-
-      window.closeSponsorModal = function(event) {
-        // If event is present, it means it's a click on the overlay
-        // We verify that the click wasn't on the content (handled by stopPropagation on content)
-        var modal = document.getElementById('sponsorModal');
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scrolling
-        }
-      };
-
-      // Close on Escape key
-      document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-          window.closeSponsorModal();
-        }
-      });
-    </script>
 
     {% unless site.theme_mode %}
       <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
