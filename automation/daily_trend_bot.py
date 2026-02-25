@@ -129,44 +129,24 @@ def generate_blog_post(client, topic_data):
     
     print(f"Generating content for: {topic_name} (URL: {github_url}) using query: {search_query}")
     
-    prompt_text = f"""
-    **Role:** Expert Tech Columnist (Professional but Accessible)
-    **Task:** Write a high-quality, professional, yet easy-to-read blog post in **Korean** about: **{topic_name}**.
-    
-    **Research & Verification (CRITICAL):**
-    1.  **Target Repository**: **{github_url}**
-    2.  **Verify Content**: You MUST access and read the README/Documentation of this specific URL.
-    3.  **Scope**: Cover **EVERYTHING** in the README. If the README is long, summarize all sections (Features, Installation, Usage, Configuration, Architecture, Contributing, etc.). Do not miss major details.
-    
-    **Content Structure:**
-    1.  **Title (Korean)**: Catchy, Viral, and "Click-worthy". **IMPORTANT: Do NOT start with "Developer..." or "개발자..." every time. Vary the structure.** (e.g., "Is this usage real?", "Why [Topic] is trending...", "Finally, an AI that...").
-    2.  **Title (English)**: Simple, descriptive title for the filename (e.g., "OpenClaw-The-AI-Agent").
-    3.  **Introduction**: Hook the reader. Explain the unique value.
-    4.  **Key Features**: Comprehensive breakdown of ALL features mentioned in README.
-    5.  **Deep Dive / Architecture**: Explain how it works internally.
-    6.  **Installation & Setup**: Detailed step-by-step from README.
-    7.  **Usage Guide**: How to use it after installation.
-    8.  **Use Cases**: Real-world scenarios.
-    9.  **Comparison**: Pros and cons.
-    10. **Conclusion**: Final verdict.
-    
-    **Constraints:**
-    - **Language**: Korean (Body & Main Title). Polite, professional tone (~합니다/해요).
-    - **Formatting**: Markdown. Bold emphasis.
-    - **Content**: **DO NOT INCLUDE 'Author' or 'Date' lines in the body text.**
-    - **Images**: **DO NOT** embed images in the body text. Text only.
-    - **Length**: Extremely detailed. 3000+ characters.
-    
-    **Output Schema (JSON):**
-    Return a JSON object with:
-    - title_korean: String (Korean, Catchy)
-    - title_english: String (English, for filename, dashes used for spaces)
-    - summary: String (for front matter, **KOREAN**)
-    - content: String (Markdown body, Text ONLY, NO images)
-    - reference_links: List[String] (URLs found)
+    # Load prompt from config
+    config_path = os.path.join(os.path.dirname(__file__), 'prompt_config.json')
+    import json
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            prompt_template = config['daily_trend_bot']['system_prompt']
+    except Exception as e:
+        print(f"Error loading prompt_config.json: {e}. Using fallback prompt.")
+        prompt_template = """
+        Write a blog post about {topic_name}.
+        Repository: {github_url}
+        """
 
-    IMPORTANT: Return ONLY the JSON object, starting with {{ and ending with }}.
-    """
+    prompt_text = prompt_template.format(
+        topic_name=topic_name,
+        github_url=github_url
+    )
     
     tools = [types.Tool(google_search=types.GoogleSearch())]
     

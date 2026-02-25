@@ -1,0 +1,45 @@
+name: Blog Self-Improvement Pipeline
+
+on:
+  schedule:
+    - cron: '0 15 * * 0' # 00:00 KST Monday (15:00 UTC Sunday)
+  workflow_dispatch:
+
+jobs:
+  refine_prompts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd automation
+          pip install google-analytics-data google-genai
+          # Add other dependencies if needed, or pip install -r requirements.txt if updated
+
+      - name: Run Prompt Refiner
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_CREDENTIALS_JSON: ${{ secrets.GA4_CREDENTIALS_JSON }}
+        run: |
+          cd automation
+          python prompt_refiner.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name 'OPSOAI Bot'
+          git config --global user.email 'bot@opsoai.com'
+          git add automation/prompt_config.json automation/prompt_config.backup.json
+          git commit -m "Auto-evolve prompts based on GA4 traffic data [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+          git pull --rebase
+          git push

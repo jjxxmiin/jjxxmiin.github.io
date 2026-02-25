@@ -28,3 +28,6 @@ assets/js/dist
 
 __pycache__/*
 __pycache__
+
+.env
+GA4_CREDENTIALS_JSON.json
