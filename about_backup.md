@@ -24,5 +24,5 @@ order: 4
 OPSOAI는 AI 기술의 대중화와 전문 지식의 공유를 지향합니다.
 문의사항이 있으시다면 언제든 연락 부탁드립니다.
 
-*   **Email**: common.jaemin@gmail.com
+*   **Email**: ceo@opsoai.com
 *   **Github**: [jjxxmiin](https://github.com/jjxxmiin)

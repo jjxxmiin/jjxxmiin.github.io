@@ -139,7 +139,7 @@ setuptools.setup(
     name            = "[NAME]", # Replace with your own username
     version         = "0.0.1",
     author          = "Jaemin Jeong",
-    author_email    = "woalsdl600@gmail.com",
+    author_email    = "ceo@opsoai.com",
     description     = "[description]",
     url             = "[Github repository url]",
     project_urls    = {"Bug Tracker": "[Github repository url]/issues",

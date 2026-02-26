@@ -35,7 +35,7 @@ jobs:
       - name: Commit and Push
         run: |
           git config --global user.name 'OPSOAI Bot'
-          git config --global user.email 'bot@opsoai.com'
+          git config --global user.email 'ceo@opsoai.com'
           git add _posts/
           git commit -m "Auto-generated trend post for $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git pull --rebase

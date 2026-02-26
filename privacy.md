@@ -32,6 +32,6 @@ permalink: /privacy/
 ## 4. 개인정보 관리 책임자
 
 *   이름: OPSOAI 운영진
-*   이메일: common.jaemin@gmail.com
+*   이메일: ceo@opsoai.com
 
 본 방침은 2025년 12월 29일부터 시행됩니다.

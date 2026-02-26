@@ -38,7 +38,7 @@ jobs:
       - name: Commit and Push Changes
         run: |
           git config --global user.name 'OPSOAI Bot'
-          git config --global user.email 'bot@opsoai.com'
+          git config --global user.email 'ceo@opsoai.com'
           git add automation/prompt_config.json automation/prompt_config.backup.json
           git commit -m "Auto-evolve prompts based on GA4 traffic data [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
           git pull --rebase
