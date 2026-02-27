@@ -6,6 +6,7 @@ import requests
 from google import genai
 from google.genai import types
 import yaml
+import urllib.parse
 
 # Configuration
 HF_DAILY_PAPERS_URL = "https://huggingface.co/api/daily_papers"
@@ -143,9 +144,10 @@ def extract_arxiv_info(paper_id):
             if not img_src:
                 continue
             
-            # Construct absolute URL
-            # img_src is usually relative like 'x1.png'
-            full_img_url = f"{url}/{img_src}"
+            # Construct absolute URL robustly
+            # Ensure base ends with slash so urljoin doesn't drop the ID segment
+            base_url = response.url if response.url.endswith('/') else response.url + '/'
+            full_img_url = urllib.parse.urljoin(base_url, img_src)
             
             caption_tag = fig.find('figcaption')
             caption = caption_tag.get_text(strip=True) if caption_tag else ""
