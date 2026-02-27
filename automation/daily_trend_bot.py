@@ -8,6 +8,7 @@ from google.genai import types
 # Configuration
 POSTS_DIR = "../_posts"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
+FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview"]
 
 def get_gemini_client():
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -29,6 +30,42 @@ def get_thinking_config(thinking_level="HIGH"):
         print(f"Warning: ThinkingConfig validation failed ({e}). Fallback to include_thoughts=True.")
         # Fallback for older versions or validation issues
         return types.ThinkingConfig(include_thoughts=True)
+
+def generate_content_with_fallback(client, contents, response_schema=None, tools=None, thinking_level=None):
+    """
+    Unified helper to generate content with fallback logic and optional thinking.
+    """
+    for model_id in FALLBACK_MODELS:
+        try:
+            print(f"Attempting with {model_id}...")
+            
+            # Prepare config
+            gen_config = {
+                "response_mime_type": "application/json" if response_schema else "text/plain",
+            }
+            if response_schema:
+                gen_config["response_schema"] = response_schema
+            if tools:
+                gen_config["tools"] = tools
+            if thinking_level:
+                gen_config["thinking_config"] = get_thinking_config(thinking_level)
+
+            response = client.models.generate_content(
+                model=model_id, 
+                contents=contents,
+                config=types.GenerateContentConfig(**gen_config)
+            )
+            
+            if response.text:
+                return response.text
+        except Exception as e:
+            if "503" in str(e) or "overloaded" in str(e).lower():
+                print(f"Model {model_id} overloaded (503). Trying fallback...")
+                continue
+            else:
+                print(f"Error with {model_id}: {e}")
+                continue
+    return None
 
 def find_trending_topic(client):
     """
@@ -59,49 +96,41 @@ def find_trending_topic(client):
     IMPORTANT: Return ONLY the JSON LIST, starting with [ and ending with ]. Do not add markdown formatting like ```json.
     """
     
+    response_schema = {
+        "type": "ARRAY",
+        "items": {
+            "type": "OBJECT",
+            "properties": {
+                "topic_name": {"type": "STRING"},
+                "github_url": {"type": "STRING"},
+                "description": {"type": "STRING"},
+                "search_query": {"type": "STRING"}
+            },
+            "required": ["topic_name", "github_url", "description", "search_query"]
+        }
+    }
+    
     tools = [types.Tool(google_search=types.GoogleSearch())]
     
-    # Use gemini-3-pro-preview with thinking
-    response = client.models.generate_content(
-        model="gemini-3-pro-preview", 
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            tools=tools,
-            thinking_config=get_thinking_config("HIGH"),
-        )
+    # Retrieval task: No thinking config to avoid hangs/latency
+    response_text = generate_content_with_fallback(
+        client, 
+        prompt, 
+        response_schema=response_schema, 
+        tools=tools, 
+        thinking_level=None 
     )
     
-    if response.text:
+    if response_text:
         import json
-        import re
         try:
-            text = response.text.strip()
-            # Try to find JSON list
-            match = re.search(r'\[.*\]', text, re.DOTALL)
-            if match:
-                text = match.group(0)
-            elif text.startswith("```json"):
-                text = text[7:]
-            if text.startswith("```"):
-                text = text[3:]
-            if text.endswith("```"):
-                text = text[:-3]
-            
-            data = json.loads(text.strip())
-            
-            # Ensure it's a list
-            if isinstance(data, dict):
-                data = [data]
-                
+            data = json.loads(response_text)
             print(f"Identified {len(data)} potential trends.")
             for item in data:
                 print(f"- {item.get('topic_name')}: {item.get('description')}")
-                
             return data
         except Exception as e:
             print(f"Error parsing trend data: {e}")
-            print(f"Raw text: {response.text}")
-            return []
     return []
 
 def check_duplication(topic_name):
@@ -143,46 +172,43 @@ def generate_blog_post(client, topic_data):
         Repository: {github_url}
         """
 
-    prompt_text = prompt_template.format(
-        topic_name=topic_name,
-        github_url=github_url
+    prompt_text = prompt_template.replace(
+        "{topic_name}", topic_name
+    ).replace(
+        "{github_url}", github_url
     )
     
+    response_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "title_korean": {"type": "STRING"},
+            "title_english": {"type": "STRING"},
+            "summary": {"type": "STRING"},
+            "content": {"type": "STRING"},
+            "reference_links": {"type": "ARRAY", "items": {"type": "STRING"}}
+        },
+        "required": ["title_korean", "title_english", "summary", "content"]
+    }
+
     tools = [types.Tool(google_search=types.GoogleSearch())]
     
-    response = client.models.generate_content(
-        model="gemini-3-pro-preview", 
-        contents=prompt_text,
-        config=types.GenerateContentConfig(
-            tools=tools,
-            thinking_config=get_thinking_config("HIGH"),
-        )
+    # Generation task: Use HIGH thinking for quality
+    response_text = generate_content_with_fallback(
+        client, 
+        prompt_text, 
+        response_schema=response_schema, 
+        tools=tools, 
+        thinking_level="HIGH"
     )
     
-    if response.text:
+    if response_text:
         import json
-        import re
         try:
-            text = response.text.strip()
-            # Try to find JSON object
-            match = re.search(r'\{.*\}', text, re.DOTALL)
-            if match:
-                text = match.group(0)
-            elif text.startswith("```json"):
-                text = text[7:]
-            if text.startswith("```"):
-                text = text[3:]
-            if text.endswith("```"):
-                text = text[:-3]
-                
-            data = json.loads(text.strip())
-            # Inject github_url so save_post can use it
+            data = json.loads(response_text)
             data['github_url'] = github_url
             return data
         except Exception as e:
             print(f"Error parsing blog post JSON: {e}")
-            print(f"Raw text: {response.text[:500]}...")
-            return None
     return None
 
 def save_post(post_data):

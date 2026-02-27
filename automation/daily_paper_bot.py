@@ -13,6 +13,58 @@ ARXIV_HTML_URL = "https://arxiv.org/html"
 POSTS_DIR = "../_posts"
 IMAGE_DIR = "../assets/img/papers"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
+FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview"]
+
+def get_thinking_config(thinking_level="HIGH"):
+    """
+    Helper to create ThinkingConfig with fallback for compatibility.
+    Some environments might have different validation/version for google-genai.
+    """
+    try:
+        if thinking_level == "HIGH":
+            # Try to use the enum if possible, or string
+            return types.ThinkingConfig(thinking_level="HIGH")
+        return types.ThinkingConfig(thinking_level=thinking_level)
+    except Exception as e:
+        print(f"Warning: ThinkingConfig validation failed ({e}). Fallback to include_thoughts=True.")
+        # Fallback for older versions or validation issues
+        return types.ThinkingConfig(include_thoughts=True)
+
+def generate_content_with_fallback(client, contents, response_schema=None, tools=None, thinking_level=None):
+    """
+    Unified helper to generate content with fallback logic and optional thinking.
+    """
+    for model_id in FALLBACK_MODELS:
+        try:
+            print(f"Attempting with {model_id}...")
+            
+            # Prepare config
+            gen_config = {
+                "response_mime_type": "application/json" if response_schema else "text/plain",
+            }
+            if response_schema:
+                gen_config["response_schema"] = response_schema
+            if tools:
+                gen_config["tools"] = tools
+            if thinking_level:
+                gen_config["thinking_config"] = get_thinking_config(thinking_level)
+
+            response = client.models.generate_content(
+                model=model_id, 
+                contents=contents,
+                config=types.GenerateContentConfig(**gen_config)
+            )
+            
+            if response.text:
+                return response.text
+        except Exception as e:
+            if "503" in str(e) or "overloaded" in str(e).lower():
+                print(f"Model {model_id} overloaded (503). Trying fallback...")
+                continue
+            else:
+                print(f"Error with {model_id}: {e}")
+                continue
+    return None
 
 
 def fetch_daily_papers():
@@ -163,7 +215,7 @@ def generate_blog_post(paper, images=None):
         raise ValueError("GEMINI_API_KEY not found in environment variables")
     
     client = genai.Client(api_key=api_key)
-    model_id = "gemini-3-flash-preview" 
+    model_id = "gemini-3.1-pro-preview" 
 
     # Format images for the prompt
     images_text = "No images available."
@@ -190,11 +242,14 @@ def generate_blog_post(paper, images=None):
         Images: {images_text}
         """
 
-    prompt_text = prompt_template.format(
-        title=paper['title'],
-        summary=paper['summary'],
-        id=paper['id'],
-        images_text=images_text
+    prompt_text = prompt_template.replace(
+        "{title}", paper['title']
+    ).replace(
+        "{summary}", paper['summary']
+    ).replace(
+        "{id}", paper['id']
+    ).replace(
+        "{images_text}", images_text
     )
 
     response_schema = {
@@ -211,43 +266,21 @@ def generate_blog_post(paper, images=None):
         types.Tool(google_search=types.GoogleSearch())
     ]
     
-    generate_content_config = types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(
-            include_thoughts=True,
-        ),
-        tools=tools,
-        response_mime_type="application/json",
-        response_schema=response_schema
+    # Generation task: Use HIGH thinking for quality
+    response_text = generate_content_with_fallback(
+        client, 
+        prompt_text, 
+        response_schema=response_schema, 
+        tools=tools, 
+        thinking_level="HIGH"
     )
     
-    contents = [
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=prompt_text),
-            ],
-        ),
-    ]
-
-    print("Generating content with Gemini (JSON mode)...")
-    # Non-streaming for JSON usually safer to ensure complete valid JSON, but stream is fine if we concat.
-    # However, for JSON mode, non-streaming is often simpler.
-    response = client.models.generate_content(
-        model=model_id,
-        contents=contents,
-        config=generate_content_config,
-    )
-    
-    # Check if response has text (it should be JSON string)
-    if response.text:
+    if response_text:
         import json
         try:
-             # Parse JSON
-             return json.loads(response.text)
-        except json.JSONDecodeError as e:
-             print(f"Failed to parse JSON response: {e}")
-             print(f"Raw response: {response.text[:200]}...")
-             return None
+            return json.loads(response_text)
+        except Exception as e:
+            print(f"Error parsing blog post JSON: {e}")
     return None
 
 def save_post(paper, post_data, images=None):
