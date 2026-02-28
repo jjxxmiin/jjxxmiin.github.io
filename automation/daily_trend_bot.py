@@ -76,7 +76,7 @@ def find_trending_topic(client):
     
     prompt = """
     Target: https://github.com/trending?since=daily
-    Task: Find the **Top 5** most "hot" and trending AI open source projects from `github.com/trending?since=daily` (Daily Trending).
+    Task: Find the **Top 15** most "hot" and trending AI open source projects from `github.com/trending?since=daily` (Daily Trending).
     
     Criteria:
     - Must be an AI/ML related project.
@@ -133,20 +133,43 @@ def find_trending_topic(client):
             print(f"Error parsing trend data: {e}")
     return []
 
-def check_duplication(topic_name):
-    """Checks if a post about this topic already exists."""
+def check_duplication(github_url, topic_name):
+    """
+    Checks if a post with this GitHub URL or topic name already exists.
+    1. Scans file content for the github_url.
+    2. Fallback: Scans filenames for the topic name.
+    """
     if not os.path.exists(POSTS_DIR):
         return False
         
+    # 1. URL-based check (Primary)
+    if github_url:
+        clean_url = github_url.strip().rstrip('/')
+        print(f"Checking for existing posts with URL: {clean_url}")
+        
+        for filename in os.listdir(POSTS_DIR):
+            if filename.endswith(".md"):
+                filepath = os.path.join(POSTS_DIR, filename)
+                try:
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        if clean_url in content:
+                            print(f"Skipping: Post already exists for URL {clean_url} ({filename})")
+                            return True
+                except Exception as e:
+                    print(f"Error reading {filename}: {e}")
+
+    # 2. Title-based check (Fallback for old posts)
     topic_clean = topic_name.lower().replace(" ", "")
+    print(f"Checking for existing posts with topic: {topic_name} (Clean: {topic_clean})")
     
     for filename in os.listdir(POSTS_DIR):
         if filename.endswith(".md"):
-            # Simple check: is the topic name part of the filename?
             # Filenames are usually YYYY-MM-DD-title.md
             if topic_clean in filename.lower().replace("-", ""):
-                print(f"Skipping: Post likely exists for {topic_name} ({filename})")
+                print(f"Skipping: Post likely exists for topic {topic_name} ({filename})")
                 return True
+                
     return False
 
 def generate_blog_post(client, topic_data):
@@ -252,7 +275,8 @@ def save_post(post_data):
         "date": f"{date_str}",
         "categories": "Tech", # Single category
         "summary": post_data['summary'],
-        "author": "AI Trend Bot"
+        "author": "AI Trend Bot",
+        "github_url": github_url
     }
     
     if image_data:
@@ -287,16 +311,21 @@ def main():
             print("No trending topics found.")
             return
 
-        post_generated = False
+        posts_to_generate = 10
+        posts_count = 0
         
         for topic_data in topics_list:
+            if posts_count >= posts_to_generate:
+                break
+
             topic_name = topic_data['topic_name']
+            github_url = topic_data.get('github_url', '')
             
             # 2. Check Duplication
-            if check_duplication(topic_name):
+            if check_duplication(github_url, topic_name):
                 continue # Try next topic
             
-            print(f"Selected topic: {topic_name}")
+            print(f"Selected topic ({posts_count+1}/{posts_to_generate}): {topic_name}")
             
             # 3. Generate Post
             post_data = generate_blog_post(client, topic_data)
@@ -305,7 +334,8 @@ def main():
                 # 4. Save
                 save_post(post_data)
                 post_generated = True
-                break # We only want 1 post per run
+                posts_count += 1
+                # break # We only want 1 post per run -> removed break for 10 posts
             else:
                 print(f"Failed to generate post content for {topic_name}. Trying next...")
                 
