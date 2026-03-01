@@ -236,13 +236,16 @@ def generate_blog_post(client, topic_data):
 
 def save_post(post_data):
     """Saves the post to a file."""
+    # Calculate US Eastern Time (UTC-5)
     utc_now = datetime.datetime.now(datetime.timezone.utc)
-    korea_time = utc_now + datetime.timedelta(hours=9)
-    date_str = korea_time.strftime("%Y-%m-%d")
+    est_time = utc_now - datetime.timedelta(hours=5)
+    
+    date_filename = est_time.strftime("%Y-%m-%d")
+    date_frontmatter = est_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Use English title for filename
     safe_title = "".join([c if c.isalnum() or c == '-' else "" for c in post_data.get('title_english', 'New-Post').replace(" ", "-")]).strip("-")
-    filename = f"{date_str}-{safe_title}.md"
+    filename = f"{date_filename}-{safe_title}.md"
     filepath = os.path.join(POSTS_DIR, filename)
     
     # Construct OpenGraph Image URL
@@ -272,7 +275,7 @@ def save_post(post_data):
     front_matter = {
         "layout": "post",
         "title": post_data.get('title_korean', post_data.get('title', 'Untitled')),
-        "date": f"{date_str}",
+        "date": date_frontmatter,
         "categories": "Tech", # Single category
         "summary": post_data['summary'],
         "author": "AI Trend Bot",

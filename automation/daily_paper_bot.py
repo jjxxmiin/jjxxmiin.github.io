@@ -291,14 +291,16 @@ def save_post(paper, post_data, images=None):
         print("No post data to save.")
         return
 
-    # Use US Eastern Time (UTC-5)
+    # Calculate US Eastern Time (UTC-5)
     utc_now = datetime.datetime.now(datetime.timezone.utc)
-    us_time = utc_now - datetime.timedelta(hours=5) # approximated EST
-    date_str = us_time.strftime("%Y-%m-%d")
+    est_time = utc_now - datetime.timedelta(hours=5)
+    
+    date_filename = est_time.strftime("%Y-%m-%d")
+    date_frontmatter = est_time.strftime("%Y-%m-%d %H:%M:%S")
     
     # Sanitize title for filename
     safe_title = "".join([c if c.isalnum() else "-" for c in paper['title']]).strip("-")
-    filename = f"{date_str}-{safe_title}.md"
+    filename = f"{date_filename}-{safe_title}.md"
     filepath = os.path.join(POSTS_DIR, filename)
     
     # Extract fields from JSON
@@ -315,8 +317,8 @@ def save_post(paper, post_data, images=None):
     # Front Matter
     front_matter = {
         "layout": "post",
-        "title": f"[{paper.get('publishedAt', date_str)[:10]}] {korean_title}",
-        "date": date_str, # YYYY-MM-DD
+        "title": f"[{paper.get('publishedAt', date_filename)[:10]}] {korean_title}",
+        "date": date_frontmatter,
         "categories": "tech", 
         "math": True,
         "summary": summary
