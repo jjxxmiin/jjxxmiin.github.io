@@ -314,8 +314,9 @@ def main():
             print("No trending topics found.")
             return
 
-        posts_to_generate = 10
+        posts_to_generate = 1
         posts_count = 0
+        post_generated = False
         
         for topic_data in topics_list:
             if posts_count >= posts_to_generate:
@@ -338,7 +339,7 @@ def main():
                 save_post(post_data)
                 post_generated = True
                 posts_count += 1
-                # break # We only want 1 post per run -> removed break for 10 posts
+                break # We only want 1 post per run
             else:
                 print(f"Failed to generate post content for {topic_name}. Trying next...")
                 
