@@ -8,7 +8,7 @@ from google.genai import types
 # Configuration
 POSTS_DIR = "../_posts"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
-FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview"]
+FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview"]
 
 def get_gemini_client():
     api_key = os.environ.get("GEMINI_API_KEY")

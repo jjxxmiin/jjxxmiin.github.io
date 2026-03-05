@@ -14,7 +14,7 @@ ARXIV_HTML_URL = "https://arxiv.org/html"
 POSTS_DIR = "../_posts"
 IMAGE_DIR = "../assets/img/papers"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
-FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-3-flash-preview"]
+FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview"]
 
 def get_thinking_config(thinking_level="HIGH"):
     """
