@@ -125,7 +125,12 @@ script_includes:
   {% endif %}
 
   <div class="content">
-    {{ content }}
+    {% include google-ad-post-top.html %}
+    
+    {% assign placeholder = '<!-- middle_ad_placeholder -->' %}
+    {% assign content_with_placeholder = content | replace_first: '</p>', placeholder %}
+    
+    {{ content_with_placeholder | replace_first: '</p>', '</p>{% include google-ad-post-middle.html %}' | replace: placeholder, '</p>' }}
   </div>
 
   {% include google-ad-post-bottom.html %}
