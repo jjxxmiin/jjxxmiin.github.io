@@ -8,13 +8,21 @@ from google.genai import types
 import yaml
 import urllib.parse
 
+# Base Directory (Directory of the script itself)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Configuration
 HF_DAILY_PAPERS_URL = "https://huggingface.co/api/daily_papers"
 ARXIV_HTML_URL = "https://arxiv.org/html"
-POSTS_DIR = "../_posts"
-IMAGE_DIR = "../assets/img/papers"
+POSTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../_posts"))
+IMAGE_DIR = os.path.abspath(os.path.join(BASE_DIR, "../assets/img/papers"))
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
 FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview"]
+
+# Common User-Agent to avoid bot detection
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
 
 def get_thinking_config(thinking_level="HIGH"):
     """
@@ -71,7 +79,7 @@ def generate_content_with_fallback(client, contents, response_schema=None, tools
 def fetch_daily_papers():
     """Fetches daily papers from Hugging Face API."""
     try:
-        response = requests.get(HF_DAILY_PAPERS_URL)
+        response = requests.get(HF_DAILY_PAPERS_URL, headers=HEADERS)
         response.raise_for_status()
         return response.json()
     except Exception as e:
@@ -128,7 +136,7 @@ def extract_arxiv_info(paper_id):
     url = f"{ARXIV_HTML_URL}/{paper_id}"
     try:
         print(f"Fetching Arxiv page: {url}")
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -195,7 +203,7 @@ def download_images(images, paper_id):
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             
             print(f"Downloading {img_url} to {save_path}...")
-            r = requests.get(img_url, stream=True)
+            r = requests.get(img_url, headers=HEADERS, stream=True)
             r.raise_for_status()
             with open(save_path, 'wb') as f:
                 r.raw.decode_content = True
@@ -335,7 +343,21 @@ def save_post(paper, post_data, images=None):
     try:
         with open(filepath, "w", encoding="utf-8") as f:
             f.write("---\n")
-            yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
+            # Explicitly format critical fields to avoid YAML parsing issues
+            f.write(f"layout: post\n")
+            title_escaped = korean_title.replace('"', '\\"')
+            f.write(f"title: \"[{paper.get('publishedAt', date_filename)[:10]}] {title_escaped}\"\n")
+            f.write(f"date: '{date_frontmatter}'\n")
+            f.write(f"categories: tech\n")
+            f.write(f"math: true\n")
+            summary_escaped = summary.replace('"', '\\"')
+            f.write(f"summary: \"{summary_escaped}\"\n")
+            
+            if image_path:
+                f.write(f"image:\n")
+                f.write(f"  path: {image_path}\n")
+                f.write(f"  alt: Paper Thumbnail\n")
+                
             f.write("---\n\n")
             
             f.write(content_body)
