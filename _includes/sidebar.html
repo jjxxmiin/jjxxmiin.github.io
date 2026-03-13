@@ -41,6 +41,36 @@
     </ul>
   </nav>
 
+  <style>
+    .jeondal-banner {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      margin-top: auto;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
+    }
+    .jeondal-banner a {
+      display: block;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .jeondal-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .jeondal-banner:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+
+  <div class="jeondal-banner">
+    <a href="https://www.jeondal.com/" target="_blank" rel="noopener noreferrer">
+      <img src="{{ '/assets/img/jeondal-banner.jpg' | relative_url }}" alt="JEONDAL AI Photo Studio" loading="lazy">
+    </a>
+  </div>
+
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
     
 
