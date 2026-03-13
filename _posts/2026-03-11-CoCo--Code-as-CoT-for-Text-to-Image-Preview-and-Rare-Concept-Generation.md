@@ -41,7 +41,7 @@ image:
 🔹 **Step 3: Corrective Visual Refinement (최종 렌더링)**
 이제 뼈대는 완벽히 잡혔습니다. CoCo는 앞서 만든 초안 이미지와 원본 텍스트 프롬프트를 결합해, 미세한 이미지 에디팅 및 텍스처링을 수행합니다. 이때 쓰이는 것이 바로 그들이 구축한 **CoCo-10K 데이터셋**입니다. 1만 쌍의 (구조적 초안 이미지 - 고해상도 최종 이미지)로 학습된 모델은, 뼈대에 살을 붙이고 질감을 입히는 과정에서 레이아웃을 절대 무너뜨리지 않습니다.
 
-![CoCo Pipeline Concept](https://example.com/coco-architecture-diagram.png)
+![CoCo Pipeline Concept](/assets/img/papers/2603.08652/2603.08652v1/x1.png)
 *자연어 프롬프트가 코드로 변환되어 샌드박스에서 초안 렌더링을 거친 후, 최종 고해상도 이미지로 정제되는 과정. 블랙박스였던 공간 추론이 '코드'라는 명시적 형태로 튀어나온 것이 핵심입니다.*
 
 ---

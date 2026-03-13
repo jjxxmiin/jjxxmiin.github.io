@@ -4,7 +4,7 @@ from daily_paper_bot import extract_arxiv_info, download_images, IMAGE_DIR
 
 def test_extraction():
     # Use the paper ID we found earlier: 2601.18129
-    paper_id = "2601.18129"
+    paper_id = "2603.08652"
     
     print(f"Testing extraction for paper {paper_id}...")
     images = extract_arxiv_info(paper_id)

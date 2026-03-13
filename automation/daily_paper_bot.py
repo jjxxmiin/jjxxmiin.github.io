@@ -153,9 +153,10 @@ def extract_arxiv_info(paper_id):
                 continue
             
             # Construct absolute URL robustly
-            # Ensure base ends with slash so urljoin doesn't drop the ID segment
-            base_url = response.url if response.url.endswith('/') else response.url + '/'
-            full_img_url = urllib.parse.urljoin(base_url, img_src)
+            # Most Arxiv HTML pages use relative paths that might include the versioned ID.
+            # We use the parent folder of the HTML page as the base.
+            parent_url = response.url.rsplit('/', 1)[0] + '/'
+            full_img_url = urllib.parse.urljoin(parent_url, img_src)
             
             caption_tag = fig.find('figcaption')
             caption = caption_tag.get_text(strip=True) if caption_tag else ""
@@ -191,8 +192,8 @@ def download_images(images, paper_id):
         
         # Ensure filename is safe or just use index if weird
         # Arxiv usually names them x1.png, x2.png etc. 
-        # But let's prefix with paper_id just in case or keep structure
-        filename = f"{src_filename}"
+        # But for recent HTML renderings, src_filename might be "IDv1/x1.png"
+        filename = src_filename
         save_path = os.path.join(target_dir, filename)
         
         # Web accessible path for Jekyll
