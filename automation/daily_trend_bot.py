@@ -8,7 +8,14 @@ from google.genai import types
 # Configuration
 POSTS_DIR = "../_posts"
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
-FALLBACK_MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview"]
+# Preview models first (best quality), then stable aliases as a safety net so the
+# pipeline keeps working even after a preview model is retired.
+FALLBACK_MODELS = [
+    "gemini-3.1-pro-preview",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-flash-latest",
+]
 
 def get_gemini_client():
     api_key = os.environ.get("GEMINI_API_KEY")
