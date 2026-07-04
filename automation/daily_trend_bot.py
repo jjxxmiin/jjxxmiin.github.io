@@ -310,10 +310,31 @@ def save_post(post_data):
                 
     print(f"Saved post to {filepath}")
 
+def preflight_check(client):
+    """
+    Fail LOUDLY (non-zero exit) if the API key is invalid/denied.
+    Without this, a dead GEMINI_API_KEY makes find_trending_topic() return []
+    and the run finishes green with no post — a silent outage that gives no
+    red run and no alert email. This turns that into a visible failure.
+    """
+    try:
+        client.models.generate_content(model=FALLBACK_MODELS[-1], contents="ping")
+    except Exception as e:
+        msg = str(e)
+        if any(k in msg for k in ("API_KEY_INVALID", "API key not valid",
+                                  "PERMISSION_DENIED", "UNAUTHENTICATED", "401", "403")):
+            print(f"FATAL: GEMINI_API_KEY is invalid or unauthorized -> {e}")
+            raise SystemExit(1)
+        # Transient/other errors: don't block; the fallback loop will handle them.
+        print(f"Preflight warning (non-fatal): {e}")
+
 def main():
     try:
         client = get_gemini_client()
-        
+
+        # 0. Preflight: dead key -> red run + email instead of silent green
+        preflight_check(client)
+
         # 1. Find Trends (List)
         topics_list = find_trending_topic(client)
         
