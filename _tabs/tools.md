@@ -24,7 +24,7 @@ title: TOOLS
 .tcard:hover { transform:translateY(-3px); box-shadow:var(--card-shadow); border-color:rgba(42,120,214,.45); }
 .tcard-main { display:flex; gap:.7rem; align-items:center; padding:.85rem .9rem; color:inherit; }
 .tcard-main:hover { text-decoration:none; }
-.tlogo { width:44px; height:44px; border-radius:10px; flex-shrink:0; background:#f0eee9; object-fit:cover; }
+.tlogo { width:44px; height:44px; border-radius:10px; flex-shrink:0; background:rgba(128,128,128,.15); object-fit:cover; }
 .tbody { min-width:0; }
 .tname { font-weight:800; font-size:.95rem; color:var(--text-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ttitle { font-size:.8rem; color:var(--text-muted-color); line-height:1.4; margin-top:.15rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:keep-all; }
@@ -38,7 +38,7 @@ title: TOOLS
 
 <div class="tools-head" markdown="0">
   <div class="h">AI 툴 도감</div>
-  <div class="sub">블로그가 다룬 <b id="tools-count">{{ tools | size }}</b>개의 AI 툴 · 매일 새 글마다 자동으로 추가됩니다</div>
+  <div class="sub">블로그가 다룬 <b id="tools-count">{{ tools | size }}</b>개의 AI 툴, 매일 새 글마다 자동으로 추가됩니다</div>
 </div>
 
 <div class="tools-controls" markdown="0">

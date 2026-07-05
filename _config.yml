@@ -85,7 +85,7 @@ pageviews:
 #     light  - Use the light color scheme
 #     dark   - Use the dark color scheme
 #
-theme_mode: light # [light|dark]
+theme_mode: # 비워두면 방문자 시스템 설정(라이트/다크)을 따르고 사이드바에 토글이 표시됨
 
 # The CDN endpoint for images.
 # Notice that once it is assigned, the CDN url

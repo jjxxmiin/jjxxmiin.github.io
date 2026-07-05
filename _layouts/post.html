@@ -127,26 +127,32 @@ script_includes:
   {% if page.project %}
     {% assign pj = page.project %}
     <style>
-      .proj-meta { border:1px solid var(--main-border-color); background:var(--card-bg); border-radius:12px; padding:.9rem 1.1rem; margin:0 0 1.4rem; }
-      .proj-meta .pt { font-size:.72rem; font-weight:800; letter-spacing:.1em; color:#2a78d6; margin-bottom:.6rem; }
-      .proj-meta .pg { display:flex; flex-wrap:wrap; gap:.45rem .9rem; }
-      .proj-meta .pg span { font-size:.82rem; color:var(--text-muted-color); }
-      .proj-meta .pg b { color:var(--text-color); font-variant-numeric:tabular-nums; }
-      .proj-meta .pl { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.65rem; }
-      .proj-meta .pl span { font-size:.72rem; padding:.14rem .5rem; border-radius:999px; background:rgba(42,120,214,.11); color:#2a78d6; font-weight:600; }
+      .proj { border:1px solid var(--main-border-color); background:var(--card-bg); border-radius:14px; padding:1.05rem 1.15rem 1.2rem; margin:0 0 1.6rem; }
+      .proj-h { display:flex; align-items:center; gap:.5rem; font-size:.86rem; font-weight:800; color:var(--text-color); margin-bottom:.9rem; }
+      .proj-h > i { color:#2a78d6; font-size:.95rem; }
+      .proj-h .sep { flex:1; height:1px; background:var(--main-border-color); }
+      .proj-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(84px,1fr)); gap:.55rem; }
+      .proj-t { text-align:center; padding:.7rem .3rem .75rem; border-radius:11px; background:rgba(42,120,214,.055); border:1px solid var(--main-border-color); }
+      .proj-t > i { font-size:.88rem; color:#2a78d6; }
+      .proj-t .n { display:block; font-size:1.12rem; font-weight:800; color:var(--text-color); line-height:1.15; margin-top:.28rem; font-variant-numeric:tabular-nums; word-break:break-word; }
+      .proj-t .n.sm { font-size:.9rem; letter-spacing:-.01em; }
+      .proj-t .l { display:block; font-size:.67rem; color:var(--text-muted-color); margin-top:.22rem; }
+      .proj-langs { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.95rem; }
+      .proj-langs .lg { font-size:.72rem; padding:.16rem .58rem; border-radius:999px; background:rgba(128,128,128,.12); color:var(--text-color); }
+      .proj-langs .lg.top { background:rgba(42,120,214,.13); color:#2a78d6; font-weight:700; }
     </style>
-    <div class="proj-meta">
-      <div class="pt">PROJECT AT A GLANCE</div>
-      <div class="pg">
-        {% if pj.stars %}<span><b>{{ pj.stars }}</b> Stars</span>{% endif %}
-        {% if pj.forks %}<span><b>{{ pj.forks }}</b> Forks</span>{% endif %}
-        {% if pj.language %}<span>주 언어 <b>{{ pj.language }}</b></span>{% endif %}
-        {% if pj.files %}<span><b>{{ pj.files }}</b> 파일</span>{% endif %}
-        {% if pj.loc %}<span><b>{{ pj.loc }}</b> 줄</span>{% endif %}
-        {% if pj.license %}<span>라이선스 <b>{{ pj.license }}</b></span>{% endif %}
-        {% if pj.updated %}<span>업데이트 <b>{{ pj.updated }}</b></span>{% endif %}
+    <div class="proj">
+      <div class="proj-h"><i class="fas fa-cube"></i>프로젝트 한눈에 보기<span class="sep"></span></div>
+      <div class="proj-grid">
+        {% if pj.stars %}<div class="proj-t"><i class="fas fa-star"></i><span class="n">{% if pj.stars >= 1000 %}{{ pj.stars | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.stars }}{% endif %}</span><span class="l">스타</span></div>{% endif %}
+        {% if pj.forks %}<div class="proj-t"><i class="fas fa-code-branch"></i><span class="n">{% if pj.forks >= 1000 %}{{ pj.forks | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.forks }}{% endif %}</span><span class="l">포크</span></div>{% endif %}
+        {% if pj.language %}<div class="proj-t"><i class="fas fa-code"></i><span class="n">{{ pj.language }}</span><span class="l">주 언어</span></div>{% endif %}
+        {% if pj.files %}<div class="proj-t"><i class="fas fa-file-lines"></i><span class="n">{% if pj.files >= 1000 %}{{ pj.files | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.files }}{% endif %}</span><span class="l">파일 수</span></div>{% endif %}
+        {% if pj.loc %}<div class="proj-t"><i class="fas fa-align-left"></i><span class="n">{% if pj.loc >= 1000 %}{{ pj.loc | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.loc }}{% endif %}</span><span class="l">코드 줄</span></div>{% endif %}
+        {% if pj.license %}<div class="proj-t"><i class="fas fa-scale-balanced"></i><span class="n">{{ pj.license }}</span><span class="l">라이선스</span></div>{% endif %}
+        {% if pj.updated %}<div class="proj-t"><i class="fas fa-clock-rotate-left"></i><span class="n sm">{{ pj.updated }}</span><span class="l">업데이트</span></div>{% endif %}
       </div>
-      {% if pj.languages %}<div class="pl">{% for l in pj.languages %}<span>{{ l }}</span>{% endfor %}</div>{% endif %}
+      {% if pj.languages %}<div class="proj-langs">{% for l in pj.languages %}<span class="lg{% if l == pj.language %} top{% endif %}">{{ l }}</span>{% endfor %}</div>{% endif %}
     </div>
   {% endif %}
 

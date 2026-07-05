@@ -15,7 +15,7 @@ title: NEWS
 <style>
 .upd { max-width: 860px; }
 .upd-hero { border-radius: 16px; padding: 1.7rem 1.5rem; margin-bottom: 1.3rem;
-  background: linear-gradient(135deg, rgba(42,120,214,.12), rgba(240,238,233,.55));
+  background: linear-gradient(135deg, rgba(42,120,214,.14), rgba(42,120,214,.03));
   border: 1px solid var(--main-border-color); }
 .upd-hero .tag { display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.14em; color:#2a78d6; margin-bottom:.55rem; }
 .upd-hero .txt { font-size:1.3rem; font-weight:800; line-height:1.5; margin:0; color:var(--text-color); word-break:keep-all; }
@@ -45,7 +45,7 @@ title: NEWS
 <div class="upd" markdown="0">
 
   <div class="upd-hero">
-    <div class="tag">THIS WEEK IN AI</div>
+    <div class="tag">이번 주 AI 브리핑</div>
     <p class="txt">{{ news.big_picture | replace: '·', '/' }}</p>
     <div class="meta">{{ news.title_note | replace: '·', '/' }}</div>
   </div>
