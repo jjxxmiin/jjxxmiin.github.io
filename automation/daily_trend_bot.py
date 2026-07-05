@@ -25,6 +25,22 @@ def fix_table_spacing(text):
     return "\n".join(out)
 
 
+_EMOJI = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U00002B00-\U00002BFF"
+    "\U0001F1E6-\U0001F1FF\U0000FE0F\U0000200D]"
+)
+
+
+def strip_emojis(text):
+    """Remove decorative emojis (title/headers/body). Rendered HTML collapses the
+    leftover whitespace, so we only tidy heading markers for clean source."""
+    if not text:
+        return text
+    text = _EMOJI.sub("", text)
+    text = re.sub(r"(?m)^(#{1,6}) +", r"\1 ", text)   # tidy '### <emoji removed> Title'
+    return text
+
+
 def strip_fake_images(text):
     """Drop markdown images pointing at placeholder/invented hosts. The model used to
     insert ![...](https://via.placeholder.com/...) when it had no real image, which
@@ -295,11 +311,18 @@ def generate_blog_post(client, topic_data):
 
     visuals_directive = (
         "[시각 자료 적극 활용 — 매우 중요]\n"
-        "1. 다이어그램(도형): 아키텍처·데이터 흐름·처리 단계를 최소 1개(가능하면 2개) Mermaid 다이어그램으로 그린다. "
-        "```mermaid 코드블록을 쓰고 flowchart TD / sequenceDiagram 등 간단하고 문법 오류 없는 형태로 만든다. "
-        "노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]), 라벨 안에 괄호()·대괄호[]·콜론:은 쓰지 마라(파싱 오류 방지).\n"
-        "2. 도표(표): 비교·수치·트레이드오프는 마크다운 표로 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
+        "1. 다이어그램(도형): 긴 글 전반에 걸쳐 3~4개의 Mermaid 다이어그램을 넣되, 내용에 맞게 '다양한 종류'를 섞어 쓴다.\n"
+        "   - 파이프라인/구조 → flowchart TD (또는 LR)\n"
+        "   - 컴포넌트 간 상호작용/요청 흐름 → sequenceDiagram\n"
+        "   - 데이터 모델/스키마 관계 → erDiagram\n"
+        "   - 상태 전이/생명주기 → stateDiagram-v2\n"
+        "   - 클래스/모듈 구조 → classDiagram, 비중/구성비 → pie\n"
+        "   각 다이어그램은 ```mermaid 코드블록으로 쓰고, 문법 오류가 없도록 간결하게 만든다. "
+        "flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호()·대괄호[]·콜론:은 쓰지 마라. "
+        "한 종류(flowchart)만 반복하지 말고 위 종류를 골고루 활용하라.\n"
+        "2. 도표(표): 비교·수치·트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
         "3. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
+        "4. 이모지: 제목·소제목·본문에 이모지를 쓰지 마라.\n"
         f"{img_note}\n\n"
     )
 
@@ -388,11 +411,12 @@ def save_post(post_data):
     if '\\n' in content:
         content = content.replace('\\n', '\n')
     content = strip_fake_images(content)   # drop placeholder/invented image URLs
+    content = strip_emojis(content)        # no decorative emojis in the body
     content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
 
     front_matter = {
         "layout": "post",
-        "title": post_data.get('title_korean', post_data.get('title', 'Untitled')),
+        "title": strip_emojis(post_data.get('title_korean', post_data.get('title', 'Untitled'))).strip(),
         "date": date_frontmatter,
         "categories": "Tech", # Single category
         "summary": post_data['summary'],

@@ -125,12 +125,21 @@ script_includes:
   {% endif %}
 
   <div class="content">
-    {% capture middle_ad %}{% include google-ad-post-top.html %}{% endcapture %}
-    {% assign ad_with_p = middle_ad | prepend: '</p>' %}
-    {% assign placeholder = '<!-- middle_ad_placeholder -->' %}
-    {% assign content_with_placeholder = content | replace_first: '</p>', placeholder %}
-    
-    {{ content_with_placeholder | replace_first: '</p>', ad_with_p | replace: placeholder, '</p>' }}
+    {%- capture ad_top -%}{% include google-ad-post-top.html %}{%- endcapture -%}
+    {%- capture ad_mid -%}{% include google-ad-post-middle.html %}{%- endcapture -%}
+    {%- assign parts = content | split: '</p>' -%}
+    {%- assign n = parts | size -%}
+    {%- comment -%}
+      광고 위치 최적화: 본문 맨 위가 아니라 도입을 읽은 뒤(3번째 문단 뒤)에 첫 광고를 넣고,
+      긴 글(문단 14개 초과)에는 중반(약 60% 지점)에 광고를 하나 더 넣어 고르게 분산한다.
+    {%- endcomment -%}
+    {%- assign top_at = 3 -%}
+    {%- assign mid_at = n | times: 0.6 | floor -%}
+    {%- for part in parts -%}
+      {{ part }}{%- unless forloop.last -%}</p>{%- endunless -%}
+      {%- if n > 6 and forloop.index == top_at -%}{{ ad_top }}{%- endif -%}
+      {%- if n > 14 and mid_at > top_at and forloop.index == mid_at -%}{{ ad_mid }}{%- endif -%}
+    {%- endfor -%}
   </div>
 
   {% include google-ad-post-bottom.html %}
