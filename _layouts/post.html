@@ -142,8 +142,10 @@ script_includes:
     {%- endfor -%}
   </div>
 
+  {% if page.chart %}{% include chartjs.html %}{% endif %}
+
   {% include google-ad-post-bottom.html %}
-    
+
   <div class="post-tail-wrapper text-muted">
     <!-- categories -->
     {% if page.categories.size > 0 %}

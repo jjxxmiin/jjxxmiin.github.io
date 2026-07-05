@@ -1,0 +1,10 @@
+{
+  "name": "blog-visual-validation",
+  "private": true,
+  "type": "module",
+  "description": "Mermaid diagram validation for the daily trend bot (parse-only, no chromium).",
+  "dependencies": {
+    "jsdom": "^24.0.0",
+    "mermaid": "^11.4.0"
+  }
+}

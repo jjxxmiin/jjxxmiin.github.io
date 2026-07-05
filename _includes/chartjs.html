@@ -1,0 +1,33 @@
+<!-- Chart.js support: renders ```chartjs code blocks (a JSON Chart.js config) as charts.
+     Loaded only on posts with `chart: true` in front matter. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  function render() {
+    if (typeof Chart === 'undefined') { return setTimeout(render, 200); }
+    document.querySelectorAll('pre code.language-chartjs').forEach(function (code) {
+      try {
+        var cfg = JSON.parse(code.textContent);
+        if (!cfg.options) cfg.options = {};
+        cfg.options.responsive = true;
+        cfg.options.maintainAspectRatio = false;
+        var wrap = document.createElement('div');
+        wrap.className = 'chartjs-wrap';
+        wrap.style.cssText = 'position:relative;max-width:720px;height:360px;margin:1.5rem auto;';
+        var canvas = document.createElement('canvas');
+        wrap.appendChild(canvas);
+        var pre = code.closest('pre');
+        pre.parentNode.replaceChild(wrap, pre);
+        new Chart(canvas, cfg);
+      } catch (e) {
+        console.error('chartjs render failed:', e);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+})();
+</script>

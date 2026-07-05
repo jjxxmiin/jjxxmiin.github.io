@@ -1,10 +1,15 @@
 import os
 import re
+import json
+import subprocess
+import tempfile
 import datetime
 import yaml
 import requests
 from google import genai
 from google.genai import types
+
+MERMAID_VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "validate_mermaid.mjs")
 
 
 def fix_table_spacing(text):
@@ -39,6 +44,16 @@ def strip_emojis(text):
     text = _EMOJI.sub("", text)
     text = re.sub(r"(?m)^(#{1,6}) +", r"\1 ", text)   # tidy '### <emoji removed> Title'
     return text
+
+
+def linkify_bare_urls(text):
+    """Turn bare http(s) URLs into clickable [url](url) markdown — outside code fences
+    and not already inside a markdown link/autolink/image/attribute."""
+    parts = re.split(r"(```.*?```)", text, flags=re.S)   # keep fenced blocks intact
+    url_re = re.compile(r'(?<![\(\[<"/=`])(https?://[^\s)\]<>"`]+)')
+    for i in range(0, len(parts), 2):                    # even indices = non-code
+        parts[i] = url_re.sub(lambda m: f"[{m.group(1)}]({m.group(1)})", parts[i])
+    return "".join(parts)
 
 
 def strip_fake_images(text):
@@ -89,6 +104,87 @@ def get_repo_images(github_url, limit=3):
         if len(out) >= limit:
             break
     return out
+
+
+# ---------------------------------------------------------------------------
+# Visual validation: never publish a diagram/chart that renders as an error box.
+# ---------------------------------------------------------------------------
+def _extract_blocks(content, lang):
+    """Return list of (whole_fence, inner_code) for ```<lang> fenced blocks."""
+    pat = re.compile(r"```" + lang + r"[ \t]*\n(.*?)```", re.S)
+    return [(m.group(0), m.group(1)) for m in pat.finditer(content)]
+
+
+def _validate_mermaid(codes):
+    """Validate mermaid strings with the node parser. Returns [(ok, error), ...].
+    If node/validator can't run, skip validation (treat as ok) so we never crash."""
+    if not codes:
+        return []
+    try:
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
+            json.dump([c.strip() for c in codes], tf)
+            path = tf.name
+        out = subprocess.run(["node", MERMAID_VALIDATOR, path],
+                             cwd=os.path.dirname(MERMAID_VALIDATOR),
+                             capture_output=True, text=True, timeout=150)
+        os.unlink(path)
+        res = json.loads(out.stdout)
+        return [(bool(r.get("ok", True)), r.get("error", "")) for r in res]
+    except Exception as e:
+        print(f"  (mermaid 검증 건너뜀: {e})")
+        return [(True, "")] * len(codes)
+
+
+def _repair_mermaid(client, code, error):
+    prompt = f"""아래 Mermaid 다이어그램에 문법 오류가 있다. 같은 의미를 유지하되 오류만 고쳐라.
+[오류] {error}
+[규칙]
+- erDiagram/classDiagram에서 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE 같은 예약어를 엔티티/클래스 이름으로 쓰지 마라. CODE_CLASS 처럼 접두사를 붙이거나 큰따옴표로 감싼다.
+- flowchart 노드 라벨은 큰따옴표로 감싸고 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.
+- 오직 고친 Mermaid 코드 본문만 출력하라 (``` 펜스·설명·따옴표 없이).
+
+[원본]
+{code.strip()}"""
+    fixed = generate_content_with_fallback(client, prompt)
+    if not fixed:
+        return None
+    fixed = re.sub(r"^```[a-zA-Z]*\n?", "", fixed.strip())
+    return re.sub(r"\n?```$", "", fixed).strip()
+
+
+def _validate_chartjs(code):
+    """A chartjs block must be a JSON object with type + data."""
+    try:
+        cfg = json.loads(code)
+        return isinstance(cfg, dict) and bool(cfg.get("type")) and bool(cfg.get("data"))
+    except Exception:
+        return False
+
+
+def fix_visuals(client, content):
+    """Validate every mermaid/chartjs block. Repair once; if still invalid, drop it —
+    so a broken visual never reaches the published post as a red 'Syntax error' box."""
+    # Mermaid
+    m_blocks = _extract_blocks(content, "mermaid")
+    if m_blocks:
+        for (whole, inner), (ok, err) in zip(m_blocks, _validate_mermaid([b for _, b in m_blocks])):
+            if ok:
+                continue
+            print(f"  ⚠️ mermaid 오류 → 복구 시도: {err[:70]}")
+            fixed = _repair_mermaid(client, inner, err)
+            if fixed and _validate_mermaid([fixed])[0][0]:
+                content = content.replace(whole, "```mermaid\n" + fixed + "\n```", 1)
+                print("     ✅ 복구 성공")
+            else:
+                content = content.replace(whole, "", 1)
+                print("     🗑️ 복구 실패 → 다이어그램 제거")
+    # Chart.js (JSON config)
+    for whole, inner in _extract_blocks(content, "chartjs"):
+        if _validate_chartjs(inner):
+            continue
+        print("  ⚠️ chartjs JSON 오류 → 제거")
+        content = content.replace(whole, "", 1)
+    return content
 
 # Configuration
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
@@ -310,19 +406,27 @@ def generate_blog_post(client, topic_data):
         img_note = "이 저장소에는 쓸 만한 실제 이미지가 없다. 이미지는 넣지 말고 Mermaid 다이어그램과 표로 시각화하라."
 
     visuals_directive = (
-        "[시각 자료 적극 활용 — 매우 중요]\n"
-        "1. 다이어그램(도형): 긴 글 전반에 걸쳐 3~4개의 Mermaid 다이어그램을 넣되, 내용에 맞게 '다양한 종류'를 섞어 쓴다.\n"
-        "   - 파이프라인/구조 → flowchart TD (또는 LR)\n"
-        "   - 컴포넌트 간 상호작용/요청 흐름 → sequenceDiagram\n"
+        "[시각 자료 매우 적극 활용 — 그림을 넉넉히, 글 전반에 고르게 배치]\n"
+        "1. Mermaid 다이어그램(도형): 6~8개를, 내용에 맞게 '다양한 종류'를 섞어 넣는다. 한 종류만 반복하지 마라.\n"
+        "   - 파이프라인/구조 → flowchart TD 또는 LR\n"
+        "   - 컴포넌트 상호작용/요청 흐름 → sequenceDiagram\n"
         "   - 데이터 모델/스키마 관계 → erDiagram\n"
         "   - 상태 전이/생명주기 → stateDiagram-v2\n"
-        "   - 클래스/모듈 구조 → classDiagram, 비중/구성비 → pie\n"
-        "   각 다이어그램은 ```mermaid 코드블록으로 쓰고, 문법 오류가 없도록 간결하게 만든다. "
-        "flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호()·대괄호[]·콜론:은 쓰지 마라. "
-        "한 종류(flowchart)만 반복하지 말고 위 종류를 골고루 활용하라.\n"
-        "2. 도표(표): 비교·수치·트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
-        "3. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
-        "4. 이모지: 제목·소제목·본문에 이모지를 쓰지 마라.\n"
+        "   - 클래스/모듈 구조 → classDiagram, 구성비 → pie\n"
+        "   [Mermaid 문법 안전 규칙 — 반드시 지킬 것]\n"
+        "   - erDiagram/classDiagram의 엔티티·클래스 이름에 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE, GROUP 같은 예약어를 쓰지 마라. "
+        "CODE_CLASS, CODE_FUNC 처럼 접두사를 붙이거나 이름을 바꾼다.\n"
+        "   - flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.\n"
+        "   - 각 다이어그램은 단순하고 문법 오류가 없게 만든다.\n"
+        "2. Chart.js(그래프): 벤치마크·수치 비교(토큰 절감량, 속도, 언어 지원 수 등)는 ```chartjs 코드블록에 '유효한 JSON' Chart.js 설정으로 1~2개 넣어라. 예시:\n"
+        "   ```chartjs\n"
+        "   {\"type\":\"bar\",\"data\":{\"labels\":[\"기존 방식\",\"codebase-memory-mcp\"],\"datasets\":[{\"label\":\"토큰 사용량\",\"data\":[412000,3400]}]}}\n"
+        "   ```\n"
+        "   반드시 순수 JSON(주석·후행쉼표·홑따옴표 금지)만 넣는다.\n"
+        "3. 도표(표): 비교·트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
+        "4. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
+        "5. 링크: 모든 링크는 [보이는 텍스트](URL) 형태의 클릭 가능한 마크다운으로 쓴다. 맨 URL 노출 금지.\n"
+        "6. 이모지: 제목·소제목·본문에 이모지를 쓰지 마라.\n"
         f"{img_note}\n\n"
     )
 
@@ -363,6 +467,7 @@ def generate_blog_post(client, topic_data):
         try:
             data = json.loads(response_text)
             data['github_url'] = github_url
+            data['content'] = fix_visuals(client, data.get('content', ''))  # validate diagrams/charts
             return data
         except Exception as e:
             print(f"Error parsing blog post JSON: {e}")
@@ -412,6 +517,7 @@ def save_post(post_data):
         content = content.replace('\\n', '\n')
     content = strip_fake_images(content)   # drop placeholder/invented image URLs
     content = strip_emojis(content)        # no decorative emojis in the body
+    content = linkify_bare_urls(content)   # make bare URLs clickable [url](url)
     content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
 
     front_matter = {
@@ -429,6 +535,9 @@ def save_post(post_data):
     # Chirpy renders ```mermaid blocks only when the post opts in via front matter.
     if re.search(r'```\s*mermaid', content):
         front_matter["mermaid"] = True
+    # Our Chart.js include is loaded only when the post has a chart.
+    if re.search(r'```\s*chartjs', content):
+        front_matter["chart"] = True
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("---\n")
@@ -439,7 +548,11 @@ def save_post(post_data):
         if post_data.get('reference_links'):
             f.write("\n\n## References\n")
             for link in post_data['reference_links']:
-                f.write(f"- {link}\n")
+                link = str(link).strip()
+                if link.startswith("http"):
+                    f.write(f"- [{link}]({link})\n")   # clickable
+                else:
+                    f.write(f"- {link}\n")
                 
     print(f"Saved post to {filepath}")
 
