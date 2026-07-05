@@ -16,14 +16,15 @@ from google.genai import types
 
 
 def clean(t):
-    """Strip Gemini grounding citation markers like [2.1.7] that leak into text."""
-    return re.sub(r"\s*\[\d[\d.]*\]", "", str(t or "")).strip()
+    """Strip Gemini grounding citation markers like [2.1.7], and the '·' middot (banned)."""
+    t = re.sub(r"\s*\[\d[\d.]*\]", "", str(t or ""))
+    return t.replace("·", "/").strip()
 
 OUT_PATH = os.environ.get("AI_NEWS_OUT") or os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "_data", "ai_news.yml"
 )
 MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-flash-latest"]
-CATEGORIES = ["프론티어 모델", "코딩 툴", "영상·이미지", "음성·음악", "오픈소스·중국계", "국내"]
+CATEGORIES = ["프론티어 모델", "코딩 툴", "영상/이미지", "음성/음악", "오픈소스/중국계", "국내"]
 
 
 def kst_now():
@@ -31,14 +32,15 @@ def kst_now():
 
 
 def generate(client, today_str):
-    prompt = f"""오늘은 {today_str}이다. 최근 1~2주간 '실제로 발표된' AI 툴·모델 업데이트 소식을 큐레이션하라.
+    prompt = f"""오늘은 {today_str}이다. 최근 1~2주간 '실제로 발표된' AI 툴/모델 업데이트 소식을 큐레이션하라.
 
 [규칙]
-- 웹 검색으로 사실을 확인한, 실제로 일어난 소식만 담아라. 추측·미확인·2주 초과 소식은 제외.
-- date는 '월/일'(예: "7/1"), text는 "제품명 — 무엇이 어떻게 바뀌었는지"를 담백하고 구체적으로 한 줄.
+- 웹 검색으로 사실을 확인한, 실제로 일어난 소식만 담아라. 추측/미확인/2주 초과 소식은 제외.
+- date는 '월/일'(예: "7/1"), text는 "제품명 — 무엇이 어떻게 바뀌었는지"를 구체적으로 한 줄.
 - 카테고리 name은 반드시 다음 6개 중에서만: {', '.join(CATEGORIES)}. 각 카테고리 2~5개.
-- 과장·이모지·상투어('마법', '핵심', '혁명적', '게임체인저' 등) 금지. 사실·수치 위주.
-- big_picture: 이번 주 전체를 관통하는 흐름을 한 문장으로.
+- 과장/이모지/상투어('마법', '핵심', '혁명적', '게임체인저' 등) 금지. 사실/수치 위주.
+- 가운뎃점 '·' 문자는 절대 쓰지 마라. 나열/구분이 필요하면 '/' 나 쉼표를 써라.
+- big_picture: 이번 주 흐름을 파워블로거처럼 후킹 있고 임팩트 있게, 딱 한 문장으로 요약(단, 과장/이모지 없이 사실 기반).
 - 한국어로 작성. 확인 안 되면 넣지 마라."""
 
     schema = {

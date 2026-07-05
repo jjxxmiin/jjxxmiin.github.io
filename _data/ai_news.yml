@@ -1,14 +1,14 @@
 # 주간 AI 소식 — automation/ai_news_bot.py 가 매주 갱신 (수동 편집도 가능)
 updated: '2026-07-05'
 title_note: 최근 1~2주 AI 툴 업데이트 (2026.7.5 기준)
-big_picture: '"에이전트 전쟁" — 모델사·툴사 가리지 않고 전부 에이전트 기능으로 수렴 중입니다.'
+big_picture: '"에이전트 전쟁" — 모델사/툴사 가리지 않고 전부 에이전트 기능으로 수렴 중입니다.'
 categories:
 - name: 프론티어 모델
   items:
   - date: 6/26
-    text: OpenAI GPT-5.6 프리뷰 — Sol·Terra·Luna 3단 구성, 신뢰 파트너 한정 공개, 수 주 내 GA (프리뷰 중엔 ChatGPT에서 못 씀)
+    text: OpenAI GPT-5.6 프리뷰 — Sol/Terra/Luna 3단 구성, 신뢰 파트너 한정 공개, 수 주 내 GA (프리뷰 중엔 ChatGPT에서 못 씀)
   - date: 6/30
-    text: Claude Sonnet 5 출시 — 코딩·에이전트 특화, 8/31까지 $2/$10 도입가
+    text: Claude Sonnet 5 출시 — 코딩/에이전트 특화, 8/31까지 $2/$10 도입가
   - date: 6/30
     text: 구글 Gemini Omni Flash — 오디오 포함 10초 영상 생성+자연어로 이어서 편집, YouTube Shorts 롤아웃. 고속 이미지 모델 Nano Banana 2 Lite도 동시 공개
   - date: 7/1
@@ -18,7 +18,7 @@ categories:
 - name: 코딩 툴
   items:
   - date: 6/29
-    text: Cursor iOS 앱 — 폰에서 데스크톱 에이전트 원격 조종·PR 머지까지 (이번 주 코딩툴 최대 뉴스)
+    text: Cursor iOS 앱 — 폰에서 데스크톱 에이전트 원격 조종/PR 머지까지 (이번 주 코딩툴 최대 뉴스)
   - date: 6/18
     text: Claude Code Artifacts — 코딩 세션을 실시간 공유 대시보드로
   - date: 6/22
@@ -27,7 +27,7 @@ categories:
     text: Devin Security Swarm — 취약점 탐지→익스플로잇 검증→패치 PR 자동
   - date: 7/3
     text: Replit — 데스크톱 앱 리디자인 + Whop 결제 통합
-- name: 영상·이미지
+- name: 영상/이미지
   items:
   - date: 6/25→7/2
     text: Runway Agent 2.0 → Agent Skills — 명령 한 줄로 광고 캠페인 제작, 마케팅 플랫폼으로 피벗 중
@@ -35,13 +35,13 @@ categories:
     text: Krea 2 오픈웨이트 — 자체 12.9B 이미지 모델 공개, Turbo는 ~2초 생성
   - date: 6/17
     text: Kling 3.0 Turbo + Omni — 속도/품질 투트랙
-- name: 음성·음악
+- name: 음성/음악
   items:
   - date: 6/22~30
     text: ElevenLabs 4연타 — SynthID 워터마크+무료 탐지기(6/24), 광고 현지화 Ads Engine(6/22), 마이클 케인 AI 음성 '오디세이' 오디오북(6/23), 에이전트 SOP 기능(6/30)
   - date: 6/25
     text: Suno 'Spark' — 인디 아티스트 인큐베이터인데 'Suno 비판 금지' 조항으로 논란
-- name: 오픈소스·중국계
+- name: 오픈소스/중국계
   items:
   - date: 6/16
     text: GLM-5.2 — MIT 라이선스로 SWE-bench에서 GPT-5.5 추월, 비용 1/6 (오픈웨이트 진영 현재 1위)
@@ -60,4 +60,4 @@ categories:
   - date: 6/29
     text: 줌(ZUM), K-엑사원 전면 적용 — 국산 파운데이션 모델 첫 포털 상용화
   - date: 7/1
-    text: 노션 3.6 — Claude·Cursor를 노션 안에서 팀원처럼 부리는 오케스트레이션
+    text: 노션 3.6 — Claude/Cursor를 노션 안에서 팀원처럼 부리는 오케스트레이션
