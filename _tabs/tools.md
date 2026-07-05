@@ -37,7 +37,6 @@ title: TOOLS
 </style>
 
 <div class="tools-head" markdown="0">
-  <div class="tag">AI TOOLS</div>
   <div class="h">AI 툴 도감</div>
   <div class="sub">블로그가 다룬 <b id="tools-count">{{ tools | size }}</b>개의 AI 툴 · 매일 새 글마다 자동으로 추가됩니다</div>
 </div>
