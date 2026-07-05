@@ -58,6 +58,22 @@ title: TRENDS
     </div>
   </div>
 
+  <div class="trd-grid2">
+    <div class="trd-card">
+      <h2>누적 글 수</h2>
+      <div class="trd-chart"><canvas id="trends-cumulative"></canvas></div>
+    </div>
+    <div class="trd-card">
+      <h2>요일별 발행</h2>
+      <div class="trd-chart"><canvas id="trends-dow"></canvas></div>
+    </div>
+  </div>
+
+  <div class="trd-card">
+    <h2>많이 다룬 키워드</h2>
+    <div class="trd-chart" style="height:360px;"><canvas id="trends-keywords"></canvas></div>
+  </div>
+
   {%- assign news = site.data.ai_news -%}
   {%- if news -%}
   <div class="trd-card">

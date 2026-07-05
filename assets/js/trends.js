@@ -79,6 +79,43 @@
       data: { labels: owners, datasets: [{ label: '글 수', data: owners.map(function (o) { return oMap[o]; }), backgroundColor: palette[4], borderRadius: 4 }] },
       options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
     });
+
+    /* cumulative posts (growth curve) */
+    var run = 0;
+    var cumData = months.map(function (m) { run += mMap[m]; return run; });
+    mkChart('trends-cumulative', {
+      type: 'line',
+      data: { labels: months, datasets: [{ label: '누적', data: cumData, borderColor: palette[1], backgroundColor: 'rgba(27,175,122,.15)', fill: true, tension: 0.3, pointRadius: 2 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+
+    /* day-of-week distribution */
+    var dowNames = ['일', '월', '화', '수', '목', '금', '토'];
+    var dow = [0, 0, 0, 0, 0, 0, 0];
+    POSTS.forEach(function (p) { var d = new Date(p.date); if (!isNaN(d.getTime())) { dow[d.getDay()]++; } });
+    mkChart('trends-dow', {
+      type: 'bar',
+      data: { labels: dowNames, datasets: [{ label: '글 수', data: dow, backgroundColor: palette[2], borderRadius: 4 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+
+    /* most-covered keywords (from titles) */
+    var KW = [
+      { label: '에이전트', re: /agent|에이전트/i }, { label: '코딩', re: /cod|코딩|\bide\b/i },
+      { label: 'MCP', re: /\bmcp\b/i }, { label: 'RAG', re: /\brag\b/i },
+      { label: '오픈소스', re: /open[- ]?(source|weight)|오픈소스|오픈웨이트/i },
+      { label: '모델/LLM', re: /\bllm\b|모델|gpt|llama|gemini|claude/i },
+      { label: '이미지/영상', re: /image|이미지|video|영상|diffus/i }, { label: '음성', re: /voice|음성|speech|audio|\btts\b/i },
+      { label: '로컬', re: /local|로컬|on[- ]?device|온디바이스/i }, { label: '추론/서빙', re: /inference|추론|serv|vllm/i },
+      { label: '메모리/그래프', re: /memory|메모리|graph|그래프/i }, { label: '터미널/CLI', re: /terminal|터미널|\bcli\b/i }
+    ];
+    var kw = KW.map(function (k) { return { label: k.label, n: POSTS.filter(function (p) { return k.re.test(p.title || ''); }).length }; })
+      .filter(function (x) { return x.n > 0; }).sort(function (a, b) { return b.n - a.n; });
+    mkChart('trends-keywords', {
+      type: 'bar',
+      data: { labels: kw.map(function (x) { return x.label; }), datasets: [{ label: '글 수', data: kw.map(function (x) { return x.n; }), backgroundColor: palette[4], borderRadius: 4 }] },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
   }
 
   function mkChart(id, cfg) {
