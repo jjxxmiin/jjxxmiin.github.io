@@ -24,7 +24,8 @@ OUT_PATH = os.environ.get("AI_NEWS_OUT") or os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "_data", "ai_news.yml"
 )
 MODELS = ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-flash-latest"]
-CATEGORIES = ["프론티어 모델", "코딩 툴", "영상/이미지", "음성/음악", "오픈소스/중국계", "국내"]
+CATEGORIES = ["프론티어 모델", "코딩 툴", "영상/이미지", "디자인", "음성/음악",
+              "검색", "문서/생산성", "오픈소스/중국계", "국내"]
 
 
 def kst_now():

@@ -67,7 +67,10 @@ title: UPDATES
     {%- when '프론티어 모델' -%}{%- assign ci = 'fa-rocket' -%}
     {%- when '코딩 툴' -%}{%- assign ci = 'fa-code' -%}
     {%- when '영상/이미지' -%}{%- assign ci = 'fa-film' -%}
+    {%- when '디자인' -%}{%- assign ci = 'fa-palette' -%}
     {%- when '음성/음악' -%}{%- assign ci = 'fa-music' -%}
+    {%- when '검색' -%}{%- assign ci = 'fa-magnifying-glass' -%}
+    {%- when '문서/생산성' -%}{%- assign ci = 'fa-file-lines' -%}
     {%- when '오픈소스/중국계' -%}{%- assign ci = 'fa-cube' -%}
     {%- when '국내' -%}{%- assign ci = 'fa-flag' -%}
     {%- else -%}{%- assign ci = 'fa-angle-right' -%}

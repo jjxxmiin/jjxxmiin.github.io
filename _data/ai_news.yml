@@ -35,12 +35,32 @@ categories:
     text: Krea 2 오픈웨이트 — 자체 12.9B 이미지 모델 공개, Turbo는 ~2초 생성
   - date: 6/17
     text: Kling 3.0 Turbo + Omni — 속도/품질 투트랙
+- name: 디자인
+  items:
+  - date: 6/30
+    text: Figma — OpenAI 코덱스(Codex)와 연동되어 코드를 캔버스 디자인으로 변환하거나 디자인을 코드로 구현하는 양방향 통합 환경 출시
+  - date: 6/24
+    text: Figma — 맞춤형 작업 워크플로우를 구축하는 AI Gen 플러그인 및 캔버스 내 모션, 셰이더 생성 기능 공개
 - name: 음성/음악
   items:
   - date: 6/22~30
     text: ElevenLabs 4연타 — SynthID 워터마크+무료 탐지기(6/24), 광고 현지화 Ads Engine(6/22), 마이클 케인 AI 음성 '오디세이' 오디오북(6/23), 에이전트 SOP 기능(6/30)
   - date: 6/25
     text: Suno 'Spark' — 인디 아티스트 인큐베이터인데 'Suno 비판 금지' 조항으로 논란
+- name: 검색
+  items:
+  - date: 6/26
+    text: 네이버 — 검색 의도를 파악해 쇼핑 및 예약 등 실생활 행동으로 연결하는 대화형 검색 서비스 'AI 탭' 정식 출시
+  - date: 6/23
+    text: Perplexity — 사용자의 작업 내역을 기억하고 실수를 자체 수정하며 성능을 개선하는 AI 메모리 시스템 'Brain' 공개
+- name: 문서/생산성
+  items:
+  - date: 6/26
+    text: OpenAI — 신규 모델 GPT-5.6 Sol을 미국 정부의 사이버 보안 검토 요구에 따라 소수 파트너 대상 프리뷰 형태로 제한적 공개
+  - date: 6/25
+    text: Anthropic — 슬랙(Slack) 환경 내에서 AI가 팀원처럼 직접 협업하고 작업을 자동화하는 'Claude Tag' 기능 발표
+  - date: 6/23
+    text: Perplexity — Word, Excel, Teams 등 Microsoft 365 앱 내부에서 출처 기반 답변과 분석을 제공하는 'Computer' 도입
 - name: 오픈소스/중국계
   items:
   - date: 6/16
