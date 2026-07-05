@@ -1,5 +1,70 @@
+# robots.txt — opsoai.com
+# Search + AI answer engines are all welcome (AEO: we WANT AI search to cite us).
+
+# ---- Search engines ----
+User-agent: Googlebot
+Allow: /
+
 User-agent: Yeti
 Allow: /
 
+User-agent: bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Daumoa
+Allow: /
+
+# ---- AI / answer engines (ChatGPT, Claude, Gemini, Perplexity, etc.) ----
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# ---- Everyone else ----
 User-agent: *
 Allow: /
+
+Sitemap: https://www.opsoai.com/sitemap.xml

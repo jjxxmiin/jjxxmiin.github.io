@@ -454,12 +454,21 @@ def generate_blog_post(client, topic_data):
         f"{img_note}\n\n"
     )
 
+    aeo_directive = (
+        "[검색·AI 답변 최적화(SEO/AEO) — 중요]\n"
+        "- 도입부에 이 글의 핵심을 3줄로 요약한 'TL;DR(한 줄 요약)'을 넣어, 검색·AI가 바로 인용할 수 있게 한다.\n"
+        "- 본문 소제목은 사람들이 실제로 검색·질문하는 표현(예: '~란 무엇인가', '~와 무엇이 다른가', '어떻게 설치하나')으로 자연스럽게 녹인다.\n"
+        "- 반드시 'faq' 필드에 사람들이 실제로 궁금해할 질문 4~6개와, 각 질문당 2~4문장의 명확하고 사실 기반 답변을 담아라. "
+        "질문은 구체적이고(예: '토큰을 얼마나 절감하나?', 'MCP를 지원하지 않는 에디터에서도 쓸 수 있나?'), 답변은 검색으로 확인한 정확한 정보로 쓴다.\n\n"
+    )
+
     topic_header = (
         "[작성 대상 — 반드시 아래 주제로만 작성. 다른 기술로 절대 새지 말 것]\n"
         f"- 프로젝트명: {topic_name}\n"
         f"- GitHub 저장소: {github_url}\n"
         f"- 검색 쿼리: {search_query}\n\n"
         + visuals_directive
+        + aeo_directive
     )
     prompt_text = topic_header + prompt_text
 
@@ -470,7 +479,19 @@ def generate_blog_post(client, topic_data):
             "title_english": {"type": "STRING"},
             "summary": {"type": "STRING"},
             "content": {"type": "STRING"},
-            "reference_links": {"type": "ARRAY", "items": {"type": "STRING"}}
+            "reference_links": {"type": "ARRAY", "items": {"type": "STRING"}},
+            # AEO: concise Q&A that answer engines (ChatGPT/Claude/Gemini/Perplexity) can lift
+            "faq": {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "question": {"type": "STRING"},
+                        "answer": {"type": "STRING"},
+                    },
+                    "required": ["question", "answer"],
+                },
+            },
         },
         "required": ["title_korean", "title_english", "summary", "content"]
     }
@@ -564,12 +585,27 @@ def save_post(post_data):
     if re.search(r'```\s*chartjs', content):
         front_matter["chart"] = True
 
+    # AEO: FAQ -> front matter (feeds FAQPage JSON-LD) + a visible Q&A section.
+    faq = [
+        {"question": strip_emojis(str(x.get("question", ""))).strip(),
+         "answer": strip_emojis(str(x.get("answer", ""))).strip()}
+        for x in (post_data.get("faq") or [])
+        if x.get("question") and x.get("answer")
+    ]
+    if faq:
+        front_matter["faq"] = faq
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("---\n")
         yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
         f.write("---\n\n")
         f.write(content)
-        
+
+        if faq:
+            f.write("\n\n## 자주 묻는 질문 (FAQ)\n")
+            for item in faq:
+                f.write(f"\n### {item['question']}\n\n{item['answer']}\n")
+
         if post_data.get('reference_links'):
             f.write("\n\n## References\n")
             for link in post_data['reference_links']:

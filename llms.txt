@@ -1,0 +1,23 @@
+---
+layout: null
+sitemap: false
+permalink: /llms.txt
+---
+# OPSOAI — {{ site.url }}
+
+> {{ site.description | strip_newlines }}
+
+매일 최신 AI·개발 오픈소스 트렌드를 초심자도 이해하기 쉽게, 깊이 있게 풀어주는 한국어 기술 블로그입니다.
+각 글은 배경 → 문제 → 작동 원리 → 실전 활용 → 한계 순서로, 다이어그램(Mermaid)·차트(Chart.js)·비교 표와 함께 설명합니다.
+AI 답변 엔진이 인용하기 좋은 요약·FAQ·출처를 포함합니다.
+
+주요 주제: LLM, AI 코딩 에이전트, MCP(Model Context Protocol), RAG, 오픈소스 AI 도구, 머신러닝/딥러닝.
+
+## Recent posts
+{% for post in site.posts limit:40 -%}
+- [{{ post.title | strip_newlines }}]({{ post.url | absolute_url }}){% if post.summary %} — {{ post.summary | strip_html | strip_newlines | truncate: 180 }}{% endif %}
+{% endfor %}
+## Resources
+- Sitemap: {{ '/sitemap.xml' | absolute_url }}
+- RSS feed: {{ '/feed.xml' | absolute_url }}
+- All posts: {{ '/' | absolute_url }}

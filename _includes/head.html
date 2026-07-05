@@ -72,6 +72,23 @@
 
   {{ seo_tags }}
 
+  <!-- AEO: FAQPage structured data (answer engines + Google rich results) -->
+  {% if page.faq and page.faq.size > 0 %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {% for item in page.faq %}{
+          "@type": "Question",
+          "name": {{ item.question | strip_html | jsonify }},
+          "acceptedAnswer": { "@type": "Answer", "text": {{ item.answer | strip_html | jsonify }} }
+        }{% unless forloop.last %},{% endunless %}{% endfor %}
+      ]
+    }
+    </script>
+  {% endif %}
+
   <title>
     {%- unless page.layout == 'home' -%}
       {{ page.title | append: ' | ' }}
