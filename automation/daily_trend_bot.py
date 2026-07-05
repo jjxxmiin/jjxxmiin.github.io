@@ -519,6 +519,72 @@ def generate_blog_post(client, topic_data):
             print(f"Error parsing blog post JSON: {e}")
     return None
 
+def fetch_project_meta(github_url):
+    """Pull project facts from GitHub (stars, forks, primary language, languages, file count,
+    size, license, topics, last-updated) + best-effort LOC. Rendered as a project card."""
+    m = re.search(r"github\.com/([^/]+)/([^/#?]+)", github_url or "")
+    if not m:
+        return {}
+    owner = m.group(1)
+    repo = m.group(2).replace(".git", "").split("?")[0].split("#")[0]
+    headers = {"Accept": "application/vnd.github+json"}
+    tok = os.environ.get("GITHUB_TOKEN")
+    if tok:
+        headers["Authorization"] = f"Bearer {tok}"
+    meta = {}
+    branch = "main"
+    try:
+        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=headers, timeout=20)
+        if r.status_code == 200:
+            d = r.json()
+            branch = d.get("default_branch") or "main"
+            if d.get("stargazers_count") is not None:
+                meta["stars"] = d["stargazers_count"]
+            if d.get("forks_count") is not None:
+                meta["forks"] = d["forks_count"]
+            if d.get("language"):
+                meta["language"] = d["language"]
+            lic = (d.get("license") or {}).get("spdx_id")
+            if lic and lic != "NOASSERTION":
+                meta["license"] = lic
+            if d.get("size"):
+                meta["size_kb"] = d["size"]
+            if d.get("pushed_at"):
+                meta["updated"] = d["pushed_at"][:10]
+            if d.get("created_at"):
+                meta["created"] = d["created_at"][:10]
+            if d.get("topics"):
+                meta["topics"] = d["topics"][:6]
+    except Exception as e:
+        print(f"  project meta (repo) fail: {e}")
+    try:
+        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}/languages", headers=headers, timeout=15)
+        if r.status_code == 200:
+            langs = sorted(r.json().items(), key=lambda kv: kv[1], reverse=True)
+            if langs:
+                meta["languages"] = [k for k, _ in langs[:5]]
+    except Exception:
+        pass
+    try:
+        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1",
+                         headers=headers, timeout=25)
+        if r.status_code == 200:
+            files = sum(1 for t in r.json().get("tree", []) if t.get("type") == "blob")
+            if files:
+                meta["files"] = files
+    except Exception:
+        pass
+    try:  # LOC is best-effort (codetabs is often down)
+        r = requests.get(f"https://api.codetabs.com/v1/loc/?github={owner}/{repo}", timeout=25)
+        if r.status_code == 200 and r.text.strip().startswith("["):
+            tot = next((x for x in r.json() if x.get("language") == "Total"), None)
+            if tot and tot.get("linesOfCode"):
+                meta["loc"] = tot["linesOfCode"]
+    except Exception:
+        pass
+    return meta
+
+
 def save_post(post_data):
     """Saves the post to a file."""
     # Calculate US Eastern Time (UTC-5)
@@ -578,6 +644,10 @@ def save_post(post_data):
 
     if image_data:
         front_matter["image"] = image_data
+    # Project facts (stars, language, files, LOC, ...) -> rendered as a card in post.html.
+    project = fetch_project_meta(github_url)
+    if project:
+        front_matter["project"] = project
     # Chirpy renders ```mermaid blocks only when the post opts in via front matter.
     if re.search(r'```\s*mermaid', content):
         front_matter["mermaid"] = True

@@ -3,16 +3,36 @@ layout: post
 title: '오픈소스 AI 모의해킹 도구 Strix: 실제 해커처럼 생각하고 검증하는 자율형 보안 에이전트'
 date: '2026-07-05 05:04:10'
 categories: Tech
-summary: Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해
-  오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
+summary: Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해 오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
 author: AI Trend Bot
 github_url: https://github.com/usestrix/strix
 image:
   path: https://opengraph.githubassets.com/1/usestrix/strix
-  alt: 'In-Depth Guide to Strix: The Open-Source Autonomous AI Penetration Testing
-    Agent'
+  alt: 'In-Depth Guide to Strix: The Open-Source Autonomous AI Penetration Testing Agent'
 mermaid: true
 chart: true
+project:
+  stars: 36853
+  forks: 3736
+  language: Python
+  license: Apache-2.0
+  size_kb: 5857
+  updated: '2026-07-03'
+  created: '2025-08-05'
+  topics:
+  - agents
+  - ai-hacking
+  - ai-penetration-testing
+  - ai-pentesting
+  - ai-security
+  - artificial-intelligence
+  languages:
+  - Python
+  - Jinja
+  - Shell
+  - Dockerfile
+  - Makefile
+  files: 204
 ---
 
 ## 오픈소스 AI 모의해킹 도구 Strix 심층 해설: 실제 해커처럼 생각하고 검증하는 자율형 보안 에이전트

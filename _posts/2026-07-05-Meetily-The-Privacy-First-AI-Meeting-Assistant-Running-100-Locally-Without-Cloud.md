@@ -3,32 +3,47 @@ layout: post
 title: 'Meetily: 오디오 유출 없이 내 PC에서 완성되는 프라이버시 최우선 AI 회의 비서'
 date: '2026-07-05 05:54:28'
 categories: Tech
-summary: 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고
-  기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
+summary: 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고 기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
 author: AI Trend Bot
 github_url: https://github.com/Zackriya-Solutions/meetily
 image:
   path: https://opengraph.githubassets.com/1/Zackriya-Solutions/meetily
-  alt: 'Meetily: The Privacy-First AI Meeting Assistant Running 100% Locally Without
-    Cloud'
+  alt: 'Meetily: The Privacy-First AI Meeting Assistant Running 100% Locally Without Cloud'
 mermaid: true
 chart: true
 faq:
 - question: 오프라인 상태(인터넷 연결 끊김)에서도 정말 모든 기능이 작동하나요?
-  answer: 네, 완전히 작동합니다. 음성 텍스트 변환에 필요한 Whisper/Parakeet 모델과 요약에 사용되는 Ollama LLM 모델이
-    모두 사용자의 PC 하드 드라이브에 미리 다운로드되어 구동되기 때문에 외부 네트워크 연결이 전혀 필요하지 않습니다.
+  answer: 네, 완전히 작동합니다. 음성 텍스트 변환에 필요한 Whisper/Parakeet 모델과 요약에 사용되는 Ollama LLM 모델이 모두 사용자의 PC 하드 드라이브에 미리 다운로드되어 구동되기 때문에 외부 네트워크 연결이 전혀 필요하지 않습니다.
 - question: 어떤 운영체제를 지원하나요?
-  answer: Meetily는 현재 macOS(Apple Silicon 권장)와 Windows 환경을 공식 지원하며 설치 관리자를 제공합니다.
-    리눅스 사용자나 개발자의 경우 Docker나 소스 코드를 통해 직접 빌드하여 사용할 수 있습니다.
+  answer: Meetily는 현재 macOS(Apple Silicon 권장)와 Windows 환경을 공식 지원하며 설치 관리자를 제공합니다. 리눅스 사용자나 개발자의 경우 Docker나 소스 코드를 통해 직접 빌드하여 사용할 수 있습니다.
 - question: 로컬 LLM(Ollama)이 설치되어 있지 않으면 요약 기능을 사용할 수 없나요?
-  answer: 네, 회의 내용을 문맥에 맞게 요약하고 액션 아이템을 추출하는 작업은 LLM의 추론 능력을 요구합니다. 따라서 Ollama가 로컬
-    시스템에 설치되어 있어야 전체 요약 파이프라인이 완성됩니다. 다만 음성 전사(텍스트 변환) 기능 자체는 단독으로 동작합니다.
+  answer: 네, 회의 내용을 문맥에 맞게 요약하고 액션 아이템을 추출하는 작업은 LLM의 추론 능력을 요구합니다. 따라서 Ollama가 로컬 시스템에 설치되어 있어야 전체 요약 파이프라인이 완성됩니다. 다만 음성 전사(텍스트 변환) 기능 자체는 단독으로 동작합니다.
 - question: 화자 분리(Speaker Diarization)는 여러 명이 겹쳐 말할 때도 정확한가요?
-  answer: 오프라인 환경에서도 음성 임베딩 분석을 통해 발화자를 꽤 훌륭하게 구분합니다. 다만, 클라우드의 거대한 자원을 사용하는 상용 모델보다는
-    여러 명의 목소리가 심하게 겹치는 상황(Crosstalk)에서 정확도가 다소 떨어질 수 있습니다.
+  answer: 오프라인 환경에서도 음성 임베딩 분석을 통해 발화자를 꽤 훌륭하게 구분합니다. 다만, 클라우드의 거대한 자원을 사용하는 상용 모델보다는 여러 명의 목소리가 심하게 겹치는 상황(Crosstalk)에서 정확도가 다소 떨어질 수 있습니다.
 - question: 기존의 클라우드 상용 도구(Otter.ai 등)와 비교했을 때 가장 큰 단점은 무엇인가요?
-  answer: 가장 큰 단점은 사용자의 PC 자원(CPU, GPU, RAM)을 크게 소모한다는 점입니다. 고사양 작업이 진행되므로 노트북 배터리가
-    빨리 닳을 수 있으며, 사양이 낮은 구형 사무용 PC에서는 실시간 처리 속도가 지연되거나 끊길 수 있습니다.
+  answer: 가장 큰 단점은 사용자의 PC 자원(CPU, GPU, RAM)을 크게 소모한다는 점입니다. 고사양 작업이 진행되므로 노트북 배터리가 빨리 닳을 수 있으며, 사양이 낮은 구형 사무용 PC에서는 실시간 처리 속도가 지연되거나 끊길 수 있습니다.
+project:
+  stars: 16383
+  forks: 1756
+  language: Rust
+  license: MIT
+  size_kb: 48206
+  updated: '2026-06-05'
+  created: '2024-12-26'
+  topics:
+  - ai
+  - ai-meeting-assistant
+  - llm
+  - local-ai
+  - mac
+  - meeting-minutes
+  languages:
+  - Rust
+  - TypeScript
+  - C++
+  - PowerShell
+  - Shell
+  files: 524
 ---
 
 [GitHub 저장소](https://github.com/Zackriya-Solutions/meetily) | [공식 웹사이트](https://meetily.ai) | [Zackriya Solutions](https://www.zackriya.com)

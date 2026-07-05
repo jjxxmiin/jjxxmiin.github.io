@@ -124,6 +124,32 @@ script_includes:
     </dialog>
   {% endif %}
 
+  {% if page.project %}
+    {% assign pj = page.project %}
+    <style>
+      .proj-meta { border:1px solid var(--main-border-color); background:var(--card-bg); border-radius:12px; padding:.9rem 1.1rem; margin:0 0 1.4rem; }
+      .proj-meta .pt { font-size:.72rem; font-weight:800; letter-spacing:.1em; color:#2a78d6; margin-bottom:.6rem; }
+      .proj-meta .pg { display:flex; flex-wrap:wrap; gap:.45rem .9rem; }
+      .proj-meta .pg span { font-size:.82rem; color:var(--text-muted-color); }
+      .proj-meta .pg b { color:var(--text-color); font-variant-numeric:tabular-nums; }
+      .proj-meta .pl { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.65rem; }
+      .proj-meta .pl span { font-size:.72rem; padding:.14rem .5rem; border-radius:999px; background:rgba(42,120,214,.11); color:#2a78d6; font-weight:600; }
+    </style>
+    <div class="proj-meta">
+      <div class="pt">PROJECT AT A GLANCE</div>
+      <div class="pg">
+        {% if pj.stars %}<span><b>{{ pj.stars }}</b> Stars</span>{% endif %}
+        {% if pj.forks %}<span><b>{{ pj.forks }}</b> Forks</span>{% endif %}
+        {% if pj.language %}<span>주 언어 <b>{{ pj.language }}</b></span>{% endif %}
+        {% if pj.files %}<span><b>{{ pj.files }}</b> 파일</span>{% endif %}
+        {% if pj.loc %}<span><b>{{ pj.loc }}</b> 줄</span>{% endif %}
+        {% if pj.license %}<span>라이선스 <b>{{ pj.license }}</b></span>{% endif %}
+        {% if pj.updated %}<span>업데이트 <b>{{ pj.updated }}</b></span>{% endif %}
+      </div>
+      {% if pj.languages %}<div class="pl">{% for l in pj.languages %}<span>{{ l }}</span>{% endfor %}</div>{% endif %}
+    </div>
+  {% endif %}
+
   <div class="content">
     {%- capture ad_top -%}{% include google-ad-post-top.html %}{%- endcapture -%}
     {%- capture ad_mid -%}{% include google-ad-post-middle.html %}{%- endcapture -%}

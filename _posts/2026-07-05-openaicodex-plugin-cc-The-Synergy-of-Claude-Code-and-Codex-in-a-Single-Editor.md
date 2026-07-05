@@ -3,8 +3,7 @@ layout: post
 title: 'openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일'
 date: '2026-07-05 05:44:06'
 categories: Tech
-summary: Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를
-  구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+summary: Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
 author: AI Trend Bot
 github_url: https://github.com/openai/codex-plugin-cc
 image:
@@ -14,22 +13,26 @@ mermaid: true
 chart: true
 faq:
 - question: 검색어에 C++ 컴파일러라고 나오던데, cc가 C++을 의미하나요?
-  answer: 아닙니다. 여기서 'cc'는 Anthropic의 에디터 환경인 'Claude Code'의 약자를 의미합니다. C++ 언어 전용 컴파일러
-    도구가 아니라, Claude Code 환경에서 OpenAI의 Codex 모델을 플러그인 형태로 원활하게 연동해주는 도구입니다.
+  answer: 아닙니다. 여기서 'cc'는 Anthropic의 에디터 환경인 'Claude Code'의 약자를 의미합니다. C++ 언어 전용 컴파일러 도구가 아니라, Claude Code 환경에서 OpenAI의 Codex 모델을 플러그인 형태로 원활하게 연동해주는 도구입니다.
 - question: 이 플러그인을 도입하면 토큰 비용을 얼마나 절감할 수 있나요?
-  answer: 단일 에이전트 사용 시 빈번하게 발생하는 무한 루프 디버깅이나 엉뚱한 방향의 코드 수정으로 인한 컨텍스트 낭비를 크게 줄여줍니다.
-    리뷰와 디버깅을 교차 수행하기 때문에 단일 호출 비용은 약간 증가할 수 있으나, 전체적인 문제 해결 시간과 시행착오 비용을 고려하면 장기적으로
-    상당한 자원 절감 효과를 기대할 수 있습니다.
+  answer: 단일 에이전트 사용 시 빈번하게 발생하는 무한 루프 디버깅이나 엉뚱한 방향의 코드 수정으로 인한 컨텍스트 낭비를 크게 줄여줍니다. 리뷰와 디버깅을 교차 수행하기 때문에 단일 호출 비용은 약간 증가할 수 있으나, 전체적인 문제 해결 시간과 시행착오 비용을 고려하면 장기적으로 상당한 자원 절감 효과를 기대할 수 있습니다.
 - question: 백그라운드 리뷰 위임 중에도 계속 코딩을 할 수 있나요?
-  answer: 네, 완벽하게 가능합니다. 이 플러그인은 로컬의 Codex 앱 서버를 활용하여 비동기(Async)로 작업을 처리합니다. `/codex:review
-    --background` 명령어 호출 후 즉시 터미널 제어권을 반환받으므로 개발자는 끊김 없이 작업을 이어갈 수 있습니다.
+  answer: 네, 완벽하게 가능합니다. 이 플러그인은 로컬의 Codex 앱 서버를 활용하여 비동기(Async)로 작업을 처리합니다. `/codex:review --background` 명령어 호출 후 즉시 터미널 제어권을 반환받으므로 개발자는 끊김 없이 작업을 이어갈 수 있습니다.
 - question: MCP를 지원하지 않는 다른 범용 에디터에서도 쓸 수 있나요?
-  answer: 현재 이 플러그인(codex-plugin-cc)은 Claude Code의 자체 플러그인 시스템과 명령어 훅에 특화되어 설계되었습니다.
-    VS Code나 Cursor 등 다른 에디터에서는 이 플러그인을 직접 설치할 수 없으며, 각 환경에 맞는 별도의 확장 프로그램이나 기본 Codex
-    CLI 연동 기능을 사용해야 합니다.
+  answer: 현재 이 플러그인(codex-plugin-cc)은 Claude Code의 자체 플러그인 시스템과 명령어 훅에 특화되어 설계되었습니다. VS Code나 Cursor 등 다른 에디터에서는 이 플러그인을 직접 설치할 수 없으며, 각 환경에 맞는 별도의 확장 프로그램이나 기본 Codex CLI 연동 기능을 사용해야 합니다.
 - question: 오프라인 환경에서도 이 플러그인이 작동하나요?
-  answer: 작동하지 않습니다. 로컬에 설치된 Codex CLI를 래핑하여 구동되지만, 실제 코드의 분석과 리뷰 산출물 생성은 OpenAI API
-    서버와의 통신을 통해 이루어지기 때문에 안정적인 인터넷 연결과 유효한 API 키(또는 계정 인증)가 필수적입니다.
+  answer: 작동하지 않습니다. 로컬에 설치된 Codex CLI를 래핑하여 구동되지만, 실제 코드의 분석과 리뷰 산출물 생성은 OpenAI API 서버와의 통신을 통해 이루어지기 때문에 안정적인 인터넷 연결과 유효한 API 키(또는 계정 인증)가 필수적입니다.
+project:
+  stars: 25268
+  forks: 1530
+  language: JavaScript
+  license: Apache-2.0
+  size_kb: 158
+  updated: '2026-06-23'
+  created: '2026-03-30'
+  languages:
+  - JavaScript
+  files: 63
 ---
 
 ## 들어가며: 개발자의 새로운 고민, 누가 AI의 코드를 리뷰할 것인가?

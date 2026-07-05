@@ -38,6 +38,7 @@ jobs:
       - name: Run Daily Trend Bot
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd automation
           python daily_trend_bot.py

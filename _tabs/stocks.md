@@ -30,6 +30,13 @@ title: STOCKS
 .stk-none { font-size:.75rem; color:var(--text-muted-color); }
 .stk-chart { font-size:.78rem; font-weight:700; color:#2a78d6; margin-top:auto; }
 .stk-chart:hover { text-decoration:underline; }
+.stk-stats { display:flex; gap:.75rem; margin-bottom:1.3rem; flex-wrap:wrap; }
+.stk-stats .s { flex:1; min-width:88px; text-align:center; padding:.8rem .4rem; border-radius:12px; background:var(--card-bg); border:1px solid var(--main-border-color); }
+.stk-stats .s .n { display:block; font-size:1.55rem; font-weight:800; color:#2a78d6; line-height:1.1; }
+.stk-stats .s .l { display:block; font-size:.74rem; color:var(--text-muted-color); margin-top:.2rem; }
+.stk-viz { border:1px solid var(--main-border-color); background:var(--card-bg); border-radius:12px; padding:1rem 1.1rem; margin-bottom:1.6rem; }
+.stk-viz h2 { font-size:1.02rem; font-weight:800; margin:0 0 .8rem; color:var(--text-color); }
+.stk-viz .cwrap { position:relative; height:360px; }
 </style>
 
 <div class="stocks" markdown="0">
@@ -45,13 +52,24 @@ title: STOCKS
     <b>투자 조언이 아니며</b>, 가격은 각 종목의 "차트 보기"에서 확인하세요.
   </div>
 
+  <div class="stk-stats">
+    <div class="s"><span class="n" id="stk-total">–</span><span class="l">종목</span></div>
+    <div class="s"><span class="n" id="stk-us">–</span><span class="l">미국</span></div>
+    <div class="s"><span class="n" id="stk-kr">–</span><span class="l">한국</span></div>
+  </div>
+
+  <div class="stk-viz">
+    <h2>블로그 연관도 (많이 다룬 순)</h2>
+    <div class="cwrap"><canvas id="stk-corr-chart"></canvas></div>
+  </div>
+
   {%- assign markets = "US,KR" | split: "," -%}
   {%- for mk in markets -%}
   <div class="stk-mkt">{% if mk == "US" %}미국{% else %}한국{% endif %}</div>
   <div class="stk-grid">
     {%- assign ms = stocks | where: "market", mk -%}
     {%- for s in ms -%}
-    <div class="stk" data-kw="{{ s.keywords | join: '|' }}">
+    <div class="stk" data-kw="{{ s.keywords | join: '|' }}" data-market="{{ s.market }}">
       <div class="stk-h"><span class="stk-name">{{ s.name }}</span><span class="stk-tk">{{ s.ticker }}</span></div>
       <div class="stk-focus">{{ s.focus }}</div>
       <div class="stk-rel-line">블로그 관련도 <b class="stk-rel">–</b>개</div>
@@ -67,4 +85,5 @@ title: STOCKS
 <script type="application/json" id="stocks-tools">
 [{% for post in toolposts %}{% assign gp = post.github_url | split: 'github.com/' | last | split: '/' %}{% assign trepo = gp[1] | split: '?' | first | split: '#' | first %}{"name":{{ trepo | default: gp[0] | jsonify }},"owner":{{ gp[0] | jsonify }},"title":{{ post.title | strip_newlines | jsonify }},"url":{{ post.url | relative_url | jsonify }},"date":{{ post.date | date: "%Y-%m-%d" | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
 </script>
+<script src="{{ '/assets/lib/chartjs/chart.umd.min.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/stocks.js' | relative_url }}" defer></script>
