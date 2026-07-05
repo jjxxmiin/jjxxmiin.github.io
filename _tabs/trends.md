@@ -76,3 +76,5 @@ title: TRENDS
 </script>
 <script src="{{ '/assets/lib/chartjs/chart.umd.min.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/trends.js' | relative_url }}" defer></script>
+
+<!-- v1 -->
