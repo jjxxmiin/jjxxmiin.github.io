@@ -83,3 +83,5 @@ title: UPDATES
   {% endfor %}
 
 </div>
+
+<!-- updates page v1 -->
