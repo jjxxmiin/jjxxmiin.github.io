@@ -12,7 +12,7 @@ title: TOOLS
 .tools-head .tag { display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.14em; color:#2a78d6; }
 .tools-head .h { font-size:1.5rem; font-weight:800; margin:.25rem 0 .2rem; color:var(--text-color); }
 .tools-head .sub { font-size:.9rem; color:var(--text-muted-color); }
-.tools-controls { position:sticky; top:0; z-index:5; padding:.55rem 0 .2rem; background:var(--main-bg); }
+.tools-controls { padding:.2rem 0 .5rem; }
 #tools-search { width:100%; padding:.7rem 1rem; border-radius:10px; border:1px solid var(--main-border-color); background:var(--card-bg); color:var(--text-color); font-size:.95rem; }
 #tools-search:focus { outline:none; border-color:#2a78d6; }
 #tools-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin:.65rem 0 .2rem; }
@@ -42,7 +42,7 @@ title: TOOLS
 </div>
 
 <div class="tools-controls" markdown="0">
-  <input id="tools-search" type="search" placeholder="툴 이름·설명 검색 (예: cursor, 에이전트, rag)" autocomplete="off">
+  <input id="tools-search" type="search" placeholder="툴 이름/설명 검색 (예: cursor, 에이전트, rag)" autocomplete="off">
   <div id="tools-chips"></div>
 </div>
 
