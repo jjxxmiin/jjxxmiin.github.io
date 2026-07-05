@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'AI 코딩 에이전트의 뇌 구조를 바꾸다: codebase-memory-mcp 심층 해설'
+title: 'AI 코딩 에이전트의 뇌 구조를 바꾸다: codebase-memory-mcp'
 date: '2026-07-05 03:51:48'
 categories: Tech
 summary: AI 코딩 에이전트가 코드를 탐색할 때 발생하는 막대한 토큰 소모와 속도 저하 문제를 해결하기 위해, 전체 코드베이스를 지식 그래프로
