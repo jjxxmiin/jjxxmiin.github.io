@@ -24,6 +24,56 @@ def fix_table_spacing(text):
         out.append(line)
     return "\n".join(out)
 
+
+def strip_fake_images(text):
+    """Drop markdown images pointing at placeholder/invented hosts. The model used to
+    insert ![...](https://via.placeholder.com/...) when it had no real image, which
+    renders as an ugly gray box. Better to have no image than a fake one."""
+    fake = re.compile(r'(?i)(via\.placeholder|placeholder\.com|dummyimage|example\.com|'
+                      r'your[-_.]?image|image[-_.]?url|placehold\.co|fakeimg)')
+    return "\n".join(l for l in text.split("\n")
+                     if not (re.match(r'^\s*!\[', l) and fake.search(l)))
+
+
+def get_repo_images(github_url, limit=3):
+    """Pull REAL embeddable images (screenshots/diagrams) from a repo's README so the
+    model can use actual visuals instead of inventing URLs. Filters out badges/shields/
+    logos (mostly SVG) so we don't embed junk. Returns a list of image URLs (may be empty)."""
+    m = re.search(r'github\.com/([^/]+)/([^/#?]+)', github_url or "")
+    if not m:
+        return []
+    owner, repo = m.group(1), m.group(2).replace(".git", "")
+    readme = ""
+    for branch in ("main", "master"):
+        try:
+            r = requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md", timeout=15)
+            if r.status_code == 200 and r.text:
+                readme = r.text
+                break
+        except Exception:
+            continue
+    if not readme:
+        return []
+    urls = re.findall(r'!\[[^\]]*\]\((https?://[^)\s]+)', readme)
+    urls += re.findall(r'<img[^>]+src=["\'](https?://[^"\']+)', readme)
+    bad = ("shields.io", "badge", "discord", "twitter", "x.com", "slsa.dev", "deepwiki",
+           "codecov", "circleci", "travis", "buymeacoffee", "ko-fi", "star-history",
+           "gitcontributor", "contrib.rocks", "hitcount", "visitor")
+    out = []
+    for u in urls:
+        low = u.lower()
+        if any(b in low for b in bad):
+            continue
+        # screenshots/diagrams are raster; SVGs are almost always badges/logos here
+        if not re.search(r'\.(png|jpe?g|gif|webp)(\?|$)', low):
+            continue
+        u = u.replace("/blob/", "/raw/")
+        if u not in out:
+            out.append(u)
+        if len(out) >= limit:
+            break
+    return out
+
 # Configuration
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
 # `cd automation && python daily_trend_bot.py` (CI) or `python automation/daily_trend_bot.py`.
@@ -234,11 +284,31 @@ def generate_blog_post(client, topic_data):
     # never injected and posts drifted off-topic. The refiner is now removed, but we keep
     # this safeguard: always prepend an explicit, unmissable topic block so generation is
     # locked to the selected topic regardless of the config's state.
+    # Real images from the repo README (screenshots/diagrams), so the model uses actual
+    # visuals instead of inventing placeholder URLs.
+    repo_images = get_repo_images(github_url)
+    if repo_images:
+        img_note = ("사용 가능한 '실제' 이미지 URL (내용과 관련 있을 때만 본문에 ![간단한 설명](URL) 형식으로 1~2개 삽입):\n"
+                    + "\n".join(f"  - {u}" for u in repo_images))
+    else:
+        img_note = "이 저장소에는 쓸 만한 실제 이미지가 없다. 이미지는 넣지 말고 Mermaid 다이어그램과 표로 시각화하라."
+
+    visuals_directive = (
+        "[시각 자료 적극 활용 — 매우 중요]\n"
+        "1. 다이어그램(도형): 아키텍처·데이터 흐름·처리 단계를 최소 1개(가능하면 2개) Mermaid 다이어그램으로 그린다. "
+        "```mermaid 코드블록을 쓰고 flowchart TD / sequenceDiagram 등 간단하고 문법 오류 없는 형태로 만든다. "
+        "노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]), 라벨 안에 괄호()·대괄호[]·콜론:은 쓰지 마라(파싱 오류 방지).\n"
+        "2. 도표(표): 비교·수치·트레이드오프는 마크다운 표로 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
+        "3. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
+        f"{img_note}\n\n"
+    )
+
     topic_header = (
         "[작성 대상 — 반드시 아래 주제로만 작성. 다른 기술로 절대 새지 말 것]\n"
         f"- 프로젝트명: {topic_name}\n"
         f"- GitHub 저장소: {github_url}\n"
         f"- 검색 쿼리: {search_query}\n\n"
+        + visuals_directive
     )
     prompt_text = topic_header + prompt_text
 
@@ -313,6 +383,13 @@ def save_post(post_data):
         except Exception as e:
             print(f"Could not parse GitHub URL for image: {e}")
 
+    # Process the body first so front matter can reflect it (e.g. the mermaid flag).
+    content = post_data['content']
+    if '\\n' in content:
+        content = content.replace('\\n', '\n')
+    content = strip_fake_images(content)   # drop placeholder/invented image URLs
+    content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
+
     front_matter = {
         "layout": "post",
         "title": post_data.get('title_korean', post_data.get('title', 'Untitled')),
@@ -322,20 +399,17 @@ def save_post(post_data):
         "author": "AI Trend Bot",
         "github_url": github_url
     }
-    
+
     if image_data:
         front_matter["image"] = image_data
-    
+    # Chirpy renders ```mermaid blocks only when the post opts in via front matter.
+    if re.search(r'```\s*mermaid', content):
+        front_matter["mermaid"] = True
+
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("---\n")
         yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
         f.write("---\n\n")
-        
-        content = post_data['content']
-        if '\\n' in content:
-            content = content.replace('\\n', '\n')
-
-        content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
         f.write(content)
         
         if post_data.get('reference_links'):
