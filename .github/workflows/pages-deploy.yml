@@ -74,7 +74,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 15
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000     # wait up to 10m for the deployment to become available
+          error_count: 15     # tolerate more transient GitHub Pages API errors before failing
