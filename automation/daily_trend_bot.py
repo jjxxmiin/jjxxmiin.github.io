@@ -6,7 +6,9 @@ from google import genai
 from google.genai import types
 
 # Configuration
-POSTS_DIR = "../_posts"
+# Resolve relative to THIS file (not the caller's CWD) so it works whether run as
+# `cd automation && python daily_trend_bot.py` (CI) or `python automation/daily_trend_bot.py`.
+POSTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "_posts")
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
 # Preview models first (best quality), then stable aliases as a safety net so the
 # pipeline keeps working even after a preview model is retired.
@@ -207,7 +209,20 @@ def generate_blog_post(client, topic_data):
     ).replace(
         "{github_url}", github_url
     )
-    
+
+    # ROBUSTNESS: prompt_config.json is auto-evolved weekly by prompt_refiner.py,
+    # which on 2026-05-31 dropped the {topic_name}/{github_url} placeholders. Without
+    # them the topic was never injected and the model free-wrote off-topic posts
+    # (everything drifted to eBPF/Sidecar). Always prepend an explicit, unmissable
+    # topic block so generation is locked to the selected topic regardless of config.
+    topic_header = (
+        "[작성 대상 — 반드시 아래 주제로만 작성. 다른 기술로 절대 새지 말 것]\n"
+        f"- 프로젝트명: {topic_name}\n"
+        f"- GitHub 저장소: {github_url}\n"
+        f"- 검색 쿼리: {search_query}\n\n"
+    )
+    prompt_text = topic_header + prompt_text
+
     response_schema = {
         "type": "OBJECT",
         "properties": {
