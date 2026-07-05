@@ -2,7 +2,7 @@ name: Daily AI Trend Post
 
 on:
   schedule:
-    - cron: '0 11,23 * * *' # Runs at 23:00 UTC (08:00 KST) and 11:00 UTC (20:00 KST)
+    - cron: '0 8 * * *' # 08:00 UTC = 17:00 KST (저녁 전) — 최신 AI 트렌드 블로그 글 1회 자동 생성
   workflow_dispatch: # Allow manual trigger
 
 jobs:

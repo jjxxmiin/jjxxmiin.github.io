@@ -1,9 +1,28 @@
 import os
+import re
 import datetime
 import yaml
 import requests
 from google import genai
 from google.genai import types
+
+
+def fix_table_spacing(text):
+    """kramdown (Jekyll) needs a blank line BEFORE and AFTER a markdown table.
+    The model often glues a table directly under a bold header, so the whole block
+    renders as a paragraph full of literal '|'. Insert the required blank lines at
+    table boundaries (without touching the rows inside the table)."""
+    is_row = lambda s: bool(re.match(r'^\s*\|.*\|', s))
+    out = []
+    for line in text.split("\n"):
+        cur = is_row(line)
+        prev = out[-1] if out else ""
+        if cur and prev.strip() and not is_row(prev):          # entering table
+            out.append("")
+        elif not cur and line.strip() and out and is_row(out[-1]):  # leaving table
+            out.append("")
+        out.append(line)
+    return "\n".join(out)
 
 # Configuration
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
@@ -315,7 +334,8 @@ def save_post(post_data):
         content = post_data['content']
         if '\\n' in content:
             content = content.replace('\\n', '\n')
-            
+
+        content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
         f.write(content)
         
         if post_data.get('reference_links'):

@@ -38,6 +38,7 @@ image:
 특히 이들이 해결한 가장 큰 기술적 난제는 '메모리 관리'와 '시각적 일관성'이었습니다.
 
 **[표: 기존 AI 비디오 생성 방식 vs OpenMontage 아키텍처 비교]**
+
 | 아키텍처 비교 항목 | 기존 AI 비디오 파이프라인 (LangChain/API Wrapper) | OpenMontage (Agent-First Architecture) |
 | :--- | :--- | :--- |
 | **제어 주체 (Orchestrator)** | 하드코딩된 Python 미들웨어 및 분기 로직 | **AI 코딩 어시스턴트 (Cursor, Claude Code 등)** |
