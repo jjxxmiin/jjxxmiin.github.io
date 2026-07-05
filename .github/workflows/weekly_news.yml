@@ -1,0 +1,39 @@
+name: Weekly AI News
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'   # 00:00 UTC Monday = 09:00 KST Monday
+  workflow_dispatch:        # allow manual run
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install google-genai PyYAML
+
+      - name: Generate weekly AI news
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          cd automation
+          python ai_news_bot.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'OPSOAI Bot'
+          git config --global user.email 'ceo@opsoai.com'
+          git add _data/ai_news.yml
+          git commit -m "Weekly AI news update [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+          git pull --rebase
+          git push
