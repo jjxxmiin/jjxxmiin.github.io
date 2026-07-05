@@ -48,6 +48,7 @@ codebase-memory-mcp의 핵심 아이디어는 **'코드의 구조적 맥락(Stru
 AI 에이전트가 "A 함수가 어디서 사용돼?"라고 물으면, 이 MCP 서버는 그래프 데이터베이스에서 `MATCH (f:Function)-[:CALLS]->(target) WHERE target.name = 'A'` 형태의 쿼리를 실행하여 단 1밀리초(ms) 만에 호출 체인만을 깔끔하게 발췌해 돌려줍니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 erDiagram
     NODE_FILE {
         string path
@@ -80,6 +81,7 @@ erDiagram
 전체 시스템은 로컬 환경에서 단일 정적 바이너리로 구동되며, 크게 4단계의 파이프라인을 거칩니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 flowchart TD
     A["로컬 소스 코드"] --> B["Tree-Sitter 파서 (158개 언어)"]
     B --> C["Hybrid LSP (의미론적 타입 추론)"]
@@ -99,6 +101,7 @@ flowchart TD
 하지만 Tree-Sitter만으로는 동적 타입 언어에서 '이 함수가 정확히 어느 클래스의 메서드인지'를 추론하기 어렵습니다. 그래서 이 프로젝트는 **Hybrid LSP**라는 독창적인 방식을 도입했습니다. Python, TypeScript, Java 등 9개 주요 언어에 대해서는 내부적인 경량 추론 엔진을 돌려 문맥과 임포트 경로를 바탕으로 타입을 유추합니다. 무거운 빌드 서버 없이도 LSP에 준하는 정확도를 얻어낸 것입니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 pie title "언어 지원 및 분석 심도"
     "Tree-sitter 구조적 파싱 (149개 언어)" : 149
     "Hybrid LSP 정밀 추론 (9개 언어)" : 9
@@ -111,6 +114,7 @@ pie title "언어 지원 및 분석 심도"
 비밀은 **RAM-First 파이프라인**에 있습니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 stateDiagram-v2
     [*] --> 텍스트_적재 : 파일 I/O
     텍스트_적재 --> 병렬_AST_추출 : 워커 풀(Worker Pool)
@@ -137,6 +141,7 @@ stateDiagram-v2
 내부적으로 이 시스템이 어떻게 구성되어 있는지 객체 지향적 관점(모듈 구조)에서 살펴보겠습니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 classDiagram
     class MODULE_CORE {
         +init_engine()
@@ -239,6 +244,7 @@ curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/i
 에이전트는 내부적으로 `trace_call_path` 도구를 호출합니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 sequenceDiagram
     participant AI as "AI 에이전트"
     participant MCP as "codebase-memory-mcp"
@@ -258,6 +264,7 @@ sequenceDiagram
 이 도구의 숨겨진 강력함은 애플리케이션 코드뿐만 아니라 Dockerfile, Kubernetes 매니페스트, Kustomize 오버레이 같은 인프라 코드까지 그래프로 연결한다는 점입니다.
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%
 flowchart LR
     A["Kustomize Base"] -->|IMPORTS| B["K8s Deployment 노드"]
     C["Dockerfile"] -->|BUILDS| D["마이크로서비스 이미지"]

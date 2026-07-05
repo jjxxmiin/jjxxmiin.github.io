@@ -161,6 +161,30 @@ def _validate_chartjs(code):
         return False
 
 
+# 2026 Pantone Color of the Year "Cloud Dancer" (#F0EEE9) theme for diagrams.
+# Cloud Dancer = airy off-white node fills; validated CVD-safe accents for borders/lines;
+# deep warm ink for text. Legible on both light and dark pages (nodes carry their own bg).
+MERMAID_THEME = (
+    '%%{init: {"theme":"base","themeVariables":{'
+    '"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926",'
+    '"secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926",'
+    '"tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926",'
+    '"lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9",'
+    '"noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578",'
+    '"clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%'
+)
+
+
+def apply_mermaid_theme(content):
+    """Prepend the Cloud Dancer (2026 CotY) init directive to each mermaid diagram."""
+    def repl(m):
+        inner = m.group(1)
+        if "%%{init" in inner:                       # already themed
+            return m.group(0)
+        return "```mermaid\n" + MERMAID_THEME + "\n" + inner.strip("\n") + "\n```"
+    return re.sub(r"```mermaid[ \t]*\n(.*?)```", repl, content, flags=re.S)
+
+
 def fix_visuals(client, content):
     """Validate every mermaid/chartjs block. Repair once; if still invalid, drop it —
     so a broken visual never reaches the published post as a red 'Syntax error' box."""
@@ -467,7 +491,8 @@ def generate_blog_post(client, topic_data):
         try:
             data = json.loads(response_text)
             data['github_url'] = github_url
-            data['content'] = fix_visuals(client, data.get('content', ''))  # validate diagrams/charts
+            data['content'] = fix_visuals(client, data.get('content', ''))   # validate diagrams/charts
+            data['content'] = apply_mermaid_theme(data['content'])            # Cloud Dancer (2026 CotY) theme
             return data
         except Exception as e:
             print(f"Error parsing blog post JSON: {e}")
