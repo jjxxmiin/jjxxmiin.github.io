@@ -1,8 +1,8 @@
 #  The contact options.
 
-- type: website
-  icon: 'fas fa-globe'
-  url: 'https://www.camorix.com'
+- type: instagram
+  icon: 'fa-brands fa-instagram'
+  url: 'https://www.instagram.com/opsoai'
 
 - type: threads
   icon: 'fa-brands fa-threads'

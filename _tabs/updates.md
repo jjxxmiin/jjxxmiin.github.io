@@ -2,7 +2,7 @@
 layout: page
 icon: fas fa-bolt
 order: 3
-title: UPDATES
+title: NEWS
 ---
 
 {%- assign news = site.data.ai_news -%}
@@ -51,7 +51,7 @@ title: UPDATES
   </div>
 
   <div class="upd-stats">
-    <div class="s"><span class="n">{{ total }}</span><span class="l">건의 업데이트</span></div>
+    <div class="s"><span class="n">{{ total }}</span><span class="l">건의 뉴스</span></div>
     <div class="s"><span class="n">{{ news.categories.size }}</span><span class="l">개 분야</span></div>
     <div class="s"><span class="n">{{ news.updated }}</span><span class="l">기준</span></div>
   </div>

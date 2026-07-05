@@ -81,7 +81,7 @@ title: TRENDS
     {%- for cat in news.categories -%}
     <div class="trd-hl"><span class="c">{{ cat.name }}</span><span class="d">{{ cat.items[0].date }}</span><span class="t">{{ cat.items[0].text }}</span></div>
     {%- endfor -%}
-    <a class="trd-more" href="{{ '/updates/' | relative_url }}">전체 업데이트 보기 →</a>
+    <a class="trd-more" href="{{ '/updates/' | relative_url }}">전체 뉴스 보기 →</a>
   </div>
   {%- endif -%}
 
