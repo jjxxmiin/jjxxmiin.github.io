@@ -22,10 +22,12 @@ permissions:
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
+# Allow one concurrent deployment, but let in-progress production deploys finish
+# (GitHub's recommended setting). cancel-in-progress: true caused the deploy step to
+# intermittently fail with "superseded" when a second run started.
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
