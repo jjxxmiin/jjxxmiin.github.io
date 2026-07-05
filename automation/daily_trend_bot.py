@@ -229,11 +229,11 @@ def generate_blog_post(client, topic_data):
         "{github_url}", github_url
     )
 
-    # ROBUSTNESS: prompt_config.json is auto-evolved weekly by prompt_refiner.py,
-    # which on 2026-05-31 dropped the {topic_name}/{github_url} placeholders. Without
-    # them the topic was never injected and the model free-wrote off-topic posts
-    # (everything drifted to eBPF/Sidecar). Always prepend an explicit, unmissable
-    # topic block so generation is locked to the selected topic regardless of config.
+    # ROBUSTNESS: the old weekly prompt_refiner.py once rewrote prompt_config.json and
+    # dropped the {topic_name}/{github_url} placeholders (2026-05-31), so the topic was
+    # never injected and posts drifted off-topic. The refiner is now removed, but we keep
+    # this safeguard: always prepend an explicit, unmissable topic block so generation is
+    # locked to the selected topic regardless of the config's state.
     topic_header = (
         "[작성 대상 — 반드시 아래 주제로만 작성. 다른 기술로 절대 새지 말 것]\n"
         f"- 프로젝트명: {topic_name}\n"
