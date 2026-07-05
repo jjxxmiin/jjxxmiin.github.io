@@ -76,9 +76,27 @@ jobs:
     needs: build
     timeout-minutes: 15
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      # The "Deploy to GitHub Pages" step is flaky (build always passes). Retry up to 3x;
+      # only fail the job if all three attempts fail.
+      - name: Deploy to GitHub Pages (attempt 1)
+        id: d1
         uses: actions/deploy-pages@v4
         with:
-          timeout: 600000     # wait up to 10m for the deployment to become available
-          error_count: 15     # tolerate more transient GitHub Pages API errors before failing
+          timeout: 600000
+          error_count: 15
+        continue-on-error: true
+      - name: Deploy to GitHub Pages (attempt 2)
+        id: d2
+        if: steps.d1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000
+          error_count: 15
+        continue-on-error: true
+      - name: Deploy to GitHub Pages (attempt 3)
+        id: deployment
+        if: steps.d1.outcome == 'failure' && steps.d2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000
+          error_count: 15
