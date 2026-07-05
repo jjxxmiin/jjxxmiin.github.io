@@ -1,15 +1,17 @@
 <!-- Chart.js support: renders ```chartjs blocks (JSON Chart.js config) as charts, themed
      with the 2026 Pantone Color of the Year "Cloud Dancer" (#F0EEE9) as the surface and a
-     validated colorblind-safe accent palette for the data. Loaded only when `chart: true`. -->
+     validated colorblind-safe accent palette. Loaded only when `chart: true`.
+     NOTE: the HTML is minified (newlines stripped), so this inline script must contain NO
+     `//` line comments — after minification they would comment out the rest of the script. -->
 <script src="{{ '/assets/lib/chartjs/chart.umd.min.js' | relative_url }}"></script>
 <script>
 (function () {
-  var CLOUD = '#F0EEE9';                       // Color of the Year — chart surface
+  var CLOUD = '#F0EEE9';
   var LIGHT = ['#2a78d6','#1baf7a','#eda100','#008300','#4a3aa7','#e34948','#e87ba4','#eb6834'];
   var DARK  = ['#3987e5','#199e70','#c98500','#008300','#9085e9','#e66767','#d55181','#d95926'];
   function isDark() {
     var m = document.documentElement.getAttribute('data-mode');
-    if (m) return m === 'dark';
+    if (m) { return m === 'dark'; }
     return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   }
   function render() {
@@ -21,23 +23,25 @@
     var surface = dark ? '#201f1d' : CLOUD;
     Chart.defaults.color = ink;
     Chart.defaults.borderColor = grid;
-    if (Chart.defaults.font) Chart.defaults.font.family = 'Pretendard, sans-serif';
-
-    document.querySelectorAll('pre code.language-chartjs').forEach(function (code) {
+    if (Chart.defaults.font) { Chart.defaults.font.family = 'Pretendard, sans-serif'; }
+    var blocks = document.querySelectorAll('pre code.language-chartjs, code.language-chartjs, .language-chartjs');
+    blocks.forEach(function (code) {
+      if (code.getAttribute('data-chart-done')) { return; }
+      var pre = code.closest('pre') || code;
       try {
         var cfg = JSON.parse(code.textContent);
         cfg.options = cfg.options || {};
         cfg.options.responsive = true;
         cfg.options.maintainAspectRatio = false;
-        var arc = ['pie', 'doughnut', 'polarArea'].indexOf(cfg.type) !== -1;
+        var arc = ['pie','doughnut','polarArea'].indexOf(cfg.type) !== -1;
         (cfg.data && cfg.data.datasets || []).forEach(function (ds, i) {
           if (ds.backgroundColor === undefined) {
             ds.backgroundColor = arc
               ? (ds.data || []).map(function (_, j) { return palette[j % palette.length]; })
               : palette[i % palette.length];
           }
-          if (ds.borderColor === undefined) ds.borderColor = arc ? surface : palette[i % palette.length];
-          if (ds.borderWidth === undefined) ds.borderWidth = arc ? 2 : 1.5;
+          if (ds.borderColor === undefined) { ds.borderColor = arc ? surface : palette[i % palette.length]; }
+          if (ds.borderWidth === undefined) { ds.borderWidth = arc ? 2 : 1.5; }
         });
         var wrap = document.createElement('div');
         wrap.className = 'chartjs-wrap';
@@ -46,11 +50,11 @@
           + 'border:1px solid ' + (dark ? 'rgba(240,238,233,0.10)' : 'rgba(43,41,38,0.08)') + ';';
         var canvas = document.createElement('canvas');
         wrap.appendChild(canvas);
-        var pre = code.closest('pre');
+        code.setAttribute('data-chart-done', '1');
         pre.parentNode.replaceChild(wrap, pre);
         new Chart(canvas, cfg);
       } catch (e) {
-        console.error('chartjs render failed:', e);
+        if (window.console) { console.error('chartjs render failed:', e); }
       }
     });
   }
@@ -59,5 +63,6 @@
   } else {
     render();
   }
+  window.addEventListener('load', render);
 })();
 </script>
