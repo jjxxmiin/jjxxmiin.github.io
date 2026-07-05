@@ -1,0 +1,163 @@
+# AI 관련 주식 + 블로그 커버리지 연관도 (수동 큐레이션)
+updated: '2026-07-05'
+stocks:
+- ticker: NVDA
+  name: NVIDIA
+  market: US
+  gf: NVDA:NASDAQ
+  focus: AI 가속기(GPU)의 사실상 표준. 학습·추론 인프라의 심장
+  keywords:
+  - nvidia
+  - gpu
+  - cuda
+  - tensorrt
+  - vllm
+  - inference
+  - 지피유
+  - 엔비디아
+  - cutlass
+- ticker: MSFT
+  name: Microsoft
+  market: US
+  gf: MSFT:NASDAQ
+  focus: Copilot·Azure·OpenAI 파트너십으로 AI를 제품 전면에
+  keywords:
+  - microsoft
+  - copilot
+  - azure
+  - github
+  - vscode
+  - openai
+  - codex
+  - m365
+  - typescript
+- ticker: GOOGL
+  name: Alphabet (Google)
+  market: US
+  gf: GOOGL:NASDAQ
+  focus: Gemini·DeepMind. 모델부터 검색·클라우드까지 수직 통합
+  keywords:
+  - google
+  - gemini
+  - deepmind
+  - gemma
+  - tensorflow
+  - ' jax'
+  - colab
+  - android
+  - chrome
+  - genai
+- ticker: META
+  name: Meta
+  market: US
+  gf: META:NASDAQ
+  focus: Llama 오픈웨이트로 오픈소스 진영 주도. PyTorch 생태계
+  keywords:
+  - meta
+  - llama
+  - pytorch
+  - segment anything
+  - fair
+- ticker: AMZN
+  name: Amazon
+  market: US
+  gf: AMZN:NASDAQ
+  focus: AWS Bedrock·SageMaker·Trainium. AI 클라우드 인프라
+  keywords:
+  - amazon
+  - aws
+  - bedrock
+  - sagemaker
+  - trainium
+- ticker: AAPL
+  name: Apple
+  market: US
+  gf: AAPL:NASDAQ
+  focus: Apple Intelligence·온디바이스 AI. MLX 프레임워크
+  keywords:
+  - apple
+  - coreml
+  - mlx
+  - macbook
+- ticker: AMD
+  name: AMD
+  market: US
+  gf: AMD:NASDAQ
+  focus: NVIDIA 대항마. ROCm으로 GPU 소프트웨어 생태계 확장
+  keywords:
+  - amd
+  - rocm
+  - radeon
+  - instinct
+- ticker: TSLA
+  name: Tesla
+  market: US
+  gf: TSLA:NASDAQ
+  focus: FSD 자율주행·Optimus 로봇·Dojo 학습 클러스터
+  keywords:
+  - tesla
+  - fsd
+  - dojo
+  - optimus
+  - autopilot
+  - robot
+  - 로봇
+- ticker: PLTR
+  name: Palantir
+  market: US
+  gf: PLTR:NASDAQ
+  focus: 기업·정부용 AI 운영 플랫폼(AIP)
+  keywords:
+  - palantir
+  - foundry
+  - ' aip'
+- ticker: AVGO
+  name: Broadcom
+  market: US
+  gf: AVGO:NASDAQ
+  focus: 맞춤형 AI 칩(ASIC)·데이터센터 네트워킹
+  keywords:
+  - broadcom
+- ticker: 005930
+  name: 삼성전자
+  market: KR
+  gf: 005930:KRX
+  focus: HBM 메모리·온디바이스 AI(가우스). AI 반도체 핵심 공급
+  keywords:
+  - samsung
+  - 삼성
+  - hbm
+  - exynos
+  - gauss
+  - 가우스
+- ticker: '000660'
+  name: SK하이닉스
+  market: KR
+  gf: 000660:KRX
+  focus: HBM 시장 선두. AI 가속기용 고대역폭 메모리
+  keywords:
+  - sk하이닉스
+  - hynix
+  - 하이닉스
+  - hbm
+- ticker: '035420'
+  name: 네이버
+  market: KR
+  gf: 035420:KRX
+  focus: 하이퍼클로바X·AI 검색(AI탭). 국산 파운데이션 모델
+  keywords:
+  - naver
+  - 네이버
+  - hyperclova
+  - clova
+  - 하이퍼클로바
+- ticker: '035720'
+  name: 카카오
+  market: KR
+  gf: 035720:KRX
+  focus: 카나나(Kanana) 자체 모델·메신저 AI
+  keywords:
+  - kakao
+  - 카카오
+  - kanana
+  - 카나나
