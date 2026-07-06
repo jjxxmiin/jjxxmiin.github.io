@@ -16,50 +16,10 @@
   </header>
   <!-- .profile-wrapper -->
 
-  <nav class="flex-column flex-grow-1 w-100 ps-0">
-    <ul class="nav">
-      <!-- home -->
-      <li class="nav-item{% if page.layout == 'home' %}{{ " active" }}{% endif %}">
-        <a href="{{ '/' | relative_url }}" class="nav-link">
-          <i class="fa-fw fas fa-home"></i>
-          <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
-        </a>
-      </li>
-      <!-- the real tabs -->
-      {% for tab in site.tabs %}
-        <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
-          <a href="{{ tab.url | relative_url }}" class="nav-link">
-            <i class="fa-fw {{ tab.icon }}"></i>
-            {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+  <!-- 아이콘 줄을 프로필 바로 아래(맨 위)로 이동 -->
+  <div class="sidebar-bottom sidebar-social-top d-flex flex-wrap align-items-center w-100">
 
-            <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
-          </a>
-        </li>
-        <!-- .nav-item -->
-      {% endfor %}
-
-    </ul>
-  </nav>
-
-  <!-- 좌측 사이드바 광고 (데스크톱 + 세로 여유 있을 때만 노출 → 내비 안 밀림) -->
-  <style>
-    #sidebar .sidebar-ad { display: none; padding: 0 1rem .6rem; }
-    @media (min-width: 992px) and (min-height: 780px) {
-      #sidebar .sidebar-ad { display: block; }
-    }
-    #sidebar .sidebar-ad .google-ad { max-height: 280px; overflow: hidden; border-radius: 8px; }
-    #sidebar .sidebar-ad .adsbygoogle { background: transparent; }
-  </style>
-  <div class="sidebar-ad w-100">
-    {% include google-ad-sidebar.html %}
-  </div>
-
-  <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
-    
-
-    <!-- Hidden data element for liquid URL - No longer needed for lazy load but keeping structure simple -->
-    
-    <!-- Sponsor Icon Button in Footer -->
+    <!-- Sponsor Icon Button -->
     <a href="#" aria-label="sponsor" onclick="openSponsorModal(event);">
       <i class="fas fa-heart" style="color: #ff6b6b;"></i>
     </a>
@@ -113,6 +73,49 @@
       {% endif %}
     {% endfor %}
   </div>
-  <!-- .sidebar-bottom -->
+  <!-- .sidebar-bottom (social icons, moved to top) -->
+
+  <style>
+    /* 아이콘 줄이 맨 위로 왔으니 프로필과의 간격만 살짝 조정 */
+    #sidebar .sidebar-social-top { margin-top: 0.75rem; margin-bottom: 1rem; }
+  </style>
+
+  <nav class="flex-column flex-grow-1 w-100 ps-0">
+    <ul class="nav">
+      <!-- home -->
+      <li class="nav-item{% if page.layout == 'home' %}{{ " active" }}{% endif %}">
+        <a href="{{ '/' | relative_url }}" class="nav-link">
+          <i class="fa-fw fas fa-home"></i>
+          <span>{{ site.data.locales[include.lang].tabs.home | upcase }}</span>
+        </a>
+      </li>
+      <!-- the real tabs -->
+      {% for tab in site.tabs %}
+        <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
+          <a href="{{ tab.url | relative_url }}" class="nav-link">
+            <i class="fa-fw {{ tab.icon }}"></i>
+            {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+
+            <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+          </a>
+        </li>
+        <!-- .nav-item -->
+      {% endfor %}
+
+    </ul>
+  </nav>
+
+  <!-- 좌측 사이드바 광고 (데스크톱 + 세로 여유 있을 때만 노출 → 내비 안 밀림) -->
+  <style>
+    #sidebar .sidebar-ad { display: none; padding: 0 1rem .6rem; }
+    @media (min-width: 992px) and (min-height: 780px) {
+      #sidebar .sidebar-ad { display: block; }
+    }
+    #sidebar .sidebar-ad .google-ad { max-height: 280px; overflow: hidden; border-radius: 8px; }
+    #sidebar .sidebar-ad .adsbygoogle { background: transparent; }
+  </style>
+  <div class="sidebar-ad w-100">
+    {% include google-ad-sidebar.html %}
+  </div>
 </aside>
 <!-- #sidebar -->
