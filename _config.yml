@@ -110,7 +110,7 @@ mermaid: true
 
 comments:
   # Global switch for the post-comment system. Keeping it empty means disabled.
-  provider: utterances # [disqus | utterances | giscus]
+  provider: giscus # [disqus | utterances | giscus] — giscus는 글마다 좋아요/반응 바 + 댓글 제공
   # The provider options are as follows:
   disqus:
     shortname: # fill with the Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
