@@ -12,12 +12,9 @@ title: 트렌드
 <style>
 /* ===== shared shell ===== */
 .mkt { max-width: 900px; }
-.mkt-hero { border-radius:16px; padding:1.7rem 1.5rem; margin-bottom:1.1rem;
-  background:linear-gradient(135deg, rgba(42,120,214,.14), rgba(42,120,214,.03));
-  border:1px solid var(--main-border-color); }
-.mkt-hero .tag { display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.14em; color:#2a78d6; margin-bottom:.5rem; }
-.mkt-hero .h { font-size:1.5rem; font-weight:800; margin:0 0 .4rem; color:var(--text-color); word-break:keep-all; }
-.mkt-hero .sub { font-size:.92rem; color:var(--text-muted-color); line-height:1.6; margin:0; word-break:keep-all; }
+.mkt-lead { font-size:1.02rem; color:var(--text-color); line-height:1.75; word-break:keep-all; margin:.1rem 0 1.2rem; }
+.mkt-lead b { font-weight:800; }
+.mkt-lead .muted { color:var(--text-muted-color); }
 .mkt-jump { display:flex; gap:.5rem; margin-bottom:1.4rem; flex-wrap:wrap; }
 .mkt-jump a { font-size:.82rem; font-weight:700; color:#2a78d6; background:rgba(42,120,214,.11); border:1px solid rgba(42,120,214,.25); border-radius:999px; padding:.4rem .95rem; text-decoration:none; }
 .mkt-jump a:hover { background:#2a78d6; color:#fff; }
@@ -70,11 +67,8 @@ title: 트렌드
 
 <div class="mkt" markdown="0">
 
-  <div class="mkt-hero">
-    <div class="tag">AI 트렌드 &amp; 마켓</div>
-    <div class="h">데이터로 보는 AI 흐름과 관련 주식</div>
-    <p class="sub">이 블로그가 매일 다룬 AI 툴 데이터로 개발 트렌드를 시각화하고, 그 흐름이 어떤 기업·주식과 연결되는지까지 한눈에 봅니다.</p>
-  </div>
+  <p class="mkt-lead"><b>데이터로 보는 AI 흐름과 관련 주식.</b><br>
+  <span class="muted">이 블로그가 매일 다룬 AI 툴 데이터로 개발 트렌드를 시각화하고, 그 흐름이 어떤 기업·주식과 연결되는지까지 한눈에 봅니다.</span></p>
 
   <div class="mkt-jump">
     <a href="#trend"><i class="fas fa-chart-line"></i> 트렌드 대시보드</a>

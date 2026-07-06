@@ -14,12 +14,9 @@ title: 뉴스
 
 <style>
 .upd { max-width: 860px; }
-.upd-hero { border-radius: 16px; padding: 1.7rem 1.5rem; margin-bottom: 1.3rem;
-  background: linear-gradient(135deg, rgba(42,120,214,.14), rgba(42,120,214,.03));
-  border: 1px solid var(--main-border-color); }
-.upd-hero .tag { display:inline-block; font-size:.72rem; font-weight:800; letter-spacing:.14em; color:#2a78d6; margin-bottom:.55rem; }
-.upd-hero .txt { font-size:1.3rem; font-weight:800; line-height:1.5; margin:0; color:var(--text-color); word-break:keep-all; }
-.upd-hero .meta { font-size:.82rem; color:var(--text-muted-color); margin-top:.65rem; }
+.upd-lead { margin:.1rem 0 1.5rem; word-break:keep-all; }
+.upd-lead b { font-size:1.22rem; font-weight:800; line-height:1.5; color:var(--text-color); }
+.upd-lead .muted { display:inline-block; margin-top:.55rem; font-size:.84rem; color:var(--text-muted-color); }
 .upd-stats { display:flex; gap:.75rem; margin-bottom:1.5rem; flex-wrap:wrap; }
 .upd-stats .s { flex:1; min-width:92px; text-align:center; padding:.85rem .5rem; border-radius:12px; background:var(--card-bg); border:1px solid var(--main-border-color); }
 .upd-stats .s .n { display:block; font-size:1.6rem; font-weight:800; color:#2a78d6; line-height:1.1; }
@@ -44,11 +41,8 @@ title: 뉴스
 
 <div class="upd" markdown="0">
 
-  <div class="upd-hero">
-    <div class="tag">이번 주 AI 브리핑</div>
-    <p class="txt">{{ news.big_picture | replace: '·', '/' }}</p>
-    <div class="meta">{{ news.title_note | replace: '·', '/' }}</div>
-  </div>
+  <p class="upd-lead"><b>{{ news.big_picture | replace: '·', '/' }}</b><br>
+  <span class="muted">{{ news.title_note | replace: '·', '/' }}</span></p>
 
   <div class="upd-stats">
     <div class="s"><span class="n">{{ total }}</span><span class="l">건의 뉴스</span></div>
