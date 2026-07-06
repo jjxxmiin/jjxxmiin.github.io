@@ -2,7 +2,10 @@ name: Daily AI Trend Post
 
 on:
   schedule:
-    - cron: '0 8 * * *' # 08:00 UTC = 17:00 KST (저녁 전) — 최신 AI 트렌드 블로그 글 1회 자동 생성
+    # 하루 2회 자동 포스팅 (오전/오후). 매 실행마다 트렌드 상위 중 중복 아닌 첫 주제로 글 1건 생성.
+    # 오후 실행은 오전 글을 (checkout으로) 이미 보므로 중복 제외 → 서로 다른 글 2건.
+    - cron: '0 0 * * *' # 00:00 UTC = 09:00 KST (오전)
+    - cron: '0 8 * * *' # 08:00 UTC = 17:00 KST (오후)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -48,6 +51,6 @@ jobs:
           git config --global user.name 'OPSOAI Bot'
           git config --global user.email 'ceo@opsoai.com'
           git add _posts/
-          git commit -m "Auto-generated trend post for $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git commit -m "Auto-generated trend post for $(date +'%Y-%m-%d %H:%M UTC')" || echo "No changes to commit"
           git pull --rebase
           git push
