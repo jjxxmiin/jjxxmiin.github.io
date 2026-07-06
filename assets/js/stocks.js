@@ -73,6 +73,8 @@
     var top = rows.slice().sort(function (a, b) { return b.count - a.count; });
     var us = dark ? '#3987e5' : '#2a78d6';
     var kr = dark ? '#199e70' : '#1baf7a';
+    var prev = Chart.getChart ? Chart.getChart(canvas) : null;
+    if (prev) { prev.destroy(); } // idempotent: safe if drawChart() runs more than once
     new Chart(canvas, {
       type: 'bar',
       data: {
@@ -92,5 +94,4 @@
     });
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', drawChart); } else { drawChart(); }
-  window.addEventListener('load', drawChart);
 })();

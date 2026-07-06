@@ -124,9 +124,12 @@
     cfg.options = cfg.options || {};
     cfg.options.responsive = true;
     cfg.options.maintainAspectRatio = false;
-    try { new Chart(c, cfg); } catch (e) { if (window.console) { console.error('trends chart failed', id, e); } }
+    try {
+      var prev = Chart.getChart ? Chart.getChart(c) : null;
+      if (prev) { prev.destroy(); } // idempotent: safe if start() runs more than once
+      new Chart(c, cfg);
+    } catch (e) { if (window.console) { console.error('trends chart failed', id, e); } }
   }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); } else { start(); }
-  window.addEventListener('load', start);
 })();
