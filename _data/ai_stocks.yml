@@ -5,153 +5,165 @@ stocks:
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: 인공지능 모델 훈련 및 추론을 위한 핵심 GPU 가속기를 설계하고 쿠다 생태계를 제공한다.
+  focus: AI 가속기 및 GPU 칩 시장의 핵심 설계사
   keywords:
   - gpu
   - cuda
   - blackwell
-  - hopper
-  - tensorrt
+  - rubin
+  - 엔비디아
+  - ai accelerator
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 오픈AI 파트너십을 기반으로 애저 클라우드 및 코파일럿 서비스를 통해 AI를 기업용으로 통합한다.
+  focus: 클라우드 인프라와 생성형 AI 모델을 결합한 엔터프라이즈 솔루션 제공
   keywords:
+  - azure ai
   - copilot
-  - azure
   - openai
-  - phi-3
-  - slm
-- ticker: GOOGL
-  name: Alphabet Inc.
-  market: US
-  gf: GOOGL:NASDAQ
-  focus: 자체 제미나이 모델과 TPU 인프라를 바탕으로 검색 및 클라우드 AI 솔루션을 구축한다.
-  keywords:
-  - gemini
-  - tpu
-  - gcp
-  - tensorflow
-  - jax
-- ticker: AMD
-  name: Advanced Micro Devices
-  market: US
-  gf: AMD:NASDAQ
-  focus: 엔비디아의 대항마로 평가받는 인스팅트 MI300 시리즈 AI 가속기를 데이터센터에 공급한다.
-  keywords:
-  - instinct
-  - mi300x
-  - rocm
-  - epyc
-  - ryzen ai
-- ticker: VRT
-  name: Vertiv Holdings
-  market: US
-  gf: VRT:NYSE
-  focus: 고집적 AI 데이터센터에 필수적인 액체 냉각 및 전력 관리 솔루션을 공급한다.
-  keywords:
-  - datacenter
-  - liquid cooling
-  - power management
-  - 열관리
-  - 액침냉각
+  - 마이크로소프트
+  - cloud
 - ticker: AVGO
   name: Broadcom
   market: US
   gf: AVGO:NASDAQ
-  focus: 구글과 메타 등 주요 빅테크의 맞춤형 AI 반도체 설계와 네트워크 스위치를 담당한다.
+  focus: AI 데이터센터용 커스텀 실리콘 및 이더넷 네트워킹 칩 선두주자
   keywords:
   - asic
+  - ethernet
   - custom silicon
+  - 브로드컴
   - networking
-  - pcie
-  - tomahawk
-- ticker: QCOM
-  name: Qualcomm
+- ticker: TSM
+  name: Taiwan Semiconductor Manufacturing
   market: US
-  gf: QCOM:NASDAQ
-  focus: 스마트폰과 PC에서 인터넷 연결 없이 작동하는 온디바이스 AI 프로세서를 개발한다.
+  gf: TSM:NYSE
+  focus: 글로벌 AI 반도체 파운드리 독점적 지위를 가진 제조사
   keywords:
-  - on-device ai
-  - snapdragon
-  - npu
-  - edge ai
-  - arm
+  - foundry
+  - advanced packaging
+  - cowos
+  - 파운드리
+  - tsmc
+- ticker: VRT
+  name: Vertiv Holdings
+  market: US
+  gf: VRT:NYSE
+  focus: 고밀도 AI 서버를 위한 액체 냉각 및 데이터센터 전력 관리 솔루션
+  keywords:
+  - liquid cooling
+  - thermal management
+  - 액침냉각
+  - 데이터센터
+  - 버티브
 - ticker: CEG
   name: Constellation Energy
   market: US
   gf: CEG:NASDAQ
-  focus: AI 데이터센터 운영에 필요한 막대한 전력을 원자력 발전을 통해 무탄소로 공급한다.
+  focus: AI 데이터센터의 막대한 전력 수요를 감당하는 원자력 및 청정 에너지 공급
   keywords:
-  - nuclear energy
-  - datacenter
-  - clean power
-  - smr
-  - 전력망
+  - nuclear power
+  - clean energy
+  - 데이터센터 전력
+  - 원자력
+  - 콘스텔레이션
 - ticker: MU
   name: Micron Technology
   market: US
   gf: MU:NASDAQ
-  focus: AI 가속기에 탑재되는 고대역폭 메모리인 HBM3e를 생산하여 엔비디아 등에 납품한다.
+  focus: AI 서버에 필수적인 HBM 및 고용량 메모리 반도체 공급
   keywords:
   - hbm3e
+  - hbm
   - memory
+  - 마이크론
   - dram
-  - lpddr5x
-  - 반도체
+- ticker: MRVL
+  name: Marvell Technology
+  market: US
+  gf: MRVL:NASDAQ
+  focus: 광통신 모듈 및 데이터센터 내부 연결을 위한 광학 반도체 설계
+  keywords:
+  - electro-optics
+  - pam4
+  - 광통신
+  - 마벨
+  - interconnect
+- ticker: DELL
+  name: Dell Technologies
+  market: US
+  gf: DELL:NYSE
+  focus: 엔터프라이즈 및 클라우드 서비스 제공자를 위한 AI 최적화 서버 하드웨어 제조
+  keywords:
+  - ai server
+  - poweredge
+  - 델
+  - 서버
+  - enterprise
+- ticker: '000660'
+  name: SK Hynix
+  market: KR
+  gf: 000660:KRX
+  focus: 글로벌 AI 가속기에 탑재되는 고대역폭 메모리 시장의 선도적 양산 기업
+  keywords:
+  - hbm
+  - hbm3e
+  - hbm4
+  - sk하이닉스
+  - memory
 - ticker: 005930
-  name: 삼성전자
+  name: Samsung Electronics
   market: KR
   gf: 005930:KRX
-  focus: HBM 메모리 양산 및 자체 AI 가속기 마하-1 개발, 온디바이스 AI 스마트폰을 출시한다.
+  focus: 차세대 AI 메모리 기술 및 턴키 반도체 생산 체제를 갖춘 종합 반도체 기업
   keywords:
   - hbm
   - mach-1
-  - galaxy ai
-  - foundry
-  - 온디바이스ai
-- ticker: '000660'
-  name: SK하이닉스
+  - 삼성전자
+  - 파운드리
+  - cxl
+- ticker: 039030
+  name: Hanmi Semiconductor
   market: KR
-  gf: 000660:KRX
-  focus: 엔비디아 GPU에 탑재되는 핵심 HBM 메모리 시장을 선점하고 수율을 안정화하고 있다.
-  keywords:
-  - hbm3e
-  - mr-muf
-  - memory
-  - ai 반도체
-  - hbm4
-- ticker: '042700'
-  name: 한미반도체
-  market: KR
-  gf: 042700:KRX
-  focus: HBM 제조의 핵심 공정인 칩 수직 적층을 위한 TC 본더 장비를 시장에 공급한다.
+  gf: 039030:KRX
+  focus: HBM 제조 공정에 필수적인 열압착 본딩 장비 개발 및 공급
   keywords:
   - tc bonder
+  - tc본더
+  - 한미반도체
+  - 패키징 장비
   - hbm
-  - 장비
-  - 수직적층
-  - 패키징
-- ticker: '267260'
-  name: HD현대일렉트릭
+- ticker: '077360'
+  name: Isu Petasys
   market: KR
-  gf: 267260:KRX
-  focus: AI 데이터센터 건설 증가에 따라 수요가 급증한 전력 변압기와 송배전 설비를 생산한다.
+  gf: 077360:KRX
+  focus: AI 서버 및 네트워크 통신 장비에 들어가는 고다층 인쇄회로기판 제조
+  keywords:
+  - mlb
+  - pcb
+  - 이수페타시스
+  - 고다층기판
+  - network
+- ticker: '452160'
+  name: HD Hyundai Electric
+  market: KR
+  gf: 452160:KRX
+  focus: AI 데이터센터 확장에 따른 초고압 변압기 및 전력 인프라 핵심 장비 생산
   keywords:
   - 변압기
   - 전력기기
-  - datacenter
-  - 송배전
-  - 그리드
+  - transformer
+  - hd현대일렉트릭
+  - 전력망
 - ticker: '328130'
-  name: 루닛
+  name: Lunit
   market: KR
   gf: 328130:KRX
-  focus: 딥러닝 기술을 활용해 암 진단을 보조하고 맞춤형 치료제를 찾아내는 의료 AI 솔루션을 제공한다.
+  focus: AI 기반 암 진단 및 의료 영상 판독 솔루션을 글로벌 시장에 서비스
   keywords:
+  - 루닛
   - lunit insight
-  - lunit scope
   - 의료 ai
-  - 딥러닝
-  - 바이오마커
+  - ai software
+  - cancer screening
