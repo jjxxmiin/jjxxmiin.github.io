@@ -6,7 +6,8 @@ theme: jekyll-theme-chirpy
 # The language of the webpage › https://www.lingoes.net/en/translator/langcode.htm
 # If it has the same name as one of the files in folder `_data/locales`, the layout language will also be changed,
 # otherwise, the layout language will use the default value of 'en'.
-lang: ko
+# NOTE: 젬이 제공하는 로케일 파일명이 `ko-KR.yml`이므로 `ko`가 아니라 `ko-KR`이어야 UI가 한국어로 표시됨.
+lang: ko-KR
 
 # Change to your timezone › https://kevinnovak.github.io/Time-Zone-Picker
 timezone: Asia/Seoul
@@ -117,17 +118,22 @@ comments:
   utterances:
     repo: jjxxmiin/jjxxmiin.github.io # <gh-username>/<repo>
     issue_term: pathname # < url | pathname | title | ...>
-  # Giscus options › https://giscus.app
+  # Giscus options › https://giscus.app  (커뮤니티 게시판 /board/ 에서 사용)
   giscus:
-    repo: # <gh-username>/<repo>
-    repo_id:
-    category:
-    category_id:
-    mapping: # optional, default to 'pathname'
-    strict: # optional, default to '0'
-    input_position: # optional, default to 'bottom'
-    lang: # optional, default to the value of `site.lang`
-    reactions_enabled: # optional, default to the value of `1`
+    repo: jjxxmiin/jjxxmiin.github.io
+    repo_id: R_kgDOLMuybg # 저장소 GraphQL node id (미리 채워둠)
+    category: # ← Discussions 활성화 후 giscus.app에서 카테고리명 (예: Announcements)
+    category_id: # ← giscus.app에서 복사한 category id (이 값이 채워지면 게시판이 자동으로 열림)
+    mapping: pathname
+    strict: "0"
+    input_position: top
+    lang: ko
+    reactions_enabled: "1"
+
+# 후원 설정 — Buy Me a Coffee (buymeacoffee.com/<username>)
+# 가입 후 본인 핸들로 바꾸세요. 사이드바 하트 버튼과 후원 모달에서 사용됩니다.
+sponsor:
+  buymeacoffee: opsoai
 
 # Self-hosted static assets, optional › https://github.com/cotes2020/chirpy-static-assets
 assets:

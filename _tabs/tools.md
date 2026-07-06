@@ -2,7 +2,7 @@
 layout: page
 icon: fas fa-toolbox
 order: 4
-title: TOOLS
+title: 오픈소스
 ---
 
 {%- assign tools = site.posts | where_exp: "p", "p.github_url" -%}

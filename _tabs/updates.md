@@ -2,7 +2,7 @@
 layout: page
 icon: fas fa-bolt
 order: 3
-title: NEWS
+title: 뉴스
 ---
 
 {%- assign news = site.data.ai_news -%}

@@ -2,7 +2,7 @@
 layout: page
 icon: fas fa-arrow-trend-up
 order: 6
-title: STOCKS
+title: 주식
 ---
 
 {%- assign stocks = site.data.ai_stocks.stocks -%}

@@ -2,7 +2,7 @@
 layout: page
 icon: fas fa-chart-line
 order: 5
-title: TRENDS
+title: 트렌드
 ---
 
 {%- assign tools = site.posts | where_exp: "p", "p.github_url" -%}

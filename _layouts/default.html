@@ -144,7 +144,37 @@ layout: compress
       .sponsor-modal-desc {
         color: #666 !important;
         font-size: 0.9rem;
+        line-height: 1.65;
         margin-bottom: 1.5rem;
+        word-break: keep-all;
+      }
+      .sponsor-emoji {
+        font-size: 2.6rem;
+        line-height: 1;
+        margin-bottom: 0.6rem;
+      }
+      .sponsor-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #ffdd00;
+        color: #111 !important;
+        font-weight: 800;
+        font-size: 1rem;
+        padding: 0.8rem 1.6rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+      }
+      .sponsor-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+        text-decoration: none;
+      }
+      .sponsor-fine {
+        font-size: 0.78rem;
+        color: #999 !important;
+        margin: 0.9rem 0 0;
       }
       @keyframes fadeIn {
         from { opacity: 0; }
@@ -168,9 +198,13 @@ layout: compress
     <div id="sponsorModal" class="sponsor-modal-overlay" onclick="closeSponsorModal(event)">
       <div class="sponsor-modal-content" onclick="event.stopPropagation()">
         <button class="sponsor-modal-close" onclick="closeSponsorModal()">&times;</button>
-        <h3 class="sponsor-modal-title">Support OPSOAI ☕</h3>
-        <p class="sponsor-modal-desc">QR code scan</p>
-        <img src="{{ '/assets/img/sponsor-qr.png' | relative_url }}" alt="Sponsorship QR Code" class="sponsor-qr-image">
+        <div class="sponsor-emoji">☕</div>
+        <h3 class="sponsor-modal-title">OPSOAI에 커피 한 잔</h3>
+        <p class="sponsor-modal-desc">매일 올라오는 AI 논문 요약·뉴스·오픈소스 정리가 도움이 되셨다면, 커피 한 잔으로 응원해 주세요. 다음 글을 만드는 힘이 됩니다.</p>
+        <a class="sponsor-btn" href="https://www.buymeacoffee.com/{{ site.sponsor.buymeacoffee | default: 'opsoai' }}" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-mug-hot"></i> 커피 사주기
+        </a>
+        <p class="sponsor-fine">카드 결제 · 로그인 없이 가능</p>
       </div>
     </div>
 
