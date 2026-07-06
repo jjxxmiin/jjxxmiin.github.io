@@ -41,6 +41,19 @@
     </ul>
   </nav>
 
+  <!-- 좌측 사이드바 광고 (데스크톱 + 세로 여유 있을 때만 노출 → 내비 안 밀림) -->
+  <style>
+    #sidebar .sidebar-ad { display: none; padding: 0 1rem .6rem; }
+    @media (min-width: 992px) and (min-height: 780px) {
+      #sidebar .sidebar-ad { display: block; }
+    }
+    #sidebar .sidebar-ad .google-ad { max-height: 280px; overflow: hidden; border-radius: 8px; }
+    #sidebar .sidebar-ad .adsbygoogle { background: transparent; }
+  </style>
+  <div class="sidebar-ad w-100">
+    {% include google-ad-sidebar.html %}
+  </div>
+
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
     
 
