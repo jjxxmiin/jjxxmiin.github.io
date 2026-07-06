@@ -122,8 +122,8 @@ comments:
   giscus:
     repo: jjxxmiin/jjxxmiin.github.io
     repo_id: R_kgDOLMuybg # 저장소 GraphQL node id (미리 채워둠)
-    category: # ← Discussions 활성화 후 giscus.app에서 카테고리명 (예: Announcements)
-    category_id: # ← giscus.app에서 복사한 category id (이 값이 채워지면 게시판이 자동으로 열림)
+    category: Announcements
+    category_id: DIC_kwDOLMuybs4DAk95
     mapping: pathname
     strict: "0"
     input_position: top
