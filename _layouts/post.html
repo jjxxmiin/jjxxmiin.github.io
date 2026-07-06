@@ -229,3 +229,76 @@ script_includes:
   </div>
   <!-- div.post-tail-wrapper -->
 </article>
+
+<!-- 본문 상단의 "[GitHub 저장소] | [공식 웹사이트] | [...]" 링크 줄을 버튼형으로 업그레이드 -->
+<style>
+  .content .post-links { display:flex; flex-wrap:wrap; gap:.5rem; margin:.2rem 0 1.7rem; }
+  .content .post-links a.post-link {
+    display:inline-flex; align-items:center; gap:.45rem;
+    font-size:.85rem; font-weight:700; text-decoration:none;
+    color:var(--text-color); background:var(--card-bg);
+    border:1px solid var(--main-border-color); border-radius:10px; padding:.5rem .9rem;
+    transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .content .post-links a.post-link:hover { border-color:rgba(42,120,214,.5); transform:translateY(-1px); box-shadow:var(--card-shadow); text-decoration:none; }
+  .content .post-links a.post-link i { color:#2a78d6; font-size:.9rem; }
+</style>
+<script>
+  (function () {
+    function buildBox(links) {
+      var box = document.createElement('div');
+      box.className = 'post-links';
+      links.forEach(function (a) {
+        var href = a.getAttribute('href') || '';
+        var t = (a.textContent || '').toLowerCase();
+        var icon = (/github\.com/.test(href) || /github|저장소|repo/.test(t)) ? 'fa-brands fa-github'
+          : (/웹사이트|website|homepage|공식|docs|문서|사이트|페이지/.test(t)) ? 'fa-solid fa-globe'
+          : 'fa-solid fa-arrow-up-right-from-square';
+        var na = document.createElement('a');
+        na.href = href; na.className = 'post-link';
+        if (/^https?:/.test(href)) { na.target = '_blank'; na.rel = 'noopener noreferrer'; }
+        var i = document.createElement('i'); i.className = icon;
+        var s = document.createElement('span'); s.textContent = a.textContent;
+        na.appendChild(i); na.appendChild(s);
+        box.appendChild(na);
+      });
+      return box;
+    }
+    function upgrade() {
+      var content = document.querySelector('.content');
+      if (!content) return;
+
+      /* 1) 파이프 링크 줄이 문단으로 렌더된 경우 */
+      Array.prototype.slice.call(content.children).forEach(function (p) {
+        if (p.tagName !== 'P') return;
+        var links = p.querySelectorAll('a');
+        if (links.length < 2) return;
+        var ok = true;
+        Array.prototype.slice.call(p.childNodes).forEach(function (n) {
+          if (n.nodeType === 1 && n.tagName !== 'A') ok = false;
+          if (n.nodeType === 3 && /[^\s|·]/.test(n.textContent)) ok = false;
+        });
+        if (!ok) return;
+        p.replaceWith(buildBox(Array.prototype.slice.call(links)));
+      });
+
+      /* 2) kramdown이 파이프 링크 줄을 1행 표로 만든 경우: 각 셀에 링크 하나인 단일 행 표 */
+      Array.prototype.slice.call(content.querySelectorAll('.table-wrapper')).forEach(function (wrap) {
+        var table = wrap.querySelector('table');
+        if (!table) return;
+        if (table.querySelectorAll('tr').length !== 1) return; /* 진짜 표는 헤더+구분행 2행 이상 */
+        var cells = table.querySelectorAll('td, th');
+        if (cells.length < 2) return;
+        var links = [], ok = true;
+        Array.prototype.slice.call(cells).forEach(function (td) {
+          var as = td.querySelectorAll('a');
+          if (as.length !== 1 || td.textContent.trim() !== as[0].textContent.trim()) { ok = false; return; }
+          links.push(as[0]);
+        });
+        if (!ok) return;
+        wrap.replaceWith(buildBox(links));
+      });
+    }
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', upgrade); } else { upgrade(); }
+  })();
+</script>
