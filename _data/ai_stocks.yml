@@ -1,11 +1,11 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-07'
+updated: '2026-07-08'
 stocks:
 - ticker: NVDA
-  name: NVIDIA Corporation
+  name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: AI 연산을 위한 그래픽 처리 장치(GPU) 및 가속 컴퓨팅 플랫폼을 제공한다.
+  focus: AI 가속기 및 GPU 생태계의 주도 기업
   keywords:
   - gpu
   - cuda
@@ -13,140 +13,136 @@ stocks:
   - hopper
   - tensorrt
 - ticker: MSFT
-  name: Microsoft Corporation
+  name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 클라우드 인프라와 결합된 생성형 AI 서비스 및 소프트웨어 부문의 선두주자이다.
+  focus: 클라우드 인프라와 생성형 AI 서비스 결합
   keywords:
-  - azure
   - copilot
+  - azure
   - openai
-  - slm
-  - chatgpt
-- ticker: AMD
-  name: Advanced Micro Devices, Inc.
+  - windows ai
+- ticker: ARM
+  name: Arm Holdings
   market: US
-  gf: AMD:NASDAQ
-  focus: 서버용 CPU 및 AI 가속기 시장에서 엔비디아의 주요 경쟁사로 제품군을 확대하고 있다.
+  gf: ARM:NASDAQ
+  focus: 온디바이스 AI 및 데이터센터용 저전력 CPU 아키텍처
   keywords:
-  - mi300
-  - instinct
-  - epyc
-  - ryzen ai
-  - rocm
+  - cpu
+  - neoverse
+  - npu
+  - architecture
+- ticker: SMCI
+  name: Super Micro Computer
+  market: US
+  gf: SMCI:NASDAQ
+  focus: 고성능 AI 서버 및 액체 냉각 솔루션 제공
+  keywords:
+  - ai server
+  - liquid cooling
+  - rack scale
+  - datacenter
+- ticker: CEG
+  name: Constellation Energy
+  market: US
+  gf: CEG:NASDAQ
+  focus: AI 데이터센터의 전력 수요를 지원하는 원자력 에너지 공급
+  keywords:
+  - nuclear
+  - datacenter power
+  - clean energy
+  - smp
 - ticker: AVGO
-  name: Broadcom Inc.
+  name: Broadcom
   market: US
   gf: AVGO:NASDAQ
-  focus: 데이터센터 내 AI 서버 간의 방대한 데이터 전송을 위한 네트워킹 칩과 맞춤형 실리콘을 설계한다.
+  focus: 맞춤형 AI 칩 설계 및 데이터센터 네트워킹 부품
   keywords:
   - asic
   - networking
-  - ethernet
-  - tomahawk
   - pcie
-- ticker: ARM
-  name: Arm Holdings plc
-  market: US
-  gf: ARM:NASDAQ
-  focus: 저전력 고효율 아키텍처를 기반으로 모바일 및 클라우드 데이터센터용 AI 칩 설계의 기반을 제공한다.
-  keywords:
-  - architecture
-  - neoverse
-  - cpu
-  - edge ai
-  - npu
-- ticker: VRT
-  name: Vertiv Holdings Co
-  market: US
-  gf: VRT:NYSE
-  focus: 고성능 AI 서버 가동 시 발생하는 열을 관리하는 데이터센터 냉각 및 전력 관리 솔루션을 제공한다.
-  keywords:
-  - liquid cooling
-  - data center
-  - thermal management
-  - ups
-- ticker: CEG
-  name: Constellation Energy Corporation
-  market: US
-  gf: CEG:NASDAQ
-  focus: 전력 소모가 극심한 AI 데이터센터에 원자력을 포함한 무탄소 전력을 안정적으로 공급하는 핵심 기업이다.
-  keywords:
-  - nuclear
-  - clean energy
-  - data center
-  - power generation
+  - custom silicon
+  - tomahawk
 - ticker: MU
-  name: Micron Technology, Inc.
+  name: Micron Technology
   market: US
   gf: MU:NASDAQ
-  focus: AI 시스템의 메모리 병목 현상을 해소하는 고대역폭 메모리(HBM) 및 고용량 서버 D램을 생산한다.
+  focus: 고대역폭 메모리 및 AI 서버용 고용량 스토리지
   keywords:
-  - hbm
   - hbm3e
-  - dram
   - ddr5
   - memory
+  - nand
+- ticker: TSM
+  name: Taiwan Semiconductor
+  market: US
+  gf: TSM:NYSE
+  focus: 첨단 AI 반도체 파운드리 및 패키징 기술 제공
+  keywords:
+  - foundry
+  - cowos
+  - 3nm
+  - 2nm
+  - advanced packaging
 - ticker: PLTR
-  name: Palantir Technologies Inc.
+  name: Palantir Technologies
   market: US
   gf: PLTR:NYSE
-  focus: 기업 및 정부 기관이 자체 데이터를 활용해 의사 결정을 자동화할 수 있는 AI 소프트웨어 플랫폼을 구축한다.
+  focus: 기업 및 정부 기관을 위한 맞춤형 AI 데이터 분석 플랫폼
   keywords:
   - aip
   - gotham
   - foundry
-  - data analytics
-  - llm
+  - machine learning
 - ticker: 005930
-  name: 삼성전자
+  name: Samsung Electronics
   market: KR
   gf: 005930:KRX
-  focus: AI 반도체용 고대역폭 메모리(HBM) 생산과 맞춤형 AI 칩 파운드리 서비스를 동시에 제공한다.
+  focus: HBM, 파운드리, 온디바이스 AI를 아우르는 종합 반도체 기업
   keywords:
   - hbm
+  - galaxy ai
   - foundry
   - exynos
-  - gaa
   - mach-1
 - ticker: '000660'
-  name: SK하이닉스
+  name: SK hynix
   market: KR
   gf: 000660:KRX
-  focus: 엔비디아 등 글로벌 AI 칩 선도 기업에 최신 규격의 고대역폭 메모리(HBM)를 핵심적으로 공급한다.
+  focus: 글로벌 AI 가속기용 HBM 주요 공급사
   keywords:
   - hbm3e
   - hbm4
-  - ddr5
+  - dram
   - memory
+  - pim
 - ticker: '042700'
-  name: 한미반도체
+  name: Hanmi Semiconductor
   market: KR
   gf: 042700:KRX
-  focus: HBM 생산의 핵심 공정인 칩 적층에 사용되는 열압착(TC) 본더 장비 시장을 주도하고 있다.
+  focus: HBM 제조에 쓰이는 TC 본더 장비 선도
   keywords:
   - tc bonder
   - hbm
-  - packaging
+  - advanced packaging
   - semiconductor equipment
-- ticker: '267260'
-  name: HD현대일렉트릭
+- ticker: '035420'
+  name: NAVER
   market: KR
-  gf: 267260:KRX
-  focus: 글로벌 AI 데이터센터 확장에 따른 전력 인프라 수요 증가로 초고압 변압기 시장에서 수혜를 입고 있다.
+  gf: 035420:KRX
+  focus: 한국어 특화 초대규모 생성형 AI 및 B2B 클라우드 서비스
   keywords:
-  - transformer
-  - power grid
-  - data center
-  - 초고압변압기
-- ticker: '077360'
-  name: 이수페타시스
+  - hyperclova x
+  - clova
+  - cue
+  - cloud
+- ticker: '328130'
+  name: Lunit
   market: KR
-  gf: 077360:KRX
-  focus: 글로벌 AI 가속기 및 네트워크 장비에 필수적으로 들어가는 고다층 인쇄회로기판(MLB)을 공급한다.
+  gf: 328130:KRX
+  focus: 의료 영상 분석 및 암 진단 분야의 시각 AI 솔루션
   keywords:
-  - mlb
-  - pcb
-  - network
-  - ai server
-  - 고다층기판
+  - medical ai
+  - lunit insight
+  - lunit scope
+  - healthcare
