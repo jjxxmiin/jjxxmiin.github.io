@@ -1,148 +1,158 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-08'
+updated: '2026-07-09'
 stocks:
 - ticker: NVDA
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: AI 가속기 및 GPU 생태계의 주도 기업
+  focus: GPU 및 AI 가속기 시장의 핵심 하드웨어 및 소프트웨어 생태계 제공
   keywords:
   - gpu
   - cuda
   - blackwell
   - hopper
+  - ai accelerator
   - tensorrt
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 클라우드 인프라와 생성형 AI 서비스 결합
+  focus: OpenAI 협력을 통한 클라우드 AI 인프라 및 생성형 AI 서비스 제공
   keywords:
-  - copilot
   - azure
+  - copilot
   - openai
-  - windows ai
-- ticker: ARM
-  name: Arm Holdings
-  market: US
-  gf: ARM:NASDAQ
-  focus: 온디바이스 AI 및 데이터센터용 저전력 CPU 아키텍처
-  keywords:
-  - cpu
-  - neoverse
-  - npu
-  - architecture
-- ticker: SMCI
-  name: Super Micro Computer
-  market: US
-  gf: SMCI:NASDAQ
-  focus: 고성능 AI 서버 및 액체 냉각 솔루션 제공
-  keywords:
-  - ai server
-  - liquid cooling
-  - rack scale
-  - datacenter
-- ticker: CEG
-  name: Constellation Energy
-  market: US
-  gf: CEG:NASDAQ
-  focus: AI 데이터센터의 전력 수요를 지원하는 원자력 에너지 공급
-  keywords:
-  - nuclear
-  - datacenter power
-  - clean energy
-  - smp
+  - cloud
+  - llm
 - ticker: AVGO
   name: Broadcom
   market: US
   gf: AVGO:NASDAQ
-  focus: 맞춤형 AI 칩 설계 및 데이터센터 네트워킹 부품
+  focus: AI 데이터센터용 맞춤형 칩(ASIC) 및 고속 네트워크 스위치 칩 설계
   keywords:
   - asic
   - networking
-  - pcie
+  - switch
   - custom silicon
-  - tomahawk
+  - pcie
+- ticker: AMD
+  name: Advanced Micro Devices
+  market: US
+  gf: AMD:NASDAQ
+  focus: 데이터센터용 AI 가속기 및 서버용 프로세서 개발로 시장 경쟁력 강화
+  keywords:
+  - mi300
+  - instinct
+  - epyc
+  - rocm
+  - gpu
+- ticker: ARM
+  name: Arm Holdings
+  market: US
+  gf: ARM:NASDAQ
+  focus: 저전력 고효율 프로세서 아키텍처를 통해 AI 엣지 디바이스 및 서버 칩 설계 지원
+  keywords:
+  - architecture
+  - npu
+  - cpu
+  - neoverse
+  - ip
+- ticker: VRT
+  name: Vertiv Holdings
+  market: US
+  gf: VRT:NYSE
+  focus: 고집적 AI 서버 구동에 필수적인 데이터센터 전력 및 열 관리 인프라 제공
+  keywords:
+  - cooling
+  - power management
+  - datacenter
+  - liquid cooling
+  - infrastructure
 - ticker: MU
   name: Micron Technology
   market: US
   gf: MU:NASDAQ
-  focus: 고대역폭 메모리 및 AI 서버용 고용량 스토리지
+  focus: AI 서버에 필수적인 고대역폭 메모리(HBM) 및 고성능 D램 공급
   keywords:
+  - hbm
   - hbm3e
-  - ddr5
+  - dram
   - memory
-  - nand
-- ticker: TSM
-  name: Taiwan Semiconductor
-  market: US
-  gf: TSM:NYSE
-  focus: 첨단 AI 반도체 파운드리 및 패키징 기술 제공
-  keywords:
-  - foundry
-  - cowos
-  - 3nm
-  - 2nm
-  - advanced packaging
+  - datacenter
 - ticker: PLTR
   name: Palantir Technologies
   market: US
   gf: PLTR:NYSE
-  focus: 기업 및 정부 기관을 위한 맞춤형 AI 데이터 분석 플랫폼
+  focus: 기업 및 정부 데이터를 통합하고 AI 모델을 적용하는 데이터 분석 플랫폼 제공
   keywords:
   - aip
   - gotham
   - foundry
-  - machine learning
+  - data analytics
+  - software
+- ticker: SMCI
+  name: Super Micro Computer
+  market: US
+  gf: SMCI:NASDAQ
+  focus: AI 최적화 고성능 서버 및 액체 냉각 솔루션 탑재 랙 시스템 제조
+  keywords:
+  - server
+  - rack
+  - liquid cooling
+  - datacenter
+  - hardware
 - ticker: 005930
   name: Samsung Electronics
   market: KR
   gf: 005930:KRX
-  focus: HBM, 파운드리, 온디바이스 AI를 아우르는 종합 반도체 기업
+  focus: AI용 고대역폭 메모리(HBM) 및 턴키 파운드리 서비스 제공
   keywords:
   - hbm
-  - galaxy ai
   - foundry
+  - memory
   - exynos
-  - mach-1
+  - npu
 - ticker: '000660'
-  name: SK hynix
+  name: SK Hynix
   market: KR
   gf: 000660:KRX
-  focus: 글로벌 AI 가속기용 HBM 주요 공급사
+  focus: 고성능 AI 가속기에 탑재되는 HBM 메모리 선도적 개발 및 공급
   keywords:
+  - hbm
   - hbm3e
-  - hbm4
-  - dram
   - memory
-  - pim
+  - dram
+  - datacenter
 - ticker: '042700'
   name: Hanmi Semiconductor
   market: KR
   gf: 042700:KRX
-  focus: HBM 제조에 쓰이는 TC 본더 장비 선도
+  focus: HBM 제조 핵심 공정인 실리콘 관통 전극(TSV) 열압착 본딩 장비 공급
   keywords:
   - tc bonder
+  - tsv
+  - packaging
   - hbm
-  - advanced packaging
-  - semiconductor equipment
-- ticker: '035420'
-  name: NAVER
+  - equipment
+- ticker: '007660'
+  name: Isu Petasys
   market: KR
-  gf: 035420:KRX
-  focus: 한국어 특화 초대규모 생성형 AI 및 B2B 클라우드 서비스
+  gf: 007660:KRX
+  focus: AI 서버 및 네트워크용 고다층 인쇄회로기판(MLB) 제조
   keywords:
-  - hyperclova x
-  - clova
-  - cue
-  - cloud
-- ticker: '328130'
-  name: Lunit
+  - mlb
+  - pcb
+  - server
+  - network
+  - hardware
+- ticker: '010120'
+  name: LS ELECTRIC
   market: KR
-  gf: 328130:KRX
-  focus: 의료 영상 분석 및 암 진단 분야의 시각 AI 솔루션
+  gf: 010120:KRX
+  focus: 데이터센터 확장에 따른 전력 인프라 및 배전반 수요 증가 수혜
   keywords:
-  - medical ai
-  - lunit insight
-  - lunit scope
-  - healthcare
+  - power
+  - transformer
+  - datacenter
+  - infrastructure
+  - electricity
