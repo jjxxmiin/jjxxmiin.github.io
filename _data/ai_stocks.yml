@@ -1,157 +1,157 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-10'
+updated: '2026-07-11'
 stocks:
 - ticker: NVDA
-  name: Nvidia
+  name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: 인공지능 가속기 시장을 주도하는 핵심 GPU 및 플랫폼 공급사
+  focus: AI 가속기 및 GPU 시장을 주도하는 팹리스 기업
   keywords:
-  - gpu
-  - cuda
+  - h100
+  - b200
   - blackwell
-  - hopper
-  - tensorrt
+  - cuda
+  - gpu
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 오픈에이아이 파트너십과 애저 클라우드를 결합한 기업용 인공지능 서비스 선두주자
+  focus: 클라우드 인프라와 생성형 AI 기술을 결합한 엔터프라이즈 솔루션 제공
   keywords:
-  - copilot
   - azure
+  - copilot
   - openai
-  - chatgpt
-  - ai agent
+  - gpt
+  - 클라우드
 - ticker: AVGO
   name: Broadcom
   market: US
   gf: AVGO:NASDAQ
-  focus: 대규모 인공지능 데이터센터의 데이터 병목을 해소하는 네트워크 칩 및 커스텀 실리콘 강자
+  focus: AI 데이터센터 네트워크 장비 및 맞춤형 AI 반도체 설계
   keywords:
   - asic
   - ethernet
-  - pcie
-  - networking
-  - custom chip
-- ticker: CEG
-  name: Constellation Energy
-  market: US
-  gf: CEG:NASDAQ
-  focus: 인공지능 데이터센터의 폭발적 전력 수요를 감당하기 위한 무탄소 원자력 에너지 공급
-  keywords:
-  - nuclear
-  - datacenter
-  - clean energy
-  - power
-  - smr
+  - tomahawk
+  - 네트워크
+  - 스위치
 - ticker: VRT
   name: Vertiv Holdings
   market: US
   gf: VRT:NYSE
-  focus: 고성능 인공지능 서버 발열을 제어하는 액체 냉각 및 전력 관리 솔루션
+  focus: 고전력 AI 데이터센터를 위한 열 관리 및 전력 인프라 솔루션
   keywords:
-  - liquid cooling
-  - thermal management
-  - ups
+  - 냉각
+  - 액체냉각
   - datacenter
-  - infrastructure
-- ticker: MU
-  name: Micron Technology
+  - thermal
+  - power
+- ticker: AAPL
+  name: Apple
   market: US
-  gf: MU:NASDAQ
-  focus: 인공지능 서버용 고대역폭 메모리 및 고용량 솔리드 스테이트 드라이브 공급 확대
+  gf: AAPL:NASDAQ
+  focus: 온디바이스 AI 시스템을 적용한 소비자 기기 및 소프트웨어 생태계 구축
   keywords:
-  - hbm3e
-  - dram
-  - nand
-  - ssd
-  - memory
-- ticker: ARM
-  name: Arm Holdings
-  market: US
-  gf: ARM:NASDAQ
-  focus: 저전력 고효율 아키텍처를 통해 모바일 및 데이터센터 인공지능 프로세서 설계 지원
-  keywords:
-  - cpu
-  - architecture
+  - apple intelligence
+  - siri
+  - 온디바이스
   - npu
-  - neoverse
-  - ip
+  - neural engine
+- ticker: TSM
+  name: Taiwan Semiconductor Manufacturing
+  market: US
+  gf: TSM:NYSE
+  focus: 최선단 공정을 통한 글로벌 AI 반도체 위탁 생산 주도
+  keywords:
+  - 파운드리
+  - finfet
+  - tsmc
+  - 패키징
+  - cowos
 - ticker: PLTR
   name: Palantir Technologies
   market: US
   gf: PLTR:NYSE
-  focus: 정부 및 민간 기업의 데이터를 통합 분석하는 인공지능 플랫폼 제공
+  focus: 정부 및 기업 데이터를 통합 분석하는 AI 플랫폼 제공
   keywords:
   - aip
   - gotham
   - foundry
-  - data analytics
-  - llm
-- ticker: ANET
-  name: Arista Networks
+  - 데이터분석
+  - 엔터프라이즈
+- ticker: GOOGL
+  name: Alphabet
   market: US
-  gf: ANET:NYSE
-  focus: 대규모 인공지능 워크로드를 처리하는 클라우드 네트워크 스위치 및 이더넷 기술 선도
+  gf: GOOGL:NASDAQ
+  focus: 자체 LLM과 맞춤형 AI 칩을 활용한 클라우드 및 검색 서비스 고도화
   keywords:
-  - ethernet
-  - switch
-  - eos
-  - cloud networking
-  - ai spine
+  - gemini
+  - tpu
+  - gcp
+  - vertex ai
+  - 검색
+- ticker: DELL
+  name: Dell Technologies
+  market: US
+  gf: DELL:NYSE
+  focus: 대규모 AI 모델 학습 및 추론에 최적화된 고성능 서버 구축
+  keywords:
+  - ai server
+  - poweredge
+  - storage
+  - 인프라
+  - 데이터센터
 - ticker: 005930
-  name: Samsung Electronics
+  name: 삼성전자
   market: KR
   gf: 005930:KRX
-  focus: 고대역폭 메모리 기술과 파운드리 역량을 융합한 턴키 인공지능 반도체 솔루션 제공
+  focus: AI 메모리 및 파운드리, 온디바이스 AI 기기를 아우르는 종합 반도체 기업
   keywords:
   - hbm
-  - gddr
-  - foundry
+  - 파운드리
+  - galaxy ai
+  - 가전
   - exynos
-  - memory
 - ticker: '000660'
-  name: SK Hynix
+  name: SK하이닉스
   market: KR
   gf: 000660:KRX
-  focus: 핵심 인공지능 가속기에 탑재되는 고대역폭 메모리 시장의 글로벌 선도 기업
+  focus: AI 가속기에 필수적인 고대역폭 메모리 시장의 핵심 공급사
   keywords:
   - hbm3e
-  - hbm4
   - dram
-  - pim
+  - 낸드플래시
+  - 메모리
   - advanced packaging
 - ticker: '042700'
-  name: Hanmi Semiconductor
+  name: 한미반도체
   market: KR
   gf: 042700:KRX
-  focus: 고대역폭 메모리 제조의 핵심 공정인 실리콘 관통 전극 본딩 장비 주력 공급
+  focus: HBM 제조 공정에 사용되는 열압착 본더 등 반도체 후공정 장비 생산
   keywords:
   - tc bonder
-  - tsv
-  - hbm equipment
-  - packaging
-  - 반도체 장비
-- ticker: '077360'
-  name: Isu Petasys
-  market: KR
-  gf: 077360:KRX
-  focus: 인공지능 가속기 및 네트워크 장비에 들어가는 고다층 인쇄회로기판 제조
-  keywords:
-  - mlb
-  - pcb
-  - network board
-  - ai accelerator
-  - 기판
+  - hbm
+  - 후공정
+  - 장비
+  - 본딩
 - ticker: '010120'
-  name: LS ELECTRIC
+  name: LS일렉트릭
   market: KR
   gf: 010120:KRX
-  focus: 인공지능 데이터센터 확장에 필수적인 초고압 변압기 및 전력 인프라 설비 구축
+  focus: AI 데이터센터 확충에 따른 전력 수요 증가를 지원하는 전력 기기 및 시스템
   keywords:
-  - 변압기
   - 전력기기
-  - 배전반
+  - 변압기
   - 스마트그리드
-  - datacenter power
+  - 배전
+  - 데이터센터
+- ticker: '328130'
+  name: 루닛
+  market: KR
+  gf: 328130:KRX
+  focus: 딥러닝 기술을 활용한 암 진단 및 치료 예측 AI 영상 분석 솔루션
+  keywords:
+  - lunit insight
+  - lunit scope
+  - 의료ai
+  - 딥러닝
+  - 바이오마커
