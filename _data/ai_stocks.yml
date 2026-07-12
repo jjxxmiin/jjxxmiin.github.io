@@ -1,157 +1,168 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-11'
+updated: '2026-07-12'
 stocks:
 - ticker: NVDA
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: AI 가속기 및 GPU 시장을 주도하는 팹리스 기업
+  focus: AI 모델 학습/추론용 GPU 시장 독점적 지위 확보
   keywords:
-  - h100
-  - b200
-  - blackwell
-  - cuda
   - gpu
+  - cuda
+  - blackwell
+  - tensorrt
+  - 엔비디아
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 클라우드 인프라와 생성형 AI 기술을 결합한 엔터프라이즈 솔루션 제공
+  focus: OpenAI 파트너십 및 클라우드 기반 AI 에이전트 서비스 주도
   keywords:
-  - azure
   - copilot
-  - openai
+  - azure
   - gpt
   - 클라우드
-- ticker: AVGO
-  name: Broadcom
-  market: US
-  gf: AVGO:NASDAQ
-  focus: AI 데이터센터 네트워크 장비 및 맞춤형 AI 반도체 설계
-  keywords:
-  - asic
-  - ethernet
-  - tomahawk
-  - 네트워크
-  - 스위치
-- ticker: VRT
-  name: Vertiv Holdings
-  market: US
-  gf: VRT:NYSE
-  focus: 고전력 AI 데이터센터를 위한 열 관리 및 전력 인프라 솔루션
-  keywords:
-  - 냉각
-  - 액체냉각
-  - datacenter
-  - thermal
-  - power
-- ticker: AAPL
-  name: Apple
-  market: US
-  gf: AAPL:NASDAQ
-  focus: 온디바이스 AI 시스템을 적용한 소비자 기기 및 소프트웨어 생태계 구축
-  keywords:
-  - apple intelligence
-  - siri
-  - 온디바이스
-  - npu
-  - neural engine
-- ticker: TSM
-  name: Taiwan Semiconductor Manufacturing
-  market: US
-  gf: TSM:NYSE
-  focus: 최선단 공정을 통한 글로벌 AI 반도체 위탁 생산 주도
-  keywords:
-  - 파운드리
-  - finfet
-  - tsmc
-  - 패키징
-  - cowos
-- ticker: PLTR
-  name: Palantir Technologies
-  market: US
-  gf: PLTR:NYSE
-  focus: 정부 및 기업 데이터를 통합 분석하는 AI 플랫폼 제공
-  keywords:
-  - aip
-  - gotham
-  - foundry
-  - 데이터분석
-  - 엔터프라이즈
+  - 에이전트
 - ticker: GOOGL
   name: Alphabet
   market: US
   gf: GOOGL:NASDAQ
-  focus: 자체 LLM과 맞춤형 AI 칩을 활용한 클라우드 및 검색 서비스 고도화
+  focus: Gemini 생태계와 자체 AI 반도체 TPU를 통한 클라우드 확장
   keywords:
   - gemini
   - tpu
-  - gcp
   - vertex ai
-  - 검색
-- ticker: DELL
-  name: Dell Technologies
+  - 텐서플로우
+  - 구글
+- ticker: CEG
+  name: Constellation Energy
   market: US
-  gf: DELL:NYSE
-  focus: 대규모 AI 모델 학습 및 추론에 최적화된 고성능 서버 구축
+  gf: CEG:NASDAQ
+  focus: 데이터센터 전력 수요 증가에 대응하는 원자력 에너지 공급
   keywords:
-  - ai server
-  - poweredge
-  - storage
+  - 원자력
+  - 데이터센터
+  - 전력
+  - smr
+  - 에너지
+- ticker: VRT
+  name: Vertiv
+  market: US
+  gf: VRT:NYSE
+  focus: 고성능 AI 서버 발열 제어를 위한 액체 냉각 솔루션 제공
+  keywords:
+  - 액침냉각
+  - 열관리
   - 인프라
   - 데이터센터
+  - 전력관리
+- ticker: MU
+  name: Micron Technology
+  market: US
+  gf: MU:NASDAQ
+  focus: AI 메모리 대역폭 확장을 위한 HBM3E 및 차세대 메모리 개발
+  keywords:
+  - hbm
+  - hbm3e
+  - 메모리
+  - 대역폭
+  - 마이크론
+- ticker: ARM
+  name: Arm Holdings
+  market: US
+  gf: ARM:NASDAQ
+  focus: 클라우드 및 온디바이스 AI를 위한 전력 효율적 CPU 아키텍처 제공
+  keywords:
+  - arm v9
+  - 에지 ai
+  - 아키텍처
+  - npu
+  - 전력효율
+- ticker: PLTR
+  name: Palantir Technologies
+  market: US
+  gf: PLTR:NYSE
+  focus: 엔터프라이즈 및 국방 분야에 특화된 데이터 분석 AI 플랫폼
+  keywords:
+  - aip
+  - 파운드리
+  - 데이터분석
+  - 국방 ai
+  - b2b
+- ticker: ANET
+  name: Arista Networks
+  market: US
+  gf: ANET:NYSE
+  focus: 대규모 AI 클러스터 구축에 필수적인 초고속 이더넷 네트워킹
+  keywords:
+  - 이더넷
+  - 네트워크
+  - 스위치
+  - 대역폭
+  - 인프라
 - ticker: 005930
   name: 삼성전자
   market: KR
   gf: 005930:KRX
-  focus: AI 메모리 및 파운드리, 온디바이스 AI 기기를 아우르는 종합 반도체 기업
+  focus: HBM 메모리 및 파운드리, 온디바이스 AI 기기 생태계 구축
   keywords:
   - hbm
   - 파운드리
-  - galaxy ai
-  - 가전
-  - exynos
+  - 온디바이스
+  - 가우스
+  - 엑시노스
 - ticker: '000660'
   name: SK하이닉스
   market: KR
   gf: 000660:KRX
-  focus: AI 가속기에 필수적인 고대역폭 메모리 시장의 핵심 공급사
+  focus: 엔비디아 핵심 벤더로서 고성능 HBM 시장 선도
   keywords:
   - hbm3e
-  - dram
-  - 낸드플래시
+  - hbm4
+  - 엔비디아 벤더
   - 메모리
-  - advanced packaging
+  - d램
+- ticker: '035420'
+  name: NAVER
+  market: KR
+  gf: 035420:KRX
+  focus: 한국어 특화 LLM 하이퍼클로바X 기반의 소버린 AI 서비스 구축
+  keywords:
+  - 하이퍼클로바x
+  - 소버린 ai
+  - cue
+  - 클라우드
+  - llm
 - ticker: '042700'
   name: 한미반도체
   market: KR
   gf: 042700:KRX
-  focus: HBM 제조 공정에 사용되는 열압착 본더 등 반도체 후공정 장비 생산
+  focus: HBM 제조 핵심 공정인 TC 본더 장비 독보적 기술력 보유
   keywords:
-  - tc bonder
+  - tc 본더
   - hbm
   - 후공정
+  - 패키징
   - 장비
-  - 본딩
-- ticker: '010120'
-  name: LS일렉트릭
+- ticker: '377030'
+  name: HD현대일렉트릭
   market: KR
-  gf: 010120:KRX
-  focus: AI 데이터센터 확충에 따른 전력 수요 증가를 지원하는 전력 기기 및 시스템
+  gf: 377030:KRX
+  focus: AI 데이터센터 증설에 따른 전력기기 및 초고압 변압기 수요 수혜
   keywords:
-  - 전력기기
   - 변압기
-  - 스마트그리드
-  - 배전
+  - 전력망
   - 데이터센터
+  - 전력기기
+  - 인프라
 - ticker: '328130'
   name: 루닛
   market: KR
   gf: 328130:KRX
-  focus: 딥러닝 기술을 활용한 암 진단 및 치료 예측 AI 영상 분석 솔루션
+  focus: 딥러닝 기반 의료 영상 진단 및 AI 바이오마커 솔루션 상용화
   keywords:
-  - lunit insight
-  - lunit scope
-  - 의료ai
+  - 의료 ai
+  - 루닛 인사이트
+  - 스코프
   - 딥러닝
-  - 바이오마커
+  - 진단
