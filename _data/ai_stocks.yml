@@ -1,168 +1,177 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-21'
+updated: '2026-07-22'
 stocks:
 - ticker: NVDA
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: AI 가속기 GPU 및 CUDA 소프트웨어 생태계를 주도하는 핵심 설계 기업이다.
+  focus: ai 모델 학습/추론에 필수적인 gpu 및 가속 컴퓨팅 플랫폼 제공
   keywords:
   - gpu
   - cuda
+  - hopper
   - blackwell
   - tensorrt
-  - hopper
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: OpenAI와의 파트너십을 통해 Azure 클라우드와 엔터프라이즈 소프트웨어 전반에 생성형 AI를 통합하고 있다.
+  focus: openai 파트너십 및 클라우드 기반 ai 서비스 인프라 제공
   keywords:
   - azure
   - copilot
   - openai
-  - cloud
-  - llm
+  - gpt
+  - slm
 - ticker: GOOGL
   name: Alphabet
   market: US
   gf: GOOGL:NASDAQ
-  focus: Gemini 대형 언어 모델과 자체 개발 AI 칩인 TPU를 통해 클라우드 및 검색 AI 인프라를 제공한다.
+  focus: 자체 ai 모델 제미나이 개발 및 tpu 기반 클라우드 인프라 운영
   keywords:
   - gemini
   - tpu
-  - tensorflow
   - gcp
+  - tensorflow
   - deepmind
 - ticker: AVGO
   name: Broadcom
   market: US
   gf: AVGO:NASDAQ
-  focus: 대규모 AI 클러스터를 연결하는 이더넷 네트워킹 스위치 및 맞춤형 AI 반도체(ASIC)를 설계한다.
+  focus: 대규모 ai 데이터센터를 위한 맞춤형 반도체 및 네트워크 스위치 설계
   keywords:
   - asic
   - ethernet
-  - pcie
-  - networking
   - tomahawk
+  - networking
+  - custom silicon
 - ticker: ARM
   name: Arm Holdings
   market: US
   gf: ARM:NASDAQ
-  focus: AI 가속기와 함께 탑재되는 고효율 CPU 아키텍처 및 명령어 집합(ISA)을 설계한다.
+  focus: 전력 효율이 높은 ai 데이터센터용 cpu 아키텍처 및 ip 제공
   keywords:
-  - cpu
   - neoverse
-  - architecture
-  - ip
+  - cpu architecture
+  - edge ai
+  - npu
   - instruction set
-- ticker: VRT
-  name: Vertiv
-  market: US
-  gf: VRT:NYSE
-  focus: 고집적 AI 데이터센터 운영에 필수적인 액체 냉각 및 전력 인프라 솔루션을 공급한다.
-  keywords:
-  - cooling
-  - datacenter
-  - thermal
-  - power
-  - infrastructure
 - ticker: PLTR
   name: Palantir Technologies
   market: US
   gf: PLTR:NYSE
-  focus: 기업과 정부가 자체 데이터를 LLM과 결합하여 운영할 수 있게 돕는 인공지능 플랫폼(AIP)을 제공한다.
+  focus: 기업 및 정부 기관의 데이터 통합 분석을 위한 ai 플랫폼 지원
   keywords:
   - aip
   - gotham
   - foundry
-  - ontology
-  - data
+  - data ontology
+  - llm integration
 - ticker: CEG
   name: Constellation Energy
   market: US
   gf: CEG:NASDAQ
-  focus: 전력 소모가 극심한 AI 데이터센터에 원자력을 기반으로 한 무탄소 기저 전력을 공급한다.
+  focus: 전력 소모가 막대한 ai 데이터센터에 안정적인 원자력 에너지 공급
   keywords:
-  - nuclear
-  - datacenter
-  - energy
-  - power
-  - clean energy
-- ticker: ALAB
-  name: Astera Labs
+  - nuclear energy
+  - data center
+  - clean power
+  - smr
+  - baseload
+- ticker: ANET
+  name: Arista Networks
   market: US
-  gf: ALAB:NASDAQ
-  focus: AI 인프라 내부의 데이터 병목 현상을 해소하는 고속 PCIe 및 CXL 연결 솔루션을 개발한다.
+  gf: ANET:NYSE
+  focus: ai 워크로드를 처리하는 데이터센터용 고속 이더넷 네트워킹 솔루션
   keywords:
-  - pcie
-  - cxl
-  - retimer
-  - connectivity
-  - bandwidth
-- ticker: '000660'
-  name: SK하이닉스
-  market: KR
-  gf: 000660:KRX
-  focus: AI 학습용 GPU에 탑재되는 고대역폭 메모리(HBM) 시장의 선두 공급사이다.
+  - eos
+  - ethernet
+  - switches
+  - network topology
+  - throughput
+- ticker: AMD
+  name: Advanced Micro Devices
+  market: US
+  gf: AMD:NASDAQ
+  focus: 엔비디아의 대안으로 꼽히는 ai 가속기 및 서버용 프로세서 개발
   keywords:
-  - hbm
-  - hbm3e
-  - dram
-  - memory
-  - nvidia
+  - instinct
+  - rocm
+  - mi300
+  - epyc
+  - npu
+- ticker: TSM
+  name: Taiwan Semiconductor
+  market: US
+  gf: TSM:NYSE
+  focus: 글로벌 팹리스 기업들의 첨단 ai 반도체를 독점적으로 위탁 생산
+  keywords:
+  - foundry
+  - cowos
+  - packaging
+  - 3nm
+  - finfet
 - ticker: 005930
-  name: 삼성전자
+  name: Samsung Electronics
   market: KR
   gf: 005930:KRX
-  focus: HBM과 DDR5 등 첨단 메모리 양산 및 AI 가속기 위탁 생산을 위한 파운드리 서비스를 제공한다.
+  focus: ai 반도체 메모리 hbm 공급 및 온디바이스 ai 기기 생태계 확장
   keywords:
   - hbm
-  - ddr5
+  - galaxy ai
   - foundry
-  - exynos
-  - memory
+  - gddr
+  - cxl
+- ticker: '000660'
+  name: SK Hynix
+  market: KR
+  gf: 000660:KRX
+  focus: 엔비디아 gpu에 탑재되는 최고 성능의 고대역폭 메모리 핵심 공급사
+  keywords:
+  - hbm3e
+  - hbm4
+  - dram
+  - memory controller
+  - tsv
 - ticker: '042700'
-  name: 한미반도체
+  name: Hanmi Semiconductor
   market: KR
   gf: 042700:KRX
-  focus: HBM 제조 공정에서 DRAM을 수직으로 정밀하게 적층하는 핵심 장비인 TC 본더를 생산한다.
+  focus: 고대역폭 메모리 생산에 필수적인 열압착 본딩 장비 제조
   keywords:
   - tc bonder
-  - packaging
-  - hbm
-  - 장비
-  - 후공정
+  - hbm packaging
+  - semiconductor equipment
+  - thermo-compression
 - ticker: '035420'
   name: NAVER
   market: KR
   gf: 035420:KRX
-  focus: 한국어에 특화된 소버린 AI 모델인 HyperCLOVA X를 자체 개발하여 서비스형 AI를 구축한다.
+  focus: 한국어에 특화된 초거대 ai 언어 모델 개발 및 b2b 솔루션 제공
   keywords:
   - hyperclova x
-  - clova
+  - cue
   - llm
-  - search
-  - cloud
+  - clova studio
+  - b2b ai
 - ticker: '267260'
-  name: HD현대일렉트릭
+  name: HD Hyundai Electric
   market: KR
   gf: 267260:KRX
-  focus: 북미 지역을 중심으로 AI 데이터센터 전력망 구축에 필요한 초고압 변압기를 공급한다.
+  focus: 글로벌 ai 데이터센터 증설에 따른 초고압 변압기 등 전력 인프라 공급
   keywords:
   - transformer
-  - 변압기
-  - 전력
-  - 그리드
-  - datacenter
-- ticker: '007660'
-  name: 이수페타시스
+  - power grid
+  - data center infrastructure
+  - high voltage
+- ticker: '376930'
+  name: Lunit
   market: KR
-  gf: 007660:KRX
-  focus: AI 가속기 및 네트워크 스위치에 들어가는 고다층 인쇄회로기판(MLB)을 글로벌 빅테크에 공급한다.
+  gf: 376930:KRX
+  focus: 딥러닝 기술을 활용한 암 진단 및 치료 예측 의료 ai 솔루션
   keywords:
-  - mlb
-  - pcb
-  - 기판
-  - network
-  - accelerator
+  - lunit insight
+  - lunit scope
+  - medical ai
+  - deep learning
+  - computer vision
