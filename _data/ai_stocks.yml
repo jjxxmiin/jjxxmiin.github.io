@@ -1,157 +1,168 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-23'
+updated: '2026-07-24'
 stocks:
 - ticker: NVDA
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: AI 모델 학습 및 추론에 필수적인 GPU 가속기 및 네트워킹 플랫폼 설계 시장을 장악하고 있다.
+  focus: AI 가속기 및 GPU 시장을 주도하는 핵심 인프라 기업
   keywords:
-  - cuda
-  - hopper
-  - blackwell
   - gpu
-  - tensorrt
+  - cuda
+  - blackwell
+  - hopper
+  - tensor
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: 클라우드 인프라와 자체 생성형 AI 모델을 통합한 엔터프라이즈 솔루션을 제공한다.
+  focus: OpenAI와의 협력 및 클라우드 인프라를 통해 엔터프라이즈 AI 서비스 주도
   keywords:
   - azure
   - copilot
   - openai
-  - gpt
   - cloud
+  - gpt
 - ticker: AMD
   name: Advanced Micro Devices
   market: US
   gf: AMD:NASDAQ
-  focus: 데이터센터용 고성능 AI 가속기를 출시하며 엔비디아 생태계의 주요 대안으로 활용되고 있다.
+  focus: 엔비디아의 대안으로 꼽히는 AI 가속기 및 서버용 프로세서 제조사
   keywords:
-  - instinct
   - mi300
-  - rocm
   - epyc
-  - ryzen ai
-- ticker: AVGO
-  name: Broadcom
-  market: US
-  gf: AVGO:NASDAQ
-  focus: AI 데이터센터 내 대규모 트래픽 처리를 위한 고성능 네트워킹 스위치 및 주문형 반도체를 공급한다.
-  keywords:
-  - asic
-  - tomahawk
-  - jericho
-  - ethernet
-  - pci express
-- ticker: MU
-  name: Micron Technology
-  market: US
-  gf: MU:NASDAQ
-  focus: AI 서버 성능 향상에 필수적인 고대역폭 메모리 및 고용량 서버용 D램을 제조한다.
-  keywords:
-  - hbm
-  - hbm3e
-  - ddr5
-  - lpddr
-  - memory
-- ticker: PLTR
-  name: Palantir Technologies
-  market: US
-  gf: PLTR:NYSE
-  focus: 정부 기관 및 기업 데이터를 통합 분석하는 대규모 AI 기반 소프트웨어 플랫폼을 서비스한다.
-  keywords:
-  - aip
-  - gotham
-  - foundry
-  - ontology
-  - 데이터분석
+  - ryzen
+  - rocm
+  - gpu
 - ticker: VRT
   name: Vertiv Holdings
   market: US
   gf: VRT:NYSE
-  focus: 고밀도 AI 서버 운영 환경에 필수적인 데이터센터 열 관리 및 전력 인프라 시스템을 구축한다.
+  focus: 고밀도 AI 데이터센터에 필수적인 전력 및 열 관리 냉각 솔루션 제공
   keywords:
-  - 액체냉각
-  - thermal management
-  - ups
   - datacenter
   - cooling
-- ticker: ARM
-  name: Arm Holdings
-  market: US
-  gf: ARM:NASDAQ
-  focus: 저전력 고효율 프로세서 아키텍처를 설계하여 모바일 및 서버용 AI 칩의 핵심 기반 기술을 제공한다.
-  keywords:
-  - neoverse
-  - cpu architecture
-  - armv9
-  - npu
-  - ip
+  - power
+  - infrastructure
+  - thermal
 - ticker: CEG
   name: Constellation Energy
   market: US
-  gf: CEG:NASDAQ
-  focus: 원자력 발전 기반의 무탄소 전력을 공급하여 AI 데이터센터의 기하급수적인 전력 수요에 대응한다.
+  gf: CEG:NYSE
+  focus: 전력 소모가 극심한 AI 데이터센터를 위한 무탄소 원자력 전력 공급망 주목주
   keywords:
   - nuclear
-  - smr
-  - 데이터센터전력
-  - carbon free
-  - 에너지
-- ticker: 005930
-  name: Samsung Electronics
-  market: KR
-  gf: 005930:KRX
-  focus: 파운드리, 메모리, 첨단 패키징을 융합한 턴키 솔루션과 온디바이스 AI 탑재 스마트기기를 생산한다.
+  - energy
+  - datacenter
+  - clean energy
+  - power
+- ticker: PLTR
+  name: Palantir Technologies
+  market: US
+  gf: PLTR:NYSE
+  focus: 정부 및 기업용 AI 플랫폼(AIP)을 통해 데이터 분석 및 의사결정 자동화 지원
+  keywords:
+  - aip
+  - gotham
+  - foundry
+  - data
+  - software
+- ticker: TSM
+  name: Taiwan Semiconductor Manufacturing
+  market: US
+  gf: TSM:NYSE
+  focus: 전 세계 최첨단 AI 반도체 물량을 위탁 생산하는 파운드리 선도 기업
+  keywords:
+  - foundry
+  - fabrication
+  - packaging
+  - cowos
+  - silicon
+- ticker: MU
+  name: Micron Technology
+  market: US
+  gf: MU:NASDAQ
+  focus: AI 서버의 필수 부품인 HBM(고대역폭 메모리) 및 고용량 D램 공급
   keywords:
   - hbm
-  - gddr
-  - 온디바이스ai
+  - dram
+  - memory
+  - nand
+  - storage
+- ticker: MRVL
+  name: Marvell Technology
+  market: US
+  gf: MRVL:NASDAQ
+  focus: AI 클러스터간 방대한 데이터 전송을 돕는 광학 네트워킹 및 맞춤형 실리콘 칩 설계
+  keywords:
+  - networking
+  - asic
+  - optical
+  - interconnect
+  - silicon
+- ticker: 005930
+  name: 삼성전자
+  market: KR
+  gf: 005930:KRX
+  focus: HBM 및 차세대 AI 메모리 기술을 턴키 방식으로 제공하는 글로벌 종합 반도체 기업
+  keywords:
+  - hbm
+  - dram
+  - foundry
   - exynos
-  - gaa
+  - memory
 - ticker: '000660'
-  name: SK Hynix
+  name: SK하이닉스
   market: KR
   gf: 000660:KRX
-  focus: 고성능 AI 가속기에 탑재되는 최고 사양의 고대역폭 메모리를 선도적으로 양산하여 글로벌 시장에 공급한다.
+  focus: 글로벌 HBM 시장 점유율 선두를 유지하며 핵심 AI 가속기에 메모리 공급
   keywords:
   - hbm
   - hbm3e
-  - hbm4
-  - pim
-  - 고대역폭메모리
+  - dram
+  - memory
+  - nand
 - ticker: '042700'
-  name: Hanmi Semiconductor
+  name: 한미반도체
   market: KR
   gf: 042700:KRX
-  focus: 고대역폭 메모리 제조의 핵심 공정인 실리콘 관통 전극용 열압착 본딩 장비를 개발 및 독점 공급한다.
+  focus: HBM 제조 공정에 필수적인 TC 본더 장비 시장을 선도하는 핵심 장비주
   keywords:
-  - tcbonder
-  - tsv
-  - 반도체장비
-  - 후공정
-  - 패키징
+  - tc bonder
+  - packaging
+  - hbm
+  - equipment
+  - semiconductor
 - ticker: '035420'
   name: NAVER
   market: KR
   gf: 035420:KRX
-  focus: 한국어 환경에 특화된 자체 대규모 언어 모델을 구축하고 이를 검색 및 클라우드 기업용 서비스에 적용한다.
+  focus: 자체 개발한 초대규모 AI 하이퍼클로바X를 검색 및 B2B 서비스에 이식하는 플랫폼 기업
   keywords:
   - hyperclova x
   - clova
-  - cue
-  - 대규모언어모델
-  - 클라우드
-- ticker: '377030'
-  name: OpenEdge Technology
+  - search
+  - platform
+  - cloud
+- ticker: '317330'
+  name: HD현대일렉트릭
   market: KR
-  gf: 377030:KRX
-  focus: 엣지 디바이스 환경에서 AI 알고리즘을 구동하기 위한 신경망 처리 장치 및 메모리 컨트롤러 지적재산권을 설계한다.
+  gf: 317330:KRX
+  focus: AI 데이터센터 확장에 따른 전력 인프라 수요 급증으로 북미 변압기 수출 수혜
   keywords:
-  - npu
-  - 반도체ip
-  - 온디바이스ai
-  - memory controller
-  - 엣지컴퓨팅
+  - transformer
+  - power
+  - grid
+  - infrastructure
+  - electricity
+- ticker: '077360'
+  name: 이수페타시스
+  market: KR
+  gf: 077360:KRX
+  focus: 글로벌 빅테크에 AI 서버용 고다층 인쇄회로기판(MLB)을 납품하는 부품주
+  keywords:
+  - mlb
+  - pcb
+  - server
+  - network
+  - board
