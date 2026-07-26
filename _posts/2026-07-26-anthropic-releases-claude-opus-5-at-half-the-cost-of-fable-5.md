@@ -2,7 +2,7 @@
 layout: post
 title: 앤스로픽 Claude Opus 5 출시, Fable 5급 성능을 반값에 제공하다
 date: 2026-07-26 20:11:15 +0900
-last_modified_at: 2026-07-26 20:11:15 +0900
+last_modified_at: 2026-07-26 20:48:42 +0900
 categories: Tech
 description: 앤스로픽이 2026년 7월 24일 Claude Opus 5를 출시했습니다. 최상위 Fable 5 수준의 성능을 반값에 제공하며 프롬프트 캐시 유지 등 실무 도입에 유리한 특징을 갖췄습니다.
 summary: 앤스로픽이 최고 수준 모델인 Claude Fable 5에 근접한 성능을 내면서도 가격은 절반으로 낮춘 Claude Opus 5를 공식 출시했습니다. 특히 대화 도중 도구를 변경해도 프롬프트 캐시가 유지되는 새로운 베타 기능을 도입해, 기업들이 AI 에이전트를 더 저렴하고 효율적으로 운영할 수 있게 되었습니다.
@@ -35,6 +35,8 @@ entities:
 - Opus 4.8
 - Frontier-Bench
 - GDPval-AA
+mermaid: true
+chart: true
 faq:
 - question: Claude Opus 5의 가격은 얼마인가요?
   answer: 100만 입력 토큰당 5달러, 100만 출력 토큰당 25달러입니다. 이는 이전 버전인 Opus 4.8과 동일한 비용이며, 최상위 모델인 Claude Fable 5의 절반 수준에 불과합니다.
@@ -55,6 +57,40 @@ AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 �
 
 단순히 저렴해지기만 한 것이 아닙니다. Claude Opus 5는 Frontier-Bench나 GDPval-AA 같은 주요 평가 지표에서 새로운 최고 수준(State-of-the-art)의 성능을 기록하며 Claude Fable 5의 지능에 근접하는 성과를 냈습니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>. 최고급 지능을 중간급 가격표를 달고 내놓아 기업과 개발자들에게 매우 매력적인 선택지를 제공한 것입니다.
 
+가격표가 얼마나 단순해졌는지는 그래프로 보면 바로 들어옵니다. 아래 값은 추정치가 아니라 앤스로픽이 공개한 100만 토큰당 API 가격입니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>.
+
+```chartjs
+{
+  "type": "bar",
+  "data": {
+    "labels": ["입력 토큰", "출력 토큰"],
+    "datasets": [
+      {
+        "label": "Claude Opus 5: 100만 토큰당 가격(달러)",
+        "data": [5, 25]
+      }
+    ]
+  },
+  "options": {
+    "plugins": {
+      "title": {
+        "display": true,
+        "text": "Claude Opus 5 API 가격"
+      }
+    },
+    "scales": {
+      "y": {
+        "beginAtZero": true,
+        "title": {
+          "display": true,
+          "text": "미국 달러"
+        }
+      }
+    }
+  }
+}
+```
+
 <figure class="news-source-image">
   <img src="https://www.cnet.com/wp-content/uploads/sites/2/Opus-5-Hero.png" alt="CNET 원문에 게시된 Claude Opus 5 이미지" loading="lazy" decoding="async">
   <figcaption>CNET가 Claude Opus 5 기사와 함께 공개한 이미지입니다. <a href="https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant" target="_blank" rel="noopener noreferrer">출처: CNET</a></figcaption>
@@ -65,6 +101,16 @@ AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 �
 비용 절감과 함께 도입된 대화 도중 도구를 바꿔도 기존 기억을 날리지 않는 새로운 기능 때문입니다. 앤스로픽은 Claude Opus 5와 함께, 개발자가 대화 도중에 도구를 변경하더라도 프롬프트 캐시(Prompt cache)가 무효화되지 않는 베타 기능을 새롭게 도입했습니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>.
 
 이게 왜 중요한지 일상적인 상황에 빗대어 보겠습니다. 식당에서 종업원에게 복잡한 주문을 길게 설명했는데, 결제 수단을 바꾼다고 해서 종업원이 주문 내용까지 전부 잊어버리고 처음부터 다시 말하라고 하면 곤란할 것입니다. 기존의 AI 모델들은 긴 문맥을 캐시에 임시로 저장해 두고 쓰다가도, 중간에 도구를 변경하면 이 캐시가 깨져버려 처음부터 다시 데이터를 읽어 들여야 했습니다. 이는 곧 시간 지연과 API 호출 비용 상승으로 직결됩니다. 하지만 이번에 추가된 베타 기능 덕분에 긴 호흡의 작업을 수행하는 기업용 AI 에이전트들이 훨씬 더 유연하고 저렴하게 작동할 수 있게 되었습니다.
+
+말로 들으면 복잡하지만 흐름은 간단합니다. 도구를 바꿔도 앞서 읽은 문맥을 다시 처리하지 않는 것이 핵심입니다.
+
+```mermaid
+flowchart LR
+  A["긴 대화와 작업 문맥"] --> B["프롬프트 캐시에 저장"]
+  B --> C["대화 도중 도구 변경"]
+  C --> D["캐시 유지 베타"]
+  D --> E["문맥을 처음부터 다시 읽는 작업 감소"]
+```
 
 ## 그래서 우리에게 뭐가 달라질까?
 

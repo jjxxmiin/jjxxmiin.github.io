@@ -4,6 +4,9 @@ import json
 import datetime
 import html
 import ipaddress
+import math
+import subprocess
+import tempfile
 from difflib import SequenceMatcher
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
@@ -258,6 +261,10 @@ def source_list_html(sources):
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
 # `cd automation && python daily_trend_bot.py` (CI) or `python automation/daily_trend_bot.py`.
 POSTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "_posts")
+MERMAID_VALIDATOR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "validate_mermaid.mjs",
+)
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
 NEWS_WINDOW_HOURS = max(24, min(168, int(os.environ.get("AI_NEWS_WINDOW_HOURS", "72"))))
 MAX_NEWS_AGE_DAYS = max(2, min(14, int(os.environ.get("AI_NEWS_MAX_AGE_DAYS", "7"))))
@@ -852,6 +859,208 @@ def _normalize_news_markdown(content):
     return fix_table_spacing(re.sub(r"\n{3,}", "\n\n", text).strip())
 
 
+def _fenced_blocks(content, language):
+    """Return the bodies of fenced blocks for one exact language."""
+    return re.findall(
+        rf"```{re.escape(language)}[ \t]*\n(.*?)\n```",
+        str(content or ""),
+        flags=re.S | re.I,
+    )
+
+
+def _validate_mermaid_codes(codes):
+    """Parse Mermaid diagrams with the same JS package used by the automation."""
+    diagrams = [str(code or "").strip() for code in codes]
+    if not diagrams:
+        return []
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            suffix=".json",
+            encoding="utf-8",
+            delete=False,
+        ) as handle:
+            json.dump(diagrams, handle, ensure_ascii=False)
+            temporary = handle.name
+        result = subprocess.run(
+            ["node", MERMAID_VALIDATOR, temporary],
+            cwd=os.path.dirname(MERMAID_VALIDATOR),
+            capture_output=True,
+            text=True,
+            timeout=25,
+            check=False,
+        )
+        if result.returncode != 0:
+            message = (result.stderr or result.stdout or "validator failed").strip()
+            return [{"ok": False, "error": message[:300]} for _ in diagrams]
+        parsed = json.loads(result.stdout)
+        if not isinstance(parsed, list) or len(parsed) != len(diagrams):
+            raise ValueError("unexpected Mermaid validator output")
+        return [
+            {
+                "ok": bool(item.get("ok")),
+                "error": str(item.get("error") or "")[:300],
+            }
+            for item in parsed
+        ]
+    except (OSError, subprocess.SubprocessError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        return [{"ok": False, "error": str(exc)[:300]} for _ in diagrams]
+    finally:
+        if temporary and os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+_FACT_NUMBER = re.compile(
+    r"(?<![A-Za-z0-9])[-+]?(?:\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(?![A-Za-z0-9])"
+)
+
+
+def _verified_numeric_values(evidence):
+    """Extract raw numeric values from fact-checked statements, without deriving any."""
+    values = set()
+    for fact in evidence.get("facts") or []:
+        for token in _FACT_NUMBER.findall(str(fact.get("text") or "")):
+            try:
+                value = float(token.replace(",", ""))
+                if math.isfinite(value):
+                    values.add(value)
+            except ValueError:
+                continue
+    return values
+
+
+def _validate_chartjs_code(code, evidence):
+    """Accept only small, declarative Chart.js JSON grounded in verified facts."""
+    try:
+        if len(str(code or "")) > 20_000:
+            return False, "Chart.js JSON이 너무 큼"
+        config = json.loads(str(code or ""))
+    except (TypeError, ValueError, json.JSONDecodeError) as exc:
+        return False, f"Chart.js JSON 파싱 실패: {exc}"
+
+    if not isinstance(config, dict):
+        return False, "Chart.js 최상위 값은 객체여야 함"
+    if config.get("type") not in {"bar", "line", "pie", "doughnut", "polarArea", "radar"}:
+        return False, "허용되지 않은 Chart.js 유형"
+    if any(key in str(code) for key in ('"__proto__"', '"prototype"', '"constructor"')):
+        return False, "안전하지 않은 Chart.js 키"
+
+    data = config.get("data")
+    labels = data.get("labels") if isinstance(data, dict) else None
+    datasets = data.get("datasets") if isinstance(data, dict) else None
+    if (
+        not isinstance(labels, list)
+        or not 2 <= len(labels) <= 20
+        or not all(isinstance(label, str) and 0 < len(label) <= 120 for label in labels)
+    ):
+        return False, "Chart.js labels는 2~20개의 짧은 문자열이어야 함"
+    if not isinstance(datasets, list) or not 1 <= len(datasets) <= 4:
+        return False, "Chart.js datasets는 1~4개여야 함"
+
+    chart_values = []
+    for dataset in datasets:
+        values = dataset.get("data") if isinstance(dataset, dict) else None
+        if not isinstance(dataset, dict) or not str(dataset.get("label") or "").strip():
+            return False, "모든 Chart.js dataset에 label이 필요함"
+        if not isinstance(values, list) or len(values) != len(labels):
+            return False, "Chart.js data와 labels 길이가 다름"
+        for value in values:
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                return False, "Chart.js data에는 숫자만 허용"
+            numeric = float(value)
+            if not math.isfinite(numeric):
+                return False, "Chart.js data에 유한하지 않은 숫자 포함"
+            chart_values.append(numeric)
+
+    if len(chart_values) < 2:
+        return False, "비교할 Chart.js 수치가 부족함"
+    verified = _verified_numeric_values(evidence)
+    unsupported = sorted({
+        value for value in chart_values
+        if not any(math.isclose(value, allowed, rel_tol=1e-9, abs_tol=1e-9) for allowed in verified)
+    })
+    if unsupported:
+        return False, "검증 facts에 없는 수치: " + ", ".join(
+            f"{value:g}" for value in unsupported[:5]
+        )
+    options = config.get("options")
+    plugins = options.get("plugins") if isinstance(options, dict) else None
+    title = plugins.get("title") if isinstance(plugins, dict) else None
+    if (
+        not isinstance(title, dict)
+        or title.get("display") is not True
+        or not str(title.get("text") or "").strip()
+    ):
+        return False, "Chart.js에 표시할 제목이 없음"
+    return True, ""
+
+
+def _remove_fenced_block(content, language, code):
+    pattern = re.compile(
+        rf"```{re.escape(language)}[ \t]*\r?\n{re.escape(code)}\r?\n```",
+        flags=re.I,
+    )
+    return pattern.sub("", content, count=1)
+
+
+def _mermaid_grounding_error(code, evidence):
+    """Block active directives and numbers that did not pass the fact-check step."""
+    text = str(code or "")
+    lowered = text.lower()
+    if len(text) > 20_000:
+        return "Mermaid 코드가 너무 큼"
+    if any(token in lowered for token in ("click ", "javascript:", "<script", "<iframe", "%%{")):
+        return "Mermaid 외부 동작 또는 설정 지시문 포함"
+
+    verified = _verified_numeric_values(evidence)
+    unsupported = []
+    for token in _FACT_NUMBER.findall(text):
+        value = float(token.replace(",", ""))
+        if not any(math.isclose(value, allowed, rel_tol=1e-9, abs_tol=1e-9)
+                   for allowed in verified):
+            unsupported.append(value)
+    if unsupported:
+        return "검증 facts에 없는 Mermaid 수치: " + ", ".join(
+            f"{value:g}" for value in sorted(set(unsupported))[:5]
+        )
+    return ""
+
+
+def _sanitize_news_visuals(content, evidence):
+    """Keep up to three safe Mermaid blocks and one evidence-backed chart."""
+    text = str(content or "")
+    mermaid_codes = _fenced_blocks(text, "mermaid")
+    if not mermaid_codes:
+        return text, ["검증 가능한 Mermaid 다이어그램 없음"]
+
+    mermaid_results = _validate_mermaid_codes(mermaid_codes)
+    kept_mermaid = 0
+    for code, result in zip(mermaid_codes, mermaid_results):
+        grounding_error = _mermaid_grounding_error(code, evidence)
+        if result["ok"] and not grounding_error and kept_mermaid < 3:
+            kept_mermaid += 1
+            continue
+        reason = grounding_error or result["error"] or "허용 개수 초과"
+        text = _remove_fenced_block(text, "mermaid", code)
+        print(f"  Mermaid 제외: {reason}")
+    if kept_mermaid == 0:
+        return text, ["문법과 근거 검증을 통과한 Mermaid 다이어그램 없음"]
+
+    chart_codes = _fenced_blocks(text, "chartjs")
+    kept_chart = 0
+    for code in chart_codes:
+        valid, error = _validate_chartjs_code(code, evidence)
+        if valid and kept_chart < 1:
+            kept_chart += 1
+            continue
+        # A chart is optional. Removing an ungrounded or extra chart preserves the
+        # article while preventing plausible-looking invented numbers from shipping.
+        text = _remove_fenced_block(text, "chartjs", code)
+        print(f"  Chart.js 제외: {error or '허용 개수 초과'}")
+    return re.sub(r"\n{3,}", "\n\n", text).strip(), []
+
+
 def _article_errors(post, evidence):
     content = post.get("content") or ""
     errors = []
@@ -870,8 +1079,17 @@ def _article_errors(post, evidence):
     unsupported = sorted(url for url in linked if url and url not in allowed)
     if unsupported:
         errors.append("검증 원문 밖 링크 포함: " + ", ".join(unsupported[:3]))
-    if re.search(r"```(?:mermaid|chartjs)", content):
-        errors.append("뉴스 글에 불필요한 생성형 도표 포함")
+    if len(_fenced_blocks(content, "mermaid")) not in {1, 2, 3}:
+        errors.append("Mermaid 다이어그램은 1~3개 필요")
+    if len(_fenced_blocks(content, "chartjs")) > 1:
+        errors.append("Chart.js 차트 1개 초과")
+    other_fences = [
+        language.lower()
+        for language in re.findall(r"```([A-Za-z0-9_-]+)", content)
+        if language.lower() not in {"mermaid", "chartjs"}
+    ]
+    if other_fences:
+        errors.append("허용되지 않은 코드 블록: " + ", ".join(sorted(set(other_fences))))
     return errors
 
 
@@ -910,7 +1128,17 @@ def generate_blog_post(client, topic_data, evidence):
   4. 직접 써보거나 지켜볼 포인트
   5. 아직은 선을 그어야 할 부분
 - 각 섹션 첫 문장은 그 질문에 바로 답해야 한다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
-- 이미지, Mermaid, Chart.js, 코드 블록은 넣지 않는다. 검증한 원문 이미지는 코드가 자동 배치한다.
+- 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
+- Mermaid를 1~3개 넣는다. 사건 흐름, 제품 작동 방식, 선택 기준처럼 글만으로
+  한눈에 안 들어오는 관계를 flowchart·sequenceDiagram·timeline 중 알맞은 형태로
+  보여준다. 노드와 라벨에도 facts와 unknowns에 있는 내용만 쓰며 가짜 수치를 만들지 않는다.
+- 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
+  chartjs 코드 블록 안에는 주석 없는 순수 JSON만 쓰고 type, data.labels,
+  data.datasets를 포함한다. 모든 dataset에는 label을 붙이고 options.plugins.title에는
+  display: true와 명확한 text를 넣는다. data의 모든 숫자는 facts에 원문 그대로
+  있어야 하며 계산값·추정치·임의 점수는 금지한다. 수치 비교가 부적절하면 차트는 생략한다.
+- Mermaid·Chart.js 외의 코드 블록은 넣지 않는다. 그림 앞뒤에는 독자가 무엇을
+  봐야 하는지 한두 문장으로 설명하되, 똑같은 내용을 장황하게 반복하지 않는다.
 - faq는 실제 검색 질문 3~4개와 각각 2~4문장의 직접 답변으로 만든다.
 - tags는 5~10개, entities는 원문 표기 3~10개다.
 - title_english는 파일명에 쓸 간결한 영문 제목이며 사실을 과장하지 않는다.
@@ -960,6 +1188,7 @@ def generate_blog_post(client, topic_data, evidence):
     for key in ("title_korean", "title_english", "description", "summary"):
         post[key] = strip_emojis(str(post.get(key) or "")).strip()
     post["content"] = _normalize_news_markdown(post.get("content"))
+    post["content"], visual_errors = _sanitize_news_visuals(post["content"], evidence)
     post["tags"] = list(dict.fromkeys(
         strip_emojis(str(value)).strip()
         for value in (post.get("tags") or [])
@@ -986,7 +1215,7 @@ def generate_blog_post(client, topic_data, evidence):
         if item.get("question") and item.get("answer")
     ][:4]
 
-    errors = _article_errors(post, evidence)
+    errors = visual_errors + _article_errors(post, evidence)
     if not all(post.get(key) for key in ("title_korean", "title_english", "description", "summary")):
         errors.append("제목 또는 메타 설명 누락")
     if not 60 <= len(post["description"]) <= 180:
@@ -1073,6 +1302,10 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         "faq": faq,
         "sitemap": True,
     }
+    if _fenced_blocks(content, "mermaid"):
+        front_matter["mermaid"] = True
+    if _fenced_blocks(content, "chartjs"):
+        front_matter["chart"] = True
     if article_images:
         front_matter["article_images"] = article_images
 

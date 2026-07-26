@@ -216,7 +216,131 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertIn('id="source-1"', source_list)
         self.assertIn('id="source-2"', source_list)
 
+    def test_mermaid_validator_accepts_valid_and_rejects_invalid_syntax(self):
+        results = bot._validate_mermaid_codes([
+            'flowchart LR\n  A["공식 발표"] --> B["사용자 확인"]',
+            "this is not a mermaid diagram",
+        ])
+        self.assertTrue(results[0]["ok"])
+        self.assertFalse(results[1]["ok"])
+
+    def test_chartjs_requires_every_data_value_to_exist_in_verified_facts(self):
+        evidence = {
+            "facts": [
+                {"text": "입력 가격은 5달러이고 비교 모델은 10달러입니다."},
+                {"text": "출력 가격은 각각 25달러와 50달러입니다."},
+            ],
+        }
+        grounded = json.dumps({
+            "type": "bar",
+            "data": {
+                "labels": ["Opus 5", "Fable 5"],
+                "datasets": [
+                    {"label": "입력", "data": [5, 10]},
+                    {"label": "출력", "data": [25, 50]},
+                ],
+            },
+            "options": {
+                "plugins": {
+                    "title": {"display": True, "text": "토큰 가격 비교"}
+                }
+            },
+        })
+        invented = json.dumps({
+            "type": "bar",
+            "data": {
+                "labels": ["Opus 5", "Fable 5"],
+                "datasets": [{"label": "임의 점수", "data": [87, 99]}],
+            },
+            "options": {
+                "plugins": {
+                    "title": {"display": True, "text": "임의 점수"}
+                }
+            },
+        })
+        self.assertEqual(bot._validate_chartjs_code(grounded, evidence), (True, ""))
+        valid, error = bot._validate_chartjs_code(invented, evidence)
+        self.assertFalse(valid)
+        self.assertIn("facts에 없는 수치", error)
+        untitled = json.dumps({
+            "type": "bar",
+            "data": {
+                "labels": ["Opus 5", "Fable 5"],
+                "datasets": [{"label": "입력", "data": [5, 10]}],
+            },
+            "options": [],
+        })
+        valid, error = bot._validate_chartjs_code(untitled, evidence)
+        self.assertFalse(valid)
+        self.assertIn("제목", error)
+
+    def test_visual_sanitizer_keeps_mermaid_and_drops_ungrounded_chart(self):
+        content = """
+```mermaid
+flowchart LR
+  A["발표"] --> B["확인"]
+```
+
+```chartjs
+{"type":"bar","data":{"labels":["A","B"],"datasets":[{"label":"임의 점수","data":[87,99]}]},"options":{"plugins":{"title":{"display":true,"text":"임의 점수"}}}}
+```
+""".strip()
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            return_value=[{"ok": True, "error": ""}],
+        ):
+            sanitized, errors = bot._sanitize_news_visuals(
+                content,
+                {"facts": [{"text": "가격은 5달러와 10달러입니다."}]},
+            )
+        self.assertEqual(errors, [])
+        self.assertIn("```mermaid", sanitized)
+        self.assertNotIn("```chartjs", sanitized)
+
+    def test_visual_sanitizer_drops_unsafe_mermaid_but_keeps_valid_one(self):
+        content = """
+```mermaid
+flowchart LR
+  A["공식 발표"] --> B["도입 검토"]
+```
+
+```mermaid
+flowchart LR
+  A["임의 점수 999"] --> B["과장"]
+```
+""".strip()
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            return_value=[
+                {"ok": True, "error": ""},
+                {"ok": True, "error": ""},
+            ],
+        ):
+            sanitized, errors = bot._sanitize_news_visuals(
+                content,
+                {"facts": [{"text": "공식 가격은 5달러입니다."}]},
+            )
+        self.assertEqual(errors, [])
+        self.assertEqual(sanitized.count("```mermaid"), 1)
+        self.assertNotIn("999", sanitized)
+
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
+        mermaid = (
+            '```mermaid\n'
+            'flowchart LR\n'
+            '  A["공식 발표"] --> B["도입 검토"]\n'
+            '```'
+        )
+        chart = (
+            '```chartjs\n'
+            '{"type":"bar","data":{"labels":["이전","현재"],'
+            '"datasets":[{"label":"검증 가격","data":[10,5]}]},'
+            '"options":{"plugins":{"title":{"display":true,'
+            '"text":"가격 비교"}}}}\n'
+            '```'
+        )
         post = {
             "title_korean": "Example AI 새 모델, 실제로 달라진 세 가지",
             "title_english": "Example AI New Model Changes Three Things",
@@ -227,7 +351,12 @@ class DailyTrendNewsBotTests(unittest.TestCase):
                     "첫 문단입니다"
                     "[Example](https://example.com/news/new-model)."
                 ),
-                *[f"{heading}\n\n검증된 본문입니다." for heading in bot.NEWS_HEADINGS],
+                f"{bot.NEWS_HEADINGS[0]}\n\n검증된 본문입니다.\n\n{chart}",
+                f"{bot.NEWS_HEADINGS[1]}\n\n검증된 본문입니다.\n\n{mermaid}",
+                *[
+                    f"{heading}\n\n검증된 본문입니다."
+                    for heading in bot.NEWS_HEADINGS[2:]
+                ],
             ]),
             "tags": ["AI 뉴스", "Example AI", "생성형 AI", "AI 모델", "AI 트렌드"],
             "entities": ["Example AI", "Example Model"],
@@ -258,7 +387,10 @@ class DailyTrendNewsBotTests(unittest.TestCase):
                     "tier": "trusted",
                 },
             ],
-            "facts": [{"text": f"Fact {index}"} for index in range(4)],
+            "facts": [
+                {"text": "검증 가격은 10달러에서 5달러로 바뀌었습니다."},
+                *[{"text": f"Fact {index}"} for index in range(1, 4)],
+            ],
         }
         images = [
             {
@@ -285,6 +417,8 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         front_matter = yaml.safe_load(raw.split("---", 2)[1])
         self.assertEqual(front_matter["layout"], "post")
         self.assertEqual(front_matter["article_type"], "NewsArticle")
+        self.assertTrue(front_matter["mermaid"])
+        self.assertTrue(front_matter["chart"])
         self.assertEqual(
             front_matter["news_source_url"],
             "https://example.com/news/new-model",
