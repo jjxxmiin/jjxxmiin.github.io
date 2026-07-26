@@ -26,9 +26,7 @@ layout: compress
 
         <div class="row flex-grow-1">
           <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
-            {% if page.layout == 'home' %}
-              {{ content }}
-            {% elsif layout.refactor or layout.layout == 'default' %}
+            {% if layout.refactor or layout.layout == 'default' %}
               {% include refactor-content.html content=content lang=lang %}
             {% else %}
               {{ content }}
@@ -200,12 +198,12 @@ layout: compress
       <div class="sponsor-modal-content" onclick="event.stopPropagation()">
         <button class="sponsor-modal-close" onclick="closeSponsorModal()">&times;</button>
         <div class="sponsor-emoji">☕</div>
-        <h3 class="sponsor-modal-title">Support independent AI reporting</h3>
-        <p class="sponsor-modal-desc">If OPSOAI helps you understand what changed in AI, a coffee supports the source checks, visuals, and next investigation.</p>
+        <h3 class="sponsor-modal-title">OPSOAI에 커피 한 잔</h3>
+        <p class="sponsor-modal-desc">매일 올라오는 AI 논문 요약·뉴스·오픈소스 정리가 도움이 되셨다면, 커피 한 잔으로 응원해 주세요. 다음 글을 만드는 힘이 됩니다.</p>
         <a class="sponsor-btn" href="https://www.buymeacoffee.com/{{ site.sponsor.buymeacoffee | default: 'opsoai' }}" target="_blank" rel="noopener noreferrer">
-          <i class="fas fa-mug-hot"></i> Buy OPSOAI a coffee
+          <i class="fas fa-mug-hot"></i> 커피 사주기
         </a>
-        <p class="sponsor-fine">Card payment available • No account required</p>
+        <p class="sponsor-fine">카드 결제 · 로그인 없이 가능</p>
       </div>
     </div>
 

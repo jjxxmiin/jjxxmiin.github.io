@@ -1,4 +1,4 @@
-/* AI company coverage map. For each stock card (data-kw keywords), find archived AI tools whose
+/* AI 주식 연관도. For each stock card (data-kw keywords), find blog-covered AI tools whose
    name/title/owner match; show count + related tool chips; fill summary tiles; and render a
    "blog correlation" bar chart (Chart.js). External file (not HTML-minified). */
 (function () {
@@ -37,7 +37,7 @@
       wrap.innerHTML = rel.length
         ? rel.slice(0, 4).map(function (t) { return '<a class="stk-tool" href="' + t.url + '">' + esc(t.name) + '</a>'; }).join('')
           + (rel.length > 4 ? '<span class="stk-more">+' + (rel.length - 4) + '</span>' : '')
-        : '<span class="stk-none">No directly related article</span>';
+        : '<span class="stk-none">직접 다룬 글 없음</span>';
     }
     var nameEl = card.querySelector('.stk-name');
     rows.push({ name: nameEl ? nameEl.textContent : '', count: rel.length, market: card.getAttribute('data-market') || 'US' });
@@ -80,7 +80,7 @@
       data: {
         labels: top.map(function (r) { return r.name; }),
         datasets: [{
-          label: 'Archive coverage',
+          label: '블로그 관련 글 수',
           data: top.map(function (r) { return r.count; }),
           backgroundColor: top.map(function (r) { return r.market === 'KR' ? kr : us; }),
           borderRadius: 4

@@ -2,9 +2,7 @@
 layout: page
 icon: fas fa-comments
 order: 7
-title: Community
-description: Ask questions and share useful experience about AI news, models, tools, research, and real-world deployment.
-keywords: [AI community, artificial intelligence questions, AI news discussion]
+title: 커뮤니티
 ---
 
 {%- assign g = site.comments.giscus -%}
@@ -23,14 +21,14 @@ keywords: [AI community, artificial intelligence questions, AI news discussion]
 
 <div class="comm" markdown="0">
 
-  <p class="comm-lead"><b>Let’s make AI coverage more useful together.</b><br>
-  <span class="muted">Share a question, a tool you tested, a paper worth explaining, or a story we should investigate. Reader requests help shape future coverage.</span></p>
+  <p class="comm-lead"><b>AI, 같이 이야기해요.</b><br>
+  <span class="muted">궁금한 논문, 써 본 툴 후기, 다뤄줬으면 하는 주제까지 자유롭게 남겨주세요. 남겨주신 질문과 요청은 다음 글의 소재가 됩니다.</span></p>
 
   <div class="comm-rules">
-    <span class="r"><i class="fas fa-lightbulb"></i>Pitch a topic</span>
-    <span class="r"><i class="fas fa-comments"></i>Ask or review</span>
-    <span class="r"><i class="fas fa-heart"></i>Respect each other</span>
-    <span class="r"><i class="fab fa-github"></i>Sign in with GitHub</span>
+    <span class="r"><i class="fas fa-lightbulb"></i>주제 요청 환영</span>
+    <span class="r"><i class="fas fa-comments"></i>편하게 질문·후기</span>
+    <span class="r"><i class="fas fa-heart"></i>서로 존중</span>
+    <span class="r"><i class="fab fa-github"></i>GitHub 로그인으로 작성</span>
   </div>
 
   {% if g.repo and g.repo_id and g.category_id %}
@@ -45,14 +43,14 @@ keywords: [AI community, artificial intelligence questions, AI news discussion]
     data-emit-metadata="0"
     data-input-position="{{ g.input_position | default: 'top' }}"
     data-theme="preferred_color_scheme"
-    data-lang="{{ g.lang | default: 'en' }}"
+    data-lang="{{ g.lang | default: 'ko' }}"
     data-loading="lazy"
     crossorigin="anonymous"
     async>
   </script>
   {% else %}
   <div class="comm-setup">
-    The community is <b>being prepared</b>. Comments will open soon.
+    게시판을 <b>준비 중</b>입니다. 곧 자유롭게 글을 남기실 수 있어요.
   </div>
   {% endif %}
 

@@ -1,36 +1,37 @@
 ---
 layout: page
 title: Privacy Policy
-description: Learn how OPSOAI uses analytics, advertising, cookies, and limited visitor data, and how you can control personalized advertising.
-robots: "index, follow"
 icon: fas fa-user-shield
 permalink: /privacy/
 ---
 
-# Privacy Policy
+# 개인정보 처리방침 (Privacy Policy)
 
-**OPSOAI** respects visitor privacy and aims to collect only the information needed to operate, understand, and support this website.
+**OPSOAI** (이하 "사이트")는 이용자의 개인정보를 소중히 여기며, "정보통신망 이용촉진 및 정보보호 등에 관한 법률" 등 관련 법령을 준수합니다.
 
-## 1. Information we use
+## 1. 개인정보의 수집 및 이용 목적
 
-You can read the site without creating an account. We may use the following third-party services to understand site usage and support advertising:
+본 사이트는 별도의 회원가입 없이 콘텐츠를 이용할 수 있습니다. 단, 방문자 통계 분석 및 광고 게재를 위해 다음과 같은 제3자 도구가 사용될 수 있습니다.
 
-- **Google Analytics:** aggregated or pseudonymous information about how visitors use the site.
-- **Google AdSense:** advertising that may be personalized according to your settings and applicable law.
+*   **Google Analytics**: 방문자의 사이트 이용 형태 분석 (익명화된 데이터)
+*   **Google AdSense**: 사용자 맞춤형 광고 제공
 
-## 2. Cookies and your choices
+## 2. 쿠키(Cookie)의 운용 및 거부
 
-Cookies and similar storage technologies may remember preferences, measure visits, and help serve relevant advertising.
+본 사이트는 이용자에게 개별적인 맞춤 서비스를 제공하기 위해 이용정보를 저장하고 수시로 불러오는 '쿠키(cookie)'를 사용합니다.
 
-You can block or delete cookies in your browser. Doing so may affect preferences or features that rely on local storage.
+*   **쿠키의 사용 목적**: 이용자의 접속 빈도나 방문 시간 등을 분석하여 이용자의 취향과 관심분야를 파악하고, 각종 이벤트 참여 정도 및 방문 회수 파악 등을 통한 타겟 마케팅 및 개인 맞춤 서비스 제공
+*   **쿠키 설정 거부 방법**: 이용자는 쿠키 설치에 대한 선택권을 가지고 있습니다. 따라서 웹브라우저에서 옵션을 설정함으로써 모든 쿠키를 허용하거나, 쿠키가 저장될 때마다 확인을 거치거나, 아니면 모든 쿠키의 저장을 거부할 수도 있습니다.
 
-## 3. Third-party advertising
+## 3. 제3자 광고 서비스
 
-OPSOAI may use Google AdSense. Google and other advertising providers may use cookies to serve ads based on visits to this and other websites. You can review or disable personalized advertising through [Google Ads Settings](https://www.google.com/settings/ads).
+본 사이트는 광고 수익을 위해 Google AdSense를 이용하고 있습니다.
+*   Google을 포함한 제3자 공급업체는 쿠키를 사용하여 사용자의 웹사이트 방문 기록을 바탕으로 광고를 게재합니다.
+*   사용자는 [Google 광고 설정](https://www.google.com/settings/ads)에서 개인 맞춤 광고를 해제할 수 있습니다.
 
-## 4. Contact
+## 4. 개인정보 관리 책임자
 
-- **Operator:** OPSOAI
-- **Email:** ceo@opsoai.com
+*   이름: OPSOAI 운영진
+*   이메일: ceo@opsoai.com
 
-Effective December 29, 2025. This page may be updated when the site’s services or legal obligations change.
+본 방침은 2025년 12월 29일부터 시행됩니다.

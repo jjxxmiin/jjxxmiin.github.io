@@ -2,9 +2,7 @@
 layout: page
 icon: fas fa-toolbox
 order: 4
-title: Open-source Archive
-description: Search the AI open-source projects and developer tools previously analyzed by OPSOAI.
-keywords: [AI open source, AI developer tools, open-source AI archive]
+title: 오픈소스
 ---
 
 {%- assign tools = site.posts | where_exp: "p", "p.github_url" -%}
@@ -39,12 +37,12 @@ keywords: [AI open source, AI developer tools, open-source AI archive]
 </style>
 
 <div class="tools-head" markdown="0">
-  <div class="h">AI Tool Archive</div>
-  <div class="sub"><b id="tools-count">{{ tools | size }}</b> open-source AI tools from the OPSOAI archive</div>
+  <div class="h">AI 툴 도감</div>
+  <div class="sub">블로그가 다룬 <b id="tools-count">{{ tools | size }}</b>개의 AI 툴, 매일 새 글마다 자동으로 추가됩니다</div>
 </div>
 
 <div class="tools-controls" markdown="0">
-  <input id="tools-search" type="search" placeholder="Search names and descriptions (for example: Cursor, agent, RAG)" autocomplete="off">
+  <input id="tools-search" type="search" placeholder="툴 이름/설명 검색 (예: cursor, 에이전트, rag)" autocomplete="off">
   <div id="tools-chips"></div>
 </div>
 

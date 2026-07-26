@@ -2,9 +2,7 @@
 layout: page
 icon: fas fa-chart-line
 order: 5
-title: AI Data
-description: Explore patterns in the OPSOAI technology archive and see how frequently major AI companies and topics appear in our coverage.
-keywords: [AI trends, artificial intelligence data, AI companies, AI coverage analysis]
+title: 트렌드
 ---
 
 {%- assign tools = site.posts | where_exp: "p", "p.github_url" -%}
@@ -69,91 +67,103 @@ keywords: [AI trends, artificial intelligence data, AI companies, AI coverage an
 
 <div class="mkt" markdown="0">
 
-  <p class="mkt-lead"><b>Patterns in the OPSOAI technology archive.</b><br>
-  <span class="muted">These charts visualize the projects, organizations, and topics covered in our historical open-source archive. They are editorial coverage signals, not market forecasts.</span></p>
+  <p class="mkt-lead"><b>데이터로 보는 AI 흐름과 관련 주식.</b><br>
+  <span class="muted">이 블로그가 매일 다룬 AI 툴 데이터로 개발 트렌드를 시각화하고, 그 흐름이 어떤 기업·주식과 연결되는지까지 한눈에 봅니다.</span></p>
 
   <div class="mkt-jump">
-    <a href="#trend"><i class="fas fa-chart-line"></i> Archive dashboard</a>
-    <a href="#market"><i class="fas fa-arrow-trend-up"></i> Company map</a>
+    <a href="#trend"><i class="fas fa-chart-line"></i> 트렌드 대시보드</a>
+    <a href="#market"><i class="fas fa-arrow-trend-up"></i> 관련 주식</a>
   </div>
 
   <!-- ============ 트렌드 대시보드 ============ -->
-  <h2 class="mkt-sec" id="trend"><i class="fas fa-chart-line"></i>Archive dashboard<span class="lead">Based on covered AI tools</span></h2>
+  <h2 class="mkt-sec" id="trend"><i class="fas fa-chart-line"></i>트렌드 대시보드<span class="lead">블로그가 다룬 AI 툴 기준</span></h2>
 
   <div class="trd-stats">
-    <div class="s"><span class="n" id="st-total">–</span><span class="l">Covered tools</span></div>
-    <div class="s"><span class="n" id="st-orgs">–</span><span class="l">Organizations</span></div>
-    <div class="s"><span class="n" id="st-month">–</span><span class="l">This month</span></div>
+    <div class="s"><span class="n" id="st-total">–</span><span class="l">총 다룬 툴</span></div>
+    <div class="s"><span class="n" id="st-orgs">–</span><span class="l">기업/조직</span></div>
+    <div class="s"><span class="n" id="st-month">–</span><span class="l">이번 달 글</span></div>
   </div>
 
   <div class="trd-card">
-    <h3>Monthly coverage</h3>
+    <h3>월별 발행 추이</h3>
     <div class="trd-chart"><canvas id="trends-monthly"></canvas></div>
   </div>
 
   <div class="trd-grid2">
     <div class="trd-card">
-      <h3>Topic distribution</h3>
+      <h3>분야별 분포</h3>
       <div class="trd-chart"><canvas id="trends-cats"></canvas></div>
     </div>
     <div class="trd-card">
-      <h3>Top 10 organizations</h3>
+      <h3>최다 등장 조직 TOP 10</h3>
       <div class="trd-chart"><canvas id="trends-orgs"></canvas></div>
     </div>
   </div>
 
   <div class="trd-grid2">
     <div class="trd-card">
-      <h3>Cumulative articles</h3>
+      <h3>누적 글 수</h3>
       <div class="trd-chart"><canvas id="trends-cumulative"></canvas></div>
     </div>
     <div class="trd-card">
-      <h3>Publishing by weekday</h3>
+      <h3>요일별 발행</h3>
       <div class="trd-chart"><canvas id="trends-dow"></canvas></div>
     </div>
   </div>
 
   <div class="trd-card">
-    <h3>Most-covered keywords</h3>
+    <h3>많이 다룬 키워드</h3>
     <div class="trd-chart" style="height:360px;"><canvas id="trends-keywords"></canvas></div>
   </div>
 
   <!-- ============ AI 주식 연관도 ============ -->
-  <h2 class="mkt-sec" id="market"><i class="fas fa-arrow-trend-up"></i>Company coverage map<span class="lead">Archive mentions by company</span></h2>
+  <h2 class="mkt-sec" id="market"><i class="fas fa-arrow-trend-up"></i>AI 주식 연관도<span class="lead">트렌드가 향하는 종목</span></h2>
 
   <div class="stocks-note">
-    <b>Coverage count</b> is the number of archived AI-tool articles that mention a
-    company’s products or keywords. It measures our historical coverage only.
-    <b>This is not investment advice</b>; use the external chart for current market data.
+    각 종목의 <b>블로그 관련도</b>는 그 회사의 제품/키워드가 등장한 블로그 글(AI 툴) 수입니다.
+    많이 엮일수록 그 회사의 AI가 실제 개발 현장에서 자주 언급된다는 신호예요.
+    <b>투자 조언이 아니며</b>, 가격은 각 종목의 "차트 보기"에서 확인하세요.
   </div>
 
   <div class="stk-stats">
-    <div class="s"><span class="n" id="stk-total">–</span><span class="l">Companies</span></div>
-    <div class="s"><span class="n" id="stk-us">–</span><span class="l">United States</span></div>
-    <div class="s"><span class="n" id="stk-kr">–</span><span class="l">South Korea</span></div>
+    <div class="s"><span class="n" id="stk-total">–</span><span class="l">종목</span></div>
+    <div class="s"><span class="n" id="stk-us">–</span><span class="l">미국</span></div>
+    <div class="s"><span class="n" id="stk-kr">–</span><span class="l">한국</span></div>
   </div>
 
   <div class="stk-viz">
-    <h3>Archive coverage count</h3>
+    <h3>블로그 연관도 (많이 다룬 순)</h3>
     <div class="cwrap"><canvas id="stk-corr-chart"></canvas></div>
   </div>
 
   {%- assign markets = "US,KR" | split: "," -%}
   {%- for mk in markets -%}
-  <div class="stk-mkt">{% if mk == "US" %}United States{% else %}South Korea{% endif %}</div>
+  <div class="stk-mkt">{% if mk == "US" %}미국{% else %}한국{% endif %}</div>
   <div class="stk-grid">
     {%- assign ms = stocks | where: "market", mk -%}
     {%- for s in ms -%}
     <div class="stk" data-kw="{{ s.keywords | join: '|' }}" data-market="{{ s.market }}">
       <div class="stk-h"><span class="stk-name">{{ s.name }}</span><span class="stk-tk">{{ s.ticker }}</span></div>
       <div class="stk-focus">{{ s.focus }}</div>
-      <div class="stk-rel-line">Coverage <b class="stk-rel">–</b> articles</div>
+      <div class="stk-rel-line">블로그 관련도 <b class="stk-rel">–</b>개</div>
       <div class="stk-tools"></div>
-      <a class="stk-chart" href="https://www.google.com/finance/quote/{{ s.gf }}" target="_blank" rel="noopener">View market chart →</a>
+      <a class="stk-chart" href="https://www.google.com/finance/quote/{{ s.gf }}" target="_blank" rel="noopener">차트 보기 →</a>
     </div>
     {%- endfor -%}
   </div>
   {%- endfor -%}
+
+  <!-- ============ 이번 주 하이라이트 ============ -->
+  {%- assign news = site.data.ai_news -%}
+  {%- if news -%}
+  <h2 class="mkt-sec"><i class="fas fa-bolt"></i>이번 주 하이라이트</h2>
+  <div class="trd-card">
+    {%- for cat in news.categories -%}
+    <div class="trd-hl"><span class="c">{{ cat.name }}</span><span class="d">{{ cat.items[0].date }}</span><span class="t">{{ cat.items[0].text }}</span></div>
+    {%- endfor -%}
+    <a class="trd-more" href="{{ '/updates/' | relative_url }}">전체 뉴스 보기 →</a>
+  </div>
+  {%- endif -%}
 
 </div>
 

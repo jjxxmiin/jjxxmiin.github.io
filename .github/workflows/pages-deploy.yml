@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
   workflow_run:
-    workflows: ["Daily CV Paper Post", "Twice Daily Bilingual AI News", "Weekly AI News"]
+    workflows: ["Daily CV Paper Post", "Daily AI Trend Post"]
     types:
       - completed
 

@@ -1,4 +1,4 @@
-/* AI tool archive renderer. Reads the Liquid-generated JSON in #tools-data and renders a
+/* AI 툴 도감 renderer. Reads the Liquid-generated JSON in #tools-data and renders a
    searchable / filterable card grid. External file (not HTML-minified), so comments are safe. */
 (function () {
   var dataEl = document.getElementById('tools-data');
@@ -11,25 +11,25 @@
 
   function catOf(t) {
     var s = (t.name + ' ' + t.title).toLowerCase();
-    if (/design|디자인|figma|canvas|ui\/ux|ux\/ui/.test(s)) { return 'Design'; }
-    if (/video|영상|비디오|image|이미지|diffus|render|montage|clip|photo|사진|frame/.test(s)) { return 'Video & image'; }
-    if (/voice|음성|speech|audio|music|음악|\btts\b|sound|오디오/.test(s)) { return 'Voice & audio'; }
-    if (/\brag\b|search|검색|graph|그래프|memory|메모리|데이터|vector|벡터|\bdb\b|index|색인|knowledge/.test(s)) { return 'Data & search'; }
-    if (/cod|코딩|\bide\b|\bcli\b|agent|에이전트|\bdev\b|compil|컴파일|plugin|플러그인|terminal|터미널|mcp|debug/.test(s)) { return 'Coding'; }
-    return 'Other';
+    if (/design|디자인|figma|canvas|ui\/ux|ux\/ui/.test(s)) { return '디자인'; }
+    if (/video|영상|비디오|image|이미지|diffus|render|montage|clip|photo|사진|frame/.test(s)) { return '영상/이미지'; }
+    if (/voice|음성|speech|audio|music|음악|\btts\b|sound|오디오/.test(s)) { return '음성/음악'; }
+    if (/\brag\b|search|검색|graph|그래프|memory|메모리|데이터|vector|벡터|\bdb\b|index|색인|knowledge/.test(s)) { return '데이터/검색'; }
+    if (/cod|코딩|\bide\b|\bcli\b|agent|에이전트|\bdev\b|compil|컴파일|plugin|플러그인|terminal|터미널|mcp|debug/.test(s)) { return '코딩'; }
+    return '기타';
   }
 
-  var CATS = ['All', 'Coding', 'Video & image', 'Design', 'Voice & audio', 'Data & search', 'Other'];
-  var counts = { 'All': TOOLS.length };
+  var CATS = ['전체', '코딩', '영상/이미지', '디자인', '음성/음악', '데이터/검색', '기타'];
+  var counts = { '전체': TOOLS.length };
   TOOLS.forEach(function (t) { t.cat = catOf(t); counts[t.cat] = (counts[t.cat] || 0) + 1; });
 
-  var state = { cat: 'All', q: '' };
+  var state = { cat: '전체', q: '' };
 
   var chipsWrap = document.getElementById('tools-chips');
   CATS.forEach(function (c) {
-    if (c !== 'All' && !counts[c]) { return; }
+    if (c !== '전체' && !counts[c]) { return; }
     var b = document.createElement('button');
-    b.className = 'tchip' + (c === 'All' ? ' on' : '');
+    b.className = 'tchip' + (c === '전체' ? ' on' : '');
     b.textContent = c + ' ' + (counts[c] || 0);
     b.setAttribute('data-cat', c);
     b.addEventListener('click', function () {
@@ -50,13 +50,13 @@
 
   function renderGrid() {
     var list = TOOLS.filter(function (t) {
-      if (state.cat !== 'All' && t.cat !== state.cat) { return false; }
+      if (state.cat !== '전체' && t.cat !== state.cat) { return false; }
       if (state.q && (t.name + ' ' + t.title).toLowerCase().indexOf(state.q) === -1) { return false; }
       return true;
     });
     var count = document.getElementById('tools-count');
     if (count) { count.textContent = list.length; }
-    if (!list.length) { grid.innerHTML = '<p class="tools-empty">No matching tools found.</p>'; return; }
+    if (!list.length) { grid.innerHTML = '<p class="tools-empty">검색 결과가 없어요.</p>'; return; }
 
     grid.innerHTML = list.map(function (t) {
       var logo = ghAvatar(t.owner);
