@@ -1,16 +1,17 @@
 import os
 import re
 import json
-import subprocess
-import tempfile
 import datetime
+import html
+import ipaddress
+from difflib import SequenceMatcher
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
+
 import yaml
 import requests
+from bs4 import BeautifulSoup
 from google import genai
 from google.genai import types
-
-MERMAID_VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "validate_mermaid.mjs")
-
 
 def fix_table_spacing(text):
     """kramdown (Jekyll) needs a blank line BEFORE and AFTER a markdown table.
@@ -66,155 +67,174 @@ def strip_fake_images(text):
                      if not (re.match(r'^\s*!\[', l) and fake.search(l)))
 
 
-def get_repo_images(github_url, limit=3):
-    """Pull REAL embeddable images (screenshots/diagrams) from a repo's README so the
-    model can use actual visuals instead of inventing URLs. Filters out badges/shields/
-    logos (mostly SVG) so we don't embed junk. Returns a list of image URLs (may be empty)."""
-    m = re.search(r'github\.com/([^/]+)/([^/#?]+)', github_url or "")
-    if not m:
-        return []
-    owner, repo = m.group(1), m.group(2).replace(".git", "")
-    readme = ""
-    for branch in ("main", "master"):
-        try:
-            r = requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md", timeout=15)
-            if r.status_code == 200 and r.text:
-                readme = r.text
-                break
-        except Exception:
-            continue
-    if not readme:
-        return []
-    urls = re.findall(r'!\[[^\]]*\]\((https?://[^)\s]+)', readme)
-    urls += re.findall(r'<img[^>]+src=["\'](https?://[^"\']+)', readme)
-    bad = ("shields.io", "badge", "discord", "twitter", "x.com", "slsa.dev", "deepwiki",
-           "codecov", "circleci", "travis", "buymeacoffee", "ko-fi", "star-history",
-           "gitcontributor", "contrib.rocks", "hitcount", "visitor")
-    out = []
-    for u in urls:
-        low = u.lower()
-        if any(b in low for b in bad):
-            continue
-        # screenshots/diagrams are raster; SVGs are almost always badges/logos here
-        if not re.search(r'\.(png|jpe?g|gif|webp)(\?|$)', low):
-            continue
-        u = u.replace("/blob/", "/raw/")
-        if u not in out:
-            out.append(u)
-        if len(out) >= limit:
-            break
-    return out
-
-
-# ---------------------------------------------------------------------------
-# Visual validation: never publish a diagram/chart that renders as an error box.
-# ---------------------------------------------------------------------------
-def _extract_blocks(content, lang):
-    """Return list of (whole_fence, inner_code) for ```<lang> fenced blocks."""
-    pat = re.compile(r"```" + lang + r"[ \t]*\n(.*?)```", re.S)
-    return [(m.group(0), m.group(1)) for m in pat.finditer(content)]
-
-
-def _validate_mermaid(codes):
-    """Validate mermaid strings with the node parser. Returns [(ok, error), ...].
-    If node/validator can't run, skip validation (treat as ok) so we never crash."""
-    if not codes:
-        return []
+def _usable_image_url(url):
+    """Verify that a collected source image is a public, non-trivial raster asset."""
+    if not _public_https_url(url):
+        return False
+    low = str(url).lower()
+    if any(token in low for token in (
+        "favicon", "avatar", "logo.", "/logo/", "badge", "sprite", "tracking",
+        "pixel", "spacer", "1x1",
+    )):
+        return False
+    if re.search(r"\.(?:svg|ico)(?:$|\?)", low):
+        return False
     try:
-        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tf:
-            json.dump([c.strip() for c in codes], tf)
-            path = tf.name
-        out = subprocess.run(["node", MERMAID_VALIDATOR, path],
-                             cwd=os.path.dirname(MERMAID_VALIDATOR),
-                             capture_output=True, text=True, timeout=150)
-        os.unlink(path)
-        res = json.loads(out.stdout)
-        return [(bool(r.get("ok", True)), r.get("error", "")) for r in res]
-    except Exception as e:
-        print(f"  (mermaid 검증 건너뜀: {e})")
-        return [(True, "")] * len(codes)
-
-
-def _repair_mermaid(client, code, error):
-    prompt = f"""아래 Mermaid 다이어그램에 문법 오류가 있다. 같은 의미를 유지하되 오류만 고쳐라.
-[오류] {error}
-[규칙]
-- erDiagram/classDiagram에서 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE 같은 예약어를 엔티티/클래스 이름으로 쓰지 마라. CODE_CLASS 처럼 접두사를 붙이거나 큰따옴표로 감싼다.
-- flowchart 노드 라벨은 큰따옴표로 감싸고 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.
-- 오직 고친 Mermaid 코드 본문만 출력하라 (``` 펜스·설명·따옴표 없이).
-
-[원본]
-{code.strip()}"""
-    fixed = generate_content_with_fallback(client, prompt)
-    if not fixed:
-        return None
-    fixed = re.sub(r"^```[a-zA-Z]*\n?", "", fixed.strip())
-    return re.sub(r"\n?```$", "", fixed).strip()
-
-
-def _validate_chartjs(code):
-    """A chartjs block must be a JSON object with type + data."""
-    try:
-        cfg = json.loads(code)
-        return isinstance(cfg, dict) and bool(cfg.get("type")) and bool(cfg.get("data"))
-    except Exception:
+        response = requests.get(
+            url,
+            timeout=HTTP_TIMEOUT,
+            headers={
+                "User-Agent": USER_AGENT,
+                "Accept": "image/avif,image/webp,image/png,image/jpeg,image/gif",
+            },
+            allow_redirects=True,
+            stream=True,
+        )
+        content_type = response.headers.get("content-type", "").lower()
+        content_length = response.headers.get("content-length")
+        ok = (
+            200 <= response.status_code < 400
+            and content_type.startswith("image/")
+            and "svg" not in content_type
+            and (not content_length or int(content_length) >= 20_000)
+        )
+        response.close()
+        return ok
+    except (requests.RequestException, TypeError, ValueError):
         return False
 
 
-# 2026 Pantone Color of the Year "Cloud Dancer" (#F0EEE9) theme for diagrams.
-# Cloud Dancer = airy off-white node fills; validated CVD-safe accents for borders/lines;
-# deep warm ink for text. Legible on both light and dark pages (nodes carry their own bg).
-MERMAID_THEME = (
-    '%%{init: {"theme":"base","themeVariables":{'
-    '"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926",'
-    '"secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926",'
-    '"tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926",'
-    '"lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9",'
-    '"noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578",'
-    '"clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%'
-)
+def _article_image_candidates(source):
+    """Collect declared share images and a few article-body images from one direct source."""
+    source_url = canonical_url(source.get("url"))
+    if direct_source_rejection_reason(source_url):
+        return []
+    try:
+        response = requests.get(
+            source_url,
+            timeout=HTTP_TIMEOUT,
+            headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"},
+            allow_redirects=True,
+        )
+        if response.status_code >= 400 or "html" not in response.headers.get("content-type", "").lower():
+            return []
+        soup = BeautifulSoup(response.text[:2_000_000], "html.parser")
+    except requests.RequestException:
+        return []
 
+    candidates = []
+    for selector, attr in (
+        ('meta[property="og:image:secure_url"]', "content"),
+        ('meta[property="og:image"]', "content"),
+        ('meta[name="twitter:image"]', "content"),
+        ('meta[name="twitter:image:src"]', "content"),
+        ('link[rel="image_src"]', "href"),
+    ):
+        for node in soup.select(selector):
+            value = node.get(attr)
+            if value:
+                candidates.append((urljoin(response.url, value), node.get("alt") or ""))
 
-def apply_mermaid_theme(content):
-    """Prepend the Cloud Dancer (2026 CotY) init directive to each mermaid diagram."""
-    def repl(m):
-        inner = m.group(1)
-        if "%%{init" in inner:                       # already themed
-            return m.group(0)
-        return "```mermaid\n" + MERMAID_THEME + "\n" + inner.strip("\n") + "\n```"
-    return re.sub(r"```mermaid[ \t]*\n(.*?)```", repl, content, flags=re.S)
+    for node in soup.select("article img, main img")[:8]:
+        value = node.get("src") or node.get("data-src") or node.get("data-lazy-src")
+        if value:
+            candidates.append((urljoin(response.url, value), node.get("alt") or ""))
 
-
-def fix_visuals(client, content):
-    """Validate every mermaid/chartjs block. Repair once; if still invalid, drop it —
-    so a broken visual never reaches the published post as a red 'Syntax error' box."""
-    # Mermaid
-    m_blocks = _extract_blocks(content, "mermaid")
-    if m_blocks:
-        for (whole, inner), (ok, err) in zip(m_blocks, _validate_mermaid([b for _, b in m_blocks])):
-            if ok:
-                continue
-            print(f"  ⚠️ mermaid 오류 → 복구 시도: {err[:70]}")
-            fixed = _repair_mermaid(client, inner, err)
-            if fixed and _validate_mermaid([fixed])[0][0]:
-                content = content.replace(whole, "```mermaid\n" + fixed + "\n```", 1)
-                print("     ✅ 복구 성공")
-            else:
-                content = content.replace(whole, "", 1)
-                print("     🗑️ 복구 실패 → 다이어그램 제거")
-    # Chart.js (JSON config)
-    for whole, inner in _extract_blocks(content, "chartjs"):
-        if _validate_chartjs(inner):
+    output = []
+    for url, alt in candidates:
+        normalized = canonical_url(url)
+        if not normalized or any(item["url"] == normalized for item in output):
             continue
-        print("  ⚠️ chartjs JSON 오류 → 제거")
-        content = content.replace(whole, "", 1)
+        output.append({
+            "url": normalized,
+            "alt": strip_emojis(str(alt or "")).strip(),
+        })
+    return output
+
+
+def collect_source_images(sources, limit=4):
+    """Collect real images declared by verified source pages. No image generation."""
+    images = []
+    seen = set()
+    ordered = sorted(
+        sources or [],
+        key=lambda source: 0 if source.get("tier") == "official" else 1,
+    )
+    for source in ordered:
+        per_source = 0
+        per_source_limit = 2 if source.get("tier") == "official" else 1
+        for candidate in _article_image_candidates(source):
+            if len(images) >= limit:
+                return images
+            image_url = candidate["url"]
+            if image_url in seen or not _usable_image_url(image_url):
+                continue
+            seen.add(image_url)
+            publisher = str(source.get("publisher") or source.get("name") or "원문 출처").strip()
+            images.append({
+                "path": image_url,
+                "alt": candidate["alt"] or f"{publisher} 원문에 게시된 AI 뉴스 이미지",
+                "caption": f"{publisher}가 원문과 함께 공개한 이미지입니다.",
+                "credit": publisher,
+                "source_url": canonical_url(source.get("url")),
+            })
+            per_source += 1
+            if per_source >= per_source_limit:
+                break
+    return images
+
+
+def _source_figure(image):
+    source_url = html.escape(str(image.get("source_url") or ""), quote=True)
+    credit = html.escape(str(image.get("credit") or "원문 출처"))
+    caption = html.escape(str(image.get("caption") or "원문에 게시된 이미지입니다."))
+    alt = html.escape(str(image.get("alt") or "AI 뉴스 원문 이미지"), quote=True)
+    path = html.escape(str(image.get("path") or ""), quote=True)
+    credit_html = (
+        f'<a href="{source_url}" target="_blank" rel="noopener noreferrer">출처: {credit}</a>'
+        if source_url else f"출처: {credit}"
+    )
+    return (
+        '<figure class="news-source-image">\n'
+        f'  <img src="{path}" alt="{alt}" loading="lazy" decoding="async">\n'
+        f"  <figcaption>{caption} {credit_html}</figcaption>\n"
+        "</figure>"
+    )
+
+
+def insert_source_images(content, images):
+    """Spread collected visuals through useful sections instead of making a gallery."""
+    targets = (
+        "## 왜 지금 다들 이 이야기를 할까?",
+        "## 그래서 우리에게 뭐가 달라질까?",
+        "## 직접 써보거나 지켜볼 포인트",
+    )
+    for target, image in zip(targets, images or []):
+        content = content.replace(target, f"{_source_figure(image)}\n\n{target}", 1)
     return content
+
 
 # Configuration
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
 # `cd automation && python daily_trend_bot.py` (CI) or `python automation/daily_trend_bot.py`.
 POSTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "_posts")
 FALLBACK_THUMBNAIL = "/assets/img/logo.png"
+NEWS_WINDOW_HOURS = max(24, min(168, int(os.environ.get("AI_NEWS_WINDOW_HOURS", "72"))))
+MAX_NEWS_AGE_DAYS = max(2, min(14, int(os.environ.get("AI_NEWS_MAX_AGE_DAYS", "7"))))
+HTTP_TIMEOUT = max(5, min(30, int(os.environ.get("AI_NEWS_HTTP_TIMEOUT", "12"))))
+USER_AGENT = "Mozilla/5.0 (compatible; OPSOAI-NewsBot/2.0; +https://www.opsoai.com/)"
+TRACKING_QUERY_KEYS = {
+    "fbclid", "gclid", "mc_cid", "mc_eid", "ref", "ref_src", "source",
+    "utm_campaign", "utm_content", "utm_medium", "utm_source", "utm_term",
+}
+SEARCH_HOSTS = {
+    "google.com", "www.google.com", "news.google.com", "bing.com", "www.bing.com",
+    "search.naver.com", "m.search.naver.com", "search.daum.net",
+}
+GENERIC_SOURCE_PATHS = {
+    "", "/", "/blog", "/news", "/search", "/articles", "/resources",
+    "/docs", "/documentation",
+}
 # Preview models first (best quality), then stable aliases as a safety net so the
 # pipeline keeps working even after a preview model is retired.
 FALLBACK_MODELS = [
@@ -223,6 +243,118 @@ FALLBACK_MODELS = [
     "gemini-3.1-flash-lite-preview",
     "gemini-flash-latest",
 ]
+
+
+def kst_now():
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+
+
+def canonical_url(value):
+    """Normalize a source URL while preserving meaningful query parameters."""
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    try:
+        parsed = urlparse(raw)
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
+            return ""
+        host = parsed.hostname.lower().rstrip(".")
+        port = f":{parsed.port}" if parsed.port else ""
+        query = urlencode([
+            (key, val)
+            for key, val in parse_qsl(parsed.query, keep_blank_values=True)
+            if key.lower() not in TRACKING_QUERY_KEYS
+        ])
+        path = re.sub(r"/+", "/", parsed.path or "/")
+        if path != "/":
+            path = path.rstrip("/")
+        return urlunparse(("https", host + port, path, "", query, ""))
+    except (TypeError, ValueError):
+        return ""
+
+
+def _public_https_url(value):
+    """Reject private/literal network targets before model-supplied URLs are fetched."""
+    normalized = canonical_url(value)
+    if not normalized:
+        return False
+    parsed = urlparse(normalized)
+    if parsed.scheme != "https":
+        return False
+    host = (parsed.hostname or "").lower()
+    if host in {"localhost", "localhost.localdomain"} or host.endswith(".local"):
+        return False
+    try:
+        address = ipaddress.ip_address(host)
+        if not address.is_global:
+            return False
+    except ValueError:
+        pass
+    return True
+
+
+def direct_source_rejection_reason(value):
+    """Only accept a specific article, announcement, paper, filing, or documentation page."""
+    normalized = canonical_url(value)
+    if not normalized or not _public_https_url(normalized):
+        return "유효한 공개 HTTPS URL이 아님"
+    parsed = urlparse(normalized)
+    host = (parsed.hostname or "").lower()
+    if host in SEARCH_HOSTS:
+        return "검색 결과 URL"
+    path = (parsed.path or "/").lower().rstrip("/") or "/"
+    if path in GENERIC_SOURCE_PATHS:
+        return "홈페이지 또는 섹션 URL"
+    if re.search(r"\.(?:png|jpe?g|gif|webp|svg|pdf|zip)(?:$|\?)", path):
+        return "기사/발표 원문이 아닌 파일 URL"
+    return None
+
+
+def parse_iso_date(value):
+    try:
+        return datetime.date.fromisoformat(str(value or "")[:10])
+    except ValueError:
+        return None
+
+
+def recent_publication(value, *, now=None, max_days=MAX_NEWS_AGE_DAYS):
+    now = now or kst_now()
+    published = parse_iso_date(value)
+    if not published:
+        return False
+    age = (now.date() - published).days
+    return -1 <= age <= max_days
+
+
+def probe_source(url):
+    """Best-effort HTTP verification without downloading a full article."""
+    normalized = canonical_url(url)
+    if direct_source_rejection_reason(normalized):
+        return {"url": normalized, "status": None, "reachable": False}
+    try:
+        response = requests.get(
+            normalized,
+            timeout=HTTP_TIMEOUT,
+            headers={
+                "User-Agent": USER_AGENT,
+                "Accept": "text/html,application/xhtml+xml",
+            },
+            allow_redirects=True,
+            stream=True,
+        )
+        status = int(response.status_code)
+        final_url = canonical_url(response.url)
+        content_type = response.headers.get("content-type", "").lower()
+        response.close()
+        return {
+            "url": final_url if not direct_source_rejection_reason(final_url) else normalized,
+            "status": status,
+            "reachable": 200 <= status < 400 and (
+                not content_type or "html" in content_type or "xml" in content_type
+            ),
+        }
+    except requests.RequestException:
+        return {"url": normalized, "status": None, "reachable": False}
 
 def get_gemini_client():
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -283,32 +415,52 @@ def generate_content_with_fallback(client, contents, response_schema=None, tools
 
 def find_trending_topic(client):
     """
-    Uses Gemini with Google Search to find today's trending AI topics.
-    Returns a list of dictionaries with 'topic_name', 'github_url', 'description', 'search_query'.
+    Uses Gemini with Google Search to find consequential, newly published AI news.
+    GitHub Trending and repository popularity are explicitly excluded as topic sources.
     """
-    print("Searching for trending AI topics from GitHub Trending (Daily)...")
-    
-    prompt = """
-    Target: https://github.com/trending?since=daily
-    Task: Find the **Top 15** most "hot" and trending AI open source projects from `github.com/trending?since=daily` (Daily Trending).
-    
-    Criteria:
-    - Must be an AI/ML related project.
-    - Must be a repository that is currently trending (high star velocity).
-    - Favor projects that are NEW or recently viral over established ones (like pytorch/transformers).
-    
-    Exclude:
-    - Non-AI projects.
-    - Collections/Lists (awesome-lists) unless they are extremely viral tools.
-    
-    Return a JSON LIST of objects (Array), where each object contains:
-    - topic_name: The name of the project/tool.
-    - github_url: The URL of the GitHub repository.
-    - description: A brief 1-sentence description.
-    - search_query: A specific search query to get detailed info about this topic.
+    now = kst_now()
+    history = recent_news_history()
+    print(f"최근 {NEWS_WINDOW_HOURS}시간의 글로벌 AI 뉴스를 검색합니다...")
+    prompt = f"""
+You are the real-time news desk for a global AI publication.
+The current time is {now.isoformat(timespec='minutes')}.
+Use Google Search to find and rank 10-15 consequential AI stories that were
+actually announced, released, published, filed, or reported in the last
+{NEWS_WINDOW_HOURS} hours.
 
-    IMPORTANT: Return ONLY the JSON LIST, starting with [ and ending with ]. Do not add markdown formatting like ```json.
-    """
+[INCLUDE]
+- New AI models, product releases, material feature updates, important research,
+  regulation/policy, security incidents, pricing/availability changes, or major
+  business decisions with concrete impact.
+- Stories useful to developers, founders, operators, creators, companies, or
+  everyday AI users globally.
+- Prefer an official announcement, official documentation, paper, filing, or
+  incident notice as the primary source. Trusted original reporting is acceptable
+  when no official source exists.
+
+[EXCLUDE]
+- GitHub Trending rankings, star counts, or a repository profile without a broader
+  news event.
+- Rumors, forecasts, recycled explainers, vague opinion pieces, and announcements
+  older than {MAX_NEWS_AGE_DAYS} days.
+- Search result URLs, homepages, category pages, or URLs with no printed date.
+- Marketing partnerships that do not materially change a product or decision.
+
+[OUTPUT RULES]
+- Rank candidates by freshness, direct-source strength, practical impact, novelty,
+  and broad interest. Famous company names alone are not a reason to rank high.
+- source_url must be one specific HTTPS article/announcement page that directly
+  supports the event.
+- published_at must be the date printed by that source in YYYY-MM-DD. Never assume
+  today's date.
+- source_tier is official or trusted.
+- event_status is announced, released, available, research, policy, or incident.
+- Write headline, summary, why_it_matters, and search_query in English.
+- trend_score is an integer from 0 to 100.
+
+[RECENTLY PUBLISHED BY OPSOAI — do not repeat the same event]
+{json.dumps(history[:50], ensure_ascii=False)}
+"""
     
     response_schema = {
         "type": "ARRAY",
@@ -316,11 +468,23 @@ def find_trending_topic(client):
             "type": "OBJECT",
             "properties": {
                 "topic_name": {"type": "STRING"},
-                "github_url": {"type": "STRING"},
-                "description": {"type": "STRING"},
-                "search_query": {"type": "STRING"}
+                "headline": {"type": "STRING"},
+                "summary": {"type": "STRING"},
+                "why_it_matters": {"type": "STRING"},
+                "event_status": {"type": "STRING"},
+                "published_at": {"type": "STRING"},
+                "source_name": {"type": "STRING"},
+                "source_url": {"type": "STRING"},
+                "source_tier": {"type": "STRING"},
+                "entities": {"type": "ARRAY", "items": {"type": "STRING"}},
+                "search_query": {"type": "STRING"},
+                "trend_score": {"type": "NUMBER"}
             },
-            "required": ["topic_name", "github_url", "description", "search_query"]
+            "required": [
+                "topic_name", "headline", "summary", "why_it_matters",
+                "event_status", "published_at", "source_name", "source_url",
+                "source_tier", "entities", "search_query", "trend_score"
+            ]
         }
     }
     
@@ -339,148 +503,388 @@ def find_trending_topic(client):
         import json
         try:
             data = json.loads(response_text)
-            print(f"Identified {len(data)} potential trends.")
+            cleaned = []
+            seen_urls = set()
             for item in data:
-                print(f"- {item.get('topic_name')}: {item.get('description')}")
-            return data
+                source_url = canonical_url(item.get("source_url"))
+                tier = str(item.get("source_tier") or "").strip().lower()
+                if direct_source_rejection_reason(source_url):
+                    continue
+                if tier not in {"official", "trusted"}:
+                    continue
+                if not recent_publication(item.get("published_at"), now=now):
+                    continue
+                if source_url in seen_urls:
+                    continue
+                item["source_url"] = source_url
+                item["source_tier"] = tier
+                item["entities"] = list(dict.fromkeys(
+                    str(value).strip()
+                    for value in (item.get("entities") or [])
+                    if str(value).strip()
+                ))[:10]
+                item["trend_score"] = max(0, min(100, int(item.get("trend_score") or 0)))
+                if not item.get("topic_name") or not item.get("headline"):
+                    continue
+                if check_duplication(item, history=history):
+                    print(f"  중복 후보 제외: {item['headline']}")
+                    continue
+                seen_urls.add(source_url)
+                cleaned.append(item)
+            cleaned.sort(key=lambda item: item["trend_score"], reverse=True)
+            print(f"검증 가능한 최신 후보 {len(cleaned)}건을 찾았습니다.")
+            for item in cleaned:
+                print(f"- [{item['trend_score']:02d}] {item['headline']} ({item['source_name']})")
+            return cleaned
         except Exception as e:
             print(f"Error parsing trend data: {e}")
     return []
 
-def check_duplication(github_url, topic_name):
-    """
-    Checks if a post with this GitHub URL or topic name already exists.
-    1. Scans file content for the github_url.
-    2. Fallback: Scans filenames for the topic name.
-    """
-    if not os.path.exists(POSTS_DIR):
-        return False
-        
-    # 1. URL-based check (Primary)
-    if github_url:
-        clean_url = github_url.strip().rstrip('/')
-        print(f"Checking for existing posts with URL: {clean_url}")
-        
-        for filename in os.listdir(POSTS_DIR):
-            if filename.endswith(".md"):
-                filepath = os.path.join(POSTS_DIR, filename)
-                try:
-                    with open(filepath, "r", encoding="utf-8") as f:
-                        content = f.read()
-                        if clean_url in content:
-                            print(f"Skipping: Post already exists for URL {clean_url} ({filename})")
-                            return True
-                except Exception as e:
-                    print(f"Error reading {filename}: {e}")
+def _front_matter(filepath):
+    try:
+        with open(filepath, encoding="utf-8") as handle:
+            raw = handle.read(120_000)
+        if not raw.startswith("---"):
+            return {}
+        return yaml.safe_load(raw.split("---", 2)[1]) or {}
+    except (OSError, ValueError, TypeError, yaml.YAMLError):
+        return {}
 
-    # 2. Title-based check (Fallback for old posts)
-    topic_clean = topic_name.lower().replace(" ", "")
-    print(f"Checking for existing posts with topic: {topic_name} (Clean: {topic_clean})")
-    
-    for filename in os.listdir(POSTS_DIR):
-        if filename.endswith(".md"):
-            # Filenames are usually YYYY-MM-DD-title.md
-            if topic_clean in filename.lower().replace("-", ""):
-                print(f"Skipping: Post likely exists for topic {topic_name} ({filename})")
-                return True
-                
+
+def recent_news_history(days=45):
+    """Read only news metadata; legacy GitHub-project posts do not block new stories."""
+    history = []
+    cutoff = kst_now().date() - datetime.timedelta(days=days)
+    if not os.path.isdir(POSTS_DIR):
+        return history
+    for filename in sorted(os.listdir(POSTS_DIR), reverse=True):
+        if not filename.endswith(".md"):
+            continue
+        match = re.match(r"(\d{4}-\d{2}-\d{2})-", filename)
+        if match and parse_iso_date(match.group(1)) and parse_iso_date(match.group(1)) < cutoff:
+            continue
+        data = _front_matter(os.path.join(POSTS_DIR, filename))
+        primary = canonical_url(data.get("news_source_url"))
+        citations = data.get("source_citations") or []
+        urls = [primary] if primary else []
+        urls += [
+            canonical_url(item.get("url"))
+            for item in citations
+            if isinstance(item, dict) and item.get("url")
+        ]
+        if not urls and not data.get("news_headline"):
+            continue
+        history.append({
+            "title": str(data.get("title") or ""),
+            "headline": str(data.get("news_headline") or ""),
+            "publishedAt": str(data.get("news_published_at") or ""),
+            "sourceUrls": list(dict.fromkeys(url for url in urls if url)),
+            "entities": list(data.get("entities") or []),
+        })
+    return history[:100]
+
+
+def _identity(value):
+    return re.sub(r"[^0-9a-z가-힣]+", "", str(value or "").casefold())
+
+
+def check_duplication(candidate, *, history=None, source_urls=None):
+    """Block the same event, without blocking future news about the same company."""
+    history = history if history is not None else recent_news_history()
+    urls = {
+        canonical_url(url)
+        for url in ([candidate.get("source_url")] + list(source_urls or []))
+        if canonical_url(url)
+    }
+    headline = _identity(candidate.get("headline"))
+    event_date = str(candidate.get("published_at") or "")[:10]
+    entities = {_identity(value) for value in candidate.get("entities") or [] if _identity(value)}
+    for item in history:
+        if urls & set(item.get("sourceUrls") or []):
+            return True
+        old_headline = _identity(item.get("headline"))
+        old_entities = {_identity(value) for value in item.get("entities") or [] if _identity(value)}
+        same_date = event_date and event_date == str(item.get("publishedAt") or "")[:10]
+        if (
+            headline and old_headline
+            and SequenceMatcher(None, headline, old_headline).ratio() >= 0.78
+            and (same_date or bool(entities & old_entities))
+        ):
+            return True
     return False
 
-def generate_blog_post(client, topic_data):
-    """Generates a detailed blog post about the topic."""
-    
-    topic_name = topic_data['topic_name']
-    github_url = topic_data.get('github_url', '')
-    search_query = topic_data.get('search_query', topic_name + " AI github features technology details")
-    
-    print(f"Generating content for: {topic_name} (URL: {github_url}) using query: {search_query}")
-    
-    # Load prompt from config
-    config_path = os.path.join(os.path.dirname(__file__), 'prompt_config.json')
-    import json
+
+EVIDENCE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "verified": {"type": "BOOLEAN"},
+        "reason": {"type": "STRING"},
+        "event_status": {"type": "STRING"},
+        "published_at": {"type": "STRING"},
+        "sources": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "url": {"type": "STRING"},
+                    "title": {"type": "STRING"},
+                    "publisher": {"type": "STRING"},
+                    "published_at": {"type": "STRING"},
+                    "tier": {"type": "STRING"}
+                },
+                "required": ["url", "title", "publisher", "published_at", "tier"]
+            }
+        },
+        "facts": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "text": {"type": "STRING"},
+                    "source_urls": {"type": "ARRAY", "items": {"type": "STRING"}}
+                },
+                "required": ["text", "source_urls"]
+            }
+        },
+        "unknowns": {"type": "ARRAY", "items": {"type": "STRING"}}
+    },
+    "required": [
+        "verified", "reason", "event_status", "published_at",
+        "sources", "facts", "unknowns"
+    ]
+}
+
+
+def verify_news_candidate(client, candidate):
+    """Re-research the chosen story and build a source-locked fact pack."""
+    now = kst_now()
+    prompt = f"""
+You are OPSOAI's independent AI-news fact checker.
+The current time is {now.isoformat(timespec='minutes')}.
+Use Google Search to independently verify this candidate:
+
+{json.dumps(candidate, ensure_ascii=False)}
+
+[RULES]
+- verified=true only when the concrete event occurred and is no older than
+  {MAX_NEWS_AGE_DAYS} days.
+- Include 2-5 direct sources. At least one must be an official announcement,
+  documentation page, paper, filing, security notice, or regulator page.
+- The other source should be independent trusted original reporting when available.
+- Search result pages, homepages, category pages, image files, and social snippets
+  are not sources.
+- Use the publication date printed by each source in YYYY-MM-DD. Never infer today.
+- Separate announced/planned from released/available. Preserve limited preview,
+  region, price, benchmark, evaluation, and security-incident conditions.
+- facts must contain 4-10 atomic, directly supported facts. Every fact lists the
+  exact source URLs that support it.
+- Put uncertain or conflicting claims in unknowns, never in facts.
+- Return source tier as official or trusted. Write factual fields in English.
+"""
+    response_text = generate_content_with_fallback(
+        client,
+        prompt,
+        response_schema=EVIDENCE_SCHEMA,
+        tools=[types.Tool(google_search=types.GoogleSearch())],
+        thinking_level="HIGH",
+    )
+    if not response_text:
+        return None
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-            prompt_template = config['daily_trend_bot']['system_prompt']
-    except Exception as e:
-        print(f"Error loading prompt_config.json: {e}. Using fallback prompt.")
-        prompt_template = """
-        Write a blog post about {topic_name}.
-        Repository: {github_url}
-        """
+        raw = json.loads(response_text)
+    except (TypeError, ValueError):
+        return None
+    if not raw.get("verified") or not recent_publication(raw.get("published_at"), now=now):
+        print(f"  팩트체크 탈락: {raw.get('reason') or '최신 사건으로 검증되지 않음'}")
+        return None
 
-    prompt_text = prompt_template.replace(
-        "{topic_name}", topic_name
-    ).replace(
-        "{github_url}", github_url
-    )
+    sources = []
+    source_map = {}
+    for source in raw.get("sources") or []:
+        url = canonical_url(source.get("url"))
+        tier = str(source.get("tier") or "").strip().lower()
+        published = str(source.get("published_at") or "")[:10]
+        if (
+            direct_source_rejection_reason(url)
+            or tier not in {"official", "trusted"}
+            or not recent_publication(published, now=now)
+            or url in source_map
+        ):
+            continue
+        probe = probe_source(url)
+        normalized = {
+            "url": probe["url"] or url,
+            "title": str(source.get("title") or "").strip(),
+            "publisher": str(source.get("publisher") or "").strip(),
+            "published_at": published,
+            "tier": tier,
+            "reachable": bool(probe["reachable"]),
+            "http_status": probe["status"],
+        }
+        source_map[url] = normalized
+        source_map[normalized["url"]] = normalized
+        sources.append(normalized)
 
-    # ROBUSTNESS: the old weekly prompt_refiner.py once rewrote prompt_config.json and
-    # dropped the {topic_name}/{github_url} placeholders (2026-05-31), so the topic was
-    # never injected and posts drifted off-topic. The refiner is now removed, but we keep
-    # this safeguard: always prepend an explicit, unmissable topic block so generation is
-    # locked to the selected topic regardless of the config's state.
-    # Real images from the repo README (screenshots/diagrams), so the model uses actual
-    # visuals instead of inventing placeholder URLs.
-    repo_images = get_repo_images(github_url)
-    if repo_images:
-        img_note = ("사용 가능한 '실제' 이미지 URL (내용과 관련 있을 때만 본문에 ![간단한 설명](URL) 형식으로 1~2개 삽입):\n"
-                    + "\n".join(f"  - {u}" for u in repo_images))
-    else:
-        img_note = "이 저장소에는 쓸 만한 실제 이미지가 없다. 이미지는 넣지 말고 Mermaid 다이어그램과 표로 시각화하라."
+    unique_sources = []
+    seen = set()
+    for source in sources:
+        if source["url"] not in seen:
+            seen.add(source["url"])
+            unique_sources.append(source)
+    sources = unique_sources
+    allowed_urls = {source["url"] for source in sources}
+    facts = []
+    for fact in raw.get("facts") or []:
+        urls = []
+        for value in fact.get("source_urls") or []:
+            normalized = canonical_url(value)
+            mapped = source_map.get(normalized)
+            final_url = mapped["url"] if mapped else normalized
+            if final_url in allowed_urls:
+                urls.append(final_url)
+        text = str(fact.get("text") or "").strip()
+        if text and urls:
+            facts.append({"text": text, "source_urls": list(dict.fromkeys(urls))})
 
-    visuals_directive = (
-        "[시각 자료 매우 적극 활용 — 그림을 넉넉히, 글 전반에 고르게 배치]\n"
-        "1. Mermaid 다이어그램(도형): 6~8개를, 내용에 맞게 '다양한 종류'를 섞어 넣는다. 한 종류만 반복하지 마라.\n"
-        "   - 파이프라인/구조 → flowchart TD 또는 LR\n"
-        "   - 컴포넌트 상호작용/요청 흐름 → sequenceDiagram\n"
-        "   - 데이터 모델/스키마 관계 → erDiagram\n"
-        "   - 상태 전이/생명주기 → stateDiagram-v2\n"
-        "   - 클래스/모듈 구조 → classDiagram, 구성비 → pie\n"
-        "   [Mermaid 문법 안전 규칙 — 반드시 지킬 것]\n"
-        "   - erDiagram/classDiagram의 엔티티·클래스 이름에 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE, GROUP 같은 예약어를 쓰지 마라. "
-        "CODE_CLASS, CODE_FUNC 처럼 접두사를 붙이거나 이름을 바꾼다.\n"
-        "   - flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.\n"
-        "   - 각 다이어그램은 단순하고 문법 오류가 없게 만든다.\n"
-        "2. Chart.js(그래프): 벤치마크·수치 비교(토큰 절감량, 속도, 언어 지원 수 등)는 ```chartjs 코드블록에 '유효한 JSON' Chart.js 설정으로 1~2개 넣어라. 예시:\n"
-        "   ```chartjs\n"
-        "   {\"type\":\"bar\",\"data\":{\"labels\":[\"기존 방식\",\"codebase-memory-mcp\"],\"datasets\":[{\"label\":\"토큰 사용량\",\"data\":[412000,3400]}]}}\n"
-        "   ```\n"
-        "   반드시 순수 JSON(주석·후행쉼표·홑따옴표 금지)만 넣는다.\n"
-        "3. 도표(표): 비교·트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
-        "4. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
-        "5. 링크: 모든 링크는 [보이는 텍스트](URL) 형태의 클릭 가능한 마크다운으로 쓴다. 맨 URL 노출 금지.\n"
-        "6. 이모지: 제목·소제목·본문에 이모지를 쓰지 마라.\n"
-        f"{img_note}\n\n"
-    )
+    errors = []
+    if len(sources) < 2:
+        errors.append("직접 원문 2개 미만")
+    if not any(source["tier"] == "official" for source in sources):
+        errors.append("공식 원문 없음")
+    if not any(source["reachable"] for source in sources):
+        errors.append("HTTP로 확인된 원문 없음")
+    if len({urlparse(source["url"]).hostname for source in sources}) < 2:
+        errors.append("독립된 두 출처가 아님")
+    if len(facts) < 4:
+        errors.append("직접 근거가 연결된 사실 4개 미만")
+    if errors:
+        print("  팩트체크 출고 기준 미달: " + " / ".join(errors))
+        return None
+    return {
+        "verified": True,
+        "reason": str(raw.get("reason") or "").strip(),
+        "event_status": str(raw.get("event_status") or candidate.get("event_status") or "").strip(),
+        "published_at": str(raw.get("published_at") or candidate.get("published_at"))[:10],
+        "sources": sources,
+        "facts": facts,
+        "unknowns": [
+            str(value).strip() for value in (raw.get("unknowns") or []) if str(value).strip()
+        ],
+    }
 
-    aeo_directive = (
-        "[검색·AI 답변 최적화(SEO/AEO) — 중요]\n"
-        "- 도입부에 이 글의 핵심을 3줄로 요약한 'TL;DR(한 줄 요약)'을 넣어, 검색·AI가 바로 인용할 수 있게 한다.\n"
-        "- 본문 소제목은 사람들이 실제로 검색·질문하는 표현(예: '~란 무엇인가', '~와 무엇이 다른가', '어떻게 설치하나')으로 자연스럽게 녹인다.\n"
-        "- 반드시 'faq' 필드에 사람들이 실제로 궁금해할 질문 4~6개와, 각 질문당 2~4문장의 명확하고 사실 기반 답변을 담아라. "
-        "질문은 구체적이고(예: '토큰을 얼마나 절감하나?', 'MCP를 지원하지 않는 에디터에서도 쓸 수 있나?'), 답변은 검색으로 확인한 정확한 정보로 쓴다.\n\n"
-    )
+NEWS_HEADINGS = (
+    "## 무슨 일이 벌어진 걸까?",
+    "## 왜 지금 다들 이 이야기를 할까?",
+    "## 그래서 우리에게 뭐가 달라질까?",
+    "## 직접 써보거나 지켜볼 포인트",
+    "## 아직은 선을 그어야 할 부분",
+)
 
-    topic_header = (
-        "[작성 대상 — 반드시 아래 주제로만 작성. 다른 기술로 절대 새지 말 것]\n"
-        f"- 프로젝트명: {topic_name}\n"
-        f"- GitHub 저장소: {github_url}\n"
-        f"- 검색 쿼리: {search_query}\n\n"
-        + visuals_directive
-        + aeo_directive
-    )
-    prompt_text = topic_header + prompt_text
 
+def _load_news_prompt():
+    config_path = os.path.join(os.path.dirname(__file__), "prompt_config.json")
+    try:
+        with open(config_path, encoding="utf-8") as handle:
+            config = json.load(handle)
+        block = config.get("daily_ai_news_bot") or config.get("daily_trend_bot") or {}
+        return str(block["system_prompt"])
+    except (OSError, ValueError, TypeError, KeyError):
+        return (
+            "검증된 직접 원문만 바탕으로 최신 AI 뉴스를 쉽고 재미있게 설명하는 "
+            "한국어 파워블로거다. 사실과 해석을 분리하고 과장하지 않는다."
+        )
+
+
+def _normalize_news_markdown(content):
+    text = str(content or "").replace("\\n", "\n").strip()
+    # Remove any model-invented image before heading normalization; consuming the
+    # whitespace afterwards at a later stage can glue the first H2 to the intro.
+    text = re.sub(r"!\[[^\]]*\]\([^)]+\)", "", text)
+    for heading in NEWS_HEADINGS:
+        text = re.sub(
+            rf"\s*{re.escape(heading)}\s*",
+            f"\n\n{heading}\n\n",
+            text,
+            count=1,
+        )
+    text = re.sub(r"(?m)^#(?!#)\s+.*(?:\n|$)", "", text)
+    text = strip_fake_images(strip_emojis(text))
+    text = linkify_bare_urls(text)
+    return fix_table_spacing(re.sub(r"\n{3,}", "\n\n", text).strip())
+
+
+def _article_errors(post, evidence):
+    content = post.get("content") or ""
+    errors = []
+    positions = [content.find(heading) for heading in NEWS_HEADINGS]
+    if any(position < 0 for position in positions):
+        errors.append("필수 뉴스 섹션 누락")
+    elif positions != sorted(positions):
+        errors.append("뉴스 섹션 순서 오류")
+    if len(re.sub(r"\s+", "", content)) < 1800:
+        errors.append("본문이 너무 짧음")
+    allowed = {canonical_url(source["url"]) for source in evidence["sources"]}
+    linked = {
+        canonical_url(url)
+        for url in re.findall(r"\]\((https?://[^)\s]+)", content)
+    }
+    unsupported = sorted(url for url in linked if url and url not in allowed)
+    if unsupported:
+        errors.append("검증 원문 밖 링크 포함: " + ", ".join(unsupported[:3]))
+    if re.search(r"```(?:mermaid|chartjs)", content):
+        errors.append("뉴스 글에 불필요한 생성형 도표 포함")
+    return errors
+
+
+def generate_blog_post(client, topic_data, evidence):
+    """Write one fact-locked Korean AI news feature in a lively blogger voice."""
+    print(f"뉴스 글 작성: {topic_data['headline']}")
+    prompt_text = f"""
+{_load_news_prompt()}
+
+[선정된 최신 AI 뉴스]
+{json.dumps(topic_data, ensure_ascii=False)}
+
+[재검증된 직접 원문과 사실 — 이것만 사실 근거로 사용]
+{json.dumps(evidence, ensure_ascii=False)}
+
+[출고 규칙]
+- 모든 독자용 필드는 자연스러운 한국어로 쓴다. 회사명, 제품명, 모델명은
+  원문 표기를 유지한다.
+- facts에 있는 내용만 사실로 쓴다. unknowns는 모르는 사실 또는 한계로 명시한다.
+- 수치, 가격, 날짜, 출시 범위, 프리뷰/지역/평가 조건을 절대 생략하거나 확대하지 않는다.
+- 사실을 말한 문장 바로 옆에 [공식 발표 또는 매체명](검증된 URL)을 붙인다.
+  evidence.sources에 없는 URL은 절대 만들지 않는다.
+- 첫 두 문장은 독자가 "그래서 내게 무슨 의미인데?"를 바로 알게 한다.
+- 말투는 똑똑한 친구에게 설명하는 인기 파워블로거처럼 친근하고 리듬감 있게 쓴다.
+  짧은 문장, 자연스러운 질문, 구체적인 예시를 섞되 억지 유행어나 호들갑은 금지한다.
+- 보도자료를 번역한 듯한 문장, 교과서식 정의, 반복 요약, 의미 없는 전망,
+  장황한 역사 설명은 넣지 않는다.
+- 제목은 검색할 회사/제품명과 실제 변화를 앞쪽에 넣고, 사람이 누르고 싶을 만큼
+  구체적으로 쓴다. 낚시성 표현, 이모지, 느낌표 도배는 금지한다.
+- description은 검색 결과용 70~160자, summary는 2~3문장이다.
+- 본문은 H1 없이 2,800~4,500자 정도로 쓴다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
+  1. 무슨 일이 벌어진 걸까?
+  2. 왜 지금 다들 이 이야기를 할까?
+  3. 그래서 우리에게 뭐가 달라질까?
+  4. 직접 써보거나 지켜볼 포인트
+  5. 아직은 선을 그어야 할 부분
+- 각 섹션 첫 문장은 그 질문에 바로 답해야 한다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
+- 이미지, Mermaid, Chart.js, 코드 블록은 넣지 않는다. 검증한 원문 이미지는 코드가 자동 배치한다.
+- faq는 실제 검색 질문 3~4개와 각각 2~4문장의 직접 답변으로 만든다.
+- tags는 5~10개, entities는 원문 표기 3~10개다.
+- title_english는 파일명에 쓸 간결한 영문 제목이며 사실을 과장하지 않는다.
+"""
     response_schema = {
         "type": "OBJECT",
         "properties": {
             "title_korean": {"type": "STRING"},
             "title_english": {"type": "STRING"},
+            "description": {"type": "STRING"},
             "summary": {"type": "STRING"},
             "content": {"type": "STRING"},
-            "reference_links": {"type": "ARRAY", "items": {"type": "STRING"}},
-            # AEO: concise Q&A that answer engines (ChatGPT/Claude/Gemini/Perplexity) can lift
+            "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
+            "entities": {"type": "ARRAY", "items": {"type": "STRING"}},
             "faq": {
                 "type": "ARRAY",
                 "items": {
@@ -493,204 +897,183 @@ def generate_blog_post(client, topic_data):
                 },
             },
         },
-        "required": ["title_korean", "title_english", "summary", "content"]
+        "required": [
+            "title_korean", "title_english", "description", "summary",
+            "content", "tags", "entities", "faq"
+        ],
     }
-
-    tools = [types.Tool(google_search=types.GoogleSearch())]
-    
-    # Generation task: Use HIGH thinking for quality
     response_text = generate_content_with_fallback(
-        client, 
-        prompt_text, 
-        response_schema=response_schema, 
-        tools=tools, 
-        thinking_level="HIGH"
+        client,
+        prompt_text,
+        response_schema=response_schema,
+        tools=None,
+        thinking_level="HIGH",
     )
-    
-    if response_text:
-        import json
-        try:
-            data = json.loads(response_text)
-            data['github_url'] = github_url
-            data['content'] = fix_visuals(client, data.get('content', ''))   # validate diagrams/charts
-            data['content'] = apply_mermaid_theme(data['content'])            # Cloud Dancer (2026 CotY) theme
-            return data
-        except Exception as e:
-            print(f"Error parsing blog post JSON: {e}")
-    return None
-
-def fetch_project_meta(github_url):
-    """Pull project facts from GitHub (stars, forks, primary language, languages, file count,
-    size, license, topics, last-updated) + best-effort LOC. Rendered as a project card."""
-    m = re.search(r"github\.com/([^/]+)/([^/#?]+)", github_url or "")
-    if not m:
-        return {}
-    owner = m.group(1)
-    repo = m.group(2).replace(".git", "").split("?")[0].split("#")[0]
-    headers = {"Accept": "application/vnd.github+json"}
-    tok = os.environ.get("GITHUB_TOKEN")
-    if tok:
-        headers["Authorization"] = f"Bearer {tok}"
-    meta = {}
-    branch = "main"
+    if not response_text:
+        return None
     try:
-        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}", headers=headers, timeout=20)
-        if r.status_code == 200:
-            d = r.json()
-            branch = d.get("default_branch") or "main"
-            if d.get("stargazers_count") is not None:
-                meta["stars"] = d["stargazers_count"]
-            if d.get("forks_count") is not None:
-                meta["forks"] = d["forks_count"]
-            if d.get("language"):
-                meta["language"] = d["language"]
-            lic = (d.get("license") or {}).get("spdx_id")
-            if lic and lic != "NOASSERTION":
-                meta["license"] = lic
-            if d.get("size"):
-                meta["size_kb"] = d["size"]
-            if d.get("pushed_at"):
-                meta["updated"] = d["pushed_at"][:10]
-            if d.get("created_at"):
-                meta["created"] = d["created_at"][:10]
-            if d.get("topics"):
-                meta["topics"] = d["topics"][:6]
-    except Exception as e:
-        print(f"  project meta (repo) fail: {e}")
-    try:
-        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}/languages", headers=headers, timeout=15)
-        if r.status_code == 200:
-            langs = sorted(r.json().items(), key=lambda kv: kv[1], reverse=True)
-            if langs:
-                meta["languages"] = [k for k, _ in langs[:5]]
-    except Exception:
-        pass
-    try:
-        r = requests.get(f"https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1",
-                         headers=headers, timeout=25)
-        if r.status_code == 200:
-            files = sum(1 for t in r.json().get("tree", []) if t.get("type") == "blob")
-            if files:
-                meta["files"] = files
-    except Exception:
-        pass
-    try:  # LOC is best-effort (codetabs is often down)
-        r = requests.get(f"https://api.codetabs.com/v1/loc/?github={owner}/{repo}", timeout=25)
-        if r.status_code == 200 and r.text.strip().startswith("["):
-            tot = next((x for x in r.json() if x.get("language") == "Total"), None)
-            if tot and tot.get("linesOfCode"):
-                meta["loc"] = tot["linesOfCode"]
-    except Exception:
-        pass
-    return meta
+        post = json.loads(response_text)
+    except (TypeError, ValueError) as exc:
+        print(f"글 JSON 파싱 실패: {exc}")
+        return None
+
+    for key in ("title_korean", "title_english", "description", "summary"):
+        post[key] = strip_emojis(str(post.get(key) or "")).strip()
+    post["content"] = _normalize_news_markdown(post.get("content"))
+    post["tags"] = list(dict.fromkeys(
+        strip_emojis(str(value)).strip()
+        for value in (post.get("tags") or [])
+        if strip_emojis(str(value)).strip()
+    ))[:10]
+    post["entities"] = list(dict.fromkeys(
+        [
+            strip_emojis(str(value)).strip()
+            for value in (post.get("entities") or [])
+            if strip_emojis(str(value)).strip()
+        ]
+        + [
+            str(value).strip()
+            for value in (topic_data.get("entities") or [])
+            if str(value).strip()
+        ]
+    ))[:12]
+    post["faq"] = [
+        {
+            "question": strip_emojis(str(item.get("question") or "")).strip(),
+            "answer": strip_emojis(str(item.get("answer") or "")).strip(),
+        }
+        for item in (post.get("faq") or [])
+        if item.get("question") and item.get("answer")
+    ][:4]
+
+    errors = _article_errors(post, evidence)
+    if not all(post.get(key) for key in ("title_korean", "title_english", "description", "summary")):
+        errors.append("제목 또는 메타 설명 누락")
+    if not 60 <= len(post["description"]) <= 180:
+        errors.append(f"메타 설명 길이 부적합: {len(post['description'])}자")
+    if len(post["faq"]) < 3:
+        errors.append("FAQ 3개 미만")
+    if len(post["tags"]) < 5:
+        errors.append("태그 5개 미만")
+    if errors:
+        print("글 출고 기준 미달: " + " / ".join(errors))
+        return None
+    return post
+
+def _safe_slug(value):
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", str(value or "")).strip("-").lower()
+    return slug[:120] or f"ai-news-{kst_now():%H%M%S}"
 
 
-def save_post(post_data):
-    """Saves the post to a file."""
-    # Calculate US Eastern Time (UTC-5)
-    utc_now = datetime.datetime.now(datetime.timezone.utc)
-    est_time = utc_now - datetime.timedelta(hours=5)
-    
-    date_filename = est_time.strftime("%Y-%m-%d")
-    date_frontmatter = est_time.strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Use English title for filename
-    safe_title = "".join([c if c.isalnum() or c == '-' else "" for c in post_data.get('title_english', 'New-Post').replace(" ", "-")]).strip("-")
-    filename = f"{date_filename}-{safe_title}.md"
-    filepath = os.path.join(POSTS_DIR, filename)
-    
-    # Construct OpenGraph Image URL
-    # Format: https://opengraph.githubassets.com/1/{owner}/{repo}
-    github_url = post_data.get('github_url', '')
-    image_data = None
-    
-    if "github.com/" in github_url:
-        try:
-            # Extract owner/repo
-            # github.com/owner/repo
-            parts = github_url.split("github.com/")[1].split("/")
-            if len(parts) >= 2:
-                owner = parts[0]
-                repo = parts[1]
-                # Clean up query params or hashes if present
-                repo = repo.split("?")[0].split("#")[0]
-                
-                image_url = f"https://opengraph.githubassets.com/1/{owner}/{repo}"
-                image_data = {
-                    "path": image_url,
-                    "alt": f"{post_data.get('title_english', 'Thumbnail')}"
-                }
-        except Exception as e:
-            print(f"Could not parse GitHub URL for image: {e}")
+def save_post(post_data, topic_data, evidence, *, now=None):
+    """Save a news post using the existing blog layout and collected source visuals."""
+    now = now or kst_now()
+    filename = f"{now:%Y-%m-%d}-{_safe_slug(post_data.get('title_english'))}.md"
+    filepath = os.path.realpath(os.path.join(POSTS_DIR, filename))
+    if os.path.commonpath([os.path.realpath(POSTS_DIR), filepath]) != os.path.realpath(POSTS_DIR):
+        raise RuntimeError("잘못된 게시물 경로")
+    if os.path.exists(filepath):
+        raise RuntimeError(f"같은 파일이 이미 존재합니다: {filename}")
+    os.makedirs(POSTS_DIR, exist_ok=True)
 
-    # Process the body first so front matter can reflect it (e.g. the mermaid flag).
-    content = post_data['content']
-    if '\\n' in content:
-        content = content.replace('\\n', '\n')
-    content = strip_fake_images(content)   # drop placeholder/invented image URLs
-    content = strip_emojis(content)        # no decorative emojis in the body
-    content = linkify_bare_urls(content)   # make bare URLs clickable [url](url)
-    content = fix_table_spacing(content)   # ensure tables render (blank line before/after)
+    images = collect_source_images(evidence.get("sources") or [], limit=4)
+    if images:
+        print(f"원문 이미지 {len(images)}장을 수집했습니다.")
+        hero_image = images[0]
+        article_images = images[1:]
+    else:
+        print("사용 가능한 원문 이미지가 없어 기존 로고를 사용합니다.")
+        hero_image = {
+            "path": FALLBACK_THUMBNAIL,
+            "alt": post_data["title_korean"],
+            "credit": "OPSOAI",
+        }
+        article_images = []
 
+    content = insert_source_images(post_data["content"], article_images)
+    primary_source = next(
+        (source for source in evidence["sources"] if source.get("tier") == "official"),
+        evidence["sources"][0],
+    )
+    faq = [
+        {
+            "question": strip_emojis(str(item.get("question") or "")).strip(),
+            "answer": strip_emojis(str(item.get("answer") or "")).strip(),
+        }
+        for item in post_data.get("faq") or []
+        if item.get("question") and item.get("answer")
+    ]
     front_matter = {
         "layout": "post",
-        "title": strip_emojis(post_data.get('title_korean', post_data.get('title', 'Untitled'))).strip(),
-        "date": date_frontmatter,
-        "categories": "Tech", # Single category
-        "summary": post_data['summary'],
+        "title": post_data["title_korean"],
+        "date": now.strftime("%Y-%m-%d %H:%M:%S %z"),
+        "last_modified_at": now.strftime("%Y-%m-%d %H:%M:%S %z"),
+        "categories": "Tech",
+        "tags": post_data["tags"],
+        "description": post_data["description"],
+        "summary": post_data["summary"],
         "author": "AI Trend Bot",
-        "github_url": github_url
+        "article_type": "NewsArticle",
+        "image": hero_image,
+        "news_headline": topic_data["headline"],
+        "news_source_url": primary_source["url"],
+        "news_published_at": evidence["published_at"],
+        "source_citations": [
+            {
+                "name": source["publisher"],
+                "url": source["url"],
+                "published_at": source["published_at"],
+            }
+            for source in evidence["sources"]
+        ],
+        "entities": post_data["entities"],
+        "faq": faq,
+        "sitemap": True,
     }
+    if article_images:
+        front_matter["article_images"] = article_images
 
-    if image_data:
-        front_matter["image"] = image_data
-    # Project facts (stars, language, files, LOC, ...) -> rendered as a card in post.html.
-    project = fetch_project_meta(github_url)
-    if project:
-        front_matter["project"] = project
-    # Chirpy renders ```mermaid blocks only when the post opts in via front matter.
-    if re.search(r'```\s*mermaid', content):
-        front_matter["mermaid"] = True
-    # Our Chart.js include is loaded only when the post has a chart.
-    if re.search(r'```\s*chartjs', content):
-        front_matter["chart"] = True
-
-    # AEO: FAQ -> front matter (feeds FAQPage JSON-LD) + a visible Q&A section.
-    faq = [
-        {"question": strip_emojis(str(x.get("question", ""))).strip(),
-         "answer": strip_emojis(str(x.get("answer", ""))).strip()}
-        for x in (post_data.get("faq") or [])
-        if x.get("question") and x.get("answer")
+    body = [content.rstrip(), "", "## 자주 묻는 질문", ""]
+    for item in faq:
+        body += [f"### {item['question']}", "", item["answer"], ""]
+    body += ["## 직접 확인한 원문", ""]
+    for source in evidence["sources"]:
+        body.append(
+            f"- [{source['publisher']} — {source['title']}]({source['url']}) "
+            f"({source['published_at']})"
+        )
+    body += [
+        "",
+        "> 이 글은 위 원문을 직접 확인해 작성했습니다. 가격, 기능 범위, 지역별 제공 "
+        "여부는 게시 후 바뀔 수 있으니 실제 도입 전 공식 문서를 다시 확인하세요.",
+        "",
     ]
-    if faq:
-        front_matter["faq"] = faq
 
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write("---\n")
-        yaml.dump(front_matter, f, allow_unicode=True, sort_keys=False)
-        f.write("---\n\n")
-        f.write(content)
-
-        if faq:
-            f.write("\n\n## 자주 묻는 질문 (FAQ)\n")
-            for item in faq:
-                f.write(f"\n### {item['question']}\n\n{item['answer']}\n")
-
-        if post_data.get('reference_links'):
-            f.write("\n\n## References\n")
-            for link in post_data['reference_links']:
-                link = str(link).strip()
-                if link.startswith("http"):
-                    f.write(f"- [{link}]({link})\n")   # clickable
-                else:
-                    f.write(f"- {link}\n")
-                
-    print(f"Saved post to {filepath}")
+    temporary = f"{filepath}.tmp"
+    try:
+        with open(temporary, "x", encoding="utf-8") as handle:
+            handle.write("---\n")
+            yaml.safe_dump(
+                front_matter,
+                handle,
+                allow_unicode=True,
+                sort_keys=False,
+                width=1000,
+            )
+            handle.write("---\n\n")
+            handle.write("\n".join(body))
+        os.replace(temporary, filepath)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+    print(f"게시물 저장 완료: {filepath}")
+    print(f"직접 원문 {len(evidence['sources'])}개 / 검증 사실 {len(evidence['facts'])}개")
+    return filepath
 
 def preflight_check(client):
     """
     Fail LOUDLY (non-zero exit) if the API key is invalid/denied.
-    Without this, a dead GEMINI_API_KEY makes find_trending_topic() return []
+    Without this, a dead GEMINI_API_KEY makes news discovery return []
     and the run finishes green with no post — a silent outage that gives no
     red run and no alert email. This turns that into a visible failure.
     """
@@ -705,54 +1088,36 @@ def preflight_check(client):
         # Transient/other errors: don't block; the fallback loop will handle them.
         print(f"Preflight warning (non-fatal): {e}")
 
+
 def main():
-    try:
-        client = get_gemini_client()
+    client = get_gemini_client()
+    preflight_check(client)
+    candidates = find_trending_topic(client)
+    if not candidates:
+        raise RuntimeError("발행 가능한 최신 AI 뉴스 후보를 찾지 못했습니다.")
 
-        # 0. Preflight: dead key -> red run + email instead of silent green
-        preflight_check(client)
+    history = recent_news_history()
+    for index, topic_data in enumerate(candidates, 1):
+        print(f"\n후보 {index}/{len(candidates)} 재검증: {topic_data['headline']}")
+        evidence = verify_news_candidate(client, topic_data)
+        if not evidence:
+            continue
 
-        # 1. Find Trends (List)
-        topics_list = find_trending_topic(client)
-        
-        if not topics_list:
-            print("No trending topics found.")
-            return
+        topic_data["published_at"] = evidence["published_at"]
+        source_urls = [source["url"] for source in evidence["sources"]]
+        if check_duplication(topic_data, history=history, source_urls=source_urls):
+            print("  이미 다룬 사건이라 다음 후보로 넘어갑니다.")
+            continue
 
-        posts_to_generate = 1
-        posts_count = 0
-        post_generated = False
-        
-        for topic_data in topics_list:
-            if posts_count >= posts_to_generate:
-                break
+        post_data = generate_blog_post(client, topic_data, evidence)
+        if not post_data:
+            print("  글 출고 기준을 통과하지 못해 다음 후보로 넘어갑니다.")
+            continue
 
-            topic_name = topic_data['topic_name']
-            github_url = topic_data.get('github_url', '')
-            
-            # 2. Check Duplication
-            if check_duplication(github_url, topic_name):
-                continue # Try next topic
-            
-            print(f"Selected topic ({posts_count+1}/{posts_to_generate}): {topic_name}")
-            
-            # 3. Generate Post
-            post_data = generate_blog_post(client, topic_data)
-            
-            if post_data:
-                # 4. Save
-                save_post(post_data)
-                post_generated = True
-                posts_count += 1
-                break # We only want 1 post per run
-            else:
-                print(f"Failed to generate post content for {topic_name}. Trying next...")
-                
-        if not post_generated:
-            print("All trending topics were either duplicates or failed to generate.")
-            
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        save_post(post_data, topic_data, evidence)
+        return
+
+    raise RuntimeError("모든 후보가 중복 또는 팩트체크/품질 기준 미달입니다.")
 
 if __name__ == "__main__":
     main()
