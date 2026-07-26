@@ -460,20 +460,25 @@ def generate_content_with_fallback(client, contents, response_schema=None, tools
                 continue
     return None
 
-def find_trending_topic(client):
+def find_trending_topic(
+    client,
+    *,
+    window_hours=NEWS_WINDOW_HOURS,
+    max_age_days=MAX_NEWS_AGE_DAYS,
+):
     """
     Uses Gemini with Google Search to find consequential, newly published AI news.
     GitHub Trending and repository popularity are explicitly excluded as topic sources.
     """
     now = kst_now()
     history = recent_news_history()
-    print(f"최근 {NEWS_WINDOW_HOURS}시간의 글로벌 AI 뉴스를 검색합니다...")
+    print(f"최근 {window_hours}시간의 글로벌 AI 뉴스를 검색합니다...")
     prompt = f"""
 You are the real-time news desk for a global AI publication.
 The current time is {now.isoformat(timespec='minutes')}.
 Use Google Search to find and rank 10-15 consequential AI stories that were
 actually announced, released, published, filed, or reported in the last
-{NEWS_WINDOW_HOURS} hours.
+{window_hours} hours.
 
 [INCLUDE]
 - New AI models, product releases, material feature updates, important research,
@@ -489,7 +494,7 @@ actually announced, released, published, filed, or reported in the last
 - GitHub Trending rankings, star counts, or a repository profile without a broader
   news event.
 - Rumors, forecasts, recycled explainers, vague opinion pieces, and announcements
-  older than {MAX_NEWS_AGE_DAYS} days.
+  older than {max_age_days} days.
 - Search result URLs, homepages, category pages, or URLs with no printed date.
 - Marketing partnerships that do not materially change a product or decision.
 
@@ -558,7 +563,11 @@ actually announced, released, published, filed, or reported in the last
                     continue
                 if tier not in {"official", "trusted"}:
                     continue
-                if not recent_publication(item.get("published_at"), now=now):
+                if not recent_publication(
+                    item.get("published_at"),
+                    now=now,
+                    max_days=max_age_days,
+                ):
                     continue
                 if source_url in seen_urls:
                     continue
@@ -628,6 +637,21 @@ def recent_news_history(days=45):
             "entities": list(data.get("entities") or []),
         })
     return history[:100]
+
+
+def daily_post_exists(*, now=None):
+    """Return True once the daily news automation has produced a KST-dated post."""
+    now = now or kst_now()
+    prefix = f"{now:%Y-%m-%d}-"
+    if not os.path.isdir(POSTS_DIR):
+        return False
+    for filename in os.listdir(POSTS_DIR):
+        if not filename.startswith(prefix) or not filename.endswith(".md"):
+            continue
+        data = _front_matter(os.path.join(POSTS_DIR, filename))
+        if data.get("automation") == "daily_ai_news" or data.get("news_headline"):
+            return True
+    return False
 
 
 def _identity(value):
@@ -701,7 +725,13 @@ EVIDENCE_SCHEMA = {
 }
 
 
-def verify_news_candidate(client, candidate):
+def verify_news_candidate(
+    client,
+    candidate,
+    *,
+    strict=True,
+    max_age_days=MAX_NEWS_AGE_DAYS,
+):
     """Re-research the chosen story and build a source-locked fact pack."""
     now = kst_now()
     prompt = f"""
@@ -713,7 +743,7 @@ Use Google Search to independently verify this candidate:
 
 [RULES]
 - verified=true only when the concrete event occurred and is no older than
-  {MAX_NEWS_AGE_DAYS} days.
+  {max_age_days} days.
 - Include 2-5 direct sources. At least one must be an official announcement,
   documentation page, paper, filing, security notice, or regulator page.
 - The other source should be independent trusted original reporting when available.
@@ -740,7 +770,11 @@ Use Google Search to independently verify this candidate:
         raw = json.loads(response_text)
     except (TypeError, ValueError):
         return None
-    if not raw.get("verified") or not recent_publication(raw.get("published_at"), now=now):
+    if not raw.get("verified") or not recent_publication(
+        raw.get("published_at"),
+        now=now,
+        max_days=max_age_days,
+    ):
         print(f"  팩트체크 탈락: {raw.get('reason') or '최신 사건으로 검증되지 않음'}")
         return None
 
@@ -753,7 +787,7 @@ Use Google Search to independently verify this candidate:
         if (
             direct_source_rejection_reason(url)
             or tier not in {"official", "trusted"}
-            or not recent_publication(published, now=now)
+            or not recent_publication(published, now=now, max_days=max_age_days)
             or url in source_map
         ):
             continue
@@ -805,7 +839,8 @@ Use Google Search to independently verify this candidate:
         errors.append("직접 근거가 연결된 사실 4개 미만")
     if errors:
         print("  팩트체크 출고 기준 미달: " + " / ".join(errors))
-        return None
+        if strict or not sources or not facts:
+            return None
     return {
         "verified": True,
         "reason": str(raw.get("reason") or "").strip(),
@@ -816,6 +851,53 @@ Use Google Search to independently verify this candidate:
         "unknowns": [
             str(value).strip() for value in (raw.get("unknowns") or []) if str(value).strip()
         ],
+        "quality_warnings": errors,
+    }
+
+
+def candidate_fallback_evidence(candidate):
+    """Build a last-resort fact pack from the discovery result and its direct URL."""
+    url = canonical_url(candidate.get("source_url"))
+    if direct_source_rejection_reason(url):
+        return None
+    published = str(candidate.get("published_at") or "")[:10]
+    if not parse_iso_date(published):
+        published = kst_now().date().isoformat()
+    probe = probe_source(url)
+    source_url = probe["url"] or url
+    facts = []
+    for value in (
+        candidate.get("headline"),
+        candidate.get("summary"),
+        candidate.get("why_it_matters"),
+    ):
+        text = str(value or "").strip()
+        if text and text not in {item["text"] for item in facts}:
+            facts.append({"text": text, "source_urls": [source_url]})
+    if not facts:
+        return None
+    tier = str(candidate.get("source_tier") or "trusted").strip().lower()
+    if tier not in {"official", "trusted"}:
+        tier = "trusted"
+    return {
+        "verified": False,
+        "reason": "검색 단계의 직접 원문을 사용한 일일 발행 폴백",
+        "event_status": str(candidate.get("event_status") or "reported").strip(),
+        "published_at": published,
+        "sources": [{
+            "url": source_url,
+            "title": str(candidate.get("headline") or candidate.get("topic_name") or "").strip(),
+            "publisher": str(candidate.get("source_name") or "원문").strip(),
+            "published_at": published,
+            "tier": tier,
+            "reachable": bool(probe["reachable"]),
+            "http_status": probe["status"],
+        }],
+        "facts": facts,
+        "unknowns": [
+            "독립된 추가 원문과 세부 제공 조건은 발행 시점에 모두 확인되지 않았습니다."
+        ],
+        "quality_warnings": ["엄격한 재검증 대신 검색 단계의 직접 원문 1개를 사용함"],
     }
 
 NEWS_HEADINGS = (
@@ -1093,7 +1175,147 @@ def _article_errors(post, evidence):
     return errors
 
 
-def generate_blog_post(client, topic_data, evidence):
+def _remove_unverified_links(content, evidence):
+    """Keep only links that point to the selected direct sources."""
+    allowed = {canonical_url(source["url"]) for source in evidence.get("sources") or []}
+
+    def replace(match):
+        label, url = match.group(1), match.group(2)
+        return match.group(0) if canonical_url(url) in allowed else label
+
+    return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", replace, str(content or ""))
+
+
+def _fallback_post_data(topic_data, evidence):
+    """Create a small, source-linked post when every model-writing attempt fails."""
+    topic = str(
+        topic_data.get("topic_name")
+        or (topic_data.get("entities") or ["AI"])[0]
+        or "AI"
+    ).strip()
+    headline = str(topic_data.get("headline") or f"{topic} 최신 소식").strip()
+    source = evidence["sources"][0]
+    publisher = str(source.get("publisher") or "원문").strip()
+    source_link = f"[{publisher}]({source['url']})"
+    facts = [
+        str(item.get("text") or "").strip()
+        for item in evidence.get("facts") or []
+        if str(item.get("text") or "").strip()
+    ]
+    unknowns = [
+        str(value).strip()
+        for value in evidence.get("unknowns") or []
+        if str(value).strip()
+    ]
+    fact_text = "\n\n".join(
+        f"- {text} {source_link}" for text in facts[:5]
+    ) or f"- {headline} 관련 직접 원문이 공개됐습니다. {source_link}"
+    unknown_text = "\n\n".join(f"- {text}" for text in unknowns[:4]) or (
+        "- 가격, 지역별 제공 범위, 실제 도입 조건은 원문에서 다시 확인해야 합니다."
+    )
+    content = f"""
+{topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다.
+
+{NEWS_HEADINGS[0]}
+
+{headline} 소식이 포착됐습니다. 발행일은 {evidence.get('published_at') or '원문 표기 기준'}이며, 아래 내용은 {source_link}에서 확인할 수 있는 범위만 담았습니다.
+
+{fact_text}
+
+{NEWS_HEADINGS[1]}
+
+이 소식의 핵심은 새 기능이나 발표의 이름보다 실제 사용자와 개발자의 선택이 달라지는지에 있습니다. 지금 단계에서는 원문이 밝힌 내용과 아직 공개하지 않은 내용을 분리해서 보는 것이 안전합니다.
+
+{NEWS_HEADINGS[2]}
+
+도입을 검토한다면 현재 쓰는 도구와 바로 교체하기보다 작은 작업에서 먼저 비교해 보는 편이 좋습니다. 제공 지역, 요금, 데이터 처리 방식처럼 의사결정에 영향을 주는 조건은 실제 사용 전에 원문에서 다시 확인해야 합니다.
+
+{NEWS_HEADINGS[3]}
+
+첫째, 공식 제공 범위와 사용 조건을 확인합니다. 둘째, 기존 작업 흐름에서 시간을 줄여주는지 작은 예제로 비교합니다. 셋째, 발표 내용과 실제 일반 제공 상태가 같은지 구분합니다.
+
+{NEWS_HEADINGS[4]}
+
+{unknown_text}
+
+추가 원문이 공개되거나 제공 조건이 바뀌면 판단도 달라질 수 있습니다. 따라서 이 글은 오늘 시점의 출발점으로 활용하고, 실제 도입 전에는 연결된 원문을 다시 확인하는 것이 좋습니다.
+""".strip()
+    description = (
+        f"{topic} 관련 최신 AI 소식을 확인 가능한 직접 원문 범위에서 정리했습니다. "
+        "발표 내용과 실제 영향, 도입 전에 다시 확인할 조건과 한계를 함께 살펴봅니다."
+    )
+    return {
+        "title_korean": f"{topic} 업데이트, 오늘 확인할 핵심 포인트",
+        "title_english": f"Daily AI Brief {topic} {evidence.get('published_at') or ''}",
+        "description": description,
+        "summary": (
+            f"{headline} 소식을 직접 원문 범위에서 정리했습니다. "
+            "확인된 내용과 아직 다시 확인해야 할 조건을 나눠 살펴봅니다."
+        ),
+        "content": _normalize_news_markdown(content),
+        "tags": ["AI 뉴스", topic, "인공지능", "생성형 AI", "AI 트렌드"],
+        "entities": list(dict.fromkeys(
+            [topic]
+            + [
+                str(value).strip()
+                for value in topic_data.get("entities") or []
+                if str(value).strip()
+            ]
+        ))[:10],
+        "faq": [
+            {
+                "question": f"{topic} 소식에서 오늘 확인된 내용은 무엇인가요?",
+                "answer": (
+                    f"{headline} 관련 내용이 직접 원문에서 확인됐습니다. "
+                    "세부 조건은 글 하단 원문을 함께 확인하는 것이 안전합니다."
+                ),
+            },
+            {
+                "question": f"{topic}을 지금 바로 도입해도 되나요?",
+                "answer": (
+                    "작은 작업에서 먼저 비교한 뒤 결정하는 편이 좋습니다. "
+                    "가격, 제공 지역, 데이터 처리 조건은 실제 도입 전에 다시 확인하세요."
+                ),
+            },
+            {
+                "question": "이 글에서 아직 확인되지 않은 부분은 무엇인가요?",
+                "answer": unknowns[0] if unknowns else (
+                    "세부 제공 조건과 실제 사용 환경의 차이는 추가 확인이 필요합니다."
+                ),
+            },
+        ],
+    }
+
+
+def _relax_post_data(post, topic_data, evidence):
+    """Repair a model draft enough to publish without introducing new claims."""
+    fallback = _fallback_post_data(topic_data, evidence)
+    if not isinstance(post, dict):
+        return fallback
+    for key in ("title_korean", "title_english", "description", "summary"):
+        if not str(post.get(key) or "").strip():
+            post[key] = fallback[key]
+    content = _remove_unverified_links(post.get("content"), evidence)
+    positions = [content.find(heading) for heading in NEWS_HEADINGS]
+    if any(position < 0 for position in positions) or positions != sorted(positions):
+        content = fallback["content"]
+    post["content"] = content
+    post["tags"] = list(dict.fromkeys(
+        list(post.get("tags") or []) + fallback["tags"]
+    ))[:10]
+    post["entities"] = list(dict.fromkeys(
+        list(post.get("entities") or []) + fallback["entities"]
+    ))[:12]
+    faq = list(post.get("faq") or [])
+    for item in fallback["faq"]:
+        if len(faq) >= 3:
+            break
+        faq.append(item)
+    post["faq"] = faq[:4]
+    return post
+
+
+def generate_blog_post(client, topic_data, evidence, *, strict=True):
     """Write one fact-locked Korean AI news feature in a lively blogger voice."""
     print(f"뉴스 글 작성: {topic_data['headline']}")
     prompt_text = f"""
@@ -1184,12 +1406,14 @@ def generate_blog_post(client, topic_data, evidence):
         thinking_level="HIGH",
     )
     if not response_text:
-        return None
+        return None if strict else _fallback_post_data(topic_data, evidence)
     try:
         post = json.loads(response_text)
     except (TypeError, ValueError) as exc:
         print(f"글 JSON 파싱 실패: {exc}")
-        return None
+        return None if strict else _fallback_post_data(topic_data, evidence)
+    if not isinstance(post, dict):
+        return None if strict else _fallback_post_data(topic_data, evidence)
 
     for key in ("title_korean", "title_english", "description", "summary"):
         post[key] = strip_emojis(str(post.get(key) or "")).strip()
@@ -1232,7 +1456,9 @@ def generate_blog_post(client, topic_data, evidence):
         errors.append("태그 5개 미만")
     if errors:
         print("글 출고 기준 미달: " + " / ".join(errors))
-        return None
+        if strict:
+            return None
+        return _relax_post_data(post, topic_data, evidence)
     return post
 
 def _safe_slug(value):
@@ -1292,6 +1518,10 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     ]
     front_matter = {
         "layout": "post",
+        "automation": "daily_ai_news",
+        "publication_mode": (
+            "fallback" if evidence.get("quality_warnings") else "verified"
+        ),
         "title": post_data["title_korean"],
         "date": now.strftime("%Y-%m-%d %H:%M:%S %z"),
         "last_modified_at": now.strftime("%Y-%m-%d %H:%M:%S %z"),
@@ -1327,12 +1557,21 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     for item in faq:
         body += [f"### {item['question']}", "", item["answer"], ""]
     body += ["## 직접 확인한 원문", "", source_list_html(evidence["sources"])]
-    body += [
-        "",
-        "> 이 글은 위 원문을 직접 확인해 작성했습니다. 가격, 기능 범위, 지역별 제공 "
-        "여부는 게시 후 바뀔 수 있으니 실제 도입 전 공식 문서를 다시 확인하세요.",
-        "",
-    ]
+    if evidence.get("quality_warnings"):
+        body += [
+            "",
+            "> 이 글은 하루 1건 발행 원칙에 따라 당일 확인 가능한 직접 원문 범위에서 "
+            "작성했습니다. 독립 출처나 일부 세부 조건이 부족할 수 있으므로 실제 도입 "
+            "전에는 연결된 원문을 다시 확인하세요.",
+            "",
+        ]
+    else:
+        body += [
+            "",
+            "> 이 글은 위 원문을 직접 확인해 작성했습니다. 가격, 기능 범위, 지역별 제공 "
+            "여부는 게시 후 바뀔 수 있으니 실제 도입 전 공식 문서를 다시 확인하세요.",
+            "",
+        ]
 
     temporary = f"{filepath}.tmp"
     try:
@@ -1353,6 +1592,8 @@ def save_post(post_data, topic_data, evidence, *, now=None):
             os.unlink(temporary)
     print(f"게시물 저장 완료: {filepath}")
     print(f"직접 원문 {len(evidence['sources'])}개 / 검증 사실 {len(evidence['facts'])}개")
+    if evidence.get("quality_warnings"):
+        print("완화 발행: " + " / ".join(evidence["quality_warnings"]))
     return filepath
 
 def preflight_check(client):
@@ -1374,17 +1615,19 @@ def preflight_check(client):
         print(f"Preflight warning (non-fatal): {e}")
 
 
-def main():
-    client = get_gemini_client()
-    preflight_check(client)
-    candidates = find_trending_topic(client)
-    if not candidates:
-        raise RuntimeError("발행 가능한 최신 AI 뉴스 후보를 찾지 못했습니다.")
-
-    history = recent_news_history()
+def _publish_from_candidates(client, candidates, history):
+    """Try strict publishing first, then force one grounded fallback from the list."""
+    fallback_options = []
     for index, topic_data in enumerate(candidates, 1):
         print(f"\n후보 {index}/{len(candidates)} 재검증: {topic_data['headline']}")
-        evidence = verify_news_candidate(client, topic_data)
+        evidence = verify_news_candidate(
+            client,
+            topic_data,
+            strict=False,
+            max_age_days=14,
+        )
+        if not evidence:
+            evidence = candidate_fallback_evidence(topic_data)
         if not evidence:
             continue
 
@@ -1394,15 +1637,61 @@ def main():
             print("  이미 다룬 사건이라 다음 후보로 넘어갑니다.")
             continue
 
-        post_data = generate_blog_post(client, topic_data, evidence)
-        if not post_data:
-            print("  글 출고 기준을 통과하지 못해 다음 후보로 넘어갑니다.")
+        if evidence.get("quality_warnings"):
+            fallback_options.append((topic_data, evidence))
             continue
 
-        save_post(post_data, topic_data, evidence)
+        post_data = generate_blog_post(client, topic_data, evidence)
+        if post_data:
+            return save_post(post_data, topic_data, evidence)
+        print("  엄격한 글 출고 기준 미달, 완화 발행 후보로 보관합니다.")
+        fallback_options.append((topic_data, evidence))
+
+    for topic_data, evidence in fallback_options:
+        print(f"\n일일 발행 폴백 적용: {topic_data['headline']}")
+        post_data = generate_blog_post(
+            client,
+            topic_data,
+            evidence,
+            strict=False,
+        )
+        if post_data:
+            return save_post(post_data, topic_data, evidence)
+    return None
+
+
+def main():
+    force = os.environ.get("AI_NEWS_FORCE_PUBLISH", "").strip().lower() in {
+        "1", "true", "yes"
+    }
+    if not force and daily_post_exists():
+        print("오늘의 자동 뉴스 글이 이미 있어 추가 발행하지 않습니다.")
         return
 
-    raise RuntimeError("모든 후보가 중복 또는 팩트체크/품질 기준 미달입니다.")
+    client = get_gemini_client()
+    preflight_check(client)
+    candidates = find_trending_topic(client)
+    history = recent_news_history()
+    published = _publish_from_candidates(client, candidates, history)
+    if published:
+        return
+
+    print("기본 검색에서 발행하지 못해 최근 14일 범위로 후보를 넓힙니다.")
+    broad_candidates = find_trending_topic(
+        client,
+        window_hours=336,
+        max_age_days=14,
+    )
+    seen = {canonical_url(item.get("source_url")) for item in candidates}
+    broad_candidates = [
+        item for item in broad_candidates
+        if canonical_url(item.get("source_url")) not in seen
+    ]
+    published = _publish_from_candidates(client, broad_candidates, history)
+    if published:
+        return
+
+    raise RuntimeError("직접 원문이 있는 비중복 AI 뉴스 후보를 찾지 못했습니다.")
 
 if __name__ == "__main__":
     main()

@@ -153,6 +153,101 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertEqual(len(evidence["facts"]), 4)
         self.assertEqual(evidence["sources"][0]["tier"], "official")
 
+    @mock.patch.object(bot, "probe_source")
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_relaxed_fact_check_keeps_single_source_for_daily_fallback(
+        self,
+        generate,
+        probe,
+    ):
+        source = "https://official.example.com/announcements/new-model"
+        generate.return_value = json.dumps({
+            "verified": True,
+            "reason": "공식 발표 한 건으로 확인",
+            "event_status": "released",
+            "published_at": "2026-07-25",
+            "sources": [{
+                "url": source,
+                "title": "Official model announcement",
+                "publisher": "Example",
+                "published_at": "2026-07-25",
+                "tier": "official",
+            }],
+            "facts": [{
+                "text": "Example released the model.",
+                "source_urls": [source],
+            }],
+            "unknowns": ["Independent reporting is not available yet."],
+        })
+        probe.return_value = {
+            "url": source,
+            "status": 200,
+            "reachable": True,
+        }
+        candidate = {
+            "topic_name": "Example AI",
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+            "source_url": source,
+            "event_status": "released",
+        }
+        with mock.patch.object(bot, "kst_now", return_value=self.now):
+            evidence = bot.verify_news_candidate(
+                mock.Mock(),
+                candidate,
+                strict=False,
+            )
+        self.assertIsNotNone(evidence)
+        self.assertEqual(len(evidence["sources"]), 1)
+        self.assertEqual(len(evidence["facts"]), 1)
+        self.assertIn("직접 원문 2개 미만", evidence["quality_warnings"])
+
+    def test_daily_post_exists_recognizes_legacy_news_and_new_marker(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory):
+            self.assertFalse(bot.daily_post_exists(now=self.now))
+            path = os.path.join(directory, "2026-07-26-daily-test.md")
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write("---\nautomation: daily_ai_news\n---\n")
+            self.assertTrue(bot.daily_post_exists(now=self.now))
+
+    @mock.patch.object(bot, "generate_content_with_fallback", return_value=None)
+    def test_relaxed_writer_creates_deterministic_post_when_models_fail(self, _generate):
+        source = "https://example.com/news/new-model"
+        candidate = {
+            "topic_name": "Example AI",
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+            "source_url": source,
+            "entities": ["Example AI"],
+        }
+        evidence = {
+            "published_at": "2026-07-25",
+            "sources": [{
+                "url": source,
+                "title": "Official announcement",
+                "publisher": "Example",
+                "published_at": "2026-07-25",
+                "tier": "official",
+            }],
+            "facts": [{
+                "text": "Example released a new model.",
+                "source_urls": [source],
+            }],
+            "unknowns": ["Pricing is not published."],
+            "quality_warnings": ["single source"],
+        }
+        post = bot.generate_blog_post(
+            mock.Mock(),
+            candidate,
+            evidence,
+            strict=False,
+        )
+        self.assertTrue(post["title_korean"])
+        self.assertEqual(len(post["faq"]), 3)
+        for heading in bot.NEWS_HEADINGS:
+            self.assertIn(heading, post["content"])
+
     def test_markdown_normalizer_restores_news_headings_and_removes_images(self):
         raw = (
             "도입 ![가짜](https://example.com/fake.png) "
