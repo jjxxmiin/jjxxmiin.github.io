@@ -1,0 +1,45 @@
+title: "[질문] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        재현 가능한 정보와 시도한 내용을 함께 적으면 더 정확한 답을 받을 수 있습니다.
+        API 키, 개인정보, 비공개 코드가 포함되지 않았는지 확인해 주세요.
+  - type: textarea
+    id: question
+    attributes:
+      label: 무엇이 궁금한가요?
+      description: 기대한 결과와 실제 결과를 구체적으로 적어 주세요.
+      placeholder: 문제 상황과 궁금한 점을 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: attempts
+    attributes:
+      label: 이미 시도한 방법
+      description: 확인한 문서, 실행한 코드, 오류 메시지를 적어 주세요.
+      placeholder: 시도한 방법과 그 결과를 적어 주세요.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: 환경
+      description: 모델·도구 이름, 버전, 운영체제 등 관련 정보가 있다면 적어 주세요.
+      placeholder: 예) Python 3.12, macOS, Gemini API
+    validations:
+      required: false
+  - type: textarea
+    id: references
+    attributes:
+      label: 참고 링크
+      placeholder: 관련 논문, 문서, 저장소 URL
+    validations:
+      required: false
+  - type: checkboxes
+    id: guidelines
+    attributes:
+      label: 커뮤니티 약속
+      options:
+        - label: 민감정보를 제거했고 서로를 존중하는 대화에 동의합니다.
+          required: true

@@ -123,7 +123,7 @@ comments:
   utterances:
     repo: jjxxmiin/jjxxmiin.github.io # <gh-username>/<repo>
     issue_term: pathname # < url | pathname | title | ...>
-  # Giscus options › https://giscus.app  (커뮤니티 게시판 /board/ 에서 사용)
+  # Giscus options › https://giscus.app (블로그 글별 댓글 전용)
   giscus:
     repo: jjxxmiin/jjxxmiin.github.io
     repo_id: R_kgDOLMuybg # 저장소 GraphQL node id (미리 채워둠)

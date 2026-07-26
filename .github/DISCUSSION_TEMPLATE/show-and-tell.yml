@@ -1,0 +1,54 @@
+title: "[도구·프로젝트 공유] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        직접 사용해 본 AI 도구, 워크플로, 만들고 있는 프로젝트를 소개해 주세요.
+        단순 링크 홍보보다 실제 사용 경험과 한계를 함께 나누는 글을 환영합니다.
+  - type: input
+    id: name
+    attributes:
+      label: 도구 또는 프로젝트 이름
+      placeholder: 이름을 적어 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: 어떤 관계인가요?
+      options:
+        - 직접 사용한 도구
+        - 직접 만든 프로젝트
+        - 기여하고 있는 오픈소스
+        - 흥미롭게 살펴본 프로젝트
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: 무엇을 해봤나요?
+      description: 사용 목적, 과정, 결과를 구체적으로 적어 주세요.
+      placeholder: 어떤 문제에 사용했고 결과는 어땠나요?
+    validations:
+      required: true
+  - type: textarea
+    id: pros_and_limits
+    attributes:
+      label: 좋았던 점과 아쉬운 점
+      placeholder: 실제로 느낀 장점과 한계를 함께 적어 주세요.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: 링크
+      placeholder: https://
+    validations:
+      required: false
+  - type: checkboxes
+    id: guidelines
+    attributes:
+      label: 커뮤니티 약속
+      options:
+        - label: 관계와 이해관계를 투명하게 밝혔으며 반복 홍보를 하지 않겠습니다.
+          required: true
