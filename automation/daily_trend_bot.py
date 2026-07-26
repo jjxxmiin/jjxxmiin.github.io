@@ -269,6 +269,10 @@ FALLBACK_THUMBNAIL = "/assets/img/logo.png"
 NEWS_WINDOW_HOURS = max(24, min(168, int(os.environ.get("AI_NEWS_WINDOW_HOURS", "72"))))
 MAX_NEWS_AGE_DAYS = max(2, min(14, int(os.environ.get("AI_NEWS_MAX_AGE_DAYS", "7"))))
 HTTP_TIMEOUT = max(5, min(30, int(os.environ.get("AI_NEWS_HTTP_TIMEOUT", "12"))))
+GEMINI_HTTP_TIMEOUT_MS = max(
+    60_000,
+    min(600_000, int(os.environ.get("GEMINI_HTTP_TIMEOUT_MS", "180000"))),
+)
 USER_AGENT = "Mozilla/5.0 (compatible; OPSOAI-NewsBot/2.0; +https://www.opsoai.com/)"
 TRACKING_QUERY_KEYS = {
     "fbclid", "gclid", "mc_cid", "mc_eid", "ref", "ref_src", "source",
@@ -282,13 +286,9 @@ GENERIC_SOURCE_PATHS = {
     "", "/", "/blog", "/news", "/search", "/articles", "/resources",
     "/docs", "/documentation",
 }
-# Preview models first (best quality), then stable aliases as a safety net so the
-# pipeline keeps working even after a preview model is retired.
+# Use one stable production model for discovery, fact-checking, writing, and preflight.
 FALLBACK_MODELS = [
-    "gemini-3.1-pro-preview",
-    "gemini-3-flash-preview",
-    "gemini-3.1-flash-lite-preview",
-    "gemini-flash-latest",
+    "gemini-3.6-flash",
 ]
 
 
@@ -407,7 +407,10 @@ def get_gemini_client():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY not found in environment variables")
-    return genai.Client(api_key=api_key)
+    return genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=GEMINI_HTTP_TIMEOUT_MS),
+    )
 
 def get_thinking_config(thinking_level="HIGH"):
     """

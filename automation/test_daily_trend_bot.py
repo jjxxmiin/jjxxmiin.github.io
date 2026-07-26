@@ -17,6 +17,18 @@ class DailyTrendNewsBotTests(unittest.TestCase):
     def setUp(self):
         self.now = datetime.datetime(2026, 7, 26, 9, 0, tzinfo=KST)
 
+    def test_pipeline_uses_only_gemini_3_6_flash_with_request_timeout(self):
+        self.assertEqual(bot.FALLBACK_MODELS, ["gemini-3.6-flash"])
+        with mock.patch.object(bot.genai, "Client") as client, \
+                mock.patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
+            bot.get_gemini_client()
+        kwargs = client.call_args.kwargs
+        self.assertEqual(kwargs["api_key"], "test-key")
+        self.assertEqual(
+            kwargs["http_options"].timeout,
+            bot.GEMINI_HTTP_TIMEOUT_MS,
+        )
+
     def test_canonical_url_removes_tracking_parameters(self):
         url = bot.canonical_url(
             "HTTP://Example.COM/ai/launch/?utm_source=x&keep=1&fbclid=abc#top"
