@@ -245,8 +245,38 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         )
         self.assertTrue(post["title_korean"])
         self.assertEqual(len(post["faq"]), 3)
+        self.assertTrue(post["content"].startswith("```mermaid"))
+        self.assertEqual(post["content"].count("```mermaid"), 3)
+        self.assertTrue(all(
+            item["ok"]
+            for item in bot._validate_mermaid_codes(
+                bot._fenced_blocks(post["content"], "mermaid")
+            )
+        ))
         for heading in bot.NEWS_HEADINGS:
             self.assertIn(heading, post["content"])
+
+    def test_first_valid_mermaid_is_promoted_to_article_start(self):
+        content = """
+첫 문단입니다.
+
+## 무슨 일이 벌어진 걸까?
+
+설명입니다.
+
+```mermaid
+flowchart LR
+  A["사건"] --> B["영향"]
+```
+
+## 왜 지금 다들 이 이야기를 할까?
+
+추가 설명입니다.
+""".strip()
+        promoted = bot._promote_first_mermaid(content)
+        self.assertTrue(promoted.startswith("```mermaid"))
+        self.assertEqual(promoted.count("```mermaid"), 1)
+        self.assertLess(promoted.index("```mermaid"), promoted.index("첫 문단입니다."))
 
     def test_markdown_normalizer_restores_news_headings_and_removes_images(self):
         raw = (

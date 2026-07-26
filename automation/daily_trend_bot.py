@@ -950,6 +950,22 @@ def _fenced_blocks(content, language):
     )
 
 
+def _promote_first_mermaid(content):
+    """Move the first Mermaid block to the very start as the article overview."""
+    text = str(content or "").strip()
+    match = re.search(
+        r"```mermaid[ \t]*\r?\n.*?\r?\n```",
+        text,
+        flags=re.S | re.I,
+    )
+    if not match:
+        return text
+    overview = match.group(0).strip()
+    remainder = (text[:match.start()] + text[match.end():]).strip()
+    remainder = re.sub(r"\n{3,}", "\n\n", remainder)
+    return f"{overview}\n\n{remainder}".strip()
+
+
 def _validate_mermaid_codes(codes):
     """Parse Mermaid diagrams with the same JS package used by the automation."""
     diagrams = [str(code or "").strip() for code in codes]
@@ -1110,7 +1126,7 @@ def _mermaid_grounding_error(code, evidence):
 
 
 def _sanitize_news_visuals(content, evidence):
-    """Keep up to three safe Mermaid blocks and one evidence-backed chart."""
+    """Keep up to five safe Mermaid blocks and one evidence-backed chart."""
     text = str(content or "")
     mermaid_codes = _fenced_blocks(text, "mermaid")
     if not mermaid_codes:
@@ -1120,7 +1136,7 @@ def _sanitize_news_visuals(content, evidence):
     kept_mermaid = 0
     for code, result in zip(mermaid_codes, mermaid_results):
         grounding_error = _mermaid_grounding_error(code, evidence)
-        if result["ok"] and not grounding_error and kept_mermaid < 3:
+        if result["ok"] and not grounding_error and kept_mermaid < 5:
             kept_mermaid += 1
             continue
         reason = grounding_error or result["error"] or "허용 개수 초과"
@@ -1140,7 +1156,8 @@ def _sanitize_news_visuals(content, evidence):
         # article while preventing plausible-looking invented numbers from shipping.
         text = _remove_fenced_block(text, "chartjs", code)
         print(f"  Chart.js 제외: {error or '허용 개수 초과'}")
-    return re.sub(r"\n{3,}", "\n\n", text).strip(), []
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return _promote_first_mermaid(text), []
 
 
 def _article_errors(post, evidence):
@@ -1153,6 +1170,8 @@ def _article_errors(post, evidence):
         errors.append("뉴스 섹션 순서 오류")
     if len(re.sub(r"\s+", "", content)) < 1800:
         errors.append("본문이 너무 짧음")
+    if not content.lstrip().lower().startswith("```mermaid"):
+        errors.append("글 첫 부분에 전체 흐름 Mermaid가 없음")
     allowed = {canonical_url(source["url"]) for source in evidence["sources"]}
     linked = {
         canonical_url(url)
@@ -1161,8 +1180,8 @@ def _article_errors(post, evidence):
     unsupported = sorted(url for url in linked if url and url not in allowed)
     if unsupported:
         errors.append("검증 원문 밖 링크 포함: " + ", ".join(unsupported[:3]))
-    if len(_fenced_blocks(content, "mermaid")) not in {1, 2, 3}:
-        errors.append("Mermaid 다이어그램은 1~3개 필요")
+    if len(_fenced_blocks(content, "mermaid")) not in {3, 4, 5}:
+        errors.append("Mermaid 다이어그램은 3~5개 필요")
     if len(_fenced_blocks(content, "chartjs")) > 1:
         errors.append("Chart.js 차트 1개 초과")
     other_fences = [
@@ -1214,6 +1233,13 @@ def _fallback_post_data(topic_data, evidence):
         "- 가격, 지역별 제공 범위, 실제 도입 조건은 원문에서 다시 확인해야 합니다."
     )
     content = f"""
+```mermaid
+flowchart LR
+    A["오늘의 AI 변화"] --> B["직접 원문 확인"]
+    B --> C["사용자와 개발자 영향"]
+    C --> D["도입 조건과 한계"]
+```
+
 {topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다.
 
 {NEWS_HEADINGS[0]}
@@ -1226,6 +1252,13 @@ def _fallback_post_data(topic_data, evidence):
 
 이 소식의 핵심은 새 기능이나 발표의 이름보다 실제 사용자와 개발자의 선택이 달라지는지에 있습니다. 지금 단계에서는 원문이 밝힌 내용과 아직 공개하지 않은 내용을 분리해서 보는 것이 안전합니다.
 
+```mermaid
+flowchart TD
+    A["새 발표 확인"] --> B["기존 도구와 비교"]
+    B --> C["작은 작업에서 시험"]
+    C --> D["비용과 조건 재확인"]
+```
+
 {NEWS_HEADINGS[2]}
 
 도입을 검토한다면 현재 쓰는 도구와 바로 교체하기보다 작은 작업에서 먼저 비교해 보는 편이 좋습니다. 제공 지역, 요금, 데이터 처리 방식처럼 의사결정에 영향을 주는 조건은 실제 사용 전에 원문에서 다시 확인해야 합니다.
@@ -1233,6 +1266,13 @@ def _fallback_post_data(topic_data, evidence):
 {NEWS_HEADINGS[3]}
 
 첫째, 공식 제공 범위와 사용 조건을 확인합니다. 둘째, 기존 작업 흐름에서 시간을 줄여주는지 작은 예제로 비교합니다. 셋째, 발표 내용과 실제 일반 제공 상태가 같은지 구분합니다.
+
+```mermaid
+flowchart LR
+    A["도입 검토"] --> B{{"조건 확인"}}
+    B -->|충분함| C["제한된 범위에서 적용"]
+    B -->|부족함| D["추가 원문과 업데이트 대기"]
+```
 
 {NEWS_HEADINGS[4]}
 
@@ -1297,7 +1337,12 @@ def _relax_post_data(post, topic_data, evidence):
             post[key] = fallback[key]
     content = _remove_unverified_links(post.get("content"), evidence)
     positions = [content.find(heading) for heading in NEWS_HEADINGS]
-    if any(position < 0 for position in positions) or positions != sorted(positions):
+    if (
+        any(position < 0 for position in positions)
+        or positions != sorted(positions)
+        or not content.lstrip().lower().startswith("```mermaid")
+        or len(_fenced_blocks(content, "mermaid")) not in {3, 4, 5}
+    ):
         content = fallback["content"]
     post["content"] = content
     post["tags"] = list(dict.fromkeys(
@@ -1356,9 +1401,14 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
 - 회사·제품·모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어·약칭·핵심 검색어를
   억지로 반복하지 않는다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
 - 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
-- Mermaid를 1~3개 넣는다. 사건 흐름, 제품 작동 방식, 선택 기준처럼 글만으로
-  한눈에 안 들어오는 관계를 flowchart·sequenceDiagram·timeline 중 알맞은 형태로
-  보여준다. 노드와 라벨에도 facts와 unknowns에 있는 내용만 쓰며 가짜 수치를 만들지 않는다.
+- content의 첫 요소는 반드시 전체 글을 한눈에 요약하는 Mermaid 다이어그램이어야 한다.
+  도입 문단이나 설명 문장보다 먼저 ```mermaid 코드 블록을 배치하고, 사건 → 근거 →
+  사용자 영향 → 확인할 한계의 흐름을 4~7개 노드로 간결하게 보여준다.
+- Mermaid는 첫 전체 흐름도를 포함해 3~5개 넣는다. 최소한 ① 글 전체 요약,
+  ② 사건 또는 제품 작동 흐름, ③ 독자의 도입 판단·주의점 다이어그램을 각각 하나씩
+  만든다. flowchart·sequenceDiagram·timeline 등 내용에 맞는 형식을 섞고, 같은
+  결론을 모양만 바꿔 반복하지 않는다. 노드와 라벨에도 facts와 unknowns에 있는
+  내용만 쓰며 가짜 수치를 만들지 않는다.
 - 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
   chartjs 코드 블록 안에는 주석 없는 순수 JSON만 쓰고 type, data.labels,
   data.datasets를 포함한다. 모든 dataset에는 label을 붙이고 options.plugins.title에는
