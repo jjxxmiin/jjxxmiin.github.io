@@ -500,7 +500,6 @@ actually announced, released, published, filed, or reported in the last
     )
     
     if response_text:
-        import json
         try:
             data = json.loads(response_text)
             cleaned = []

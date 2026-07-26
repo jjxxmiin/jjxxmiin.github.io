@@ -53,6 +53,32 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             bot.recent_publication("unknown", now=self.now, max_days=7)
         )
 
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_discovery_executes_full_prompt_and_normalizes_candidates(self, generate):
+        generate.return_value = json.dumps([{
+            "topic_name": "Example AI",
+            "headline": "Example AI releases a verified new model",
+            "summary": "The company released a new model.",
+            "why_it_matters": "Developers can evaluate a new option.",
+            "event_status": "released",
+            "published_at": "2026-07-26",
+            "source_name": "Example",
+            "source_url": "https://example.com/2026/07/new-model?utm_source=test",
+            "source_tier": "official",
+            "entities": ["Example AI", "Example Model"],
+            "search_query": "Example AI new model official announcement",
+            "trend_score": 91,
+        }])
+        with mock.patch.object(bot, "kst_now", return_value=self.now), \
+                mock.patch.object(bot, "recent_news_history", return_value=[]):
+            candidates = bot.find_trending_topic(mock.Mock())
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(
+            candidates[0]["source_url"],
+            "https://example.com/2026/07/new-model",
+        )
+        self.assertEqual(candidates[0]["trend_score"], 91)
+
     def test_duplicate_story_matches_source_but_not_company_name(self):
         history = [{
             "title": "Example의 이전 소식",
