@@ -1,0 +1,25 @@
+{% assign all_news_posts = site.posts | where: "article_type", "NewsArticle" %}
+{% if include.lang contains "ko" %}
+  {% assign news_posts = all_news_posts | where: "lang", "ko-KR" %}
+{% else %}
+  {% assign news_posts = all_news_posts | where: "lang", "en" %}
+{% endif %}
+{% assign newsroom_tags = "" | split: "" %}
+{% for post in news_posts %}
+  {% for tag in post.tags %}
+    {% unless newsroom_tags contains tag %}
+      {% assign newsroom_tags = newsroom_tags | push: tag %}
+    {% endunless %}
+  {% endfor %}
+{% endfor %}
+{% if newsroom_tags.size > 0 %}
+  <section>
+    <h2 class="panel-heading">{% if include.lang contains "ko" %}AI 주제{% else %}AI Topics{% endif %}</h2>
+    <div class="d-flex flex-wrap mt-3 mb-1 me-3">
+      {% for tag_name in newsroom_tags limit:10 %}
+        {% assign url = tag_name | slugify | url_encode | prepend: "/tags/" | append: "/" %}
+        <a class="post-tag btn btn-outline-primary" href="{{ url | relative_url }}">{{ tag_name }}</a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}

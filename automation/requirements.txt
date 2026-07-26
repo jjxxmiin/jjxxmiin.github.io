@@ -2,3 +2,4 @@ requests
 google-genai
 PyYAML
 beautifulsoup4
+Pillow

@@ -1,8 +1,17 @@
+---
+permalink: /robots.txt
+---
 # robots.txt — opsoai.com
-# Search + AI answer engines are all welcome (AEO: we WANT AI search to cite us).
+# Search and AI answer engines may crawl and cite public OPSOAI content.
 
-# ---- Search engines ----
+# Search engines
 User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Image
 Allow: /
 
 User-agent: Yeti
@@ -17,14 +26,14 @@ Allow: /
 User-agent: Daumoa
 Allow: /
 
-# ---- AI / answer engines (ChatGPT, Claude, Gemini, Perplexity, etc.) ----
-User-agent: GPTBot
-Allow: /
-
+# AI search and answer engines
 User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
 Allow: /
 
 User-agent: ClaudeBot
@@ -63,8 +72,8 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-# ---- Everyone else ----
 User-agent: *
 Allow: /
 
 Sitemap: https://www.opsoai.com/sitemap.xml
+Sitemap: https://www.opsoai.com/image-sitemap.xml

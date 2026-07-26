@@ -3,26 +3,32 @@ layout: page
 title: About
 icon: fas fa-info-circle
 order: 4
+description: Learn how OPSOAI selects, verifies, explains, and illustrates consequential AI stories with credited source visuals for a global audience.
+robots: "noindex, follow"
+sitemap: false
 ---
 
-# OPSOAI 소개
+# About OPSOAI
 
-**OPSOAI**는 인공지능(AI) 분야의 최신 연구 성과와 기술 트렌드를 심도 있게 다루는 전문 테크 블로그입니다.
+**OPSOAI** is an independent technology publication focused on consequential developments in artificial intelligence.
 
-## 미션 (Mission)
+## Mission
 
-우리의 미션은 방대하게 쏟아지는 AI 논문과 기술 정보 속에서 **가장 가치 있는 지식**을 선별하여, 연구자와 개발자들이 쉽고 깊이 있게 이해할 수 있도록 돕는 것입니다.
+Our mission is to identify the AI stories that materially change a product, workflow, market, policy, or technical decision—and explain them without losing the conditions and limitations in the source.
 
-## 주요 콘텐츠
+## What we publish
 
-*   **Daily Paper Review**: 매일 쏟아지는 Hugging Face Daily Papers 중 핵심적인 Computer Vision 및 Generative AI 논문을 선정하여 심층 분석합니다.
-*   **Tech Insights**: 복잡한 수식과 이론을 넘어, 실제 산업에 적용 가능한 인사이트와 기술적 함의를 제공합니다.
-*   **Expert Analysis**: 단순한 요약을 넘어, 아키텍처의 장단점과 프레임워크의 혁신성을 비판적인 시각에서 분석합니다.
+- **Twice-daily bilingual AI news:** one source-checked global story every morning and afternoon, published as linked English and Korean editions.
+- **Source-led visuals:** images collected from checked source pages, displayed with visible credit and a direct link to the publisher.
+- **Practical analysis:** what changed, who is affected, what to verify, and what remains unknown.
+- **Human voice:** short, conversational explanations and useful questions instead of press-release or analyst-report prose.
+- **Legacy research and open-source archive:** earlier technical articles remain available in their original Korean.
 
-## 운영자
+## Editorial standard
 
-OPSOAI는 AI 기술의 대중화와 전문 지식의 공유를 지향합니다.
-문의사항이 있으시다면 언제든 연락 부탁드립니다.
+Official announcements, documentation, filings, and papers are prioritized. Material claims are linked to direct sources, company claims are labeled, and preliminary findings remain preliminary.
 
-*   **Email**: ceo@opsoai.com
-*   **Github**: [jjxxmiin](https://github.com/jjxxmiin)
+## Contact
+
+- **Email:** ceo@opsoai.com
+- **GitHub:** [jjxxmiin](https://github.com/jjxxmiin)

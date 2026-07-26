@@ -6,95 +6,271 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta
     name="viewport"
-    content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
   >
 
-  {%- capture seo_tags -%}
-    {% seo title=false %}
-  {%- endcapture -%}
+  {%- comment -%}One canonical metadata source avoids duplicate descriptions/OG tags.{%- endcomment -%}
+  {% assign is_home = false %}
+  {% if page.layout == 'home' or page.url == '/' %}{% assign is_home = true %}{% endif %}
+  {% assign raw_title = page.seo_title | default: page.title | default: site.title %}
+  {% assign page_lang = page.lang | default: site.lang | default: 'en' %}
+  {% assign og_locale = page_lang | replace: '-', '_' %}
+  {% if is_home %}
+    {% capture seo_title %}{{ site.title }} | {{ site.tagline }}{% endcapture %}
+  {% else %}
+    {% capture seo_title %}{{ raw_title }} | {{ site.title }}{% endcapture %}
+  {% endif %}
+  {% assign seo_title = seo_title | strip_html | strip_newlines | strip %}
+  {% assign raw_description = page.description | default: page.summary | default: page.excerpt | default: site.description %}
+  {% assign seo_description = raw_description | strip_html | strip_newlines | truncate: 160 %}
+  {% if seo_description.size < 80 %}
+    {% if page.layout == 'post' %}
+      {% if page_lang contains 'ko' %}
+        {% capture seo_description %}{{ raw_title | strip_html }}의 주요 개념과 배경, 작동 원리, 실제 활용과 한계를 OPSOAI가 한국어로 설명합니다. 관련 AI 기술을 처음 접하는 독자도 이해할 수 있게 정리했습니다.{% endcapture %}
+      {% else %}
+        {% capture seo_description %}OPSOAI explains {{ raw_title | strip_html }} with verified sources, practical impact, limitations, and the details AI builders and users need to know.{% endcapture %}
+      {% endif %}
+    {% else %}
+      {% if page_lang contains 'ko' %}
+        {% capture seo_description %}{{ raw_title | strip_html }}에서 OPSOAI가 직접 원문으로 확인한 최신 AI 뉴스와 인공지능 기술 해설을 찾아보세요. 주요 변화와 실제 영향을 한국어로 알기 쉽게 정리합니다.{% endcapture %}
+      {% else %}
+        {% capture seo_description %}Explore source-checked AI news and analysis from OPSOAI, with clear explanations of what changed, why it matters, and what to watch next.{% endcapture %}
+      {% endif %}
+    {% endif %}
+    {% assign seo_description = seo_description | strip_newlines | truncate: 160 %}
+  {% endif %}
+  {% assign canonical_url = page.canonical_url | default: page.url | absolute_url %}
+  {% assign image_src = page.image.path | default: page.image | default: site.social_preview_image %}
+  {% assign image_alt = page.image.alt | default: page.title | default: site.title %}
+  {% if image_src contains '://' %}
+    {% assign image_url = image_src %}
+  {% else %}
+    {% assign image_url = image_src | absolute_url %}
+  {% endif %}
+  {% assign keyword_values = page.keywords | default: page.tags | default: site.keywords %}
+  {% assign keyword_text = keyword_values | join: ', ' %}
+  {% assign robots_value = page.robots | default: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' %}
 
-  <!-- Setup Open Graph image -->
+  <title>{{ seo_title | escape }}</title>
+  <meta name="description" content="{{ seo_description | escape }}">
+  <meta name="keywords" content="{{ keyword_text | escape }}">
+  <meta name="author" content="{{ site.social.name | default: site.title | escape }}">
+  <meta name="robots" content="{{ robots_value }}">
+  <meta name="googlebot" content="{{ robots_value }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+  {% if page.translations %}
+    {% if page.translations.en %}<link rel="alternate" hreflang="en" href="{{ page.translations.en | absolute_url }}">{% endif %}
+    {% if page.translations.ko %}<link rel="alternate" hreflang="ko" href="{{ page.translations.ko | absolute_url }}">{% endif %}
+    <link rel="alternate" hreflang="x-default" href="{{ page.translations.en | default: page.url | absolute_url }}">
+  {% else %}
+    <link rel="alternate" hreflang="{{ page_lang }}" href="{{ canonical_url }}">
+    <link rel="alternate" hreflang="x-default" href="{% if page_lang contains 'en' %}{{ canonical_url }}{% else %}{{ '/' | absolute_url }}{% endif %}">
+  {% endif %}
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }} feed" href="{{ '/feed.xml' | absolute_url }}">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ '/sitemap.xml' | absolute_url }}">
 
-  {% if page.image %}
-    {% assign src = page.image.path | default: page.image %}
-
-    {% unless src contains '://' %}
-      {%- capture img_url -%}
-        {% include media-url.html src=src subpath=page.media_subpath absolute=true %}
-      {%- endcapture -%}
-
-      {%- capture old_url -%}{{ src | absolute_url }}{%- endcapture -%}
-      {%- capture new_url -%}{{ img_url }}{%- endcapture -%}
-
-      {% assign seo_tags = seo_tags | replace: old_url, new_url %}
-    {% endunless %}
-
-  {% elsif site.social_preview_image %}
-    {%- capture img_url -%}
-      {% include media-url.html src=site.social_preview_image absolute=true %}
-    {%- endcapture -%}
-
-    {%- capture og_image -%}
-      <meta property="og:image" content="{{ img_url }}" />
-    {%- endcapture -%}
-
-    {%- capture twitter_image -%}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta property="twitter:image" content="{{ img_url }}" />
-    {%- endcapture -%}
-
-    {% assign old_meta_clip = '<meta name="twitter:card" content="summary" />' %}
-    {% assign new_meta_clip = og_image | append: twitter_image %}
-    {% assign seo_tags = seo_tags | replace: old_meta_clip, new_meta_clip %}
+  <meta property="og:locale" content="{{ og_locale }}">
+  <meta property="og:site_name" content="{{ site.title | escape }}">
+  <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{{ seo_title | escape }}">
+  <meta property="og:description" content="{{ seo_description | escape }}">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:image" content="{{ image_url }}">
+  <meta property="og:image:alt" content="{{ image_alt | strip_html | escape }}">
+  {% if page.image.width and page.image.height %}
+    <meta property="og:image:width" content="{{ page.image.width }}">
+    <meta property="og:image:height" content="{{ page.image.height }}">
+  {% elsif page.image == nil %}
+    <meta property="og:image:width" content="{{ site.social_preview_image_width | default: 1200 }}">
+    <meta property="og:image:height" content="{{ site.social_preview_image_height | default: 630 }}">
+  {% endif %}
+  {% if page.layout == 'post' %}
+    <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+    <meta property="article:modified_time" content="{{ page.last_modified_at | default: page.date | date_to_xmlschema }}">
+    <meta property="article:section" content="{{ page.categories | first | default: 'AI' | escape }}">
+    {% for tag in page.tags %}<meta property="article:tag" content="{{ tag | escape }}">{% endfor %}
   {% endif %}
 
-  <!-- Manual Meta Description Override (since jekyll-seo-tag ignores params sometimes) -->
-  {% assign seo_description = page.description | default: page.summary %}
-  {% if seo_description %}
-    {% assign seo_description_stripped = seo_description | strip_html | strip_newlines | truncate: 160 %}
-    <meta name="description" content="{{ seo_description_stripped }}">
-    <meta property="og:description" content="{{ seo_description_stripped }}">
-    <meta property="twitter:description" content="{{ seo_description_stripped }}">
-    <!-- Remove default description tags from seo_tags to avoid duplicates -->
-    {% assign description_regex = '<meta (name|property)="description" content="[^"]*" />' %}
-    {% assign og_description_regex = '<meta (name|property)="og:description" content="[^"]*" />' %}
-    {% assign twitter_description_regex = '<meta (name|property)="twitter:description" content="[^"]*" />' %}
-    
-    {% assign seo_tags = seo_tags | replace: description_regex, '' %}
-    {% assign seo_tags = seo_tags | replace: og_description_regex, '' %}
-    {% assign seo_tags = seo_tags | replace: twitter_description_regex, '' %}
-  {% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ seo_title | escape }}">
+  <meta name="twitter:description" content="{{ seo_description | escape }}">
+  <meta name="twitter:image" content="{{ image_url }}">
+  <meta name="twitter:image:alt" content="{{ image_alt | strip_html | escape }}">
 
-  <!-- Naver Verification -->
-  {% if site.webmaster_verifications.naver %}
-    <meta name="naver-site-verification" content="{{ site.webmaster_verifications.naver }}" />
-  {% endif %}
+  <style>
+    .news-visual{margin:2rem 0 2.25rem}
+    .news-visual img{display:block;width:100%;height:auto;margin:0;border-radius:16px;box-shadow:0 14px 34px rgba(15,23,42,.16)}
+    .news-visual figcaption{margin:.65rem .25rem 0;color:var(--text-muted-color);font-size:.82rem;line-height:1.55}
+    .news-visual figcaption strong{color:#2a78d6;letter-spacing:.06em}
+    .language-switcher{display:inline-flex;align-items:center;gap:.2rem;padding:.22rem;border:1px solid var(--main-border-color);border-radius:999px;background:var(--card-bg)}
+    .language-switcher a{padding:.38rem .72rem;border-radius:999px;color:var(--text-muted-color);font-size:.78rem;font-weight:800;text-decoration:none;line-height:1}
+    .language-switcher a[aria-current="page"]{background:#2a78d6;color:#fff}
+    .article-snapshot{margin:.25rem 0 2rem;padding:1.15rem 1.25rem 1.05rem;border:1px solid rgba(42,120,214,.28);border-left:4px solid #2a78d6;border-radius:14px;background:rgba(42,120,214,.065)}
+    .article-snapshot strong{display:block;margin-bottom:.55rem;color:#2a78d6;font-size:.82rem;letter-spacing:.04em}
+    .article-snapshot ul{margin:0;padding-left:1.15rem}
+    .article-snapshot li{margin:.34rem 0;line-height:1.55}
+  </style>
 
-  {{ seo_tags }}
+  {% if site.webmaster_verifications.google %}<meta name="google-site-verification" content="{{ site.webmaster_verifications.google }}">{% endif %}
+  {% if site.webmaster_verifications.bing %}<meta name="msvalidate.01" content="{{ site.webmaster_verifications.bing }}">{% endif %}
+  {% if site.webmaster_verifications.naver %}<meta name="naver-site-verification" content="{{ site.webmaster_verifications.naver }}">{% endif %}
+  {% if site.webmaster_verifications.yandex %}<meta name="yandex-verification" content="{{ site.webmaster_verifications.yandex }}">{% endif %}
 
-  <!-- AEO: FAQPage structured data (answer engines + Google rich results) -->
+  {%- comment -%}SEO/AEO/GEO knowledge graph shared by every rendered page.{%- endcomment -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": {{ site.url | append: "/#organization" | jsonify }},
+        "name": {{ site.title | jsonify }},
+        "url": {{ site.url | append: "/" | jsonify }},
+        "logo": {
+          "@type": "ImageObject",
+          "url": {{ site.logo | default: site.avatar | absolute_url | jsonify }}
+        },
+        "email": {{ site.social.email | jsonify }}
+      },
+      {
+        "@type": "WebSite",
+        "@id": {{ site.url | append: "/#website" | jsonify }},
+        "url": {{ site.url | append: "/" | jsonify }},
+        "name": {{ site.title | jsonify }},
+        "description": {{ site.description | strip_newlines | jsonify }},
+        "inLanguage": {{ site.lang | default: "en" | jsonify }},
+        "publisher": {"@id": {{ site.url | append: "/#organization" | jsonify }}}
+      },
+      {
+        "@type": "WebPage",
+        "@id": {{ canonical_url | append: "#webpage" | jsonify }},
+        "url": {{ canonical_url | jsonify }},
+        "name": {{ seo_title | jsonify }},
+        "description": {{ seo_description | jsonify }},
+        "inLanguage": {{ page_lang | jsonify }},
+        "isPartOf": {"@id": {{ site.url | append: "/#website" | jsonify }}},
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": {{ image_url | jsonify }}
+          {% if page.image.width %},
+          "width": {{ page.image.width | jsonify }}{% endif %}
+          {% if page.image.height %},
+          "height": {{ page.image.height | jsonify }}{% endif %}
+          {% if page.image.caption or page.image.alt %},
+          "caption": {{ page.image.caption | default: page.image.alt | strip_html | jsonify }}{% endif %}
+          {% if page.image.credit %},
+          "creditText": {{ page.image.credit | strip_html | jsonify }}{% endif %}
+        }
+        {% if page.entities and page.entities.size > 0 %},
+        "about": [
+          {% for entity in page.entities %}{"@type": "Thing", "name": {{ entity | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}
+        ]{% endif %}
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": {{ canonical_url | append: "#breadcrumb" | jsonify }},
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": {{ site.title | jsonify }},
+            "item": {{ site.url | append: "/" | jsonify }}
+          }{% unless is_home %},
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ raw_title | strip_html | jsonify }},
+            "item": {{ canonical_url | jsonify }}
+          }{% endunless %}
+        ]
+      }{% if page.layout == 'post' %},
+      {
+        "@type": {{ page.article_type | default: "BlogPosting" | jsonify }},
+        "@id": {{ canonical_url | append: "#article" | jsonify }},
+        "mainEntityOfPage": {"@id": {{ canonical_url | append: "#webpage" | jsonify }}},
+        "headline": {{ page.title | strip_html | jsonify }},
+        "description": {{ seo_description | jsonify }},
+        "image": [
+          {
+            "@type": "ImageObject",
+            "url": {{ image_url | jsonify }}
+            {% if page.image.width %},
+            "width": {{ page.image.width | jsonify }}{% endif %}
+            {% if page.image.height %},
+            "height": {{ page.image.height | jsonify }}{% endif %}
+            {% if page.image.caption or page.image.alt %},
+            "caption": {{ page.image.caption | default: page.image.alt | strip_html | jsonify }}{% endif %}
+            {% if page.image.credit %},
+            "creditText": {{ page.image.credit | strip_html | jsonify }}{% endif %}
+          }{% if page.article_images and page.article_images.size > 0 %},
+          {% for article_image in page.article_images %}
+            {% assign article_image_src = article_image.path | default: article_image %}
+            {
+              "@type": "ImageObject",
+              "url":
+            {% if article_image_src contains '://' %}
+              {{ article_image_src | jsonify }}
+            {% else %}
+              {{ article_image_src | absolute_url | jsonify }}
+            {% endif %}
+              {% if article_image.width %},
+              "width": {{ article_image.width | jsonify }}{% endif %}
+              {% if article_image.height %},
+              "height": {{ article_image.height | jsonify }}{% endif %}
+              {% if article_image.caption or article_image.alt %},
+              "caption": {{ article_image.caption | default: article_image.alt | strip_html | jsonify }}{% endif %}
+              {% if article_image.credit %},
+              "creditText": {{ article_image.credit | strip_html | jsonify }}{% endif %}
+            }{% unless forloop.last %},{% endunless %}
+          {% endfor %}{% endif %}
+        ],
+        "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+        "dateModified": {{ page.last_modified_at | default: page.date | date_to_xmlschema | jsonify }},
+        "inLanguage": {{ page_lang | jsonify }},
+        "isAccessibleForFree": true,
+        "author": {"@id": {{ site.url | append: "/#organization" | jsonify }}},
+        "publisher": {"@id": {{ site.url | append: "/#organization" | jsonify }}},
+        "articleSection": {{ page.categories | join: ", " | jsonify }},
+        "keywords": {{ keyword_text | jsonify }},
+        "speakable": {
+          "@type": "SpeakableSpecification",
+          "cssSelector": ["article h1", ".post-desc", ".content > p:first-of-type"]
+        }
+        {% if page.entities and page.entities.size > 0 %},
+        "about": [
+          {% for entity in page.entities %}{"@type": "Thing", "name": {{ entity | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}
+        ],
+        "mentions": [
+          {% for entity in page.entities %}{"@type": "Thing", "name": {{ entity | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}
+        ]{% endif %}
+        {% if page.source_citations and page.source_citations.size > 0 %},
+        "citation": [
+          {% for source in page.source_citations %}{{ source.url | jsonify }}{% unless forloop.last %},{% endunless %}{% endfor %}
+        ]{% endif %}
+      }{% endif %}
+    ]
+  }
+  </script>
+
   {% if page.faq and page.faq.size > 0 %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
+      "@id": {{ canonical_url | append: "#faq" | jsonify }},
       "mainEntity": [
         {% for item in page.faq %}{
           "@type": "Question",
           "name": {{ item.question | strip_html | jsonify }},
-          "acceptedAnswer": { "@type": "Answer", "text": {{ item.answer | strip_html | jsonify }} }
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": {{ item.answer | strip_html | jsonify }}
+          }
         }{% unless forloop.last %},{% endunless %}{% endfor %}
       ]
     }
     </script>
   {% endif %}
-
-  <title>
-    {%- unless page.layout == 'home' -%}
-      {{ page.title | append: ' | ' }}
-    {%- endunless -%}
-    {{ site.title }}
-  </title>
 
   {% include_cached favicons.html %}
 

@@ -17,7 +17,14 @@ script_includes:
 <article class="px-1" data-toc="{{ enable_toc }}">
   <header>
     {% include google-ad-script.html %}
-    
+
+    {% if page.translations %}
+      <nav class="language-switcher mb-3" aria-label="{% if page.lang contains 'ko' %}기사 언어{% else %}Article language{% endif %}">
+        <a href="{{ page.translations.ko | relative_url }}" hreflang="ko"{% if page.lang contains 'ko' %} aria-current="page"{% endif %}>한국어</a>
+        <a href="{{ page.translations.en | relative_url }}" hreflang="en"{% unless page.lang contains 'ko' %} aria-current="page"{% endunless %}>English</a>
+      </nav>
+    {% endif %}
+
     <h1 data-toc-skip>{{ page.title }}</h1>
     {% if page.description %}
       <p class="post-desc fw-light mb-4">{{ page.description }}</p>
@@ -48,9 +55,16 @@ script_includes:
         {% endif %}
 
         <div class="mt-3 mb-3">
-          <img {{ src }} {{ class }} {{ alt }} w="1200" h="630" {{ lqip }}>
-          {%- if page.image.alt -%}
-            <figcaption class="text-center pt-2 pb-2">{{ page.image.alt }}</figcaption>
+          <img {{ src }} {{ class }} {{ alt }} width="{{ page.image.width | default: 1200 }}" height="{{ page.image.height | default: 630 }}" {{ lqip }}>
+          {%- if page.image.alt or page.image.caption or page.image.credit -%}
+            <figcaption class="text-center pt-2 pb-2">
+              {{ page.image.caption | default: page.image.alt | escape }}
+              {%- if page.image.source_url -%}
+                &nbsp;·&nbsp;<a href="{{ page.image.source_url | escape }}" rel="noopener noreferrer" target="_blank">Image: {{ page.image.credit | default: "Source" | escape }}</a>
+              {%- elsif page.image.credit -%}
+                &nbsp;·&nbsp;Image: {{ page.image.credit | escape }}
+              {%- endif -%}
+            </figcaption>
           {%- endif -%}
         </div>
       {% endif %}
@@ -157,6 +171,17 @@ script_includes:
   {% endif %}
 
   <div class="content">
+    {% if page.article_type == "NewsArticle" and page.key_takeaways %}
+      <aside class="article-snapshot" aria-label="{% if page.lang contains 'ko' %}핵심 요약{% else %}Quick summary{% endif %}">
+        <strong>{% if page.lang contains 'ko' %}이것만 알고 가세요{% else %}The three things to know{% endif %}</strong>
+        <ul>
+          {% for takeaway in page.key_takeaways limit:3 %}
+            <li>{{ takeaway }}</li>
+          {% endfor %}
+        </ul>
+      </aside>
+    {% endif %}
+
     {%- capture ad_top -%}{% include google-ad-post-top.html %}{%- endcapture -%}
     {%- capture ad_mid -%}{% include google-ad-post-middle.html %}{%- endcapture -%}
     {%- assign parts = content | split: '</p>' -%}

@@ -1,0 +1,66 @@
+{% assign all_stories = site.posts | where: "article_type", "NewsArticle" %}
+{% if include.lang contains "ko" %}
+  {% assign stories = all_stories | where: "lang", "ko-KR" %}
+  {% assign newsroom_is_korean = true %}
+{% else %}
+  {% assign stories = all_stories | where: "lang", "en" %}
+  {% assign newsroom_is_korean = false %}
+{% endif %}
+
+<style>
+.newsroom { max-width:900px; }
+.newsroom-language { display:flex;justify-content:flex-end;margin:0 0 1rem; }
+.newsroom-lead { margin:.1rem 0 1.6rem;color:var(--text-color);line-height:1.7; }
+.newsroom-lead b { display:block;font-size:1.25rem;font-weight:850;margin-bottom:.25rem; }
+.newsroom-lead span { color:var(--text-muted-color); }
+.newsroom-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.15rem; }
+.newsroom-card { overflow:hidden;border:1px solid var(--main-border-color);border-radius:16px;background:var(--card-bg);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
+.newsroom-card:hover { transform:translateY(-4px);box-shadow:var(--card-shadow);border-color:rgba(42,120,214,.45); }
+.newsroom-card a { color:inherit;text-decoration:none; }
+.newsroom-card img { display:block;width:100%;aspect-ratio:1200/630;object-fit:cover;margin:0;border-radius:0; }
+.newsroom-body { padding:1rem 1.05rem 1.1rem; }
+.newsroom-meta { display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem;color:var(--text-muted-color);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em; }
+.newsroom-meta .verified { color:#2a78d6;font-weight:800; }
+.newsroom-title { margin:0 0 .55rem;font-size:1.08rem;line-height:1.38;font-weight:850;color:var(--heading-color); }
+.newsroom-desc { margin:0;color:var(--text-muted-color);font-size:.87rem;line-height:1.58;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden; }
+.newsroom-empty { padding:2rem;border:1px dashed var(--main-border-color);border-radius:14px;color:var(--text-muted-color);text-align:center; }
+@media(max-width:680px){.newsroom-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="newsroom" markdown="0">
+  <div class="newsroom-language">
+    <nav class="language-switcher" aria-label="{% if newsroom_is_korean %}뉴스룸 언어{% else %}Newsroom language{% endif %}">
+      <a href="{{ '/ko/updates/' | relative_url }}" hreflang="ko"{% if newsroom_is_korean %} aria-current="page"{% endif %}>한국어</a>
+      <a href="{{ '/updates/' | relative_url }}" hreflang="en"{% unless newsroom_is_korean %} aria-current="page"{% endunless %}>English</a>
+    </nav>
+  </div>
+  <p class="newsroom-lead">
+    {% if newsroom_is_korean %}
+      <b>뉴스는 많고, 읽을 시간은 짧으니까.</b>
+      <span>하루 두 번 중요한 AI 이야기만 골라 딱딱한 보도자료 대신 쉬운 설명, 실제 영향, 바로 써먹을 체크리스트로 전합니다.</span>
+    {% else %}
+      <b>Too much AI news. Not enough time.</b>
+      <span>Twice a day, we pick the story that matters and turn the source material into a clear explanation, a useful checklist, and an honest account of what remains unknown.</span>
+    {% endif %}
+  </p>
+
+  {% if stories.size > 0 %}
+  <div class="newsroom-grid">
+    {% for post in stories limit:24 %}
+    <article class="newsroom-card">
+      <a href="{{ post.url | relative_url }}">
+        {% assign card_image = post.image.path | default: post.image %}
+        <img src="{{ card_image | relative_url }}" alt="{{ post.image.alt | default: post.title | escape }}" width="1200" height="630" loading="lazy" decoding="async">
+        <div class="newsroom-body">
+          <div class="newsroom-meta"><span class="verified">{% if newsroom_is_korean %}원문 검증{% else %}Source checked{% endif %}</span><span>•</span><time datetime="{{ post.date | date_to_xmlschema }}">{% if newsroom_is_korean %}{{ post.date | date: "%Y. %-m. %-d." }}{% else %}{{ post.date | date: "%b %-d, %Y" }}{% endif %}</time></div>
+          <h2 class="newsroom-title">{{ post.title }}</h2>
+          <p class="newsroom-desc">{{ post.description | default: post.summary | strip_html }}</p>
+        </div>
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="newsroom-empty">{% if newsroom_is_korean %}한국어 AI 뉴스룸의 첫 기사를 준비하고 있습니다.{% else %}The global AI newsroom is preparing its first story.{% endif %}</div>
+  {% endif %}
+</div>
