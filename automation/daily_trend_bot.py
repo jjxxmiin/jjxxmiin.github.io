@@ -214,6 +214,46 @@ def insert_source_images(content, images):
     return content
 
 
+def compact_source_citations(content, sources):
+    """Replace long inline publisher links with linked numeric source markers."""
+    source_numbers = {
+        canonical_url(source.get("url")): index
+        for index, source in enumerate(sources or [], 1)
+        if canonical_url(source.get("url"))
+    }
+    pattern = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
+
+    def replace(match):
+        number = source_numbers.get(canonical_url(match.group(2)))
+        if not number:
+            return match.group(0)
+        label = html.escape(match.group(1).strip(), quote=True)
+        return (
+            f'<sup class="source-citation">'
+            f'<a href="#source-{number}" aria-label="{label} 출처">[{number}]</a>'
+            "</sup>"
+        )
+
+    return pattern.sub(replace, str(content or ""))
+
+
+def source_list_html(sources):
+    """Render the checked-source list with anchors targeted by numeric citations."""
+    lines = ['<ol class="checked-source-list">']
+    for index, source in enumerate(sources or [], 1):
+        url = html.escape(str(source.get("url") or ""), quote=True)
+        publisher = html.escape(str(source.get("publisher") or "원문"))
+        title = html.escape(str(source.get("title") or "직접 원문"))
+        published = html.escape(str(source.get("published_at") or ""))
+        lines.append(
+            f'  <li id="source-{index}"><a href="{url}" target="_blank" '
+            f'rel="noopener noreferrer">{publisher} — {title}</a>'
+            f"{f' ({published})' if published else ''}</li>"
+        )
+    lines.append("</ol>")
+    return "\n".join(lines)
+
+
 # Configuration
 # Resolve relative to THIS file (not the caller's CWD) so it works whether run as
 # `cd automation && python daily_trend_bot.py` (CI) or `python automation/daily_trend_bot.py`.
@@ -853,7 +893,8 @@ def generate_blog_post(client, topic_data, evidence):
 - facts에 있는 내용만 사실로 쓴다. unknowns는 모르는 사실 또는 한계로 명시한다.
 - 수치, 가격, 날짜, 출시 범위, 프리뷰/지역/평가 조건을 절대 생략하거나 확대하지 않는다.
 - 사실을 말한 문장 바로 옆에 [공식 발표 또는 매체명](검증된 URL)을 붙인다.
-  evidence.sources에 없는 URL은 절대 만들지 않는다.
+  저장 단계에서 짧은 숫자 각주로 자동 변환된다. evidence.sources에 없는 URL은
+  절대 만들지 않는다.
 - 첫 두 문장은 독자가 "그래서 내게 무슨 의미인데?"를 바로 알게 한다.
 - 말투는 똑똑한 친구에게 설명하는 인기 파워블로거처럼 친근하고 리듬감 있게 쓴다.
   짧은 문장, 자연스러운 질문, 구체적인 예시를 섞되 억지 유행어나 호들갑은 금지한다.
@@ -989,7 +1030,11 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         }
         article_images = []
 
-    content = insert_source_images(post_data["content"], article_images)
+    # Keep the prose clean: long publisher links become [1], [2] markers. Collected
+    # source images are also placed in the body; when only one survives validation,
+    # the hero is intentionally reused once so the article is not text-only.
+    content = compact_source_citations(post_data["content"], evidence["sources"])
+    content = insert_source_images(content, images)
     primary_source = next(
         (source for source in evidence["sources"] if source.get("tier") == "official"),
         evidence["sources"][0],
@@ -1034,12 +1079,7 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     body = [content.rstrip(), "", "## 자주 묻는 질문", ""]
     for item in faq:
         body += [f"### {item['question']}", "", item["answer"], ""]
-    body += ["## 직접 확인한 원문", ""]
-    for source in evidence["sources"]:
-        body.append(
-            f"- [{source['publisher']} — {source['title']}]({source['url']}) "
-            f"({source['published_at']})"
-        )
+    body += ["## 직접 확인한 원문", "", source_list_html(evidence["sources"])]
     body += [
         "",
         "> 이 글은 위 원문을 직접 확인해 작성했습니다. 가격, 기능 범위, 지역별 제공 "

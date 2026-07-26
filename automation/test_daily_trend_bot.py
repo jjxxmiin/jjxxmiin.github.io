@@ -187,6 +187,35 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             output.index("## 왜 지금 다들 이 이야기를 할까?"),
         )
 
+    def test_source_links_become_numbered_citations(self):
+        sources = [
+            {
+                "url": "https://example.com/news/model",
+                "publisher": "Example",
+                "title": "Official model announcement",
+                "published_at": "2026-07-25",
+            },
+            {
+                "url": "https://trusted.example.net/ai/model",
+                "publisher": "Trusted Tech",
+                "title": "Independent coverage",
+                "published_at": "2026-07-25",
+            },
+        ]
+        content = (
+            "공식 가격이 공개됐습니다"
+            "[Example](https://example.com/news/model?utm_source=blog). "
+            "독립 보도도 이를 확인했습니다"
+            "[Trusted Tech](https://trusted.example.net/ai/model)."
+        )
+        compact = bot.compact_source_citations(content, sources)
+        self.assertIn('href="#source-1"', compact)
+        self.assertIn('href="#source-2"', compact)
+        self.assertNotIn("[Example](", compact)
+        source_list = bot.source_list_html(sources)
+        self.assertIn('id="source-1"', source_list)
+        self.assertIn('id="source-2"', source_list)
+
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
         post = {
             "title_korean": "Example AI 새 모델, 실제로 달라진 세 가지",
@@ -194,7 +223,10 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             "description": "Example AI가 공개한 새 모델의 실제 변화와 제공 범위, 도입 전에 확인할 제한 조건을 직접 원문을 바탕으로 정리합니다.",
             "summary": "Example AI가 새 모델을 공개했습니다. 실제 도입 전에는 제공 범위와 제한 조건을 확인해야 합니다.",
             "content": "\n\n".join([
-                "첫 문단입니다.",
+                (
+                    "첫 문단입니다"
+                    "[Example](https://example.com/news/new-model)."
+                ),
                 *[f"{heading}\n\n검증된 본문입니다." for heading in bot.NEWS_HEADINGS],
             ]),
             "tags": ["AI 뉴스", "Example AI", "생성형 AI", "AI 모델", "AI 트렌드"],
@@ -261,6 +293,9 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertNotIn("project", front_matter)
         self.assertNotIn("tags", front_matter)
         self.assertIn('<figure class="news-source-image">', raw)
+        self.assertIn('href="#source-1"', raw)
+        self.assertIn('id="source-1"', raw)
+        self.assertNotIn("[Example](", raw)
         self.assertIn("## 직접 확인한 원문", raw)
 
 

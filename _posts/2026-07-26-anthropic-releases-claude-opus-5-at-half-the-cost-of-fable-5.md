@@ -47,17 +47,22 @@ faq:
 sitemap: true
 ---
 
-AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 반값으로 떨어졌다는 사실입니다. 앤스로픽이 최상위 모델인 Claude Fable 5에 육박하는 지능을 갖추고도 비용은 정확히 절반으로 줄인 Claude Opus 5를 2026년 7월 24일 정식 출시했습니다[씨넷](https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant).
+AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 반값으로 떨어졌다는 사실입니다. 앤스로픽이 최상위 모델인 Claude Fable 5에 육박하는 지능을 갖추고도 비용은 정확히 절반으로 줄인 Claude Opus 5를 2026년 7월 24일 정식 출시했습니다<sup class="source-citation"><a href="#source-3" aria-label="CNET 출처">[3]</a></sup>.
 
 ## 무슨 일이 벌어진 걸까?
 
-앤스로픽이 2026년 7월 24일, 새로운 AI 모델인 Claude Opus 5를 시장에 내놓았습니다[악시오스](https://www.axios.com/2026/07/24/anthropic-releases-new-model-opus-5). 이번 출시의 핵심은 압도적인 가성비와 최고 수준의 성능이 결합했다는 점입니다. 이 모델의 이용 가격은 100만 입력 토큰당 5달러, 100만 출력 토큰당 25달러로 책정되었습니다. 이는 이전 세대 모델인 Opus 4.8과 동일한 가격이면서, 최상위 모델인 Claude Fable 5의 절반 수준에 불과한 비용입니다[앤스로픽](https://www.anthropic.com/news/introducing-claude-opus-5). 
+앤스로픽이 2026년 7월 24일, 새로운 AI 모델인 Claude Opus 5를 시장에 내놓았습니다<sup class="source-citation"><a href="#source-2" aria-label="Axios 출처">[2]</a></sup>. 이번 출시의 핵심은 압도적인 가성비와 최고 수준의 성능이 결합했다는 점입니다. 이 모델의 이용 가격은 100만 입력 토큰당 5달러, 100만 출력 토큰당 25달러로 책정되었습니다. 이는 이전 세대 모델인 Opus 4.8과 동일한 가격이면서, 최상위 모델인 Claude Fable 5의 절반 수준에 불과한 비용입니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>.
 
-단순히 저렴해지기만 한 것이 아닙니다. Claude Opus 5는 Frontier-Bench나 GDPval-AA 같은 주요 평가 지표에서 새로운 최고 수준(State-of-the-art)의 성능을 기록하며 Claude Fable 5의 지능에 근접하는 성과를 냈습니다[앤스로픽](https://www.anthropic.com/news/introducing-claude-opus-5). 최고급 지능을 중간급 가격표를 달고 내놓아 기업과 개발자들에게 매우 매력적인 선택지를 제공한 것입니다.
+단순히 저렴해지기만 한 것이 아닙니다. Claude Opus 5는 Frontier-Bench나 GDPval-AA 같은 주요 평가 지표에서 새로운 최고 수준(State-of-the-art)의 성능을 기록하며 Claude Fable 5의 지능에 근접하는 성과를 냈습니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>. 최고급 지능을 중간급 가격표를 달고 내놓아 기업과 개발자들에게 매우 매력적인 선택지를 제공한 것입니다.
+
+<figure class="news-source-image">
+  <img src="https://www.cnet.com/wp-content/uploads/sites/2/Opus-5-Hero.png" alt="CNET 원문에 게시된 Claude Opus 5 이미지" loading="lazy" decoding="async">
+  <figcaption>CNET가 Claude Opus 5 기사와 함께 공개한 이미지입니다. <a href="https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant" target="_blank" rel="noopener noreferrer">출처: CNET</a></figcaption>
+</figure>
 
 ## 왜 지금 다들 이 이야기를 할까?
 
-비용 절감과 함께 도입된 대화 도중 도구를 바꿔도 기존 기억을 날리지 않는 새로운 기능 때문입니다. 앤스로픽은 Claude Opus 5와 함께, 개발자가 대화 도중에 도구를 변경하더라도 프롬프트 캐시(Prompt cache)가 무효화되지 않는 베타 기능을 새롭게 도입했습니다[앤스로픽](https://www.anthropic.com/news/introducing-claude-opus-5). 
+비용 절감과 함께 도입된 대화 도중 도구를 바꿔도 기존 기억을 날리지 않는 새로운 기능 때문입니다. 앤스로픽은 Claude Opus 5와 함께, 개발자가 대화 도중에 도구를 변경하더라도 프롬프트 캐시(Prompt cache)가 무효화되지 않는 베타 기능을 새롭게 도입했습니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>.
 
 이게 왜 중요한지 일상적인 상황에 빗대어 보겠습니다. 식당에서 종업원에게 복잡한 주문을 길게 설명했는데, 결제 수단을 바꾼다고 해서 종업원이 주문 내용까지 전부 잊어버리고 처음부터 다시 말하라고 하면 곤란할 것입니다. 기존의 AI 모델들은 긴 문맥을 캐시에 임시로 저장해 두고 쓰다가도, 중간에 도구를 변경하면 이 캐시가 깨져버려 처음부터 다시 데이터를 읽어 들여야 했습니다. 이는 곧 시간 지연과 API 호출 비용 상승으로 직결됩니다. 하지만 이번에 추가된 베타 기능 덕분에 긴 호흡의 작업을 수행하는 기업용 AI 에이전트들이 훨씬 더 유연하고 저렴하게 작동할 수 있게 되었습니다.
 
@@ -65,7 +70,7 @@ AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 �
 
 기업들이 본격적으로 복잡한 코딩이나 기업 지식 노동을 수행하는 AI 에이전트를 실무에 대규모로 투입할 수 있게 됩니다. 지능은 최상위 모델에 근접했는데 비용은 절반으로 줄었고, 프롬프트 캐시까지 유지되니 AI를 활용한 소프트웨어 엔지니어링이나 긴 문서를 다루는 작업의 단가가 획기적으로 낮아지는 구조입니다.
 
-또한, 안전성 검증 과정에서 사용자 경험이 훨씬 매끄러워집니다. 기존에는 생물학 관련 요청이 안전 분류기(Safety classifier)에 걸려 최상위 모델인 Claude Fable 5에서 차단될 경우, 하위 모델인 Opus 4.8로 우회(라우팅)되어 처리되었습니다. 하지만 이제는 이런 요청들이 곧바로 성능이 뛰어난 Claude Opus 5로 라우팅되어 처리됩니다[앤스로픽](https://www.anthropic.com/news/introducing-claude-opus-5). 까다로운 제약이 걸린 전문 분야에서도 사용자가 더 높은 품질의 답변을 끊김 없이 받을 수 있게 된 것입니다.
+또한, 안전성 검증 과정에서 사용자 경험이 훨씬 매끄러워집니다. 기존에는 생물학 관련 요청이 안전 분류기(Safety classifier)에 걸려 최상위 모델인 Claude Fable 5에서 차단될 경우, 하위 모델인 Opus 4.8로 우회(라우팅)되어 처리되었습니다. 하지만 이제는 이런 요청들이 곧바로 성능이 뛰어난 Claude Opus 5로 라우팅되어 처리됩니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>. 까다로운 제약이 걸린 전문 분야에서도 사용자가 더 높은 품질의 답변을 끊김 없이 받을 수 있게 된 것입니다.
 
 ## 직접 써보거나 지켜볼 포인트
 
@@ -73,7 +78,7 @@ AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 �
 
 ## 아직은 선을 그어야 할 부분
 
-모든 면에서 최고 성능을 완벽히 대체할 수 있는 것은 아닙니다. 전반적인 기능 향상에도 불구하고, 사이버 보안 취약점을 찾아내고 악용(Exploiting)하는 특정 기능에 있어서는 여전히 사이버 보안 특화 모델인 Claude Mythos 5에 뒤처집니다[앤스로픽](https://www.anthropic.com/news/introducing-claude-opus-5). 보안 테스트나 고도의 보안 관련 의사결정을 온전히 맡기기에는 아직 명확한 한계가 존재합니다.
+모든 면에서 최고 성능을 완벽히 대체할 수 있는 것은 아닙니다. 전반적인 기능 향상에도 불구하고, 사이버 보안 취약점을 찾아내고 악용(Exploiting)하는 특정 기능에 있어서는 여전히 사이버 보안 특화 모델인 Claude Mythos 5에 뒤처집니다<sup class="source-citation"><a href="#source-1" aria-label="Anthropic 출처">[1]</a></sup>. 보안 테스트나 고도의 보안 관련 의사결정을 온전히 맡기기에는 아직 명확한 한계가 존재합니다.
 
 더불어, 글로벌 서비스 도입 시 규제 관련 불확실성도 고려해야 합니다. 지난 2026년 6월 Claude Fable 5와 Claude Mythos 5에 적용되었던 일시적인 수출 통제나 지역 제한(Geo-restrictions) 조치가 이번 Claude Opus 5 출시에도 동일하게 적용될지 여부는 아직 명확하게 알려지지 않았습니다. 특정 국가나 지역을 대상으로 글로벌 서비스를 준비하는 기업이라면 이 부분의 제약 사항을 예의주시할 필요가 있습니다.
 
@@ -97,8 +102,10 @@ AI 성능이 올라가는 것보다 반가운 소식은 최고 수준의 AI가 �
 
 ## 직접 확인한 원문
 
-- [Anthropic — Introducing Claude Opus 5](https://www.anthropic.com/news/introducing-claude-opus-5) (2026-07-24)
-- [Axios — Anthropic releases new model, Opus 5](https://www.axios.com/2026/07/24/anthropic-releases-new-model-opus-5) (2026-07-24)
-- [CNET — Anthropic Releases Claude Opus 5 to Be Your New 'Everyday' Assistant](https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant) (2026-07-24)
+<ol class="checked-source-list">
+  <li id="source-1"><a href="https://www.anthropic.com/news/introducing-claude-opus-5" target="_blank" rel="noopener noreferrer">Anthropic — Introducing Claude Opus 5</a> (2026-07-24)</li>
+  <li id="source-2"><a href="https://www.axios.com/2026/07/24/anthropic-releases-new-model-opus-5" target="_blank" rel="noopener noreferrer">Axios — Anthropic releases new model, Opus 5</a> (2026-07-24)</li>
+  <li id="source-3"><a href="https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant" target="_blank" rel="noopener noreferrer">CNET — Anthropic Releases Claude Opus 5 to Be Your New 'Everyday' Assistant</a> (2026-07-24)</li>
+</ol>
 
 > 이 글은 위 원문을 직접 확인해 작성했습니다. 가격, 기능 범위, 지역별 제공 여부는 게시 후 바뀔 수 있으니 실제 도입 전 공식 문서를 다시 확인하세요.
