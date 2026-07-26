@@ -1008,7 +1008,6 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         "date": now.strftime("%Y-%m-%d %H:%M:%S %z"),
         "last_modified_at": now.strftime("%Y-%m-%d %H:%M:%S %z"),
         "categories": "Tech",
-        "tags": post_data["tags"],
         "description": post_data["description"],
         "summary": post_data["summary"],
         "author": "AI Trend Bot",

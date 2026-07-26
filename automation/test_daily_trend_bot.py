@@ -259,6 +259,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         )
         self.assertNotIn("github_url", front_matter)
         self.assertNotIn("project", front_matter)
+        self.assertNotIn("tags", front_matter)
         self.assertIn('<figure class="news-source-image">', raw)
         self.assertIn("## 직접 확인한 원문", raw)
 

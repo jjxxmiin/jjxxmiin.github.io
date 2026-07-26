@@ -4,14 +4,6 @@ title: 앤스로픽 Claude Opus 5 출시, Fable 5급 성능을 반값에 제공�
 date: 2026-07-26 20:11:15 +0900
 last_modified_at: 2026-07-26 20:11:15 +0900
 categories: Tech
-tags:
-- Anthropic
-- Claude Opus 5
-- Claude Fable 5
-- 프롬프트 캐싱
-- AI 에이전트
-- 대형언어모델
-- LLM
 description: 앤스로픽이 2026년 7월 24일 Claude Opus 5를 출시했습니다. 최상위 Fable 5 수준의 성능을 반값에 제공하며 프롬프트 캐시 유지 등 실무 도입에 유리한 특징을 갖췄습니다.
 summary: 앤스로픽이 최고 수준 모델인 Claude Fable 5에 근접한 성능을 내면서도 가격은 절반으로 낮춘 Claude Opus 5를 공식 출시했습니다. 특히 대화 도중 도구를 변경해도 프롬프트 캐시가 유지되는 새로운 베타 기능을 도입해, 기업들이 AI 에이전트를 더 저렴하고 효율적으로 운영할 수 있게 되었습니다.
 author: AI Trend Bot
