@@ -1,168 +1,157 @@
 # AI 관련 주식 — automation/ai_stocks_bot.py 가 매일 갱신 (수동 편집도 가능)
-updated: '2026-07-25'
+updated: '2026-07-26'
 stocks:
 - ticker: NVDA
   name: NVIDIA
   market: US
   gf: NVDA:NASDAQ
-  focus: GPU architecture and software ecosystem for AI training and inference.
+  focus: AI 반도체 시장을 장악하고 있는 GPU 및 AI 컴퓨팅 플랫폼 선도 기업
   keywords:
   - gpu
   - cuda
-  - hopper
   - blackwell
+  - hopper
   - tensorrt
 - ticker: MSFT
   name: Microsoft
   market: US
   gf: MSFT:NASDAQ
-  focus: Cloud infrastructure and generative AI integration across enterprise software.
+  focus: 클라우드 컴퓨팅과 생성형 AI 모델을 결합한 엔터프라이즈 AI 서비스 제공
   keywords:
   - azure
-  - copilot
   - openai
+  - copilot
+  - phi-3
   - cloud
-  - windows
-- ticker: AVGO
-  name: Broadcom
+- ticker: GOOGL
+  name: Alphabet
   market: US
-  gf: AVGO:NASDAQ
-  focus: Custom AI ASICs and advanced networking chips for data centers.
+  gf: GOOGL:NASDAQ
+  focus: 자체 개발한 초거대 AI 모델과 맞춤형 AI 가속기를 기반으로 한 생태계 구축
   keywords:
-  - asic
-  - networking
-  - pcie
-  - ethernet
-  - switch
+  - gemini
+  - tpu
+  - tensorflow
+  - vertex ai
+  - gcp
 - ticker: VRT
-  name: Vertiv
+  name: Vertiv Holdings
   market: US
   gf: VRT:NYSE
-  focus: Thermal management and power infrastructure for high-density AI data centers.
+  focus: 고집적 AI 데이터센터 운영에 필수적인 전력 관리 및 액체 냉각 인프라 제공
   keywords:
-  - cooling
-  - hvac
-  - power
-  - datacenter
-  - infrastructure
-- ticker: AMD
-  name: Advanced Micro Devices
+  - liquid cooling
+  - data center
+  - thermal management
+  - 인프라
+  - 쿨링
+- ticker: SMCI
+  name: Super Micro Computer
   market: US
-  gf: AMD:NASDAQ
-  focus: High-performance AI accelerators and data center CPUs.
+  gf: SMCI:NASDAQ
+  focus: 고성능 AI 프로세서를 탑재한 맞춤형 데이터센터 서버 시스템 설계 및 제조
   keywords:
-  - instinct
-  - epyc
-  - rocm
-  - accelerator
-  - cpu
-- ticker: DELL
-  name: Dell Technologies
-  market: US
-  gf: DELL:NYSE
-  focus: Enterprise AI servers and storage optimized for generative AI workloads.
-  keywords:
-  - server
-  - storage
-  - enterprise
-  - hardware
-  - poweredge
+  - ai server
+  - rack scale
+  - liquid cooling
+  - 랙서버
+  - 데이터센터
 - ticker: ARM
   name: Arm Holdings
   market: US
   gf: ARM:NASDAQ
-  focus: Power-efficient instruction set architectures for edge and cloud AI computing.
+  focus: 저전력 고효율 아키텍처를 통해 온디바이스 AI 및 클라우드 프로세서 설계 지원
   keywords:
   - architecture
+  - on-device ai
   - cpu
-  - edge
   - neoverse
-  - mobile
-- ticker: CEG
-  name: Constellation Energy
+  - npu
+- ticker: MU
+  name: Micron Technology
   market: US
-  gf: CEG:NASDAQ
-  focus: Clean nuclear energy supply crucial for power-hungry AI data centers.
-  keywords:
-  - nuclear
-  - energy
-  - datacenter
-  - power
-  - grid
-- ticker: PLTR
-  name: Palantir Technologies
-  market: US
-  gf: PLTR:NYSE
-  focus: AI platforms for data integration and decision making in defense and enterprise.
-  keywords:
-  - aip
-  - gotham
-  - foundry
-  - defense
-  - data
-- ticker: 005930
-  name: Samsung Electronics
-  market: KR
-  gf: 005930:KRX
-  focus: Advanced memory solutions including HBM and foundry services for AI chips.
-  keywords:
-  - hbm
-  - foundry
-  - memory
-  - exynos
-  - 반도체
-- ticker: '000660'
-  name: SK Hynix
-  market: KR
-  gf: 000660:KRX
-  focus: Leading supplier of High Bandwidth Memory (HBM) crucial for AI accelerators.
+  gf: MU:NASDAQ
+  focus: AI 가속기의 병목 현상을 해소하는 고대역폭 메모리 및 고성능 D램 공급
   keywords:
   - hbm
   - dram
   - memory
-  - 엔비디아
   - hbm3e
-- ticker: '042700'
+  - 반도체
+- ticker: CEG
+  name: Constellation Energy
+  market: US
+  gf: CEG:NASDAQ
+  focus: 전력 소모가 극심한 AI 데이터센터에 원자력을 포함한 무탄소 전력 공급
+  keywords:
+  - nuclear
+  - clean energy
+  - data center
+  - grid
+  - 전력
+- ticker: PLTR
+  name: Palantir Technologies
+  market: US
+  gf: PLTR:NYSE
+  focus: 기업 및 정부 기관의 데이터 통합 분석을 지원하는 인공지능 플랫폼 제공
+  keywords:
+  - aip
+  - gotham
+  - foundry
+  - machine learning
+  - 데이터분석
+- ticker: '000660'
+  name: SK Hynix
+  market: KR
+  gf: 000660:KRX
+  focus: 주요 AI 가속기에 탑재되는 최상위 세대 고대역폭 메모리의 핵심 공급사
+  keywords:
+  - hbm
+  - hbm3e
+  - dram
+  - 메모리
+  - 낸드
+- ticker: 005930
+  name: Samsung Electronics
+  market: KR
+  gf: 005930:KRX
+  focus: 고용량 메모리 반도체 공급 및 첨단 파운드리 공정을 통한 AI 칩 위탁 생산
+  keywords:
+  - hbm
+  - foundry
+  - on-device ai
+  - gddr
+  - exynos
+- ticker: 073390
   name: Hanmi Semiconductor
   market: KR
-  gf: 042700:KRX
-  focus: Essential TC bonder equipment for vertically stacking HBM chips.
+  gf: 073390:KRX
+  focus: 고대역폭 메모리 제조 공정에 필수적인 열압착 본딩 장비 개발 및 양산
   keywords:
   - tc bonder
-  - packaging
   - hbm
-  - 장비
-  - 후공정
-- ticker: '007660'
-  name: Isu Petasys
+  - packaging
+  - 반도체장비
+  - 본딩
+- ticker: '010120'
+  name: LS ELECTRIC
   market: KR
-  gf: 007660:KRX
-  focus: Manufacturing highly multi-layered printed circuit boards (MLB) for AI networks.
-  keywords:
-  - mlb
-  - pcb
-  - network
-  - 기판
-  - 서버
-- ticker: '267260'
-  name: HD Hyundai Electric
-  market: KR
-  gf: 267260:KRX
-  focus: Ultra-high voltage transformers supporting AI data center power expansion.
+  gf: 010120:KRX
+  focus: 북미 등 주요 지역의 AI 데이터센터 확장에 따른 초고압 변압기 및 배전 설비 공급
   keywords:
   - transformer
-  - power
-  - grid
+  - power grid
+  - data center
   - 변압기
-  - 전력망
-- ticker: '328130'
+  - 전력설비
+- ticker: '377030'
   name: Lunit
   market: KR
-  gf: 328130:KRX
-  focus: AI-powered medical image analysis and cancer diagnostics software.
+  gf: 377030:KRX
+  focus: 딥러닝 기반의 의료 영상 분석 기술로 암 진단 및 치료 보조 솔루션 상용화
   keywords:
-  - healthcare
-  - vision
-  - insight
-  - scope
-  - 의료ai
+  - medical ai
+  - deep learning
+  - 루닛인사이트
+  - 루닛스코프
+  - 헬스케어
