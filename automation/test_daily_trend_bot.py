@@ -417,6 +417,10 @@ flowchart LR
         front_matter = yaml.safe_load(raw.split("---", 2)[1])
         self.assertEqual(front_matter["layout"], "post")
         self.assertEqual(front_matter["article_type"], "NewsArticle")
+        self.assertEqual(front_matter["seo"]["type"], "NewsArticle")
+        self.assertNotIn("author", front_matter)
+        self.assertEqual(front_matter["image"]["creditText"], "Example")
+        self.assertNotIn("source_url", front_matter["image"])
         self.assertTrue(front_matter["mermaid"])
         self.assertTrue(front_matter["chart"])
         self.assertEqual(

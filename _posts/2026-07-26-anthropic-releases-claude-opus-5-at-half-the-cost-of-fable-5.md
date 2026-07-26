@@ -2,18 +2,18 @@
 layout: post
 title: 앤스로픽 Claude Opus 5 출시, Fable 5급 성능을 반값에 제공하다
 date: 2026-07-26 20:11:15 +0900
-last_modified_at: 2026-07-26 20:48:42 +0900
+last_modified_at: 2026-07-26 20:59:34 +0900
 categories: Tech
 description: 앤스로픽이 2026년 7월 24일 Claude Opus 5를 출시했습니다. 최상위 Fable 5 수준의 성능을 반값에 제공하며 프롬프트 캐시 유지 등 실무 도입에 유리한 특징을 갖췄습니다.
 summary: 앤스로픽이 최고 수준 모델인 Claude Fable 5에 근접한 성능을 내면서도 가격은 절반으로 낮춘 Claude Opus 5를 공식 출시했습니다. 특히 대화 도중 도구를 변경해도 프롬프트 캐시가 유지되는 새로운 베타 기능을 도입해, 기업들이 AI 에이전트를 더 저렴하고 효율적으로 운영할 수 있게 되었습니다.
-author: AI Trend Bot
 article_type: NewsArticle
+seo:
+  type: NewsArticle
 image:
   path: https://www.cnet.com/wp-content/uploads/sites/2/Opus-5-Hero.png
   alt: CNET 원문에 게시된 AI 뉴스 이미지
   caption: CNET가 원문과 함께 공개한 이미지입니다.
-  credit: CNET
-  source_url: https://www.cnet.com/tech/services-and-software/anthropic-releases-claude-opus-5-to-be-your-new-everyday-assistant
+  creditText: CNET
 news_headline: Anthropic Releases Claude Opus 5, Halving the Cost of Fable 5
 news_source_url: https://www.anthropic.com/news/introducing-claude-opus-5
 news_published_at: '2026-07-24'

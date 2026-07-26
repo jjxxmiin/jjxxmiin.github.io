@@ -48,22 +48,8 @@
     {% assign seo_tags = seo_tags | replace: old_meta_clip, new_meta_clip %}
   {% endif %}
 
-  <!-- Manual Meta Description Override (since jekyll-seo-tag ignores params sometimes) -->
-  {% assign seo_description = page.description | default: page.summary %}
-  {% if seo_description %}
-    {% assign seo_description_stripped = seo_description | strip_html | strip_newlines | truncate: 160 %}
-    <meta name="description" content="{{ seo_description_stripped }}">
-    <meta property="og:description" content="{{ seo_description_stripped }}">
-    <meta property="twitter:description" content="{{ seo_description_stripped }}">
-    <!-- Remove default description tags from seo_tags to avoid duplicates -->
-    {% assign description_regex = '<meta (name|property)="description" content="[^"]*" />' %}
-    {% assign og_description_regex = '<meta (name|property)="og:description" content="[^"]*" />' %}
-    {% assign twitter_description_regex = '<meta (name|property)="twitter:description" content="[^"]*" />' %}
-    
-    {% assign seo_tags = seo_tags | replace: description_regex, '' %}
-    {% assign seo_tags = seo_tags | replace: og_description_regex, '' %}
-    {% assign seo_tags = seo_tags | replace: twitter_description_regex, '' %}
-  {% endif %}
+  <!-- Let search and answer engines use full text and large article-image previews. -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
   <!-- Naver Verification -->
   {% if site.webmaster_verifications.naver %}

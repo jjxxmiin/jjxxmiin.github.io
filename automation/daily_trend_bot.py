@@ -1120,14 +1120,19 @@ def generate_blog_post(client, topic_data, evidence):
   장황한 역사 설명은 넣지 않는다.
 - 제목은 검색할 회사/제품명과 실제 변화를 앞쪽에 넣고, 사람이 누르고 싶을 만큼
   구체적으로 쓴다. 낚시성 표현, 이모지, 느낌표 도배는 금지한다.
-- description은 검색 결과용 70~160자, summary는 2~3문장이다.
+- 제목은 핵심 검색어를 한 번만 자연스럽게 사용하고 같은 표현을 반복하지 않는다.
+  description은 검색 결과만 읽어도 사건·변화·독자 영향을 이해할 수 있는 70~160자,
+  summary는 독립적으로 인용해도 의미가 통하는 2~3문장이다.
 - 본문은 H1 없이 2,800~4,500자 정도로 쓴다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
   1. 무슨 일이 벌어진 걸까?
   2. 왜 지금 다들 이 이야기를 할까?
   3. 그래서 우리에게 뭐가 달라질까?
   4. 직접 써보거나 지켜볼 포인트
   5. 아직은 선을 그어야 할 부분
-- 각 섹션 첫 문장은 그 질문에 바로 답해야 한다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
+- 각 섹션 첫 1~2문장은 검색·답변 엔진이 그대로 인용해도 이해되도록 주어와 제품명을
+  생략하지 않은 직접 답변으로 쓴다. 그 뒤에 이유와 예시를 붙인다.
+- 회사·제품·모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어·약칭·핵심 검색어를
+  억지로 반복하지 않는다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
 - 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
 - Mermaid를 1~3개 넣는다. 사건 흐름, 제품 작동 방식, 선택 기준처럼 글만으로
   한눈에 안 들어오는 관계를 flowchart·sequenceDiagram·timeline 중 알맞은 형태로
@@ -1139,7 +1144,8 @@ def generate_blog_post(client, topic_data, evidence):
   있어야 하며 계산값·추정치·임의 점수는 금지한다. 수치 비교가 부적절하면 차트는 생략한다.
 - Mermaid·Chart.js 외의 코드 블록은 넣지 않는다. 그림 앞뒤에는 독자가 무엇을
   봐야 하는지 한두 문장으로 설명하되, 똑같은 내용을 장황하게 반복하지 않는다.
-- faq는 실제 검색 질문 3~4개와 각각 2~4문장의 직접 답변으로 만든다.
+- faq는 독자가 실제 검색창이나 AI 답변창에 물을 법한 서로 다른 질문 3~4개로 만든다.
+  답변 첫 문장만 읽어도 결론이 나오게 하고, 뒤 문장에 조건·가격·제한을 덧붙인다.
 - tags는 5~10개, entities는 원문 표기 3~10개다.
 - title_english는 파일명에 쓸 간결한 영문 제목이며 사실을 과장하지 않는다.
 """
@@ -1248,14 +1254,22 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     images = collect_source_images(evidence.get("sources") or [], limit=4)
     if images:
         print(f"원문 이미지 {len(images)}장을 수집했습니다.")
-        hero_image = images[0]
+        collected_hero = images[0]
+        # Keep the source URL on the visible figure, but expose only valid
+        # ImageObject fields in jekyll-seo-tag's NewsArticle JSON-LD.
+        hero_image = {
+            "path": collected_hero["path"],
+            "alt": collected_hero["alt"],
+            "caption": collected_hero["caption"],
+            "creditText": collected_hero["credit"],
+        }
         article_images = images[1:]
     else:
         print("사용 가능한 원문 이미지가 없어 기존 로고를 사용합니다.")
         hero_image = {
             "path": FALLBACK_THUMBNAIL,
             "alt": post_data["title_korean"],
-            "credit": "OPSOAI",
+            "creditText": "OPSOAI",
         }
         article_images = []
 
@@ -1284,8 +1298,8 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         "categories": "Tech",
         "description": post_data["description"],
         "summary": post_data["summary"],
-        "author": "AI Trend Bot",
         "article_type": "NewsArticle",
+        "seo": {"type": "NewsArticle"},
         "image": hero_image,
         "news_headline": topic_data["headline"],
         "news_source_url": primary_source["url"],
