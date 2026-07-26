@@ -2,10 +2,9 @@ name: Daily AI Trend Post
 
 on:
   schedule:
-    # 하루 2회 오전 9시·오후 5시(KST). 최근 AI 뉴스 중 팩트체크와 중복 검사를
-    # 통과한 사건을 실행마다 한 건씩 발행한다.
+    # 하루 1회 오전 9시(KST). 최근 AI 뉴스 중 팩트체크와 중복 검사를
+    # 통과한 사건을 한 건만 발행한다.
     - cron: '0 0 * * *' # 00:00 UTC = 09:00 KST
-    - cron: '0 8 * * *' # 08:00 UTC = 17:00 KST
   workflow_dispatch: # Allow manual trigger
 
 jobs:
