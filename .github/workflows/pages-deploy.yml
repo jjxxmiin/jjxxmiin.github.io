@@ -12,6 +12,14 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # A push made by Daily AI Trend Post's GITHUB_TOKEN does not emit another
+  # workflow push event. Build once that publisher finishes, but only when it
+  # actually advanced main (no-op retry runs are skipped by the job condition).
+  workflow_run:
+    workflows: ["Daily AI Trend Post"]
+    types:
+      - completed
+
 permissions:
   contents: read
   pages: write
@@ -26,6 +34,12 @@ concurrency:
 
 jobs:
   build:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_sha != github.sha
+      )
     runs-on: ubuntu-latest
 
     steps:
