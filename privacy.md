@@ -11,13 +11,13 @@ permalink: /privacy/
 
 ## 1. 개인정보의 수집 및 이용 목적
 
-본 사이트는 별도의 회원가입 없이 콘텐츠를 이용할 수 있습니다. 단, 방문자 통계 분석, 광고 게재 및 커뮤니티 기능 제공을 위해 다음과 같은 제3자 도구가 사용될 수 있습니다.
+본 사이트는 별도의 회원가입 없이 콘텐츠를 이용할 수 있습니다. 단, 방문자 통계 분석, 광고 게재 및 블로그 댓글 제공을 위해 다음과 같은 제3자 도구가 사용될 수 있습니다.
 
 *   **Google Analytics**: 방문자의 사이트 이용 형태 분석 (익명화된 데이터)
 *   **Google AdSense**: 사용자 맞춤형 광고 제공
-*   **GitHub Discussions 및 Giscus**: 블로그 댓글과 커뮤니티 토론 제공. 작성 시 GitHub 계정 정보, 공개 게시물, 답글 및 반응 정보가 GitHub에서 처리됩니다.
+*   **GitHub Discussions 및 Giscus**: 블로그 댓글 제공. 작성 시 GitHub 계정 정보, 공개 댓글, 답글 및 반응 정보가 GitHub에서 처리됩니다.
 
-커뮤니티 글 작성과 반응에는 GitHub 로그인이 필요합니다. 해당 기능을 이용하면 GitHub의 [개인정보처리방침](https://docs.github.com/site-policy/privacy-policies/github-privacy-statement)과 서비스 약관이 적용됩니다. 사이트는 공개된 토론의 제목, 작성자명, 카테고리, 작성·수정 시각, 답글 및 추천 수를 커뮤니티 목록에 표시할 수 있습니다.
+댓글 작성과 반응에는 GitHub 로그인이 필요합니다. 해당 기능을 이용하면 GitHub의 [개인정보처리방침](https://docs.github.com/site-policy/privacy-policies/github-privacy-statement)과 서비스 약관이 적용됩니다.
 
 ## 2. 쿠키(Cookie)의 운용 및 거부
 

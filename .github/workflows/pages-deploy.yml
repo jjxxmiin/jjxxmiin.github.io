@@ -12,22 +12,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-  # Refresh the community home whenever a topic itself changes. Comment counts
-  # are refreshed by the next regular deployment without rebuilding per reply.
-  discussion:
-    types:
-      - created
-      - edited
-      - deleted
-      - transferred
-      - pinned
-      - unpinned
-      - locked
-      - unlocked
-      - category_changed
-      - answered
-      - unanswered
-
   # A push made by Daily AI Trend Post's GITHUB_TOKEN does not emit another
   # workflow push event. Build once that publisher finishes, but only when it
   # actually advanced main (no-op retry runs are skipped by the job condition).
@@ -38,7 +22,6 @@ on:
 
 permissions:
   contents: read
-  discussions: read
   pages: write
   id-token: write
 
@@ -77,12 +60,6 @@ jobs:
         with:
           ruby-version: 3.3
           bundler-cache: true
-
-      - name: Fetch community discussions
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 automation/fetch_community_discussions.py
 
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
