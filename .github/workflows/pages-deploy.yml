@@ -12,11 +12,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-  # A push made by Daily AI Trend Post's GITHUB_TOKEN does not emit another
-  # workflow push event. Build once that publisher finishes, but only when it
+  # A push made by a publisher workflow's GITHUB_TOKEN does not emit another
+  # workflow push event. Build once a publisher finishes, but only when it
   # actually advanced main (no-op retry runs are skipped by the job condition).
   workflow_run:
-    workflows: ["Daily AI Trend Post"]
+    workflows: ["Daily AI Trend Post", "Daily OSS Trend Post"]
     types:
       - completed
 
