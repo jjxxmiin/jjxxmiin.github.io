@@ -95,13 +95,16 @@ jobs:
           pip install -r requirements.txt
           npm ci --no-audit --no-fund
 
-      - name: Install Chromium for thumbnail rendering
+      - name: Prepare thumbnail rendering
         if: steps.gate.outputs.run == 'true'
-        # 대표 이미지 카드를 headless Chromium으로 찍는다. 없으면 카드 없이 발행된다.
+        # GitHub 러너에는 google-chrome 이 이미 깔려 있다. chromium-browser 를
+        # apt 로 받으면 ubuntu-24.04 에서는 snap 전환 패키지라 실패한다.
+        # 한 줄로 묶으면 그 실패가 imagemagick 설치까지 같이 날려서,
+        # JPEG 변환이 안 되는 채로 발행될 수 있다. 그래서 따로 세운다.
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq chromium-browser fonts-noto-cjk imagemagick || \
-            echo "Chromium 설치 실패. 카드 없이 진행합니다."
+          which google-chrome || echo "google-chrome 없음. 카드 없이 발행됩니다."
+          sudo apt-get update -qq || true
+          sudo apt-get install -y -qq imagemagick || echo "ImageMagick 없음. PNG로 저장됩니다."
 
       - name: Refresh topic queue
         if: steps.gate.outputs.run == 'true'

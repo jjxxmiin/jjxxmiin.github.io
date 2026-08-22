@@ -165,6 +165,11 @@ def render(html_text: str, out_png: str, browser: str) -> None:
     # 저장소 안의 숨김이 아닌 경로에 두면 통과한다.
     scratch = os.path.join(os.path.dirname(os.path.abspath(__file__)), "thumb_tmp")
     os.makedirs(scratch, exist_ok=True)
+    # 렌더가 중간에 끊기면 임시 디렉터리가 남는다. 시작할 때 한 번 걷어낸다.
+    for stale in os.listdir(scratch):
+        stale_path = os.path.join(scratch, stale)
+        if os.path.isdir(stale_path):
+            shutil.rmtree(stale_path, ignore_errors=True)
     # Chromium의 --screenshot 은 PNG만 낸다. 최종이 jpg면 일단 png로 받는다.
     shot_target = out_png[:-4] + ".png" if out_png.endswith(".jpg") else out_png
     with tempfile.TemporaryDirectory(dir=scratch) as tmp:
@@ -179,14 +184,23 @@ def render(html_text: str, out_png: str, browser: str) -> None:
              f"--screenshot={shot_target}", f"file://{src}"],
             check=True, capture_output=True, timeout=90,
         )
-    # 배경이 그라디언트라 PNG로 두면 200KB를 넘는다. 색 수 감축은 효과가 없어
-    # (트루컬러로 다시 쓰임) JPEG로 변환한다. 같은 카드가 90KB 아래로 떨어진다.
-    if out_png.endswith(".jpg") and shutil.which("convert"):
-        tmp_png = shot_target
-        subprocess.run(["convert", tmp_png, "-strip", "-quality", "84",
-                        "-sampling-factor", "4:2:0", out_png],
-                       check=True, capture_output=True)
-        os.remove(tmp_png)
+    if not os.path.exists(shot_target):
+        raise RuntimeError(f"브라우저가 스크린샷을 만들지 못했습니다: {shot_target}")
+
+    # PNG로 두면 장당 200KB를 넘는다. JPEG로 바꿔 4분의 1로 줄인다.
+    # ImageMagick 이 없는 환경(CI에서 apt 설치가 실패한 경우 등)에서는
+    # 변환을 건너뛰고 PNG를 그대로 쓴다. 여기서 조용히 넘어가면
+    # 존재하지 않는 .jpg 경로가 프론트매터에 박혀 이미지가 통째로 깨진다.
+    if out_png.endswith(".jpg"):
+        if shutil.which("convert"):
+            subprocess.run(["convert", shot_target, "-strip", "-quality", "84",
+                            "-sampling-factor", "4:2:0", out_png],
+                           check=True, capture_output=True)
+            os.remove(shot_target)
+        else:
+            print("  ImageMagick 이 없어 PNG로 저장합니다.")
+            os.replace(shot_target, out_png)  # 확장자만 jpg, 내용은 png
+            # 브라우저와 Jekyll 모두 내용 기반으로 처리하므로 표시에는 문제가 없다.
 
 
 def generate_card(slug: str, title: str, category: str, tags: list[str],
