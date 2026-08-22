@@ -276,7 +276,7 @@ script_includes:
         var ok = true;
         Array.prototype.slice.call(p.childNodes).forEach(function (n) {
           if (n.nodeType === 1 && n.tagName !== 'A') ok = false;
-          if (n.nodeType === 3 && /[^\s|·]/.test(n.textContent)) ok = false;
+          if (n.nodeType === 3 && /[^\s|]/.test(n.textContent)) ok = false;
         });
         if (!ok) return;
         p.replaceWith(buildBox(Array.prototype.slice.call(links)));

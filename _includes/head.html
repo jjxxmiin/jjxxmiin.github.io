@@ -48,8 +48,19 @@
     {% assign seo_tags = seo_tags | replace: old_meta_clip, new_meta_clip %}
   {% endif %}
 
-  <!-- Let search and answer engines use full text and large article-image previews. -->
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <!-- Let search and answer engines use full text and large article-image previews.
+       단, 페이지네이션(/page2/ 이후)과 archives 는 색인에서 뺀다. Search Console 실측에서
+       이 목록 페이지들이 90일 618노출을 먹고 클릭은 2건(CTR 0.3%)이었다. 제목만 나열된
+       thin content라 클릭이 안 나오면서 실제 글이 나갈 자리를 차지한다.
+       follow 는 유지해 링크는 계속 타고 들어가게 둔다. -->
+  {%- assign _paginated = false -%}
+  {%- if paginator and paginator.page > 1 -%}{%- assign _paginated = true -%}{%- endif -%}
+  {%- if page.layout == 'archives' -%}{%- assign _paginated = true -%}{%- endif -%}
+  {%- if _paginated -%}
+    <meta name="robots" content="noindex, follow">
+  {%- else -%}
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  {%- endif -%}
 
   <!-- Naver Verification -->
   {% if site.webmaster_verifications.naver %}

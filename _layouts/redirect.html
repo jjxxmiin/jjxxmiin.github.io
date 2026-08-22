@@ -1,0 +1,17 @@
+---
+---
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="{{ page.redirect_to | absolute_url }}">
+<meta http-equiv="refresh" content="0; url={{ page.redirect_to | absolute_url }}">
+<title>이동합니다 — OPSOAI</title>
+</head>
+<body>
+<p>이 페이지는 더 이상 운영하지 않습니다.
+<a href="{{ page.redirect_to | absolute_url }}">OPSOAI 홈으로 이동</a>합니다.</p>
+<script>location.replace({{ page.redirect_to | absolute_url | jsonify }});</script>
+</body>
+</html>

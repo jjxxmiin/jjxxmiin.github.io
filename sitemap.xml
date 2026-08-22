@@ -1,0 +1,44 @@
+---
+layout: null
+permalink: /sitemap.xml
+sitemap: false
+---
+{%- comment -%}
+  jekyll-sitemap 을 대신하는 자체 사이트맵.
+
+  테마 기본값은 페이지네이션(/page2/ ~ /page53/) 62개를 그대로 실어 보냈는데,
+  Search Console 실측에서 이 목록 페이지들이 클릭 없이 노출만 가져갔다.
+  색인해서 얻을 게 없는 URL은 애초에 제출하지 않는다.
+
+  제외 대상: 페이지네이션, sitemap:false 를 명시한 페이지(리다이렉트 등), 404.
+{%- endcomment -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+{%- for post in site.posts %}
+  {%- unless post.sitemap == false %}
+  <url>
+    <loc>{{ post.url | absolute_url | xml_escape }}</loc>
+    <lastmod>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</lastmod>
+  </url>
+  {%- endunless %}
+{%- endfor %}
+{%- for page in site.pages %}
+  {%- assign is_paginated = page.url | slice: 0, 5 %}
+  {%- unless page.sitemap == false or is_paginated == '/page' or page.url contains '404' %}
+  {%- if page.url contains '.html' or page.url contains '.xml' or page.url contains '.txt' %}{% continue %}{% endif %}
+  <url>
+    <loc>{{ page.url | absolute_url | xml_escape }}</loc>
+    {%- if page.last_modified_at %}
+    <lastmod>{{ page.last_modified_at | date_to_xmlschema }}</lastmod>
+    {%- endif %}
+  </url>
+  {%- endunless %}
+{%- endfor %}
+{%- for tab in site.tabs %}
+  {%- unless tab.sitemap == false %}
+  <url>
+    <loc>{{ tab.url | absolute_url | xml_escape }}</loc>
+  </url>
+  {%- endunless %}
+{%- endfor %}
+</urlset>
