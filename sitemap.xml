@@ -13,7 +13,7 @@ sitemap: false
   제외 대상: 페이지네이션, sitemap:false 를 명시한 페이지(리다이렉트 등), 404.
 {%- endcomment -%}
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {%- for post in site.posts %}
   {%- unless post.sitemap == false %}
   <url>
