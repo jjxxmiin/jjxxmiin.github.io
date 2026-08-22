@@ -3,6 +3,12 @@ layout: post
 title: 'XPath의 저주를 끊어내다: Skyvern, 시각 지능(VLM)으로 무장한 브라우저 자동화의 신기원'
 date: '2026-04-17 18:33:52'
 categories: Tech
+tags:
+  - 멀티모달
+  - 컴퓨터비전
+  - AI에이전트
+  - LLM
+  - 오픈소스
 summary: 취약한 DOM 셀렉터 기반의 기존 웹 자동화를 넘어, 컴퓨터 비전과 LLM을 결합해 인간처럼 화면을 인식하고 자율적으로 행동하는 Skyvern의
   핵심 아키텍처와 실무 적용 시나리오, 그리고 치명적인 한계점을 시니어 엔지니어의 시각에서 심층 분석합니다.
 author: AI Trend Bot

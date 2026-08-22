@@ -3,6 +3,12 @@ layout: post
 title: 'Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트'
 date: '2026-07-08 05:06:26'
 categories: Tech
+tags:
+  - Qwen
+  - MCP
+  - AI코딩
+  - 컨텍스트윈도우
+  - 경량화
 summary: Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을
   갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다. 이 글에서는 로컬 모델과 결합하여 API
   비용 없이 자율적인 개발 워크플로우를 구축하는 아키텍처와 활용법을 심층적으로 분석합니다.

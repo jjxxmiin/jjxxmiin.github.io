@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-10] [InternVL-U] \"이해와 생성을 하나의 가중치에 우겨넣지 마라\" 4B로 14B 모델을 박살낸 멀티모달 아키텍처의 비밀"
 date: '2026-03-12 04:37:11'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - 경량화
+  - 디퓨전모델
+  - 이미지생성
 math: true
 summary: "이해와 생성을 분리하고 텍스트 추론으로 통제하는 4B 파라미터 초경량 멀티모달 설계 철학."
 image:

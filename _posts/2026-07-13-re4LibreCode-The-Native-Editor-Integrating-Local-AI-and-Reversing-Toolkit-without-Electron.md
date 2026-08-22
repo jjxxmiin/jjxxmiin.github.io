@@ -3,6 +3,12 @@ layout: post
 title: 're4/LibreCode: 일렉트론을 걷어내고 로컬 AI와 리버싱을 통합한 네이티브 에디터'
 date: '2026-07-13 05:49:29'
 categories: Tech
+tags:
+  - Llama
+  - RAG
+  - AI코딩
+  - 온디바이스AI
+  - AI보안
 summary: re4/LibreCode는 .NET 10과 Avalonia UI를 기반으로 설계되어 일렉트론의 무거움을 극복하고, Ollama 기반의
   완전 오프라인 로컬 AI(RAG)와 강력한 역공학(리버싱) 도구들을 단일 환경에 통합한 차세대 코드 에디터입니다.
 author: AI Trend Bot

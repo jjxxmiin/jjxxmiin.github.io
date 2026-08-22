@@ -3,6 +3,12 @@ layout: post
 title: 프롬프트 엔지니어링의 종말? 10년 차 개발자가 본 'ADK(Agent Development Kit) Python'의 민낯과 아키텍처
 date: '2026-04-24 18:34:09'
 categories: Tech
+tags:
+  - 파이썬
+  - 아키텍처분석
+  - 프롬프트엔지니어링
+  - 멀티에이전트
+  - 벡터DB
 summary: 단순한 LLM API 래퍼를 넘어, 자율형 에이전트의 상태 관리와 도구 호출을 OS 수준에서 추상화하는 ADK Python의 핵심
   아키텍처, 실무 적용 시나리오, 그리고 시니어 개발자의 관점에서 본 치명적인 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

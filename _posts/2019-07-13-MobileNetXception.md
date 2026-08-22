@@ -2,8 +2,14 @@
 layout: post
 title:  "Xception MobileNet 톺아보기"
 summary: "Xception MobileNet"
+image:
+  path: /assets/img/thumb/MobileNetXception.jpg
+  alt: Xception MobileNet 톺아보기 대표 이미지
 date:   2019-07-07 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 경량화
 ---
 
 **수행능력을 향상시키기 위한 최고의 방법 : 모델의 깊이를 늘린다.**

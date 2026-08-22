@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-12] DeepGen 1.0: 5B 파라미터로 80B를 압도하는 경량 통합 멀티모달 모델의 혁신'
 date: '2026-02-13'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 강화학습
+  - 이미지생성
+  - DeepSeek
+  - Qwen
 math: true
 summary: 5B 규모로 80B 성능을 뛰어넘는 차세대 이미지 생성 및 편집 모델 DeepGen 1.0 분석
 image:

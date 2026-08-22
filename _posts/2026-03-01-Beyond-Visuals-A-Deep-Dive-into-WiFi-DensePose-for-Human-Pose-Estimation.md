@@ -3,6 +3,10 @@ layout: post
 title: WiFi로 벽 너머 사람을 본다고? WiFi-DensePose가 보여준 마법 같은 기술
 date: '2026-03-01'
 categories: Tech
+tags:
+  - 로보틱스
+  - 컴퓨터비전
+  - AI트렌드
 summary: 카메라 없이 WiFi 신호만으로 사람의 3D 포즈를 정교하게 추적하는 WiFi-DensePose 기술을 분석합니다. 프라이버시와 보안,
   그리고 미래 가전의 새로운 가능성을 탐구하는 개발자의 솔직한 리뷰입니다.
 author: AI Trend Bot

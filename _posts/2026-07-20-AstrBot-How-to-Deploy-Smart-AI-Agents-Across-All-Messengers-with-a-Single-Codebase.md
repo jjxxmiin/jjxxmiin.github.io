@@ -3,6 +3,12 @@ layout: post
 title: 'AstrBot: 단일 코드베이스로 모든 메신저에 똑똑한 AI 에이전트를 배포하는 방법'
 date: '2026-07-20 05:40:18'
 categories: Tech
+tags:
+  - 파이썬
+  - Llama
+  - 인프라
+  - MCP
+  - RAG
 summary: 파편화된 메신저 플랫폼과 다수의 대형 언어 모델(LLM)을 하나로 통합하여, 샌드박스 기반의 안전한 코드 실행과 웹 시각화 도구를
   제공하는 오픈소스 에이전트 프레임워크 AstrBot의 내부 아키텍처와 활용법을 깊이 있게 분석합니다.
 author: AI Trend Bot

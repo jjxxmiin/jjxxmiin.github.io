@@ -3,6 +3,12 @@ layout: post
 title: 'langchain-ai/openwiki: AI 코딩 에이전트 전용 저장소 위키가 필요한 이유와 작동 원리'
 date: '2026-07-06 21:46:43'
 categories: Tech
+tags:
+  - AI코딩
+  - RAG
+  - 컨텍스트윈도우
+  - AI에이전트
+  - LLM
 summary: LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다.
   이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와 도입 방법, 그리고 실전 활용 시나리오를 매우 깊이
   있게 분석합니다.
@@ -230,6 +236,7 @@ openwiki --init
 
 프로젝트의 `.github/workflows/openwiki.yml` 파일을 만들고 아래와 같이 구성할 수 있습니다.
 
+{% raw %}
 ```yaml
 name: Update OpenWiki
 on:
@@ -259,6 +266,7 @@ jobs:
           title: 'docs: OpenWiki 자동 업데이트'
           branch: 'chore/update-openwiki'
 ```
+{% endraw %}
 
 이 워크플로우를 등록해 두면, 인간 개발자는 코딩에만 집중하고 '문서화'는 AI 에이전트가 뒤에서 알아서 처리하는 쾌적한 경험을 할 수 있습니다.
 

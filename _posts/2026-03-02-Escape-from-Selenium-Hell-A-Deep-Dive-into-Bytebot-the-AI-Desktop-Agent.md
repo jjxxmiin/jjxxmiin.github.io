@@ -3,6 +3,12 @@ layout: post
 title: 셀레니움 지옥에서 탈출? AI에게 컴퓨터를 통째로 쥐여주는 'Bytebot' 사용기
 date: '2026-03-02 18:25:41'
 categories: Tech
+tags:
+  - 인프라
+  - 멀티모달
+  - 컴퓨터비전
+  - AI에이전트
+  - LLM
 summary: 단순한 웹 스크래핑 도구를 넘어, AI에게 리눅스 데스크톱 환경을 제공하여 사람처럼 브라우저와 앱을 제어하게 만드는 오픈소스 'Bytebot'을
   심층 분석합니다. 기존 자동화의 한계와 AI 에이전트의 가능성을 개발자 관점에서 솔직하게 풀어냅니다.
 author: AI Trend Bot

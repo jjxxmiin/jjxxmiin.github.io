@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-09] NarraScore: 계층적 감정 제어를 통한 영상 서사와 음악의 완벽한 동기화 - 차세대 AI 작곡 프레임워크
   심층 분석'
 date: '2026-02-14'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 디퓨전모델
+  - 트랜스포머
+  - 음성AI
+  - 파인튜닝
 math: true
 summary: 서사와 감정의 가교, NarraScore가 여는 장편 영상 기반 음악 생성의 새로운 패러다임.
 image:

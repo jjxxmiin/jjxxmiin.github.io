@@ -6,6 +6,11 @@ title: CrowdStrike 2026 위협 보고서 발표, Mastra AI 오픈소스 공급�
 date: 2026-08-04 10:54:38 +0900
 last_modified_at: 2026-08-04 10:54:38 +0900
 categories: Tech
+tags:
+  - AI보안
+  - 업무자동화
+  - 오픈소스
+  - AI에이전트
 description: CrowdStrike가 2026 위협 헌팅 보고서를 통해 북한 해킹 조직 STARDUST CHOLLIMA의 Mastra AI 프레임워크 침투 사건과 AI 에이전트 위협 급증 사실을 공개했습니다.
 summary: CrowdStrike는 2026년 8월 3일 발표한 위협 헌팅 보고서에서 북한 연계 해킹 그룹 STARDUST CHOLLIMA가 Mastra AI 프레임워크 131개 패키지에 악성 npm 패키지를 주입했다고 밝혔습니다. AI 에이전트가 유발한 보안 탐지 건수가 사람보다 2.5배 빠르게 늘어났으며, 상반기 레지스트리 위협의 87%가 npm 패키지 관련이었습니다. 취약점 공개 48시간 이내 공격이 88%에 달하는 만큼 실시간 공급망 검증과 런타임 보안 대책이 시급합니다.
 article_type: NewsArticle

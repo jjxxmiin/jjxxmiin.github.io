@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-02-08] 로봇의 지능적 ''고민''을 구현하다: RD-VLA, 잠재적 반복 추론을 통한 VLA 모델의 혁신적 확장'
 date: '2026-02-10'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 멀티모달
+  - 트랜스포머
+  - AI에이전트
 math: true
 summary: 고정된 연산량을 깨고 상황에 맞춰 사고하는 RD-VLA의 잠재적 반복 추론 기술 분석
 image:

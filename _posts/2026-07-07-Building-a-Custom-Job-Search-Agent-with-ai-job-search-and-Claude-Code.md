@@ -3,6 +3,12 @@ layout: post
 title: 'ai-job-search: 클로드 코드로 나만의 맞춤형 구직 에이전트 구축하기'
 date: '2026-07-07 21:25:45'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - 튜토리얼
+  - AI에이전트
+  - 오픈소스
 summary: 클로드 코드(Claude Code)를 기반으로 공고 수집, 적합도 평가, 맞춤형 이력서 작성 등 구직 전 과정을 자동화하는 ai-job-search
   프레임워크의 작동 원리와 실전 활용법을 깊이 있게 분석합니다.
 author: AI Trend Bot

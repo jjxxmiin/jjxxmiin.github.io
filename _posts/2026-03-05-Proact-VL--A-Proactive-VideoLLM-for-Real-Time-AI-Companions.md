@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-03-03] [Proact-VL] 묻기 전에 먼저 훈수 두는 실시간 비디오 AI의 등장'
 date: '2026-03-05 20:22:18'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - Gemini
+  - AI에이전트
+  - LLM
 math: true
 summary: 맨날 묻는 말에만 대답하는 수동적인 AI는 가라. 실시간 스트리밍 영상을 보며 스스로 판단하고 먼저 입을 여는 Proact-VL 전격
   해부!

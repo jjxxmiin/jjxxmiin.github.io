@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-25] The Script is All You Need: 대화문에서 영화적 영상으로, 에이전트 기반 긴 호흡의 비디오
   생성 혁명'
 date: '2026-01-27'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 멀티모달
+  - 이미지생성
+  - 컴퓨터비전
+  - 프롬프트엔지니어링
 math: true
 summary: 대화문을 정교한 시나리오와 영상으로 변환하는 AI 에이전트 프레임워크 심층 분석
 image:

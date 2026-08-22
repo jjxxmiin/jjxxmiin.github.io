@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Compare"
 date:   2022-02-11 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetCompare.jpg
+  alt: DarkNet 시리즈 - Compare 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 컴퓨터비전
 math: true
 ---
 

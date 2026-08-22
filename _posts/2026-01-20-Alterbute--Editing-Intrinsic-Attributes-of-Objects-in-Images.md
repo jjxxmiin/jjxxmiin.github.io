@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-15] Alterbute: 객체의 정체성을 유지하며 내재적 속성을 자유자재로 편집하는 혁신적 확산 모델 분석'
 date: '2026-01-20'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 이미지생성
+  - 멀티모달
+  - 파인튜닝
+  - 컴퓨터비전
 math: true
 summary: 객체의 정체성은 보존하고 색상, 재질, 형태만 바꾼다! Alterbute 기술 심층 분석.
 image:

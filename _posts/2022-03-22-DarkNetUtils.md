@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Utils"
 date:   2022-03-22 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetUtils.jpg
+  alt: DarkNet 시리즈 - Utils 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

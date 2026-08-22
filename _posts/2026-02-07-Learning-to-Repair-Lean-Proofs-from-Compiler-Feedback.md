@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-03] Lean 증명 자동 수선의 혁명: 컴파일러 피드백을 활용한 APRIL 데이터셋 및 학습 전략 심층 분석'
 date: '2026-02-07'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 파인튜닝
+  - 컨텍스트윈도우
+  - AI보안
+  - 경량화
 math: true
 summary: 컴파일러 피드백으로 AI 증명 능력을 극대화하는 APRIL 데이터셋과 수선 기법 심층 가이드
 image:

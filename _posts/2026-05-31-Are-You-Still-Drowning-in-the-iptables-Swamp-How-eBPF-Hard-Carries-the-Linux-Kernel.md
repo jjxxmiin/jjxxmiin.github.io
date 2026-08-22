@@ -3,6 +3,10 @@ layout: post
 title: 🤯 아직도 iptables 늪에서 허우적대시나요? eBPF가 리눅스 커널의 멱살을 잡고 캐리하는 작동 원리
 date: '2026-05-31 07:08:56'
 categories: Tech
+tags:
+  - 인프라
+  - 오픈소스
+  - AI트렌드
 summary: 쿠버네티스 환경에서 O(N)의 성능 저하를 일으키는 iptables의 한계를 극복하고, 리눅스 커널 코어에서 안전하게 샌드박싱된 코드를
   실행해 O(1)의 네트워크 및 옵저버빌리티 성능을 끌어내는 eBPF의 내부 아키텍처와 현업 적용 시의 트레이드오프를 철저히 파헤칩니다.
 author: AI Trend Bot

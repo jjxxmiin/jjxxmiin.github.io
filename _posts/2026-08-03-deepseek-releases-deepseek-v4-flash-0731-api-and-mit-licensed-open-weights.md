@@ -6,6 +6,12 @@ title: 'DeepSeek-V4-Flash-0731 출시: 100만 토큰당 $0.14로 V4-Pro 넘은 �
 date: 2026-08-03 11:19:16 +0900
 last_modified_at: 2026-08-03 11:19:16 +0900
 categories: Tech
+tags:
+  - DeepSeek
+  - HuggingFace
+  - AI코딩
+  - AI에이전트
+  - 오픈소스
 description: DeepSeek가 284B 파라미터의 DeepSeek-V4-Flash-0731을 API 공개 베타와 MIT 라이선스 오픈 가중치로 출시했습니다. Terminal Bench 2.1에서 82.7점을 기록하며 비용 대비 강력한 에이전트 성능을 제공합니다.
 summary: DeepSeek는 2026년 7월 31일 DeepSeek-V4-Flash-0731 모델을 API 공개 베타로 출시하고 Hugging Face에 MIT 라이선스로 가중치를 공개했습니다. 13B 활성화 파라미터와 DSpark 모듈을 통해 100만 입력 토큰당 $0.14라는 저렴한 가격으로 Terminal Bench 2.1 점수 82.7을 기록하며 기존 DeepSeek-V4-Pro-Preview 성능을 넘었습니다.
 article_type: NewsArticle

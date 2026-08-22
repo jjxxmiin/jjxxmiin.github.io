@@ -2,8 +2,15 @@
 layout: post
 title:  "AutoAugment 톺아보기"
 summary: "AutoAugment 논문 읽어보기"
+image:
+  path: /assets/img/thumb/AutoAugment.jpg
+  alt: AutoAugment 톺아보기 대표 이미지
 date:   2019-09-28 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 강화학습
+  - 컴퓨터비전
 math: true
 ---
 

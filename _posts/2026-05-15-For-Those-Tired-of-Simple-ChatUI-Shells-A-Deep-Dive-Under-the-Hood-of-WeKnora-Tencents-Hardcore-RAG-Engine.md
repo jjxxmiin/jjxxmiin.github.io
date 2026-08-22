@@ -3,6 +3,12 @@ layout: post
 title: '[도발적] 단순 ChatUI 껍데기에 지친 당신을 위해: 텐센트가 작정하고 깎은 RAG 엔진, WeKnora 밑바닥 뜯어보기'
 date: '2026-05-15 07:30:42'
 categories: Tech
+tags:
+  - RAG
+  - MCP
+  - 아키텍처분석
+  - 파이썬
+  - 벡터DB
 summary: 단순 프롬프트 래퍼를 넘어 멀티모달 파싱, GraphRAG, ReACT 에이전트를 결합한 텐센트의 오픈소스 RAG 프레임워크 'WeKnora'의
   핵심 아키텍처와 실무 적용 시나리오를 심층 분석합니다.
 author: AI Trend Bot

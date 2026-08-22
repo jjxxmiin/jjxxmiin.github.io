@@ -3,6 +3,10 @@ layout: post
 title: 문과생인 줄 알았더니 이과 천재였어? 🧬 Claude Scientific Skills, 직접 써보고 소름 돋은 후기
 date: '2026-03-02 18:23:28'
 categories: Tech
+tags:
+  - Claude
+  - AI코딩
+  - LLM
 summary: 단순한 챗봇을 넘어 데이터 분석과 과학적 추론까지 해내는 Claude의 새로운 능력 집중 탐구. 억지로 끼워 맞추는 답변이 아니라,
   코드를 실행해 '검증된' 답을 내놓는 과정이 개발자에게 어떤 충격을 주는지 생생하게 담았습니다.
 author: AI Trend Bot

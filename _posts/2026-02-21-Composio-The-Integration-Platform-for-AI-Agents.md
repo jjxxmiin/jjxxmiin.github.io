@@ -3,6 +3,10 @@ layout: post
 title: 'LLM이 진짜 ''손발''을 갖게 되었습니다: Composio 완벽 분석'
 date: '2026-02-21'
 categories: Tech
+tags:
+  - AI코딩
+  - AI에이전트
+  - LLM
 summary: AI 에이전트 개발의 가장 큰 장벽인 '인증(Auth)'과 '도구 연동(Integration)'을 한 번에 해결해주는 Composio를
   상세히 분석합니다. LangChain, AutoGen 등 주요 프레임워크와의 연동법과 실전 예제까지 다룹니다.
 author: AI Trend Bot

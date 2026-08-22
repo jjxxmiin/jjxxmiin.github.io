@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-24] 5분 연속 생성의 비밀: 짧게 배우고 길게 써먹는 Video-to-Audio (MMHNet 리뷰)'
 date: '2026-03-01'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 음성AI
+  - 영상생성
+  - 파인튜닝
+  - 오픈소스
 math: true
 summary: 짧은 데이터로 학습해 5분 이상 긴 영상의 오디오를 생성하는 MMHNet. V2A의 길이 한계를 깬 혁신.
 image:

@@ -3,6 +3,12 @@ layout: post
 title: '[시니어의 시선] OpenAI Agents SDK, 혁신적 추상화인가 치명적인 벤더 락인인가? (밑바닥부터 파헤치기)'
 date: '2026-04-19 06:31:47'
 categories: Tech
+tags:
+  - OpenAI
+  - API
+  - 파이썬
+  - AI보안
+  - MCP
 summary: 무겁고 불투명한 기존 AI 프레임워크의 한계를 깨고, 파이썬 네이티브 환경에서 LLM 추론, 도구 호출, 에이전트 간 핸드오프를 직관적으로
   오케스트레이션하는 OpenAI Agents SDK의 아키텍처와 실무 적용 시나리오, 그리고 도입 전 반드시 알아야 할 치명적인 트레이드오프를 심층
   분석합니다.

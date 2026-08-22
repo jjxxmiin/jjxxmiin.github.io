@@ -3,6 +3,12 @@ layout: post
 title: 'AI 코딩의 환상을 부수다: ''Andrej Karpathy Skills''가 실무 개발의 룰을 바꾸는 방식'
 date: '2026-04-13 07:02:18'
 categories: Tech
+tags:
+  - AI코딩
+  - 프롬프트엔지니어링
+  - ClaudeCode
+  - 컨텍스트윈도우
+  - LLM
 summary: 기존 AI 코딩 어시스턴트의 치명적 한계인 오버엔지니어링과 임의 리팩토링 문제를 해결하기 위해 등장한 'Andrej Karpathy
   Skills'의 4대 핵심 원칙(Think Before Coding, Surgical Changes 등)과 자율 검증 루프 아키텍처를 심층 분석하고,
   대규모 실무 프로젝트에 이를 적용하여 얻을 수 있는 통제력과 현실적인 트레이드오프를 시니어 엔지니어의 관점에서 다룹니다.

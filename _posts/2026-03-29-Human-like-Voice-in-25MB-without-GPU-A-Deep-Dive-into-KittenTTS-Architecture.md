@@ -3,6 +3,12 @@ layout: post
 title: 'GPU 없이 25MB로 구현하는 사람의 목소리: KittenTTS 아키텍처 딥다이브'
 date: '2026-03-29 06:24:34'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 음성AI
+  - 파이썬
+  - 경량화
+  - 온디바이스AI
 summary: 클라우드 종속성과 무거운 VRAM 요구량에 지친 개발자들을 위해 등장한 15M 파라미터의 초경량 로컬 TTS, KittenTTS(v0.8)의
   내부 아키텍처와 실무 활용 가이드를 현업 시니어 개발자의 시선에서 심층 분석합니다.
 author: AI Trend Bot

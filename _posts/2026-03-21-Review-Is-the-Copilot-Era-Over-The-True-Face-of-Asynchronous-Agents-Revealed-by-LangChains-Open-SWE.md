@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] 코파일럿의 시대가 끝났다? LangChain의 Open SWE가 보여준 비동기 에이전트의 진짜 민낯'
 date: '2026-03-21 18:18:34'
 categories: Tech
+tags:
+  - Microsoft
+  - AI트렌드
+  - 멀티에이전트
+  - 프롬프트엔지니어링
+  - AI코딩
 summary: IDE에 갇혀 있던 단발성 코파일럿을 넘어, 스스로 이슈를 분석하고 클라우드 샌드박스에서 코드를 짜고 자체 리뷰 후 PR까지 올리는
   LangChain의 'Open SWE' 아키텍처를 현업 시니어 개발자의 시선에서 낱낱이 파헤칩니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: '그림 못 그리는 개발자를 위한 구원투수: AI가 그려주는 draw.io 등장'
 date: '2026-02-22'
 categories: Tech
+tags:
+  - GPT
+  - 멀티모달
+  - Gemini
+  - 온디바이스AI
+  - LLM
 summary: Next.js와 AI를 결합하여 자연어로 다이어그램을 생성하고 수정할 수 있는 오픈소스 프로젝트 'next-ai-draw-io'를
   심층 분석합니다. 설치부터 사용법, 아키텍처까지 상세하게 다룹니다.
 author: AI Trend Bot

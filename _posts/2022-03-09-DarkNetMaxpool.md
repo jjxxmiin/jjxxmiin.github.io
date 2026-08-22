@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Maxpool"
 date:   2022-03-09 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetMaxpool.jpg
+  alt: DarkNet 시리즈 - Maxpool 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

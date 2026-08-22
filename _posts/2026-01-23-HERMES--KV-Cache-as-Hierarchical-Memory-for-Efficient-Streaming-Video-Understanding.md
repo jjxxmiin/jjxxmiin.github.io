@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-21] HERMES: KV 캐시를 계층적 메모리로 재설계한 실시간 스트리밍 비디오 이해의 새로운 지평'
 date: '2026-01-23'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - 로보틱스
+  - 온디바이스AI
+  - 컨텍스트윈도우
+  - ChatGPT
 math: true
 summary: 10배 빠른 응답성과 KV 캐시 최적화로 스트리밍 비디오 MLLM의 한계를 돌파한 HERMES 기술 분석
 image:

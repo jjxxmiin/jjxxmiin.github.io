@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Iseg Layer"
 date:   2022-03-02 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetIsegLayer.jpg
+  alt: DarkNet 시리즈 - Iseg Layer 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - YOLO
 math: true
 ---
 

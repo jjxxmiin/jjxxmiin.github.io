@@ -3,6 +3,12 @@ layout: post
 title: '더 이상 유튜브 튜토리얼은 필요 없다: ''진짜'' 커서를 움직이는 AI, farzaa/clicky 아키텍처 심층 분석'
 date: '2026-04-10 18:29:58'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 음성AI
+  - 온디바이스AI
+  - ChatGPT
+  - 로보틱스
 summary: macOS 환경에서 Vision LLM과 실시간 음성을 결합해 화면의 UI를 직접 짚어주는 온디바이스 AI 튜터, farzaa/clicky의
   아키텍처와 트레이드오프를 10년 차 시니어 엔지니어의 시각으로 심도 있게 파헤칩니다.
 author: AI Trend Bot

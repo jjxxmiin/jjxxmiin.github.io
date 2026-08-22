@@ -2,8 +2,14 @@
 layout: post
 title:  "가속기 프로그래밍 겨울학교"
 summary: "2019 가속기 프로그래밍 겨울학교"
+image:
+  path: /assets/img/thumb/accelerator.jpg
+  alt: 가속기 프로그래밍 겨울학교 대표 이미지
 date:   2019-02-18 09:00 -0400
-categories: review
+categories: Basics
+tags:
+  - 오픈소스
+  - 아키텍처분석
 math: true
 ---
 

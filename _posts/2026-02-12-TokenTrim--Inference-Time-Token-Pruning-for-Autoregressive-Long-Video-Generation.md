@@ -3,7 +3,12 @@ layout: post
 title: '[2026-01-30] 비디오 생성의 고질병 ''시간적 편향''을 도려내다: TokenTrim - 추론 시점 토큰 프루닝 기술 심층
   분석'
 date: '2026-02-12'
-categories: tech
+categories: Tech
+tags:
+  - 경량화
+  - 영상생성
+  - 로보틱스
+  - 트랜스포머
 math: true
 summary: 긴 비디오 생성의 한계를 극복하는 혁신적 토큰 프루닝 기술, TokenTrim 심층 분석
 image:

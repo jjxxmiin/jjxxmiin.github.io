@@ -3,7 +3,12 @@ layout: post
 title: '[2026-02-16] 불확실성을 넘어서: 의료 영상 진단의 혁명, UA-VLS(Uncertainty-Aware Vision-Language
   Segmentation) 기술 분석'
 date: '2026-02-20'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 컴퓨터비전
+  - 트랜스포머
+  - 반도체
 math: true
 summary: 의료 영상과 텍스트의 결합, SSM 기반 초고효율 멀티모달 세그멘테이션 가이드
 image:

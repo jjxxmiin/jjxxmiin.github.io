@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Region Layer"
 date:   2022-03-14 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetRegionLayer.jpg
+  alt: DarkNet 시리즈 - Region Layer 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 컴퓨터비전
 math: true
 ---
 

@@ -2,8 +2,14 @@
 layout: post
 title:  "EfficientDet 톺아보기 1"
 summary: "EfficientNet 논문 읽어보기"
+image:
+  path: /assets/img/thumb/EfficientDet.jpg
+  alt: EfficientDet 톺아보기 1 대표 이미지
 date:   2019-11-23 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 컴퓨터비전
 math: true
 ---
 

@@ -2,8 +2,14 @@
 layout: post
 title:  "MMDetection 톺아보기"
 summary: "MMDetection 논문 읽어보기 / 사용하기"
+image:
+  path: /assets/img/thumb/mmdetection.jpg
+  alt: MMDetection 톺아보기 대표 이미지
 date:   2019-08-29 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 컴퓨터비전
 ---
 
 ## MMDetection

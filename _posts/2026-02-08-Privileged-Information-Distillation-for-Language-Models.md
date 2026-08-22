@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-04] [심층 분석] 숨겨진 추론의 벽을 넘다: Privileged Information Distillation(π-Distill)을
   통한 차세대 에이전트 모델 학습 전략'
 date: '2026-02-08'
-categories: tech
+categories: Tech
+tags:
+  - 경량화
+  - GPT
+  - 아키텍처분석
+  - Qwen
+  - 강화학습
 math: true
 summary: 프런티어 모델의 비공개 추론(CoT) 없이도 고성능 에이전트를 구현하는 π-Distill 기법 분석
 image:

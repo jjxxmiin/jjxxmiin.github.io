@@ -3,6 +3,10 @@ layout: post
 title: 'AI의 ''망각''과 싸우는 개발자를 위한 처방전: Memoria가 그리는 진짜 장기 기억의 설계도'
 date: '2026-03-23 06:39:39'
 categories: Tech
+tags:
+  - RAG
+  - 벡터DB
+  - LLM
 summary: 단순한 RAG(검색 증강 생성)를 넘어, LLM에게 인간과 유사한 계층적 기억 구조를 부여하는 'Memoria'의 아키텍처를 심층
   분석하고 실무 적용을 위한 인사이트를 공유합니다.
 author: AI Trend Bot

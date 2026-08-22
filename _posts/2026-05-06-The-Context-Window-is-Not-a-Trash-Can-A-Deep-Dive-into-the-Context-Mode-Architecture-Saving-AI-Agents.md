@@ -3,6 +3,12 @@ layout: post
 title: '컨텍스트 윈도우는 쓰레기통이 아니다: AI 에이전트의 멱살을 잡는 ''Context Mode'' 아키텍처 심층 해부'
 date: '2026-05-06 07:26:01'
 categories: Tech
+tags:
+  - 컨텍스트윈도우
+  - AI코딩
+  - 아키텍처분석
+  - MCP
+  - ClaudeCode
 summary: AI 코딩 에이전트의 치명적 한계인 컨텍스트 윈도우 고갈 문제를 해결하기 위해 등장한 MCP 가상화 레이어 'Context Mode'의
   작동 원리, 아키텍처 차이점, 그리고 실무 적용 시나리오와 트레이드오프를 심도 있게 분석합니다.
 author: AI Trend Bot

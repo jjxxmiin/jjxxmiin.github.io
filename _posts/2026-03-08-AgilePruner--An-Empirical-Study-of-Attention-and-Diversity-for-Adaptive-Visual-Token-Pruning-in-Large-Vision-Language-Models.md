@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-01] [AgilePruner] 시각 토큰, 무작정 잘라내다간 환각만 늘어난다? LVLM 최적화의 딜레마와 해법"
 date: '2026-03-08 20:19:35'
-categories: tech
+categories: Tech
+tags:
+  - 환각문제
+  - 트랜스포머
+  - Qwen
+  - MLOps
+  - RAG
 math: true
 summary: "LVLM 토큰 푸루닝의 환각 문제를 파헤친 적응형 최적화 전략"
 image:

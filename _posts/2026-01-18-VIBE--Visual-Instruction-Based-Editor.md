@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-05] VIBE: 3.6B 파라미터로 실현한 고효율 고해상도 이미지 편집의 혁신 - Visual Instruction
   Based Editor 심층 분석'
 date: '2026-01-18'
-categories: tech
+categories: Tech
+tags:
+  - 이미지생성
+  - Qwen
+  - 디퓨전모델
+  - 온디바이스AI
+  - 경량화
 math: true
 summary: 가벼운 모델로 구현한 2K 해상도 이미지 편집의 미래, VIBE 기술 분석
 image:

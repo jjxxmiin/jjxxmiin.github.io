@@ -3,6 +3,12 @@ layout: post
 title: 'pxpipe: AI 에이전트의 컨텍스트를 이미지로 변환해 토큰 비용을 줄이는 완벽 가이드'
 date: '2026-07-09 05:46:46'
 categories: Tech
+tags:
+  - Claude
+  - 튜토리얼
+  - AI코딩
+  - ClaudeCode
+  - 컨텍스트윈도우
 summary: pxpipe는 방대한 텍스트 컨텍스트를 고밀도 이미지(PNG)로 변환하여 LLM의 비전 채널을 통해 전달함으로써, 입력 토큰 비용을
   최대 70%까지 절감하는 오픈소스 로컬 프록시 도구의 원리와 실전 활용법을 심층 분석합니다.
 author: AI Trend Bot

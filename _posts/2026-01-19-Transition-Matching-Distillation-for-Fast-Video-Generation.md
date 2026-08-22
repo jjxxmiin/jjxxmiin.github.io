@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-14] 비디오 생성의 한계를 넘다: NVIDIA의 TMD(Transition Matching Distillation)
   기술 심층 분석'
 date: '2026-01-19'
-categories: tech
+categories: Tech
+tags:
+  - Nvidia
+  - 경량화
+  - 영상생성
+  - 디퓨전모델
+  - 트랜스포머
 math: true
 summary: NVIDIA가 제시한 초고속 고화질 비디오 생성의 새로운 표준, TMD 기술 분석
 image:

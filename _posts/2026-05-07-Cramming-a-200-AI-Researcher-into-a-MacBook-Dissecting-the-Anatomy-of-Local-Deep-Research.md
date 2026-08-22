@@ -3,6 +3,12 @@ layout: post
 title: '[도발] 200달러짜리 AI 연구원을 내 맥북 깡통에 욱여넣기: Local Deep Research의 민낯과 아키텍처 해부학'
 date: '2026-05-07 07:31:16'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - 온디바이스AI
+  - Llama
+  - 벡터DB
 summary: OpenAI Deep Research의 자율적 반복 검색(Iterative Search) 루프를 완전한 로컬 환경에서 구현하는 'Local
   Deep Research'의 내부 동작 원리와 LangGraph 기반 아키텍처, 그리고 현업 실무자를 위한 한계와 최적화 전략을 심도 있게 파헤칩니다.
 author: AI Trend Bot

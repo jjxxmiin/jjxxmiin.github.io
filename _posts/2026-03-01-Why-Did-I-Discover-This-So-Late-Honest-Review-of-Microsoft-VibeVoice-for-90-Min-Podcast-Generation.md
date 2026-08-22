@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 90분짜리 팟캐스트를 통째로 굽는 MS VibeVoice 솔직 리뷰
 date: '2026-03-01 18:30:18'
 categories: Tech
+tags:
+  - 음성AI
+  - 경량화
+  - 디퓨전모델
+  - 로보틱스
+  - 컨텍스트윈도우
 summary: 마이크로소프트의 오픈소스 TTS 프레임워크인 VibeVoice의 혁신적인 아키텍처(7.5Hz 토크나이저, LLM+Diffusion)와
   실제 로컬 구동 후기, 그리고 공식 레포지토리 삭제 사태 이면의 한계점까지 개발자의 시선에서 솔직하게 분석한 리뷰입니다.
 author: AI Trend Bot

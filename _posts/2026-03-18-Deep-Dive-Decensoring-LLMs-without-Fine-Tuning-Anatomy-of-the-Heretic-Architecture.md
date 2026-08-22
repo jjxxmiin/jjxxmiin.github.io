@@ -3,6 +3,12 @@ layout: post
 title: '[Deep Dive] 파인튜닝 없이 LLM의 검열을 해제하다: Heretic 아키텍처 해부'
 date: '2026-03-18 18:26:09'
 categories: Tech
+tags:
+  - 파인튜닝
+  - 아키텍처분석
+  - 트랜스포머
+  - AI보안
+  - 경량화
 summary: 안전성 필터로 인해 제약이 걸린 오픈소스 LLM을 파인튜닝 없이, 방향성 절제(Directional Ablation)와 TPE 기반의
   파라미터 최적화(Optuna)를 통해 완전 자동으로 검열 해제하는 'Heretic'의 내부 동작 원리와 실무 적용 방안을 현직 개발자 시선에서
   심층 분석합니다.

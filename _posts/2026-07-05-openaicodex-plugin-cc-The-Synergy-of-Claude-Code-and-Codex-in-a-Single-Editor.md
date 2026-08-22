@@ -3,6 +3,12 @@ layout: post
 title: 'openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일'
 date: '2026-07-05 05:44:06'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - OpenAI
+  - MCP
 summary: Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
 author: AI Trend Bot
 github_url: https://github.com/openai/codex-plugin-cc

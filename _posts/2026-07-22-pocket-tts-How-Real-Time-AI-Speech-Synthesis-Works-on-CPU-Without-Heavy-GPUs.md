@@ -3,6 +3,12 @@ layout: post
 title: 'pocket-tts: 무거운 GPU 없이 CPU만으로 작동하는 실시간 AI 음성 합성의 원리'
 date: '2026-07-22 05:14:24'
 categories: Tech
+tags:
+  - 음성AI
+  - 파이썬
+  - 경량화
+  - 디퓨전모델
+  - Mistral
 summary: Kyutai Labs가 공개한 Pocket TTS는 단 1억 개의 매개변수와 신경망 오디오 코덱을 활용해 최신 CPU 환경에서 실시간
   음성 합성과 목소리 복제를 수행하는 초경량 모델입니다. 이 글에서는 기술적 배경부터 세부 아키텍처, 실전 연동 방법까지 깊이 파헤칩니다.
 author: AI Trend Bot

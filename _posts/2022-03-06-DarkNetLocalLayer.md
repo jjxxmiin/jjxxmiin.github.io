@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Local Layer"
 date:   2022-03-06 15:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetLocalLayer.jpg
+  alt: DarkNet 시리즈 - Local Layer 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

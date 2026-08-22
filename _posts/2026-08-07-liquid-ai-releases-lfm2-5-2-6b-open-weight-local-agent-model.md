@@ -6,6 +6,12 @@ title: Liquid AI, 스마트폰과 CPU에서 작동하는 로컬 에이전트 모
 date: 2026-08-07 11:22:00 +0900
 last_modified_at: 2026-08-07 11:22:00 +0900
 categories: Tech
+tags:
+  - HuggingFace
+  - 온디바이스AI
+  - 트랜스포머
+  - 컨텍스트윈도우
+  - AI서비스
 description: Liquid AI가 2.5GB 미만 RAM 환경에서 작동하는 오픈웨이트 에이전트 모델 LFM2.5-2.6B를 출시했습니다. 클라우드 연결 없이 스마트폰과 CPU에서 128K 컨텍스트와 툴 콜링을 오프라인으로 실행할 수 있습니다.
 summary: Liquid AI가 스마트폰 및 소비자용 CPU에서 로컬로 구동되는 26억 매개변수 온디바이스 에이전트 모델 LFM2.5-2.6B를 공개했습니다. 2.5GB 미만의 RAM 메모리로 128K 컨텍스트와 네이티브 툴 콜링을 지원하며, Hugging Face를 통해 오픈웨이트로 배포되었습니다.
 article_type: NewsArticle

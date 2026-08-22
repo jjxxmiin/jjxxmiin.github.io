@@ -4,6 +4,12 @@ title: 터미널로 내려온 AI 에이전트, 'Gemini CLI'가 10년 차 개발�
   딥다이브)
 date: '2026-03-20 06:26:23'
 categories: Tech
+tags:
+  - Gemini
+  - MCP
+  - 아키텍처분석
+  - Google
+  - AI코딩
 summary: 단순한 코드 복붙을 넘어 로컬 환경에서 스스로 추론(ReAct)하고 실행하며, MCP(Model Context Protocol)를
   통해 외부 환경과 직접 소통하는 자율형 AI 에이전트인 Gemini CLI의 아키텍처와 실무 활용법, 그리고 10년 차 개발자의 비판적 리뷰를
   담은 심층 칼럼입니다.

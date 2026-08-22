@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-08] [3D Vision] 라벨링 노가다는 끝났다. 비디오를 3D 공간 지능으로 변환하는 'Holi-Spatial' 심층 해부"
 date: '2026-03-10 04:38:10'
-categories: tech
+categories: Tech
+tags:
+  - 3D생성
+  - 아키텍처분석
+  - 로보틱스
+  - 멀티모달
+  - 업무자동화
 math: true
 summary: "수동 라벨링의 지옥을 탈출할 3DGS 기반 400만 개 공간 데이터 자동 생성 파이프라인."
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-19] 포인트 클라우드 노가다 끝. 비디오 생성 모델에서 3D 공간 지각력을 날먹하는 VEGA-3D 아키텍처 해부"
 date: '2026-03-20 20:14:37'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 3D생성
+  - 디퓨전모델
+  - 로보틱스
+  - 아키텍처분석
 math: true
 summary: "비디오 확산 모델의 잠재 공간에서 3D 공간 지각력을 무료로 뽑아내는 VEGA-3D 완벽 해부."
 image:

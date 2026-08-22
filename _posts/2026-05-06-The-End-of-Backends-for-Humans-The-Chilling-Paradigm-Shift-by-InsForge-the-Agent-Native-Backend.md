@@ -3,6 +3,12 @@ layout: post
 title: '인간을 위한 백엔드의 종말: AI 에이전트 전용 백엔드 ''InsForge''가 던진 섬뜩한 패러다임'
 date: '2026-05-06 18:42:54'
 categories: Tech
+tags:
+  - AI트렌드
+  - MCP
+  - AI코딩
+  - ChatGPT
+  - AI에이전트
 summary: 기존 Supabase와 Firebase가 인간의 클릭을 위한 플랫폼이었다면, InsForge는 철저히 AI 코딩 에이전트(Cursor,
   Claude Code 등)를 위해 설계된 '에이전트 네이티브 백엔드(Agent-Native Backend)'입니다. MCP(Model Context
   Protocol)를 활용해 백엔드 인프라를 기계가 읽을 수 있는 시맨틱 레이어로 추상화하여, 에이전트의 환각(Hallucination)을 줄이고

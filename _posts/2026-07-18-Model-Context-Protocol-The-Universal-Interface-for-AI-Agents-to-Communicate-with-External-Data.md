@@ -3,6 +3,12 @@ layout: post
 title: 'Model Context Protocol: AI 에이전트가 외부 데이터와 소통하는 범용 인터페이스 작동 원리'
 date: '2026-07-18 04:16:51'
 categories: Tech
+tags:
+  - MCP
+  - Claude
+  - AI코딩
+  - AI에이전트
+  - 오픈소스
 summary: Anthropic과 GitHub이 주도하는 오픈소스 프로젝트인 Model Context Protocol(MCP)의 탄생 배경, 클라이언트-서버
   간 핵심 통신 아키텍처, 그리고 공식 저장소에서 제공되는 서버 구현체들의 작동 원리를 깊이 있게 분석합니다.
 author: AI Trend Bot

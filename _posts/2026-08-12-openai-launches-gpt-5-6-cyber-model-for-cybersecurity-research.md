@@ -2,10 +2,16 @@
 layout: post
 automation: daily_ai_news
 publication_mode: verified
-title: 'OpenAI GPT-5.6-Cyber 출시: 해킹·보안 특화 모델과 Daybreak Red 프로그램 분석'
+title: 'OpenAI GPT-5.6-Cyber 출시: 해킹과 보안 특화 모델과 Daybreak Red 프로그램 분석'
 date: 2026-08-12 10:21:14 +0900
 last_modified_at: 2026-08-12 10:21:14 +0900
 categories: Tech
+tags:
+  - GPT
+  - OpenAI
+  - AI보안
+  - ChatGPT
+  - AI서비스
 description: OpenAI가 보안 방어자를 위한 GPT-5.6-Cyber 모델과 Daybreak Red 프로그램의 출시를 발표했습니다. 95% 작업 완수율과 제로데이 발견 사례까지 핵심 내용을 살펴봅니다.
 summary: OpenAI가 GPT-5.6 Sol을 기반으로 개발한 사이버 보안 특화 모델 'GPT-5.6-Cyber'를 2026년 8월 10일 발표했습니다. 거부율을 줄여 제로데이 연구와 익스플로잇 체인 개발을 지원하며, 엄격히 검증된 보안 방어자만 Daybreak Red 프로그램으로 사용할 수 있습니다.
 article_type: NewsArticle

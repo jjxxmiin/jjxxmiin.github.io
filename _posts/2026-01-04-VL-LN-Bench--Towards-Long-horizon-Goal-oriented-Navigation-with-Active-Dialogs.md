@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-26] 대화형 에이전트의 혁명: VL-LN 벤치마크를 통해 본 능동적 다이얼로그 기반 Embodied AI의 미래'
 date: '2026-01-04'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 벤치마크
+  - 강화학습
+  - 멀티모달
+  - 온디바이스AI
 math: true
 summary: 모호한 명령을 스스로 해결하는 지능형 내비게이션 에이전트와 VL-LN 벤치마크 분석
 image:

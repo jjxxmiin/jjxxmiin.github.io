@@ -3,6 +3,12 @@ layout: post
 title: '내 맥북을 AI에게 통째로 넘겼을 때 벌어진 일: trycua/cua, 브라우저 자동화의 종말을 고하다'
 date: '2026-04-27 07:19:32'
 categories: Tech
+tags:
+  - MCP
+  - 업무자동화
+  - AI코딩
+  - 로보틱스
+  - 온디바이스AI
 summary: AI 에이전트에게 안전하게 데스크톱 제어권을 넘길 수 있는 '컴퓨터 사용 에이전트(CUA) 전용 Docker', trycua/cua의
   핵심 아키텍처와 실무 도입 시의 장단점을 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

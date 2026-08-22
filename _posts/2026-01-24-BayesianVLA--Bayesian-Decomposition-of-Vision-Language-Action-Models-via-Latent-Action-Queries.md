@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-21] 로봇의 언어 이해를 혁신하는 BayesianVLA: Information Collapse 해결과 베이지안 분해
   기술의 심층 분석'
 date: '2026-01-24'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 멀티모달
+  - 파인튜닝
+  - 온디바이스AI
+  - 트랜스포머
 math: true
 summary: VLA 모델의 치명적 결함인 '정보 붕괴'를 해결하는 베이지안 접근법 분석
 image:

@@ -3,6 +3,11 @@ layout: post
 title: '숫자 너머의 ''기류''를 읽는 기술: HKUDS Vibe-Trading이 퀀트의 판을 뒤흔드는 이유'
 date: '2026-04-27 18:44:20'
 categories: Tech
+tags:
+  - 경량화
+  - 멀티모달
+  - LLM
+  - AI에이전트
 summary: 전통적인 지표 기반 매매의 한계를 넘어, 거대언어모델(LLM)과 멀티모달 데이터를 통해 시장의 'Vibe(분위기)'를 정량화하고 실전
   트레이딩에 녹여내는 HKUDS의 혁신적인 접근법과 그 이면의 아키텍처를 심층 분석합니다.
 author: AI Trend Bot

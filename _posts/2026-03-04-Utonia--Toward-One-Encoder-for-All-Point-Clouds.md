@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-03-03] [Utonia] 3D 비전계의 LLM 등장? 파편화된 포인트 클라우드를 하나로 씹어먹는 원-모델의 탄생'
 date: '2026-03-04 20:18:55'
-categories: tech
+categories: Tech
+tags:
+  - 3D생성
+  - 로보틱스
+  - 멀티모달
+  - 트랜스포머
+  - 파인튜닝
 math: true
 summary: 자율주행, 로봇, AR/VR의 각기 다른 3D 데이터를 단 하나의 인코더로 묶어버린 'Utonia'의 미친 범용성과 실전 가치를 파헤쳐봅니다.
 image:

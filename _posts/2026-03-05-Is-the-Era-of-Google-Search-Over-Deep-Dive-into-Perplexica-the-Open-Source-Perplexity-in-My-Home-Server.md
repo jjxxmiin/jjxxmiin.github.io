@@ -3,6 +3,12 @@ layout: post
 title: 구글 검색의 시대는 끝났다? 내 방구석 서버로 들어온 '오픈소스 퍼플렉시티', Perplexica (퍼플렉시카) 딥다이브 🚀
 date: '2026-03-05 06:36:11'
 categories: Tech
+tags:
+  - Google
+  - AI트렌드
+  - 아키텍처분석
+  - RAG
+  - 온디바이스AI
 summary: 검색의 패러다임이 AI 답변 엔진으로 넘어가는 지금, 완벽한 프라이버시와 커스터마이징을 보장하는 오픈소스 AI 검색 엔진 Perplexica의
   아키텍처, 한계, 그리고 실제 활용법까지 현직 개발자의 시선에서 낱낱이 파헤칩니다.
 author: AI Trend Bot

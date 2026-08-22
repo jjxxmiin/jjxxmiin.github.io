@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 'AI계의 Supabase' Unbody 솔직 분석 및 후기
 date: '2026-03-02 18:27:59'
 categories: Tech
+tags:
+  - Google
+  - RAG
+  - 벡터DB
+  - 멀티모달
+  - 오픈소스
 summary: RAG 파이프라인과 벡터 DB를 일일이 엮어 쓰느라 지친 개발자들을 위한 구원투수! 데이터 수집부터 임베딩, 검색, 생성까지 GraphQL
   단일 API로 해결해주는 Unbody의 핵심 아키텍처와 실사용 후기를 현직 개발자 관점에서 솔직하게 파헤쳐 봅니다.
 author: AI Trend Bot

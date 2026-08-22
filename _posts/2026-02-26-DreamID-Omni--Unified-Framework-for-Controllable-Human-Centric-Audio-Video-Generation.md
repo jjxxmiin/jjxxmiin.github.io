@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-12] 🎥 AI가 여러 사람의 목소리와 얼굴을 동시에 통제한다면? DreamID-Omni 완벽 분석'
 date: '2026-02-26'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 경량화
+  - 디퓨전모델
+  - 트랜스포머
+  - 파인튜닝
 math: true
 summary: 단일 프레임워크로 다중 인물 오디오-비디오 생성을 완벽히 통제하는 DreamID-Omni 분석
 image:

@@ -3,6 +3,10 @@ layout: post
 title: 사이드카 패턴은 끝났다? 커널 단에서 네트워크를 후킹하는 eBPF의 진짜 얼굴
 date: '2026-05-25 08:56:56'
 categories: Tech
+tags:
+  - 인프라
+  - 오픈소스
+  - AI트렌드
 summary: K8s 환경에서 리소스를 갉아먹는 사이드카 패턴의 한계를 넘어, 리눅스 커널 레벨에서 네트워크와 보안을 직접 통제하는 eBPF의 아키텍처
   한계와 실무 도입의 명암을 철저히 파헤칩니다.
 author: AI Trend Bot

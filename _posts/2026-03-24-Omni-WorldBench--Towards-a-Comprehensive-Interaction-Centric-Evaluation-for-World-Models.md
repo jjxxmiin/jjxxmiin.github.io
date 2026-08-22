@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-23] 월드 모델 평가는 왜 다 이 모양일까? Omni-WorldBench로 까보는 4D 물리엔진의 민낯"
 date: '2026-03-24 20:22:16'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 로보틱스
+  - 멀티모달
+  - 영상생성
+  - 경량화
 math: true
 summary: "픽셀 장난질을 진짜 물리엔진과 구분할 수 있을까? 상호작용과 인과관계를 채점하는 Omni-WorldBench 해부."
 image:

@@ -3,6 +3,12 @@ layout: post
 title: RAG의 종말, 혹은 진화? 10년 차 개발자가 뜯어본 'Supermemory' 아키텍처
 date: '2026-03-25 18:28:23'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - 벡터DB
+  - MCP
+  - AI코딩
 summary: 단순한 벡터 검색(Vector Search)을 넘어, 시계열 데이터와 지식 그래프를 결합해 LLM에 '진짜 기억'을 심어주는 오픈소스
   메모리 엔진, Supermemory의 내부 아키텍처와 실무 활용 가치를 파헤칩니다.
 author: AI Trend Bot

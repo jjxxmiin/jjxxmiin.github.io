@@ -3,6 +3,12 @@ layout: post
 title: 'AI Berkshire: 일반 인공지능이 주식 투자를 못 하는 이유와 다중 에이전트 프레임워크의 해결책'
 date: '2026-07-11 21:27:20'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - AI코딩
+  - 강화학습
+  - AI보안
+  - AI투자
 summary: 일반적인 언어 모델이 투자 분석에서 보여주는 양비론적 한계와 데이터 환각을 극복하기 위해, 4대 가치투자 대가의 방법론을 다중 에이전트로
   구현한 AI Berkshire 프레임워크의 구조와 작동 원리를 깊이 있게 분석합니다.
 author: AI Trend Bot

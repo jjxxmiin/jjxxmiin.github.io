@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-17] 로봇 시뮬레이션의 '차원'이 다르다: 2D 비디오를 넘어 4D로 진화한 Kinema4D"
 date: '2026-03-18 04:46:07'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 디퓨전모델
+  - 영상생성
+  - 트랜스포머
+  - AI에이전트
 math: true
 summary: "2D 비디오의 한계를 깨고 URDF 기반 4D 공간 상호작용을 구현한 차세대 시뮬레이터."
 image:

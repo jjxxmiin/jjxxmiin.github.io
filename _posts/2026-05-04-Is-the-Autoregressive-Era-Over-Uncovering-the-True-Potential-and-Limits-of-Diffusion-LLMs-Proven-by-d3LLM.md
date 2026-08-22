@@ -3,6 +3,12 @@ layout: post
 title: LLM은 왜 꼭 왼쪽에서 오른쪽으로만 읽어야 할까? d3LLM이 박살 낸 자기회귀(AR)의 병목과 디퓨전 모델의 실무적 진실
 date: '2026-05-04 18:46:13'
 categories: Tech
+tags:
+  - 디퓨전모델
+  - 경량화
+  - Qwen
+  - MLOps
+  - 트랜스포머
 summary: 자기회귀(AR) 모델의 순차적 생성 병목을 해결하기 위해 등장한 d3LLM의 혁신적인 아키텍처(가상 궤적 증류, 멀티블록 디코딩)를
   심층 분석하고, 현업 실무자 관점에서의 도입 가능성과 한계를 고찰합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-11] 끈적한 OCR 파이프라인의 종말? 4B 파라미터로 레이아웃까지 씹어먹는 Qianfan-OCR 해부"
 date: '2026-03-18 20:23:28'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - RAG
+  - 멀티모달
+  - Qwen
+  - Gemini
 math: true
 summary: "파이프라인 떡칠은 이제 그만. 4B 단일 모델에 Layout-as-Thought를 도입해 마크다운을 직조하는 괴물 VLM."
 image:

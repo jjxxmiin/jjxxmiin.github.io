@@ -3,6 +3,12 @@ layout: post
 title: '12만 6천 별의 진실: Andrej Karpathy Skills가 폭로한 AI 코딩 에이전트의 치명적 민낯과 통제 전략'
 date: '2026-05-20 19:03:04'
 categories: Tech
+tags:
+  - AI코딩
+  - 강화학습
+  - 트랜스포머
+  - 프롬프트엔지니어링
+  - ClaudeCode
 summary: 단 하나의 CLAUDE.md 파일로 12만 6천 개의 깃허브 스타를 받은 andrej-karpathy-skills 레포지토리는 AI의
   오버엔지니어링 습관을 물리적으로 통제하는 행동 제어 프로토콜입니다. 이 글에서는 이 650토큰 남짓의 제약이 어떻게 LLM의 추론 구조를 바꾸고
   실무의 재앙을 막아내는지 심층적으로 분석합니다.

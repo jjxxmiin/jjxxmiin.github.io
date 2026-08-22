@@ -6,6 +6,12 @@ title: 'Nvidia Nemotron 3.5 Lightning 및 NeMo Switchyard 공개: 에이전트 A
 date: 2026-08-13 10:22:35 +0900
 last_modified_at: 2026-08-13 10:22:35 +0900
 categories: Tech
+tags:
+  - Nvidia
+  - 트랜스포머
+  - Qwen
+  - 컨텍스트윈도우
+  - AI에이전트
 description: Nvidia가 자율 에이전트의 속도와 비용을 혁신할 Nemotron 3.5 Lightning 모델과 NeMo Switchyard 라우터를 공식 출시했습니다. 하이브리드 MoE 구조와 동적 라우팅이 가져올 변화를 확인해 보세요.
 summary: Nvidia가 자율 에이전트 시스템을 위해 개발된 30B 규모의 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 라우터 라이브러리 NeMo Switchyard를 2026년 8월 11일 공개했습니다. NeMo Switchyard는 프론티어 모델 대신 반복적인 도구 호출 및 검증 작업을 저비용 실행 모델로 전환하여 운영 비용과 지연 시간을 획기적으로 낮춥니다. Nemotron 3.5 Lightning은 하이브리드 Mamba-Transformer MoE 구조를 채택해 1M 토큰 컨텍스트와 높은 처리량을 제공합니다.
 article_type: NewsArticle
@@ -65,7 +71,7 @@ flowchart LR
 
 ## 무슨 일이 벌어진 걸까?
 
-Nvidia가 2026년 8월 11일 자율 에이전트 구축을 위한 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 모델 라우팅 라이브러리 NeMo Switchyard를 동시에 공식 출시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="NVIDIA Blog 출처">[1]</a></sup>. 이번 발표의 핵심은 복잡한 AI 에이전트 시스템에서 매번 비싼 대형 언어 모델을 호출하지 않고도, 작업을 똑똑하게 분배하여 실행할 수 있는 고성능·고효율 생태계를 구축했다는 점입니다 <sup class="source-citation"><a href="#source-2" aria-label="NVIDIA Developer Blog 출처">[2]</a></sup>.
+Nvidia가 2026년 8월 11일 자율 에이전트 구축을 위한 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 모델 라우팅 라이브러리 NeMo Switchyard를 동시에 공식 출시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="NVIDIA Blog 출처">[1]</a></sup>. 이번 발표의 핵심은 복잡한 AI 에이전트 시스템에서 매번 비싼 대형 언어 모델을 호출하지 않고도, 작업을 똑똑하게 분배하여 실행할 수 있는 고성능과 고효율 생태계를 구축했다는 점입니다 <sup class="source-citation"><a href="#source-2" aria-label="NVIDIA Developer Blog 출처">[2]</a></sup>.
 
 Nemotron 3.5 Lightning은 전체 300억 개(30B)의 파라미터를 갖춘 전문가 혼합(Mixture-of-Experts, MoE) 구조의 오픈 모델이지만, 순방향 전파(forward pass) 시에는 단 30억 개(3B)의 파라미터만 활성화됩니다 <sup class="source-citation"><a href="#source-2" aria-label="NVIDIA Developer Blog 출처">[2]</a></sup>. 함께 공개된 NeMo Switchyard는 에이전트의 작업 단계마다 가장 적절하고 비용 효율적인 모델을 찾아 자동으로 연결해 주는 라우터 역할을 수행합니다 <sup class="source-citation"><a href="#source-1" aria-label="NVIDIA Blog 출처">[1]</a></sup>.
 

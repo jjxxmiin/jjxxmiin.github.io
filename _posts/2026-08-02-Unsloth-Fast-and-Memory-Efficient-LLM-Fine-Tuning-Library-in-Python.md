@@ -3,6 +3,12 @@ layout: post
 title: 'Unsloth: 단 한 대의 GPU로 대형 언어 모델을 5배 빠르게 학습시키는 파이썬 가속 라이브러리'
 date: '2026-08-02 20:18:31'
 categories: Tech
+tags:
+  - 파이썬
+  - Llama
+  - MLOps
+  - 강화학습
+  - 파인튜닝
 summary: Unsloth는 PyTorch의 역전파 연산과 아텐션 메커니즘을 Triton 커널로 직접 재작성하여 대형 언어 모델 학습 속도를 최대
   5배 높이고 VRAM 사용량을 80% 절감하는 오픈소스 라이브러리입니다.
 author: AI Trend Bot

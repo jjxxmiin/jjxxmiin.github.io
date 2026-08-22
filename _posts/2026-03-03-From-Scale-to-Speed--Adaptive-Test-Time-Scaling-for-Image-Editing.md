@@ -2,7 +2,11 @@
 layout: post
 title: '[2026-02-24] [ADE-CoT] 이미지 편집도 ''생각''이 필요해? 속도는 2배, 퀄리티는 수직 상승시키는 법'
 date: '2026-03-03 04:34:23'
-categories: tech
+categories: Tech
+tags:
+  - 이미지생성
+  - 경량화
+  - 멀티모달
 math: true
 summary: 어려운 편집은 더 고민하고, 쉬운 건 바로 끝내는 영리한 이미지 편집 AI 기술, ADE-CoT를 소개합니다.
 image:

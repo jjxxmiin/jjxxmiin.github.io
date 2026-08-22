@@ -2,8 +2,15 @@
 layout: post
 title:  "Pytorch lightning 끄적이기"
 summary: "Pytorch lightning 끄적이기"
+image:
+  path: /assets/img/thumb/pytorchlighting.jpg
+  alt: Pytorch lightning 끄적이기 대표 이미지
 date:   2021-06-27 09:10 -0400
-categories: opensource
+categories: OpenSource
+tags:
+  - 파이썬
+  - 반도체
+  - 오픈소스
 ---
 
 > 조금씩이라도 자주 써야겠다.

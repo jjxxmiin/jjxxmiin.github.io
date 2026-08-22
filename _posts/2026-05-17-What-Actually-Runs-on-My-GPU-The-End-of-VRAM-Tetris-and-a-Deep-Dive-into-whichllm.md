@@ -3,6 +3,12 @@ layout: post
 title: '"내 GPU에선 뭐가 돌아가요?" VRAM 테트리스의 종말과 whichllm 심층 해부'
 date: '2026-05-17 06:57:11'
 categories: Tech
+tags:
+  - 경량화
+  - 아키텍처분석
+  - 트랜스포머
+  - 컨텍스트윈도우
+  - 파이썬
 summary: VRAM 크기만으로 모델을 고르던 시대는 끝났습니다. 단순한 VRAM 계산기를 넘어 MoE 활성 파라미터, GQA 기반 KV 캐시
   오버헤드, 최신성(Recency) 기반 ELO 랭킹까지 고려해 내 로컬 하드웨어에 최적화된 LLM을 찾아주는 실전 라우팅 CLI 툴 'whichllm'의
   아키텍처와 한계점을 시니어 엔지니어의 시선으로 심도 있게 해부합니다.

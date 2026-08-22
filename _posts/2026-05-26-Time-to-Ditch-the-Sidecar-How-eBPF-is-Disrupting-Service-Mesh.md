@@ -3,6 +3,9 @@ layout: post
 title: '사이드카, 이제 좀 버리시죠: eBPF가 서비스 매시의 판을 뒤엎는 방식'
 date: '2026-05-26 18:59:38'
 categories: Tech
+tags:
+  - 인프라
+  - AI트렌드
 summary: 무겁고 리소스를 갉아먹는 사이드카 패턴의 한계를 짚어보고, 커널 레벨에서 네트워크와 보안을 직접 제어하는 eBPF 기반 서비스 매시의
   혁신적 아키텍처와 현업 도입 시의 Trade-off를 심도 있게 파헤칩니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: 'LangChain 스파게티 코드에 지친 당신을 위해: Langflow 아키텍처와 내부 동작 원리 딥다이브'
 date: '2026-03-21 06:18:51'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 파이썬
+  - RAG
+  - 멀티에이전트
+  - 벡터DB
 summary: Langflow는 단순한 노코드 UI가 아닙니다. 복잡한 LangChain 기반의 LLM 파이프라인을 시각적 DAG로 구성하고 동적
   컴파일하는 강력한 프로토타이핑 엔진입니다. 이 글에서는 Langflow의 코어 아키텍처, 실무 활용 시나리오, 그리고 도입 시 고려해야 할 현실적인
   트레이드오프를 현업 시니어 개발자의 시선에서 깊이 있게 파헤칩니다.

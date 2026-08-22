@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-09] MOVA: 비디오와 오디오의 완벽한 동기화를 위한 MoE 기반 차세대 통합 생성 모델 심층 분석'
 date: '2026-02-10'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - 아키텍처분석
+  - 영상생성
+  - 음성AI
+  - 파인튜닝
 math: true
 summary: 비디오와 오디오를 동시에 생성하는 32B MoE 모델 MOVA의 아키텍처와 기술적 혁신 분석
 image:

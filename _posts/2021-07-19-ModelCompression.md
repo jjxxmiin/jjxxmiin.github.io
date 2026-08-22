@@ -2,8 +2,16 @@
 layout: post
 title:  "2021 Efficient Deep Learning 톺아보기"
 summary: "Efficient Deep Learning: A Survey on Making Deep Learning Models Smaller, Faster, and Better"
+image:
+  path: /assets/img/thumb/ModelCompression.jpg
+  alt: 2021 Efficient Deep Learning 톺아보기 대표 이미지
 date:   2021-07-19 09:10 -0400
-categories: paper
+categories: Paper
+tags:
+  - 경량화
+  - 논문리뷰
+  - 파인튜닝
+  - 온디바이스AI
 math: true
 ---
 

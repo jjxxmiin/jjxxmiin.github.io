@@ -2,8 +2,17 @@
 layout: post
 title: "PhotoDoodle: 예술적 이미지 편집을 위한 새로운 접근법"
 summary: "PhotoDoodle은 소량의 샘플 데이터만으로도 개별적인 예술적 스타일을 학습하여 이미지에 자연스럽게 장식 요소를 추가하는 혁신적인 AI 모델입니다."
+image:
+  path: /assets/img/thumb/PhotoDoodle.jpg
+  alt: "PhotoDoodle: 예술적 이미지 편집을 위한 새로운 접근법 대표 이미지"
 date: 2025-03-03
-categories: paper
+categories: Paper
+tags:
+  - 이미지생성
+  - 파인튜닝
+  - 디퓨전모델
+  - 트랜스포머
+  - 오픈소스
 math: true
 ---
 

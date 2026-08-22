@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-13] 💥 하나의 모델, 두 개의 뇌: 텍스트 이해와 이미지 생성을 찢어버린 'Cheers' 아키텍처 해부"
 date: '2026-03-16 04:58:50'
-categories: tech
+categories: Tech
+tags:
+  - 이미지생성
+  - 아키텍처분석
+  - 디퓨전모델
+  - 멀티모달
+  - 트랜스포머
 math: true
 summary: "이해용 의미 토큰과 생성용 디테일 토큰을 물리적으로 분리하여 토큰 4배 압축, 비용 80% 절감"
 image:

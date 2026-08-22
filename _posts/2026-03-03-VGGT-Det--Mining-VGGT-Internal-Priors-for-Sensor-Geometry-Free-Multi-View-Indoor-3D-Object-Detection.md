@@ -2,7 +2,11 @@
 layout: post
 title: '[2026-03-01] [3D Detection] 카메라 캘리브레이션 없이 3D 객체를 찾는다고? VGGT-Det이 판을 엎었습니다'
 date: '2026-03-03 20:17:08'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - 로보틱스
+  - 컴퓨터비전
 math: true
 summary: 카메라 위치 데이터 없이 2D 이미지만으로 3D 공간을 파악하는 미친 모델의 등장
 image:

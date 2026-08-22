@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-12] 선 하나로 뒤바뀌는 의미의 마법: Stroke of Surprise와 점진적 시맨틱 일루전의 기술적 심층 분석'
 date: '2026-02-15'
-categories: tech
+categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - 디퓨전모델
+  - 경량화
+  - 이미지생성
 math: true
 summary: 한 단계씩 그려질 때마다 의미가 변하는 'Stroke of Surprise' AI 기술 분석
 image:
@@ -54,7 +60,7 @@ image:
 -   **Prefix Strokes (S_prefix):** Phase 1에서 그려지는 획들.
 -   **Delta Strokes (S_delta):** Phase 2에서 추가되는 획들.
 
-![Figure 3:Pipeline overview.Our method optimizes a set of learnable stroke parameters, which are divided intoprefix strokesSprefixS_{\text{prefix}}anddelta strokesSdeltaS_{\text{delta}}. The optimization process involves two parallel branches. In the top branch, only the prefix strokes are rendered by a differentiable rasterizer to create a partial sketch (e.g., a rabbit). This sketch is then guided by a pre-trained, frozen text-to-image diffusion model using a prompt corresponding to the prefix (“a rabbit”), resulting in the prefix SDS lossℒSDSprefix\mathcal{L}_{\text{SDS}}^{\text{prefix}}. In the bottom branch, thefull set of strokesis rendered to create the complete sketch (e.g., a horse). This is guided by the same diffusion model using a prompt for the full object (“a horse”), resulting in the full SDS lossℒSDSfull\mathcal{L}_{\text{SDS}}^{\text{full}}. The total SDS guidance loss is the sum of these two termsℒSDS=ℒSDSprefix+ℒSDSfull\mathcal{L}_{\text{SDS}}=\mathcal{L}_{\text{SDS}}^{\text{prefix}}+\mathcal{L}_{\text{SDS}}^{\text{full}}. Gradients from this total loss are backpropagated to update all learnable stroke parameters.](/assets/img/papers/2602.12280/x3.png)
+![Figure 3: Pipeline overview. Our method optimizes a set of learnable stroke parameters, which are divided intoprefix strokesS](/assets/img/papers/2602.12280/x3.png)
 *Figure 3: 파이프라인 개요. Prefix Strokes는 단독으로 Phase 1의 프롬프트를 만족하도록 최적화되고, 전체(Full) 획은 Phase 2의 프롬프트를 만족하도록 동시에 최적화됩니다.*
 
 이 구조의 묘미는 **역전파(Backpropagation)**에 있습니다. Prefix Strokes는 Phase 1의 손실 함수($\mathcal{L}_{\text{SDS}}^{\text{prefix}}$)뿐만 아니라 Phase 2의 손실 함수($\mathcal{L}_{\text{SDS}}^{\text{full}}$)로부터도 그래디언트를 전달받습니다. 즉, 초기 획이 결정될 때 이미 '미래에 추가될 획'들과 어떻게 조화를 이룰지가 고려되는 것입니다. 이것이 바로 논문에서 강조하는 **'공통 구조 서브스페이스(Common Structural Subspace)'**를 찾는 과정입니다.
@@ -93,7 +99,7 @@ image:
 
 기존의 CLIP 점수만으로는 '일루전의 강도'를 측정하기 어렵습니다. 저자들은 GPT-4o를 평가자로 활용하는 혁신적인 파이프라인을 구축했습니다.
 
-![Figure 5:VLM-based evaluation and ranking pipeline.We employ GPT-4o to assess the quality of illusion sketches.(a) For Phase 1, the model evaluates the recognizability of the prefix sketch (SprefixS_{\text{prefix}}).(b) For Phase 2, the model evaluates the full sketch (SfullS_{\text{full}}) while simultaneously comparing it against the delta strokes (SdeltaS_{\text{delta}}). This comparison ensures that the prefix strokes provideessential structural scaffoldingfor the second concept, rather than being merely overwritten. High scores are awarded only whenSfullS_{\text{full}}is significantly more recognizable thanSdeltaS_{\text{delta}}alone.](/assets/img/papers/2602.12280/x5.png)
+![Figure 5: VLM-based evaluation and ranking pipeline](/assets/img/papers/2602.12280/x5.png)
 *Figure 5: VLM 기반 평가 파이프라인. GPT-4o가 각 단계의 인식 가능성과 초기 획의 기여도를 정밀하게 측정합니다.*
 
 이 평가 방식은 단순히 최종 결과물이 프롬프트에 맞는지뿐만 아니라, **"Prefix Strokes가 Phase 2에서 실질적인 구조적 역할을 수행하고 있는가?"**를 묻습니다. 만약 Delta Strokes만으로도 Phase 2 이미지가 완성된다면, 그것은 진정한 일루전이 아니기 때문입니다. 실험 결과, 본 제안 방식은 기존의 SketchDreamer나 SketchAgent보다 압도적으로 높은 일루전 점수를 획득했습니다.
@@ -102,7 +108,7 @@ image:
 
 본 기술의 강력함은 다단계 확장 시에도 유지됩니다.
 
-![Figure 6:Multi-phase pipeline.We scale toKKphases (e.g., Apple→\toSheep→\toEinstein) using cumulative stroke subsets (S1,…,SKS_{1},\ldots,S_{K}). Parallel branches optimize each cumulative sketchI1:iI_{1:i}against promptpip_{i}.Joint optimizationensures early strokes receive gradients from all subsequent losses (∑ℒSDSi\sum\mathcal{L}_{\text{SDS}}^{i}), creating a structure primed for the entire evolutionary sequence.](/assets/img/papers/2602.12280/x6.png)
+![Figure 6: Multi-phase pipeline. We scale toKKphases (e.g., Apple→ → ) using cumulative stroke subsets (S1,…, SKS , , S )](/assets/img/papers/2602.12280/x6.png)
 *Figure 6: 다단계 파이프라인. '사과 -> 양 -> 아인슈타인'과 같이 연속적인 의미 변화를 구현하는 과정을 보여줍니다.*
 
 다단계 최적화에서는 $K$개의 누적된 획 집합을 사용하며, 각 단계의 손실 함수가 이전 단계의 획들에 누적되어 반영됩니다. 이는 마치 복잡한 퍼즐을 맞추는 것과 같으며, 공동 최적화(Joint Optimization)가 없으면 달성 불가능한 영역입니다.

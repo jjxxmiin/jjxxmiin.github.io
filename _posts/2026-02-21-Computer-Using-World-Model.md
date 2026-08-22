@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-19] 컴퓨터를 쓰는 AI의 혁명: CUWM(Computer-Using World Model)이 제시하는 자율형 에이전트의
   미래'
 date: '2026-02-21'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 강화학습
+  - 로보틱스
+  - 멀티모달
+  - 업무자동화
 math: true
 summary: AI가 클릭 전 결과를 미리 본다? CUWM 기술의 핵심 심층 분석.
 image:

@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-15] Experiential Reinforcement Learning (ERL): 언어 모델의 ''경험-성찰-내재화''
   루프를 통한 강화학습의 새로운 지평'
 date: '2026-02-18'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - Qwen
+  - 경량화
+  - AI에이전트
+  - LLM
 math: true
 summary: 실수를 자산으로 바꾸는 경험적 강화학습, LLM의 한계를 넘는 혁신적 방법론 분석
 image:

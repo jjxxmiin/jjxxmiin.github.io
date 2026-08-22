@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-25] AI가 내 컴퓨터를 조종하려면? 600만 프레임의 노가다가 만든 'CUA-Suite' 해부"
 date: '2026-03-27 04:46:56'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 강화학습
+  - 파인튜닝
+  - AI코딩
+  - 월드모델
 math: true
 summary: "듬성듬성한 스크린샷은 가라. 30fps 연속 비디오로 AI의 마우스 컨트롤을 진화시킬 CUA-Suite 등장."
 image:

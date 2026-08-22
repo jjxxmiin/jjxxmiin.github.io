@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-23] 아이폰에서 3초 만에 보고 그린다? 온디바이스 통합 멀티모달 AI ''Mobile-O'' 심층 분석'
 date: '2026-02-24'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 온디바이스AI
+  - MCP
+  - 디퓨전모델
+  - 아키텍처분석
 math: true
 summary: 클라우드 없이 모바일에서 실시간 이미지 이해와 생성을 구현한 Mobile-O의 혁신적인 아키텍처
 image:

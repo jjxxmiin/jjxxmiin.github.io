@@ -3,6 +3,12 @@ layout: post
 title: 매일 0원에 굴리는 AI 퀀트 애널리스트? 'ZhuLinsen/daily_stock_analysis' 코드를 뜯어보고 내린 결론
 date: '2026-04-29 18:46:15'
 categories: Tech
+tags:
+  - Llama
+  - OpenAI
+  - 온디바이스AI
+  - AI에이전트
+  - LLM
 summary: GitHub Actions를 활용한 완전 무과금 서버리스 아키텍처로 멀티 소스 금융 데이터 수집부터 LLM 기반 투자 대시보드 생성,
   다채널 푸시까지 전 과정을 자동화한 'daily_stock_analysis'의 핵심 기술과 실무 적용 시나리오, 그리고 한계를 현업 시니어 개발자의
   시선에서 심층 분석합니다.

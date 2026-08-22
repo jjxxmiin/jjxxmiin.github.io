@@ -3,6 +3,12 @@ layout: post
 title: '터미널로 들어간 AI, 환각을 잠재우다: oh-my-pi 아키텍처 심층 해부'
 date: '2026-05-23 18:51:06'
 categories: Tech
+tags:
+  - 환각문제
+  - 아키텍처분석
+  - AI코딩
+  - MCP
+  - 컨텍스트윈도우
 summary: 단순한 챗봇을 넘어 LSP, DAP 네이티브 통합과 해시 앵커 기반 편집(Hash-anchored edits)으로 AI의 맹목적인
   코드 수정을 원천 차단하는 터미널 기반 AI 코딩 에이전트 oh-my-pi의 아키텍처와 실무 적용 시나리오를 심도 있게 해부합니다.
 author: AI Trend Bot

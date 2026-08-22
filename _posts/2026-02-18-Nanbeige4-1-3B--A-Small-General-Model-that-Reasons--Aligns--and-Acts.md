@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-13] 3B 모델의 한계를 넘어서: Nanbeige4.1-3B, 추론과 에이전트 기능을 극대화한 초소형 범용 AI의
   탄생'
 date: '2026-02-18'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 경량화
+  - AI코딩
+  - Qwen
+  - 온디바이스AI
 math: true
 summary: 3B 파라미터로 600회 도구 호출을 성공시킨 혁신적인 SLM, Nanbeige4.1-3B 분석
 image:
@@ -52,7 +58,7 @@ Nanbeige4.1-3B의 가장 큰 강점 중 하나는 복잡한 추론 경로를 스
 ### 3.3 코드 생성의 혁신: 시간 복잡도 인지형 강화학습(Code RL)
 일반적인 코드 생성 모델은 유닛 테스트(Unit Test) 통과 여부만을 보상으로 삼습니다. 하지만 Nanbeige4.1-3B는 여기서 한 걸음 더 나아가 **시간 복잡도(Time Complexity)**를 보상 체계에 통합했습니다.
 
-![Figure 3:Gated time-complexity reward design in code RL. The time rewardRtimeR_{\mathrm{time}}is activated only when a solution passes all test cases (PassRate=1\mathrm{PassRate}=1), and the judge system provides online feedback by comparing the predicted time complexity against the reference optimal bound.](/assets/img/papers/2602.13367/x3.png)
+![Figure 3: Gated time-complexity reward design in code RL](/assets/img/papers/2602.13367/x3.png)
 *그림 3은 코드 강화학습에서의 게이트형 시간 복잡도 보상 설계를 보여줍니다. 시간 보상은 모든 테스트 케이스를 통과했을 때만 활성화되며, 최적의 복잡도와 비교하여 피드백을 제공합니다.*
 
 이 구조의 핵심은 **$R_{time}$** 보상입니다. 모델이 짠 코드가 정답을 맞혔더라도(PassRate=1), 실행 시간이 최적의 알고리즘(Reference Bound)보다 느리면 낮은 보상을 받습니다. 이는 모델이 효율적인 알고리즘(예: $O(n^2)$ 대신 $O(n \log n)$)을 선택하도록 강제하며, 실질적인 소프트웨어 개발 역량을 비약적으로 향상시킵니다.
@@ -64,7 +70,7 @@ Nanbeige4.1-3B의 가장 큰 강점 중 하나는 복잡한 추론 경로를 스
 ### 4.1 2단계 코드 강화학습(Two-stage Code RL)
 모델의 학습은 점진적으로 진행되었습니다. 첫 번째 단계에서는 일반적인 코드 정확도를 높이는 데 집중하고, 두 번째 단계에서는 앞서 설명한 시간 복잡도 보상을 추가하여 성능을 최적화했습니다.
 
-![Figure 4:Training dynamics of two-stage code RL. We track the reward (including the gatedRtimeR_{\mathrm{time}}in Stage 2) and LiveCodeBench performance across training, showing consistent improvements from Stage 1 to Stage 2.](/assets/img/papers/2602.13367/x4.png)
+![Figure 4: Training dynamics of two-stage code RL](/assets/img/papers/2602.13367/x4.png)
 *그림 4는 2단계 코드 강화학습의 역동성을 보여줍니다. 단계 1에서 2로 넘어가며 보상과 LiveCodeBench 성능이 지속적으로 향상되는 것을 확인할 수 있습니다.*
 
 ### 4.2 에이전트 학습: Turn-level Supervision

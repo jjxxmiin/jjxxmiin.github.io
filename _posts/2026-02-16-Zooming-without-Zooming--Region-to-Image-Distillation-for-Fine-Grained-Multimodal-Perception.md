@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-12] Zooming without Zooming: MLLM의 미세 시각 인지 한계를 돌파하는 Region-to-Image
   Distillation 기술 분석'
 date: '2026-02-16'
-categories: tech
+categories: Tech
+tags:
+  - 경량화
+  - GPT
+  - Gemini
+  - 멀티모달
+  - Qwen
 math: true
 summary: 에이전트 없이도 정교한 시각 인지를 가능케 하는 ZwZ 기술 심층 분석
 image:

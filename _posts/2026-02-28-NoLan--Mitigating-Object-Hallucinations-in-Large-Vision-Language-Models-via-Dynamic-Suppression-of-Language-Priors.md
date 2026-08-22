@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-02-25] [NoLan 리뷰] LVLM 환각(Hallucination), 범인은 눈(Vision)이 아니라 뇌(언어모델)였다?'
 date: '2026-02-28'
-categories: tech
+categories: Tech
+tags:
+  - 환각문제
+  - 멀티모달
+  - Qwen
+  - 파인튜닝
 math: true
 summary: 멀티모달 AI의 환각을 '디코딩 타임 언어 억제'로 해결한 NoLan 논문 심층 리뷰
 image:

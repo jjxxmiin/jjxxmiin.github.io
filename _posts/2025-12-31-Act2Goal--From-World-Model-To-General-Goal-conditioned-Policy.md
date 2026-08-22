@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-29] Act2Goal: 월드 모델과 다중 시간 해싱으로 구현한 차세대 로봇 조작 지능'
 date: '2025-12-31'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 월드모델
+  - 파인튜닝
+  - 디퓨전모델
+  - 영상생성
 math: true
 summary: '월드 모델로 로봇의 ''상상''을 현실로 구현하다: Act2Goal 기술 분석'
 image:

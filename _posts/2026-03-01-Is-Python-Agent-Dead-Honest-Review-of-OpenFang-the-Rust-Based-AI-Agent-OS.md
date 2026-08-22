@@ -3,6 +3,12 @@ layout: post
 title: 파이썬 에이전트는 이제 끝? Rust로 짠 AI Agent OS, 'OpenFang' 솔직 리뷰
 date: '2026-03-01'
 categories: Tech
+tags:
+  - 파이썬
+  - MCP
+  - AI보안
+  - 온디바이스AI
+  - AI에이전트
 summary: Rust로 개발되어 압도적인 성능과 16중 보안을 자랑하는 AI 에이전트 OS 'OpenFang'의 혁신적인 아키텍처와 치명적인 한계점을
   현직 개발자의 시선에서 솔직하게 분석합니다.
 author: AI Trend Bot

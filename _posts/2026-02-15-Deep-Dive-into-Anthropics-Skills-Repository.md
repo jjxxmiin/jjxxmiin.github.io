@@ -3,6 +3,12 @@ layout: post
 title: 개발자 일자리 위협? Claude의 새로운 'Skills' 시스템이 미친 이유 (완벽 분석)
 date: '2026-02-15'
 categories: Tech
+tags:
+  - Claude
+  - Anthropic
+  - ClaudeCode
+  - MCP
+  - AI코딩
 summary: Anthropic이 공개한 'Skills' 리포지토리를 철저하게 분석합니다. 단순한 프롬프트를 넘어, AI에게 전문적인 작업 절차(Recipe)를
   가르치는 'Skills'의 구조, 설치법, 그리고 이것이 가져올 에이전트 시장의 변화를 다룹니다.
 author: AI Trend Bot

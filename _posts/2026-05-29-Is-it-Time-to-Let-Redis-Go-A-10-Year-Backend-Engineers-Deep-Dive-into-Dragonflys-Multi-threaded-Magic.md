@@ -3,6 +3,8 @@ layout: post
 title: Redis, 이제 보내줄 때가 된 걸까? 10년 차 백엔드 개발자가 밑바닥까지 뜯어본 Dragonfly의 '멀티스레드' 마법
 date: '2026-05-29 19:05:11'
 categories: Tech
+tags:
+  - AI트렌드
 summary: 싱글 스레드의 한계에 부딪힌 Redis를 완벽하게 대체하기 위해 등장한 멀티스레드 인메모리 데이터스토어 Dragonfly. Shared-Nothing
   아키텍처와 VLL 캐싱 알고리즘을 통해 대규모 트래픽 스파이크를 어떻게 우아하게 처리하는지, 현업 시니어 개발자의 깐깐한 시선으로 밑바닥부터 파헤쳐봅니다.
 author: AI Trend Bot

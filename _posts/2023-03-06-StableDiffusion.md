@@ -2,8 +2,15 @@
 layout: post
 title:  "Diffusion 톺아보기"
 summary: "Long time no see"
+image:
+  path: /assets/img/thumb/StableDiffusion.jpg
+  alt: Diffusion 톺아보기 대표 이미지
 date:   2023-03-06 16:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 디퓨전모델
+  - 논문리뷰
+  - 이미지생성
 math: true
 ---
 

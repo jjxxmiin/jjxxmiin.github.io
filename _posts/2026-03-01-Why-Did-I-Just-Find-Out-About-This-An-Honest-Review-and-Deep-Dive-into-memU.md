@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? LLM의 기억 상실증을 치료할 'memU' 솔직 분석 및 후기
 date: '2026-03-01 18:17:52'
 categories: Tech
+tags:
+  - RAG
+  - 컨텍스트윈도우
+  - 벡터DB
+  - AI에이전트
+  - 오픈소스
 summary: LLM 기반 에이전트의 치명적인 단점인 '기억 상실' 문제를 파일 시스템 구조로 해결하여 24/7 능동형 AI를 가능하게 하는 오픈소스
   메모리 프레임워크 memU에 대한 심층 분석.
 author: AI Trend Bot

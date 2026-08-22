@@ -3,6 +3,12 @@ layout: post
 title: 'Meetily: 오디오 유출 없이 내 PC에서 완성되는 프라이버시 최우선 AI 회의 비서'
 date: '2026-07-05 05:54:28'
 categories: Tech
+tags:
+  - Llama
+  - 음성AI
+  - 온디바이스AI
+  - Mistral
+  - LLM
 summary: 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고 기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
 author: AI Trend Bot
 github_url: https://github.com/Zackriya-Solutions/meetily

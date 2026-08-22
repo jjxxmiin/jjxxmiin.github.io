@@ -6,6 +6,11 @@ title: Meta Muse Glimmer 공개, 개인 GPU로 돌리는 30B 로컬 AI 에이전
 date: 2026-08-11 10:11:13 +0900
 last_modified_at: 2026-08-11 10:11:13 +0900
 categories: Tech
+tags:
+  - AI트렌드
+  - 경량화
+  - AI에이전트
+  - 오픈소스
 description: Meta가 개인용 PC와 Mac에서 구동 가능한 30B 규모의 오픈소스 모델 Muse Glimmer를 공개했습니다. 4비트 양자화로 20GB RAM 이하에서 고성능 로컬 AI 에이전트를 실행하는 핵심 변화를 파악해보세요.
 summary: Meta가 2026년 8월 10일 소비자용 GPU 환경에 최적화된 300억 파라미터 오픈소스 모델 Muse Glimmer를 Apache 2.0 라이선스로 출시했습니다. 4비트 양자화를 적용해 메모리 점유율을 20GB RAM 이하로 낮추었으며, 추측 디코딩과 실패 회복 기능을 갖춰 개인 디바이스에서도 고성능 로컬 AI 에이전트를 구동할 수 있습니다.
 article_type: NewsArticle
@@ -47,7 +52,7 @@ mermaid: true
 graph TD
     A[Meta, Muse Glimmer 공개] --> B[Apache 2.0 라이선스 & 30B 파라미터]
     B --> C[4비트 양자화로 20GB RAM 이하 구동]
-    C --> D[소비자용 단일 GPU·Mac에서 로컬 AI 에이전트 실행]
+    C --> D[소비자용 단일 GPU와 Mac에서 로컬 AI 에이전트 실행]
     D --> E[실패 회복 기능 및 추측 디코딩 탑재]
     E --> F[확인할 한계: 상위 Muse Spark 전용 데이터 의존성]
 ```

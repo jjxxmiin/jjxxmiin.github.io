@@ -3,6 +3,12 @@ layout: post
 title: 'OpenViking: AI 에이전트의 ''기억상실증''을 치료할 오픈소스 컨텍스트 데이터베이스 등장'
 date: '2026-02-18'
 categories: Tech
+tags:
+  - 벡터DB
+  - RAG
+  - AI에이전트
+  - 오픈소스
+  - LLM
 summary: 바이트댄스(ByteDance)의 Volcengine이 공개한 OpenViking은 단순한 벡터 DB를 넘어, 파일 시스템 패러다임(viking://)을
   적용한 AI 전용 컨텍스트 데이터베이스입니다. 계층적 로딩(L0-L2)과 디렉터리 재귀 검색을 통해 에이전트의 기억 관리 효율성을 극대화하는 방법을
   소개합니다.

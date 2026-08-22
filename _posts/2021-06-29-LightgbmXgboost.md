@@ -2,8 +2,13 @@
 layout: post
 title:  "LightGBM 그리고 XGBoost 끄적이기"
 summary: "LightGBM 그리고 XGBoost 끄적이기"
+image:
+  path: /assets/img/thumb/LightgbmXgboost.jpg
+  alt: LightGBM 그리고 XGBoost 끄적이기 대표 이미지
 date:   2021-06-29 09:10 -0400
-categories: concept
+categories: Basics
+tags:
+  - AI트렌드
 ---
 
 > Competitions에서 맨날 사용되는 LightGBM과 XGBoost 그에 대해서 알아보자

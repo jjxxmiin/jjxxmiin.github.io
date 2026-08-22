@@ -3,7 +3,11 @@ layout: post
 title: '[2026-02-12] 시각적 추론의 패러다임 전환: Thinking with Drafting(TwD)을 통한 광학적 압축 해제와 논리적
   재구성 심층 분석'
 date: '2026-02-14'
-categories: tech
+categories: Tech
+tags:
+  - AI트렌드
+  - 멀티모달
+  - LLM
 math: true
 summary: DSL 기반 논리 재구성으로 MLLM의 시각적 추론 한계를 극복하는 TwD 기술 분석
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-03] [LoGeR 리뷰] VRAM 터뜨리던 3D 재구성의 구원자? O(N^2) 어텐션을 찢어버린 하이브리드 메모리 아키텍처"
 date: '2026-03-10 20:15:36'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - 3D생성
+  - 아키텍처분석
+  - 파이썬
+  - 로보틱스
 math: true
 summary: "무거운 사후 최적화(BA) 없이 19,000 프레임을 스케일 드리프트 없이 버티는 3D 재구성 아키텍처. TTT와 SWA 메모리의 완벽한 앙상블."
 image:

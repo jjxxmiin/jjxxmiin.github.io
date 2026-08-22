@@ -3,6 +3,12 @@ layout: post
 title: '[Kibitz 딥다이브] 터미널의 소음을 서사로 바꾸다: AI 에이전트 스웜을 지휘하는 통제실'
 date: '2026-03-19 18:24:23'
 categories: Tech
+tags:
+  - AI코딩
+  - 아키텍처분석
+  - MCP
+  - ClaudeCode
+  - 멀티에이전트
 summary: '바쁜 독자를 위한 1줄 요약: Kibitz는 여러 AI 코딩 에이전트(Claude Code, Codex 등)가 터미널에 쏟아내는
   난해한 로그와 JSON 소음을 사람이 읽기 쉬운 ''서사(Narrative)''로 디코딩하고, 단일 인터페이스에서 여러 에이전트를 모니터링 및
   제어할 수 있게 해주는 혁신적인 오케스트레이션 도구입니다.'

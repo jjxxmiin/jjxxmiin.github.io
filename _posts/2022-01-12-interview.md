@@ -2,8 +2,13 @@
 layout: post
 title:  "Deep Learning Interviews 끄적이기"
 summary: "Deep Learning Interviews 끄적이기"
+image:
+  path: /assets/img/thumb/interview.jpg
+  alt: Deep Learning Interviews 끄적이기 대표 이미지
 date:   2022-01-12 09:10 -0400
-categories: concept
+categories: Basics
+tags:
+  - AI트렌드
 math: true
 ---
 

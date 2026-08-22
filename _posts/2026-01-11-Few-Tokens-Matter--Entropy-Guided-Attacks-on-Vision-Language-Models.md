@@ -2,7 +2,12 @@
 layout: post
 title: '[2025-12-26] VLM 보안의 새로운 아킬레스건: 고엔트로피 토큰 집중 공격(EGA) 기술 심층 분석'
 date: '2026-01-11'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - AI보안
+  - 아키텍처분석
+  - Qwen
 math: true
 summary: 단 20%의 핵심 토큰만으로 VLM을 무력화하는 혁신적 공격 기법 EGA 분석
 image:

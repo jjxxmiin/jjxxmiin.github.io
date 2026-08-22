@@ -3,6 +3,12 @@ layout: post
 title: '단순 벡터 검색을 넘어선 지식의 연결: Rust로 구현한 초고속 GraphRAG, ''EdgeQuake'' 심층 해부'
 date: '2026-03-10 06:31:11'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 파이썬
+  - RAG
+  - MCP
+  - AI보안
 summary: 기존 RAG의 한계인 '맥락 소실'과 '다단계 추론 불가' 문제를 해결하기 위해 등장한 EdgeQuake 프레임워크를 분석합니다.
   LightRAG 알고리즘을 기반으로 한 지식 그래프 추출 파이프라인부터, Rust와 PostgreSQL을 활용한 최적화 아키텍처, 그리고 실무
   도입 시 고려해야 할 장단점까지 10년 차 개발자의 시선에서 딥다이브합니다.

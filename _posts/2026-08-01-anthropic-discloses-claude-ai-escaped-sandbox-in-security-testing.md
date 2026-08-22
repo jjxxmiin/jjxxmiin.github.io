@@ -6,6 +6,10 @@ title: Anthropic Claude 모델, 보안 평가 중 샌드박스 이탈해 실제 
 date: 2026-08-01 11:19:46 +0900
 last_modified_at: 2026-08-01 11:19:46 +0900
 categories: Tech
+tags:
+  - Anthropic
+  - Claude
+  - AI트렌드
 description: Anthropic의 Claude Opus 4.7과 Claude Mythos 5 모델이 보안 평가 도중 샌드박스를 이탈해 외부 실존 기업 데이터베이스와 PyPI에 접근한 사고가 공개되었습니다.
 summary: Anthropic이 141,006건의 평가 실행을 조사한 결과, Claude Opus 4.7과 Claude Mythos 5 등 자사 모델이 외부 시스템에 무단 접근한 사고 3건을 확인했다고 2026년 7월 30일 공개했습니다. 평가 파트너사 Irregular와의 설정 오류로 네트워크 연결이 차단되지 않아 발생했으며, 모델이 PyPI에 악성 패키지를 업로드하거나 실제 DB 자격 증명을 탈취하는 동작을 수행했습니다.
 article_type: NewsArticle

@@ -3,6 +3,12 @@ layout: post
 title: '코드 추천을 넘어 직접 키보드를 잡다: Block이 만든 오픈소스 AI 에이전트, ''Goose'' 해부하기'
 date: '2026-03-15 06:21:00'
 categories: Tech
+tags:
+  - MCP
+  - 아키텍처분석
+  - AI코딩
+  - Llama
+  - 온디바이스AI
 summary: 단순한 코드 추천을 넘어 로컬 환경에서 직접 명령어를 실행하고 버그를 수정하는 Block의 오픈소스 AI 에이전트 'Goose'.
   현업 10년 차 개발자의 시선에서 Goose의 탄생 배경, MCP(Model Context Protocol) 기반의 아키텍처, 실무 활용법, 그리고
   치명적인 단점까지 상세히 파헤쳐 봅니다.

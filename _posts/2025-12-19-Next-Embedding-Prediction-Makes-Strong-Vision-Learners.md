@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-18] 비전 지능의 새로운 지평: Next-Embedding Prediction (NEPA) 기술 심층 분석'
 date: '2025-12-19'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 컴퓨터비전
+  - 트랜스포머
+  - 멀티모달
+  - 월드모델
 math: true
 summary: 픽셀 재구성 없이 임베딩 예측만으로 달성한 최첨단 비전 학습 모델, NEPA 심층 분석
 image:

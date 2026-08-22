@@ -3,6 +3,12 @@ layout: post
 title: 'code-review-graph 심층 분석: AI 코딩 에이전트가 코드를 정확히 기억하는 원리'
 date: '2026-07-17 21:06:53'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - 아키텍처분석
+  - 파이썬
+  - RAG
 summary: AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의
   내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
 author: AI Trend Bot

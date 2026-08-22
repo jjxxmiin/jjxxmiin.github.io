@@ -3,6 +3,12 @@ layout: post
 title: '터미널을 떠나지 않는 개발자의 꿈: AI 에이전트 ''OpenCode'' 완벽 분석'
 date: '2026-02-20'
 categories: Tech
+tags:
+  - Microsoft
+  - AI코딩
+  - OpenAI
+  - Claude
+  - 온디바이스AI
 summary: 터미널 환경에서 벗어나지 않고 모든 AI 모델을 자유롭게 사용하는 Go 언어 기반의 초고속 AI 에이전트, OpenCode를 소개합니다.
   설치부터 아키텍처, 실전 활용법까지 완벽하게 가이드합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-26] [AgentVista] 제미나이도 정답률 27%? 멀티모달 AI의 거품을 박살낼 역대급 하드코어 벤치마크'
 date: '2026-03-06 20:14:23'
-categories: tech
+categories: Tech
+tags:
+  - Gemini
+  - 멀티모달
+  - 벤치마크
+  - 파이썬
+  - 로보틱스
 math: true
 summary: 현실 세계의 복잡성을 그대로 가져와 멀티모달 AI의 한계를 폭로하는 AgentVista를 파헤칩니다.
 image:

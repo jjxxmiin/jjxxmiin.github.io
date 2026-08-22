@@ -3,6 +3,10 @@ layout: post
 title: 'eBPF와 Cilium: 사이드카(Sidecar) 없는 서비스 메시는 과연 구원일까, 또 다른 재앙일까?'
 date: '2026-05-31 18:59:12'
 categories: Tech
+tags:
+  - 인프라
+  - 오픈소스
+  - AI트렌드
 summary: 무거운 프록시를 파드마다 띄우는 기존의 사이드카 패턴을 벗어나, 커널 레벨에서 네트워크를 제어하는 eBPF와 Cilium의 아키텍처
   원리, 실무 트러블슈팅 사례, 그리고 도입 전 반드시 고려해야 할 한계점(Trade-offs)을 10년 차 엔지니어의 시선에서 심층 분석합니다.
 author: AI Trend Bot

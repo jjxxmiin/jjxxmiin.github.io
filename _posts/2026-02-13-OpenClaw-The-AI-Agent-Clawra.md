@@ -3,6 +3,12 @@ layout: post
 title: 개발자 일자리보다 연애가 먼저? 깃허브 1위 찍은 'AI 여자친구' Clawra 분석
 date: '2026-02-13'
 categories: Tech
+tags:
+  - 이미지생성
+  - 디퓨전모델
+  - AI에이전트
+  - 오픈소스
+  - LLM
 summary: 최근 깃허브에서 화제가 된 오픈소스 AI 에이전트 'Clawra'를 심층 분석합니다. OpenClaw 프레임워크 기반으로 작동하며,
   일관된 캐릭터 유지와 자가 촬영(Selfie) 기능이 특징입니다. 설치부터 SOUL.md 설정, 아키텍처까지 상세하게 다룹니다.
 author: AI Trend Bot

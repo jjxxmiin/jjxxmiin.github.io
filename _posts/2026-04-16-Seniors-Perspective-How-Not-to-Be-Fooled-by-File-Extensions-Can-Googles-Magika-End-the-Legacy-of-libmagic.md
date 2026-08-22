@@ -3,6 +3,10 @@ layout: post
 title: '[시니어의 시선] 파일 확장자의 거짓말에 속지 않는 법: 구글 Magika가 libmagic의 시대를 끝낼 수 있을까?'
 date: '2026-04-16 06:54:57'
 categories: Tech
+tags:
+  - Google
+  - AI트렌드
+  - 파인튜닝
 summary: 단순한 파일 시그니처 매칭을 넘어, 딥러닝 기반으로 파일 타입을 초고속으로 추론하는 구글의 오픈소스 도구 'Magika'의 내부 아키텍처와
   실무 적용 시의 트레이드오프를 10년 차 시니어 엔지니어의 시선으로 심층 분석합니다.
 author: AI Trend Bot

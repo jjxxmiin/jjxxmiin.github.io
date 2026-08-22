@@ -6,15 +6,18 @@ title: 알리바바 Wan 3.0 공개 베타 개시, 문서 입력으로 30초 AI �
 date: 2026-08-10 10:12:06 +0900
 last_modified_at: 2026-08-10 10:12:06 +0900
 categories: Tech
-description: 알리바바 클라우드가 30초 연속 원컷 AI 비디오 생성과 PDF·PPT 문서 참조 기능을 갖춘 Wan 3.0 공개 베타를 개시했습니다. 핵심 변화와 실무 활용 포인트를 정리해 드립니다.
+tags:
+  - Qwen
+  - 영상생성
+  - AI서비스
+description: 알리바바 클라우드가 30초 연속 원컷 AI 비디오 생성과 PDF와 PPT 문서 참조 기능을 갖춘 Wan 3.0 공개 베타를 개시했습니다. 핵심 변화와 실무 활용 포인트를 정리해 드립니다.
 summary: 알리바바 클라우드가 차세대 비디오 생성 AI 모델인 Wan 3.0(통의완상 3.0)의 공개 베타 테스트를 시작했습니다. 기존 15초에서 2배 늘어난 최대 30초 단일 샷 비디오 생성을 지원하며, PDF와 PPT 등 오피스 문서와 웹페이지 URL을 직접 참조해 영상을 만드는 옴니 리퍼런스 기능을 탑재했습니다.
 article_type: NewsArticle
 seo:
   type: NewsArticle
 image:
-  path: /assets/img/logo.png
-  alt: 알리바바 Wan 3.0 공개 베타 개시, 문서 입력으로 30초 AI 비디오 원컷 생성
-  creditText: OPSOAI
+  path: /assets/img/thumb/alibaba-launches-wan-3-0-public-beta-supporting-30-second-ai-video-and-document-inputs.jpg
+  alt: "알리바바 Wan 3.0 공개 베타 개시, 문서 입력으로 30초 AI 비디오 원컷 생성 대표 이미지"
 news_headline: Alibaba Opens Wan 3.0 Public Beta Supporting 30-Second Single-Shot AI Video and Document Inputs
 news_source_url: https://www.alibabacloud.com/en/notfound?_p_lc=1
 news_published_at: '2026-08-07'

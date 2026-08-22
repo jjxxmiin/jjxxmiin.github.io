@@ -4,6 +4,12 @@ title: '[DeepSeek-TUI 심층 분석] "클로드 코드(Claude Code)는 이제 �
   터미널 에이전트의 충격'
 date: '2026-05-11 08:44:22'
 categories: Tech
+tags:
+  - Claude
+  - DeepSeek
+  - ClaudeCode
+  - MCP
+  - 아키텍처분석
 summary: DeepSeek V4의 강력한 추론 모델을 바탕으로 로컬 터미널에서 직접 코드를 읽고, 수정하고, 명령어를 실행하는 오픈소스 자율
   에이전트 'DeepSeek-TUI'의 아키텍처, 실무 활용법, 그리고 한계를 현업 시니어 엔지니어의 시선에서 깊이 있게 파헤칩니다.
 author: AI Trend Bot

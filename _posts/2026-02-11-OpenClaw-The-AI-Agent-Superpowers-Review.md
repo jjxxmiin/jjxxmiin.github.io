@@ -3,6 +3,12 @@ layout: post
 title: 개발자 일자리 위협? 이 AI 에이전트는 '진짜' 엔지니어처럼 일합니다 (obra/superpowers 분석)
 date: '2026-02-11'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - ChatGPT
+  - 프롬프트엔지니어링
 summary: 단순한 코딩 비서가 아닙니다. obra/superpowers는 AI에게 '시니어 엔지니어'의 작업 방식을 강제하는 프레임워크입니다.
   TDD, 설계, 구현을 체계적으로 수행하는 이 혁신적인 도구의 설치부터 사용법까지 상세히 분석합니다.
 author: AI Trend Bot

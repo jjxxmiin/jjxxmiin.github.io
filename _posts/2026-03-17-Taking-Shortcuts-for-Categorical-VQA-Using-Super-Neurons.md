@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-11] VLM 파인튜닝은 낭비다. 1번째 레이어에서 5배 빠르게 답을 낚아채는 Super Neuron (SN) 기법 해부"
 date: '2026-03-17 20:23:53'
-categories: tech
+categories: Tech
+tags:
+  - 파인튜닝
+  - 멀티모달
+  - 아키텍처분석
+  - 트랜스포머
+  - 컨텍스트윈도우
 math: true
 summary: "VLM 첫 번째 토큰/레이어에서 답을 낚아채는 극단적 조기 종료(Early Exit) 아키텍처"
 image:

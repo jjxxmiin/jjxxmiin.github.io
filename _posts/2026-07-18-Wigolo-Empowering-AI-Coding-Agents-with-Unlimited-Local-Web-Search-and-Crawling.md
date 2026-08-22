@@ -3,6 +3,12 @@ layout: post
 title: 'Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법'
 date: '2026-07-18 21:23:05'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - Claude
+  - ClaudeCode
+  - Gemini
 summary: Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬
   기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해 오래된 데이터에 갇힌 에이전트의 한계를 근본적으로
   해결합니다.

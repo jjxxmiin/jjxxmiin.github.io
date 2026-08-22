@@ -3,6 +3,12 @@ layout: post
 title: '알리바바의 숨겨진 병기, Qwen-Agent: 랭체인(LangChain)의 왕좌를 위협하는 실용주의 에이전트 프레임워크 파헤치기'
 date: '2026-03-06 18:22:25'
 categories: Tech
+tags:
+  - Qwen
+  - 파이썬
+  - 멀티에이전트
+  - RAG
+  - 벡터DB
 summary: 알리바바의 Qwen 모델을 기반으로 한 Qwen-Agent 프레임워크의 아키텍처, 장단점, 그리고 실제 활용 사례를 현직 개발자의
   시선에서 깊이 있게 파헤쳐봅니다. 실용주의적 관점에서 멀티 에이전트와 코드 인터프리터의 활용법을 다룹니다.
 author: AI Trend Bot

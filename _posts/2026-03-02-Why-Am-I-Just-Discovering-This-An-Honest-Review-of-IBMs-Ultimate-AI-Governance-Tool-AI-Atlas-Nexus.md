@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? IBM이 작정하고 푼 AI 거버넌스 끝판왕 'AI Atlas Nexus' 솔직 리뷰
 date: '2026-03-02 18:41:12'
 categories: Tech
+tags:
+  - AI정책
+  - RAG
+  - 온디바이스AI
+  - AI보안
+  - LLM
 summary: IBM에서 오픈소스로 공개한 AI Atlas Nexus의 핵심 기능과 실무 적용 가능성, 그리고 현직 개발자의 솔직한 장단점 리뷰를
   담은 기술 칼럼입니다. 파편화된 AI 리스크를 지식 그래프로 통합하고 LLM을 통해 자동 진단하는 혁신적인 접근법을 다룹니다.
 author: AI Trend Bot

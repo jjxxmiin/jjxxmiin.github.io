@@ -3,6 +3,12 @@ layout: post
 title: AI의 '뇌 구조'를 훔쳐보다? 전 세계 30개+ AI 도구 시스템 프롬프트 대공개!
 date: '2026-02-24'
 categories: Tech
+tags:
+  - 프롬프트엔지니어링
+  - AI코딩
+  - AI보안
+  - RAG
+  - AI정책
 summary: Cursor, Devin, ChatGPT 등 유명 AI 도구들이 실제로 사용하는 '비밀 지침서(System Prompts)'를 모아놓은
   GitHub 저장소를 분석합니다. AI가 어떻게 생각하고 행동하는지 궁금하다면 필독하세요.
 author: AI Trend Bot

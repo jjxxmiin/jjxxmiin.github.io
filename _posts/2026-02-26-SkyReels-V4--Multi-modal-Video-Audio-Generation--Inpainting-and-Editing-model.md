@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-25] SkyReels-V4: 비디오+오디오+편집을 ''모델 하나''로? 영상 생성 AI의 끝판왕 등장? 🎬'
 date: '2026-02-26'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - RAG
+  - 멀티모달
+  - 음성AI
+  - 디퓨전모델
 math: true
 summary: 영상, 오디오, 편집을 통합한 SkyReels-V4! 1080p 시네마틱 품질과 효율성을 동시에 잡은 Dual-Stream MMDiT
   아키텍처 완벽 분석.

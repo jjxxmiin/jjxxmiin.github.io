@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 오픈소스 여론 분석 끝판왕 'BettaFish' 솔직 리뷰
 date: '2026-03-01 18:27:31'
 categories: Tech
+tags:
+  - 멀티모달
+  - 멀티에이전트
+  - 온디바이스AI
+  - 오픈소스
+  - AI에이전트
 summary: 단순한 크롤러나 LLM 래퍼가 아닙니다. 5개의 AI 에이전트가 스스로 데이터를 수집하고 토론하며 여론을 분석하는 혁신적인 오픈소스
   프로젝트, BettaFish(WeiYu)의 아키텍처와 활용 가능성을 개발자의 시각에서 깊이 있게 파헤쳐 봅니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-11] 비디오 AI 에이전트의 새로운 지평: VideoDR 벤치마크와 Open-Web 기반 심층 추론 기술 분석'
 date: '2026-01-13'
-categories: tech
+categories: Tech
+tags:
+  - 벤치마크
+  - GPT
+  - 멀티모달
+  - Gemini
+  - 컨텍스트윈도우
 math: true
 summary: 비디오와 웹을 결합한 최초의 Deep Research 벤치마크, VideoDR 심층 분석
 image:

@@ -2,8 +2,14 @@
 layout: post
 title:  "구글 어시스턴트 끄적이기"
 summary: "라즈베리파이에서 google Assistant API 실행하기"
+image:
+  path: /assets/img/thumb/googleapi.jpg
+  alt: 구글 어시스턴트 끄적이기 대표 이미지
 date:   2019-07-09 13:00 -0400
-categories: edge
+categories: Basics
+tags:
+  - Google
+  - 온디바이스AI
 ---
 
 ## API vs SDK

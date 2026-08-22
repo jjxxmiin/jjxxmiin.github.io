@@ -2,7 +2,12 @@
 layout: post
 title: '[2025-12-31] SpaceTimePilot: 시공간의 한계를 넘어선 생성형 렌더링의 혁명적 진보'
 date: '2026-01-03'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 영상생성
+  - 로보틱스
+  - 3D생성
 math: true
 summary: 공간과 시간을 독립적으로 제어하는 차세대 비디오 생성 기술, SpaceTimePilot 심층 분석
 image:

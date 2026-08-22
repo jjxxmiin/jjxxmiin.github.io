@@ -3,6 +3,12 @@ layout: post
 title: 'open-code-review: 2만 명의 개발자가 검증한 알리바바의 하이브리드 AI 코드 리뷰 시스템'
 date: '2026-07-25 21:29:10'
 categories: Tech
+tags:
+  - Qwen
+  - 파인튜닝
+  - AI보안
+  - LLM
+  - 오픈소스
 summary: 알리바바가 오픈소스로 공개한 open-code-review는 결정론적 파이프라인과 LLM을 결합한 하이브리드 아키텍처를 통해 기존
   AI 코드 리뷰의 토큰 낭비와 환각 현상을 해결합니다. 정확한 라인 단위 코멘트와 세밀한 규칙을 통해 리뷰 품질을 극대화하는 방법을 심층적으로
   분석합니다.

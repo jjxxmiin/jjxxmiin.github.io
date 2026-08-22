@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] ''everything-claude-code''가 파헤친 AI 코딩의 민낯, 그리고 진정한 에이전트 오케스트레이션'
 date: '2026-03-22 18:20:27'
 categories: Tech
+tags:
+  - Claude
+  - AI코딩
+  - ClaudeCode
+  - 멀티에이전트
+  - 컨텍스트윈도우
 summary: 단순한 터미널 챗봇에 불과했던 Claude Code를 13개의 전문 에이전트와 40개의 스킬을 갖춘 '개발팀'으로 진화시킨 깃허브
   화제의 프로젝트. 컨텍스트 부패를 막는 아키텍처부터 살벌한 API 토큰 비용 문제까지, 10년 차 개발자의 시선으로 밑바닥까지 뜯어봅니다.
 author: AI Trend Bot

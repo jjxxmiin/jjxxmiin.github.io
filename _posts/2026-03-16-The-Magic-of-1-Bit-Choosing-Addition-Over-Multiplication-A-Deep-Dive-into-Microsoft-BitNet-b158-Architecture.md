@@ -3,6 +3,12 @@ layout: post
 title: '1-bit의 마법, 곱셈을 버리고 덧셈을 택하다: Microsoft BitNet b1.58 아키텍처 딥다이브'
 date: '2026-03-16 18:25:05'
 categories: Tech
+tags:
+  - Microsoft
+  - 아키텍처분석
+  - 트랜스포머
+  - 반도체
+  - 경량화
 summary: LLM의 가장 무거운 연산인 행렬 곱셈(MatMul)을 완전히 제거하고, 가중치를 {-1, 0, 1}의 1.58비트로 압축하여 극단적인
   메모리 및 전력 효율을 달성한 Microsoft의 BitNet 아키텍처를 심도 있게 분석합니다.
 author: AI Trend Bot

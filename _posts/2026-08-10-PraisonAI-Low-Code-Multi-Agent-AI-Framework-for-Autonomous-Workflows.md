@@ -3,6 +3,12 @@ layout: post
 title: 'PraisonAI: YAML과 파이썬 코드로 구축하는 자율형 멀티 AI 에이전트 오케스트레이션'
 date: '2026-08-10 20:06:44'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - 파이썬
+  - MCP
+  - RAG
+  - 업무자동화
 summary: PraisonAI는 코드 몇 줄이나 간단한 YAML 설정만으로 자율형 멀티 AI 에이전트 시스템을 구축하고 배포할 수 있게 해주는
   오픈소스 프레임워크입니다. 100개 이상의 LLM 지원, 메모리 관리, RAG, MCP 도구 연동을 통해 복잡한 오케스트레이션을 단순화합니다.
 author: AI Trend Bot

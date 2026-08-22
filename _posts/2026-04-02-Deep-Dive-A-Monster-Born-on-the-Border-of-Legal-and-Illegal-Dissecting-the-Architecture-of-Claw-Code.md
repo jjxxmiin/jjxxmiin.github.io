@@ -3,6 +3,12 @@ layout: post
 title: '[심층 분석] 합법과 불법의 경계에서 탄생한 괴물, ''Claw Code'' 아키텍처 심층 해부'
 date: '2026-04-02 18:27:30'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 파이썬
+  - AI코딩
+  - Claude
+  - ClaudeCode
 summary: 단일 프롬프트의 한계를 넘어선 앤스로픽(Anthropic)의 Claude Code 유출 사태와, 이를 기반으로 탄생한 깃허브 최단기
   10만 스타 레포 'Claw Code'의 이중 계층(Rust/Python) 및 다중 에이전트 오케스트레이션 아키텍처를 심도 있게 분석합니다.
 author: AI Trend Bot

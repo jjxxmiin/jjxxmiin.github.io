@@ -2,8 +2,14 @@
 layout: post
 title:  "라즈베리파이에서 Openvino 끄적이기"
 summary: "라즈베리파이에서 YOLOv3를 Openvino를 활용하여 실행하기"
+image:
+  path: /assets/img/thumb/YOLOOpenvino.jpg
+  alt: 라즈베리파이에서 Openvino 끄적이기 대표 이미지
 date:   2019-03-30 13:00 -0400
-categories: edge
+categories: Basics
+tags:
+  - YOLO
+  - 온디바이스AI
 ---
 
 ### Dependency

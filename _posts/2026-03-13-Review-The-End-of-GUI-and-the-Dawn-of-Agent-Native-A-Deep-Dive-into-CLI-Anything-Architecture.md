@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] GUI의 종말과 Agent-Native의 서막: CLI-Anything 아키텍처 딥다이브'
 date: '2026-03-13 18:22:51'
 categories: Tech
+tags:
+  - Claude
+  - 아키텍처분석
+  - ClaudeCode
+  - AI보안
+  - 업무자동화
 summary: 인간을 위해 설계된 GUI 소프트웨어를 AI 에이전트가 제어할 수 있는 결정론적 CLI로 자동 변환해 주는 'CLI-Anything'의
   핵심 아키텍처와 한계, 그리고 에이전트-퍼스트 시대의 개발 방법론을 심도 있게 분석합니다.
 author: AI Trend Bot

@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-02-19] FRAPPE: 차세대 로봇 VLA 모델을 위한 다중 미래 표현 정렬 기반의 세계 모델링 혁신'
 date: '2026-02-22'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 월드모델
+  - 파인튜닝
+  - 경량화
 math: true
 summary: 픽셀 복원을 넘어 잠재 공간의 정렬로 로봇의 미래 예측력과 범용성을 극대화한 FRAPPE 기술 분석
 image:

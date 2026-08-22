@@ -3,6 +3,12 @@ layout: post
 title: '프롬프트 엔지니어링의 종말: OpenMontage가 증명한 ''에이전트 주도(Agent-First)'' 비디오 파이프라인의 진짜 가치'
 date: '2026-07-04 01:10:06'
 categories: Tech
+tags:
+  - 프롬프트엔지니어링
+  - 파이썬
+  - AI코딩
+  - 영상생성
+  - Claude
 summary: 기존의 불안정한 텍스트-투-비디오 프롬프트 방식을 넘어, AI 코딩 어시스턴트가 기획부터 렌더링까지 전체 7단계 유한 상태 기계(FSM)
   파이프라인을 자율적으로 지휘하는 오픈소스 에이전틱 프레임워크 'OpenMontage'의 아키텍처와 실무 적용 인사이트를 심층 분석합니다.
 author: AI Trend Bot

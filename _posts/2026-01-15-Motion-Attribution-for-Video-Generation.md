@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-13] 비디오 생성 AI의 ''움직임''을 지배하다: Motive 프레임워크를 통한 데이터 속성 분석과 큐레이션의 혁신'
 date: '2026-01-15'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 디퓨전모델
+  - 파인튜닝
+  - 로보틱스
+  - 컴퓨터비전
 math: true
 summary: 비디오 데이터의 움직임 기여도를 추적하여 생성 품질을 혁신하는 Motive 기술 분석.
 image:

@@ -3,6 +3,12 @@ layout: post
 title: 'Agno: 순수 파이썬 기반 고성능 멀티 에이전트 시스템과 AgentOS 구축'
 date: '2026-08-21 19:27:24'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - 파이썬
+  - Gemini
+  - 업무자동화
+  - 온디바이스AI
 summary: 'Agno(구 Phidata)는 복잡한 그래프나 체인 추상화 없이 순수 파이썬 코드만으로 멀티 에이전트를 구축할 수 있는 고성능 오픈소스
   프레임워크입니다.
 

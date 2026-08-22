@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-02-28] [WildActor] AI 비디오의 '골판지 컷아웃' 한계를 부수다: 완벽한 전신 일관성을 잡은 아키텍처 파헤치기"
 date: '2026-03-09 04:41:20'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 영상생성
+  - 트랜스포머
+  - 파인튜닝
+  - 경량화
 math: true
 summary: "얼굴만 똑같고 몸은 따로 노는 AI 비디오는 이제 그만. 완벽한 전신 일관성을 유지하는 프레임워크."
 image:

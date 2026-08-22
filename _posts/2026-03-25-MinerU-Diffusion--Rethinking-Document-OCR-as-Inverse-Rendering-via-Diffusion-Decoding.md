@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-23] LLM식 순차 디코딩은 틀렸다? OCR을 디퓨전으로 병렬 처리하는 MinerU-Diffusion 해부"
 date: '2026-03-25 20:27:42'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 아키텍처분석
+  - 트랜스포머
+  - 멀티모달
+  - MLOps
 math: true
 summary: "문서 파싱의 병목인 AR 디코딩을 버리고 디퓨전 병렬 디코딩으로 3.2배 속도를 낸 혁신적 접근법"
 image:

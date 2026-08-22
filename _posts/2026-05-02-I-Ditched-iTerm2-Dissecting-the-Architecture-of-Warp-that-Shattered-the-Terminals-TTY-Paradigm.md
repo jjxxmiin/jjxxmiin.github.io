@@ -3,6 +3,11 @@ layout: post
 title: 'iTerm2를 버렸다: 터미널의 TTY 패러다임을 박살낸 Warp의 밑바닥 아키텍처 해부'
 date: '2026-05-02 18:35:41'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - 오픈소스
+  - AI에이전트
 summary: 단순히 빠른 GPU 터미널이 아닙니다. Warp는 1970년대부터 이어져 온 문자 스트림(TTY) 기반의 터미널 인터페이스를 Rust와
   블록(Block) 아키텍처로 완전히 재설계하며, CLI 환경에 IDE급의 생산성을 부여한 혁명적인 도구입니다.
 author: AI Trend Bot
@@ -50,6 +55,7 @@ Warp는 UI부터 코어 비즈니스 로직까지 모두 Rust로 작성되었습
 
 내부적으로 Warp의 프롬프트는 단순한 쉘 프롬프트가 아니라, 완전히 독립적인 미니 텍스트 에디터(Text Editor)입니다. 아래의 Warp 워크플로우(Workflow) 설정 예시를 보시죠. 이처럼 구조화된 데이터 포맷을 터미널이 직접 파싱하여 렌더링합니다.
 
+{% raw %}
 ```yaml
 # .warp/workflows/k8s_restart_crashloop.yaml
 ---
@@ -59,7 +65,8 @@ author: senior_dev
 tags: [kubernetes, k8s, devops, troubleshooting]
 command: kubectl get pods -n {{namespace}} | grep CrashLoopBackOff | awk '{print $1}' | xargs -I {} kubectl delete pod {} -n {{namespace}}
 ```
-이렇게 정의된 워크플로우는 터미널 프롬프트에서 `Shift + Cmd + Space`를 누르면 IDE의 스니펫처럼 파라미터(`{{namespace}}`) 입력창과 함께 인터랙티브하게 실행됩니다. 쉘 스크립트의 파라미터를 외우고 다닐 필요가 없어진 거죠.
+{% endraw %}
+이렇게 정의된 워크플로우는 터미널 프롬프트에서 `Shift + Cmd + Space`를 누르면 IDE의 스니펫처럼 파라미터({% raw %}`{{namespace}}`{% endraw %}) 입력창과 함께 인터랙티브하게 실행됩니다. 쉘 스크립트의 파라미터를 외우고 다닐 필요가 없어진 거죠.
 
 ## 4. Pragmatic Use Cases (실무 적용 시나리오)
 

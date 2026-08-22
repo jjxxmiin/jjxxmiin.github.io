@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-01] NeoVerse 심층 분석: 야생의 단안 비디오로 구축하는 차세대 4D 월드 모델의 혁명'
 date: '2026-01-05'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 아키텍처분석
+  - 3D생성
+  - 로보틱스
+  - 디퓨전모델
 math: true
 summary: 단안 비디오만으로 구현하는 초정밀 4D 재구성 및 생성 기술, NeoVerse의 모든 것
 image:

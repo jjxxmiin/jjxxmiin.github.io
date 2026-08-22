@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-18] TurboDiffusion: 비디오 확산 모델을 200배 가속화하는 혁신적 프레임워크 심층 분석'
 date: '2025-12-25'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 경량화
+  - 아키텍처분석
+  - 영상생성
+  - 트랜스포머
 math: true
 summary: 'TurboDiffusion이 달성한 100-200배 가속화의 기술적 정수: SageAttention, rCM, W8A8.'
 image:

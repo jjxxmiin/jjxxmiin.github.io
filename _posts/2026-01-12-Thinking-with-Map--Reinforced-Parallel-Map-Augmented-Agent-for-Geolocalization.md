@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-08] [심층 분석] 지도를 읽는 AI: Thinking with Map, 강화학습과 병렬 탐색으로 Geolocalization의
   한계를 넘다'
 date: '2026-01-12'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 아키텍처분석
+  - Gemini
+  - 음성AI
+  - 경량화
 math: true
 summary: AI가 인간처럼 지도를 보고 위치를 찾는 혁신적 방법론, Thinking with Map과 MAPBench 분석.
 image:

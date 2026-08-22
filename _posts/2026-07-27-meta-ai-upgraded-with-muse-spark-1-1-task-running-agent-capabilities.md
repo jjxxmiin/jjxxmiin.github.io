@@ -2,10 +2,15 @@
 layout: post
 automation: daily_ai_news
 publication_mode: verified
-title: Meta, Muse Spark 1.1 탑재한 Meta AI 에이전트 출시… Gmail·Google Calendar 연동 및 자율 작업 실행
+title: Meta, Muse Spark 1.1 탑재한 Meta AI 에이전트 출시… Gmail와 Google Calendar 연동 및 자율 작업 실행
 date: 2026-07-27 11:15:24 +0900
 last_modified_at: 2026-07-27 11:15:24 +0900
 categories: Tech
+tags:
+  - Google
+  - Meta
+  - AI서비스
+  - AI에이전트
 description: Meta가 2026년 7월 24일 Muse Spark 1.1 기반 Meta AI 에이전트 업데이트를 발표했습니다. Gmail 및 Google Calendar 연동과 프롬프트 재입력 없는 자율 업무 처리 기능을 지원합니다.
 summary: Meta는 2026년 7월 24일 웹과 모바일 환경의 Meta AI에 Muse Spark 1.1 기반의 에이전트 기능을 탑재하여 정식 출시했습니다. 이번 업데이트를 통해 Meta AI는 Google Calendar와 Gmail 데이터를 연동하고, 반복적인 질문 없이도 일일 브리핑과 슬라이드 제작 등 복잡한 작업을 자율적으로 수행합니다. 초기 기능은 일부 지역의 meta.ai 및 모바일 앱에 적용되었으며 향후 WhatsApp으로 확장될 예정입니다.
 article_type: NewsArticle

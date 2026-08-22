@@ -3,6 +3,12 @@ layout: post
 title: '당신의 AI 에이전트는 왜 실무에서 ''바보''가 될까? : Scientific Agent Skills 아키텍처 해부와 샌드박싱 설계'
 date: '2026-05-13 18:51:57'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - RAG
+  - 프롬프트엔지니어링
+  - AI보안
+  - 컨텍스트윈도우
 summary: LLM 에이전트의 치명적 한계인 '절차적 지식의 부재'를 해결하는 Scientific Agent Skills의 내부 아키텍처를 심층
   분석하고, 실무에서 마주하는 환각, 토큰 낭비, 보안 문제를 타개하기 위한 샌드박싱 및 런타임 격리 전략을 시니어 엔지니어의 관점에서 비판적으로
   해부합니다.

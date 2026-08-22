@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] 안드레이 카파시의 Autoresearch: 밤샘 하이퍼파라미터 튜닝의 종말과 ''에이전틱 엔지니어링''의 서막'
 date: '2026-03-08 18:18:39'
 categories: Tech
+tags:
+  - 컨텍스트윈도우
+  - 트랜스포머
+  - 파인튜닝
+  - AI에이전트
+  - LLM
 summary: 딥러닝 연구원들이 밤새워 하던 하이퍼파라미터 튜닝과 코드 수정을 AI 에이전트가 단일 GPU에서 자율적으로 수행하는 카파시의 'Autoresearch'
   프레임워크를 현업 시니어 개발자의 시선에서 심도 있게 분석합니다.
 author: AI Trend Bot

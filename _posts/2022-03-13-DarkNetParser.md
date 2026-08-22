@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Parser"
 date:   2022-03-13 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetParser.jpg
+  alt: DarkNet 시리즈 - Parser 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

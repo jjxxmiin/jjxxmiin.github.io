@@ -3,6 +3,12 @@ layout: post
 title: '거대 AI 프레임워크의 오만함을 부수다: 12MB 바이너리 ''Axe''가 증명한 UNIX 철학과 LLM의 결합'
 date: '2026-05-07 18:46:03'
 categories: Tech
+tags:
+  - MCP
+  - 파이썬
+  - 온디바이스AI
+  - 컨텍스트윈도우
+  - AI정책
 summary: 복잡하고 무거운 기존 AI 챗봇 프레임워크의 한계를 극복하기 위해 등장한 12MB 단일 바이너리 도구 'Axe'의 아키텍처와 실무
   활용법을 UNIX 철학 관점에서 심도 있게 분석합니다.
 author: AI Trend Bot

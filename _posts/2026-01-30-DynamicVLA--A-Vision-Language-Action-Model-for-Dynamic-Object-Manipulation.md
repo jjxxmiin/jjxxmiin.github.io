@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-29] [심층 분석] DynamicVLA: 실시간 동적 물체 조작을 위한 로봇 Embodied AI의 새로운 지평'
 date: '2026-01-30'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 아키텍처분석
+  - 경량화
+  - 트랜스포머
+  - LLM
 math: true
 summary: 동적 환경에서의 로봇 제어를 혁신하는 0.4B DynamicVLA 모델의 기술적 심층 분석
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-10] 로봇 여러 대가 보내는 1인칭 영상, AI는 과연 이해할까? 'MA-EgoQA'와 다중 에이전트의 한계"
 date: '2026-03-12 20:12:34'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 멀티에이전트
+  - 멀티모달
+  - RAG
+  - 컨텍스트윈도우
 math: true
 summary: "멀티 에이전트 VLM 시대의 진짜 병목. 6개의 1인칭 비디오 스트림을 통합하는 아키텍처와 현실적인 한계점 분석."
 image:

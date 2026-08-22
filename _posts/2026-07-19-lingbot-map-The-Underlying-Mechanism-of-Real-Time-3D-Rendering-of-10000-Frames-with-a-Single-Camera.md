@@ -3,6 +3,12 @@ layout: post
 title: 'lingbot-map: 단일 카메라로 1만 프레임의 3D 공간을 실시간으로 그려내는 원리'
 date: '2026-07-19 04:44:14'
 categories: Tech
+tags:
+  - 3D생성
+  - 로보틱스
+  - 트랜스포머
+  - 반도체
+  - 컴퓨터비전
 summary: 단일 일반 카메라만으로 3D 공간을 실시간 스트리밍 방식으로 재구성하는 Robbyant의 오픈소스 파운데이션 모델, lingbot-map의
   작동 원리, 아키텍처, 그리고 한계를 깊이 있게 분석합니다.
 author: AI Trend Bot

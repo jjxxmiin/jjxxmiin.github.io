@@ -3,6 +3,12 @@ layout: post
 title: 우리의 AI 에이전트는 왜 항상 삼천포로 빠질까? LangChain 'deepagents' 아키텍처 뜯어보기
 date: '2026-03-17 18:25:37'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - API
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
+  - ClaudeCode
 summary: 단순한 무한 루프의 한계를 넘어선 LangChain의 'deepagents'는 계획 수립, 가상 파일 시스템, 서브 에이전트 위임이라는
   시스템 중심적 접근을 통해 길고 복잡한 태스크를 해결하는 차세대 에이전트 아키텍처입니다.
 author: AI Trend Bot

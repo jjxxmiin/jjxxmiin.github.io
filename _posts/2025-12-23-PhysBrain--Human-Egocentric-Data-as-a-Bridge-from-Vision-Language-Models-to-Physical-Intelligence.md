@@ -3,7 +3,13 @@ layout: post
 title: '[2025-12-18] PhysBrain: 인간의 1인칭 시점(Egocentric) 데이터를 활용한 물리적 지능(Physical Intelligence)으로의
   도약'
 date: '2025-12-23'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 멀티모달
+  - 경량화
+  - 트랜스포머
+  - AI에이전트
 math: true
 summary: 인간의 1인칭 시점 데이터를 활용해 VLM을 물리 지능으로 진화시킨 PhysBrain 분석
 image:

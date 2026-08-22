@@ -3,6 +3,11 @@ layout: post
 title: 메모리 30MB로 V8을 돌린다고? 러스트(Rust)가 낳은 괴물 브라우저 'Obscura' 심층 해부
 date: '2026-04-28 07:23:28'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - RAG
+  - 경량화
+  - AI에이전트
 summary: 기존 크로미움의 비대한 렌더링 파이프라인을 걷어내고 러스트(Rust) 환경에 V8 엔진을 직접 결합하여 메모리를 30MB로 압축한
   초경량 헤드리스 브라우저 'Obscura'의 아키텍처와 실무 적용 시나리오를 심층 분석합니다.
 author: AI Trend Bot

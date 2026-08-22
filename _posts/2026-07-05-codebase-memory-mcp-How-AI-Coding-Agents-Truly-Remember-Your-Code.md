@@ -3,6 +3,12 @@ layout: post
 title: 'codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법'
 date: '2026-07-05 05:26:08'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - 튜토리얼
+  - RAG
+  - ClaudeCode
 summary: AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
 author: AI Trend Bot
 github_url: https://github.com/DeusData/codebase-memory-mcp

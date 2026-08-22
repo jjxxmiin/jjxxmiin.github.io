@@ -3,6 +3,12 @@ layout: post
 title: LLM의 기억 상실증을 치료하는 가장 우아한 메스, Mem0(메모-제로) 심층 해부
 date: '2026-05-04 07:20:01'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - 벡터DB
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
 summary: 기존 RAG와 Full-Context 방식의 한계를 넘어, LLM 스스로 대화 맥락을 분석하고 기억을 갱신(A.U.D.N)하는 Mem0의
   하이브리드 아키텍처와 실무 도입 시나리오를 철저히 파헤칩니다.
 author: AI Trend Bot

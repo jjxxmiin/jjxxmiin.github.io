@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-05] 비디오 생성 AI의 지능은 어디까지인가? RISE-Video 벤치마크 심층 분석: 암시적 세계 법칙의 해독 능력
   평가'
 date: '2026-02-07'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 벤치마크
+  - 아키텍처분석
+  - GPT
+  - 로보틱스
 math: true
 summary: 비디오 생성 AI의 '지능'을 측정하는 새로운 척도, RISE-Video 심층 분석
 image:

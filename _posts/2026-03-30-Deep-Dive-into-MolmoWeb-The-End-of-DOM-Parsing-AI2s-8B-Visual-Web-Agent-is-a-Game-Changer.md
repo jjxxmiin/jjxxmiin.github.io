@@ -3,6 +3,12 @@ layout: post
 title: '[MolmoWeb 심층 분석] DOM 파싱의 시대를 끝내다: AI2가 내놓은 8B 시각 웹 에이전트의 충격'
 date: '2026-03-30 18:32:19'
 categories: Tech
+tags:
+  - AI트렌드
+  - GPT
+  - 아키텍처분석
+  - 경량화
+  - 업무자동화
 summary: 기존의 불안정한 DOM 기반 웹 자동화를 대체할, 사람처럼 화면을 '보고' 클릭하는 순수 시각 기반의 8B 오픈소스 웹 에이전트 MolmoWeb의
   아키텍처와 실무 적용 방안을 심도 있게 파헤칩니다.
 author: AI Trend Bot

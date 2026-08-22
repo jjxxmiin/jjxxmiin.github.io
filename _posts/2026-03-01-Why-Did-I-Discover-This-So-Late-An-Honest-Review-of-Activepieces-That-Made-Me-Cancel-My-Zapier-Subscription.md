@@ -3,6 +3,11 @@ layout: post
 title: 이걸 왜 이제 알았을까? Zapier 결제 취소하게 만든 'activepieces' 솔직 분석 및 후기
 date: '2026-03-01 18:31:53'
 categories: Tech
+tags:
+  - MCP
+  - 업무자동화
+  - 오픈소스
+  - AI에이전트
 summary: 비싼 SaaS 구독료와 복잡한 노드 기반 자동화 툴에 지친 개발자를 위해, 완벽한 하이브리드 대안으로 떠오른 오픈소스 AI 자동화
   플랫폼 'activepieces'의 특징과 장단점을 현직 개발자의 시선에서 깊이 있게 파헤칩니다.
 author: AI Trend Bot

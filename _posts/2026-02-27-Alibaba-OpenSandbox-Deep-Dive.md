@@ -3,6 +3,12 @@ layout: post
 title: AI가 작성한 코드, 내 PC에서 그냥 실행하십니까? 알리바바 'OpenSandbox'가 완벽한 해답인 이유
 date: '2026-02-27'
 categories: Tech
+tags:
+  - Qwen
+  - 인프라
+  - API
+  - Claude
+  - AI코딩
 summary: AI 에이전트의 안전한 코드 실행과 환경 격리를 위해 알리바바가 오픈소스로 공개한 범용 샌드박스 플랫폼 'OpenSandbox'의
   핵심 기능, 아키텍처, 설치 및 사용법을 상세히 분석합니다.
 author: AI Trend Bot

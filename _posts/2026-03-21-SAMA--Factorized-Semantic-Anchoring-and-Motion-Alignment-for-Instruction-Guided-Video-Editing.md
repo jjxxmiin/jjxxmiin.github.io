@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-19] 외부 VLM 의존도는 버려라. 비디오 편집의 시맨틱과 모션을 완벽히 쪼갠 SAMA 파이프라인 해부"
 date: '2026-03-21 20:23:22'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - 디퓨전모델
+  - MLOps
+  - 영상생성
 math: true
 summary: "VLM 없이 비디오 편집의 시맨틱과 모션을 분리하여 SOTA를 달성한 SAMA 프레임워크 분석"
 image:

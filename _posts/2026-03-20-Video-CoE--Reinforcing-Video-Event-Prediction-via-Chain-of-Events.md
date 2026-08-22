@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-16] 단순 프레임 분석은 잊어라. Video-CoE: MLLM에 'Chain of Events'를 주입해 미래를 예측하는 법"
 date: '2026-03-20 04:34:15'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 튜토리얼
+  - 환각문제
+  - Qwen
+  - 파인튜닝
 math: true
 summary: "MLLM이 비디오 다음 상황을 예측하지 못하는 이유? Video-CoE가 SFT와 GRPO로 시계열 논리 추론의 판을 바꿉니다."
 image:

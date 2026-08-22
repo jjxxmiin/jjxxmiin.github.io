@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-09] 비디오 이해의 새로운 지평: TimeChat-Captioner의 6차원 구조적 캡셔닝 기술 및 OmniDC 연구
   심층 분석'
 date: '2026-02-12'
-categories: tech
+categories: Tech
+tags:
+  - GPT
+  - Gemini
+  - 강화학습
+  - 멀티모달
+  - Qwen
 math: true
 summary: 비디오를 시나리오처럼 읽다! Gemini를 뛰어넘은 TimeChat-Captioner의 혁신적 접근
 image:

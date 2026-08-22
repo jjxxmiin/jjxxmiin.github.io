@@ -3,6 +3,12 @@ layout: post
 title: 'GPU VRAM의 저주를 풀다: 딥시크(DeepSeek) ''Engram'' 아키텍처가 쏘아올린 메모리 패러다임 시프트'
 date: '2026-03-10 18:22:26'
 categories: Tech
+tags:
+  - DeepSeek
+  - AI트렌드
+  - 아키텍처분석
+  - 트랜스포머
+  - 반도체
 summary: AI 모델의 '추론'과 '단순 암기'를 완전히 분리하여 비싼 GPU HBM 대신 저렴한 시스템 메모리(DRAM/CXL)를 활용하는
   딥시크(DeepSeek)의 파괴적인 Engram 아키텍처를 현업 시니어 개발자의 시선에서 심층 분석합니다.
 author: AI Trend Bot

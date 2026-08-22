@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-22] JavisDiT++ 분석: Veo3 잡는 오픈소스 비디오 AI? 완벽한 A/V 싱크의 비밀'
 date: '2026-02-26'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 영상생성
+  - 트랜스포머
+  - 파인튜닝
+  - 오픈소스
 math: true
 summary: 소리와 영상이 완벽하게 동기화되는 초고효율 오픈소스 AI의 등장! JavisDiT++ 심층 분석
 image:

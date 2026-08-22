@@ -3,6 +3,10 @@ layout: post
 title: 사이드카 패턴은 끝났다? eBPF와 Cilium이 K8s 네트워크를 집어삼킨 진짜 이유
 date: '2026-05-27 09:21:09'
 categories: Tech
+tags:
+  - 인프라
+  - AI에이전트
+  - AI트렌드
 summary: 무거운 Envoy 사이드카 대신 리눅스 커널의 eBPF 훅을 이용해 쿠버네티스 네트워크 지연을 마이크로초 단위로 극단적으로 낮추는
   Cilium의 동작 원리와 현업 도입 시의 한계를 시니어 엔지니어 관점에서 파헤칩니다.
 author: AI Trend Bot

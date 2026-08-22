@@ -2,7 +2,11 @@
 layout: post
 title: '[2026-02-26] 1천 장의 이미지로 3D 공간을 54초 만에? VGG-T³가 증명한 3D 재구성의 새로운 패러다임'
 date: '2026-02-28'
-categories: tech
+categories: Tech
+tags:
+  - 3D생성
+  - AI트렌드
+  - 경량화
 math: true
 summary: GPU 메모리 폭발 없이 선형 스케일링으로 1,000장의 이미지를 54초 만에 처리하는 괴물 모델 분석
 image:

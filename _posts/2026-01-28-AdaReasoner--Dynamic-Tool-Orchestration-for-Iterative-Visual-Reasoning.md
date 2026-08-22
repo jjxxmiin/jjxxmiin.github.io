@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-26] AdaReasoner: 멀티모달 AI의 도구 활용 혁명, GPT-5를 뛰어넘는 자율적 추론 아키텍처 심층 분석'
 date: '2026-01-28'
-categories: tech
+categories: Tech
+tags:
+  - GPT
+  - 멀티모달
+  - 강화학습
+  - 아키텍처분석
+  - AI보안
 math: true
 summary: 도구 활용을 '일반 추론 기술'로 승화시켜 GPT-5를 압도한 AdaReasoner의 기술적 혁신
 image:

@@ -3,6 +3,12 @@ layout: post
 title: '모질라(Mozilla)의 역습: ''Thunderbolt''가 엔터프라이즈 AI의 판도를 뒤집을 수 있을까?'
 date: '2026-04-19 18:29:41'
 categories: Tech
+tags:
+  - AI트렌드
+  - MCP
+  - RAG
+  - ChatGPT
+  - MLOps
 summary: 클라우드 종속성과 사내 데이터 보안 문제로 골머리를 앓는 현업 실무자를 위해, 모질라가 새롭게 내놓은 주권형 AI 클라이언트 'Thunderbolt'의
   핵심 아키텍처(Haystack, MCP)와 기존 레거시 시스템(Node.js, Spring) 연동 실무 시나리오를 밑바닥부터 비판적으로 해부합니다.
 author: AI Trend Bot

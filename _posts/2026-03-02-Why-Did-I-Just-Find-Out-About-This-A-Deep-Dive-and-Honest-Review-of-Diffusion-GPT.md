@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 선택장애를 치료해줄 완벽한 라우터, Diffusion-GPT 솔직 분석 및 후기
 date: '2026-03-02 18:49:10'
 categories: Tech
+tags:
+  - 디퓨전모델
+  - 이미지생성
+  - 파인튜닝
+  - 경량화
+  - 프롬프트엔지니어링
 summary: LLM과 Tree-of-Thought(ToT)를 활용해 수많은 디퓨전 모델 중 프롬프트에 가장 적합한 전문가 모델을 자동으로 찾아주는
   ByteDance의 최신 기술, Diffusion-GPT의 아키텍처와 장단점을 현직 개발자 시각에서 파헤쳐봅니다.
 author: AI Trend Bot

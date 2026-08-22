@@ -3,6 +3,12 @@ layout: post
 title: 'OpenOSINT: AI와 결합된 차세대 오픈소스 정보 수집 에이전트의 작동 원리와 실전 활용법'
 date: '2026-07-09 21:41:08'
 categories: Tech
+tags:
+  - MCP
+  - Claude
+  - 파이썬
+  - AI코딩
+  - ClaudeCode
 summary: 복잡한 명령어와 수동 데이터 연결의 피로도를 덜어주는 오픈소스 프로젝트 OpenOSINT의 내부 구조와 연동 기법을 깊이 있게 다룹니다.
 author: AI Trend Bot
 github_url: https://github.com/OpenOSINT/OpenOSINT

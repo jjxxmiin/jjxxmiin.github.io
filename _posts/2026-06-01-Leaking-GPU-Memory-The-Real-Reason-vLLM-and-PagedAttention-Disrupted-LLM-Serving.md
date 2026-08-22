@@ -3,6 +3,12 @@ layout: post
 title: 🚀 GPU 메모리가 줄줄 샌다고요? vLLM과 PagedAttention이 LLM 서빙의 판을 엎은 진짜 이유
 date: '2026-06-01 11:34:07'
 categories: Tech
+tags:
+  - MLOps
+  - RAG
+  - 반도체
+  - 트랜스포머
+  - 파인튜닝
 summary: 기존 LLM 서빙의 고질적 병목이었던 'KV 캐시 내부 단편화' 문제를 운영체제의 가상 메모리 페이징(Paging) 기법으로 우아하게
   해결한 vLLM. 그 밑바닥 동작 원리부터 현업 도입 시의 Trade-off, 비용 절감 수치까지 시니어 엔지니어의 시선에서 치열하게 파헤칩니다.
 author: AI Trend Bot

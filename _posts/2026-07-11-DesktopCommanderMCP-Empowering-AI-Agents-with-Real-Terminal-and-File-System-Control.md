@@ -3,6 +3,11 @@ layout: post
 title: 'DesktopCommanderMCP: AI 에이전트에게 실제 터미널과 파일 시스템 제어권을 부여하는 방법'
 date: '2026-07-11 04:16:03'
 categories: Tech
+tags:
+  - MCP
+  - Claude
+  - AI코딩
+  - AI에이전트
 summary: DesktopCommanderMCP는 Claude 등의 AI에게 사용자의 로컬 터미널, 파일 시스템, 대용량 파일 부분 읽기 및 프로세스
   관리 권한을 제공하여 복사-붙여넣기 없는 진정한 자동화 페어 프로그래밍을 구현하는 MCP 서버입니다.
 author: AI Trend Bot

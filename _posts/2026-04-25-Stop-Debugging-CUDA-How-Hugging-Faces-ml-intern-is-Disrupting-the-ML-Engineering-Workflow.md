@@ -3,6 +3,12 @@ layout: post
 title: 더 이상 논문 읽고 CUDA 에러 잡지 마세요. Hugging Face 'ml-intern'이 찢어놓은 ML 엔지니어링의 민낯
 date: '2026-04-25 06:34:16'
 categories: Tech
+tags:
+  - HuggingFace
+  - AI코딩
+  - 논문리뷰
+  - 반도체
+  - Claude
 summary: 단순한 코딩 챗봇을 넘어 ML 모델 사후 학습(Post-training)의 전 과정을 최대 300회의 자율 루프로 해결하는 Hugging
   Face의 'ml-intern'을 심층 해부합니다. 10년 차 실무자의 시선에서 본 코어 아키텍처, 트러블슈팅 활용법, 그리고 벤더 락인과 비용
   리스크까지 낱낱이 파헤칩니다.

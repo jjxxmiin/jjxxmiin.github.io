@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-10] [MM-Zero] 데이터 0개로 VLM을 학습시킨다고? 코드를 렌더링 엔진으로 쓰는 자가진화 아키텍처 해부"
 date: '2026-03-11 20:12:15'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 멀티모달
+  - 아키텍처분석
+  - 파이썬
+  - 디퓨전모델
 math: true
 summary: "수백만 장의 이미지 데이터셋 없이, 코드로 이미지를 생성하고 강화학습으로 스스로 진화하는 MM-Zero 프레임워크 심층 분석."
 image:

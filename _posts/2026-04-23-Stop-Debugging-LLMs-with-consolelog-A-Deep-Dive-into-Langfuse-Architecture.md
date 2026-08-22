@@ -3,6 +3,12 @@ layout: post
 title: LLM 앱, 언제까지 console.log로 디버깅하실 건가요? (Langfuse 아키텍처 심층 해부)
 date: '2026-04-23 06:56:11'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 파이썬
+  - RAG
+  - 벡터DB
+  - LLM
 summary: 기존 APM으로는 해결 불가능한 LLM 파이프라인의 환각(Hallucination), 토큰 비용, 지연 시간 문제를 우아하게 해결하는
   Langfuse의 비동기 트레이싱 아키텍처와 실무 적용기를 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

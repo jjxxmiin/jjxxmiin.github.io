@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-03-03] [멀티모달] 텍스트만 파먹던 LLM은 잊어라, 근본부터 다시 짠 비전-언어 모델의 등장'
 date: '2026-03-05 04:36:11'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 디퓨전모델
+  - 트랜스포머
+  - 월드모델
+  - 로보틱스
 math: true
 summary: 텍스트와 비전을 처음부터 '동시에' 학습시키면 모델이 물리 법칙을 깨우칩니다.
 image:

@@ -2,8 +2,14 @@
 layout: post
 title:  "Detectron 끄적이기"
 summary: "Pytorch Detectron 사용하기"
+image:
+  path: /assets/img/thumb/Detectron.jpg
+  alt: Detectron 끄적이기 대표 이미지
 date:   2020-04-04 13:00 -0400
-categories: opensource
+categories: OpenSource
+tags:
+  - 컴퓨터비전
+  - 오픈소스
 use_math: true
 ---
 

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-14] 10B 모델의 반란: STEP3-VL-10B가 증명한 고효율 멀티모달 추론의 미래와 기술적 심층 분석'
 date: '2026-01-17'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - Qwen
+  - 강화학습
+  - Gemini
 math: true
 summary: 10B 규모로 200B급 성능을 압도하는 차세대 멀티모달 AI 기술 분석
 image:

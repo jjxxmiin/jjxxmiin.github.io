@@ -6,6 +6,12 @@ title: Moonshot AI Kimi K3 출시와 Anthropic Fable 5 증류 논란의 핵심
 date: 2026-07-26 21:36:41 +0900
 last_modified_at: 2026-07-26 21:36:41 +0900
 categories: Tech
+tags:
+  - Anthropic
+  - AI보안
+  - 경량화
+  - AI정책
+  - 반도체
 description: 중국 스타트업 Moonshot AI의 2.8조 파라미터 Kimi K3 출시 이후, 미국 정부가 제기한 Anthropic Fable 5 모델 무단 증류 및 기술 탈취 의혹의 진실과 향후 전망을 알기 쉽게 정리합니다.
 summary: Moonshot AI가 강력한 성능의 Kimi K3를 오픈 가중치 형태로 전격 출시했습니다. 이에 미국 백악관은 Anthropic의 Fable 5를 무단 증류했다고 거세게 비난하며 글로벌 AI 기술 패권 경쟁이 격화되고 있습니다. 과연 이 초대형 모델의 실체는 무엇이고, 지식재산권 침해 논란이 우리에게 미칠 영향은 무엇인지 짚어봅니다.
 article_type: NewsArticle

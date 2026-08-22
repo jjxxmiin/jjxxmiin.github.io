@@ -3,6 +3,12 @@ layout: post
 title: 웹 자동화의 ‘은탄환’은 존재할까? Page Agent가 설계하는 선언적 브라우징의 미래
 date: '2026-03-09 06:30:43'
 categories: Tech
+tags:
+  - AI코딩
+  - 멀티모달
+  - 컨텍스트윈도우
+  - AI에이전트
+  - LLM
 summary: 단순한 스크래핑과 셀렉터 전쟁을 넘어, 인간처럼 웹을 이해하고 조작하는 'Page Agent'의 기술적 아키텍처와 실무적 한계를 10년
   차 시니어 개발자의 시선으로 깊게 파헤칩니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-17] Spatia: 업데이터블 공간 메모리를 통한 비디오 생성의 기하학적 혁신과 심층 분석'
 date: '2025-12-28'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 3D생성
+  - 아키텍처분석
+  - 트랜스포머
+  - 디퓨전모델
 math: true
 summary: 3D 포인트 클라우드 메모리로 비디오 일관성을 혁신한 Spatia 모델의 기술적 해부
 image:

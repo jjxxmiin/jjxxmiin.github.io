@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-31] Green-VLA: 5단계 커리큘럼 학습과 RL 정렬을 통한 범용 로봇 제어 모델의 심층 분석'
 date: '2026-02-03'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 아키텍처분석
+  - 멀티모달
+  - 강화학습
+  - 디퓨전모델
 math: true
 summary: 휴머노이드와 다중 로봇 제어를 위한 차세대 VLA 프레임워크, Green-VLA 기술 분석
 image:

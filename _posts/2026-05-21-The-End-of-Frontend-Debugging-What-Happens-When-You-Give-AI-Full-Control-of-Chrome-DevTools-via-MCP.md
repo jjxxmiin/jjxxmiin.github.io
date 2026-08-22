@@ -3,6 +3,12 @@ layout: post
 title: '[프론트엔드 디버깅의 종말?] AI에게 Chrome DevTools의 통제권을 넘겼을 때 벌어지는 일'
 date: '2026-05-21 08:56:56'
 categories: Tech
+tags:
+  - MCP
+  - Claude
+  - AI코딩
+  - ChatGPT
+  - LLM
 summary: 단순한 코드 생성을 넘어, AI가 직접 브라우저를 열고 DOM과 네트워크를 분석하며 디버깅을 수행하게 만드는 'chrome-devtools-mcp'의
   아키텍처와 실무적 가치, 그리고 시니어 개발자의 시선에서 본 치명적인 한계점을 심층 해부합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-27] 디퓨전 언어 모델(dLLM) 기반의 차세대 VLA 혁명: Dream-VL 및 Dream-VLA 심층 분석'
 date: '2025-12-30'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 로보틱스
+  - 아키텍처분석
+  - 온디바이스AI
+  - 파인튜닝
 math: true
 summary: AR 모델의 한계를 넘는 디퓨전 기반 VLM/VLA, 로보틱스 제어의 새로운 패러다임 제시
 image:

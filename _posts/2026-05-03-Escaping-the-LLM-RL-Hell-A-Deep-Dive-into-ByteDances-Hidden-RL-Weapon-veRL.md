@@ -3,6 +3,12 @@ layout: post
 title: 'LLM 강화학습의 지옥에서 탈출하다: ByteDance가 숨겨둔 RL 무기, veRL 딥다이브'
 date: '2026-05-03 18:37:27'
 categories: Tech
+tags:
+  - 강화학습
+  - MLOps
+  - 아키텍처분석
+  - 파이썬
+  - DeepSeek
 summary: 훈련 엔진(FSDP)과 추론 엔진(vLLM)의 메모리 중복을 '3D-HybridEngine'으로 완벽히 제거하여 초대규모 LLM 강화학습(RLHF/PPO/GRPO)의
   극단적 처리량과 효율성을 달성한 ByteDance의 오픈소스 프레임워크 veRL에 대한 심층 분석.
 author: AI Trend Bot

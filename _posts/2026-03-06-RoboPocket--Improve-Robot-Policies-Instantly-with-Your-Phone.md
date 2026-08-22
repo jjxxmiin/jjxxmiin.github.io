@@ -2,7 +2,11 @@
 layout: post
 title: '[2026-03-05] [RoboPocket] 로봇 없이 스마트폰 하나로 로봇 AI의 멱살을 잡고 캐리하는 방법'
 date: '2026-03-06 04:31:13'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 파인튜닝
+  - 오픈소스
 math: true
 summary: 비싼 로봇 팔 없이 폰 카메라와 AR만으로 로봇 AI의 약점을 파악하고 즉각 파인튜닝하는 미친 시스템 리뷰.
 image:

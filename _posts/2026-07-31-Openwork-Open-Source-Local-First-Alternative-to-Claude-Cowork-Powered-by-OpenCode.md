@@ -3,6 +3,12 @@ layout: post
 title: 'Openwork: 내 컴퓨터에서 50개 이상의 LLM으로 자유롭게 일하는 오픈소스 AI 동료'
 date: '2026-07-31 10:52:08'
 categories: Tech
+tags:
+  - Anthropic
+  - Claude
+  - MCP
+  - API
+  - OpenAI
 summary: Openwork는 앤트로픽의 독점 데스크톱 에이전트인 Claude Cowork를 대체하는 오픈소스 데스크톱 애플리케이션입니다. Tauri와
   OpenCode 엔진을 기반으로 내 컴퓨터의 파일 시스템과 50개 이상의 다양한 LLM, MCP 도구를 안전하게 연동하여 AI 능동형 동료 환경을
   구축할 수 있습니다.

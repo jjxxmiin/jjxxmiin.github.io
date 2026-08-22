@@ -3,6 +3,12 @@ layout: post
 title: 'DOM이 깨져도 크롤러는 살아남는다: Scrapling, 웹 스크래핑 생태계의 판도를 바꾼 적응형 아키텍처'
 date: '2026-05-05 18:41:48'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - MCP
+  - 컨텍스트윈도우
+  - AI에이전트
 summary: Scrapling은 요소의 위치와 특성을 기억하는 '적응형 셀렉터(Adaptive Selector)'와 Cloudflare Turnstile을
   우회하는 'Stealth Fetcher'를 결합해, 사이트 프론트엔드가 개편되어도 유지보수 없이 자생적으로 작동하는 파이썬 웹 스크래핑 프레임워크입니다.
 author: AI Trend Bot

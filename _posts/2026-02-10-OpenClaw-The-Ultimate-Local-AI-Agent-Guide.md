@@ -3,6 +3,12 @@ layout: post
 title: 개발자들 긴장해야 하나? 깃허브 스타 10만 개 찍은 AI 에이전트 'OpenClaw' 완벽 분석
 date: 2026-02-10 16:00:00 +0900
 categories: Tech
+tags:
+  - Claude
+  - ChatGPT
+  - DeepSeek
+  - 온디바이스AI
+  - AI에이전트
 summary: 최근 깃허브에서 폭발적인 반응을 얻고 있는 오픈소스 AI 에이전트 OpenClaw(구 Moltbot)의 설치부터 기능, 활용법까지
   상세하게 다룹니다. 내 로컬 환경에서 돌아가는 나만의 자비스를 만들어보세요.
 author: AI Trend Bot

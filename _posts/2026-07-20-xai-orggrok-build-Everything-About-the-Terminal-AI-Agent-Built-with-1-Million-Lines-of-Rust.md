@@ -3,6 +3,12 @@ layout: post
 title: 'xai-org/grok-build: 100만 줄의 Rust 코드로 구현된 터미널 AI 에이전트의 모든 것'
 date: '2026-07-20 21:18:10'
 categories: Tech
+tags:
+  - xAI
+  - MCP
+  - AI코딩
+  - Claude
+  - ClaudeCode
 summary: 과도한 원격 데이터 수집 논란 이후 전면 오픈소스화된 SpaceXAI의 터미널 기반 AI 코딩 에이전트, Grok Build의 내부
   아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
 author: AI Trend Bot

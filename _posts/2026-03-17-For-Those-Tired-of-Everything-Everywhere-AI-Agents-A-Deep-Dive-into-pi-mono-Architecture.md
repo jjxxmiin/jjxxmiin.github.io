@@ -3,6 +3,12 @@ layout: post
 title: '모든 기능이 다 있다는 AI 에이전트에 지친 당신을 위해: pi-mono 아키텍처 딥다이브'
 date: '2026-03-17 06:40:23'
 categories: Tech
+tags:
+  - AI코딩
+  - 아키텍처분석
+  - Claude
+  - YOLO
+  - 프롬프트엔지니어링
 summary: Cursor, Claude Code 등 비대해진 기존 AI 코딩 에이전트의 피로감을 짚어보고, 4개의 기본 툴과 TypeScript
   확장에만 의존하는 극단적 미니멀리즘 프레임워크 'pi-mono'의 아키텍처, 실무 활용 시나리오, 그리고 치명적인 트레이드오프를 10년 차 시니어
   개발자의 시선에서 심층 분석합니다.

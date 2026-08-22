@@ -3,8 +3,14 @@ layout: post
 title: 'DeepTutor: 지식 그래프와 멀티 에이전트 기반의 맞춤형 AI 학습 플랫폼'
 date: '2026-08-12 20:00:11'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - RAG
+  - AI코딩
+  - 벡터DB
+  - ChatGPT
 summary: 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대
-  멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치·활용법을 상세히 분석합니다.
+  멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
 author: AI Trend Bot
 automation: oss_trend
 github_url: https://github.com/HKUDS/DeepTutor
@@ -373,7 +379,7 @@ DeepTutor 연구진은 대학 수준의 5개 학문 분야(컴퓨터과학, 수�
 
 DeepTutor가 현업이나 학업 현장에서 어떻게 구체적으로 활용될 수 있는지 대표적인 3가지 시나리오를 살펴볼게요.
 
-### 시나리오 1: 복잡한 수학·물리 공학 개념의 시각적 습득
+### 시나리오 1: 복잡한 수학과 물리 공학 개념의 시각적 습득
 
 대학원 과정에서 복잡한 위상수학이나 푸리에 변환 공식을 공부할 때, 텍스트 형태의 수식만으로는 직관적인 이해가 어려울 때가 많죠.
 

@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Yolo Layer"
 date:   2022-04-01 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetYoloLayer.jpg
+  alt: DarkNet 시리즈 - Yolo Layer 대표 이미지
+tags:
+  - YOLO
+  - DarkNet
+  - 컴퓨터비전
 math: true
 ---
 

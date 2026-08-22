@@ -3,6 +3,12 @@ layout: post
 title: 'headroom: AI 코딩 에이전트의 컨텍스트 한계를 넘는 압축 기술'
 date: '2026-07-07 05:46:49'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - RAG
+  - 컨텍스트윈도우
+  - ClaudeCode
 summary: Headroom은 대형 언어 모델(LLM)에 전달되는 방대한 도구 출력과 로그, RAG 결과물을 최대 95%까지 압축하여 토큰 비용을
   줄이고 답변 정확도를 유지하는 오픈소스 기반의 컨텍스트 압축 레이어입니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: '파라미터 뻥튀기는 끝났다: 실무자 관점에서 뜯어본 OpenMythos와 순환-깊이 트랜스포머의 충격'
 date: '2026-04-23 18:39:21'
 categories: Tech
+tags:
+  - 트랜스포머
+  - AI보안
+  - MLOps
+  - DeepSeek
+  - Mistral
 summary: 단일 가중치 블록을 최대 16번 순환시키며 연산의 깊이로 지능을 구현하는 OpenMythos의 아키텍처를 분석합니다. 770M 파라미터로
   1.3B급 성능을 내는 RDT(Recurrent-Depth Transformer)의 핵심 원리와 LTI 안정성, MoE 라우팅 구조를 실무자의
   관점에서 심층 해부하고, 프로덕션 도입 시의 장단점과 레거시 연동 시나리오를 제시합니다.

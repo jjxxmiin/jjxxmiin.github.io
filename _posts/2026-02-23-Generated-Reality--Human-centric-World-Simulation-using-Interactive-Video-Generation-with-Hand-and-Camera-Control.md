@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-20] [초격차 AI] 생성형 현실(Generated Reality)의 도래: 손과 시선으로 제어하는 인터랙티브 세계
   모델 분석'
 date: '2026-02-23'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 영상생성
+  - 로보틱스
+  - 트랜스포머
+  - 경량화
 math: true
 summary: XR의 미래, DiT 기반 실시간 인간 중심 세계 시뮬레이션 기술 및 상호작용 분석
 image:

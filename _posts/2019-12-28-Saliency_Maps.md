@@ -2,8 +2,14 @@
 layout: post
 title:  "Visualising Image Classification Models and Saliency Maps 톺아보기"
 summary: "Visualising Image Classification Models and Saliency Maps 논문 읽어보기"
+image:
+  path: /assets/img/thumb/Saliency_Maps.jpg
+  alt: Visualising Image Classification Models and Saliency Maps 톺아 대표 이미지
 date:   2019-12-27 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 컴퓨터비전
 math: true
 ---
 

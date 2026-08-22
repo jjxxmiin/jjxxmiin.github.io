@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-09] MLLM의 물리적 지능을 파헤치다: VisPhyWorld를 통한 코드 기반 비디오 재구성 및 물리적 추론 분석'
 date: '2026-02-19'
-categories: tech
+categories: Tech
+tags:
+  - GPT
+  - 영상생성
+  - 로보틱스
+  - 월드모델
+  - Gemini
 math: true
 summary: '코드로 검증하는 MLLM의 물리 추론 능력: VisPhyWorld 분석'
 image:

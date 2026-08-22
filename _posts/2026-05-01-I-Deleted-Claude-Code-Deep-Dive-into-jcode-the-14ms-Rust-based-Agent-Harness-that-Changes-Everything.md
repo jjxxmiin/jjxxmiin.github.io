@@ -3,6 +3,12 @@ layout: post
 title: 'Claude Code를 지워버렸다: 14ms로 부팅되는 최강의 Rust 기반 에이전트 하네스 ''jcode'' 심층 해부'
 date: '2026-05-01 06:52:55'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - 아키텍처분석
+  - AI코딩
+  - 멀티에이전트
 summary: Node.js 기반의 무거운 AI 래퍼(Wrapper) 시대는 끝났습니다. 14ms의 부팅 속도, 27.8MB의 RAM 점유율, 벡터
   임베딩 기반의 시맨틱 메모리와 네이티브 스웜(Swarm) 멀티 에이전트 협업을 지원하는 Rust 기반의 차세대 코딩 에이전트 하네스 'jcode'의
   아키텍처와 실무 적용 시나리오를 시니어 엔지니어의 시선에서 낱낱이 파헤칩니다.

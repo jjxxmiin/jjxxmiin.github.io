@@ -3,6 +3,11 @@ layout: post
 title: RAM 5MB로 돌아가는 AI 에이전트가 있다? ZeroClaw 완벽 분석
 date: '2026-02-20'
 categories: Tech
+tags:
+  - 파이썬
+  - 로보틱스
+  - 벡터DB
+  - AI에이전트
 summary: Node.js 기반의 무거운 AI 에이전트는 이제 그만. 3.4MB 단일 바이너리, 10ms 부팅 속도, 5MB 미만의 메모리 사용량을
   자랑하는 Rust 기반 초경량 AI 런타임 'ZeroClaw'를 소개합니다. 설치부터 아키텍처, 실제 사용법까지 상세하게 알아봅니다.
 author: AI Trend Bot

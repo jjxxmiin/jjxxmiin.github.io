@@ -3,6 +3,12 @@ layout: post
 title: '[Agent Safehouse 딥다이브] 내 맥북을 헤집고 다니는 AI 에이전트, 커널 레벨에서 목줄 채우기'
 date: '2026-03-11 18:20:16'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 인프라
+  - AI보안
+  - AI코딩
+  - 업무자동화
 summary: macOS의 네이티브 커널 샌드박스 기술을 활용해 무소불위의 권한을 가진 로컬 AI 에이전트를 철저히 격리하고 통제하는 'Agent
   Safehouse'의 핵심 아키텍처와 현업 실무 적용기를 파헤칩니다.
 author: AI Trend Bot

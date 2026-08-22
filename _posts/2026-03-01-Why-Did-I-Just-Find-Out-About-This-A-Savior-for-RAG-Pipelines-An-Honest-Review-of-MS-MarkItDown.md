@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? RAG 파이프라인의 구원자, MS MarkItDown 솔직 분석 및 후기
 date: '2026-03-01'
 categories: Tech
+tags:
+  - RAG
+  - 멀티모달
+  - 온디바이스AI
+  - 음성AI
+  - LLM
 summary: 마이크로소프트에서 조용히 공개한 'MarkItDown'은 PDF, 엑셀, PPT 등 다양한 문서를 LLM 친화적인 마크다운으로 완벽하게
   변환해주는 툴입니다. 텍스트 추출 노가다에 지친 현직 개발자의 시선에서, 이 툴이 왜 기존 파서들과 급이 다른지 장단점을 솔직하게 파헤쳐봅니다.
 author: AI Trend Bot

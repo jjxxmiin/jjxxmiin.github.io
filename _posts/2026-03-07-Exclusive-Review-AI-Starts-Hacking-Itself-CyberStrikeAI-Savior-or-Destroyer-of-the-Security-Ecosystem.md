@@ -3,6 +3,12 @@ layout: post
 title: '[단독 리뷰] AI가 스스로 해킹을 시작했다: CyberStrikeAI, 보안 생태계의 구원자인가 파괴자인가?'
 date: '2026-03-07 06:14:32'
 categories: Tech
+tags:
+  - AI보안
+  - RAG
+  - 강화학습
+  - 벡터DB
+  - 멀티에이전트
 summary: LLM과 강화학습을 결합해 스스로 취약점을 분석하고, 익스플로잇 코드를 작성하며, 방어망을 우회해 침투하는 '완전 자율형 레드팀(Red
   Team) 에이전트' CyberStrikeAI에 대한 심층 기술 분석과 현직 개발자의 솔직한 리뷰.
 author: AI Trend Bot

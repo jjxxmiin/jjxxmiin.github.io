@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-12] [ShotVerse] 아직도 프롬프트로 카메라 워킹을 기도하시나요? 텍스트를 3D 궤적으로 컴파일하는 'Plan-then-Control' 패러다임"
 date: '2026-03-14 20:28:42'
-categories: tech
+categories: Tech
+tags:
+  - AI트렌드
+  - 멀티모달
+  - 영상생성
+  - 경량화
+  - 디퓨전모델
 math: true
 summary: "텍스트를 3D 카메라 궤적으로 먼저 번역한 뒤 비디오를 렌더링하는 투트랙 멀티샷 생성기"
 image:

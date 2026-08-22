@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-05] [AI 심층 분석] RLVR의 고질적 난제 ''답변 길이 편향'' 해결: LUSPO 알고리즘의 등장과 기술적
   혁신'
 date: '2026-02-06'
-categories: tech
+categories: Tech
+tags:
+  - Qwen
+  - 강화학습
+  - 아키텍처분석
+  - 멀티모달
+  - 프롬프트엔지니어링
 math: true
 summary: RLVR의 답변 길이 붕괴 현상을 해결한 LUSPO의 수학적 원리와 성능 분석
 image:

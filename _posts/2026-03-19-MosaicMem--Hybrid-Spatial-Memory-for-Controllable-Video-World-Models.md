@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-17] 3D 좌표계와 Latent의 기묘한 동거: MosaicMem으로 끝내는 비디오 생성 모델의 기억상실증"
 date: '2026-03-19 04:36:31'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 디퓨전모델
+  - 3D생성
+  - 월드모델
+  - 파인튜닝
 math: true
 summary: "동적 객체와 완벽한 카메라 시점을 동시에 잡은 하이브리드 공간 메모리 MosaicMem 해부."
 image:

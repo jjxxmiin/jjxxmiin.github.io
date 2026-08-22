@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 바이트댄스가 작정하고 푼 미친 리서치 AI, Deer-Flow 2.0 솔직 리뷰
 date: '2026-02-27'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - ChatGPT
+  - 음성AI
+  - AI보안
+  - DeepSeek
 summary: 단순한 LLM 래퍼를 넘어선 바이트댄스의 오픈소스 '딥 리서치(Deep Research)' 프레임워크 Deer-Flow 2.0. 다중
   에이전트 기반으로 검색, 코드 실행, 보고서 작성, 심지어 팟캐스트 생성까지 알아서 해내는 이 괴물 같은 도구의 아키텍처부터 실제 사용 후기,
   장단점까지 현직 개발자의 시선에서 탈탈 털어봅니다.

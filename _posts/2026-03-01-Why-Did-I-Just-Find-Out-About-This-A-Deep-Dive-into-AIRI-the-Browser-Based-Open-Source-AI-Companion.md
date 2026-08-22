@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 브라우저에서 돌아가는 AI 사이버 생명체, AIRI 솔직 분석 및 후기
 date: '2026-03-01'
 categories: Tech
+tags:
+  - 파이썬
+  - 음성AI
+  - RAG
+  - 반도체
+  - 벡터DB
 summary: 파이썬 기반의 무거운 세팅 없이 웹 기술(WebGPU, WASM)만으로 구동되는 혁신적인 오픈소스 AI 컴패니언 'AIRI'의 핵심
   기술, 활용 사례, 그리고 개발자 시선에서의 솔직한 장단점을 파헤쳐 봅니다.
 author: AI Trend Bot

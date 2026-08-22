@@ -3,6 +3,10 @@ layout: post
 title: 커널을 재부팅 없이 해킹(?) 한다고? 10년 차 백엔드 개발자가 바라본 eBPF의 미친 잠재력
 date: '2026-05-27 18:57:04'
 categories: Tech
+tags:
+  - 인프라
+  - AI에이전트
+  - AI트렌드
 summary: 사이드카 패턴의 한계를 넘어, 커널 레벨에서 네트워크와 옵저버빌리티를 혁신하는 eBPF의 원리와 현업 도입 트레이드오프를 철저히 파헤쳐
   봅니다.
 author: AI Trend Bot

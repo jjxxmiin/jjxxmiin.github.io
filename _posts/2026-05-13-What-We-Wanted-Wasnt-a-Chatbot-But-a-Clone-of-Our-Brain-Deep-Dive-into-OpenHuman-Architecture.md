@@ -3,6 +3,12 @@ layout: post
 title: '우리가 원했던 건 챗봇이 아니라 ''내 뇌의 복제본''이었다: OpenHuman 아키텍처 심층 해부'
 date: '2026-05-13 08:11:08'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - Llama
+  - 온디바이스AI
+  - ChatGPT
+  - 경량화
 summary: 단순한 챗봇을 넘어, 내 모든 업무 컨텍스트를 로컬 환경에서 영구 기억하는 Rust+Tauri 기반 AI 에이전트 OS 'OpenHuman'의
   아키텍처와 실무적 가치를 파헤칩니다.
 author: AI Trend Bot

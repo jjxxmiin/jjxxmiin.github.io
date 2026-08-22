@@ -3,6 +3,12 @@ layout: post
 title: '[시니어의 시선] 챗봇의 시대를 넘어: LangGraph로 설계하는 ''스스로 일하는'' Agentic Workflow 딥다이브'
 date: '2026-03-26 18:24:03'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - 컨텍스트윈도우
+  - AI에이전트
+  - 오픈소스
 summary: 단순한 일회성 프롬프트를 넘어, AI가 스스로 계획하고 수정하며 작업을 완수하는 'Agentic Workflow'의 핵심 아키텍처를
   분석합니다. LangGraph의 상태 관리(State Management)와 순환(Cycle) 구조가 현업 서버 아키텍처를 어떻게 혁신하고 있는지,
   10년 차 시니어 개발자의 시선에서 가감 없이 해부합니다.

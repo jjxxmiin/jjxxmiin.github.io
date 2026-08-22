@@ -3,6 +3,12 @@ layout: post
 title: '당신의 AI 에이전트가 30분 만에 바보가 되는 이유: Claude Code ''Context Mode'' 아키텍처 심층 해부'
 date: '2026-05-09 18:40:24'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - MCP
+  - 아키텍처분석
 summary: MCP 툴의 방대한 출력 데이터로 인한 AI 에이전트의 컨텍스트 붕괴(Context Rot) 문제를 해결하기 위해, 샌드박스와 SQLite
   FTS5 기반의 가상화 레이어를 도입하여 토큰 낭비를 98% 줄이는 'Context Mode' 아키텍처의 작동 원리와 실무 적용 시나리오를 심층
   분석합니다.

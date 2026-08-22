@@ -3,6 +3,12 @@ layout: post
 title: 새벽 3시의 PagerDuty를 멈추게 할 기술, OpenSRE 밑바닥까지 파헤치기
 date: '2026-04-18 18:29:09'
 categories: Tech
+tags:
+  - 인프라
+  - RAG
+  - AI보안
+  - AI코딩
+  - AI에이전트
 summary: 단순한 AI 챗봇을 넘어 40여 개의 운영 도구를 활용해 장애를 자율적으로 조사하고 근본 원인을 파악하는 'AI SRE 에이전트 프레임워크',
   OpenSRE의 핵심 아키텍처와 현업 적용 시나리오, 그리고 도입 시의 딜레마를 심도 있게 분석합니다.
 author: AI Trend Bot

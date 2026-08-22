@@ -4,6 +4,12 @@ title: '[리뷰] GitHub Agentic Workflows (gh-aw) 밑바닥까지 파헤치기: 
   시작인가?'
 date: '2026-04-01 06:46:14'
 categories: Tech
+tags:
+  - AI코딩
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - AI에이전트
+  - LLM
 summary: 복잡한 YAML 작성과 반복적인 레포지토리 관리의 고통을 덜어주기 위해 등장한 GitHub Agentic Workflows(gh-aw)의
   내부 아키텍처를 시니어 엔지니어의 시각에서 해부합니다. 단순한 마케팅 용어를 넘어, 자연어가 컴파일되는 원리부터 gh-aw-firewall의 샌드박스
   격리 구조, 그리고 실무 도입 시 반드시 고려해야 할 치명적인 트레이드오프까지 깊이 있게 파헤칩니다.

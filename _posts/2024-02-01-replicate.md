@@ -2,8 +2,17 @@
 layout: post
 title:  "Replicate 끄적이기"
 summary: "자신의 인공지능 모델을 Replicate로 배포하기"
+image:
+  path: /assets/img/thumb/replicate.jpg
+  alt: Replicate 끄적이기 대표 이미지
 date:   2024-02-01 16:00 -0400
-categories: review
+categories: Basics
+tags:
+  - 인프라
+  - 파이썬
+  - MLOps
+  - 반도체
+  - 디퓨전모델
 math: true
 ---
 

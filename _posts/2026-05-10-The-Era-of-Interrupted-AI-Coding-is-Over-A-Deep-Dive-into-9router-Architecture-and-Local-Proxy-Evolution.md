@@ -3,6 +3,12 @@ layout: post
 title: 'AI 코딩 쿼터 초과로 흐름 끊기는 시대는 끝났다: 9router 아키텍처와 로컬 프록시의 진화'
 date: '2026-05-10 18:43:09'
 categories: Tech
+tags:
+  - AI코딩
+  - AI트렌드
+  - API
+  - Claude
+  - OpenAI
 summary: 잦은 API Rate Limit과 쿼터 초과로 인한 AI 코딩 도구의 맥 끊김 문제를 해결하는 '9router'의 핵심 아키텍처(RTK
   토큰 압축, 3-Tier Fallback, 포맷 트랜스레이션)를 실무자의 시선에서 심층 분석합니다.
 author: AI Trend Bot

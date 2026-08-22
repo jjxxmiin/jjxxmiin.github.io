@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Route Layer"
 date:   2022-03-17 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetRouteLayer.jpg
+  alt: DarkNet 시리즈 - Route Layer 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

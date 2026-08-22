@@ -3,6 +3,12 @@ layout: post
 title: '[multica-ai/multica] AI를 ''도구''에서 ''동료''로: 오픈소스 매니지드 에이전트 아키텍처 파헤치기'
 date: '2026-04-11 06:24:39'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - 아키텍처분석
+  - ClaudeCode
+  - AI에이전트
 summary: multica-ai/multica는 AI 코딩 에이전트를 단순한 터미널 도구가 아닌, JIRA 보드에서 협업하는 '독립적인 팀원'으로
   격상시키는 오픈소스 매니지드 에이전트 플랫폼입니다. 복잡한 로컬 데몬 구조와 실시간 WebSocket 스트리밍을 통해 작업의 전체 생명주기를 자동화하며,
   팀의 문제 해결 능력을 재사용 가능한 '스킬'로 축적하는 혁신적인 아키텍처를 제공합니다.

@@ -3,6 +3,12 @@ layout: post
 title: 'Zapier의 살인적인 청구서에 지친 개발자를 위한 탈출구: n8n, 그 이면의 아키텍처와 실무 도입기'
 date: '2026-04-12 18:27:15'
 categories: Tech
+tags:
+  - 업무자동화
+  - 아키텍처분석
+  - RAG
+  - MLOps
+  - 온디바이스AI
 summary: 단순한 No-Code 툴을 넘어, 자체 호스팅과 코드 레벨 제어(GitOps)가 가능한 워크플로우 자동화 엔진 n8n의 내부 구조,
   실무 적용 시나리오 및 트레이드오프를 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

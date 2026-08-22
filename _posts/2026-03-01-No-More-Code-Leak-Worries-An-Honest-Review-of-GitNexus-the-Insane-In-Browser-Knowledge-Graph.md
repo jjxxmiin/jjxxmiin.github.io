@@ -3,6 +3,12 @@ layout: post
 title: 회사 코드 유출 걱정 끝? 브라우저에서 도는 미친 지식 그래프 'GitNexus' 솔직 분석 🚀
 date: '2026-03-01'
 categories: Tech
+tags:
+  - RAG
+  - AI코딩
+  - MCP
+  - ClaudeCode
+  - 벡터DB
 summary: 서버 전송 없이 브라우저 단에서 깃허브 레포지토리의 지식 그래프를 생성하고, Graph RAG와 MCP 연동까지 지원하는 완전 로컬
   코드 분석기 'GitNexus'의 핵심 기능과 장단점을 현직 개발자 시선에서 파헤쳐봅니다.
 author: AI Trend Bot

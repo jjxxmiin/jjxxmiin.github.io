@@ -3,6 +3,12 @@ layout: post
 title: 'Claude-Mem 심층 분석: 터미널 속 AI에게 ''영구적인 기억''을 이식하다'
 date: '2026-03-07 18:17:18'
 categories: Tech
+tags:
+  - Claude
+  - 아키텍처분석
+  - ClaudeCode
+  - RAG
+  - 컨텍스트윈도우
 summary: Claude Code의 치명적인 단점이었던 '세션 초기화(기억 상실)' 문제를 해결하는 혁신적인 오픈소스 플러그인, Claude-Mem의
   아키텍처와 실제 활용법, 그리고 이것이 개발자 생태계에 미칠 파장을 현직 개발자의 시선에서 심도 있게 파헤칩니다.
 author: AI Trend Bot

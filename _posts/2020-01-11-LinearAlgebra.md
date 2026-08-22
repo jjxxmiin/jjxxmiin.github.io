@@ -2,8 +2,13 @@
 layout: post
 title:  "선형대수학 끄적이기"
 summary: "훑어보기 위해 적어본 선형 대수학 기초 + PCA, LDA"
+image:
+  path: /assets/img/thumb/LinearAlgebra.jpg
+  alt: 선형대수학 끄적이기 대표 이미지
 date:   2020-01-11 16:00 -0400
-categories: concept
+categories: Basics
+tags:
+  - AI트렌드
 math: true
 ---
 

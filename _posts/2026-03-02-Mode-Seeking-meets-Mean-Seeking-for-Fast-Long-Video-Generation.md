@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-02-27] [MMM] 1분짜리 고퀄 AI 영상? ''때깔''과 ''서사''를 섞는 미친 방법'
 date: '2026-03-02 20:27:00'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 영상생성
+  - 트랜스포머
+  - 오픈소스
 math: true
 summary: 짧은 영상의 '고화질'과 긴 영상의 '개연성'을 동시에 잡는 법. Mode Seeking과 Mean Seeking의 기막힌 동거를
   소개합니다.

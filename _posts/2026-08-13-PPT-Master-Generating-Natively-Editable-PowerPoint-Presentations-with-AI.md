@@ -3,6 +3,12 @@ layout: post
 title: 'PPT Master: AI가 슬라이드 통이미지 대신 진짜 수정 가능한 파워포인트를 만드는 방법'
 date: '2026-08-13 20:00:37'
 categories: Tech
+tags:
+  - AI코딩
+  - 파이썬
+  - Claude
+  - ClaudeCode
+  - 온디바이스AI
 summary: PPT Master는 PDF, 마이그레이션 문서, 텍스트 등을 수정 가능한 고품질 파워포인트(.pptx) 파일로 변환해 주는 오픈소스
   AI 프레젠테이션 자동화 도구입니다. 기존 AI 도구들이 슬라이드를 수정 불가능한 통이미지로 만들던 문제를 SVG 2D 좌표 계산 및 DrawingML
   벡터 직렬화 기술로 완전하게 해결했습니다.

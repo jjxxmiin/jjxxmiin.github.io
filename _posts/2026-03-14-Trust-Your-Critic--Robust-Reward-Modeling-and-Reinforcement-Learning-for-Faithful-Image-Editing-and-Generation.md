@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-12] [AI 논문 해부] 미쳐버린 Reward Model을 구출하라: 이미지 편집/생성 RLHF를 위한 FIRM-8B의 등장"
 date: '2026-03-14 04:26:13'
-categories: tech
+categories: Tech
+tags:
+  - 이미지생성
+  - 강화학습
+  - 논문리뷰
+  - 아키텍처분석
+  - 멀티모달
 math: true
 summary: "이미지 생성 RLHF의 고질병인 보상 모델의 '환각'과 '보상 해킹'을 해결하는 FIRM 프레임워크 딥다이브."
 image:

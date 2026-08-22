@@ -3,6 +3,12 @@ layout: post
 title: 사이드카 패턴의 종말? eBPF가 커널 레벨에서 서비스 메시를 뒤집어엎는 방식
 date: '2026-05-29 08:55:23'
 categories: Tech
+tags:
+  - 인프라
+  - C언어
+  - AI보안
+  - 경량화
+  - 오픈소스
 summary: MSA 환경에서 악명 높은 프록시 사이드카의 오버헤드를 eBPF 기술이 커널 레벨에서 어떻게 해결하는지, 네트워크 패킷의 컨텍스트
   스위칭 구조와 XDP 코드를 통해 10년 차 실무자의 시선으로 심도 있게 파헤칩니다.
 author: AI Trend Bot

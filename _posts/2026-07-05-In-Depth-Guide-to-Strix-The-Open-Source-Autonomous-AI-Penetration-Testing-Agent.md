@@ -3,6 +3,12 @@ layout: post
 title: '오픈소스 AI 모의해킹 도구 Strix: 실제 해커처럼 생각하고 검증하는 자율형 보안 에이전트'
 date: '2026-07-05 05:04:10'
 categories: Tech
+tags:
+  - AI보안
+  - 멀티에이전트
+  - AI에이전트
+  - 오픈소스
+  - LLM
 summary: Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해 오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
 author: AI Trend Bot
 github_url: https://github.com/usestrix/strix
@@ -266,6 +272,7 @@ flowchart LR
 
 이를 구현하기 위한 GitHub Actions 워크플로우 YAML은 아주 간결합니다.
 
+{% raw %}
 ```yaml
 name: strix-penetration-test
 on: pull_request
@@ -283,6 +290,7 @@ jobs:
           STRIX_LLM: "anthropic/claude-sonnet-4-6"
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
 ```
+{% endraw %}
 
 이 파이프라인이 구축되면, 취약한 코드가 운영 환경(Production)에 도달하기 전에 완벽하게 차단됩니다.
 

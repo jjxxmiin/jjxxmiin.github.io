@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 바이트댄스가 푼 오픈소스 딥 리서치 끝판왕 'Deer-flow' 솔직 분석 및 후기
 date: '2026-02-28'
 categories: Tech
+tags:
+  - 파이썬
+  - OpenAI
+  - 음성AI
+  - MCP
+  - 멀티에이전트
 summary: 바이트댄스가 오픈소스로 공개한 다중 에이전트 딥 리서치 프레임워크 'DeerFlow'의 핵심 아키텍처, 실사용 유즈케이스, 그리고
   현직 개발자 시선에서의 솔직한 장단점을 깊이 있게 다룬 기술 리뷰 포스트입니다.
 author: AI Trend Bot

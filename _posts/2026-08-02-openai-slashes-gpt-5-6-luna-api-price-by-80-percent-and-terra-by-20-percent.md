@@ -6,6 +6,11 @@ title: OpenAI, GPT-5.6 API 가격 최대 80% 인하… 개발자 및 기업 비�
 date: 2026-08-02 11:08:17 +0900
 last_modified_at: 2026-08-02 11:08:17 +0900
 categories: Tech
+tags:
+  - API
+  - GPT
+  - OpenAI
+  - MLOps
 description: OpenAI가 GPT-5.6 Luna API 가격을 80%, Terra를 20% 전격 인하했습니다. 최적화된 서빙 효율성과 Fast 모드 도입 등 최신 API 가격 변화와 시사점을 정리했습니다.
 summary: 2026년 7월 30일 OpenAI가 GPT-5.6 API 가격 인하를 공식 발표했습니다. 경량 모델인 GPT-5.6 Luna 가격은 80% 하락해 100만 입력 토큰당 0.20달러로 내려갔고, 중급 모델인 GPT-5.6 Terra는 20% 할인되었습니다. 최상위 모델인 GPT-5.6 Sol은 표준 가격을 유지하되 2.5배 빠른 Fast 모드가 새롭게 추가되었습니다.
 article_type: NewsArticle
@@ -59,7 +64,7 @@ graph TD
     C --> D2[GPT-5.6 Terra 20% 인하: 입력 $2.00 / 출력 $12.00]
     C --> D3[GPT-5.6 Sol 가격 유지 & Fast 모드 도입]
     D1 & D2 --> E[개발자 및 기업의 AI 운용 비용 절감]
-    D3 --> F[고성능·저라텐시 작업 선택지 확대]
+    D3 --> F[고성능과 저라텐시 작업 선택지 확대]
 ```
 
 ## 무슨 일이 벌어진 걸까?
@@ -93,7 +98,7 @@ sequenceDiagram
     Model->>API: 런타임 및 서빙 효율성 극대화
     API->>Dev: GPT-5.6 Luna 가격 80% 인하 제공
     Dev->>API: 대규모 데이터 처리 및 API 요청
-    API->>Dev: 저비용·고효율 데이터 응답 전달
+    API->>Dev: 저비용과 고효율 데이터 응답 전달
 ```
 위 시퀀스 다이어그램은 인공지능 최적화를 통한 인프라 효율성 향상이 어떻게 개발자의 비용 절감으로 연결되는지 보여줍니다.
 

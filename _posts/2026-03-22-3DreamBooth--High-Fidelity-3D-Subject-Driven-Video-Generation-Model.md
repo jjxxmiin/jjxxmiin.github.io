@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-19] 3DreamBooth: 2D 환각에 빠진 비디오 생성 모델을 구원할 진짜 3D 커스텀 방법론 (1프레임 최적화의 비밀)"
 date: '2026-03-22 20:24:00'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 환각문제
+  - 트랜스포머
+  - 파인튜닝
+  - 디퓨전모델
 math: true
 summary: "단 1프레임 최적화로 완벽한 3D 비디오를 생성하는 3DreamBooth 아키텍처 해부"
 image:

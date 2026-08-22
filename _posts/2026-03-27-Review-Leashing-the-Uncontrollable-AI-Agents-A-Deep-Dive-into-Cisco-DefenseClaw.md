@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] 통제 불능의 AI 에이전트에 목줄을 채우다: Cisco DefenseClaw 딥다이브'
 date: '2026-03-27 18:24:48'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - AI보안
+  - MCP
+  - AI정책
+  - AI에이전트
 summary: 2025년 말 세상을 뒤흔든 OpenClaw의 열풍 이면에는 심각한 보안 공백이 존재했습니다. RSA 2026에서 Cisco가 발표하고
   오늘(3월 27일) 깃허브에 공개된 DefenseClaw는 NVIDIA의 OpenShell 위에서 작동하며, 에이전트의 스킬과 MCP 서버를 실행
   전 스캔하고 런타임에 제어하는 강력한 거버넌스 프레임워크입니다. 10년 차 개발자의 시선에서 이 기술의 아키텍처, 실무 활용 가치, 그리고 뼈아픈

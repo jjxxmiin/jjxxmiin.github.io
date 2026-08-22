@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-03-04] [ArtHOI] AI는 왜 아직도 냉장고 문 하나 제대로 못 열까? 4D 모션 역설계의 끝판왕 등장'
 date: '2026-03-07 04:22:16'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 영상생성
+  - 디퓨전모델
+  - 월드모델
 math: true
 summary: AI 영상에서 손가락이 냉장고를 뚫고 들어가는 끔찍한 현상, 4D 재구성 프레임워크 ArtHOI가 끝냅니다.
 image:

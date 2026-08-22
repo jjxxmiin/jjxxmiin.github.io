@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 주식판을 뒤집어놓을 AI 어벤져스, 'TradingAgents-CN' 솔직 분석 및 후기
 date: '2026-03-01'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - DeepSeek
+  - Qwen
+  - 온디바이스AI
+  - 프롬프트엔지니어링
 summary: 다중 AI 에이전트들이 가상의 투자 회사를 차려 치열하게 토론하며 투자 결정을 내리는 오픈소스 프레임워크 'TradingAgents-CN'에
   대한 개발자 시점의 심층 분석과 실사용 후기입니다.
 author: AI Trend Bot

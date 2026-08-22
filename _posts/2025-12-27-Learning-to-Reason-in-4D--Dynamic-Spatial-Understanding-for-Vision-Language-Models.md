@@ -3,7 +3,13 @@ layout: post
 title: '[2025-12-23] VLM의 한계를 넘어서는 4차원 시공간 추론: DSR Suite와 Geometry Selection Module
   (GSM) 기술 분석'
 date: '2025-12-27'
-categories: tech
+categories: Tech
+tags:
+  - GPT
+  - 3D생성
+  - Qwen
+  - 로보틱스
+  - 멀티모달
 math: true
 summary: 4D 시공간 추론을 위한 DSR Suite 및 GSM 기반의 VLM 고도화 전략
 image:

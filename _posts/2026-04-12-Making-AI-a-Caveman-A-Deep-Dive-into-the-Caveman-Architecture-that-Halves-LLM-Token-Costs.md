@@ -3,6 +3,12 @@ layout: post
 title: '인공지능을 원시인으로 만들다: LLM 토큰 비용을 반토막 내는 ''Caveman'' 아키텍처 심층 해부'
 date: '2026-04-12 06:30:15'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - 컨텍스트윈도우
+  - 멀티에이전트
 summary: LLM의 불필요한 수식어와 예절을 제거하여 핵심 기술 용어와 코드만 출력하게 만듦으로써, API 비용을 극적으로 절감하고 응답 속도를
   개선하는 최적화 도구 'Caveman'의 내부 구조와 실무 적용 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

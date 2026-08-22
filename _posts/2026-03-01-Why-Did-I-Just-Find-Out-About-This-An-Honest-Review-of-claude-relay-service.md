@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? API 요금 폭탄과 속도 제한을 날려버린 claude-relay-service 솔직 리뷰
 date: '2026-03-01 18:26:28'
 categories: Tech
+tags:
+  - Claude
+  - API
+  - AI코딩
+  - ClaudeCode
+  - Gemini
 summary: Claude Code, OpenAI, Gemini 등 다양한 AI API를 하나로 묶어 팀원들과 안전하게 공유하고, 비용과 트래픽을
   효율적으로 분산할 수 있는 강력한 오픈소스 프로젝트 'claude-relay-service(CRS)'에 대한 심층 분석 및 실사용 후기입니다.
 author: AI Trend Bot

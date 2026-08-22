@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-12] [비디오 생성] 캐릭터 두 명 넣었다고 얼굴 융합되는 현상, VAE 건너뛰는 잠재 공간(Latent) RL로 해결한 DreamVideo-Omni 해부하기"
 date: '2026-03-13 20:16:20'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 강화학습
+  - 아키텍처분석
+  - 디퓨전모델
+  - 파인튜닝
 math: true
 summary: "멀티 객체 제어와 신원 유지의 딜레마. VAE 디코딩을 스킵하고 Latent 단에서 직접 RL 보상을 때려박은 독종 프레임워크의 등장."
 image:

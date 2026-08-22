@@ -2,8 +2,13 @@
 layout: post
 title:  "HazardNet 톺아보기"
 summary: "도로위에 위험물을 감지하는 방법에 대한 논문"
+image:
+  path: /assets/img/thumb/HazardNet.jpg
+  alt: HazardNet 톺아보기 대표 이미지
 date:   2024-02-10 16:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
 math: true
 ---
 

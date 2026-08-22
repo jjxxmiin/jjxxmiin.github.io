@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-13] RynnBrain: 물리적 지능을 향한 도약, 오픈 소스 Embodied Foundation Model의 심층
   기술 분석'
 date: '2026-02-19'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 멀티모달
+  - 트랜스포머
+  - 월드모델
+  - 오픈소스
 math: true
 summary: 로봇 지능의 새로운 기준, RynnBrain의 MoE 아키텍처와 시공간적 추론 능력 전격 해부
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-11] DeepImageSearch: 이미지 검색의 패러다임 시프트, 에이전틱 추론과 시각적 맥락의 결합'
 date: '2026-02-17'
-categories: tech
+categories: Tech
+tags:
+  - AI트렌드
+  - GPT
+  - 로보틱스
+  - 멀티모달
+  - Gemini
 math: true
 summary: 단순 검색을 넘어 시각적 역사를 추론하는 멀티모달 에이전트의 시대
 image:

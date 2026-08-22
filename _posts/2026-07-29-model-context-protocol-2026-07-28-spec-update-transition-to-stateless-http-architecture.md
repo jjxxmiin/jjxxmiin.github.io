@@ -6,8 +6,12 @@ title: Model Context Protocol 2026-07-28 규격 발표, 무상태 HTTP 구조 �
 date: 2026-07-29 11:03:57 +0900
 last_modified_at: 2026-07-29 11:03:57 +0900
 categories: Tech
+tags:
+  - MCP
+  - API
+  - AI에이전트
 description: Model Context Protocol이 2026년 7월 28일 사양 업데이트를 통해 세션 연결 없이 헤더 기반으로 작동하는 무상태 HTTP 구조로 전환했습니다. 엔터프라이즈 AI 에이전트 구축 환경에 미치는 변화와 주요 포인트를 살피세요.
-summary: Model Context Protocol 프로젝트가 2026년 7월 28일 정식 사양 업데이트를 발표했습니다. 이번 개정으로 지속적인 세션 연결과 프로토콜 수준의 핸드셰이크가 제거되고, 헤더 기반 라우팅이 가능한 무상태(Stateless) HTTP 요청·응답 구조로 바뀌었습니다.
+summary: Model Context Protocol 프로젝트가 2026년 7월 28일 정식 사양 업데이트를 발표했습니다. 이번 개정으로 지속적인 세션 연결과 프로토콜 수준의 핸드셰이크가 제거되고, 헤더 기반 라우팅이 가능한 무상태(Stateless) HTTP 요청과 응답 구조로 바뀌었습니다.
 article_type: NewsArticle
 seo:
   type: NewsArticle
@@ -38,7 +42,7 @@ entities:
 - Claude Desktop
 faq:
 - question: Model Context Protocol 2026-07-28 사양 업데이트의 가장 큰 변화는 무엇인가요?
-  answer: 기존의 양방향 상태 유지(Stateful) 세션 연결을 없애고, 무상태(Stateless) HTTP 요청·응답 아키텍처로 전면 개편되었습니다. 이를 통해 Mcp-Method 및 Mcp-Name 같은 HTTP 헤더 기반으로 일반 로드밸런서에서 트래픽을 분산시킬 수 있게 되었습니다.
+  answer: 기존의 양방향 상태 유지(Stateful) 세션 연결을 없애고, 무상태(Stateless) HTTP 요청과 응답 아키텍처로 전면 개편되었습니다. 이를 통해 Mcp-Method 및 Mcp-Name 같은 HTTP 헤더 기반으로 일반 로드밸런서에서 트래픽을 분산시킬 수 있게 되었습니다.
 - question: 기존의 상태 유지 방식 MCP 서버는 바로 사용할 수 없게 되나요?
   answer: 아닙니다, 12개월의 일몰(Deprecation) 유예 기간이 적용되어 기존 방식을 한동안 유지할 수 있습니다. 하지만 향후 표준 호환성을 위해 12개월 내에 무상태 HTTP 아키텍처로 마이그레이션해야 합니다.
 - question: 세션 연결이 사라지면 다중 라운드트립 도구 상호작용은 어떻게 처리하나요?
@@ -158,7 +162,7 @@ Model Context Protocol의 개정 사양 도입 시 반드시 주의해야 할 �
 
 ### Model Context Protocol 2026-07-28 사양 업데이트의 가장 큰 변화는 무엇인가요?
 
-기존의 양방향 상태 유지(Stateful) 세션 연결을 없애고, 무상태(Stateless) HTTP 요청·응답 아키텍처로 전면 개편되었습니다. 이를 통해 Mcp-Method 및 Mcp-Name 같은 HTTP 헤더 기반으로 일반 로드밸런서에서 트래픽을 분산시킬 수 있게 되었습니다.
+기존의 양방향 상태 유지(Stateful) 세션 연결을 없애고, 무상태(Stateless) HTTP 요청과 응답 아키텍처로 전면 개편되었습니다. 이를 통해 Mcp-Method 및 Mcp-Name 같은 HTTP 헤더 기반으로 일반 로드밸런서에서 트래픽을 분산시킬 수 있게 되었습니다.
 
 ### 기존의 상태 유지 방식 MCP 서버는 바로 사용할 수 없게 되나요?
 

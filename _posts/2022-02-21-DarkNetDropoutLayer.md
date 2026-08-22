@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Dropout Layer"
 date:   2022-02-21 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetDropoutLayer.jpg
+  alt: DarkNet 시리즈 - Dropout Layer 대표 이미지
+tags:
+  - DarkNet
+  - 반도체
+  - 컴퓨터비전
 math: true
 ---
 

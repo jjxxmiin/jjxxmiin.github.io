@@ -2,8 +2,17 @@
 layout: post  
 title: 프로덕션 환경에서의 인공지능 모델 배포 완벽 가이드
 summary: 모델 훈련부터 프로덕션 배포까지 인공지능 시스템 구축의 모든 것
+image:
+  path: /assets/img/thumb/Deployment.jpg
+  alt: 프로덕션 환경에서의 인공지능 모델 배포 완벽 가이드 대표 이미지
 date: 2025-03-31  
-categories: mlops
+categories: Tech
+tags:
+  - MLOps
+  - 인프라
+  - 튜토리얼
+  - 경량화
+  - 컴퓨터비전
 math: true  
 ---
 
@@ -555,6 +564,7 @@ CI/CD(지속적 통합/지속적 배포)는 코드 변경이 자동으로 테스
 
 ### GitHub Actions 워크플로우 설정
 
+{% raw %}
 ```yaml
 # .github/workflows/deploy.yml
 name: Build and Deploy
@@ -624,6 +634,7 @@ jobs:
       run: |
         kubectl rollout status deployment/image-classifier -n model-serving
 ```
+{% endraw %}
 
 ## 6. 모니터링 및 로깅 시스템
 

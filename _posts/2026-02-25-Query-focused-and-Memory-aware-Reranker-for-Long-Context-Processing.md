@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-12] LLM의 ''기억력''을 10배 끌어올리는 기술: 4B 모델로 SOTA를 달성한 QRRanker의 마법'
 date: '2026-02-25'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - RAG
+  - 컨텍스트윈도우
+  - 파인튜닝
+  - LLM
 math: true
 summary: 4B 파라미터로 대형 모델을 압도하는 고효율 Reranker, QRRanker의 등장!
 image:

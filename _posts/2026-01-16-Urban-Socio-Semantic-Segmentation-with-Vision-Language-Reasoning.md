@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-15] [심층 분석] 위성 영상 인식의 패러다임 전환: SocioReasoner를 통한 도시 소셜 시맨틱 세그멘테이션
   기술 분석'
 date: '2026-01-16'
-categories: tech
+categories: Tech
+tags:
+  - 컴퓨터비전
+  - AI트렌드
+  - 아키텍처분석
+  - 강화학습
+  - 멀티모달
 math: true
 summary: 위성 이미지에서 사회적 맥락을 읽어내는 AI, SocioSeg와 SocioReasoner 기술 심층 분석
 image:

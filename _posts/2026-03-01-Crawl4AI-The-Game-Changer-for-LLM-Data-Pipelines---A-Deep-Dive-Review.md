@@ -3,6 +3,12 @@ layout: post
 title: '이걸 왜 이제 알았을까? Crawl4AI 솔직 분석: LLM 개발자의 ''노가다''를 끝내줄 구세주'
 date: '2026-03-01'
 categories: Tech
+tags:
+  - RAG
+  - 프롬프트엔지니어링
+  - LLM
+  - AI에이전트
+  - 오픈소스
 summary: 지저분한 웹 데이터를 LLM이 좋아하는 깔끔한 마크다운으로 순식간에 바꿔주는 Crawl4AI를 소개합니다. 직접 써보며 느낀 압도적인
   편의성과 효율성, 그리고 소소한 단점까지 개발자의 시각에서 생생하게 담았습니다.
 author: AI Trend Bot

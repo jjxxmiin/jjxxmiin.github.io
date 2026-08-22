@@ -3,6 +3,12 @@ layout: post
 title: '[Hermes Agent 심층 리뷰] 매번 리셋되는 AI에 지친 당신을 위해: ''기억''하고 ''성장''하는 진짜 에이전트의 등장'
 date: '2026-03-14 18:22:00'
 categories: Tech
+tags:
+  - MCP
+  - RAG
+  - AI서비스
+  - ChatGPT
+  - 경량화
 summary: 단발성 대화에 머물던 기존 챗봇의 한계를 깨고, 내 서버에 상주하며 경험을 통해 스스로 스킬을 만들고 진화하는 Nous Research의
   초개인화된 연속성(Persistent) AI 에이전트, Hermes Agent의 아키텍처와 실무 활용성을 현직 시니어 개발자의 시선에서 심층 분석합니다.
 author: AI Trend Bot

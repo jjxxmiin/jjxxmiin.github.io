@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 터미널 붙박이 개발자를 위한 완벽한 AI 파트너, SST OpenCode 솔직 리뷰
 date: '2026-03-02 18:34:30'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - ChatGPT
+  - DeepSeek
 summary: 75개 이상의 LLM 지원, 다중 세션, LSP 연동은 물론 오픈소스의 자유로움까지 갖춘 터미널 AI 코딩 에이전트 'SST OpenCode'의
   심층 분석과 실사용 후기를 개발자 관점에서 다룹니다.
 author: AI Trend Bot

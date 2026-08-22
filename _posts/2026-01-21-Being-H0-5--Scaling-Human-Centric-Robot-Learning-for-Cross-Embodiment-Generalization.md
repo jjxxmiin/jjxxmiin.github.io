@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-19] Being-H0.5: 범용 로봇의 ''모국어''를 찾아서 - 인간 중심 학습 기반의 크로스-엠보디먼트 VLA
   기술 심층 분석'
 date: '2026-01-21'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 디퓨전모델
+  - 트랜스포머
+  - 파인튜닝
+  - 멀티모달
 math: true
 summary: 3.5만 시간의 데이터와 MoF 아키텍처로 로봇의 신체적 한계를 극복한 차세대 VLA 모델 분석
 image:

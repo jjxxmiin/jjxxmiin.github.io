@@ -3,6 +3,12 @@ layout: post
 title: 'LiveKit Agents: 초저지연 실시간 음성 AI 에이전트를 위한 오픈소스 프레임워크'
 date: '2026-08-04 21:02:37'
 categories: Tech
+tags:
+  - MCP
+  - 음성AI
+  - 멀티모달
+  - ChatGPT
+  - Gemini
 summary: LiveKit Agents는 WebRTC 기반의 초저지연 오디오 스트리밍을 활용해 실시간 대화형 음성 AI를 개발할 수 있는 오픈소스
   프레임워크입니다. STT-LLM-TTS 조합 파이프라인부터 OpenAI Realtime API 같은 스피치 투 스피치 모델까지 자유롭게 구성할
   수 있으며, 고성능 턴 디텍션과 MCP 지원을 갖추고 있습니다.
@@ -138,7 +144,7 @@ OpenAI Realtime API(`gpt-4o-realtime`, `gpt-mini-realtime`)나 Gemini Live와 �
 ### 3. 의미론적 턴 디텍션 (Semantic Turn Detection)
 대화형 음성 AI에서 가장 어려운 요소 중 하나는 사용자가 말을 마쳤는지 판단하는 것입니다. 단순 음량 기반 VAD를 사용할 경우 사용자가 "음... 그렇다면..." 하면서 1초 정도 뜸을 들일 때 AI가 성급하게 대화를 치고 들어오는 실수를 범합니다.
 
-LiveKit Agents는 이를 해결하기 위해 트랜스포머 기반의 **Turn Detector Model**을 탑재하고 있습니다. 이 모델은 소리의 음향적 정보(Acoustic Cues)뿐만 아니라, 오디오에서 변환된 텍스트의 문법적·의미론적 맥락(Semantic Context)을 동시에 분석합니다. 문장이 완결되었는지 여부를 실시간으로 예측하여, 사용자 대화의 흐름을 자연스럽게 보장합니다.
+LiveKit Agents는 이를 해결하기 위해 트랜스포머 기반의 **Turn Detector Model**을 탑재하고 있습니다. 이 모델은 소리의 음향적 정보(Acoustic Cues)뿐만 아니라, 오디오에서 변환된 텍스트의 문법적과 의미론적 맥락(Semantic Context)을 동시에 분석합니다. 문장이 완결되었는지 여부를 실시간으로 예측하여, 사용자 대화의 흐름을 자연스럽게 보장합니다.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"primaryColor":"#F0EEE9","primaryBorderColor":"#2a78d6","primaryTextColor":"#2b2926","secondaryColor":"#e8f0fb","secondaryBorderColor":"#4a3aa7","secondaryTextColor":"#2b2926","tertiaryColor":"#eafaf3","tertiaryBorderColor":"#1baf7a","tertiaryTextColor":"#2b2926","lineColor":"#8a8578","textColor":"#2b2926","edgeLabelBackground":"#F0EEE9","noteBkgColor":"#F0EEE9","noteTextColor":"#2b2926","noteBorderColor":"#8a8578","clusterBkg":"#faf9f6","clusterBorder":"#d8d4c8","fontFamily":"Pretendard, sans-serif"}}}%%

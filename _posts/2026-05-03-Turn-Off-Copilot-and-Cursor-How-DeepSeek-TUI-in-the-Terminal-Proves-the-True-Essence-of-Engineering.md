@@ -3,6 +3,12 @@ layout: post
 title: '"코파일럿, 커서(Cursor) 다 끄세요." 터미널에 강림한 DeepSeek-TUI가 증명한 진짜 엔지니어링의 본질'
 date: '2026-05-03 06:37:36'
 categories: Tech
+tags:
+  - DeepSeek
+  - AI코딩
+  - Microsoft
+  - OpenAI
+  - MCP
 summary: 무거운 GUI 기반 AI 에디터를 벗어나, 딥시크(DeepSeek) V4의 압도적 성능과 터미널의 순수성을 결합한 차세대 코딩 에이전트
   'DeepSeek-TUI'의 핵심 아키텍처와 실무 적용 시나리오를 심도 있게 파헤칩니다.
 author: AI Trend Bot

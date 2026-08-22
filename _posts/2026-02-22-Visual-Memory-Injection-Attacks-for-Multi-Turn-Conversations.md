@@ -2,7 +2,11 @@
 layout: post
 title: '[2026-02-17] 시각적 기억 주입(VMI): 멀티턴 대화형 시각-언어 모델(LVLM)을 무력화하는 신종 보안 위협 분석'
 date: '2026-02-22'
-categories: tech
+categories: Tech
+tags:
+  - AI보안
+  - Qwen
+  - 오픈소스
 math: true
 summary: 이미지 한 장으로 AI의 장기 기억을 조작하는 VMI 공격의 파괴적 메커니즘과 보안 함의
 image:
@@ -64,20 +68,19 @@ $$ \min_{\delta \in \mathcal{C}} \mathbb{E}_{c \sim \mathcal{D}_{context}} [ \ma
 ### 5.1 대화 턴 수에 따른 성공률
 실험 결과, VMI는 대화가 5턴 이상 진행된 후에도 80% 이상의 높은 공격 성공률(Attack Success Rate, ASR)을 유지했습니다. 이는 기존의 단일 턴 공격 방식이 대화가 진행됨에 따라 공격 효과가 급격히 희석되는 것과 대조적입니다.
 
-![Figure 2:Main results.We show attack success rates (SR∧\mathrm{SR}_{\wedge}) ofvmiacross conversation turns for four target behaviors: stock recommendation (top), political voting (2nd), car recommendation (3rd), and phone recommendation (bottom). Each row shows results across three context prompt sets:Diverse⋆\star(partially used during optimization),DiverseandHoliday(both held-out). Success requires the model to output the target behavior on the trigger topic while not leaking it into any preceding context turns.vmiachieves substantial success rates, even after several context conversation turns. Theℓ∞\ell_{\infty}-perturbation radius is set toε=8/255\varepsilon=
-icefrac{{8}}{{255}}.](/assets/img/papers/2602.15927/x2.png)
+![Figure 2: Main results. We show attack success rates (SR SR ) ofvmiacross conversation turns for four target behaviors: stock](/assets/img/papers/2602.15927/x2.png)
 *그림 2: 주요 실험 결과. 주식, 정치, 제품 추천 등 다양한 시나리오에서 대화 턴이 진행되어도 VMI는 높은 성공률을 유지하며, 훈련에 사용되지 않은 외부 문맥(Diverse, Holiday)에서도 강력한 성능을 보입니다.*
 
 ### 5.2 문구 변형에 대한 견고성
 사용자가 공격자가 예상한 정확한 문장으로 질문하지 않더라도 공격은 유효했습니다. 질문의 어조나 단어 선택이 바뀌어도 모델 내부에 주입된 시각적 특징이 트리거를 활성화하는 데 성공했습니다.
 
-![Figure 3:Transferability to paraphrased prompts.We show attack success rate (SR∧\mathrm{SR}_{\wedge}) when both the anchoring prompt and trigger prompt are paraphrased (seeTable4). The attack maintains effectiveness despite prompt language variation not seen during optimization.](/assets/img/papers/2602.15927/x3.png)
+![Figure 3: Transferability to paraphrased prompts](/assets/img/papers/2602.15927/x3.png)
 *그림 3: 페러프레이징된 프롬프트에 대한 전이성. 질문의 언어적 변형에도 불구하고 공격의 효과가 지속됨을 확인할 수 있습니다.*
 
 ### 5.3 알고리즘 구성 요소의 기여도
 단순히 타겟 메시지만 학습시키는 경우(Single target) 대화가 조금만 길어져도 공격이 실패하지만, Context-cycling을 적용한 VMI는 압도적인 성능 우위를 보였습니다.
 
-![Figure 4:Attack Baselines.We show attack success rate (SR∧\mathrm{SR}_{\wedge}) against Qwen3-VL on the stock target, comparing algorithm variants (described inSection5.3).Single target, a direct adaptation of(Schlarmann and Hein,2023), fails beyond the first turn. Adding benign anchoring(w/o cycle & context)and fixed context (w/o cycle) improves performance.vmiwith context-cycling achieves best results.](/assets/img/papers/2602.15927/x4.png)
+![Figure 4: Attack Baselines. We show attack success rate (SR SR ) against Qwen3-VL on the stock target, comparing algorithm va](/assets/img/papers/2602.15927/x4.png)
 *그림 4: 베이스라인 비교. 컨텍스트 사이클링 유무에 따른 성능 차이를 보여주며, VMI의 설계가 멀티턴 환경에 최적화되었음을 증명합니다.*
 
 ## 6. 실제 적용 분야 및 글로벌 파급력 (Real-World Application & Impact)
@@ -97,7 +100,7 @@ icefrac{{8}}{{255}}.](/assets/img/papers/2602.15927/x2.png)
 
 1.  **화이트박스 가정의 한계:** 본 논문은 모델의 가중치를 알고 있는 화이트박스(White-box) 환경을 가정합니다. 하지만 GPT-4와 같은 폐쇄형 모델(Closed-source)에 대해서도 동일한 공격이 성공할지는 미지수입니다. 다만, 실험 결과에서 볼 수 있듯이 특정 모델에서 최적화된 섭동이 해당 모델을 파인튜닝한 다른 모델(SEA-LION, Med3 등)에도 전이되는 경향(Transferability)을 보였다는 점은 경계해야 할 대목입니다.
 
-![Figure 5:Transfer Attacks.We evaluate whether adversarial images optimized on a single source model transfer to fine-tuned versions of it. We report combined attack success rate (SR∧\mathrm{SR}_{\wedge}) for the stock recommendation target. The perturbation is optimized on Qwen3-VL and then evaluated without further optimization on SEA-LION and Med3 models. The attack success rate remains high after the transfer.](/assets/img/papers/2602.15927/x5.png)
+![Figure 5: Transfer Attacks. We evaluate whether adversarial images optimized on a single source model transfer to fine-tuned](/assets/img/papers/2602.15927/x5.png)
 *그림 5: 전이 공격 테스트. Qwen3-VL에서 생성된 적대적 이미지가 이를 기반으로 파인튜닝된 다른 도메인 모델(SEA-LION, Med3)에도 여전히 효과적임을 보여줍니다.*
 
 2.  **이미지 처리 파이프라인 무시:** 현실 세계의 많은 웹 서비스는 이미지를 업로드할 때 압축(JPEG Compression), 리사이징, 필터링 과정을 거칩니다. 이러한 이미지 변형이 가해졌을 때도 미세한 섭동이 살아남아 공격을 수행할 수 있을지에 대한 추가 검증이 필요합니다.

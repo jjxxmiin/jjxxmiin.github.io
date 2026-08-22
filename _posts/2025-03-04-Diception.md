@@ -2,8 +2,17 @@
 layout: post
 title: "DICEPTION: 하나의 Diffusion 모델로 모든 시각 지각 태스크 해결"
 summary: "DICEPTION은 다양한 컴퓨터 비전 태스크를 하나의 확산 모델로 수행하는 범용 AI 모델입니다. 적은 데이터로도 높은 성능을 발휘하며, 깊이 추정, 객체 분할, 표면 법선 추정 등 다양한 작업을 수행할 수 있습니다."
+image:
+  path: /assets/img/thumb/Diception.jpg
+  alt: "DICEPTION: 하나의 Diffusion 모델로 모든 시각 지각 태스크 해결 대표 이미지"
 date: 2025-03-04
-categories: paper
+categories: Paper
+tags:
+  - 디퓨전모델
+  - 컴퓨터비전
+  - 파인튜닝
+  - 로보틱스
+  - 이미지생성
 math: true
 ---
 

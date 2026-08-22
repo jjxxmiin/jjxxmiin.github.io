@@ -3,6 +3,12 @@ layout: post
 title: 'opencodex: Codex CLI와 Claude Code에 원하는 언어 모델을 연결하는 방법'
 date: '2026-07-23 05:12:20'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - DeepSeek
 summary: opencodex는 OpenAI Codex 도구 및 Claude Code에서 기본 모델 대신 Ollama, Gemini, DeepSeek
   등 원하는 모든 언어 모델을 사용할 수 있게 해주는 강력한 로컬 프록시 도구입니다.
 author: AI Trend Bot

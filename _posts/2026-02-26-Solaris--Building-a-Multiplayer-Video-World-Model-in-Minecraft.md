@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-25] 이제 AI도 ''멀티''가 됩니다: 마인크래프트로 구현한 최초의 멀티플레이어 월드 모델, Solaris'
 date: '2026-02-26'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 영상생성
+  - 멀티에이전트
+  - 트랜스포머
+  - 강화학습
 math: true
 summary: 싱글플레이 AI는 이제 그만. 여러 시점을 동시에 이해하고 시뮬레이션하는 Solaris의 등장! GameNGen을 넘어선 새로운 멀티
   에이전트 월드 모델을 분석합니다.

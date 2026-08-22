@@ -6,7 +6,11 @@ title: OpenAI 프론티어 API 제로 데이터 보존 발표, Private Safety Pr
 date: 2026-08-21 10:03:59 +0900
 last_modified_at: 2026-08-21 10:03:59 +0900
 categories: Tech
-description: OpenAI가 프론티어 API 모델을 위한 제로 데이터 보존(ZDR)과 Private Safety Processing을 발표했습니다. 금융·의료 기업의 데이터 유출 걱정 없는 AI 도입 길을 상세히 정리합니다.
+tags:
+  - OpenAI
+  - AI서비스
+  - AI트렌드
+description: OpenAI가 프론티어 API 모델을 위한 제로 데이터 보존(ZDR)과 Private Safety Processing을 발표했습니다. 금융과 의료 기업의 데이터 유출 걱정 없는 AI 도입 길을 상세히 정리합니다.
 summary: OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력 데이터가 저장되지 않으며 고객 동의 없이는 모델 학습에 활용되지 않습니다. OpenAI는 2026년 9월 기술 백서 공개와 함께 순차적 적용을 시작할 예정입니다.
 article_type: NewsArticle
 seo:

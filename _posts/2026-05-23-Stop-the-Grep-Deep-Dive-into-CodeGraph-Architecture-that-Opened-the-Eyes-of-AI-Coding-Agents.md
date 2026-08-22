@@ -3,6 +3,12 @@ layout: post
 title: '그놈의 grep 좀 그만합시다: AI 코딩 에이전트의 시야를 틔워준 CodeGraph 아키텍처 딥다이브'
 date: '2026-05-23 06:56:44'
 categories: Tech
+tags:
+  - AI코딩
+  - 아키텍처분석
+  - MCP
+  - 컨텍스트윈도우
+  - RAG
 summary: CodeGraph는 소스 코드를 단순 텍스트가 아닌 의미론적 지식 그래프로 변환하여, AI 에이전트가 무식한 전체 텍스트 검색(grep)
   대신 '결정론적 아키텍처'를 즉각적으로 쿼리(Query)하고 추론할 수 있게 만드는 혁신적인 Hybrid GraphRAG 시스템입니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-28] 오픈소스 월드 모델의 대전환: LingBot-World 심층 분석 - 비디오 생성을 넘어 실시간 상호작용의 시대로'
 date: '2026-01-29'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 영상생성
+  - AI트렌드
+  - 로보틱스
+  - 아키텍처분석
 math: true
 summary: 실시간 상호작용과 장기 일관성을 실현한 오픈소스 월드 모델, LingBot-World 기술 분석
 image:

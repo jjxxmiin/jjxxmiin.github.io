@@ -2,8 +2,17 @@
 layout: post
 title: "VideoLLaMA3 훑어보기"
 summary: "xAI가 개발한 최신 LLM, Grok 3의 기술적 혁신과 성능 분석"
+image:
+  path: /assets/img/thumb/VideoLLama3.jpg
+  alt: VideoLLaMA3 훑어보기 대표 이미지
 date: 2025-02-21 16:00 -0400
-categories: AI
+categories: Tech
+tags:
+  - Llama
+  - 파인튜닝
+  - Qwen
+  - 멀티모달
+  - LLM
 math: true
 ---
 

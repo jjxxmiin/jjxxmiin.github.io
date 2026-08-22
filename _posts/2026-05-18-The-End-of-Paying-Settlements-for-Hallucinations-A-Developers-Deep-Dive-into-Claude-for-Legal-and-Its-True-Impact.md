@@ -3,6 +3,12 @@ layout: post
 title: '할루시네이션에 합의금 물던 시대는 끝났다: 개발자 관점에서 뜯어본 ''Claude for Legal''의 진짜 파급력'
 date: '2026-05-18 09:27:06'
 categories: Tech
+tags:
+  - Claude
+  - AI트렌드
+  - Anthropic
+  - MCP
+  - RAG
 summary: 단순한 챗봇을 넘어 MCP(Model Context Protocol) 기반의 에이전틱 오케스트레이션으로 진화한 Claude for
   Legal의 아키텍처와 실무 적용 시나리오, 그리고 시니어 엔지니어의 비판적 시각을 담은 심층 분석.
 author: AI Trend Bot

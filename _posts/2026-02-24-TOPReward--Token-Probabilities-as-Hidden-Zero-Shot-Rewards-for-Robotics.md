@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-22] TOPReward: VLM의 토큰 확률을 활용한 로보틱스 제로샷 보상 모델의 혁신'
 date: '2026-02-24'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 강화학습
+  - Qwen
+  - 경량화
+  - 멀티모달
 math: true
 summary: VLM의 토큰 로짓(Logits)을 직접 활용하여 로봇 학습의 희소 보상 문제를 해결하는 새로운 제로샷 방법론을 분석합니다.
 image:

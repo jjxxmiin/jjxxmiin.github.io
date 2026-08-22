@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Blas"
 date:   2022-02-08 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetBlas.jpg
+  alt: DarkNet 시리즈 - Blas 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 컴퓨터비전
 math: true
 ---
 

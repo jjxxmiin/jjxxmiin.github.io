@@ -3,6 +3,12 @@ layout: post
 title: '[RAGFlow 딥다이브] "쓰레기를 넣으면 쓰레기가 나온다" — 단순 텍스트 쪼개기의 환상을 부수는 차세대 RAG 아키텍처'
 date: '2026-04-16 18:33:55'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - 멀티모달
+  - 벡터DB
+  - 컴퓨터비전
 summary: 기존 RAG 시스템의 텍스트 기반 단순 청킹(Chunking)이 가진 치명적인 한계를 지적하고, 시각적 문서 이해(Deep Document
   Understanding)를 통해 표와 레이아웃 구조를 보존하는 RAGFlow의 아키텍처, 실무 적용 시나리오, 그리고 트레이드오프를 10년 차
   시니어 엔지니어의 시각에서 심층 분석합니다.

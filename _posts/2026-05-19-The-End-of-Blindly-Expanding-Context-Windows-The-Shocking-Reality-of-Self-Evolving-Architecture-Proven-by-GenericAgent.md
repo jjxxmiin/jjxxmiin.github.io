@@ -3,6 +3,12 @@ layout: post
 title: '무식하게 컨텍스트 창만 늘리는 시대의 종말: GenericAgent가 증명한 ''자기 진화형'' 아키텍처의 충격적 실체'
 date: '2026-05-19 18:56:47'
 categories: Tech
+tags:
+  - 컨텍스트윈도우
+  - AI트렌드
+  - 아키텍처분석
+  - 프롬프트엔지니어링
+  - AI에이전트
 summary: 무한한 컨텍스트 창에 의존하는 기존 방식에서 벗어나, '정보 밀도'를 극대화하고 성공한 작업을 파이썬 코드로 영구 결정화(Crystallization)하여
   스스로 진화하는 3.3K 라인 초경량 프레임워크 GenericAgent의 핵심 원리와 실무 도입 전략을 심층 분석합니다.
 author: AI Trend Bot

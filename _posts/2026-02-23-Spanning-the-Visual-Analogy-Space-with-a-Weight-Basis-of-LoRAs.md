@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-17] LoRWeB: 시각적 유추 학습의 혁명, LoRA 기저(Basis) 분해를 통한 동적 이미지 편집 기술 심층
   분석'
 date: '2026-02-23'
-categories: tech
+categories: Tech
+tags:
+  - 파인튜닝
+  - 이미지생성
+  - 디퓨전모델
+  - 멀티모달
+  - 컴퓨터비전
 math: true
 summary: LoRA 기저 결합으로 시각적 유추의 한계를 넘다.
 image:
@@ -34,7 +40,7 @@ LoRWeB은 이러한 병목 현상을 해결하기 위해 **'동적 가중치 합
 
 LoRWeB의 아키텍처는 크게 세 가지 구성 요소로 나뉩니다: (1) 시각적 특징 추출을 위한 인코더, (2) 변환 프리미티브를 저장하는 LoRA 기저 세트, (3) 조건부 플로우 매칭(Flow-matching) 기반의 생성 백본입니다.
 
-![Figure 2:LoRWeB Overview.We first encode𝐚{\mathbf{a}}and𝐚′{\mathbf{a}}^{\prime}, that describe a visual transformation (e.g.adding a hat to the man), and𝐛{\mathbf{b}}, which should be edited analogously (e.g.adding a hat to the woman) with CLIP[42], and a small learned projection module. The similarity between the encoded vector and a set of learned keys determines the linear coefficients for combining the learned LoRAs into a single, mixed LoRA. This mixed LoRA is injected into a conditional flow model (e.g.Flux.1-Kontext[5]). Next, we build a2×22\times 2composite image from{𝐚,𝐚′,𝐛}\{{\mathbf{a}},{\mathbf{a}}^{\prime},{\mathbf{b}}\}. The conditional flow model gets this composite image as its input, along with a guiding edit prompt, and produces a composite image with the edited results𝐛′{\mathbf{b}}^{\prime}in the bottom-right quadrant.](/assets/img/papers/2602.15727/x2.png)
+![Figure 2: LoRWeB Overview. We first encode a and ′ a , that describe a visual transformation (e.g.adding a hat to the man), a](/assets/img/papers/2602.15727/x2.png)
 *Figure 2: LoRWeB의 전체 아키텍처 개요. 입력 쌍의 관계를 인코딩하여 최적의 LoRA 조합 가중치를 계산하고 이를 모델에 주입하는 과정을 보여줍니다.*
 
 ### 3.1. LoRA Basis Decomposition (LoRA 기저 분해)
@@ -77,7 +83,7 @@ LoRWeB은 기존의 단일 LoRA 기반 모델이나 I2I(Image-to-Image) 프레�
 ### 5.2. 양적 비교 (Quantitative Results)
 성능 측정을 위해 Gemma-3(VLM)를 활용한 편집 정확도 평가와 LPIPS/CLIP 거리 기반의 보존력 평가가 수행되었습니다.
 
-![Figure 5:Quantitative comparisons.(left) Accuracy of the applied edit and preservation of𝐛{\mathbf{b}}in𝐛′{\mathbf{b}}^{\prime}using Gemma-3[52]. Top right is better. (right) CLIP directional similarity and LPIPS between𝐛′{\mathbf{b}}^{\prime}and𝐛{\mathbf{b}}. Bottom-right is better. Our method pushes the Pareto front of edit accuracy-preservation, achieving higher edit accuracy while strongly preserving the input image.](/assets/img/papers/2602.15727/x5.png)
+![Figure 5: Quantitative comparisons.(left) Accuracy of the applied edit and preservation of b in ′ b using Gemma-3[52]](/assets/img/papers/2602.15727/x5.png)
 *Figure 5: 정량적 지표 분석. LoRWeB은 편집 정확도와 이미지 보존력 사이의 파레토 최전선(Pareto Front)을 확장하며 두 마리 토끼를 모두 잡는 데 성공했습니다.*
 
 사용자 선호도 조사(User Study)에서도 LoRWeB은 타 모델 대비 70% 이상의 높은 선택을 받으며 실제 시각적 품질의 우수성을 입증했습니다.

@@ -6,6 +6,12 @@ title: 'Google Gemini 3.7 Flash 출시: 코딩 성능 향상과 50% 수준의 AP
 date: 2026-08-14 10:25:23 +0900
 last_modified_at: 2026-08-14 10:25:23 +0900
 categories: Tech
+tags:
+  - Gemini
+  - Google
+  - API
+  - AI서비스
+  - 컨텍스트윈도우
 description: Google AI가 Gemini 3.7 Flash를 2026년 8월 13일 정식 출시했습니다. 100만 토큰 컨텍스트, 코딩 벤치마크 향상, 할인된 API 가격 정보까지 핵심 내용을 전해드립니다.
 summary: Google AI가 2026년 8월 13일 소프트웨어 엔지니어링과 에이전트 추론 성능을 끌어올린 Gemini 3.7 Flash 모델을 정식 출시했습니다. 100만 토큰 문맥 창과 최대 64K 출력 토큰을 지원하며, FrontierCode 1.1 벤치마크 점수는 43.6%로 대폭 올랐습니다. 2026년 말까지 백만 입력 토큰당 $0.75의 할인된 프로모션 요금이 적용됩니다.
 article_type: NewsArticle

@@ -3,6 +3,12 @@ layout: post
 title: 'AI 코딩, 장난감에서 실무 파이프라인으로: 단일 바이너리로 끝내는 Compozy 멀티 에이전트 오케스트레이션 심층 해부'
 date: '2026-05-18 18:58:21'
 categories: Tech
+tags:
+  - AI코딩
+  - 멀티에이전트
+  - 아키텍처분석
+  - 프롬프트엔지니어링
+  - ClaudeCode
 summary: 단일 프롬프트에 의존하던 기존 AI 코딩의 한계를 깨고, 기획부터 코드 리뷰까지의 전체 SDLC를 마크다운 기반의 상태 머신과 멀티
   에이전트로 자동화하는 Go 기반 오케스트레이션 프레임워크 'Compozy'의 내부 아키텍처와 실무 적용 시나리오를 심층 분석합니다.
 author: AI Trend Bot

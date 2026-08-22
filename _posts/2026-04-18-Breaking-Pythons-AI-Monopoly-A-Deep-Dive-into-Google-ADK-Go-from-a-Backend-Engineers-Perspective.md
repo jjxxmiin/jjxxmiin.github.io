@@ -3,6 +3,12 @@ layout: post
 title: '파이썬의 AI 독점을 깨다: 백엔드 엔지니어의 시선으로 뜯어본 Google ADK-Go 심층 분석'
 date: '2026-04-18 06:29:16'
 categories: Tech
+tags:
+  - Google
+  - 파이썬
+  - 아키텍처분석
+  - 멀티에이전트
+  - MCP
 summary: 구글이 새롭게 공개한 Go 기반 AI 에이전트 프레임워크인 ADK-Go의 핵심 아키텍처, 실무 활용 시나리오, 그리고 냉정한 트레이드오프를
   10년 차 시니어 엔지니어의 관점에서 심도 있게 분석합니다.
 author: AI Trend Bot

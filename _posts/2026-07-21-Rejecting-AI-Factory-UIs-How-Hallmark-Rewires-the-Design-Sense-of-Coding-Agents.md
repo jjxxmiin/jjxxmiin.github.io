@@ -3,6 +3,12 @@ layout: post
 title: '공장형 AI UI를 거부하다: Hallmark가 코딩 에이전트의 디자인 감각을 뜯어고치는 원리'
 date: '2026-07-21 21:15:37'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - AI에이전트
 summary: Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록
   강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가 매번 완전히 새로운 구조와 감각적인 디자인을
   설계하도록 만듭니다.

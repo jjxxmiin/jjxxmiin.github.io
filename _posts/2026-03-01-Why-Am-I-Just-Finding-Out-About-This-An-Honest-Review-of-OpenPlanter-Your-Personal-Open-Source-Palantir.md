@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 나만의 오픈소스 '팔란티어', OpenPlanter 솔직 리뷰 🕵️‍♂️
 date: '2026-03-01 18:22:19'
 categories: Tech
+tags:
+  - 인프라
+  - 온디바이스AI
+  - RAG
+  - 오픈소스
+  - AI에이전트
 summary: 흩어진 이기종 데이터를 자동으로 연결하고 분석해주는 재귀적 OSINT AI 에이전트 'OpenPlanter'의 핵심 기술, 실사용
   경험, 그리고 현직 개발자 관점의 솔직한 장단점을 파헤쳐 봅니다.
 author: AI Trend Bot

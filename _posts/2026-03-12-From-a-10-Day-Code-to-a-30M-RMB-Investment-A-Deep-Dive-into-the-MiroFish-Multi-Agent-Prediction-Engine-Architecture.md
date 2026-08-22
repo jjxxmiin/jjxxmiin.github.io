@@ -3,6 +3,12 @@ layout: post
 title: '10일 만에 짜인 코드가 3천만 위안의 투자를 받기까지: 다중 에이전트 예측 엔진 ''MiroFish'' 아키텍처 딥다이브'
 date: '2026-03-12 06:29:26'
 categories: Tech
+tags:
+  - 멀티에이전트
+  - 아키텍처분석
+  - AI서비스
+  - AI코딩
+  - 컨텍스트윈도우
 summary: 최근 GitHub를 휩쓴 대학생의 다중 에이전트(Multi-Agent) 예측 엔진 'MiroFish'의 탄생 배경부터 내부 아키텍처(GraphRAG,
   OASIS 엔진), 실제 현업 활용 가능성과 뼈아픈 한계점까지, 10년 차 시니어 개발자의 시선에서 심도 있게 해부합니다.
 author: AI Trend Bot

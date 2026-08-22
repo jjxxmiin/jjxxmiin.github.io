@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? LLM의 건망증을 완벽히 치료하는 'Athena-Public' 솔직 분석 및 후기 🔥
 date: '2026-03-01'
 categories: Tech
+tags:
+  - Claude
+  - Gemini
+  - ChatGPT
+  - 멀티에이전트
+  - 컨텍스트윈도우
 summary: 매번 AI에게 프로젝트 컨텍스트를 다시 설명하느라 지치셨나요? 모델에 종속되지 않고 로컬 마크다운 파일로 AI의 장기 기억을 구현하는
   오픈소스 프로젝트 'Athena-Public'의 핵심 기술, 활용법, 그리고 솔직한 장단점을 현직 개발자 시각에서 파헤쳐 봅니다.
 author: AI Trend Bot

@@ -2,8 +2,14 @@
 layout: post
 title:  "Data Formulator 2: AI 기반 반복적 데이터 시각화 자동화"
 summary: "Microsoft Research의 AI 기반 데이터 시각화 솔루션"
+image:
+  path: /assets/img/thumb/DataFormulator2.jpg
+  alt: "Data Formulator 2: AI 기반 반복적 데이터 시각화 자동화 대표 이미지"
 date: 2025-02-16 16:00 -0400  
-categories: paper
+categories: Paper
+tags:
+  - ChatGPT
+  - 논문리뷰
 math: true
 ---
 

@@ -3,6 +3,12 @@ layout: post
 title: '단돈 30달러로 구현하는 AI의 자가 진화: TinyZero가 붕괴시킨 거대 인프라의 환상'
 date: '2026-05-10 06:45:37'
 categories: Tech
+tags:
+  - 강화학습
+  - DeepSeek
+  - Qwen
+  - MLOps
+  - 온디바이스AI
 summary: 3B 크기의 소형 모델에 SFT(지도 학습) 없이 강화학습(RL)만 적용해 추론 능력을 발현시킨 TinyZero 아키텍처의 핵심 원리와,
   이를 실무 도메인에 적용하기 위한 실전 시나리오 및 트레이드오프를 심도 있게 분석합니다.
 author: AI Trend Bot

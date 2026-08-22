@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] 500달러짜리 AI 개발자 Devin, 오픈소스로 씹고 뜯기: OpenHands(구 OpenDevin) 아키텍처 딥다이브'
 date: '2026-03-15 18:21:49'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 인프라
+  - AI코딩
+  - 멀티에이전트
+  - AI보안
 summary: AI 소프트웨어 엔지니어 OpenHands의 내부 아키텍처(Event Stream, Docker Sandbox, Agent Delegation)를
   현업 시니어 개발자의 시선으로 낱낱이 파헤치고, 실무 적용 사례와 API 비용의 역설 등 진짜 장단점을 리뷰합니다.
 author: AI Trend Bot

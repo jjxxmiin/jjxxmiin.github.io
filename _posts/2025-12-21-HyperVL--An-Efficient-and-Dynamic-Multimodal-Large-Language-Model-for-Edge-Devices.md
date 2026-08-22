@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-16] HyperVL: 온디바이스 멀티모달 AI의 한계를 돌파하는 동적 효율성 극대화 전략 분석'
 date: '2025-12-21'
-categories: tech
+categories: Tech
+tags:
+  - 온디바이스AI
+  - 멀티모달
+  - 경량화
+  - 반도체
+  - 파인튜닝
 math: true
 summary: 온디바이스 환경을 위한 고효율 동적 멀티모달 LLM, HyperVL 아키텍처 심층 분석
 image:

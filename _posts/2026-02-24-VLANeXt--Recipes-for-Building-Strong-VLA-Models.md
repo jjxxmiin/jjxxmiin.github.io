@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-20] VLANeXt: 최강의 VLA 모델 구축을 위한 12가지 레시피와 로봇 AI 인프라 최적화 전략'
 date: '2026-02-24'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 경량화
+  - 파인튜닝
+  - 멀티에이전트
+  - 반도체
 math: true
 summary: VLANeXt는 효율적인 2.5B 파라미터로 기존 7B 모델을 압도하는 차세대 VLA 모델 설계 가이드를 제시합니다.
 image:

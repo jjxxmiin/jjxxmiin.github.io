@@ -3,6 +3,12 @@ layout: post
 title: '[도발] 당신의 로컬 AI 에이전트는 터미널에 갇혀 썩고 있다: CC-Connect와 ChatOps의 진화'
 date: '2026-04-20 07:03:48'
 categories: Tech
+tags:
+  - AI코딩
+  - ClaudeCode
+  - AI보안
+  - 멀티모달
+  - 멀티에이전트
 summary: 로컬 터미널에 종속되어 있던 AI 코딩 에이전트(Claude Code 등)를 퍼블릭 IP 없이 메신저(Slack, Telegram
   등)와 연결하는 오픈소스 브릿지 'CC-Connect'의 내부 아키텍처와 실무 적용 시나리오, 그리고 도입 시의 치명적인 트레이드오프를 시니어
   엔지니어의 관점에서 심층 분석합니다.

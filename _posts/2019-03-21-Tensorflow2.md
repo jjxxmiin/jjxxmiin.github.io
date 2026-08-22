@@ -2,8 +2,14 @@
 layout: post
 title:  "Tensorflow 2.0 끄적이기"
 summary: "텐서플로우 2.0 사용하기"
+image:
+  path: /assets/img/thumb/Tensorflow2.jpg
+  alt: Tensorflow 2.0 끄적이기 대표 이미지
 date:   2019-03-21 22:00 -0400
-categories: opensource
+categories: OpenSource
+tags:
+  - 경량화
+  - 오픈소스
 ---
 
 ## TensorFlow 2.0 alpha

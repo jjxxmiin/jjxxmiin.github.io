@@ -3,6 +3,12 @@ layout: post
 title: Redis 창시자 antirez는 왜 284B 모델을 맥북에 구겨 넣었나? - 로컬 인퍼런스 엔진 'ds4.c' 심층 해부
 date: '2026-05-11 18:49:19'
 categories: Tech
+tags:
+  - Apple
+  - DeepSeek
+  - 아키텍처분석
+  - AI코딩
+  - 반도체
 summary: 범용성이라는 허상을 버리고 오직 'DeepSeek V4 Flash + Apple Metal'이라는 극단적 타겟팅을 택한 antirez의
   새로운 로컬 인퍼런스 엔진 ds4.c. 128GB 맥북에서 284B 프론티어 AI를 구동하게 만든 하드코어 아키텍처와 Disk KV Cache의
   혁신을 시니어 개발자의 시선으로 깊이 있게 분석합니다.

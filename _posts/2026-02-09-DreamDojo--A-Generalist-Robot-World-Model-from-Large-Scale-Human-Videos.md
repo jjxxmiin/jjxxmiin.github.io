@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-06] DreamDojo: 4.4만 시간의 인간 비디오로 학습한 차세대 로봇 범용 월드 모델 심층 분석'
 date: '2026-02-09'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 월드모델
+  - 아키텍처분석
+  - 파인튜닝
+  - 경량화
 math: true
 summary: 인간의 일상을 학습하여 로봇의 미래를 예측하는 범용 월드 모델의 등장
 image:

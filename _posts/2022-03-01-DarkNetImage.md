@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Image"
 date:   2022-03-01 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetImage.jpg
+  alt: DarkNet 시리즈 - Image 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

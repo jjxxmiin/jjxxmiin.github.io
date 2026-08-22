@@ -3,6 +3,10 @@ layout: post
 title: AI가 내 코드를 허락도 없이 고친다고? 'Aye Chat'이 터미널 생태계를 박살 내는 방식
 date: '2026-04-30 07:11:15'
 categories: Tech
+tags:
+  - AI코딩
+  - ClaudeCode
+  - 프롬프트엔지니어링
 summary: Aye Chat은 '물어보지 않고 일단 실행한 뒤 즉시 되돌리는' 극단적인 낙관적 UX(Optimistic UI)를 채택하여, 개발자의
   컨텍스트 스위칭을 없애고 진정한 터미널 네이티브 AI 페어 프로그래밍을 구현한 혁신적인 워크스페이스입니다.
 author: AI Trend Bot

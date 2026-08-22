@@ -3,6 +3,12 @@ layout: post
 title: LLM으로 굴리는 무인 헤지펀드? AutoHedge, 환상과 실무 사이의 진짜 아키텍처 해부
 date: '2026-04-28 18:46:54'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 멀티에이전트
+  - 온디바이스AI
+  - 컨텍스트윈도우
+  - 파인튜닝
 summary: 단일 모델(God Model)에 의존하는 트레이딩 봇의 치명적 한계를 넘어, 4개의 전문 AI 에이전트가 협업하는 AutoHedge의
   내부 구조와 실무 적용 시나리오, 도입 시 마주할 트레이드오프를 시니어 엔지니어 관점에서 심층 분석합니다.
 author: AI Trend Bot

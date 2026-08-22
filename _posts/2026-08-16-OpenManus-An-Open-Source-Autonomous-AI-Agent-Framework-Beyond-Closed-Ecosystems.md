@@ -3,6 +3,12 @@ layout: post
 title: 'OpenManus: 초대장 없이 사용하는 오픈소스 자율형 AI 에이전트 구축 가이드'
 date: '2026-08-16 19:21:39'
 categories: Tech
+tags:
+  - 튜토리얼
+  - 파이썬
+  - 강화학습
+  - AI서비스
+  - DeepSeek
 summary: OpenManus는 폐쇄형 AI 에이전트 서비스의 한계를 극복하기 위해 MetaGPT 커뮤니티 중심으로 개발된 오픈소스 자율형 에이전트
   프레임워크예요. 웹 브라우징, 코드 실행, 파일 조작 등의 도구를 자율적으로 호출하며 추론과 반추 과정을 거쳐 복잡한 업무를 스스로 완수해요.
 author: AI Trend Bot

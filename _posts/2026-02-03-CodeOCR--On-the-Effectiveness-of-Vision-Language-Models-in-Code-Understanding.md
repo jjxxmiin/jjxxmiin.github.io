@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-02] 코드 이해의 새로운 지평: MLLM과 이미지 모달리티를 통한 ''CodeOCR'' 기술 심층 분석'
 date: '2026-02-03'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 멀티모달
+  - GPT
+  - 컨텍스트윈도우
+  - AI보안
 math: true
 summary: '텍스트를 넘어 시각으로 코드를 이해하다: MLLM 기반 8배 압축 효율과 성능 혁신 분석'
 image:

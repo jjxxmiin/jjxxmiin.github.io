@@ -4,6 +4,12 @@ title: '[Tech Deep Dive] ''바이브 코딩(Vibecoding)''의 환상과 절망, �
   찾은 해답'
 date: '2026-03-28 06:23:52'
 categories: Tech
+tags:
+  - AI코딩
+  - 아키텍처분석
+  - 컨텍스트윈도우
+  - ClaudeCode
+  - 멀티에이전트
 summary: 단일 채팅창에 의존하던 기존 AI 코딩의 '컨텍스트 부패(Context Rot)' 문제를 해결하기 위해 등장한 GSD 프레임워크의
   핵심 아키텍처와 실무 적용 가이드, 그리고 현직 개발자 시선에서의 냉철한 리뷰를 담았습니다.
 author: AI Trend Bot

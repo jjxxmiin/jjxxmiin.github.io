@@ -3,6 +3,12 @@ layout: post
 title: 'holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스'
 date: '2026-08-15 19:25:24'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - API
+  - MCP
 summary: holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를
   상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
 author: AI Trend Bot

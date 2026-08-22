@@ -3,6 +3,12 @@ layout: post
 title: 껍데기만 예쁜 챗봇 UI는 질렸습니다. Lobe Chat이 증명한 진짜 '엔터프라이즈급 AI 프론트엔드' 아키텍처의 민낯
 date: '2026-05-12 08:04:48'
 categories: Tech
+tags:
+  - OpenAI
+  - 아키텍처분석
+  - 온디바이스AI
+  - DeepSeek
+  - Gemini
 summary: 단순한 챗봇 UI 껍데기가 아닌, Next.js와 Zustand 기반의 상태 관리, 플러그인 생태계, 로컬 퍼스트 전략까지 갖춘 Lobe
   Chat의 밑바닥 아키텍처와 실무 도입 시의 진짜 장단점을 시니어 엔지니어의 시선에서 파헤칩니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: '복붙 지옥은 끝났다: 터미널로 들어온 AI 에이전트 ''Claude Code'' 딥다이브'
 date: '2026-03-12 18:22:34'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - 아키텍처분석
+  - AI코딩
+  - MCP
 summary: GUI 기반 AI 어시스턴트의 한계를 넘어, 개발자의 로컬 환경에서 직접 명령어를 실행하고 코드를 수정하는 Anthropic의 터미널
   네이티브 에이전트 'Claude Code'의 아키텍처, 실무 활용법, 그리고 치명적인 단점까지 10년 차 개발자의 시선으로 낱낱이 파헤칩니다.
 author: AI Trend Bot

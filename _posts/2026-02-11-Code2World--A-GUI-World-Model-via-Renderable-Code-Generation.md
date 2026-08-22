@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-10] Code2World: 렌더링 가능한 코드 생성을 통한 차세대 GUI 월드 모델의 도래와 기술적 심층 분석'
 date: '2026-02-11'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - AI코딩
+  - 강화학습
+  - 아키텍처분석
+  - GPT
 math: true
 summary: GUI 에이전트의 예지력을 극대화하는 코드 기반 시뮬레이션 기술, Code2World 분석
 image:
@@ -46,7 +52,7 @@ GUI 월드 모델 학습을 위해서는 '현재 화면 - 행동 - 다음 화면
 
 모델 학습은 크게 SFT(Supervised Fine-Tuning)와 RARL(Render-Aware Reinforcement Learning)의 두 단계로 나뉩니다.
 
-![Figure 2:Left: Illustration of Data Synthesis.The high-fidelityAndroidCodedataset is curated viaconstrainted initial synthesisand avisual-feedback revision loop, where synthesized HTML is iteratively refined based on rendered visual discrepancies to ensure strict alignment (SigLIP score>>0.9).Right: Two-stage Model Optimization.The pipeline progresses from an SFT cold start toRender-Aware Reinforcement Learning (RARL). Utilizing Group Relative Policy Optimization (GRPO), the model optimizes dual rewards—visual semantic (RsemR_{\text{sem}}) and action consistency (RactR_{\text{act}})—derived directly fromrendered outcomesto enforce structural and logical fidelity.](/assets/img/papers/2602.09856/x4.png)
+![Figure 2: Left: Illustration of Data Synthesis](/assets/img/papers/2602.09856/x4.png)
 *그림 2: 데이터 합성 과정(좌) 및 2단계 모델 최적화 파이프라인(우). GRPO를 활용한 강화학습이 핵심입니다.*
 
 1.  **SFT (Cold Start):** 모델이 기본적인 HTML 문법과 GUI 레이아웃 구조를 이해하도록 AndroidCode 데이터셋으로 사전 학습을 진행합니다.

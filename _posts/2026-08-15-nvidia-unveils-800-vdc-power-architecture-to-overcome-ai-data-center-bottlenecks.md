@@ -6,6 +6,12 @@ title: NVIDIA, 데이터센터 전력 병목 풀 800 VDC 직류 전력 아키텍
 date: 2026-08-15 09:57:03 +0900
 last_modified_at: 2026-08-15 09:57:03 +0900
 categories: Tech
+tags:
+  - Nvidia
+  - 인프라
+  - 아키텍처분석
+  - Google
+  - Microsoft
 description: NVIDIA가 AI 데이터센터 전력 병목을 해결하기 위해 800 VDC 전력 아키텍처를 발표했습니다. 기존 AC 데이터센터 시설을 유지하며 랙 내부 구리 사용량을 최대 80% 줄이는 2026년 하반기 기술 표준을 정리합니다.
 summary: NVIDIA가 Google, Microsoft 및 80개 이상의 OCP 파트너와 함께 AI 데이터센터 전력 병목을 극복할 MGX 호환 800 VDC 전력 아키텍처를 발표했습니다. 기존 데이터센터 건물의 AC 인프라를 재건축하지 않고도 도입할 수 있는 하이브리드 구조로, 전력 변환 단계를 줄이고 랙 내부 구리 사용량을 50%에서 80%까지 절감합니다. 이번 기술 사양은 2026년 하반기 상용화를 목표로 전력 한계에 다다른 차세대 AI 팩토리의 확장을 지원할 예정입니다.
 article_type: NewsArticle

@@ -4,6 +4,12 @@ title: 당신의 AI는 어제 한 말을 기억합니까? MS GraphRAG의 한계�
   심층 해부
 date: '2026-05-01 18:44:34'
 categories: Tech
+tags:
+  - RAG
+  - MCP
+  - 벡터DB
+  - AI코딩
+  - Gemini
 summary: 정적인 Vector RAG와 느리고 무거운 MS GraphRAG의 한계를 넘어, 데이터의 시간적 변화를 추적하는 Bi-temporal
   아키텍처와 LLM 호출 없는 300ms 초저지연 검색을 구현한 Zep의 오픈소스 지식 그래프 'Graphiti'의 내부 구조와 실무적 득실을 시니어
   엔지니어의 관점에서 심층 분석합니다.

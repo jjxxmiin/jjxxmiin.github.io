@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-15] BitDance: 바이너리 토큰과 디퓨전의 결합, 자동회귀 모델의 새로운 지평을 열다'
 date: '2026-02-18'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 경량화
+  - 온디바이스AI
+  - 이미지생성
+  - 트랜스포머
 math: true
 summary: 바이너리 토큰과 디퓨전 헤드로 AR 모델의 한계를 돌파한 BitDance 기술 분석
 image:

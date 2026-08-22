@@ -3,6 +3,12 @@ layout: post
 title: '복붙 셔틀은 이제 그만: 10년 차 개발자가 뜯어본 자율형 에이전트 ''Cline''의 진짜 민낯'
 date: '2026-03-13 06:25:49'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - ChatGPT
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
 summary: 단순 챗봇이나 자동완성을 넘어 터미널과 파일 시스템을 직접 제어하는 진정한 자율형 AI 에이전트 Cline. 그 이면에 숨겨진 아키텍처(MCP)부터
   실무 도입 시 겪게 될 API 비용 폭탄과 무한 루프의 늪까지, 현업 시니어 개발자의 시선에서 가감 없이 해부합니다.
 author: AI Trend Bot

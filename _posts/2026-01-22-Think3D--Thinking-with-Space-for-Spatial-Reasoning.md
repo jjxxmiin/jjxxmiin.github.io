@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-19] Think3D: VLM의 한계를 넘는 3D 공간 지능의 탄생 - 공간적 연쇄 사고(3D CoT)와 혁신적 프레임워크
   심층 분석'
 date: '2026-01-22'
-categories: tech
+categories: Tech
+tags:
+  - 3D생성
+  - GPT
+  - 경량화
+  - 로보틱스
+  - Gemini
 math: true
 summary: 2D 인식을 넘어 3D 공간 추론의 시대를 여는 Think3D 기술의 구조와 산업적 함의 분석
 image:

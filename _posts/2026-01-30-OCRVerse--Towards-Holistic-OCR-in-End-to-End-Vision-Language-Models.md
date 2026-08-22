@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-29] OCRVerse: 텍스트와 시각 정보를 통합하는 엔드투엔드 비전-언어 모델의 혁신적 진화'
 date: '2026-01-30'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 멀티모달
+  - 경량화
+  - 파인튜닝
+  - AI에이전트
 math: true
 summary: 텍스트 중심을 넘어 차트와 웹까지 아우르는 통합 OCR 기술, OCRVerse 심층 분석
 image:

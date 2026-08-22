@@ -3,6 +3,12 @@ layout: post
 title: '[시니어의 시선] 매번 "처음 뵙겠습니다" 하는 AI는 이제 그만: agentmemory가 LLM의 단기기억상실증을 치료하는 방법'
 date: '2026-05-12 18:53:07'
 categories: Tech
+tags:
+  - AI코딩
+  - MCP
+  - ClaudeCode
+  - 벡터DB
+  - RAG
 summary: AI 코딩 에이전트의 치명적인 한계인 '세션 간 컨텍스트 증발' 문제를 해결하는 rohitg00/agentmemory의 아키텍처와
   실무 적용 시나리오를 심도 있게 해부합니다.
 author: AI Trend Bot

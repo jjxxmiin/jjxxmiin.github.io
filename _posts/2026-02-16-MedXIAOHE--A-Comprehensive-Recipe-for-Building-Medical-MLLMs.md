@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-13] MedXIAOHE: 의료 AI의 기술적 정점 - 전문가 수준의 추론과 멀티모달 통합 전략 심층 분석'
 date: '2026-02-16'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - 환각문제
+  - 트랜스포머
+  - 강화학습
 math: true
 summary: 의료용 MLLM의 새로운 지평을 여는 MedXIAOHE의 아키텍처와 데이터 전략 완벽 가이드
 image:

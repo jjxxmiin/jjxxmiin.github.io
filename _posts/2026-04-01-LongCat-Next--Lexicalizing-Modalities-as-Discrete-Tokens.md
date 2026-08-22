@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-29] 비전과 오디오를 텍스트처럼 다룬다고? LongCat-Next가 멀티모달의 '프랑켄슈타인 아키텍처'를 박살내는 법"
 date: '2026-04-01 05:03:11'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 디퓨전모델
+  - 아키텍처분석
+  - 트랜스포머
+  - 경량화
 math: true
 summary: "LLM+Diffusion의 끔찍한 혼종은 가라. 모든 것을 이산형 토큰으로 압축한 DiNA 아키텍처 해부"
 image:

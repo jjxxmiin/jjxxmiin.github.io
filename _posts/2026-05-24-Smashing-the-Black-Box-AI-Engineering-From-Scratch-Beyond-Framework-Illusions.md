@@ -3,6 +3,12 @@ layout: post
 title: '블랙박스를 부수다: 프레임워크를 버리고 바닥부터 짠 AI 엔지니어링 생존기'
 date: '2026-05-24 07:00:05'
 categories: Tech
+tags:
+  - RAG
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
+  - MLOps
+  - 벡터DB
 summary: 거대 프레임워크(LangChain 등)의 추상화가 프로덕션 레벨에서 야기하는 치명적인 한계를 해부하고, 프롬프트 파이프라인부터 컨텍스트
   관리까지 개발자가 직접 통제하는 'From Scratch' AI 엔지니어링의 본질과 실무 적용기를 깊이 있게 파헤칩니다.
 author: AI Trend Bot

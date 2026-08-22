@@ -3,6 +3,12 @@ layout: post
 title: 'API 스파게티 코드는 이제 버리시죠: 금융권 레거시를 구원할 ''Financial Services MCP'' 심층 해부'
 date: '2026-05-08 07:10:38'
 categories: Tech
+tags:
+  - MCP
+  - 아키텍처분석
+  - 멀티에이전트
+  - AI정책
+  - 프롬프트엔지니어링
 summary: Financial MCP는 파편화된 금융 코어 시스템과 AI 에이전트 간의 통신을 단일 표준으로 통합하는 혁신적 프로토콜입니다. 기존
   커스텀 API의 한계를 극복하고 실무에 적용하는 방법과 트레이드오프를 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

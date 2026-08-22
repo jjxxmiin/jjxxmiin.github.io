@@ -2,7 +2,16 @@
 layout: post
 title:  "DarkNet 시리즈 - YOLOv4"
 date:   2022-02-04 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetYOLOv4.jpg
+  alt: DarkNet 시리즈 - YOLOv4 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 컴퓨터비전
+  - AI보안
+  - 경량화
 math: true
 ---
 

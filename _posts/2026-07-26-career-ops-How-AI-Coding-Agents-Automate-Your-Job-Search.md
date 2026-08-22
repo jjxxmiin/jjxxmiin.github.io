@@ -3,6 +3,12 @@ layout: post
 title: 'career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법'
 date: '2026-07-26 04:52:38'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - 업무자동화
+  - AI에이전트
 summary: career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며,
   ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: '내 방 안으로 들어온 거대 언어 모델: Personal AI Infrastructure 구축의 실체와 한계'
 date: '2026-05-14 07:24:37'
 categories: Tech
+tags:
+  - Llama
+  - 경량화
+  - 온디바이스AI
+  - MLOps
+  - RAG
 summary: 클라우드 종속성과 프라이버시 한계에서 벗어나, 내 로컬/프라이빗 환경에 직접 구축하는 '개인용 AI 인프라(Personal AI Infrastructure)'의
   아키텍처, 실무 활용 사례, 그리고 숨겨진 트레이드오프를 시니어 엔지니어의 관점에서 심도 있게 파헤칩니다.
 author: AI Trend Bot

@@ -2,8 +2,15 @@
 layout: post
 title: "SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까?"
 summary: "AI가 실제 개발자로 취업하고 돈을 벌 수 있을까? OpenAI의 SWE-Lancer 연구를 통해 그 가능성을 분석합니다!"
+image:
+  path: /assets/img/thumb/SWELancer.jpg
+  alt: "SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까? 대표 이미지"
 date: 2025-02-24
-categories: paper
+categories: Paper
+tags:
+  - AI코딩
+  - LLM
+  - 논문리뷰
 math: true
 ---
 

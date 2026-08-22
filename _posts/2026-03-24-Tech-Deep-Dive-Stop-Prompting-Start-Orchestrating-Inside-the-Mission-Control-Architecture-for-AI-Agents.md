@@ -3,6 +3,12 @@ layout: post
 title: '[Tech Deep Dive] AI 에이전트, 이제 ''호출''하지 말고 ''방목''하세요: Mission Control 아키텍처 해부'
 date: '2026-03-24 18:25:44'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - MCP
+  - AI코딩
+  - ChatGPT
+  - 로보틱스
 summary: 단순한 AI 어시스턴트를 넘어, 개발 도구(Sentry, GitHub 등)의 신호를 감지해 백그라운드에서 자율적으로 코드를 분석하고
   PR을 생성하는 'Continuous AI'의 핵심 관제탑, Mission Control의 내부 아키텍처와 실무 적용기를 심도 있게 파헤칩니다.
 author: AI Trend Bot

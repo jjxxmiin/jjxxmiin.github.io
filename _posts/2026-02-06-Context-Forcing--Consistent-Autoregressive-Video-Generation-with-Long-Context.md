@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-05] Context Forcing: 초장기 비디오 생성의 한계를 돌파하는 새로운 패러다임 - 1분 이상의 일관성을
   구현하는 기술적 심층 분석'
 date: '2026-02-06'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - AI트렌드
+  - 컨텍스트윈도우
+  - 경량화
+  - 디퓨전모델
 math: true
 summary: Student-Teacher 불일치를 해결하여 1분 이상의 고해상도 일관된 비디오 생성을 가능하게 하는 Context Forcing
   기술 분석.

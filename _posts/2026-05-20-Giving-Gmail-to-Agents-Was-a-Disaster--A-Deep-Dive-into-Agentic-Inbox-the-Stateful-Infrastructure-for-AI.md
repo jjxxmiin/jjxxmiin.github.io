@@ -3,6 +3,12 @@ layout: post
 title: '''에이전트에게 쥐여준 Gmail은 재앙이었다'' — 상태(State)를 품은 AI 전용 인프라, Agentic Inbox 심층 해부'
 date: '2026-05-20 08:33:16'
 categories: Tech
+tags:
+  - MCP
+  - 아키텍처분석
+  - 멀티에이전트
+  - AI에이전트
+  - LLM
 summary: AI 에이전트에게 이메일 처리 작업을 맡길 때 발생하던 상태 관리와 인프라의 한계를 극복하기 위해 등장한 Cloudflare의 'Agentic
   Inbox' 아키텍처를 심층 분석하고, 현업 실무 적용 시나리오와 트레이드오프를 고찰합니다.
 author: AI Trend Bot

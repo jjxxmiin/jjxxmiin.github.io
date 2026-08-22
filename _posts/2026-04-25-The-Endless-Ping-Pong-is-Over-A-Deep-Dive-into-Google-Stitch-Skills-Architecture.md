@@ -3,6 +3,12 @@ layout: post
 title: '디자이너와 개발자의 ''지옥의 핑퐁''은 끝났다: Google Stitch Skills 아키텍처 심층 해부'
 date: '2026-04-25 18:31:15'
 categories: Tech
+tags:
+  - Google
+  - AI코딩
+  - 아키텍처분석
+  - MCP
+  - Claude
 summary: 최근 Google이 발표한 Stitch Skills는 단순한 AI 코드 제너레이터가 아닙니다. 디자인(Stitch)과 개발(Antigravity)을
   MCP(Model Context Protocol) 기반의 에이전트로 완벽히 결합한 혁신적인 파이프라인입니다. 10년 차 개발자의 시선에서 이 기술이
   현업의 어떤 고질적 문제를 해결하는지, 내부 아키텍처는 어떻게 동작하는지, 그리고 실제 도입 시 감당해야 할 트레이드오프까지 낱낱이 파헤쳐 봅니다.

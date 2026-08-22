@@ -3,6 +3,12 @@ layout: post
 title: '[LLM 아키텍처 딥다이브] 프롬프트 엔지니어링의 종말? ''Claude Skills''가 컨텍스트 창을 다루는 우아하고도 무서운 방법'
 date: '2026-03-09 18:21:22'
 categories: Tech
+tags:
+  - Claude
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
+  - 아키텍처분석
+  - ClaudeCode
 summary: 거대한 프롬프트에 의존하던 기존의 방식을 넘어, 파일 시스템 기반의 '점진적 컨텍스트 로딩(Progressive Disclosure)'과
   샌드박스 실행을 결합해 AI가 스스로 필요한 전문 지식만 지연 로딩하게 만드는 Claude Skills의 내부 아키텍처와 실무 적용 한계를 심도
   있게 분석합니다.

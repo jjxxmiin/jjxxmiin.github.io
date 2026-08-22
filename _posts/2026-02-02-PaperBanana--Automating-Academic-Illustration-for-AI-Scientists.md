@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-30] AI 과학자를 위한 논문 그림 자동화의 혁명: PaperBanana 프레임워크 기술 심층 분석'
 date: '2026-02-02'
-categories: tech
+categories: Tech
+tags:
+  - 논문리뷰
+  - 아키텍처분석
+  - 디퓨전모델
+  - 이미지생성
+  - GPT
 math: true
 summary: AI 논문 일러스트 자동화를 선도하는 PaperBanana 프레임워크와 NeurIPS 2025 벤치마크 분석
 image:

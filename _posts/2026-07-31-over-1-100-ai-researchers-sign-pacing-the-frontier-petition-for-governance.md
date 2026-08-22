@@ -2,10 +2,16 @@
 layout: post
 automation: daily_ai_news
 publication_mode: verified
-title: OpenAI·Anthropic 등 AI 연구자 1,100명 속도 조절 공개 서한 'Pacing the Frontier' 발표
+title: OpenAI와 Anthropic 등 AI 연구자 1,100명 속도 조절 공개 서한 'Pacing the Frontier' 발표
 date: 2026-07-31 11:07:55 +0900
 last_modified_at: 2026-07-31 11:07:55 +0900
 categories: Tech
+tags:
+  - Anthropic
+  - OpenAI
+  - Google
+  - AI정책
+  - ChatGPT
 description: OpenAI, Anthropic, Google DeepMind, Meta의 연구자와 임원 1,100여 명이 미국 정부에 AI 연구 자동화에 따른 속도 조절 도구와 규제 지원을 요구하는 공개 서한을 발표했습니다.
 summary: 2026년 7월 28일, OpenAI, Anthropic, Google DeepMind, Meta 등 주요 AI 기업 연구자 1,100여 명이 AI 개발 속도를 제어하기 위한 정부 지원을 요청하는 공개 서한 'Pacing the Frontier'를 발표했습니다. 이 서한에는 Anthropic CEO Dario Amodei, OpenAI 수석 과학자 Jakub Pachocki, Meta 수석 과학자 Shengjia Zhao가 서명했으며 OpenAI와 Anthropic은 기업 차원의 공식 지지를 표명했습니다. AI 연구 자동화가 인간의 통제 범위를 벗어날 위험에 대비해 통제 가능한 속도 조절 장치를 마련하자는 것이 핵심입니다.
 article_type: NewsArticle

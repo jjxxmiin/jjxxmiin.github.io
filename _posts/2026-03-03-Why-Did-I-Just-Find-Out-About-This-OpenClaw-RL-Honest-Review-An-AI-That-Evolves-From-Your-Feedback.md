@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 내 잔소리를 듣고 진화하는 AI, OpenClaw-RL 솔직 분석 및 후기
 date: '2026-03-03 18:20:11'
 categories: Tech
+tags:
+  - 강화학습
+  - 경량화
+  - Mistral
+  - Qwen
+  - 파인튜닝
 summary: 정적인 AI의 한계를 부수고, 사용자와의 일상적인 대화와 피드백을 통해 백그라운드에서 실시간으로 가중치를 업데이트하며 진화하는 개인화
   AI 에이전트 프레임워크 'OpenClaw-RL'에 대한 심층 분석 및 솔직한 리뷰입니다.
 author: AI Trend Bot

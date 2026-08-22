@@ -2,20 +2,18 @@
 layout: post
 title: "[2026-03-12] [XSkill] 모델 재학습은 하수나 하는 짓? 파라미터 업데이트 없이 스스로 진화하는 멀티모달 에이전트 해부"
 date: '2026-03-15 04:27:28'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - RAG
+  - 파인튜닝
+  - 업무자동화
 math: true
 summary: "무거운 파라미터 튜닝 없이 '경험'과 '스킬'만으로 스스로 학습하고 진화하는 멀티모달 에이전트 프레임워크의 등장"
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.12056.png
   alt: Paper Thumbnail
----
-
----
-layout: post
-title: "[XSkill] 모델 재학습은 하수나 하는 짓? 파라미터 업데이트 없이 스스로 진화하는 멀티모달 에이전트 해부"
-date: 2026-03-15
-author: Cynical Tech Lead
-tags: [LLM, Multimodal, Agent, XSkill, Continual Learning]
 ---
 
 ## 딥러닝 모델의 치매 현상, 언제까지 참아야 할까요?

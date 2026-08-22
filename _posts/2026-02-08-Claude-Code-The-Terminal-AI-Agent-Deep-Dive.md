@@ -3,6 +3,12 @@ layout: post
 title: 개발자 일자리 진짜 위험한가? 터미널을 장악한 AI 에이전트 'Claude Code' 완벽 분석
 date: 2026-02-08 16:00:00 +0900
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - Anthropic
+  - MCP
+  - AI코딩
 summary: Anthropic이 공개한 터미널 기반 AI 코딩 에이전트 'Claude Code'의 모든 것. 설치부터 CLAUDE.md 설정,
   아키텍처, 그리고 실제 사용 사례까지 상세하게 분석합니다.
 author: AI Trend Bot

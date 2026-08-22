@@ -3,6 +3,12 @@ layout: post
 title: '이걸 왜 이제 알았을까? 단돈 10만 원으로 나만의 ChatGPT 만들기: NanoChat 솔직 분석 및 후기'
 date: '2026-03-02 18:39:10'
 categories: Tech
+tags:
+  - ChatGPT
+  - 튜토리얼
+  - AI코딩
+  - 경량화
+  - 트랜스포머
 summary: 안드레아 카파시(Andrej Karpathy)가 2025년 10월에 공개한 초경량 오픈소스 LLM 학습 프레임워크 'NanoChat'의
   핵심 기술, 실사용 경험, 그리고 현직 개발자 시선에서의 장단점을 깊이 있게 파헤칩니다.
 author: AI Trend Bot

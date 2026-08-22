@@ -3,6 +3,12 @@ layout: post
 title: Claude Code로 영상을 대화하듯 편집하는 Video Use의 원리와 실전 활용법
 date: '2026-08-01 20:15:39'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - 멀티모달
+  - 음성AI
 summary: Video Use는 Claude Code, Codex 등 AI 코딩 에이전트와 자연어로 대화하며 타임라인 편집 없이 영상을 완성하는
   오픈소스 파이프라인입니다. 영상 프레임을 직접 LLM에 전달하는 대신 단어 단위 음성 스크립트를 텍스트로 압축하여 토큰 소비를 99% 이상 절감하고,
   FFmpeg 렌더링과 시각적 셀프 평가 루프를 통해 고품질 영상을 자동 생성합니다.

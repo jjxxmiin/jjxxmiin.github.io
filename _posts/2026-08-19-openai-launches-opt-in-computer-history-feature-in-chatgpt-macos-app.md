@@ -6,6 +6,10 @@ title: OpenAI ChatGPT macOS 앱, 사용자 작업 기록하는 'Computer History
 date: 2026-08-19 09:53:50 +0900
 last_modified_at: 2026-08-19 09:53:50 +0900
 categories: Tech
+tags:
+  - ChatGPT
+  - OpenAI
+  - AI서비스
 description: OpenAI가 macOS용 ChatGPT 데스크톱 앱에 'Computer History' 기능을 출시했습니다. 화면 캡처 대신 접근성 API로 클릭과 타이핑을 기록해 ChatGPT와 Codex에 맥락을 제공합니다.
 summary: OpenAI가 macOS용 ChatGPT 데스크톱 앱 이용자를 위해 작업 활동을 기록하는 'Computer History' 기능을 정식 출시했습니다. 스크린샷 기반의 Chronicle 프리뷰를 대체하는 이 기능은 클릭과 타이핑 이력을 로컬 기억으로 전환해 AI의 맥락 이해도를 높입니다. 유럽 지역 및 일부 요금제는 적용에서 제외되며 관리자 승인과 개별 선택 설정이 필요합니다.
 article_type: NewsArticle
@@ -65,11 +69,11 @@ article_images:
 ```mermaid
 graph TD
     A[OpenAI ChatGPT macOS 앱] -->|기능 출시| B[Computer History 기능 도입]
-    B -->|수집 방식| C[macOS 접근성 API로 클릭·타이핑·앱 전환 기록]
+    B -->|수집 방식| C[macOS 접근성 API로 클릭, 타이핑, 앱 전환 기록]
     B -->|대체 관계| D[기존 스크린샷 기반 Chronicle 프리뷰 대체]
     C -->|기능 수행| E[ChatGPT 및 Codex 검색 가능 로컬 메모리 생성]
     E -->|사용자 제어| F[앱/웹사이트 제외 및 기록 삭제 가능]
-    F -->|제한 사항| G[EEA·영국·스위스 제외 및 관리자 승인 필요]
+    F -->|제한 사항| G[EEA, 영국, 스위스 제외 및 관리자 승인 필요]
 ```
 
 내 맥북에서 작업한 과정과 흐름을 AI가 스스로 기억하고 이해한다면 얼마나 편리할까요? OpenAI가 macOS용 ChatGPT 데스크톱 앱에 사용자의 컴퓨터 작업 활동을 기록하고 기억하는 'Computer History' 기능을 새로 선보였습니다.

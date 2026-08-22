@@ -3,6 +3,12 @@ layout: post
 title: 'Void 에디터: 코드가 유출되지 않는 프라이버시 중심 오픈소스 AI 코딩 도구의 원리와 활용'
 date: '2026-07-17 04:46:13'
 categories: Tech
+tags:
+  - AI코딩
+  - Llama
+  - 경량화
+  - 온디바이스AI
+  - 오픈소스
 summary: 오픈소스 AI 코드 에디터인 Void의 내부 아키텍처, 기존 상용 도구와의 차별점, 로컬 언어 모델 통합 방식 및 실제 현업 활용
   시나리오를 구체적인 다이어그램과 함께 심층적으로 분석합니다.
 author: AI Trend Bot

@@ -3,6 +3,9 @@ layout: post
 title: 스프링과 노드에 지친 당신, Rust Warp가 구원일까? 10년 차 백엔드 개발자의 처절한 필터(Filter) 해부기
 date: '2026-04-30 18:43:58'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - AI트렌드
 summary: Rust 기반 웹 프레임워크 Warp의 핵심 아키텍처인 'Filter' 시스템의 내부 동작 원리와 실무 적용 시나리오, 그리고 극한의
   성능 이면에 숨겨진 치명적인 트레이드오프를 10년 차 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

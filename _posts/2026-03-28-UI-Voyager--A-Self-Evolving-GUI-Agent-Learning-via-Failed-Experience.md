@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-25] 4B 모델로 휴먼 레벨을 씹어먹다? 실패에서 배우는 GUI 에이전트 UI-Voyager 해부"
 date: '2026-03-28 04:30:11'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 아키텍처분석
+  - GPT
+  - 경량화
+  - 파인튜닝
 math: true
 summary: "81% 성공률을 찍은 4B 파라미터 모바일 GUI 에이전트. 쓸모없던 '실패 데이터'를 과외 선생님으로 만드는 GRSD 아키텍처 파헤치기."
 image:

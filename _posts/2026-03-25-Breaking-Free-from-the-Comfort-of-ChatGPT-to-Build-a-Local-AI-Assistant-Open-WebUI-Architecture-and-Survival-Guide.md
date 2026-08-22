@@ -3,6 +3,12 @@ layout: post
 title: '챗GPT의 안락함에서 벗어나 내 컴퓨터에 AI 비서를 짓다: Open WebUI 아키텍처와 생존기'
 date: '2026-03-25 06:40:23'
 categories: Tech
+tags:
+  - Llama
+  - RAG
+  - 아키텍처분석
+  - 파이썬
+  - ChatGPT
 summary: 프라이버시 타협 없이, 로컬 환경에서 완벽하게 통제 가능한 '나만의 ChatGPT'를 가장 우아하고 강력하게 구축하는 오픈소스 아키텍처,
   Open WebUI에 대한 심층 해부입니다.
 author: AI Trend Bot

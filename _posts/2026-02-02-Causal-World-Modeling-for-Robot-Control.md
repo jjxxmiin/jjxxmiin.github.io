@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-29] 로봇 지능의 도약: LingBot-VA, 인과적 월드 모델과 Autoregressive Diffusion을 통한
   자율 제어의 혁신'
 date: '2026-02-02'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 로보틱스
+  - 월드모델
+  - 트랜스포머
+  - 영상생성
 math: true
 summary: 비디오 월드 모델로 로봇의 미래를 상상하고 제어하는 LingBot-VA 심층 분석
 image:
@@ -19,10 +25,7 @@ LingBot-VA는 단순히 비디오-언어 사전 학습(VLM)에 의존하는 기�
 
 이 보고서에서는 LingBot-VA가 어떻게 '상상력'을 '행동'으로 변환하는지, 그리고 이것이 차세대 산업용 및 서비스형 로봇 시장에 어떤 기술적 패러다임 변화를 가져올지 심층적으로 분석합니다.
 
-![Figure 1:LingBot-VA: An Autoregressive World Model for Robotic Manipulation.(1)Pretraining:LingBot-VAis pretrained on diverse in-the-wild videos and robot action data, enabling strong generalization across scenes and objects.
-(2)Comprehensive Evaluation:We conduct extensive experiments on real-world tasks (long-horizon, deformable objects, and precision manipulation) and simulation benchmarks, significantly outperforming state-of-the-art methods includingπ0.5\pi_{0.5}.
-(3)Versatile Capabilities:Beyond policy learning, our model supports visual dynamics prediction and inverse dynamics inference from robot videos.
-(4)Emergent Properties:Our causal world modeling approach exhibits long-range temporal memory and strong few-shot adaptation ability.](/assets/img/papers/2601.21998/x1.png)
+![Figure 1: LingBot-VA: An Autoregressive World Model for Robotic Manipulation.(1) Pretraining: LingBot-VAis pretrained on dive](/assets/img/papers/2601.21998/x1.png)
 *그림 1: LingBot-VA의 개요. 사전 학습부터 실제 환경 평가, 다재다능한 능력 및 창발적 특성을 보여줍니다.*
 
 ---

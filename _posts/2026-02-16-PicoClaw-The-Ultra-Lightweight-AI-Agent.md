@@ -3,6 +3,11 @@ layout: post
 title: 개발자들 충격... 10달러짜리 하드웨어에서 돌아가는 '괴물' AI 에이전트, PicoClaw 등장!
 date: '2026-02-16'
 categories: Tech
+tags:
+  - 온디바이스AI
+  - AI에이전트
+  - LLM
+  - 오픈소스
 summary: OpenClaw를 대체할 초경량 AI 에이전트 'PicoClaw'를 소개합니다. 10MB 미만의 램 사용량, 1초 부팅 속도, 그리고
   AI가 직접 코딩한 Go 언어 기반의 아키텍처까지. 10달러짜리 보드에서도 돌아가는 이 혁신적인 도구의 설치부터 활용법까지 상세히 알아봅니다.
 author: AI Trend Bot
@@ -25,7 +30,7 @@ image:
 
 이 프로젝트의 슬로건은 충격적입니다.
 
-> **"$10 Hardware · 10MB RAM · 1s Boot"**
+> **"$10 Hardware와 10MB RAM와 1s Boot"**
 
 즉, 커피 두 잔 값인 10달러짜리 하드웨어에서, 사진 한 장 크기인 10MB의 메모리만으로, 1초 만에 부팅되어 여러분의 업무를 돕는다는 것입니다. Sipeed 팀은 이를 위해 'Nanobot' 프로젝트에서 영감을 받아 아키텍처를 완전히 재설계했습니다.
 

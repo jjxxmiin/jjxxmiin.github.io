@@ -2,8 +2,14 @@
 layout: post  
 title: "InternVideo 톺아보기"  
 summary: "최신 비디오 AI 모델 InternVideo의 핵심 기술과 성능 분석"  
+image:
+  path: /assets/img/thumb/InternVideo.jpg
+  alt: InternVideo 톺아보기 대표 이미지
 date: 2025-02-15 16:00 -0400  
-categories: paper  
+categories: Paper
+tags:
+  - 논문리뷰
+  - 영상생성
 math: true  
 ---
 

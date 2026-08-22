@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? AI 에이전트 브라우저 제어의 끝판왕, pinchtab 솔직 분석
 date: '2026-03-01 18:19:36'
 categories: Tech
+tags:
+  - 파이썬
+  - 멀티에이전트
+  - 온디바이스AI
+  - AI에이전트
+  - LLM
 summary: 무겁고 종속성 강한 기존 브라우저 자동화 툴을 대체할 12MB의 가벼운 독립형 HTTP 서버 'pinchtab'에 대한 현직 개발자의
   솔직한 리뷰와 실무 활용 가이드입니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-09] OneVision-Encoder: 코덱 정렬 희소성을 통한 차세대 멀티모달 지능의 패러다임 전환'
 date: '2026-02-17'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - AI트렌드
+  - 트랜스포머
+  - Qwen
+  - 컨텍스트윈도우
 math: true
 summary: 비디오 코덱의 원리를 AI에 이식하여 효율과 성능을 동시에 잡은 혁신적 비전 인코더 분석
 image:
@@ -58,7 +64,7 @@ OneVision-Encoder의 혁신은 크게 세 가지 축으로 나뉩니다: **Codec
 
 희소한 토큰 레이아웃은 기존의 절대적 위치 임베딩을 사용할 수 없게 만듭니다. 토큰들이 격자 구조를 벗어나 불규칙하게 배치되기 때문입니다. 이를 해결하기 위해 OV-Encoder는 **Unified 3D-RoPE**를 도입했습니다.
 
-![Figure 4:3D-RoPE for Codec Patchification.A unified relative positional encoding scheme is adopted for Codec Patchification. (a) encodes full spatiotemporal offsets(Δ​t,Δ​x,Δ​y)(\Delta t,\Delta x,\Delta y)over I/P-frame sequences to preserve motion-driven inter-frame structure. (b) defines temporal offsets at the chunk level, enabling structured reasoning under non-uniform temporal sampling. (c) degenerates the formulation to purely spatial offsets(0,Δ​x,Δ​y)(0,\Delta x,\Delta y)for static inputs. 3D-RoPE preserves structural consistency, enabling coherent attention over sparse and irregular token layouts.](/assets/img/papers/2602.08683/x4.png)
+![Figure 4: 3D-RoPE for Codec Patchification](/assets/img/papers/2602.08683/x4.png)
 *그림 4: Codec Patchification을 위한 3D-RoPE. 시공간적 오프셋을 통합하여 불규칙한 토큰 배치에서도 구조적 일관성을 유지합니다.* 
 
 3D-RoPE는 시간($\Delta t$)과 공간($\Delta x, \Delta y$)의 상대적 거리를 계산하여 어텐션 메커니즘이 희소한 토큰들 사이에서도 물리적인 거리를 인지할 수 있도록 합니다. 이는 비디오뿐만 아니라 단일 이미지, 문서 이미지 등 다양한 입력 형태를 하나의 공통된 좌표계로 통합하는 역할을 합니다.

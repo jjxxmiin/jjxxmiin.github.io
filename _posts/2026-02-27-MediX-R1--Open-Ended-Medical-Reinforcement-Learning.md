@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-26] 의료 AI, 객관식 꼼수는 그만! 서술형 추론을 정복한 오픈엔드 RL ''MediX-R1'' 분석'
 date: '2026-02-27'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - DeepSeek
+  - 멀티모달
+  - LLM
+  - 오픈소스
 math: true
 summary: 객관식 퀴즈만 풀던 의료 AI의 한계를 부수다. 복합 보상 모델로 자유 응답을 정복한 MediX-R1의 실무적 가치 리뷰.
 image:

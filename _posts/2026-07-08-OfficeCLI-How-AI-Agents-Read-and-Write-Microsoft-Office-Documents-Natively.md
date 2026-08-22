@@ -3,6 +3,12 @@ layout: post
 title: 'OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조'
 date: '2026-07-08 21:39:01'
 categories: Tech
+tags:
+  - Microsoft
+  - 파이썬
+  - AI코딩
+  - ClaudeCode
+  - 업무자동화
 summary: AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는
   C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
 author: AI Trend Bot

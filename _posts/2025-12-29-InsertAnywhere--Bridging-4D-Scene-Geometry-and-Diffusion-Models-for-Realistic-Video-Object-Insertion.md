@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-19] 비디오 객체 삽입의 패러다임 시프트: InsertAnywhere, 4D 기하학적 이해와 확산 모델의 결합'
 date: '2025-12-29'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - AI트렌드
+  - 3D생성
+  - 온디바이스AI
+  - 이미지생성
 math: true
 summary: 4D 기하 구조와 확산 모델을 결합한 혁신적인 비디오 객체 삽입 프레임워크
 image:

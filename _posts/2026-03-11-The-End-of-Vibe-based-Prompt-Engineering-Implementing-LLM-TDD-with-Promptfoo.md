@@ -3,6 +3,12 @@ layout: post
 title: '감(Vibe)에 의존하는 프롬프트 엔지니어링은 끝났다: Promptfoo로 구현하는 LLM TDD 체계'
 date: '2026-03-11 06:29:23'
 categories: Tech
+tags:
+  - 프롬프트엔지니어링
+  - GPT
+  - ChatGPT
+  - RAG
+  - LLM
 summary: 프롬프트 수정 시 발생하는 무한 회귀 테스트의 늪에서 벗어나, TDD 방식의 체계적이고 정량적인 LLM 평가 환경(CI/CD)을 구축하게
   해주는 오픈소스 프레임워크 'Promptfoo'에 대한 시니어 개발자의 심층 분석입니다.
 author: AI Trend Bot

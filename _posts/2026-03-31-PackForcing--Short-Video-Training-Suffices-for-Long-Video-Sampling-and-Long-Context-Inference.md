@@ -2,7 +2,12 @@
 layout: post
 title: "[2026-03-26] 5초 학습해서 120초 뽑는다고? KV 캐시의 저주를 푼 PackForcing 기술 해부"
 date: '2026-03-31 20:49:09'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 영상생성
+  - 트랜스포머
+  - 컨텍스트윈도우
 math: true
 summary: "KV 캐시를 32배 압축하면서도 2분짜리 영상을 뽑아내는 PackForcing. 이제 VRAM 걱정 없이 롱폼 생성 가능할까요?"
 image:

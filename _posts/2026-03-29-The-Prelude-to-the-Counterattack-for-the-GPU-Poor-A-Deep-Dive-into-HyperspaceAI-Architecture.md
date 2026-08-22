@@ -3,6 +3,11 @@ layout: post
 title: 'GPU 빈곤층을 위한 반격의 서막: HyperspaceAI 아키텍처 심층 해부'
 date: '2026-03-29 18:27:04'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - AI에이전트
+  - LLM
+  - 오픈소스
 summary: HyperspaceAI는 전 세계의 유휴 컴퓨팅 자원을 libp2p 가십 프로토콜과 Proof-of-FLOPS 합의 알고리즘으로 묶어낸
   세계 최초의 P2P 분산형 AGI 네트워크로, 거대 자본이 독점한 AI 인프라 시장에 완전히 새로운 패러다임을 제시합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-17] VLM 환각 탈출구: HopChain, 단일 홉의 한계를 깨는 멀티홉 RLVR 합성 파이프라인 해부"
 date: '2026-03-23 04:56:50'
-categories: tech
+categories: Tech
+tags:
+  - 환각문제
+  - 멀티모달
+  - 아키텍처분석
+  - Qwen
+  - 컨텍스트윈도우
 math: true
 summary: "단순 VQA 데이터의 한계를 넘는 HopChain 멀티홉 데이터 합성 프레임워크와 RLVR 최적화 실무."
 image:

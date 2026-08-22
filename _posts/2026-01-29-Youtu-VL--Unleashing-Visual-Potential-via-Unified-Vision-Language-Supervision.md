@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-27] Youtu-VL: ''시각을 목표로(Vision-as-Target)'' 정의하는 통합 시각-언어 자동 회귀 모델의
   기술적 혁명'
 date: '2026-01-29'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 컴퓨터비전
+  - 경량화
+  - 로보틱스
+  - 트랜스포머
 math: true
 summary: 시각적 입력을 넘어 출력까지 통합한 Youtu-VL의 기술적 깊이와 미래 가치 분석
 image:

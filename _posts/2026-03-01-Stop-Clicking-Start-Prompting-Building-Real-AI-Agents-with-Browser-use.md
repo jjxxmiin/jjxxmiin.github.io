@@ -3,6 +3,10 @@ layout: post
 title: '이제 마우스에서 손 떼셔도 됩니다: Browser-use로 시작하는 진짜 ''AI 에이전트'' 라이프'
 date: '2026-03-01'
 categories: Tech
+tags:
+  - 로보틱스
+  - AI에이전트
+  - LLM
 summary: 웹 브라우저를 사람처럼 제어하는 오픈소스 라이브러리 'Browser-use'를 소개하며, 단순한 스크립트 자동화를 넘어 LLM이 스스로
   판단하고 행동하는 '에이전트' 시대의 변화를 다룹니다.
 author: AI Trend Bot

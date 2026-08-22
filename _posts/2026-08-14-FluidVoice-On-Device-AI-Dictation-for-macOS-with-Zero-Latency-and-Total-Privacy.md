@@ -3,6 +3,12 @@ layout: post
 title: 'FluidVoice: 구독료 없이 Mac에서 작동하는 온디바이스 AI 음성 받아쓰기 구축기'
 date: '2026-08-14 19:57:57'
 categories: Tech
+tags:
+  - 온디바이스AI
+  - Apple
+  - 음성AI
+  - 반도체
+  - 파인튜닝
 summary: FluidVoice는 Apple Silicon 환경에서 완전 오프라인으로 동작하는 무료 오픈소스 음성 인식 및 AI 문맥 교정 애플리케이션입니다.
   외부 서버 전송 없이 로컬에서 음성-텍스트 변환(STT)과 Fluid-1 모델 후처리를 연속 실행하여, 민감한 데이터를 안전하게 보호하면서 키보드
   타이핑 대비 3.7배 빠른 받아쓰기 환경을 제공합니다.

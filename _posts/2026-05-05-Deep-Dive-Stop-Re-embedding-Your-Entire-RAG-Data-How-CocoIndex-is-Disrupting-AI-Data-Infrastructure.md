@@ -3,6 +3,12 @@ layout: post
 title: '[기술 심층 분석] RAG 파이프라인, 언제까지 전체 데이터를 다시 임베딩하실 겁니까? — AI 데이터 인프라의 판을 엎는 CocoIndex'
 date: '2026-05-05 06:57:28'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - MCP
+  - 벡터DB
+  - ClaudeCode
 summary: 기존 ETL 시스템의 한계로 인해 AI 애플리케이션에서 발생하는 '데이터 신선도(Freshness)' 문제를 해결하는 CocoIndex의
   증분형(Incremental) 아키텍처와 실제 실무 도입 시나리오, 장단점을 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

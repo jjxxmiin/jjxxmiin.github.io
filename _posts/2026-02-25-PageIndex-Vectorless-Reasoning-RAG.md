@@ -3,6 +3,11 @@ layout: post
 title: 더 이상 벡터DB도, 청킹도 필요 없다? '추론형 RAG' PageIndex의 등장
 date: '2026-02-25'
 categories: Tech
+tags:
+  - RAG
+  - 벡터DB
+  - LLM
+  - AI에이전트
 summary: 기존 RAG의 한계를 넘어서는 '벡터 없는(Vectorless)' 추론 기반 문서 인덱싱 시스템, VectifyAI의 PageIndex를
   심층 분석합니다. 텍스트를 조각내는 청킹 대신 문서의 구조를 트리 형태로 이해하고, LLM이 직접 추론하여 답을 찾는 이 혁신적인 오픈소스 프로젝트의
   설치부터 사용법까지 상세히 다룹니다.

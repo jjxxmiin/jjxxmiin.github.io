@@ -3,6 +3,12 @@ layout: post
 title: 'ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법'
 date: '2026-07-22 21:27:10'
 categories: Tech
+tags:
+  - AI코딩
+  - 프롬프트엔지니어링
+  - ClaudeCode
+  - 강화학습
+  - 파인튜닝
 summary: 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을
   출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
 author: AI Trend Bot

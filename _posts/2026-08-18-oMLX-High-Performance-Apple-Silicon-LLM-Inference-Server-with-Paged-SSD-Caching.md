@@ -3,6 +3,12 @@ layout: post
 title: 'oMLX: 애플 실리콘에서 AI 코딩 에이전트 속도를 극대화하는 MLX 추론 서버'
 date: '2026-08-18 19:25:57'
 categories: Tech
+tags:
+  - AI코딩
+  - Apple
+  - MLOps
+  - 온디바이스AI
+  - ClaudeCode
 summary: oMLX는 애플 실리콘 Mac 환경에서 MLX 프레임워크를 기반으로 작동하는 고성능 LLM 추론 서버입니다. 페이징 처리된 SSD
   KV 캐싱과 연속 배칭을 통해 AI 코딩 에이전트의 첫 토큰 생성 시간(TTFT)을 획기적으로 줄여주며, OpenAI 및 Anthropic 호환
   API와 메뉴바 앱을 기본 제공합니다.

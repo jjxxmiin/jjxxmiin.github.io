@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-30] 양손 고차수 로봇 제어의 새로운 지평: GR-Dexter 기술 보고서 심층 분석 및 VLA 모델의 미래'
 date: '2026-01-02'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 아키텍처분석
+  - 온디바이스AI
+  - 멀티모달
+  - 트랜스포머
 math: true
 summary: VLA 모델을 양손 21-DoF 로봇에 이식한 GR-Dexter의 혁신적 아키텍처와 성과 분석
 image:

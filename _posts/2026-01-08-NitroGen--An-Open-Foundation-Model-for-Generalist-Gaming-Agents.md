@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-04] 범용 게임 에이전트의 시대: NVIDIA NitroGen 파운데이션 모델 심층 기술 분석'
 date: '2026-01-08'
-categories: tech
+categories: Tech
+tags:
+  - Nvidia
+  - AI트렌드
+  - 로보틱스
+  - 디퓨전모델
+  - 트랜스포머
 math: true
 summary: 4만 시간의 게임 데이터로 학습된 NitroGen, 범용 에이전트의 가능성을 증명하다.
 image:

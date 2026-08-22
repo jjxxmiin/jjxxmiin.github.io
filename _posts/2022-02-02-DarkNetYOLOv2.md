@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - YOLOv2"
 date:   2022-02-02 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetYOLOv2.jpg
+  alt: DarkNet 시리즈 - YOLOv2 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 파인튜닝
 math: true
 ---
 

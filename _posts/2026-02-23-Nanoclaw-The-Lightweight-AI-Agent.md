@@ -3,6 +3,12 @@ layout: post
 title: OpenClaw는 잊어라! 단 500줄로 끝내는 개인용 AI 에이전트 'Nanoclaw'가 뜨는 이유
 date: '2026-02-23'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - 멀티에이전트
+  - 업무자동화
 summary: 복잡하고 무거운 OpenClaw 대신, 보안과 미니멀리즘을 핵심으로 한 'Nanoclaw'가 주목받고 있습니다. 단 500줄의 코드로
   WhatsApp 연동, 컨테이너 격리, 에이전트 스웜까지 구현한 이 혁신적인 도구를 완벽 분석합니다.
 author: AI Trend Bot

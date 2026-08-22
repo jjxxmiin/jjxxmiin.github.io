@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-29] VTC-R1: 텍스트를 이미지로 압축하는 ''광학 메모리'' 혁신 - 롱 컨텍스트 추론의 병목을 해결하는 새로운
   패러다임'
 date: '2026-02-01'
-categories: tech
+categories: Tech
+tags:
+  - 컨텍스트윈도우
+  - 트랜스포머
+  - 경량화
+  - 멀티모달
+  - DeepSeek
 math: true
 summary: 추론 과정을 이미지로 압축하여 속도 2.7배, 토큰 3.4배 효율을 달성한 VTC-R1 심층 분석
 image:

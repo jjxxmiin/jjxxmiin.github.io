@@ -3,6 +3,12 @@ layout: post
 title: '코드의 ''의미''를 발굴하는 AI 고고학: Understand-Anything 아키텍처 심층 해부'
 date: '2026-05-22 19:00:37'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - Claude
+  - 멀티에이전트
+  - AI코딩
+  - ClaudeCode
 summary: 수십만 줄의 레거시 코드를 다중 에이전트 파이프라인으로 스캔해 비즈니스 도메인 중심의 인터랙티브 지식 그래프로 변환하는 'Understand-Anything'의
   내부 작동 원리와 현업 적용 시나리오, 그리고 시니어 엔지니어 관점의 냉혹한 한계점을 파헤칩니다.
 author: AI Trend Bot

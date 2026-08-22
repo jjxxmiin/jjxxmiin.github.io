@@ -3,6 +3,12 @@ layout: post
 title: 'Claude Code, API 비용의 인질극을 끝내다: free-claude-code 아키텍처와 로컬 프록시의 반격'
 date: '2026-04-26 18:33:29'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - Anthropic
+  - DeepSeek
+  - 아키텍처분석
 summary: Anthropic의 claude-code CLI가 일으킨 터미널 에이전트 혁명 이면에는 살인적인 API 비용이라는 그림자가 존재합니다.
   본 글에서는 이 비용 종속성을 타파하고 로컬 및 무료 LLM으로 트래픽을 완벽히 우회시키는 'free-claude-code' 오픈소스의 FastAPI
   기반 프록시 아키텍처, 도구 호출(Tool Call) 휴리스틱 파싱 원리, 그리고 현업에서의 구체적인 적용 시나리오와 치명적인 한계점을 10년

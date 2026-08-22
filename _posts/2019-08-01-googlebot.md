@@ -2,8 +2,17 @@
 layout: post
 title:  "구글 어시스턴트 로봇 만들기"
 summary: "Google Assistant Robot 만들기"
+image:
+  path: /assets/img/thumb/googlebot.jpg
+  alt: 구글 어시스턴트 로봇 만들기 대표 이미지
 date:   2019-08-01 13:00 -0400
-categories: edge
+categories: Basics
+tags:
+  - Google
+  - 로보틱스
+  - 튜토리얼
+  - API
+  - 음성AI
 ---
 
 ## Google Assistant Robot

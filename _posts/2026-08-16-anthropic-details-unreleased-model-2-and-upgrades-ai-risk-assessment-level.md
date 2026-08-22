@@ -6,6 +6,12 @@ title: Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개
 date: 2026-08-16 09:57:05 +0900
 last_modified_at: 2026-08-16 09:57:05 +0900
 categories: Tech
+tags:
+  - AI안전
+  - Anthropic
+  - Claude
+  - AI보안
+  - AI에이전트
 description: Anthropic이 186페이지 분량의 위험 보고서를 통해 Claude Mythos 5보다 강력한 내부 모델 Model 2의 존재를 공개하고 정렬 위험 등급을 상향 조정했습니다.
 summary: Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해 고위험 정렬 위험 등급을 '매우 낮음'에서 '낮음'으로 올렸습니다. Model 2는 내부 업무용으로 활용되며 일반 대중에 대한 출시 계획은 없습니다.
 article_type: NewsArticle

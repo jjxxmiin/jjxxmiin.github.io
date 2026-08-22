@@ -3,6 +3,12 @@ layout: post
 title: 더 이상 복사/붙여넣기는 그만. Claude Code가 터미널을 점령했습니다.
 date: '2026-02-22'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - Anthropic
+  - MCP
+  - AI보안
 summary: Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서
   직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히 다룹니다.
 author: AI Trend Bot

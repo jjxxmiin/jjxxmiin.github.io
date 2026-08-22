@@ -3,6 +3,12 @@ layout: post
 title: 'system_prompts_leaks: AI 모델들의 숨겨진 뇌 구조와 프롬프트 아키텍처 해설'
 date: '2026-07-06 06:56:30'
 categories: Tech
+tags:
+  - Anthropic
+  - Claude
+  - Google
+  - OpenAI
+  - 아키텍처분석
 summary: 글로벌 AI 기업들의 1급 비밀인 '시스템 프롬프트' 유출본을 집대성한 system_prompts_leaks 저장소를 심층 분석합니다.
   각 모델의 행동 강령, 도구 사용 규칙, 그리고 프롬프트 엔지니어링의 최신 진화 트렌드를 살펴봅니다.
 author: AI Trend Bot

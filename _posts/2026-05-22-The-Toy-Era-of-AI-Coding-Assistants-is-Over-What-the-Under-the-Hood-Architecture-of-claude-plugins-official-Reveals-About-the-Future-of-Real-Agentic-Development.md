@@ -4,6 +4,12 @@ title: 'AI 코딩 비서의 장난감 시대는 끝났다: claude-plugins-offici
   개발의 미래'
 date: '2026-05-22 08:25:45'
 categories: Tech
+tags:
+  - Claude
+  - AI코딩
+  - AI트렌드
+  - 아키텍처분석
+  - 컨텍스트윈도우
 summary: 단순한 챗봇을 넘어 로컬 LSP 통신, 브라우저 제어, 동적 도구 검색을 통해 AI 네이티브 오케스트레이션 생태계로 진화한 claude-plugins-official의
   아키텍처와 실무 적용 시나리오, 그리고 시니어의 시선으로 바라본 치명적인 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

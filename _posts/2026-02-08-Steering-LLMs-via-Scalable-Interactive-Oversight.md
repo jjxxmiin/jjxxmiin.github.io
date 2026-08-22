@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-04] LLM 제어의 새로운 패러다임: Scalable Interactive Oversight를 통한 복잡한 과업의
   정밀 정렬 기술 심층 분석'
 date: '2026-02-08'
-categories: tech
+categories: Tech
+tags:
+  - AI트렌드
+  - 강화학습
+  - AI코딩
+  - LLM
+  - AI에이전트
 math: true
 summary: 비전문가도 전문가급 AI 출력을 이끌어내는 'Scalable Interactive Oversight' 기술 심층 분석
 image:

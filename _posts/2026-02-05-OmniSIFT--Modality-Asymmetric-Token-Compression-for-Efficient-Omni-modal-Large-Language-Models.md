@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-04] OmniSIFT: 모달리티 비대칭형 토큰 압축으로 Omni-modal LLM의 효율성과 성능을 동시에 잡다'
 date: '2026-02-05'
-categories: tech
+categories: Tech
+tags:
+  - 경량화
+  - Qwen
+  - 멀티모달
+  - 온디바이스AI
+  - 컨텍스트윈도우
 math: true
 summary: 비대칭적 압축으로 토큰 75%를 줄이고도 성능은 더 높인 OmniSIFT 심층 분석
 image:

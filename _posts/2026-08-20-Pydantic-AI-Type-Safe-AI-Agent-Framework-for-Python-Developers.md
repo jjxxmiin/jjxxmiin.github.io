@@ -3,6 +3,12 @@ layout: post
 title: 'Pydantic AI: Python 개발자가 타입 안전하게 프로덕션 AI 에이전트를 구축하는 방법'
 date: '2026-08-20 19:27:27'
 categories: Tech
+tags:
+  - 파이썬
+  - Gemini
+  - 온디바이스AI
+  - 프롬프트엔지니어링
+  - AI에이전트
 summary: Pydantic AI는 Python 대표 데이터 검증 라이브러리인 Pydantic 제작팀이 공개한 모델 불가지론적 타입 안전 AI
   에이전트 프레임워크예요. 자동 검증 재시도 루프와 RunContext 기반 의존성 주입을 통해 기존 프레임워크의 복잡성과 런타임 오류 문제를 깔끔하게
   해결해 줘요.

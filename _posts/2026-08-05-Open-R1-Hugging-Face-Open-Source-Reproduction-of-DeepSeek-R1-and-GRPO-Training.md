@@ -3,6 +3,12 @@ layout: post
 title: 'Open-R1: 허깅페이스가 공개한 추론형 AI 모델 재현 프로젝트와 GRPO 학습 원리'
 date: '2026-08-05 20:59:02'
 categories: Tech
+tags:
+  - HuggingFace
+  - 강화학습
+  - DeepSeek
+  - 경량화
+  - 파인튜닝
 summary: 허깅페이스의 Open-R1 프로젝트는 DeepSeek-R1의 추론 능력 복원 과정을 완벽히 오픈소스로 재현하는 이니셔티브입니다. GRPO
   기반 강화학습과 지식 증류 기술을 활용해 누구나 고성능 추론 모델을 직접 학습시킬 수 있는 프레임워크를 제공합니다.
 author: AI Trend Bot

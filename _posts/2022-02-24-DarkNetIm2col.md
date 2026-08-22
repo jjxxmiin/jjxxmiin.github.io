@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Im2col"
 date:   2022-02-24 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetIm2col.jpg
+  alt: DarkNet 시리즈 - Im2col 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

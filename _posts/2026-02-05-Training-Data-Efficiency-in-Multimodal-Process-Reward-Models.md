@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-04] 데이터 10%로 구현하는 초고성능 시각적 추론: Multimodal Process Reward Model(MPRM)의
   효율성 혁신과 BIS 방법론 심층 분석'
 date: '2026-02-05'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 강화학습
+  - 로보틱스
+  - Qwen
+  - 온디바이스AI
 math: true
 summary: 10%의 데이터로 성능을 압도하는 MPRM 효율화 기술, BIS의 핵심 원리와 산업적 파격성 분석
 image:

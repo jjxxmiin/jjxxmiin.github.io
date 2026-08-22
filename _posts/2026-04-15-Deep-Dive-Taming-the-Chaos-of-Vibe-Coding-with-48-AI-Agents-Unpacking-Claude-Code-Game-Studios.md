@@ -3,6 +3,12 @@ layout: post
 title: '[심층 분석] 혼돈의 ''바이브 코딩''을 제어하는 48명의 AI 팀: Claude Code Game Studios 밑바닥 파헤치기'
 date: '2026-04-15 06:51:20'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - 아키텍처분석
+  - 컨텍스트윈도우
 summary: 단일 Claude Code 세션을 48명의 AI 에이전트로 구성된 가상의 스튜디오로 변환해, 기획부터 QA까지 강제적인 품질 게이트를
   적용하는 에이전틱 프레임워크의 아키텍처와 실무 도입 시나리오를 시니어 개발자의 시선에서 심층 분석합니다.
 author: AI Trend Bot

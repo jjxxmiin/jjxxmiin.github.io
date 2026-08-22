@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-08] 로봇 조작 학습의 패러다임 시프트: Visual Identity Prompting(VIP)을 통한 다중 뷰 비디오
   생성 기술(RoboVIP) 심층 분석'
 date: '2026-01-09'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - AI트렌드
+  - 디퓨전모델
+  - 영상생성
+  - 트랜스포머
 math: true
 summary: 시각적 정체성(VIP) 기반 데이터 증강으로 로봇 학습의 한계를 돌파하는 RoboVIP 기술 분석
 image:

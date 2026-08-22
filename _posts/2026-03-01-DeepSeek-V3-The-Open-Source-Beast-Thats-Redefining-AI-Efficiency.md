@@ -3,6 +3,12 @@ layout: post
 title: 이게 진짜 된다고? DeepSeek-V3, 오픈소스 AI의 판도를 뒤집어놓으셨다
 date: '2026-03-01'
 categories: Tech
+tags:
+  - DeepSeek
+  - AI트렌드
+  - GPT
+  - 트랜스포머
+  - 온디바이스AI
 summary: GPT-4o급 성능을 보여주면서도 압도적인 효율성을 자랑하는 DeepSeek-V3의 핵심 기술인 MLA와 DeepSeekMoE를 개발자의
   시각에서 깊이 있게 파헤치고, 실제 사용 경험과 솔직한 장단점을 공유합니다.
 author: AI Trend Bot

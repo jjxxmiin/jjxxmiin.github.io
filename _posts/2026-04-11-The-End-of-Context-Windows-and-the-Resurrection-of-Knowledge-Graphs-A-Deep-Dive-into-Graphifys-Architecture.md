@@ -3,6 +3,12 @@ layout: post
 title: '컨텍스트 윈도우의 종말, 그리고 지식 그래프의 부활: Graphify 아키텍처 심층 분석'
 date: '2026-04-11 18:26:07'
 categories: Tech
+tags:
+  - 컨텍스트윈도우
+  - 아키텍처분석
+  - Claude
+  - AI코딩
+  - RAG
 summary: 코드베이스를 매번 처음부터 스캐닝하며 컨텍스트를 낭비하던 기존 AI 어시스턴트의 한계를 극복하기 위해, AST 파싱과 다중 모달 AI
   추론을 결합하여 영구적인 위상 기반 지식 그래프를 구축하는 Graphify의 내부 원리와 실무적 장단점을 분석합니다.
 author: AI Trend Bot

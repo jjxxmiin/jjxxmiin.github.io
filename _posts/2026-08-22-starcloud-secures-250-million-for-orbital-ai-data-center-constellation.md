@@ -6,6 +6,10 @@ title: Starcloud, Nvidia 투자 유치하며 2억 5천만 달러 규모 우주 A
 date: 2026-08-22 09:52:42 +0900
 last_modified_at: 2026-08-22 09:52:42 +0900
 categories: Tech
+tags:
+  - Nvidia
+  - 인프라
+  - AI투자
 description: Orbital AI 스타트업 Starcloud가 23억 달러 기업가치로 2억 5천만 달러 투자를 유치했습니다. Nvidia와 협력해 우주 데이터센터 위성 양산에 나섭니다.
 summary: 우주 컴퓨팅 스타트업 Starcloud가 23억 달러의 기업가치로 2억 5천만 달러 규모의 시리즈 A 확장 투자를 마무리했습니다. Nvidia와 Cisco Investments 등이 신규 투자자로 참여했으며, 워싱턴주 우딘빌 공장에서 Nvidia Vera Rubin 모듈을 탑재한 Starcloud-3 위성을 생산할 계획입니다.
 article_type: NewsArticle
@@ -55,7 +59,7 @@ mermaid: true
 
 ```mermaid
 flowchart LR
-    P1[지상 데이터센터 전력·냉각 병목] --> P2[지구 저궤도 태양광 및 우주 공간 활용]
+    P1[지상 데이터센터 전력과 냉각 병목] --> P2[지구 저궤도 태양광 및 우주 공간 활용]
     P2 --> P3[Nvidia 연계 Space-1 Vera Rubin 모듈 탑재]
     P3 --> P4[Starcloud-3 우주선 양산 및 궤도 배치]
 ```
@@ -77,7 +81,7 @@ flowchart LR
 
 ## 왜 지금 다들 이 이야기를 할까?
 
-Starcloud의 우주 데이터센터 구상이 주목받는 이유는 지상 AI 데이터센터가 직면한 전력망 병목 현상과 냉각 한계를 극복하려는 시도이기 때문입니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 거대한 AI 모델을 학습시키고 실시간으로 운영하려면 수백 메가와트급의 전력과 엄청난 냉각 시설이 필요한데, 지상에서는 환경적·물리적 제약이 점차 심해지고 있습니다.
+Starcloud의 우주 데이터센터 구상이 주목받는 이유는 지상 AI 데이터센터가 직면한 전력망 병목 현상과 냉각 한계를 극복하려는 시도이기 때문입니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 거대한 AI 모델을 학습시키고 실시간으로 운영하려면 수백 메가와트급의 전력과 엄청난 냉각 시설이 필요한데, 지상에서는 환경적과 물리적 제약이 점차 심해지고 있습니다.
 
 반면 지구 저궤도에서는 태양광을 통해 끊임없이 전력을 확보할 수 있는 가능성이 열려 있습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 더욱이 Nvidia와의 공식 협력이 결정적이었습니다. Starcloud는 Nvidia와 협력해 우주의 극심한 환경과 방사 냉각(radiative cooling) 기술을 견디도록 설계된 AI 하드웨어 시스템인 'Space-1 Vera Rubin Module'을 개발하고 있습니다 <sup class="source-citation"><a href="#source-3" aria-label="GeekWire 출처">[3]</a></sup>.
 

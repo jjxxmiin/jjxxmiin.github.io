@@ -2,9 +2,15 @@
 layout: post
 title: '[2025-12-23] SemanticGen: 시맨틱 공간에서의 비디오 생성 - 차세대 비디오 확산 모델의 패러다임 전환과 심층 분석'
 date: '2025-12-24'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 영상생성
+  - AI트렌드
+  - 아키텍처분석
+  - 트랜스포머
 math: true
-summary: 시맨틱 레이어를 통한 고효율·고품질 비디오 생성의 새로운 지평
+summary: 시맨틱 레이어를 통한 고효율과 고품질 비디오 생성의 새로운 지평
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.20619.png
   alt: Paper Thumbnail

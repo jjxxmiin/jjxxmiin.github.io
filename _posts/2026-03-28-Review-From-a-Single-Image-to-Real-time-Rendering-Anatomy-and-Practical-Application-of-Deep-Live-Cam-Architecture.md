@@ -3,6 +3,12 @@ layout: post
 title: '[리뷰] 단 한 장의 사진이 실시간 렌더링을 만나기까지: Deep-Live-Cam 아키텍처 해부와 실무 적용기'
 date: '2026-03-28 18:24:21'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - YOLO
+  - 경량화
+  - 반도체
+  - 오픈소스
 summary: 단 한 장의 사진으로 실시간 웹캠 페이스 스왑을 구현한 Deep-Live-Cam의 내부 아키텍처, 실무 활용 시나리오, 그리고 현업
   개발자 시선에서의 치열한 장단점 분석을 담은 심도 있는 리뷰입니다.
 author: AI Trend Bot

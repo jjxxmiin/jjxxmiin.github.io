@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-24] 수천 초짜리 영상 분석, 토큰 폭탄 없이 가능할까? 엔드투엔드 비디오 에이전트 EVA 해부"
 date: '2026-03-27 20:21:20'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 강화학습
+  - 컨텍스트윈도우
+  - MLOps
+  - 멀티모달
 math: true
 summary: "토큰 낭비는 그만! RL 기반 적응형 비디오 에이전트 EVA 심층 분석"
 image:

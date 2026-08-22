@@ -3,6 +3,12 @@ layout: post
 title: '당신의 AI 코딩이 매번 망하는 진짜 이유: mattpocock/skills가 부순 ''바이브 코딩''의 환상'
 date: '2026-05-14 18:47:08'
 categories: Tech
+tags:
+  - AI코딩
+  - ClaudeCode
+  - MCP
+  - 컨텍스트윈도우
+  - 프롬프트엔지니어링
 summary: AI에게 수동적인 코드 생성을 맡기는 대신, 작고 예리한 엔지니어링 표준(Skill)을 강제하여 기획부터 TDD까지 개발자가 주도권을
   쥐게 만드는 mattpocock/skills의 마이크로 아키텍처와 실무 적용기를 심층 분석합니다.
 author: AI Trend Bot

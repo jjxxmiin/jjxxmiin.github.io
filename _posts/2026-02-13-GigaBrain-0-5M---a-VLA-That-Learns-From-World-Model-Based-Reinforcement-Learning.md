@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-12] [심층 분석] GigaBrain-0.5M*: 월드 모델 기반 강화학습(RL)으로 진화한 차세대 VLA 모델의
   탄생'
 date: '2026-02-13'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 로보틱스
+  - 월드모델
+  - 아키텍처분석
+  - 멀티모달
 math: true
 summary: 월드 모델과 RL을 결합하여 로봇의 추론과 행동 능력을 극대화한 GigaBrain-0.5M* 심층 분석.
 image:

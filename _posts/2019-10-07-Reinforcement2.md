@@ -2,8 +2,13 @@
 layout: post
 title:  "강화학습 끄적이기 2"
 summary: "모두의 딥러닝 강화학습"
+image:
+  path: /assets/img/thumb/Reinforcement2.jpg
+  alt: 강화학습 끄적이기 2 대표 이미지
 date:   2019-10-07 16:00 -0400
-categories: reinforcement
+categories: Basics
+tags:
+  - 강화학습
 math: true
 ---
 

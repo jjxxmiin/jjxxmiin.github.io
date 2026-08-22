@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-26] Vision LLM의 ''Latent Reasoning'', 알고 보니 가짜였다? (충격적인 분석 결과)'
 date: '2026-02-27'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - xAI
+  - 프롬프트엔지니어링
+  - AI에이전트
+  - LLM
 math: true
 summary: 멀티모달 모델의 '잠재적 추론'이 실제론 작동 안 한다는 충격적 연구. 해결책은 의외로 간단합니다.
 image:

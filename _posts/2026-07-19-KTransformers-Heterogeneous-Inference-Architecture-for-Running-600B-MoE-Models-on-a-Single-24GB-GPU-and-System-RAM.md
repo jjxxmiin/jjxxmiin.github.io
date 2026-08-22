@@ -3,6 +3,12 @@ layout: post
 title: 'KTransformers: 24GB 단일 GPU와 시스템 메모리로 600B급 MoE 모델을 구동하는 이기종 추론 기술'
 date: '2026-07-19 21:39:29'
 categories: Tech
+tags:
+  - 트랜스포머
+  - 경량화
+  - DeepSeek
+  - 파인튜닝
+  - RAG
 summary: 단일 24GB GPU와 시스템 메모리를 결합하는 이기종 컴퓨팅 기술을 통해 수백만 원대 데스크톱 환경에서도 671B 규모의 최신 MoE(전문가
   혼합) 언어 모델을 실용적인 속도로 추론하고 파인튜닝할 수 있게 해주는 오픈소스 프레임워크인 KTransformers의 내부 동작 원리와 실제
   활용법을 심층 분석합니다.

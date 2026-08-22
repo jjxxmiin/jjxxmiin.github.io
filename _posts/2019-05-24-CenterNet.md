@@ -2,8 +2,14 @@
 layout: post
 title:  "CenterNet 톺아보기"
 summary: "CenterNet 논문 읽어보기"
+image:
+  path: /assets/img/thumb/CenterNet.jpg
+  alt: CenterNet 톺아보기 대표 이미지
 date:   2019-05-19 13:00 -0400
-categories: paper
+categories: Paper
+tags:
+  - 논문리뷰
+  - 컴퓨터비전
 math: true
 ---
 

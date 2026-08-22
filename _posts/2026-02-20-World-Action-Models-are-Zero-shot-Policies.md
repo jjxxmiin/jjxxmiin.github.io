@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-17] 로봇 지능의 패러다임 시프트: World Action Model(WAM)과 DreamZero가 제시하는 제로샷
   정책의 미래'
 date: '2026-02-20'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - AI트렌드
+  - 디퓨전모델
+  - 영상생성
+  - 월드모델
 math: true
 summary: 비디오 디퓨전으로 구현한 14B 규모의 로봇 제어 모델, DreamZero의 기술적 심층 분석.
 image:

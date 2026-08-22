@@ -2,7 +2,12 @@
 layout: post
 title: '[2026-02-27] 왼쪽이라니까 왜 오른쪽에 그려? AI의 지독한 ‘길치’ 본능을 치료할 SpatialScore'
 date: '2026-03-02 04:40:20'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 이미지생성
+  - Gemini
+  - 디퓨전모델
 math: true
 summary: 맨날 엉뚱한 데 물건 배치하는 이미지 AI, 이제 8만 번의 ‘공간 과외’로 참교육 들어갑니다.
 image:

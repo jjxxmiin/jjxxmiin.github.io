@@ -3,6 +3,9 @@ layout: post
 title: '[리뷰] 새벽 3시의 OOM 알람을 멈추기 위하여: DeerFlow 2.0 아키텍처 심층 해부와 트레이드오프'
 date: '2026-03-30 06:51:20'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - AI트렌드
 summary: 메모리 누수와 백프레셔 지옥에 빠진 실무자를 위해, V8 힙을 우회하는 Rust 기반의 Zero-copy 아키텍처로 돌아온 DeerFlow
   2.0의 내부 동작 원리와 치명적인 도입 트레이드오프를 깊이 있게 파헤칩니다.
 author: AI Trend Bot

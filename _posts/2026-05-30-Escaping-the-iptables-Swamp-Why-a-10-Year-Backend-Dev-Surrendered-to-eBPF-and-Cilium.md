@@ -3,6 +3,9 @@ layout: post
 title: '🔥 iptables 늪에서 탈출하기: 10년 차 서버 개발자가 eBPF와 Cilium에 두 손 두 발 다 든 이유'
 date: '2026-05-30 07:03:10'
 categories: Tech
+tags:
+  - 인프라
+  - AI트렌드
 summary: 수만 개의 iptables 룰로 인해 발생하는 쿠버네티스 네트워크 병목 현상을 eBPF가 커널 레벨에서 어떻게 우회하고 해결하는지,
   그 밑바닥 원리와 실무 도입 시의 득실을 10년 차 실무자의 시선으로 낱낱이 파헤칩니다.
 author: AI Trend Bot

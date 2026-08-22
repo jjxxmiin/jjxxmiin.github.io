@@ -6,6 +6,12 @@ title: OpenAI GPT-5.6 Sol Ultrafast 공개, 초당 750토큰으로 14배 빨라�
 date: 2026-08-17 09:53:11 +0900
 last_modified_at: 2026-08-17 09:53:11 +0900
 categories: Tech
+tags:
+  - GPT
+  - OpenAI
+  - AI서비스
+  - AI에이전트
+  - LLM
 description: OpenAI와 Cerebras가 초당 최대 750토큰을 출력하는 GPT-5.6 Sol Ultrafast mode를 발표했습니다. 표준 대비 14배 빠른 이 API 계층이 가져올 서비스 변화와 주의점을 정리했습니다.
 summary: OpenAI와 Cerebras가 Cerebras 웨이퍼 스케일 엔진 기반으로 표준 대비 최대 14배 빠른 GPT-5.6 Sol Ultrafast mode API를 공개했습니다. 초당 최대 750토큰을 생성하여 실시간 음성 에이전트, 장애 대응, 금융 리서치 등 지연 시간이 중요한 서비스를 가속화합니다. 현재는 대기열 신청을 통한 제한적 프리뷰 상태로, 상업 가격과 정식 출시 일정은 추후 공개될 예정입니다.
 article_type: NewsArticle

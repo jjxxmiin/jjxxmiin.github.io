@@ -3,6 +3,12 @@ layout: post
 title: GPT API 청구서에 질리셨나요? Open-Generative-AI 실무 도입의 '진짜' 민낯과 서빙 최적화 전략
 date: '2026-04-22 18:40:39'
 categories: Tech
+tags:
+  - MLOps
+  - 경량화
+  - RAG
+  - Mistral
+  - Qwen
 summary: Open-Generative-AI의 실무 도입은 단순한 '무료 모델 다운로드'가 아닙니다. VRAM 단편화 문제를 해결하는 PagedAttention부터
   앙상블 라우팅까지, 데이터 주권과 비용 최적화를 동시에 달성하기 위해 시니어 엔지니어가 반드시 알아야 할 극한의 인프라 최적화 게임입니다.
 author: AI Trend Bot

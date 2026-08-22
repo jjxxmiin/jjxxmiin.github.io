@@ -2,8 +2,15 @@
 layout: post
 title:  "강화학습 끄적이기"
 summary: "모두의 딥러닝 강화학습"
+image:
+  path: /assets/img/thumb/Reinforcement.jpg
+  alt: 강화학습 끄적이기 대표 이미지
 date:   2019-02-25 20:00 -0400
-categories: reinforcement
+categories: Basics
+tags:
+  - 강화학습
+  - 파이썬
+  - AI에이전트
 ---
 
 ## 강화학습 이해하기: Q-Learning

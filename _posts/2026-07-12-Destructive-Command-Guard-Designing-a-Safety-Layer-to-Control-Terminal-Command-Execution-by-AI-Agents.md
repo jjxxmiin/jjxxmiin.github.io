@@ -3,6 +3,12 @@ layout: post
 title: 'Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계'
 date: '2026-07-12 21:29:24'
 categories: Tech
+tags:
+  - AI코딩
+  - AI보안
+  - ClaudeCode
+  - AI에이전트
+  - LLM
 summary: AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트
   피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일 'Destructive Command Guard'의 작동
   원리와 실무 도입 방법을 심층 분석합니다.

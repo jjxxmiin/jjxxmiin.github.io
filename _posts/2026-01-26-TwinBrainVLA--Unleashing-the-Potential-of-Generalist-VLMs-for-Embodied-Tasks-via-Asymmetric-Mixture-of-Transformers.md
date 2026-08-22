@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-20] TwinBrainVLA: 범용 VLM의 지능과 로봇 제어의 정밀함을 결합한 비대칭 트랜스포머 아키텍처 심층 분석'
 date: '2026-01-26'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 트랜스포머
+  - 멀티모달
+  - 아키텍처분석
+  - 경량화
 math: true
 summary: 범용 시각-언어 모델의 망각 없이 정밀 로봇 제어를 실현한 TwinBrainVLA 기술 분석
 image:

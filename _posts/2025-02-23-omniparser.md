@@ -2,8 +2,16 @@
 layout: post
 title: "OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트"
 summary: "GUI 인터페이스를 자동화하는 강력한 AI 기술, OmniParser의 원리와 응용"
+image:
+  path: /assets/img/thumb/omniparser.jpg
+  alt: "OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트 대표 이미지"
 date: 2025-02-23
-categories: paper
+categories: Paper
+tags:
+  - GPT
+  - 멀티모달
+  - YOLO
+  - AI에이전트
 math: true
 ---
 

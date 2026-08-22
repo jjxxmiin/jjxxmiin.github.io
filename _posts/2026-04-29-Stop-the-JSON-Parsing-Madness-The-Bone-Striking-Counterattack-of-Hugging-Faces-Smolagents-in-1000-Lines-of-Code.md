@@ -3,6 +3,12 @@ layout: post
 title: JSON 파싱 삽질은 이제 그만합시다. 1000줄의 코드에 담긴 Hugging Face 'Smolagents'의 뼈 때리는 반격
 date: '2026-04-29 07:13:03'
 categories: Tech
+tags:
+  - HuggingFace
+  - 파이썬
+  - 경량화
+  - 프롬프트엔지니어링
+  - AI에이전트
 summary: 복잡한 JSON 기반 Tool Calling의 한계를 벗어나, LLM이 직접 파이썬 코드를 작성하고 실행하는 'CodeAgent'
   패러다임을 제시한 Hugging Face의 초경량 프레임워크 Smolagents의 아키텍처와 실무 적용 시나리오, 그리고 한계점을 심층 분석합니다.
 author: AI Trend Bot

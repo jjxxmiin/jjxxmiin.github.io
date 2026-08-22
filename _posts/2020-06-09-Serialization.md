@@ -2,8 +2,13 @@
 layout: post
 title:  "Serialization 끄적이기"
 summary: "Serialization JSON, Protobuf"
+image:
+  path: /assets/img/thumb/Serialization.jpg
+  alt: Serialization 끄적이기 대표 이미지
 date:   2020-06-09 09:10 -0400
-categories: python
+categories: Basics
+tags:
+  - 파이썬
 ---
 
 ## Serialization

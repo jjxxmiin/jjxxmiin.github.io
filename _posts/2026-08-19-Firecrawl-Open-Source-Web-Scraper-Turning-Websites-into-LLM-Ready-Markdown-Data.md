@@ -3,6 +3,12 @@ layout: post
 title: 'Firecrawl: 웹사이트를 LLM 전용 마크다운 데이터로 변환하는 오픈소스 웹 스크래퍼'
 date: '2026-08-19 19:26:03'
 categories: Tech
+tags:
+  - API
+  - MCP
+  - RAG
+  - 컨텍스트윈도우
+  - LLM
 summary: Firecrawl은 복잡한 동적 웹사이트, PDF, 문서를 AI 모델이 바로 소비할 수 있는 깨끗한 마크다운과 구조화된 JSON 데이터로
   변환해주는 오픈소스 웹 데이터 API입니다. JavaScript 렌더링, 프록시 순환, 노이즈 제거를 자동으로 처리하여 RAG 파이프라인과 AI
   에디터 환경에서 토큰 소비를 대폭 줄이고 데이터 수집의 정확도를 향상시킵니다.

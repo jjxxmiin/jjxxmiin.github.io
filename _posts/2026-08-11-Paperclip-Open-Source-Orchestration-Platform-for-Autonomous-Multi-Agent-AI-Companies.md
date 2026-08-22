@@ -3,6 +3,12 @@ layout: post
 title: 'Paperclip: Claude Code와 OpenClaw 에이전트를 모아 무인 AI 기업을 가동하는 오픈소스 오케스트레이션 프레임워크'
 date: '2026-08-11 19:49:02'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - AI코딩
+  - API
+  - 멀티에이전트
 summary: Paperclip은 Claude Code, OpenClaw, Codex 등 서로 다른 AI 에이전트들을 하나의 조직으로 구성하여 자율적으로
   목표를 달성하도록 제어하는 오픈소스 오케스트레이션 플랫폼입니다. 조직도 기반 태스크 위임, 하트비트 주기 스케줄링, 예산 한도 제어, 인간 승인
   게이트를 통해 AI 에이전트 팀을 안전하고 효율적으로 운영할 수 있도록 돕습니다.

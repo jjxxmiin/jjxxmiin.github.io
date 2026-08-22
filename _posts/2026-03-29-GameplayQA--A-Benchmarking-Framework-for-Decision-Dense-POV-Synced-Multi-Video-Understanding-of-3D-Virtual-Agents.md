@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-25] 멀티모달 LLM이 FPS 게임에서 박살나는 이유: GameplayQA로 파헤치는 3D 에이전트 인지 한계와 아키텍처"
 date: '2026-03-29 04:31:02'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 아키텍처분석
+  - 환각문제
+  - 로보틱스
+  - 트랜스포머
 math: true
 summary: "MLLM의 3D 환경 인지 한계와 환각을 파헤치는 고밀도 POV 벤치마크 완벽 해부."
 image:

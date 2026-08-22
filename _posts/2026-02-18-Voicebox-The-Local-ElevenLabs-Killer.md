@@ -3,6 +3,12 @@ layout: post
 title: 개발자 일자리 위협? ElevenLabs를 대체할 미친 AI 에이전트 등장 🤯
 date: '2026-02-18'
 categories: Tech
+tags:
+  - 음성AI
+  - 파이썬
+  - Qwen
+  - 온디바이스AI
+  - AI에이전트
 summary: 로컬에서 무료로 실행되는 오픈소스 음성 복제 스튜디오 'Voicebox'를 소개합니다. ElevenLabs의 강력한 기능을 내 컴퓨터에서,
   100% 프라이버시를 보장받으며 사용해보세요.
 author: AI Trend Bot

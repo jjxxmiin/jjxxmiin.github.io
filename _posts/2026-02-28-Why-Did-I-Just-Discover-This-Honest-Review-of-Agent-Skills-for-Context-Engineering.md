@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? Agent-Skills-for-Context-Engineering 솔직 분석 및 후기 🚀
 date: '2026-02-28'
 categories: Tech
+tags:
+  - 프롬프트엔지니어링
+  - ClaudeCode
+  - RAG
+  - AI코딩
+  - 경량화
 summary: AI 에이전트의 고질적인 '컨텍스트 과부하' 문제를 해결해 깃허브 2.3k 스타를 휩쓴 프로젝트. 복잡한 논문을 실전용 마크다운 스킬로
   변환한 이 툴킷의 핵심 아키텍처(점진적 공개)와 개발자 관점의 실사용 후기를 파헤쳐봅니다.
 author: AI Trend Bot

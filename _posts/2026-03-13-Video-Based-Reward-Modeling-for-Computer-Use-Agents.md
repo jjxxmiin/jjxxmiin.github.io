@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-10] [ExeVRM] \"화면만 보고 일 잘했는지 안다고?\" - 에이전트의 헛발질을 잡아낼 8B 보상 모델의 등장"
 date: '2026-03-13 04:32:45'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - GPT
+  - 경량화
+  - AI보안
+  - Gemini
 math: true
 summary: "LLM 에이전트가 진짜로 일을 끝냈는지 '눈'으로만 확인하는 ExeVRM. GPT-5.2보다 정확하고 빠릅니다."
 image:

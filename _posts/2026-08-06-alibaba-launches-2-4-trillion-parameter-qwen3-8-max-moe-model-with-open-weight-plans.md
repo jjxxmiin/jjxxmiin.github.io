@@ -6,15 +6,20 @@ title: '알리바바 Qwen3.8-Max 공개: 2.4조 파라미터 MoE 모델과 무�
 date: 2026-08-06 10:57:00 +0900
 last_modified_at: 2026-08-06 10:57:00 +0900
 categories: Tech
+tags:
+  - Qwen
+  - 트랜스포머
+  - AI트렌드
+  - 컨텍스트윈도우
+  - AI코딩
 description: 알리바바가 2.4조 파라미터 규모의 Qwen3.8-Max를 공개했습니다. 100만 토큰 컨텍스트, 며칠간 지속되는 자율 코딩, $2/$6의 파격적 API 가격과 다음 주 오픈 웨이트 공개 소식까지 핵심 정보를 전달합니다.
 summary: 알리바바가 2026년 8월 3일 2.4조 파라미터 규모의 Mixture-of-Experts(MoE) 기반 초거대 AI 모델 Qwen3.8-Max를 정식 출시했습니다. 이 모델은 추론 시 950억 개의 활성 파라미터만 사용하며, 사람의 개입 없이 며칠씩 이어지는 복잡한 소프트웨어 엔지니어링 작업을 자율 수행할 수 있습니다. 알리바바는 다음 주 Qwen3.8-Max와 Qwen3.8-27B 두 모델의 오픈 웨이트(가중치)를 모두 공개할 예정입니다.
 article_type: NewsArticle
 seo:
   type: NewsArticle
 image:
-  path: /assets/img/logo.png
-  alt: '알리바바 Qwen3.8-Max 공개: 2.4조 파라미터 MoE 모델과 무인 코딩 시대의 시작'
-  creditText: OPSOAI
+  path: /assets/img/thumb/alibaba-launches-2-4-trillion-parameter-qwen3-8-max-moe-model-with-open-weight-plans.jpg
+  alt: "알리바바 Qwen3.8-Max 공개: 2.4조 파라미터 MoE 모델과 무인 코딩 시대의 시작 대표 이미지"
 news_headline: Alibaba Launches 2.4-Trillion Parameter Qwen3.8-Max with 16-Day Autonomous Coding Capability
 news_source_url: https://www.alibabacloud.com/blog/qwen3.8-max-a-new-bar-for-coding-and-cowork
 news_published_at: '2026-08-03'

@@ -3,6 +3,12 @@ layout: post
 title: 로컬 RAG의 게임 체인저? 알리바바가 공개한 '벡터판 SQLite' Zvec 완벽 분석
 date: '2026-02-23'
 categories: Tech
+tags:
+  - Qwen
+  - RAG
+  - 벡터DB
+  - 온디바이스AI
+  - 파이썬
 summary: 알리바바가 새롭게 오픈소스로 공개한 임베디드 벡터 데이터베이스 'Zvec'을 상세히 분석합니다. SQLite처럼 서버 없이 애플리케이션
   내부에서 작동하며, 프로덕션 레벨의 성능(Proxima 엔진)과 CRUD 기능을 모두 갖춘 이 도구의 설치법부터 사용법, 아키텍처까지 모든 것을
   다룹니다.

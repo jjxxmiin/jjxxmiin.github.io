@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-26] ShotStream 딥다이브: 단일 GPU로 16 FPS 실시간 멀티샷 비디오를 뽑아내는 인과적 아키텍처의 비밀"
 date: '2026-03-30 20:28:49'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 영상생성
+  - 경량화
+  - 파인튜닝
+  - 디퓨전모델
 math: true
 summary: "양방향 T2V의 무거운 지연 시간을 박살내다. 듀얼 캐시와 2단계 증류로 완성한 실시간 인터랙티브 비디오 스트리밍."
 image:

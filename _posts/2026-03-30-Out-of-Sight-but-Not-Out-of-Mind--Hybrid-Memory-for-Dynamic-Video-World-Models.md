@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-26] 비디오 생성 모델의 '금붕어 기억력'을 치료하다: HyDRA 아키텍처와 하이브리드 메모리 해부"
 date: '2026-03-30 05:09:31'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 아키텍처분석
+  - 트랜스포머
+  - 로보틱스
+  - 반도체
 math: true
 summary: "화면 밖으로 나간 객체가 다시 돌아올 때 발생하는 '증발 현상'을 해결한 HyDRA. 단순 캐싱을 넘어선 Top-K 메모리 리트리벌 기법을 실무 관점에서 뜯어봅니다."
 image:

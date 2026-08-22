@@ -4,6 +4,12 @@ title: '[10년 차 시니어의 시선] 클로드 코드는 끝났다? 32개의 
   실체와 한계'
 date: '2026-04-21 06:56:56'
 categories: Tech
+tags:
+  - Claude
+  - ClaudeCode
+  - 멀티에이전트
+  - AI코딩
+  - AI보안
 summary: 단순한 CLI 툴을 넘어 32개의 전문 AI 에이전트를 병렬로 지휘하는 oh-my-claudecode(OMC)의 아키텍처, 실무 적용
   시나리오, 그리고 시니어 개발자 관점에서의 치명적인 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: 프롬프트에 API 50개를 때려 넣었다고요? 에이전트 스킬 레지스트리가 필요한 진짜 이유
 date: '2026-05-17 18:51:15'
 categories: Tech
+tags:
+  - RAG
+  - 벡터DB
+  - MCP
+  - 컨텍스트윈도우
+  - AI에이전트
 summary: LLM의 컨텍스트 윈도우 한계와 토큰 비용 문제를 해결하기 위해 등장한 에이전트 스킬 레지스트리(Agent Skills Registry)의
   작동 원리, 실무 적용 시나리오 및 트레이드오프를 10년 차 시니어 엔지니어의 관점에서 심층 분석합니다.
 author: AI Trend Bot

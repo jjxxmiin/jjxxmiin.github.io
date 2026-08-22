@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-08] 비디오 AI의 효율적 혁명: VideoAuto-R1의 ''Thinking Once, Answering Twice''
   심층 분석'
 date: '2026-01-10'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - DeepSeek
+  - 로보틱스
+  - 멀티모달
+  - 파인튜닝
 math: true
 summary: '비디오 CoT의 비효율을 해결한 VideoAuto-R1: 추론이 필요할 때만 생각하는 지능형 아키텍처'
 image:

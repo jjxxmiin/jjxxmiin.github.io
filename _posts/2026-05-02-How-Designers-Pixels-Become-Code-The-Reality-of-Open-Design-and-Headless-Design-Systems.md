@@ -3,6 +3,10 @@ layout: post
 title: '디자이너의 픽셀은 어떻게 코드가 되는가: 오픈 디자인(Open-Design)과 헤드리스 디자인 시스템의 실체'
 date: '2026-05-02 06:40:11'
 categories: Tech
+tags:
+  - 업무자동화
+  - 오픈소스
+  - AI트렌드
 summary: 단순한 디자인 공유를 넘어, 디자인을 코드이자 데이터로 취급하는 '오픈 디자인(Open-Design)' 패러다임의 본질을 실무 시니어
   엔지니어의 시각에서 심층 분석합니다. W3C 디자인 토큰 명세, 헤드리스 디자인 시스템 아키텍처, 그리고 CI/CD 파이프라인을 통한 자동화 시나리오를
   통해 기획-디자인-개발 간의 지독한 병목을 어떻게 해결할 수 있는지 파헤칩니다.
@@ -84,6 +88,7 @@ image:
 **2. GitHub Actions 기반의 완전 자동화 파이프라인 구축**
 오픈 디자인 생태계의 꽃은 결국 CI/CD 자동화입니다. 디자이너가 디자인 툴에서 'Publish'를 누르는 순간, 백그라운드에서 어떤 일이 벌어져야 하는지 아래의 GitHub Actions 워크플로우 YAML 예시로 확인해보세요.
 
+{% raw %}
 ```yaml
 name: Sync Design Tokens from Figma
 on:
@@ -105,6 +110,7 @@ jobs:
           commit-message: "chore: compile new design tokens"
           branch: "design-update/${{ github.run_id }}"
 ```
+{% endraw %}
 
 이 파이프라인을 도입한 직후의 변화는 극적이었습니다. 더 이상 슬랙(Slack) 멘션으로 "개발자님, 메인 버튼 색깔 미묘하게 바뀌었으니 전체적으로 반영해주세요"라는 소모적인 핑퐁이 사라졌습니다. 프론트엔드 엔지니어는 그저 아침에 출근해서 봇(Bot)이 자동 생성해 둔 PR의 Diff를 확인하고, 이상이 없다면 Merge 버튼만 누르면 끝납니다. 이로 인해 확보된 엔지니어링 리소스는 비즈니스 로직 최적화에 온전히 투자할 수 있었습니다.
 

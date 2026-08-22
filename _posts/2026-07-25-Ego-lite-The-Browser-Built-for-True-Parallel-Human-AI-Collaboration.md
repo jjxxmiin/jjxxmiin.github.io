@@ -3,6 +3,10 @@ layout: post
 title: 'Ego-lite: AI 에이전트와 화면을 다투지 않고 완벽하게 병렬로 일하는 브라우저'
 date: '2026-07-25 04:29:23'
 categories: Tech
+tags:
+  - AI코딩
+  - 멀티모달
+  - AI에이전트
 summary: Ego-lite는 사람과 AI가 로그인 상태를 공유하며 방해 없이 동시에 일할 수 있게 설계된 크로미움 기반 브라우저입니다. 화면
   탈취나 복잡한 인증 설정 없이 쾌적한 병렬 작업 환경을 제공합니다.
 author: AI Trend Bot

@@ -3,6 +3,9 @@ layout: post
 title: 'Redux는 죽었다? 아니, RTK로 독기를 품고 돌아왔다: 10년 차가 뜯어본 상태 관리의 끝판왕'
 date: '2026-05-19 08:51:54'
 categories: Tech
+tags:
+  - 경량화
+  - AI트렌드
 summary: 보일러플레이트의 지옥이었던 Redux가 RTK(Redux Toolkit)와 RTK Query를 무기로 어떻게 프론트엔드 상태 관리의
   패러다임을 다시 장악했는지, 그 아키텍처의 밑바닥과 실무적 한계까지 철저히 해부합니다.
 author: AI Trend Bot

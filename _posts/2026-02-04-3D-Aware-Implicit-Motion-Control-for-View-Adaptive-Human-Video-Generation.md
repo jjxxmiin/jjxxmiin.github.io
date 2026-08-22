@@ -3,7 +3,12 @@ layout: post
 title: '[2026-02-03] [심층 분석] 3DiMo: 2D의 한계를 넘어 3D 인식형 임플리시트 모션 제어로 진화하는 인간 비디오 생성
   기술'
 date: '2026-02-04'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 아키텍처분석
+  - 디퓨전모델
+  - 트랜스포머
 math: true
 summary: SMPL의 제약을 탈피한 3D 인식형 모션 제어 모델 3DiMo의 기술적 혁신과 파급력 분석
 image:
@@ -38,12 +43,7 @@ image:
 
 3DiMo의 핵심 아키텍처는 크게 **모션 인코더(Motion Encoder)**와 **DiT(Diffusion Transformer) 기반 생성기**로 구성됩니다.
 
-![Figure 2:Overview of 3DiMo.Our framework consists of end-to-end trained motion encoders—ℰb\mathcal{E}_{b}for the body andℰh\mathcal{E}_{h}for hands—and an DiT-based video generator.
-Given a reference frame𝑰R\bm{I}_{R}and a driving video𝑽D\bm{V}_{D}, driving frames are first augmented with random perspective transformations before being encoded by the motion encoder to extract view-agnostic motion representations.
-These resulting features are then injected into the generator through cross-attention, enabling the model to synthesize a target sequence𝑽tgt\bm{V}_{\mathrm{tgt}}that reenacts the same underlying 3D motion while preserving flexible text-driven camera control.
-To facilitate 3D-aware learning, we introduce early-stage auxiliary geometric supervision by regressing the encoded motion to external parametric reconstruction resultsθb\theta_{b}andθh\theta_{h}.
-During training, view-rich data is used to jointly supervise same-view reconstruction and cross-view motion reproduction, driving the emergence of expressive and 3D-aware motion representations.
-At inference, motion tokens extracted directly from 2D driving frames provide rich 3D spatial cues that can animate any reference character, supporting high-fidelity and view-adaptive motion-controlled video generation.](/assets/img/papers/2602.03796/x2.png)
+![Figure 2: Overview of 3DiMo. Our framework consists of end-to-end trained motion encoders— b E for the body and h E for hands](/assets/img/papers/2602.03796/x2.png)
 *그림 1: 3DiMo의 전체 오버뷰. 모션 인코더와 DiT 생성기가 결합되어 뷰-애그노스틱 모션 토큰을 생성하고 주입하는 과정을 보여줍니다.*
 
 ### 3.1 듀얼 모션 인코더 ($\mathcal{E}_b, \mathcal{E}_h$)

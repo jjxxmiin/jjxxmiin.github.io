@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Matrix"
 date:   2022-03-08 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetMatrix.jpg
+  alt: DarkNet 시리즈 - Matrix 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

@@ -3,6 +3,12 @@ layout: post
 title: AI가 스스로 회의하고 코딩하는 시대? 'Agency Agents'의 진짜 의미와 생태계 (현직 개발자의 딥다이브)
 date: '2026-03-06 06:23:08'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - ChatGPT
+  - 멀티에이전트
+  - 벡터DB
 summary: 단순한 챗봇을 넘어 스스로 목표를 세우고, 도구를 사용하며, 다른 AI와 협업하는 'Agency Agents(에이전시 에이전트)'의
   기술적 원리, 실제 적용 사례, 그리고 현직 개발자가 느끼는 한계점까지 완벽하게 파헤쳐봅니다.
 author: AI Trend Bot

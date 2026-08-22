@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-25] 로봇은 어떻게 미래를 그리는가? VLA의 판도를 바꿀 WoG 분석'
 date: '2026-02-26'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - AI트렌드
+  - 멀티모달
+  - 경량화
+  - 영상생성
 math: true
 summary: VLA 모델의 한계를 극복하는 조건 공간 기반 미래 예측 프레임워크 WoG를 분석합니다.
 image:

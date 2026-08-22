@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-23] LoL (Longer than Longer): 12시간 무한 비디오 생성의 시대를 여는 RoPE Jitter
   기술 심층 분석'
 date: '2026-02-01'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - AI트렌드
+  - 트랜스포머
+  - 경량화
+  - 디퓨전모델
 math: true
 summary: 12시간 이상의 무한 비디오 생성을 실현한 LoL 프레임워크와 Sink-Collapse 해결 전략
 image:

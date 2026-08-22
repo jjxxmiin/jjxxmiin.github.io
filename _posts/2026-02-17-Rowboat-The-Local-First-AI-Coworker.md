@@ -3,6 +3,12 @@ layout: post
 title: 개발자 취업 위기? 기억력 천재 AI 동료 'Rowboat' 등장! (RAG를 넘어선 '진짜' 기억)
 date: '2026-02-17'
 categories: Tech
+tags:
+  - Google
+  - 벡터DB
+  - MCP
+  - RAG
+  - ChatGPT
 summary: 단순한 챗봇이 아닙니다. 당신의 이메일과 회의록을 읽고 '지식 그래프'를 구축하여 문맥을 이해하는 로컬 AI 동료 Rowboat를
   소개합니다. 설치부터 아키텍처 분석까지 완벽 정리!
 author: AI Trend Bot

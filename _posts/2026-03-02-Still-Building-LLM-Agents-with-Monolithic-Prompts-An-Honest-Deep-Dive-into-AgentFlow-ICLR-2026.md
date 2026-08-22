@@ -3,6 +3,12 @@ layout: post
 title: LLM 에이전트, 아직도 통짜 프롬프트로 짜세요? ICLR 2026 씹어먹은 'AgentFlow' 솔직 분석 ☕️
 date: '2026-03-02 18:37:04'
 categories: Tech
+tags:
+  - 강화학습
+  - 컨텍스트윈도우
+  - 파인튜닝
+  - AI에이전트
+  - LLM
 summary: 통합된 단일 LLM에 의존하던 기존 에이전트의 한계를 넘어, 4개의 전문 모듈(Planner, Executor, Verifier,
   Generator)로 역할을 분담하고 Flow-GRPO를 통해 실시간 최적화를 수행하는 혁신적인 프레임워크 'AgentFlow'의 핵심 기술과
   실효성을 현직 개발자의 시선에서 분석합니다.

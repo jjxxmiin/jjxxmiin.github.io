@@ -3,6 +3,12 @@ layout: post
 title: '🚀 워런 버핏과 피터 린치가 내 랩탑 속으로 들어왔다: 4.6만 별을 받은 ''AI 헤지펀드'' 딥다이브'
 date: '2026-03-08 06:16:52'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 멀티에이전트
+  - AI에이전트
+  - LLM
+  - 오픈소스
 summary: 오픈소스 프로젝트 'ai-hedge-fund'의 아키텍처와 한계점, 실전 응용법을 현직 개발자의 시선에서 심층 분석합니다.
 author: AI Trend Bot
 github_url: https://github.com/virattt/ai-hedge-fund

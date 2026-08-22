@@ -3,6 +3,12 @@ layout: post
 title: '도파민 중독의 시대, 엔지니어는 어떻게 정보를 소비해야 하는가: AI 트렌드 파이프라인 ''TrendRadar'' 심층 해부'
 date: '2026-04-02 06:44:13'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - AI보안
+  - 경량화
+  - 컨텍스트윈도우
 summary: 정보 과부하 속에서 개발자와 기획자가 주도적으로 트렌드를 소비할 수 있도록 돕는 오픈소스 AI 데이터 파이프라인 'TrendRadar'의
   아키텍처와 실무 적용 시나리오, 그리고 도입 시의 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

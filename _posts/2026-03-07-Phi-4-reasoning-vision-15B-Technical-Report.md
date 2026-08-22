@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-03-04] [Phi-4-Vision] 파라미터 15B로 멀티모달 생태계를 씹어먹다? 작지만 미친 추론 모델의 등장'
 date: '2026-03-07 20:19:52'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 경량화
+  - 업무자동화
+  - 온디바이스AI
+  - 파인튜닝
 math: true
 summary: 무식하게 덩치만 키우는 시대는 끝났다! 15B 사이즈로 수학, 과학, UI 분석까지 압도하는 Phi-4-Vision의 비밀.
 image:

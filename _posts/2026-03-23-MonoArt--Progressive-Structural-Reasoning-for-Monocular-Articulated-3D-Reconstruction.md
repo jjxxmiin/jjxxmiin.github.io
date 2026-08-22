@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-19] 📸 사진 한 장으로 관절 꺾이는 3D 에셋을 뽑는다고? MonoArt의 미친 추론 파이프라인 파헤치기"
 date: '2026-03-23 20:17:02'
-categories: tech
+categories: Tech
+tags:
+  - 3D생성
+  - 로보틱스
+  - 영상생성
+  - 트랜스포머
+  - 경량화
 math: true
 summary: "단일 이미지에서 3D 관절 객체를 추론하는 MonoArt. 무거운 비디오 생성 없이 빠르고 안정적인 파이프라인의 비밀."
 image:

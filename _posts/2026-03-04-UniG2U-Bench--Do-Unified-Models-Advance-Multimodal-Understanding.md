@@ -3,7 +3,11 @@ layout: post
 title: '[2026-03-03] [Paper Review] 그림 잘 그리는 AI가 똑똑할 거라는 착각: UniG2U-Bench가 밝힌 불편한
   진실 📉'
 date: '2026-03-04 04:33:46'
-categories: tech
+categories: Tech
+tags:
+  - 논문리뷰
+  - 멀티모달
+  - 로보틱스
 math: true
 summary: Unified 모델이 만능일까? 생성 능력이 이해력을 높여주는지 검증한 UniG2U-Bench 리뷰. 결과는 충격적인 역주행?
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-05] NextFlow: 6조 개 토큰으로 완성된 차세대 통합 멀티모달 혁명 - 텍스트와 이미지의 경계를 허물다'
 date: '2026-01-06'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 디퓨전모델
+  - 이미지생성
+  - 트랜스포머
+  - 강화학습
 math: true
 summary: 'NextFlow: 5초 만에 고해상도 이미지를 생성하는 통합 AR 모델의 등장'
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-27] 비디오 생성 AI의 고질병 '멀미'를 고쳤다? VGGRPO: 잠재 공간 4D 보상으로 공간 일관성 멱살 잡기"
 date: '2026-04-01 20:25:48'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 강화학습
+  - 디퓨전모델
+  - 파인튜닝
+  - 경량화
 math: true
 summary: "VAE 디코딩의 악랄한 연산 비용을 통째로 날려버리고, 잠재 공간(Latent Space)에서 직접 4D 기하학 보상을 계산하는 VGGRPO 아키텍처 완벽 해부."
 image:
@@ -10,12 +16,7 @@ image:
   alt: Paper Thumbnail
 ---
 
----
-link: https://arxiv.org/abs/2603.26599
-github: N/A
-date: 2026-04-02
-authors: VGGRPO Authors
----
+> **논문 링크:** [arXiv:2603.26599](https://arxiv.org/abs/2603.26599)
 
 솔직히 최근에 나온 비디오 생성 AI(Sora, Kling, Runway 등) 써보면서 '멀미' 안 나본 분 계신가요? 처음 1~2초는 기가 막힙니다. 그런데 피사체가 고개를 돌리거나 카메라가 패닝(Panning)을 시작하는 순간, 배경 건물이 엿가락처럼 휘어지고 캐릭터의 팔다리 비율이 붕괴되죠. 
 

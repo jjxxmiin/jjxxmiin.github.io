@@ -2,8 +2,14 @@
 layout: post  
 title: "Soft Teacher 톺아보기: 반지도 객체 탐지의 새로운 기준"  
 summary: "Soft Teacher는 반지도 학습을 활용한 객체 탐지 기법으로, 라벨이 부족한 데이터에서도 높은 성능을 달성하는 엔드-투-엔드 학습 방식"  
+image:
+  path: /assets/img/thumb/SoftTeacher.jpg
+  alt: "Soft Teacher 톺아보기: 반지도 객체 탐지의 새로운 기준 대표 이미지"
 date: 2025-02-14 16:00 -0400  
-categories: paper
+categories: Paper
+tags:
+  - 컴퓨터비전
+  - 논문리뷰
 math: true  
 ---
 

@@ -3,6 +3,12 @@ layout: post
 title: 'cc-switch: 여러 AI 코딩 도구의 API 설정과 프로바이더를 한곳에서 관리하는 데스크톱 제어 센터'
 date: '2026-08-17 19:30:47'
 categories: Tech
+tags:
+  - AI코딩
+  - Claude
+  - ClaudeCode
+  - API
+  - Gemini
 summary: cc-switch는 Claude Code, OpenAI Codex, Gemini CLI 등 다양한 AI 코딩 도구의 프로바이더 설정과
   API 키를 통합 관리하는 오픈소스 데스크톱 애플리케이션입니다. 로컬 프록시 게이트웨이, 자동 페일오버, 원자적 파일 쓰기 기능을 통해 복잡한
   CLI 환경 설정을 손쉽게 제어할 수 있습니다.

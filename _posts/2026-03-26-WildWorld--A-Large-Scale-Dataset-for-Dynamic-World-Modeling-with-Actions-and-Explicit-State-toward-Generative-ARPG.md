@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-24] 몬스터 헌터가 AI 월드 모델을 구원한다고? 픽셀의 한계를 부수는 WildWorld 데이터셋 해부"
 date: '2026-03-26 20:27:16'
-categories: tech
+categories: Tech
+tags:
+  - 월드모델
+  - 아키텍처분석
+  - 멀티모달
+  - 영상생성
+  - 로보틱스
 math: true
 summary: "픽셀 앵무새로 전락한 비디오 AI, '명시적 상태(State)'를 주입해 진짜 물리 법칙을 가르치다."
 image:

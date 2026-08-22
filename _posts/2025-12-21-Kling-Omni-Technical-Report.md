@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-18] Kling-Omni 기술 심층 분석: 멀티모달 입력을 통한 시네마틱 비디오 생성의 혁명'
 date: '2025-12-21'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 영상생성
+  - 아키텍처분석
+  - 경량화
+  - 트랜스포머
 math: true
 summary: 시네마틱 품질과 추론 능력을 갖춘 통합 비디오 생성 모델 Kling-Omni의 모든 것
 image:

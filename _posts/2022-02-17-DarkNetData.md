@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Data"
 date:   2022-02-17 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetData.jpg
+  alt: DarkNet 시리즈 - Data 대표 이미지
+tags:
+  - DarkNet
+  - YOLO
+  - 컴퓨터비전
 math: true
 ---
 

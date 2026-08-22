@@ -3,6 +3,12 @@ layout: post
 title: 'addyosmani/agent-skills: AI 코딩 에이전트에게 시니어 개발자의 업무 방식을 가르치다'
 date: '2026-07-16 21:18:42'
 categories: Tech
+tags:
+  - AI코딩
+  - AI보안
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - AI에이전트
 summary: 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항
   명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스 워크플로우입니다.
 author: AI Trend Bot

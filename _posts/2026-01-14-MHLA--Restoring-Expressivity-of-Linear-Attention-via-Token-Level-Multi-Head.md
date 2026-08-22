@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-12] [혁신적 분석] MHLA: 선형 어텐션의 표현력 한계를 돌파한 토큰 레벨 멀티헤드 기술 심층 탐구'
 date: '2026-01-14'
-categories: tech
+categories: Tech
+tags:
+  - 트랜스포머
+  - 영상생성
+  - 디퓨전모델
+  - 멀티모달
+  - 온디바이스AI
 math: true
 summary: 선형 어텐션의 성능 저하와 컨텍스트 붕괴 문제를 해결한 MHLA 아키텍처 심층 분석
 image:

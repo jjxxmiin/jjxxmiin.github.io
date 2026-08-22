@@ -3,6 +3,12 @@ layout: post
 title: 'Mevid 아키텍처 깊어보기: 멀티뷰 비디오 Re-ID의 한계를 깬 실전 파이프라인'
 date: '2026-03-19 06:32:05'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 컴퓨터비전
+  - 벡터DB
+  - 온디바이스AI
+  - 트랜스포머
 summary: 단순한 데이터셋을 넘어, 실무의 멀티뷰 비디오 추론(Re-ID) 병목과 VRAM 메모리 누수 문제를 트랙릿 기반 반자동화 파이프라인으로
   해결한 Mevid(MEVID) 프레임워크의 내부 아키텍처와 한계점을 10년 차 시니어 개발자의 시선에서 날카롭게 해부합니다.
 author: AI Trend Bot

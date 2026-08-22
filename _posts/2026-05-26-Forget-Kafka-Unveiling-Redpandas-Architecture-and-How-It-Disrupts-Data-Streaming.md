@@ -3,6 +3,10 @@ layout: post
 title: 카프카(Kafka)는 잊어라? 10배 빠른 'Redpanda'가 데이터 스트리밍의 판을 엎는 아키텍처의 비밀
 date: '2026-05-26 08:49:53'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - 오픈소스
+  - AI트렌드
 summary: JVM과 주키퍼(ZooKeeper)의 무거운 굴레에서 벗어나, C++과 Seastar 프레임워크로 무장한 Redpanda. 현업 10년
   차 시니어 엔지니어의 시선으로 바라본 성능의 실체와 '스레드 당 코어(Thread-per-Core)' 아키텍처, 그리고 뼈아픈 트레이드오프까지
   낱낱이 파헤칩니다.

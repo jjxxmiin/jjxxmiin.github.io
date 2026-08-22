@@ -3,6 +3,12 @@ layout: post
 title: 🚨 RAG만 붙이면 끝인 줄 알았죠? 실무에서 뼈맞고 도입한 GraphRAG 밑바닥 파헤치기
 date: '2026-05-28 19:04:26'
 categories: Tech
+tags:
+  - GPT
+  - RAG
+  - 벡터DB
+  - MLOps
+  - 경량화
 summary: 기존 Vector 기반 RAG의 한계인 문맥 단절과 환각(Hallucination) 현상을 극복하기 위해 GraphRAG를 실무에
   도입하며 겪은 치열한 고민, 아키텍처의 차이, 비용 최적화 및 트러블슈팅 경험을 10년 차 엔지니어의 시선으로 철저히 파헤칩니다.
 author: AI Trend Bot

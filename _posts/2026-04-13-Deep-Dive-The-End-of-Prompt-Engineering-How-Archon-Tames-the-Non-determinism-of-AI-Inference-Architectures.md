@@ -3,6 +3,12 @@ layout: post
 title: '[Deep Dive] 프롬프트 엔지니어링의 종말: Archon, AI 추론 아키텍처의 비결정성을 통제하다'
 date: '2026-04-13 18:37:35'
 categories: Tech
+tags:
+  - GPT
+  - 아키텍처분석
+  - 프롬프트엔지니어링
+  - AI코딩
+  - 멀티에이전트
 summary: 단일 LLM 호출의 비결정성(Non-deterministic) 한계를 극복하기 위해, 다양한 모델과 추론 기법(생성, 비평, 융합
   등)을 조합하여 최적의 파이프라인을 구축하는 Archon 프레임워크의 심층 분석과 실무 적용 시나리오.
 author: AI Trend Bot

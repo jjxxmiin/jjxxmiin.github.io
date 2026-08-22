@@ -3,6 +3,12 @@ layout: post
 title: AI 에이전트가 갑자기 '멍청'해지는 이유? 이제 '맥락 공학(Context Engineering)'이 답입니다
 date: '2026-02-24'
 categories: Tech
+tags:
+  - Claude
+  - 컨텍스트윈도우
+  - ClaudeCode
+  - 프롬프트엔지니어링
+  - RAG
 summary: 100만 토큰 시대에도 AI가 기억을 잃는 이유를 해결하는 'Agent Skills for Context Engineering' 완벽
   가이드. 프롬프트 엔지니어링을 넘어, 에이전트가 스스로 맥락을 관리하게 만드는 혁신적인 방법을 소개합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: '[2025-12-23] LongVideoAgent: 멀티 에이전트 추론과 강화학습으로 여는 장시간 비디오 이해의 새로운 지평'
 date: '2025-12-26'
-categories: tech
+categories: Tech
+tags:
+  - 강화학습
+  - 멀티에이전트
+  - GPT
+  - 멀티모달
+  - Gemini
 math: true
 summary: 장시간 비디오 분석의 한계를 극복하는 멀티 에이전트 협업 및 RL 기반의 혁신적 프레임워크
 image:

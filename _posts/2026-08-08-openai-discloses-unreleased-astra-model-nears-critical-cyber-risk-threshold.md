@@ -6,6 +6,11 @@ title: OpenAI 차세대 모델 Astra, '치명적' 사이버 위험 평가로 개
 date: 2026-08-08 10:05:51 +0900
 last_modified_at: 2026-08-08 10:05:51 +0900
 categories: Tech
+tags:
+  - OpenAI
+  - AI안전
+  - AI보안
+  - AI에이전트
 description: OpenAI의 미공개 AI 모델 Astra가 자체 안전 평가에서 최고 수준인 '치명적' 사이버보안 위험 등급에 도달할 수 있음이 확인되었습니다. 강화된 보안 절차에 따라 일부 내부 활동이 일시 중단되었습니다.
 summary: OpenAI는 미공개 프론티어 모델 Astra가 자체 준비태스크 프레임워크상 '치명적(Critical)' 사이버보안 위험 등급에 도달할 수 있다고 공개했습니다. 자율적 제로데이 취약점 발견 및 연쇄 공격 능력이 확인됨에 따라, OpenAI는 새롭게 강화된 보안 제어 요건을 충족할 때까지 관련 내부 작업을 일시 중단했습니다.
 article_type: NewsArticle

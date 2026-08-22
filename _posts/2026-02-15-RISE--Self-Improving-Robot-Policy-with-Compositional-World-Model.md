@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-11] 로봇 지능의 비약적 도약: RISE, ''상상력''을 통한 자가 개선 정책과 구성적 세계 모델 심층 분석'
 date: '2026-02-15'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 월드모델
+  - 아키텍처분석
+  - 강화학습
+  - 디퓨전모델
 math: true
 summary: '상상하는 세계 모델로 로봇의 한계를 넘다: RISE 논문 심층 분석.'
 image:

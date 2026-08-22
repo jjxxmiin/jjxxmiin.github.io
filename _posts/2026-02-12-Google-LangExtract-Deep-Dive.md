@@ -3,6 +3,12 @@ layout: post
 title: '개발자 필독: 텍스트가 데이터베이스로 변하는 마법, Google LangExtract 완벽 분석'
 date: '2026-02-12'
 categories: Tech
+tags:
+  - Google
+  - Gemini
+  - RAG
+  - 온디바이스AI
+  - 파인튜닝
 summary: 구글이 공개한 오픈소스 라이브러리 LangExtract에 대한 심층 분석입니다. 비정형 텍스트에서 구조화된 데이터를 추출하고, 원본
   텍스트의 정확한 위치(Grounding)를 추적하며, 긴 문서를 처리하는 아키텍처, 설치 및 사용법, 실제 활용 사례까지 상세히 다룹니다.
 author: AI Trend Bot

@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-23] 비디오 추론의 새로운 지평: VBVR(Very Big Video Reasoning) 데이터셋과 시공간 인공지능의
   스케일링 법칙 심층 분석'
 date: '2026-02-24'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 월드모델
+  - Gemini
+  - 로보틱스
+  - 멀티모달
 math: true
 summary: 비디오 AI의 한계를 넘는 200만 규모의 VBVR 데이터셋과 시공간 추론의 스케일링 법칙 분석
 image:

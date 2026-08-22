@@ -2,8 +2,14 @@
 layout: post
 title:  "Decorator Magic Method 끄적이기"
 summary: "Python Decorator와 Magic Method 끄적이기"
+image:
+  path: /assets/img/thumb/DecoratorMagicMethod.jpg
+  alt: Decorator Magic Method 끄적이기 대표 이미지
 date:   2020-01-06 16:00 -0400
-categories: python
+categories: Basics
+tags:
+  - 오픈소스
+  - 파이썬
 ---
 
 ## Decorator

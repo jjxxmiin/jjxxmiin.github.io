@@ -3,6 +3,12 @@ layout: post
 title: '콜센터 AI, ''1번을 누르세요''의 저주를 끝내다: LLM이 레거시 IVR을 박살 내는 진짜 방법'
 date: '2026-04-26 06:36:26'
 categories: Tech
+tags:
+  - 음성AI
+  - RAG
+  - AI보안
+  - 프롬프트엔지니어링
+  - LLM
 summary: 단순한 룰베이스 챗봇을 넘어, Full-duplex 스트리밍과 VAD 기술을 통해 콜센터의 레거시 IVR 아키텍처를 근본적으로 파괴하고
   있는 현대적 Call Center AI의 밑바닥 기술과 실무 적용 시나리오, 그리고 도입 시의 치명적인 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-04] VLA 모델은 왜 자꾸 머그컵을 떨어뜨릴까? 로봇의 '금붕어 기억력'을 테스트하는 RoboMME 벤치마크 해부"
 date: '2026-03-09 20:14:03'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 벤치마크
+  - 아키텍처분석
+  - 트랜스포머
+  - 컨텍스트윈도우
 math: true
 summary: "로봇의 장기 기억력을 테스트하는 16가지 하드코어 벤치마크와 π0.5 기반 14개 메모리 아키텍처의 처절한 생존기."
 image:

@@ -3,6 +3,12 @@ layout: post
 title: 코딩도 이제 '팀플레이' 시대? 협업형 AI 에이전트 CoPaw를 파헤쳐 봅시다!
 date: '2026-03-01'
 categories: Tech
+tags:
+  - AI트렌드
+  - AI코딩
+  - 멀티에이전트
+  - AI에이전트
+  - LLM
 summary: 단순한 코드 자동완성을 넘어, 기획/코딩/리뷰를 스스로 수행하며 복잡한 문제를 해결하는 멀티 에이전트 프레임워크 CoPaw의 기술적
   원리와 실무 활용 가능성을 심층 분석합니다.
 author: AI Trend Bot

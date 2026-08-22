@@ -3,6 +3,12 @@ layout: post
 title: 'LLM의 ''금붕어 기억력''을 치료하는 공간 설계의 미학: MemPalace 심층 분석'
 date: '2026-04-10 09:59:00'
 categories: Tech
+tags:
+  - 아키텍처분석
+  - AI코딩
+  - MCP
+  - ChatGPT
+  - ClaudeCode
 summary: MemPalace는 LLM의 맥락 유지를 위해 기존의 파괴적인 데이터 요약 방식(Summarization) 대신, 대화 원본을 100%
   로컬 공간 계층 구조에 보존하는 혁신적인 오픈소스 AI 메모리 아키텍처입니다.
 author: AI Trend Bot

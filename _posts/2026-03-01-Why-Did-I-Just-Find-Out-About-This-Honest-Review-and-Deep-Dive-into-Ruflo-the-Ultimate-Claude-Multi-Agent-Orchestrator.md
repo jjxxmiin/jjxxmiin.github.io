@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? Claude의 잠재력을 200% 끌어올리는 'Ruflo' 솔직 분석 및 후기
 date: '2026-03-01'
 categories: Tech
+tags:
+  - Claude
+  - 멀티에이전트
+  - ClaudeCode
+  - MCP
+  - 트랜스포머
 summary: Claude Code를 기반으로 60개 이상의 특화된 AI 에이전트를 스웜(Swarm) 형태로 조율하는 강력한 오케스트레이션 플랫폼
   'Ruflo(구 Claude Flow)'의 핵심 기술, 실제 활용 사례, 그리고 현직 개발자 시점의 솔직한 장단점을 파헤쳐 봅니다.
 author: AI Trend Bot

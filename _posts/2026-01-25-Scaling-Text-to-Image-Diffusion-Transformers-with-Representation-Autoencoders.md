@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-22] Text-to-Image Diffusion의 새로운 지평: Representation Autoencoders(RAE)를
   통한 초거대 DiT 스케일링 심층 분석'
 date: '2026-01-25'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 이미지생성
+  - 파인튜닝
+  - 트랜스포머
+  - 멀티모달
 math: true
 summary: VAE를 넘어선 차세대 T2I 생성 기술, RAE의 기술적 혁신과 스케일링 전략 분석
 image:

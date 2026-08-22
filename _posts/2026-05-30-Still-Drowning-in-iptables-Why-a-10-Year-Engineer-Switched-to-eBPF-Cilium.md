@@ -3,6 +3,9 @@ layout: post
 title: 🔥 "아직도 iptables 늪에서 허우적대나요?" 10년 차 엔지니어가 eBPF(Cilium)로 갈아탄 진짜 이유
 date: '2026-05-30 18:53:55'
 categories: Tech
+tags:
+  - 인프라
+  - AI트렌드
 summary: 수천 개의 iptables 룰로 인해 네트워크 병목을 겪는 쿠버네티스의 한계를 파헤치고, 커널 레벨에서 패킷을 O(1)로 제어하는
   eBPF와 Cilium의 동작 원리 및 실무 도입 트레이드오프를 심층 분석합니다.
 author: AI Trend Bot

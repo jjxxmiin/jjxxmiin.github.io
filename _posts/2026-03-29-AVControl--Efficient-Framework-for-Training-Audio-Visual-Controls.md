@@ -2,7 +2,12 @@
 layout: post
 title: "[2026-03-25] AVControl: 무겁고 뚱뚱한 비디오 생성 모델은 가라, LoRA 하나로 오디오-비주얼 컨트롤 끝내는 법"
 date: '2026-03-29 20:31:37'
-categories: tech
+categories: Tech
+tags:
+  - 파인튜닝
+  - 영상생성
+  - 트랜스포머
+  - 컨텍스트윈도우
 math: true
 summary: "LTX-2 기반 병렬 캔버스(Parallel Canvas)로 아키텍처 변경 없이 LoRA만 꽂아서 비디오/오디오 제어하는 프레임워크 해부"
 image:

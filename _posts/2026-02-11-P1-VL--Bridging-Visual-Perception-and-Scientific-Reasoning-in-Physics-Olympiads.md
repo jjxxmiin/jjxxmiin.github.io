@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-10] P1-VL: 물리 올림피아드 정복을 위한 시각-논리 통합 인공지능의 탄생 (SOTA VLM 분석)'
 date: '2026-02-11'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - Gemini
+  - 강화학습
+  - 트랜스포머
+  - DeepSeek
 math: true
 summary: 시각적 인지와 물리 법칙을 결합해 AI 추론의 한계를 넘는 P1-VL 모델 심층 분석
 image:

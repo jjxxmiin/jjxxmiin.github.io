@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-02-28] [DreamWorld] Sora도 울고 갈 물리법칙의 이해? 비디오 생성 AI의 '월드 모델'이 진짜 중요한 이유"
 date: '2026-03-08 04:22:41'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 월드모델
+  - 로보틱스
+  - MLOps
+  - Qwen
 math: true
 summary: "단순 픽셀 생성을 넘어 3D 물리법칙과 시간적 일관성을 깨우친 비디오 AI 모델, DreamWorld의 등장."
 image:

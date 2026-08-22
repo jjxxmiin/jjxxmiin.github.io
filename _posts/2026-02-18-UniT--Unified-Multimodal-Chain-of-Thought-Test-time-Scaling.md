@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-12] UniT: 통합 멀티모달 모델의 사고 연쇄(CoT)와 추론 시간 스케일링의 혁신적 분석'
 date: '2026-02-18'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - 이미지생성
+  - 음성AI
+  - AI에이전트
+  - LLM
 math: true
 summary: '멀티모달 추론과 생성의 한계를 넘는 UniT 기술: 추론 시간 스케일링의 새로운 패러다임 분석'
 image:

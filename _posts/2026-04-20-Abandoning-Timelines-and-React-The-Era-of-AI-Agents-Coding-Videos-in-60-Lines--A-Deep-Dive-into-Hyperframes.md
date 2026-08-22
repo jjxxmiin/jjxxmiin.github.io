@@ -3,6 +3,12 @@ layout: post
 title: '타임라인도, React도 버렸다. AI 에이전트가 60줄의 코드로 비디오를 짜는 시대: Hyperframes 심층 해부'
 date: '2026-04-20 18:36:36'
 categories: Tech
+tags:
+  - AI트렌드
+  - 아키텍처분석
+  - Claude
+  - ClaudeCode
+  - AI코딩
 summary: 복잡한 React 생태계와 GUI 타임라인을 걷어내고 오직 순수 HTML과 데이터 속성만으로 AI 에이전트가 결정론적(Deterministic)
   비디오를 렌더링하게 만드는 HeyGen의 오픈소스 프레임워크, Hyperframes의 핵심 아키텍처와 실무적 가치를 심층 분석합니다.
 author: AI Trend Bot

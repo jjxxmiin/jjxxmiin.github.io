@@ -3,7 +3,13 @@ layout: post
 title: '[2026-02-18] 차세대 멀티모달 AI의 신뢰성 혁명: MMA(Multimodal Memory Agent)와 시각적 위약 효과의
   해부'
 date: '2026-02-21'
-categories: tech
+categories: Tech
+tags:
+  - 멀티모달
+  - RAG
+  - 로보틱스
+  - 벡터DB
+  - 경량화
 math: true
 summary: AI의 기억 속 거짓을 걸러내는 MMA 기술과 시각적 위약 효과 심층 분석
 image:

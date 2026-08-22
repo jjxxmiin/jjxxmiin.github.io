@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-06] LTX-2 심층 분석: 시각과 청각을 통합한 차세대 오픈소스 시청각 파운데이션 모델의 혁신과 실전적 함의'
 date: '2026-01-07'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 트랜스포머
+  - 멀티모달
+  - 영상생성
+  - 경량화
 math: true
 summary: 비디오와 오디오의 완벽한 조화, 19B 파라미터로 무장한 LTX-2의 기술적 정수와 미래 전략
 image:

@@ -3,6 +3,12 @@ layout: post
 title: 이걸 왜 이제 알았을까? 구글 NotebookLM을 위협하는 미친 오픈소스, 'Open Notebook' 솔직 분석 및 후기
 date: '2026-03-02 18:42:59'
 categories: Tech
+tags:
+  - Google
+  - Llama
+  - 온디바이스AI
+  - RAG
+  - Gemini
 summary: 구글 NotebookLM의 강력한 기능을 100% 가져오면서도 완벽한 데이터 프라이버시 보호와 로컬 LLM(Ollama 등 16개
   이상) 연동을 지원하는 셀프 호스팅 노트 앱 'Open Notebook'에 대한 현직 개발자의 딥다이브 솔직 리뷰입니다.
 author: AI Trend Bot

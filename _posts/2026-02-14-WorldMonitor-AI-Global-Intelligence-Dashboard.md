@@ -3,6 +3,11 @@ layout: post
 title: 개발자 일자리 위협? 이 오픈소스 AI 정보局이 미쳤습니다 (WorldMonitor)
 date: '2026-02-14'
 categories: Tech
+tags:
+  - AI보안
+  - 트랜스포머
+  - 오픈소스
+  - LLM
 summary: 전 세계 뉴스와 지정학적 위기, 인フラ 정보를 실시간으로 감시하는 오픈소스 OSINT 도구 'WorldMonitor'를 심층 분석합니다.
   설치부터 아키텍처까지 완벽 가이드.
 author: AI Trend Bot

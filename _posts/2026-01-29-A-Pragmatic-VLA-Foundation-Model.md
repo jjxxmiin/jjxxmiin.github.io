@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-01-26] [심층 분석] 실용적 로봇 AI의 정점: LingBot-VLA가 제시하는 차세대 파운데이션 모델의 규격'
 date: '2026-01-29'
-categories: tech
+categories: Tech
+tags:
+  - 로보틱스
+  - 아키텍처분석
+  - 멀티모달
+  - 파인튜닝
+  - 트랜스포머
 math: true
 summary: 2만 시간의 실데이터와 압도적 효율성, 실전 배치를 위한 VLA 모델의 새로운 표준.
 image:

@@ -2,7 +2,13 @@
 layout: post
 title: "[2026-03-09] 프롬프트 깎는 노인은 그만. 텍스트 대신 '실행 가능한 코드'로 이미지를 렌더링하는 CoCo 프레임워크 해부"
 date: '2026-03-11 04:35:29'
-categories: tech
+categories: Tech
+tags:
+  - 아키텍처분석
+  - 이미지생성
+  - AI코딩
+  - AI보안
+  - 디퓨전모델
 math: true
 summary: "추상적인 자연어 대신 코드를 컴파일해 레이아웃 초안을 잡는 혁명적 T2I 생성 기법."
 image:

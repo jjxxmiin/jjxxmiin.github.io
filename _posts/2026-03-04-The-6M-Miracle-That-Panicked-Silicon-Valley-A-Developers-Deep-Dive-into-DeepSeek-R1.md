@@ -3,6 +3,12 @@ layout: post
 title: '실리콘밸리를 패닉에 빠뜨린 600만 달러의 기적: 개발자 시각에서 해부한 DeepSeek-R1의 모든 것'
 date: '2026-03-04 18:23:55'
 categories: Tech
+tags:
+  - DeepSeek
+  - 강화학습
+  - 아키텍처분석
+  - 트랜스포머
+  - OpenAI
 summary: 막대한 자본의 독점물로 여겨지던 '추론형 AI' 시장에 혜성처럼 등장한 오픈소스 모델 DeepSeek-R1. GRPO 알고리즘과 MoE
   아키텍처를 통해 불과 600만 달러의 비용으로 OpenAI o1에 필적하는 성능을 달성한 그 기술적 배경과 개발 생태계에 미칠 파장을 심도 있게
   분석합니다.

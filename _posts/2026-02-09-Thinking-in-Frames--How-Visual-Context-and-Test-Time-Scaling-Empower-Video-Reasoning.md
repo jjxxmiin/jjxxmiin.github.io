@@ -3,7 +3,13 @@ layout: post
 title: '[2026-01-28] [심층 분석] 비디오 생성은 어떻게 인공지능의 시각적 추론 능력을 깨우는가?: Thinking in Frames
   논문 분석'
 date: '2026-02-09'
-categories: tech
+categories: Tech
+tags:
+  - 영상생성
+  - 아키텍처분석
+  - Qwen
+  - 로보틱스
+  - 파인튜닝
 math: true
 summary: 비디오 생성을 시각적 추론의 도구로 재정의하고 테스트 시간 스케일링의 효용을 입증한 연구
 image:
@@ -17,7 +23,7 @@ image:
 
 전통적인 시각-언어 모델(Vision-Language Models, VLMs)은 텍스트 기반의 추론 능력에서는 괄목할 만한 성과를 거두었으나, 미세한 공간적 이해(Fine-grained spatial understanding)와 연속적인 행동 계획(Continuous action planning) 측면에서는 여전히 한계를 보이고 있습니다. 본 포스트에서 다룰 논문 **"Thinking in Frames: How Visual Context and Test-Time Scaling Empower Video Reasoning"**은 비디오 생성 모델을 단순한 미디어 생성 도구가 아닌, 복잡한 시각적 추론 문제를 해결하기 위한 **'월드 모델(World Model)'**이자 **'추론 엔진'**으로 재정의합니다.
 
-연구팀은 비디오의 각 프레임이 초기 상태와 최종 해답 사이의 **'중간 추론 단계(Intermediate Reasoning Steps)'** 역할을 한다고 가정합니다. 미로 찾기(Maze Navigation)와 탱그램 퍼즐(Tangram Puzzle)이라는 두 가지 상반된 환경(이산적 논리 vs 연속적 조작)을 통해 실험한 결과, 모델은 별도의 미세 조정 없이도 강력한 제로샷 일반화 능력을 보여주었으며, 특히 **'시각적 테스트 시간 스케일링(Visual Test-Time Scaling)'** 법칙을 발견했습니다. 이는 생성되는 비디오의 프레임 수(즉, 추론 예산)를 늘릴수록 더 복잡한 공간적·시간적 문제를 해결할 수 있음을 의미합니다.
+연구팀은 비디오의 각 프레임이 초기 상태와 최종 해답 사이의 **'중간 추론 단계(Intermediate Reasoning Steps)'** 역할을 한다고 가정합니다. 미로 찾기(Maze Navigation)와 탱그램 퍼즐(Tangram Puzzle)이라는 두 가지 상반된 환경(이산적 논리 vs 연속적 조작)을 통해 실험한 결과, 모델은 별도의 미세 조정 없이도 강력한 제로샷 일반화 능력을 보여주었으며, 특히 **'시각적 테스트 시간 스케일링(Visual Test-Time Scaling)'** 법칙을 발견했습니다. 이는 생성되는 비디오의 프레임 수(즉, 추론 예산)를 늘릴수록 더 복잡한 공간적과 시간적 문제를 해결할 수 있음을 의미합니다.
 
 ---
 
@@ -79,7 +85,7 @@ image:
 ### 5.2. Visual Test-Time Scaling의 발견
 본 논문의 가장 혁신적인 발견 중 하나는 **시각적 테스트 시간 스케일링(Visual Test-Time Scaling)**입니다. 이는 LLM에서 추론 시 '생각할 시간'을 더 주면(Chain of Thought의 길이를 늘리면) 정답률이 올라가는 현상과 매우 흡사합니다.
 
-![Figure 3:Visual Test-Time Scaling forMazeNavigationusing unseen icon with more inference budget. Row 1 shows the performance curve when increasing the total number of frames per video; Row 2 shows the performance curve when changing the scaling factorκ\kappato allocate a different number of frames per discrete step in the maze solution. Detailed results for both settings are shown in Figure6and7.](/assets/img/papers/2601.21037/x2.png)
+![Figure 3: Visual Test-Time Scaling forMazeNavigationusing unseen icon with more inference budget](/assets/img/papers/2601.21037/x2.png)
 *Figure 3: 추론 예산(프레임 수) 증가에 따른 성능 향상 곡선. 더 많은 프레임을 생성할수록 복잡한 미로에서도 성공률이 비약적으로 상승합니다.*
 
 연구팀은 비디오의 총 프레임 수를 늘리거나(Inference Budget), 각 단계별 할당되는 프레임 밀도(Scaling factor κ)를 조절함으로써 복잡한 문제 해결 능력이 선형적으로 혹은 지수적으로 향상되는 것을 관찰했습니다.

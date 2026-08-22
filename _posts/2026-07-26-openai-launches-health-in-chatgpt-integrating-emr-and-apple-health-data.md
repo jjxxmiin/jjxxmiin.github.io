@@ -6,6 +6,11 @@ title: 'OpenAI ChatGPT Health 출시: 건강 기록과 Apple Health 연동의 �
 date: 2026-07-26 22:16:11 +0900
 last_modified_at: 2026-07-26 22:16:11 +0900
 categories: Tech
+tags:
+  - ChatGPT
+  - OpenAI
+  - Apple
+  - AI서비스
 description: OpenAI가 ChatGPT에 Apple Health 및 병원 전자건강기록(EHR)을 연동하는 Health in ChatGPT 기능을 출시했습니다. 미국 내 만 18세 이상 사용자를 대상으로 개인 맞춤형 건강 분석을 제공합니다.
 summary: OpenAI가 2026년 7월 23일 개인 건강 데이터를 ChatGPT와 안전하게 연동하는 'Health in ChatGPT'를 공식 출시했습니다. 미국 내 만 18세 이상 사용자는 Apple Health 및 주요 병원 의료 기록을 연결해 수면, 운동, 혈액검사 결과 등의 맞춤형 분석을 받을 수 있습니다. 연동된 모든 건강 정보는 모델 학습과 광고 타게팅에서 철저히 제외됩니다.
 article_type: NewsArticle
@@ -45,7 +50,7 @@ faq:
 - question: 내 개인 의료 기록이나 Apple Health 데이터가 AI 학습에 사용되나요?
   answer: 아니요, 연동된 병원 의료 기록과 Apple Health 데이터는 ChatGPT 모델 학습에서 완전히 제외됩니다. 또한 해당 정보는 광고 타게팅 목적으로도 절대 활용되지 않습니다.
 - question: Health in ChatGPT로 연동할 수 있는 데이터 출처는 어디인가요?
-  answer: Apple Health 데이터를 비롯해 Epic 및 Oracle Health 기반의 병원 시스템, One Medical, Function Health의 의료 기록을 연동할 수 있습니다. 연동 후에는 수면·운동 트렌드 분석, 검사 결과 비교, 약물 리뷰가 가능합니다.
+  answer: Apple Health 데이터를 비롯해 Epic 및 Oracle Health 기반의 병원 시스템, One Medical, Function Health의 의료 기록을 연동할 수 있습니다. 연동 후에는 수면과 운동 트렌드 분석, 검사 결과 비교, 약물 리뷰가 가능합니다.
 sitemap: true
 mermaid: true
 article_images:
@@ -69,14 +74,14 @@ article_images:
 ```mermaid
 flowchart TD
     A[OpenAI Health in ChatGPT 출시] --> B[Apple Health 및 병원 EMR 연동]
-    B --> C[수면·운동·혈액검사·약물 맞춤 분석]
+    B --> C[수면, 운동, 혈액검사, 약물 맞춤 분석]
     C --> D[모델 학습 및 광고 활용 완전 제외]
     D --> E[미국 만 18세 이상 웹/iOS 사용자 제공]
 ```
 
 ## 무슨 일이 벌어진 걸까?
 
-OpenAI가 2026년 7월 23일 개인의 건강 데이터와 전자의무기록(EHR)을 ChatGPT에 직접 연동할 수 있는 'Health in ChatGPT' 기능을 공식 출시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Launching Health in ChatGPT - OpenAI 출처">[1]</a></sup>. 이제 사용자는 본인의 스마트폰에 기록된 건강 정보나 병원의 진료·검사 기록을 ChatGPT와 연결하여 내 몸 상태에 딱 맞춘 건강 인사이트를 받아볼 수 있게 되었습니다 <sup class="source-citation"><a href="#source-3" aria-label="OpenAI Once Again Makes The Case For Giving ChatGPT Your Health Records 출처">[3]</a></sup>.
+OpenAI가 2026년 7월 23일 개인의 건강 데이터와 전자의무기록(EHR)을 ChatGPT에 직접 연동할 수 있는 'Health in ChatGPT' 기능을 공식 출시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Launching Health in ChatGPT - OpenAI 출처">[1]</a></sup>. 이제 사용자는 본인의 스마트폰에 기록된 건강 정보나 병원의 진료와 검사 기록을 ChatGPT와 연결하여 내 몸 상태에 딱 맞춘 건강 인사이트를 받아볼 수 있게 되었습니다 <sup class="source-citation"><a href="#source-3" aria-label="OpenAI Once Again Makes The Case For Giving ChatGPT Your Health Records 출처">[3]</a></sup>.
 
 이 서비스는 미국 내 만 18세 이상의 로그인한 사용자들을 대상으로 먼저 시작되었습니다 <sup class="source-citation"><a href="#source-4" aria-label="ChatGPT&#x27;s Apple Health Integration Now Rolling Out to U.S. Users 출처">[4]</a></sup>. 무료 계정인 Free부터 Go, Plus, Pro 등 모든 요금제 등급에서 웹과 iOS 앱을 통해 이용할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Launching Health in ChatGPT - OpenAI 출처">[1]</a></sup>. 단순히 일반적인 건강 상식을 물어보던 대화형 AI가 내 실제 검사 수치와 수면 데이터를 읽고 답변하는 개인 맞춤형 건강 가이드로 한 단계 진화한 셈입니다.
 
@@ -95,7 +100,7 @@ flowchart LR
     Apple[Apple Health] --> SubGraph1
     Hospital[Epic / Oracle Health 병원] --> SubGraph1
     Services[One Medical / Function Health] --> SubGraph1
-    ChatGPT --> Insights[검사결과 비교 / 약물 검토 / 수면·운동 트렌드]
+    ChatGPT --> Insights[검사결과 비교 / 약물 검토 / 수면과 운동 트렌드]
     ChatGPT -.->|학습 및 광고 차단| Security[보안 및 프라이버시 보호]
 ```
 
@@ -162,7 +167,7 @@ flowchart TD
 
 ### Health in ChatGPT로 연동할 수 있는 데이터 출처는 어디인가요?
 
-Apple Health 데이터를 비롯해 Epic 및 Oracle Health 기반의 병원 시스템, One Medical, Function Health의 의료 기록을 연동할 수 있습니다. 연동 후에는 수면·운동 트렌드 분석, 검사 결과 비교, 약물 리뷰가 가능합니다.
+Apple Health 데이터를 비롯해 Epic 및 Oracle Health 기반의 병원 시스템, One Medical, Function Health의 의료 기록을 연동할 수 있습니다. 연동 후에는 수면과 운동 트렌드 분석, 검사 결과 비교, 약물 리뷰가 가능합니다.
 
 ## 직접 확인한 원문
 

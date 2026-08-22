@@ -3,6 +3,12 @@ layout: post
 title: '[n8n-mcp 심층 해부] 더 이상 AI 에이전트를 위해 파이썬 ''접착제 코드''를 짜지 마라'
 date: '2026-05-15 18:47:45'
 categories: Tech
+tags:
+  - MCP
+  - 업무자동화
+  - 파이썬
+  - Claude
+  - 아키텍처분석
 summary: n8n-mcp는 불안정하고 파편화된 API 연동 코드를 시각적 워크플로우로 대체하여, LLM이 1,000개 이상의 엔터프라이즈 앱을
   직접 제어하고 스스로 워크플로우를 구축하게 만드는 혁명적인 오케스트레이션 아키텍처입니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: 'Cloudflare Computer: AI 에이전트에게 컨테이너 대신 전용 컴퓨터를 부여하는 하이브리드 런타임'
 date: '2026-08-08 19:31:19'
 categories: Tech
+tags:
+  - AI코딩
+  - 인프라
+  - 멀티에이전트
+  - AI에이전트
+  - LLM
 summary: Cloudflare Computer는 AI 에이전트에게 가상 파일시스템과 하이브리드 실행 환경을 제공하는 오픈소스 런타임입니다. V8
   아이솔레이트 기반의 빠른 실행과 풀 스택 리눅스 컨테이너 샌드박스를 유기적으로 결합하고, Durable Object 내 SQLite 기반 파일시스템(DOFS)으로
   상태를 지속 가능하게 관리합니다.
@@ -32,7 +38,7 @@ chart: true
 faq:
 - question: Cloudflare Computer란 무엇이며 기존 Docker/Firecracker 샌드박스와 어떻게 다른가요?
   answer: Cloudflare Computer는 AI 에이전트에게 가상 파일시스템과 하이브리드 실행 환경을 제공하는 오픈소스 런타임입니다.
-    기존 Docker나 Firecracker 방식이 모든 작업에 무거운 VM이나 컨테이너를 띄우는 것과 달리, 단순 파일 읽기·편집 및 셸 명령은
+    기존 Docker나 Firecracker 방식이 모든 작업에 무거운 VM이나 컨테이너를 띄우는 것과 달리, 단순 파일 읽기와 편집 및 셸 명령은
     V8 아이솔레이트에서 즉시 처리하고 꼭 필요한 순간에만 리눅스 컨테이너를 연결합니다.
 - question: 에이전트의 파일 상태는 어디에 저장되며 지속성이 어떻게 보장되나요?
   answer: 파일시스템 상태는 Cloudflare Durable Object 내부의 SQLite 기반 가상 파일시스템(DOFS)에 권위 있는(Authoritative)
@@ -375,7 +381,7 @@ Cloudflare Computer는 단순히 하나 더 등장한 개발 도구가 아닙니
 
 ### Cloudflare Computer란 무엇이며 기존 Docker/Firecracker 샌드박스와 어떻게 다른가요?
 
-Cloudflare Computer는 AI 에이전트에게 가상 파일시스템과 하이브리드 실행 환경을 제공하는 오픈소스 런타임입니다. 기존 Docker나 Firecracker 방식이 모든 작업에 무거운 VM이나 컨테이너를 띄우는 것과 달리, 단순 파일 읽기·편집 및 셸 명령은 V8 아이솔레이트에서 즉시 처리하고 꼭 필요한 순간에만 리눅스 컨테이너를 연결합니다.
+Cloudflare Computer는 AI 에이전트에게 가상 파일시스템과 하이브리드 실행 환경을 제공하는 오픈소스 런타임입니다. 기존 Docker나 Firecracker 방식이 모든 작업에 무거운 VM이나 컨테이너를 띄우는 것과 달리, 단순 파일 읽기와 편집 및 셸 명령은 V8 아이솔레이트에서 즉시 처리하고 꼭 필요한 순간에만 리눅스 컨테이너를 연결합니다.
 
 ### 에이전트의 파일 상태는 어디에 저장되며 지속성이 어떻게 보장되나요?
 

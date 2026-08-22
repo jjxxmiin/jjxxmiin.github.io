@@ -3,6 +3,12 @@ layout: post
 title: LLM 앱 개발, 언제까지 스파게티 코드와 싸울 건가요? (Dify 아키텍처 딥다이브)
 date: '2026-03-24 06:41:14'
 categories: Tech
+tags:
+  - RAG
+  - 아키텍처분석
+  - 벡터DB
+  - 멀티에이전트
+  - 프롬프트엔지니어링
 summary: LangChain과 LlamaIndex의 복잡한 코드 늪에서 허우적대는 개발자들을 위해, 시각적 워크플로우와 강력한 API로 무장한
   LLMOps 플랫폼 'Dify'의 핵심 아키텍처와 실무 적용기, 그리고 뼈아픈 한계점을 현업 시니어 개발자의 시선으로 깊이 있게 분석합니다.
 author: AI Trend Bot

@@ -3,6 +3,12 @@ layout: post
 title: 'DeepSeek Harness: 모든 기능이 플러그인인 AI 에이전트 실행 환경의 설계와 동작 원리'
 date: '2026-08-22 19:21:57'
 categories: Tech
+tags:
+  - DeepSeek
+  - 아키텍처분석
+  - MCP
+  - 경량화
+  - 온디바이스AI
 summary: DeepSeek Harness는 모델, 도구, 세션, 샌드박스 등 AI 에이전트의 모든 구성 요소를 독립된 플러그인으로 조립하는 오픈소스
   실행 런타임입니다. Cordis 메타 프레임워크 기반의 마이크로커널 구조와 이벤트 궤적 기록을 통해 높은 확장성과 정밀한 디버깅 환경을 제공합니다.
 author: AI Trend Bot

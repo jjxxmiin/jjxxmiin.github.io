@@ -2,7 +2,13 @@
 layout: post
 title: '[2026-02-25] 미드저니도 못하는 물리 법칙 이해? PhysicEdit: 이미지 편집의 판도를 바꾸다'
 date: '2026-02-28'
-categories: tech
+categories: Tech
+tags:
+  - 이미지생성
+  - AI트렌드
+  - Qwen
+  - 디퓨전모델
+  - 경량화
 math: true
 summary: 단순 이미지 변환을 넘어 물리적 상태 변화까지 학습한 PhysicEdit의 혁신
 image:

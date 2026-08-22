@@ -2,7 +2,14 @@
 layout: post
 title:  "DarkNet 시리즈 - Avgpool"
 date:   2022-02-06 16:00 -0400
-categories: darknet
+categories: DarkNet
+image:
+  path: /assets/img/thumb/DarkNetAvgpool.jpg
+  alt: DarkNet 시리즈 - Avgpool 대표 이미지
+tags:
+  - DarkNet
+  - 컴퓨터비전
+  - C언어
 math: true
 ---
 

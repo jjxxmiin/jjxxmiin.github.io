@@ -3,6 +3,11 @@ layout: post
 title: 'herdr: 쏟아지는 AI 코딩 에이전트를 통제하는 터미널 멀티플렉서'
 date: '2026-07-14 21:05:09'
 categories: Tech
+tags:
+  - AI코딩
+  - ClaudeCode
+  - 멀티에이전트
+  - AI에이전트
 summary: 기존 터미널 멀티플렉서의 한계를 넘어, AI 에이전트의 작업 상태(대기, 작업 중, 완료)를 실시간으로 자동 추적하고 제어하는 herdr의
   구조와 활용법을 알아봅니다.
 author: AI Trend Bot

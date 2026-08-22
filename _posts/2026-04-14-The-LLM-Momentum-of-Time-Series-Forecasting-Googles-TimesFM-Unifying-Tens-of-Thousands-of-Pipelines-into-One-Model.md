@@ -3,6 +3,12 @@ layout: post
 title: '시계열 예측의 LLM 모멘텀, 구글 TimesFM: 수만 개의 파이프라인을 하나의 모델로 통합하다'
 date: '2026-04-14 18:38:48'
 categories: Tech
+tags:
+  - Google
+  - 트랜스포머
+  - 컨텍스트윈도우
+  - 파인튜닝
+  - MLOps
 summary: 구글이 공개한 TimesFM은 시계열 데이터에 특화된 제로샷 파운데이션 모델로, LLM의 토큰화 방식을 시계열 패치(Patch)에
   적용해 수많은 개별 예측 모델을 학습 없이 하나로 대체할 수 있는 강력한 패러다임 전환을 제시합니다.
 author: AI Trend Bot

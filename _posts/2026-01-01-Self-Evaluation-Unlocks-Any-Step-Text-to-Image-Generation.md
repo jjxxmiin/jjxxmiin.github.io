@@ -3,7 +3,13 @@ layout: post
 title: '[2025-12-26] 단 한 번의 스텝으로 고품질 이미지를: Self-Evaluation(Self-E) 기반 Any-Step 생성
   기술 심층 분석'
 date: '2026-01-01'
-categories: tech
+categories: Tech
+tags:
+  - 디퓨전모델
+  - 경량화
+  - 강화학습
+  - 온디바이스AI
+  - 이미지생성
 math: true
 summary: 자체 평가 메커니즘으로 1-Step부터 고품질 생성을 구현한 Self-E 모델 기술 분석
 image:
