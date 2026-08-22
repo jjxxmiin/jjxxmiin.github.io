@@ -40,3 +40,9 @@ teachingflow-*.json
 
 # 썸네일 렌더용 임시 디렉터리 (snap Chromium이 /tmp 를 못 읽어 저장소 안에 둔다)
 automation/thumb_tmp/
+
+# 개인정보가 든 문서. 공개 저장소이므로 절대 커밋 금지.
+# (생년월일, 주소, 연락처가 포함된 이력서 등)
+*이력서*
+*resume*.pdf
+*_CV.pdf
