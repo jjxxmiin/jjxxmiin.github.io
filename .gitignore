@@ -31,4 +31,12 @@ __pycache__/*
 __pycache__
 
 .env
+
+# 서비스 계정 키 — 공개 저장소이므로 절대 커밋되면 안 된다.
 GA4_CREDENTIALS_JSON.json
+teachingflow-*.json
+*-service-account*.json
+*.credentials.json
+
+# 썸네일 렌더용 임시 디렉터리 (snap Chromium이 /tmp 를 못 읽어 저장소 안에 둔다)
+automation/thumb_tmp/

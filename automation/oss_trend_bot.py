@@ -1,8 +1,8 @@
 """저녁 오픈소스 트렌드 발행 봇.
 
 GitHub Trending의 AI 오픈소스 프로젝트 중 아직 다루지 않은 것 하나를 골라 하루 1건을 쓴다.
-아침의 daily_trend_bot.py(AI 뉴스, 사실검증 파이프라인)와는 프롬프트·프론트매터
-(`automation: oss_trend`)·워크플로가 모두 분리되어 서로 간섭하지 않는다.
+아침의 daily_trend_bot.py(AI 뉴스, 사실검증 파이프라인)와는 프롬프트와 프론트매터
+(`automation: oss_trend`), 워크플로가 모두 분리되어 서로 간섭하지 않는다.
 """
 
 import os
@@ -12,6 +12,9 @@ import subprocess
 import tempfile
 import datetime
 import yaml
+
+from apply_tags import tags_for
+from make_thumbnail import generate_card
 import requests
 from google import genai
 from google.genai import types
@@ -147,8 +150,8 @@ def _repair_mermaid(client, code, error):
 [오류] {error}
 [규칙]
 - erDiagram/classDiagram에서 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE 같은 예약어를 엔티티/클래스 이름으로 쓰지 마라. CODE_CLASS 처럼 접두사를 붙이거나 큰따옴표로 감싼다.
-- flowchart 노드 라벨은 큰따옴표로 감싸고 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.
-- 오직 고친 Mermaid 코드 본문만 출력하라 (``` 펜스·설명·따옴표 없이).
+- flowchart 노드 라벨은 큰따옴표로 감싸고 라벨 안에 괄호(), 대괄호[], 콜론:을 쓰지 마라.
+- 오직 고친 Mermaid 코드 본문만 출력하라 (``` 펜스, 설명, 따옴표 없이).
 
 [원본]
 {code.strip()}"""
@@ -471,26 +474,26 @@ def generate_blog_post(client, topic_data):
         "   - 상태 전이/생명주기 → stateDiagram-v2\n"
         "   - 클래스/모듈 구조 → classDiagram, 구성비 → pie\n"
         "   [Mermaid 문법 안전 규칙 — 반드시 지킬 것]\n"
-        "   - erDiagram/classDiagram의 엔티티·클래스 이름에 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE, GROUP 같은 예약어를 쓰지 마라. "
+        "   - erDiagram/classDiagram의 엔티티와 클래스 이름에 CLASS, FUNCTION, STATE, END, GRAPH, ORDER, NODE, GROUP 같은 예약어를 쓰지 마라. "
         "CODE_CLASS, CODE_FUNC 처럼 접두사를 붙이거나 이름을 바꾼다.\n"
-        "   - flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호()·대괄호[]·콜론:을 쓰지 마라.\n"
+        "   - flowchart 노드 라벨은 큰따옴표로 감싸고(예: A[\"지식 그래프\"]) 라벨 안에 괄호(), 대괄호[], 콜론:을 쓰지 마라.\n"
         "   - 각 다이어그램은 단순하고 문법 오류가 없게 만든다.\n"
-        "2. Chart.js(그래프): 벤치마크·수치 비교(토큰 절감량, 속도, 언어 지원 수 등)는 ```chartjs 코드블록에 '유효한 JSON' Chart.js 설정으로 1~2개 넣어라. 예시:\n"
+        "2. Chart.js(그래프): 벤치마크와 수치 비교(토큰 절감량, 속도, 언어 지원 수 등)는 ```chartjs 코드블록에 '유효한 JSON' Chart.js 설정으로 1~2개 넣어라. 예시:\n"
         "   ```chartjs\n"
         "   {\"type\":\"bar\",\"data\":{\"labels\":[\"기존 방식\",\"codebase-memory-mcp\"],\"datasets\":[{\"label\":\"토큰 사용량\",\"data\":[412000,3400]}]}}\n"
         "   ```\n"
-        "   반드시 순수 JSON(주석·후행쉼표·홑따옴표 금지)만 넣는다.\n"
-        "3. 도표(표): 비교·트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
-        "4. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder·via.placeholder·example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
+        "   반드시 순수 JSON(주석, 후행쉼표, 홑따옴표 금지)만 넣는다.\n"
+        "3. 도표(표): 비교와 트레이드오프는 마크다운 표로 여러 개 정리한다. 표 앞뒤에는 반드시 빈 줄을 넣는다.\n"
+        "4. 실제 이미지: 아래 제공된 URL만 사용한다. placeholder, via.placeholder, example.com 등 가짜/추측 URL은 절대 만들지 마라.\n"
         "5. 링크: 모든 링크는 [보이는 텍스트](URL) 형태의 클릭 가능한 마크다운으로 쓴다. 맨 URL 노출 금지.\n"
-        "6. 이모지: 제목·소제목·본문에 이모지를 쓰지 마라.\n"
+        "6. 이모지: 제목, 소제목, 본문에 이모지를 쓰지 마라.\n"
         f"{img_note}\n\n"
     )
 
     aeo_directive = (
-        "[검색·AI 답변 최적화(SEO/AEO) — 중요]\n"
-        "- 도입부에 이 글의 핵심을 3줄로 요약한 'TL;DR(한 줄 요약)'을 넣어, 검색·AI가 바로 인용할 수 있게 한다.\n"
-        "- 본문 소제목은 사람들이 실제로 검색·질문하는 표현(예: '~란 무엇인가', '~와 무엇이 다른가', '어떻게 설치하나')으로 자연스럽게 녹인다.\n"
+        "[검색과 AI 답변 최적화(SEO/AEO) — 중요]\n"
+        "- 도입부에 이 글의 핵심을 3줄로 요약한 'TL;DR(한 줄 요약)'을 넣어, 검색과 AI가 바로 인용할 수 있게 한다.\n"
+        "- 본문 소제목은 사람들이 실제로 검색과 질문하는 표현(예: '~란 무엇인가', '~와 무엇이 다른가', '어떻게 설치하나')으로 자연스럽게 녹인다.\n"
         "- 반드시 'faq' 필드에 사람들이 실제로 궁금해할 질문 4~6개와, 각 질문당 2~4문장의 명확하고 사실 기반 답변을 담아라. "
         "질문은 구체적이고(예: '토큰을 얼마나 절감하나?', 'MCP를 지원하지 않는 에디터에서도 쓸 수 있나?'), 답변은 검색으로 확인한 정확한 정보로 쓴다.\n\n"
     )
@@ -673,11 +676,30 @@ def save_post(post_data):
         "summary": post_data['summary'],
         "author": "AI Trend Bot",
         "automation": AUTOMATION_TAG,
-        "github_url": github_url
+        "github_url": github_url,
+        # 통제 어휘 기반 태그 — apply_tags.py와 같은 기준을 쓴다.
+        "tags": tags_for(
+            post_data.get('title_korean', post_data.get('title', '')), content, "Tech"
+        ),
     }
 
     if image_data:
         front_matter["image"] = image_data
+    else:
+        # 대표 이미지가 없으면 목록과 공유 카드가 전부 똑같아 보인다. 제목 카드를 만든다.
+        try:
+            front_matter["image"] = {
+                "path": generate_card(
+                    slug=safe_title,
+                    title=front_matter["title"],
+                    category="Tech",
+                    tags=front_matter.get("tags") or [],
+                    date=str(front_matter["date"])[:10],
+                ),
+                "alt": front_matter["title"],
+            }
+        except Exception as exc:  # 렌더 실패가 발행을 막지는 않게 한다
+            print(f"카드 생성 실패({exc}). 대표 이미지 없이 발행합니다.")
     # Project facts (stars, language, files, LOC, ...) -> rendered as a card in post.html.
     project = fetch_project_meta(github_url)
     if project:

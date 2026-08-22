@@ -11,6 +11,9 @@ from difflib import SequenceMatcher
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
 import yaml
+
+from apply_tags import tags_for
+from make_thumbnail import generate_card
 import requests
 from bs4 import BeautifulSoup
 from google import genai
@@ -1391,7 +1394,7 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
 - 제목은 검색할 회사/제품명과 실제 변화를 앞쪽에 넣고, 사람이 누르고 싶을 만큼
   구체적으로 쓴다. 낚시성 표현, 이모지, 느낌표 도배는 금지한다.
 - 제목은 핵심 검색어를 한 번만 자연스럽게 사용하고 같은 표현을 반복하지 않는다.
-  description은 검색 결과만 읽어도 사건·변화·독자 영향을 이해할 수 있는 70~160자,
+  description은 검색 결과만 읽어도 사건, 변화, 독자 영향을 이해할 수 있는 70~160자,
   summary는 독립적으로 인용해도 의미가 통하는 2~3문장이다.
 - 본문은 H1 없이 2,800~4,500자 정도로 쓴다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
   1. 무슨 일이 벌어진 걸까?
@@ -1399,28 +1402,28 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
   3. 그래서 우리에게 뭐가 달라질까?
   4. 직접 써보거나 지켜볼 포인트
   5. 아직은 선을 그어야 할 부분
-- 각 섹션 첫 1~2문장은 검색·답변 엔진이 그대로 인용해도 이해되도록 주어와 제품명을
+- 각 섹션 첫 1~2문장은 검색과 답변 엔진이 그대로 인용해도 이해되도록 주어와 제품명을
   생략하지 않은 직접 답변으로 쓴다. 그 뒤에 이유와 예시를 붙인다.
-- 회사·제품·모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어·약칭·핵심 검색어를
+- 회사, 제품, 모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어, 약칭, 핵심 검색어를
   억지로 반복하지 않는다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
 - 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
 - content의 첫 요소는 반드시 전체 글을 한눈에 요약하는 Mermaid 다이어그램이어야 한다.
   도입 문단이나 설명 문장보다 먼저 ```mermaid 코드 블록을 배치하고, 사건 → 근거 →
   사용자 영향 → 확인할 한계의 흐름을 4~7개 노드로 간결하게 보여준다.
 - Mermaid는 첫 전체 흐름도를 포함해 3~5개 넣는다. 최소한 ① 글 전체 요약,
-  ② 사건 또는 제품 작동 흐름, ③ 독자의 도입 판단·주의점 다이어그램을 각각 하나씩
-  만든다. flowchart·sequenceDiagram·timeline 등 내용에 맞는 형식을 섞고, 같은
+  ② 사건 또는 제품 작동 흐름, ③ 독자의 도입 판단과 주의점 다이어그램을 각각 하나씩
+  만든다. flowchart, sequenceDiagram, timeline 등 내용에 맞는 형식을 섞고, 같은
   결론을 모양만 바꿔 반복하지 않는다. 노드와 라벨에도 facts와 unknowns에 있는
   내용만 쓰며 가짜 수치를 만들지 않는다.
 - 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
   chartjs 코드 블록 안에는 주석 없는 순수 JSON만 쓰고 type, data.labels,
   data.datasets를 포함한다. 모든 dataset에는 label을 붙이고 options.plugins.title에는
   display: true와 명확한 text를 넣는다. data의 모든 숫자는 facts에 원문 그대로
-  있어야 하며 계산값·추정치·임의 점수는 금지한다. 수치 비교가 부적절하면 차트는 생략한다.
-- Mermaid·Chart.js 외의 코드 블록은 넣지 않는다. 그림 앞뒤에는 독자가 무엇을
+  있어야 하며 계산값, 추정치, 임의 점수는 금지한다. 수치 비교가 부적절하면 차트는 생략한다.
+- Mermaid와 Chart.js 외의 코드 블록은 넣지 않는다. 그림 앞뒤에는 독자가 무엇을
   봐야 하는지 한두 문장으로 설명하되, 똑같은 내용을 장황하게 반복하지 않는다.
 - faq는 독자가 실제 검색창이나 AI 답변창에 물을 법한 서로 다른 질문 3~4개로 만든다.
-  답변 첫 문장만 읽어도 결론이 나오게 하고, 뒤 문장에 조건·가격·제한을 덧붙인다.
+  답변 첫 문장만 읽어도 결론이 나오게 하고, 뒤 문장에 조건, 가격, 제한을 덧붙인다.
 - tags는 5~10개, entities는 원문 표기 3~10개다.
 - title_english는 파일명에 쓸 간결한 영문 제목이며 사실을 과장하지 않는다.
 """
@@ -1522,7 +1525,9 @@ def _safe_slug(value):
 def save_post(post_data, topic_data, evidence, *, now=None):
     """Save a news post using the existing blog layout and collected source visuals."""
     now = now or kst_now()
-    filename = f"{now:%Y-%m-%d}-{_safe_slug(post_data.get('title_english'))}.md"
+    # 카드 이미지 파일명도 이 슬러그를 그대로 쓴다. 글 URL(/posts/<slug>/)과 맞춰 둔다.
+    post_slug = _safe_slug(post_data.get("title_english"))
+    filename = f"{now:%Y-%m-%d}-{post_slug}.md"
     filepath = os.path.realpath(os.path.join(POSTS_DIR, filename))
     if os.path.commonpath([os.path.realpath(POSTS_DIR), filepath]) != os.path.realpath(POSTS_DIR):
         raise RuntimeError("잘못된 게시물 경로")
@@ -1544,9 +1549,23 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         }
         article_images = images[1:]
     else:
-        print("사용 가능한 원문 이미지가 없어 기존 로고를 사용합니다.")
+        # 로고로 대체하면 모든 글의 공유 썸네일이 똑같아진다. 제목과 태그를 얹은
+        # 카드를 그 자리에서 만들어 글마다 다른 이미지가 나가게 한다.
+        print("원문 이미지가 없어 제목 카드를 생성합니다.")
+        card_tags = tags_for(post_data["title_korean"], content, "Tech")
+        try:
+            card_path = generate_card(
+                slug=post_slug,
+                title=post_data["title_korean"],
+                category="Tech",
+                tags=card_tags,
+                date=now.strftime("%Y-%m-%d"),
+            )
+        except Exception as exc:  # 렌더 실패가 발행 자체를 막지는 않게 한다
+            print(f"카드 생성 실패({exc}). 로고로 대체합니다.")
+            card_path = FALLBACK_THUMBNAIL
         hero_image = {
-            "path": FALLBACK_THUMBNAIL,
+            "path": card_path,
             "alt": post_data["title_korean"],
             "creditText": "OPSOAI",
         }
@@ -1596,6 +1615,9 @@ def save_post(post_data, topic_data, evidence, *, now=None):
             for source in evidence["sources"]
         ],
         "entities": post_data["entities"],
+        # 통제 어휘 기반 태그. Chirpy 관련글 추천이 태그 교집합으로 동작하므로
+        # 기존 612편과 같은 어휘를 써야 새 글이 옛 글과 이어진다.
+        "tags": tags_for(post_data["title_korean"], content, "Tech"),
         "faq": faq,
         "sitemap": True,
     }

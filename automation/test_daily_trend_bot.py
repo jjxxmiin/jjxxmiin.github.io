@@ -7,6 +7,8 @@ from unittest import mock
 
 import yaml
 
+import tag_taxonomy
+
 import daily_trend_bot as bot
 
 
@@ -566,7 +568,18 @@ flowchart LR
         )
         self.assertNotIn("github_url", front_matter)
         self.assertNotIn("project", front_matter)
-        self.assertNotIn("tags", front_matter)
+        # 태그는 통제 어휘(tag_taxonomy)에서 결정론적으로 뽑아 넣는다.
+        # 모델이 만들어낸 자유형 태그("AI 뉴스", "생성형 AI" 등)는 표기가 매번
+        # 흔들려 태그 공간을 파편화시키므로 프론트매터에 그대로 쓰지 않는다.
+        # Chirpy 관련글이 태그 교집합으로 동작하기 때문에 이 구분이 중요하다.
+        self.assertIn("tags", front_matter)
+        self.assertTrue(front_matter["tags"], "태그가 비어 있으면 관련글에서 고립된다")
+        vocabulary = {name for name, _patterns, _opts in tag_taxonomy.TAXONOMY}
+        self.assertTrue(
+            set(front_matter["tags"]) <= vocabulary,
+            f"통제 어휘 밖의 태그: {set(front_matter['tags']) - vocabulary}",
+        )
+        self.assertNotIn("AI 뉴스", front_matter["tags"])
         self.assertIn('<figure class="news-source-image">', raw)
         self.assertIn('href="#source-1"', raw)
         self.assertIn('id="source-1"', raw)

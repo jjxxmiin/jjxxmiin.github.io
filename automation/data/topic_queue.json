@@ -1,0 +1,845 @@
+{
+  "topics": [
+    {
+      "id": "클로드-요금제",
+      "head": "클로드 요금제",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 요금제 가격",
+      "keywords": [
+        "클로드 요금제 가격",
+        "클로드 요금제 비교",
+        "클로드 요금제 사용량 비교",
+        "클로드 요금제 추천",
+        "클로드 요금제 차이",
+        "클로드 요금제",
+        "클로드 요금제 변경",
+        "클로드 요금제 할인",
+        "클로드 요금제 해지",
+        "클로드 요금제 별 비교",
+        "클로드 요금제 비교 디시",
+        "클로드 요금제 비교해줘",
+        "클로드 요금제 추천 디시",
+        "클로드 요금제 토큰 비교"
+      ],
+      "variants": 35,
+      "both_engine": 9,
+      "priority": 119,
+      "status": "done",
+      "post": "2026-08-23-claude-pricing-guide-free-pro-max-team-comparison"
+    },
+    {
+      "id": "챗gpt-요금제",
+      "head": "챗gpt 요금제",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "챗gpt 요금제 추천",
+      "keywords": [
+        "챗gpt 요금제 추천",
+        "챗gpt 요금제 차이",
+        "챗gpt 요금제",
+        "챗gpt 요금제 변경",
+        "챗gpt 요금제 할인",
+        "챗gpt 요금제 해지",
+        "챗gpt 요금제 비교",
+        "챗gpt 요금제 변경 방법",
+        "챗gpt 요금제 공유",
+        "챗gpt 요금제 디시",
+        "챗gpt 요금제 종류",
+        "챗gpt 요금제 확인"
+      ],
+      "variants": 12,
+      "both_engine": 6,
+      "priority": 81,
+      "status": "done",
+      "post": "2026-08-23-chatgpt-pricing-plans-recommendation-and-comparison-guide"
+    },
+    {
+      "id": "로컬-llm",
+      "head": "로컬 llm",
+      "tier": "T1",
+      "format": "비교와 추천",
+      "primary": "로컬 llm 모델 비교",
+      "keywords": [
+        "로컬 llm 모델 비교",
+        "로컬 llm 성능 비교",
+        "로컬 llm 추천",
+        "로컬 llm 가격",
+        "로컬 llm 그래픽 카드 추천",
+        "로컬 llm 모델 성능 비교",
+        "로컬 llm 모델 추천",
+        "로컬 llm 비교",
+        "로컬 llm 사양 추천",
+        "로컬 llm 장비 추천",
+        "로컬 llm 추천 디시",
+        "로컬 llm 추천 모델",
+        "로컬 llm 추천 사이트",
+        "로컬 llm 하드웨어 추천"
+      ],
+      "variants": 19,
+      "both_engine": 3,
+      "priority": 55,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-코드",
+      "head": "클로드 코드",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 코드 가격",
+      "keywords": [
+        "클로드 코드 가격",
+        "클로드 코드 사용법",
+        "클로드 코드 가격 비교",
+        "클로드 코드 요금제 비교",
+        "클로드 코드 요금제 추천",
+        "클로드 코드 무료 사용법",
+        "클로드 코드 무료 요금제",
+        "클로드 코드 요금제 차이",
+        "클로드 코드 사용법 vscode",
+        "클로드 코드 추천 설정",
+        "클로드 코드 ide 추천",
+        "클로드 코드 skills 추천",
+        "클로드 코드 가격 디시",
+        "클로드 코드 가격 인상"
+      ],
+      "variants": 57,
+      "both_engine": 2,
+      "priority": 46,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-사용법",
+      "head": "클로드 사용법",
+      "tier": "T1",
+      "format": "실전 사용법",
+      "primary": "클로드 사용법",
+      "keywords": [
+        "클로드 사용법",
+        "클로드 사용법 책",
+        "클로드 사용법 pdf",
+        "클로드 사용법 디시",
+        "클로드 사용법 정리"
+      ],
+      "variants": 5,
+      "both_engine": 2,
+      "priority": 30,
+      "status": "pending"
+    },
+    {
+      "id": "ai-ppt",
+      "head": "ai ppt",
+      "tier": "T1",
+      "format": "실전 사용법",
+      "primary": "ai ppt 만들기",
+      "keywords": [
+        "ai ppt 만들기",
+        "ai ppt 만들기 추천",
+        "ai ppt 만들기 무료",
+        "ai ppt 만들기 프롬프트",
+        "ai ppt 만들기 감마",
+        "ai ppt 만들기 디시",
+        "ai ppt 만들기 사이트",
+        "ai ppt 만들기 앱",
+        "ai ppt 만들기 제미나이",
+        "ai ppt 만들기 클로드",
+        "ai ppt 자료 만들기",
+        "ai ppt 파일 만들기"
+      ],
+      "variants": 12,
+      "both_engine": 1,
+      "priority": 27,
+      "status": "pending"
+    },
+    {
+      "id": "챗gpt-유료",
+      "head": "챗gpt 유료",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "챗gpt 유료 차이",
+      "keywords": [
+        "챗gpt 유료 차이",
+        "챗gpt 유료 가격 차이",
+        "챗gpt 유료 무료 차이",
+        "챗gpt 유료 무료 차이 디시",
+        "챗gpt 유료 버전 차이",
+        "챗gpt 유료 차이 디시"
+      ],
+      "variants": 6,
+      "both_engine": 1,
+      "priority": 23,
+      "status": "pending"
+    },
+    {
+      "id": "mcp-서버",
+      "head": "mcp 서버",
+      "tier": "T1",
+      "format": "실전 사용법",
+      "primary": "mcp 서버 만들기",
+      "keywords": [
+        "mcp 서버 만들기",
+        "mcp 서버 추천",
+        "mcp 서버 추천 디시",
+        "mcp 서버 만들기 python",
+        "mcp 서버 만들기 자바",
+        "mcp 서버 무료",
+        "mcp 서버 사용법",
+        "mcp 서버 와 클라이언트 차이"
+      ],
+      "variants": 8,
+      "both_engine": 1,
+      "priority": 23,
+      "status": "pending"
+    },
+    {
+      "id": "챗gpt-프롬프트",
+      "head": "챗gpt 프롬프트",
+      "tier": "T1",
+      "format": "프롬프트와 템플릿",
+      "primary": "챗gpt 프롬프트 만들기",
+      "keywords": [
+        "챗gpt 프롬프트 만들기",
+        "챗gpt 프롬프트 추천",
+        "챗gpt 프롬프트 무료",
+        "챗gpt 프롬프트 사용법"
+      ],
+      "variants": 4,
+      "both_engine": 1,
+      "priority": 21,
+      "status": "pending"
+    },
+    {
+      "id": "ai-코딩",
+      "head": "ai 코딩",
+      "tier": "T1",
+      "format": "비교와 추천",
+      "primary": "ai 코딩 능력 비교",
+      "keywords": [
+        "ai 코딩 능력 비교",
+        "ai 코딩 도구 추천",
+        "ai 코딩 비교",
+        "ai 코딩 비교 디시",
+        "ai 코딩 사이트 추천",
+        "ai 코딩 성능 비교",
+        "ai 코딩 성능 비교 디시",
+        "ai 코딩 에이전트 비교",
+        "ai 코딩 추천",
+        "ai 코딩 추천 디시",
+        "ai 코딩 툴 비교",
+        "ai 코딩 벤치 마크 순위",
+        "ai 코딩 사용법",
+        "ai 코딩 순위"
+      ],
+      "variants": 18,
+      "both_engine": 0,
+      "priority": 21,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-ai",
+      "head": "클로드 ai",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 ai 무료 유료 차이",
+      "keywords": [
+        "클로드 ai 무료 유료 차이",
+        "클로드 ai 요금제 비교",
+        "클로드 ai 요금제 추천",
+        "클로드 ai 무료 사용법",
+        "클로드 ai 무료 요금제",
+        "클로드 ai 요금제 차이",
+        "클로드 ai 무료",
+        "클로드 ai 무료 다운로드",
+        "클로드 ai 코딩 사용법",
+        "클로드 ai 클로드 코드 차이"
+      ],
+      "variants": 10,
+      "both_engine": 0,
+      "priority": 16,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-팀",
+      "head": "클로드 팀",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 팀 요금제 가격",
+      "keywords": [
+        "클로드 팀 요금제 가격",
+        "클로드 팀 요금제 비교",
+        "클로드 팀 요금제 가입 방법",
+        "클로드 팀 요금제 사용 방법",
+        "클로드 팀 요금제 사용법",
+        "클로드 팀 요금제 차이",
+        "클로드 팀 요금제 가입",
+        "클로드 팀 요금제 사용량"
+      ],
+      "variants": 8,
+      "both_engine": 0,
+      "priority": 14,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-무료",
+      "head": "클로드 무료",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 무료 요금제 사용량",
+      "keywords": [
+        "클로드 무료 요금제 사용량",
+        "클로드 무료 요금제 제한",
+        "클로드 무료 요금제 토큰",
+        "클로드 무료 요금제 한도",
+        "클로드 무료 버전 사용법",
+        "클로드 무료 사용법",
+        "클로드 무료 크레딧 사용법"
+      ],
+      "variants": 7,
+      "both_engine": 0,
+      "priority": 12,
+      "status": "pending"
+    },
+    {
+      "id": "커서-ai",
+      "head": "커서 ai",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "커서 ai 무료 유료 차이",
+      "keywords": [
+        "커서 ai 무료 유료 차이",
+        "커서 ai 무료 사용법",
+        "커서 ai 클로드 코드 비교"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 9,
+      "status": "pending"
+    },
+    {
+      "id": "클로드-프로",
+      "head": "클로드 프로",
+      "tier": "T1",
+      "format": "가격과 요금제",
+      "primary": "클로드 프로 요금제 가격",
+      "keywords": [
+        "클로드 프로 요금제 가격",
+        "클로드 프로 무료 사용법",
+        "클로드 프로 요금제 사용량"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 9,
+      "status": "pending"
+    },
+    {
+      "id": "바이브-코딩",
+      "head": "바이브 코딩",
+      "tier": "T1",
+      "format": "비교와 추천",
+      "primary": "바이브 코딩 ai 비교",
+      "keywords": [
+        "바이브 코딩 ai 비교",
+        "바이브 코딩 ai 추천",
+        "바이브 코딩 ai 추천 디시",
+        "바이브 코딩 ai 순위",
+        "바이브 코딩 클로드 코드 차이"
+      ],
+      "variants": 5,
+      "both_engine": 0,
+      "priority": 8,
+      "status": "pending"
+    },
+    {
+      "id": "코딩-용",
+      "head": "코딩 용",
+      "tier": "T1",
+      "format": "비교와 추천",
+      "primary": "코딩 용 ai 비교",
+      "keywords": [
+        "코딩 용 ai 비교",
+        "코딩 용 ai 추천",
+        "코딩 용 ai 추천 디시",
+        "코딩 용 로컬 llm 추천"
+      ],
+      "variants": 4,
+      "both_engine": 0,
+      "priority": 7,
+      "status": "pending"
+    },
+    {
+      "id": "오픈-클로",
+      "head": "오픈 클로",
+      "tier": "T1",
+      "format": "비교와 추천",
+      "primary": "오픈 클로 로컬 llm 추천",
+      "keywords": [
+        "오픈 클로 로컬 llm 추천",
+        "오픈 클로 클로드 코드 비교",
+        "오픈 클로 클로드 코드 차이"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "ai-로고",
+      "head": "ai 로고",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "ai 로고 만들기 무료 사이트",
+      "keywords": [
+        "ai 로고 만들기 무료 사이트",
+        "ai 로고 만들기 프롬프트",
+        "ai 로고 만들기",
+        "ai 로고 만들기 무료",
+        "ai 로고 만들기 디시",
+        "ai 로고 만들기 사이트"
+      ],
+      "variants": 6,
+      "both_engine": 3,
+      "priority": 43,
+      "status": "pending"
+    },
+    {
+      "id": "ai-상세페이지",
+      "head": "ai 상세페이지",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 상세페이지 추천",
+      "keywords": [
+        "ai 상세페이지 추천",
+        "ai 상세페이지 만들기",
+        "ai 상세페이지 무료",
+        "ai 상세페이지 무료 제작",
+        "ai 상세페이지 제작 무료"
+      ],
+      "variants": 5,
+      "both_engine": 3,
+      "priority": 41,
+      "status": "pending"
+    },
+    {
+      "id": "ai-번역",
+      "head": "ai 번역",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 번역 비교",
+      "keywords": [
+        "ai 번역 비교",
+        "ai 번역 추천",
+        "ai 번역 가격",
+        "ai 번역 비교 디시",
+        "ai 번역 사이트 추천",
+        "ai 번역 성능 비교",
+        "ai 번역 안경 추천",
+        "ai 번역 추천 디시",
+        "ai 번역 품질 비교",
+        "ai 번역 무료",
+        "ai 번역 무료 디시",
+        "ai 번역 사용법"
+      ],
+      "variants": 12,
+      "both_engine": 2,
+      "priority": 38,
+      "status": "pending"
+    },
+    {
+      "id": "ai-자소서",
+      "head": "ai 자소서",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 자소서 추천",
+      "keywords": [
+        "ai 자소서 추천",
+        "ai 자소서 비교",
+        "ai 자소서 사이트 추천",
+        "ai 자소서 추천 디시",
+        "ai 자소서 검사 무료 사이트",
+        "ai 자소서 무료",
+        "ai 자소서 합격 후기"
+      ],
+      "variants": 7,
+      "both_engine": 1,
+      "priority": 23,
+      "status": "pending"
+    },
+    {
+      "id": "ai-쇼츠",
+      "head": "ai 쇼츠",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "ai 쇼츠 만들기",
+      "keywords": [
+        "ai 쇼츠 만들기",
+        "ai 쇼츠 만들기 무료",
+        "ai 쇼츠 만들기 디시",
+        "ai 쇼츠 만들기 사이트",
+        "ai 쇼츠 만들기 수익",
+        "ai 쇼츠 만들기 어플",
+        "ai 쇼츠 만들기 프로그램"
+      ],
+      "variants": 7,
+      "both_engine": 1,
+      "priority": 22,
+      "status": "pending"
+    },
+    {
+      "id": "ai-회의록",
+      "head": "ai 회의록",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 회의록 추천",
+      "keywords": [
+        "ai 회의록 추천",
+        "ai 회의록 비교",
+        "ai 회의록 어플 추천",
+        "ai 회의록 작성 추천",
+        "ai 회의록 무료"
+      ],
+      "variants": 5,
+      "both_engine": 1,
+      "priority": 21,
+      "status": "pending"
+    },
+    {
+      "id": "노션-ai",
+      "head": "노션 ai",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "노션 ai 사용법",
+      "keywords": [
+        "노션 ai 사용법",
+        "노션 ai 무료 사용법",
+        "노션 ai 회의록 가격",
+        "노션 ai 회의록 사용법",
+        "노션 ai 노트 사용법",
+        "노션 ai 회의록 무료"
+      ],
+      "variants": 6,
+      "both_engine": 1,
+      "priority": 21,
+      "status": "pending"
+    },
+    {
+      "id": "제미나이-사용법",
+      "head": "제미나이 사용법",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "제미나이 사용법",
+      "keywords": [
+        "제미나이 사용법",
+        "제미나이 사용법 pdf",
+        "제미나이 사용법 갤럭시",
+        "제미나이 사용법 디시",
+        "제미나이 사용법 책"
+      ],
+      "variants": 5,
+      "both_engine": 1,
+      "priority": 20,
+      "status": "pending"
+    },
+    {
+      "id": "자소서-ai",
+      "head": "자소서 ai",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "자소서 ai 모델 추천",
+      "keywords": [
+        "자소서 ai 모델 추천",
+        "자소서 ai 사이트 추천",
+        "자소서 ai 추천 더쿠",
+        "자소서 ai 툴 추천",
+        "자소서 ai 검사 무료",
+        "자소서 ai 사용법",
+        "자소서 ai 탐지기 무료",
+        "자소서 ai 판독기 무료",
+        "자소서 ai 표절 검사 무료 사이트"
+      ],
+      "variants": 9,
+      "both_engine": 0,
+      "priority": 12,
+      "status": "pending"
+    },
+    {
+      "id": "ai-유료",
+      "head": "ai 유료",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "ai 유료 무료 비교",
+      "keywords": [
+        "ai 유료 무료 비교",
+        "ai 유료 무료 차이",
+        "ai 유료 와 무료 차이"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 10,
+      "status": "pending"
+    },
+    {
+      "id": "코딩-ai",
+      "head": "코딩 ai",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "코딩 ai 가격 비교",
+      "keywords": [
+        "코딩 ai 가격 비교",
+        "코딩 ai 무료 추천",
+        "코딩 ai 가격"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 9,
+      "status": "pending"
+    },
+    {
+      "id": "ai-영상",
+      "head": "ai 영상",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 영상 편집 앱 추천",
+      "keywords": [
+        "ai 영상 편집 앱 추천",
+        "ai 영상 편집 추천",
+        "ai 영상 편집 추천 디시",
+        "ai 영상 편집 프로그램 추천",
+        "ai 영상 자동 편집 무료",
+        "ai 영상 편집 무료"
+      ],
+      "variants": 6,
+      "both_engine": 0,
+      "priority": 9,
+      "status": "pending"
+    },
+    {
+      "id": "ai-로",
+      "head": "ai 로",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "ai 로 ppt 만들기 무료",
+      "keywords": [
+        "ai 로 ppt 만들기 무료",
+        "ai 로 ppt 만들기 제미 나이",
+        "ai 로 기획서 만들기",
+        "ai 로 썸네일 만들기"
+      ],
+      "variants": 4,
+      "both_engine": 0,
+      "priority": 8,
+      "status": "pending"
+    },
+    {
+      "id": "kling-ai",
+      "head": "kling ai",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "kling ai 무료 사용법",
+      "keywords": [
+        "kling ai 무료 사용법",
+        "kling ai 무료 안됨",
+        "kling ai 무료",
+        "kling ai 무료 사용"
+      ],
+      "variants": 4,
+      "both_engine": 0,
+      "priority": 8,
+      "status": "pending"
+    },
+    {
+      "id": "ai-자막",
+      "head": "ai 자막",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 자막 생성 추천",
+      "keywords": [
+        "ai 자막 생성 추천",
+        "ai 자막 추천",
+        "ai 자막 만들기",
+        "ai 자막 무료",
+        "ai 자막 사용법"
+      ],
+      "variants": 5,
+      "both_engine": 0,
+      "priority": 8,
+      "status": "pending"
+    },
+    {
+      "id": "데이터-분석",
+      "head": "데이터 분석",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "데이터 분석 ai 추천",
+      "keywords": [
+        "데이터 분석 ai 추천",
+        "데이터 분석 ai 추천 디시",
+        "데이터 분석 ai 툴 추천",
+        "데이터 분석 ai 무료"
+      ],
+      "variants": 4,
+      "both_engine": 0,
+      "priority": 7,
+      "status": "pending"
+    },
+    {
+      "id": "ai-영어",
+      "head": "ai 영어",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "ai 영어 공부 앱 추천",
+      "keywords": [
+        "ai 영어 공부 앱 추천",
+        "ai 영어 공부 추천",
+        "ai 영어 공부 무료"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "논문-요약",
+      "head": "논문 요약",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "논문 요약 ai 추천",
+      "keywords": [
+        "논문 요약 ai 추천",
+        "논문 요약 ai 추천 디시",
+        "논문 요약 ai 무료"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "문서-요약",
+      "head": "문서 요약",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "문서 요약 ai 추천",
+      "keywords": [
+        "문서 요약 ai 추천",
+        "문서 요약 ai 추천 디시",
+        "문서 요약 ai 무료"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "영어-공부",
+      "head": "영어 공부",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "영어 공부 ai 비교",
+      "keywords": [
+        "영어 공부 ai 비교",
+        "영어 공부 ai 추천 디시",
+        "영어 공부 용 ai 추천"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "자소서-첨삭",
+      "head": "자소서 첨삭",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "자소서 첨삭 ai 추천",
+      "keywords": [
+        "자소서 첨삭 ai 추천",
+        "자소서 첨삭 ai 추천 디시",
+        "자소서 첨삭 ai 무료"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "회의록-작성",
+      "head": "회의록 작성",
+      "tier": "T3",
+      "format": "비교와 추천",
+      "primary": "회의록 작성 ai 비교",
+      "keywords": [
+        "회의록 작성 ai 비교",
+        "회의록 작성 ai 추천",
+        "회의록 작성 ai 무료"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 6,
+      "status": "pending"
+    },
+    {
+      "id": "피그-마",
+      "head": "피그 마",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "피그 마 ai ppt 만들기",
+      "keywords": [
+        "피그 마 ai ppt 만들기",
+        "피그 마 ai 무료",
+        "피그 마 ai 상세페이지 만들기"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 5,
+      "status": "pending"
+    },
+    {
+      "id": "라이너-ai",
+      "head": "라이너 ai",
+      "tier": "T3",
+      "format": "가격과 요금제",
+      "primary": "라이너 ai 무료",
+      "keywords": [
+        "라이너 ai 무료",
+        "라이너 ai 무료 이벤트",
+        "라이너 ai 자소서 후기"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 5,
+      "status": "pending"
+    },
+    {
+      "id": "제미나이-나노바나나",
+      "head": "제미나이 나노바나나",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "제미나이 나노바나나 사용법",
+      "keywords": [
+        "제미나이 나노바나나 사용법",
+        "제미나이 나노바나나 사용법 디시",
+        "제미나이 나노바나나 프로 사용법"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 5,
+      "status": "pending"
+    },
+    {
+      "id": "젠스-파크",
+      "head": "젠스 파크",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "젠스 파크 ai ppt 만들기",
+      "keywords": [
+        "젠스 파크 ai ppt 만들기",
+        "젠스 파크 ai 무료",
+        "젠스 파크 ai 회의록 사용법"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "priority": 5,
+      "status": "pending"
+    }
+  ]
+}
