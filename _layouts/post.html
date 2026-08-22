@@ -157,21 +157,40 @@ script_includes:
   {% endif %}
 
   <div class="content">
-    {%- capture ad_top -%}{% include google-ad-post-top.html %}{%- endcapture -%}
-    {%- capture ad_mid -%}{% include google-ad-post-middle.html %}{%- endcapture -%}
-    {%- assign parts = content | split: '</p>' -%}
-    {%- assign n = parts | size -%}
+    {%- capture inline_ad -%}{% include google-ad-post-inline.html %}{%- endcapture -%}
     {%- comment -%}
-      광고 위치 최적화: 본문 맨 위가 아니라 도입을 읽은 뒤(3번째 문단 뒤)에 첫 광고를 넣고,
-      긴 글(문단 14개 초과)에는 중반(약 60% 지점)에 광고를 하나 더 넣어 고르게 분산한다.
+      광고를 H2 섹션 경계에 넣는다. 문단 중간에 끼우면 읽던 흐름이 끊기지만
+      소제목 직전은 어차피 독자가 한 번 쉬어 가는 자리라 방해가 가장 적다.
+
+      개수는 글 길이에 비례시킨다. 섹션이 4개 미만인 짧은 글에는 넣지 않고,
+      그 이상이면 두 섹션마다 하나씩, 최대 4개까지 넣는다.
+      첫 섹션 앞에는 넣지 않는다. 도입을 읽기도 전에 광고가 나오면 이탈한다.
     {%- endcomment -%}
-    {%- assign top_at = 3 -%}
-    {%- assign mid_at = n | times: 0.6 | floor -%}
-    {%- for part in parts -%}
-      {{ part }}{%- unless forloop.last -%}</p>{%- endunless -%}
-      {%- if n > 6 and forloop.index == top_at -%}{{ ad_top }}{%- endif -%}
-      {%- if n > 14 and mid_at > top_at and forloop.index == mid_at -%}{{ ad_mid }}{%- endif -%}
+    {%- assign sections = content | split: '<h2' -%}
+    {%- assign sec_count = sections | size | minus: 1 -%}
+    {%- assign ads_used = 0 -%}
+    {%- for sec in sections -%}
+      {%- if forloop.first -%}
+        {{ sec }}
+      {%- else -%}
+        {%- comment -%} 두 번째 섹션부터, 두 개 걸러 하나씩 {%- endcomment -%}
+        {%- assign idx = forloop.index0 -%}
+        {%- assign rem = idx | modulo: 2 -%}
+        {%- if sec_count >= 4 and idx >= 2 and rem == 0 and ads_used < 4 -%}
+          {{ inline_ad }}
+          {%- assign ads_used = ads_used | plus: 1 -%}
+        {%- endif -%}
+        <h2{{ sec }}
+      {%- endif -%}
     {%- endfor -%}
+    {%- comment -%}
+      소제목이 거의 없는 옛 글은 위 규칙으로 광고가 하나도 안 붙는다.
+      그런 글에는 본문 중반에 하나만 넣는다.
+    {%- endcomment -%}
+    {%- if ads_used == 0 -%}
+      {%- assign paras = content | split: '</p>' | size -%}
+      {%- if paras > 8 -%}{{ inline_ad }}{%- endif -%}
+    {%- endif -%}
   </div>
 
   {% if page.chart %}{% include chartjs.html %}{% endif %}

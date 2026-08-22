@@ -43,14 +43,21 @@ REL_DIR = "/assets/img/thumb"
 
 W, H = 1200, 630
 
-# 카테고리별 기준 색조. 같은 카테고리는 계열이 비슷하게, 글마다는 조금씩 다르게 나온다.
-CATEGORY_HUE = {
-    "Tech": 168,        # 청록
-    "Paper": 262,       # 보라
-    "DarkNet": 20,      # 주황
-    "OpenSource": 210,  # 파랑
-    "Basics": 120,      # 초록
+# 카테고리별 액센트. 채도를 낮춰 잡았다. 형광에 가까운 색은 싸 보인다.
+# 카드에서 색이 들어가는 곳은 점 하나와 짧은 선 하나뿐이고 나머지는 전부 무채색이다.
+CATEGORY_ACCENT = {
+    "Tech":       (172, 42, 34),   # 딥 틸
+    "Paper":      (258, 30, 42),   # 뮤티드 퍼플
+    "DarkNet":    (14, 44, 42),    # 테라코타
+    "OpenSource": (212, 38, 40),   # 슬레이트 블루
+    "Basics":     (128, 30, 36),   # 세이지 그린
 }
+
+# 종이 느낌의 웜 오프화이트. 순백은 화면에서 눈이 부시고 싸구려로 보인다.
+GROUND = "#FAF9F6"
+INK = "#14151A"
+MUTED = "#83858C"
+HAIRLINE = "#E4E2DC"
 
 
 def find_chromium() -> str:
@@ -61,100 +68,94 @@ def find_chromium() -> str:
     sys.exit("headless 렌더에 쓸 Chromium 계열 브라우저를 찾지 못했습니다.")
 
 
-def palette(slug: str, category: str) -> dict:
-    """슬러그에서 결정론적으로 색을 뽑는다. 같은 글은 언제 돌려도 같은 색."""
+def palette(slug: str, category: str) -> str:
+    """카테고리 액센트를 슬러그로 아주 조금만 흔든다.
+
+    ±10도 안에서만 움직인다. 글마다 다르되 한 벌로 보이게 하려는 것이다.
+    색을 크게 돌리면 사이트 전체가 알록달록해져 프리미엄한 느낌이 사라진다.
+    """
     h = int(hashlib.sha256(slug.encode()).hexdigest()[:8], 16)
-    base = CATEGORY_HUE.get(category, 168)
-    # 카테고리 색조를 중심으로 좌우 30도 안에서만 흔든다. 계열은 유지하되 글마다 달라진다.
-    hue = (base + (h % 61) - 30) % 360
-    return {
-        "h1": hue,
-        "h2": (hue + 38) % 360,
-        "angle": 115 + (h >> 8) % 50,
-    }
+    base_h, sat, light = CATEGORY_ACCENT.get(category, CATEGORY_ACCENT["Tech"])
+    hue = (base_h + (h % 21) - 10) % 360
+    return f"hsl({hue} {sat}% {light}%)"
 
 
 def fit_title(title: str) -> tuple[str, int]:
     """길이에 따라 글자 크기를 낮춘다. 한글은 한 글자가 넓어 기준을 따로 잡는다."""
     n = len(title)
-    if n <= 28:
-        return title, 62
-    if n <= 44:
-        return title, 52
-    if n <= 62:
-        return title, 44
-    return title[:78].rstrip() + "…", 38
+    if n <= 24:
+        return title, 58
+    if n <= 40:
+        return title, 48
+    if n <= 58:
+        return title, 41
+    return title[:74].rstrip() + "…", 35
 
 
 def build_html(title: str, category: str, tags: list[str], date: str, slug: str) -> str:
-    p = palette(slug, category)
+    accent = palette(slug, category)
     shown, size = fit_title(title)
-    chips = "".join(
-        f'<span class="chip">{html.escape(t)}</span>' for t in tags[:4]
-    )
+    # 태그는 알약 모양 칩 대신 담백한 텍스트로 늘어놓는다. 칩이 많아지면
+    # 카드가 UI 스크린샷처럼 보이고 프리미엄한 느낌이 사라진다.
+    meta = "  /  ".join(html.escape(t) for t in tags[:4])
+    y, m, d = date.split("-")
     return f"""<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><style>
+<html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
   * {{ margin:0; padding:0; box-sizing:border-box; }}
   body {{
     width:{W}px; height:{H}px; overflow:hidden;
-    font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;
-    background:#0d1117; color:#fff;
-    display:flex; flex-direction:column; justify-content:space-between;
-    padding:64px 72px; position:relative;
+    background:{GROUND}; color:{INK};
+    font-family:"Pretendard","Pretendard Variable","Noto Sans CJK KR",sans-serif;
+    font-feature-settings:"ss01";
+    display:flex; flex-direction:column;
+    padding:76px 84px 72px;
   }}
-  /* 배경: 카테고리 색조 기반 그라디언트 + 미세한 격자 */
-  body::before {{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient({p['angle']}deg,
-      hsl({p['h1']} 62% 22%) 0%,
-      hsl({p['h1']} 58% 13%) 48%,
-      hsl({p['h2']} 55% 16%) 100%);
+  /* 카드 안쪽 실선 하나. 여백을 규정해 주는 최소한의 장치다. */
+  .frame {{
+    position:absolute; inset:34px;
+    border:1px solid {HAIRLINE};
+    pointer-events:none;
   }}
-  body::after {{
-    content:""; position:absolute; inset:0; opacity:.16;
-    background-image:
-      linear-gradient(hsl({p['h1']} 70% 62% / .5) 1px, transparent 1px),
-      linear-gradient(90deg, hsl({p['h1']} 70% 62% / .5) 1px, transparent 1px);
-    background-size:52px 52px;
-    -webkit-mask-image:radial-gradient(ellipse 90% 70% at 82% 15%, #000 0%, transparent 72%);
-  }}
-  .row {{ position:relative; display:flex; align-items:center; gap:14px; }}
+  header {{ display:flex; align-items:center; gap:12px; }}
+  .dot {{ width:9px; height:9px; border-radius:50%; background:{accent}; flex:none; }}
   .brand {{
-    font-size:22px; font-weight:800; letter-spacing:.16em;
-    color:hsl({p['h1']} 78% 72%);
+    font-size:15px; font-weight:700; letter-spacing:.22em;
+    color:{INK};
   }}
   .cat {{
-    font-size:16px; font-weight:600; padding:5px 13px; border-radius:5px;
-    background:hsl({p['h1']} 60% 70% / .18);
-    border:1px solid hsl({p['h1']} 60% 70% / .38);
-    color:hsl({p['h1']} 70% 84%);
+    font-size:13px; font-weight:500; letter-spacing:.08em;
+    color:{MUTED};
   }}
-  .date {{ margin-left:auto; font-size:16px; color:#ffffff88; font-variant-numeric:tabular-nums; }}
+  .date {{
+    margin-left:auto; font-size:13px; color:{MUTED};
+    font-variant-numeric:tabular-nums; letter-spacing:.04em;
+  }}
+  main {{ flex:1; display:flex; align-items:center; }}
   h1 {{
-    position:relative; font-size:{size}px; font-weight:800; line-height:1.34;
-    letter-spacing:-.02em; word-break:keep-all; max-width:20ch;
-    text-shadow:0 2px 26px rgba(0,0,0,.4);
+    font-size:{size}px; font-weight:700; line-height:1.38;
+    letter-spacing:-.028em; word-break:keep-all;
+    max-width:19ch; color:{INK};
   }}
-  .rule {{
-    position:relative; width:76px; height:5px; border-radius:3px; margin-bottom:26px;
-    background:hsl({p['h1']} 74% 60%);
-  }}
-  .chips {{ position:relative; display:flex; gap:9px; flex-wrap:wrap; }}
-  .chip {{
-    font-size:17px; font-weight:500; padding:7px 15px; border-radius:6px;
-    background:#ffffff14; border:1px solid #ffffff2b; color:#ffffffd8;
+  footer {{ display:flex; flex-direction:column; gap:16px; }}
+  .rule {{ width:44px; height:2px; background:{accent}; }}
+  .tags {{
+    font-size:15px; color:{MUTED}; letter-spacing:.01em;
   }}
 </style></head><body>
-  <div class="row">
+  <div class="frame"></div>
+  <header>
+    <span class="dot"></span>
     <span class="brand">OPSOAI</span>
     <span class="cat">{html.escape(category)}</span>
-    <span class="date">{html.escape(date)}</span>
-  </div>
-  <div>
+    <span class="date">{y}.{m}.{d}</span>
+  </header>
+  <main><h1>{html.escape(shown)}</h1></main>
+  <footer>
     <div class="rule"></div>
-    <h1>{html.escape(shown)}</h1>
-  </div>
-  <div class="chips">{chips}</div>
+    <div class="tags">{meta}</div>
+  </footer>
 </body></html>"""
 
 
@@ -174,6 +175,7 @@ def render(html_text: str, out_png: str, browser: str) -> None:
             [browser, "--headless", "--disable-gpu", "--no-sandbox",
              "--hide-scrollbars", "--force-device-scale-factor=1",
              f"--window-size={W},{H}",
+             "--virtual-time-budget=4000",  # 웹폰트(Pretendard) 로드 대기
              f"--screenshot={shot_target}", f"file://{src}"],
             check=True, capture_output=True, timeout=90,
         )
@@ -264,8 +266,16 @@ def main() -> int:
         m = post_meta(path)
         if not m:
             continue
-        if args.missing and has_image(m["data"]) and not args.force:
-            continue
+        # --force 는 '이미 있는 이미지 파일을 다시 그린다'는 뜻이지
+        # '대표 이미지가 이미 있는 글까지 대상에 넣는다'는 뜻이 아니다.
+        # 둘을 섞으면 외부 CDN 이미지를 쓰는 글까지 카드를 만들어
+        # 아무도 참조하지 않는 파일이 수백 장 쌓인다.
+        if args.missing and has_image(m["data"]):
+            path = m["data"].get("image")
+            path = path.get("path") if isinstance(path, dict) else path
+            is_own_card = "/thumb/" in str(path or "")
+            if not (is_own_card and args.force):
+                continue
         targets.append(m)
     if args.limit:
         targets = targets[: args.limit]

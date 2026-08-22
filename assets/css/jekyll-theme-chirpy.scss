@@ -1,0 +1,75 @@
+---
+---
+
+@use 'abstracts/variables' with (
+  $theme: '{{ site.theme_mode }}'
+);
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* ───────────────────────── 커스텀 스타일 ─────────────────────────
+   테마 원본(assets/css/jekyll-theme-chirpy.scss)을 그대로 복사하고
+   아래만 덧붙였다. 테마 업그레이드 시 위쪽이 바뀌었는지 확인할 것.
+   ──────────────────────────────────────────────────────────────── */
+
+/* 우측 패널을 스크롤에 붙여 둔다.
+
+   테마는 .access 에 `&:only-child` 조건으로 sticky 를 걸어 두는데,
+   패널에 광고를 형제로 넣는 순간 그 조건이 깨져 sticky 가 사라진다.
+   그래서 지금은 목차도 광고도 스크롤과 함께 위로 사라진다.
+   5,000자짜리 글에서는 읽는 내내 우측이 빈 공간이 된다.
+
+   목차와 광고를 한 덩어리로 묶어 붙여 두면, 읽기를 방해하지 않으면서
+   화면에 계속 남는다. 내용이 화면보다 길면 그 안에서만 스크롤한다. */
+@media all and (min-width: 1200px) {
+  .panel-sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    /* 스크롤바가 생겨도 시선을 뺏지 않게 얇고 흐리게 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--btn-border-color) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--btn-border-color);
+      border-radius: 2px;
+    }
+  }
+}
+
+/* 본문 사이에 들어가는 광고.
+   글의 일부처럼 보이면 오인 클릭이 되므로, 위아래 여백과 옅은 구분선으로
+   본문과 확실히 분리한다. 최소 높이를 잡아 두는 이유는 광고가 늦게 로드될 때
+   본문이 밀리는 레이아웃 이동(CLS)을 막기 위해서다. CLS 는 Core Web Vitals
+   점수를 깎고, 그게 검색 순위로 이어진다. */
+.google-ad-inline {
+  margin: 2.2rem 0;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--btn-border-color);
+  border-bottom: 1px solid var(--btn-border-color);
+  min-height: 120px;
+  text-align: center;
+
+  ins {
+    display: block;
+  }
+}
+
+/* 사이드바 광고도 같은 이유로 높이를 예약한다. */
+.google-ad {
+  min-height: 250px;
+  margin-bottom: 1.5rem;
+}

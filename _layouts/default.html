@@ -35,19 +35,26 @@ layout: compress
 
           <!-- panel -->
           <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
-            <div class="access">
-              {% include_cached update-list.html lang=lang %}
-              {% include_cached trending-tags.html lang=lang %}
+            {%- comment -%}
+              목차와 광고를 한 덩어리로 묶어 스크롤에 붙여 둔다.
+              테마는 .access 가 유일한 자식일 때만 sticky 를 거는데, 광고를
+              형제로 넣으면 그 조건이 깨져 우측 전체가 스크롤과 함께 사라진다.
+              긴 글에서는 읽는 내내 우측이 빈 공간이 되고 광고도 노출되지 않는다.
+            {%- endcomment -%}
+            <div class="panel-sticky">
+              <div class="access">
+                {% include_cached update-list.html lang=lang %}
+                {% include_cached trending-tags.html lang=lang %}
+              </div>
+
+              {% for _include in layout.panel_includes %}
+                {% assign _include_path = _include | append: '.html' %}
+                {% include {{ _include_path }} lang=lang %}
+              {% endfor %}
+
+              <!-- 우측 사이드바 광고. 목차 아래에 두어 읽기를 방해하지 않는다. -->
+              {% include google-ad-sidebar.html %}
             </div>
-            
-            <!-- 우측 사이드바 광고 -->
-            {% include google-ad-sidebar.html %}
-
-
-            {% for _include in layout.panel_includes %}
-              {% assign _include_path = _include | append: '.html' %}
-              {% include {{ _include_path }} lang=lang %}
-            {% endfor %}
           </aside>
         </div>
 
