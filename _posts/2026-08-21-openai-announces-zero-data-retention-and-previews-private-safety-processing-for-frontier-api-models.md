@@ -80,17 +80,21 @@ OpenAI Zero Data Retention and Private Safety Processing 관련 새 소식을 �
 
 ## 무슨 일이 벌어진 걸까?
 
-OpenAI Introduces Zero Data Retention for Frontier API Models and Previews Private Safety Processing 소식이 포착됐습니다. 발행일은 2026-08-19이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
+**한 줄 요약**: OpenAI 가 프런티어 API 모델에 데이터 무보존 옵션을 도입하고, 비공개 안전 처리 기능을 미리 공개했습니다
 
-- On August 19, 2026, OpenAI announced Zero Data Retention (ZDR) options for eligible API deployments on frontier models. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+<span class="source-original">원문 헤드라인: OpenAI Introduces Zero Data Retention for Frontier API Models and Previews Private Safety Processing</span>
 
-- Under Zero Data Retention, OpenAI does not retain customer prompts or model outputs after processing, nor does it use enterprise data for model training unless customers opt in. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+발행일은 2026-08-19이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
 
-- OpenAI previewed Private Safety Processing to identify misuse patterns across related interactions without revealing prompt or response content to OpenAI staff. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- 2026년 8월 19일 OpenAI 가 조건을 충족하는 프런티어 모델 API 배포에 데이터 무보존(Zero Data Retention, ZDR) 옵션을 발표했습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: On August 19, 2026, OpenAI announced Zero Data Retention (ZDR) options for eligible API deployments on frontier models.</span>
 
-- Private Safety Processing enables data to remain on customer-controlled infrastructure or on OpenAI infrastructure using customer-managed encryption keys. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- ZDR 을 켜면 OpenAI 는 처리 후 고객의 프롬프트나 모델 출력을 보관하지 않으며, 고객이 따로 동의하지 않는 한 기업 데이터를 모델 학습에 쓰지 않습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: Under Zero Data Retention, OpenAI does not retain customer prompts or model outputs after processing, nor does it use enterprise data for model training unless customers opt in.</span>
 
-- OpenAI plans to publish a technical white paper and begin rolling out Private Safety Processing in September 2026. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- 함께 미리 공개된 Private Safety Processing 은 프롬프트와 응답 내용을 OpenAI 직원에게 보여주지 않은 채, 서로 연관된 사용 기록에서 오남용 패턴을 찾아내는 기능입니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: OpenAI previewed Private Safety Processing to identify misuse patterns across related interactions without revealing prompt or response content to OpenAI staff.</span>
+
+- 이 기능을 쓰면 데이터를 고객이 통제하는 인프라에 두거나, OpenAI 인프라에 두더라도 고객이 관리하는 암호화 키로 보호할 수 있습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: Private Safety Processing enables data to remain on customer-controlled infrastructure or on OpenAI infrastructure using customer-managed encryption keys.</span>
+
+- OpenAI 는 기술 백서를 공개하고 2026년 9월부터 Private Safety Processing 을 순차 적용할 계획입니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: OpenAI plans to publish a technical white paper and begin rolling out Private Safety Processing in September 2026.</span>
 
 <figure class="news-source-image">
   <img src="https://images.ctfassets.net/kftzwdyauwt9/4bH42IUP1LSYL5WNIs0ya1/ed6b0e324c8f142d964229474d7ee601/codex-seo-private-intelligence-v3-1787157696296.png?w=1600&amp;h=900&amp;fit=fill" alt="OpenAI 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
@@ -135,7 +139,7 @@ flowchart LR
 
 ## 아직은 선을 그어야 할 부분
 
-- The exact general availability schedule for Private Safety Processing following the initial preview period.
+- 초기 프리뷰 이후 Private Safety Processing 이 언제 정식 제공되는지는 아직 공개되지 않았습니다.<br><span class="source-original">원문: The exact general availability schedule for Private Safety Processing following the initial preview period.</span>
 
 추가 원문이 공개되거나 제공 조건이 바뀌면 판단도 달라질 수 있습니다. 따라서 이 글은 오늘 시점의 출발점으로 활용하고, 실제 도입 전에는 연결된 원문을 다시 확인하는 것이 좋습니다.
 

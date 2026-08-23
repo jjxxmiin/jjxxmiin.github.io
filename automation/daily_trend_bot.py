@@ -717,16 +717,21 @@ EVIDENCE_SCHEMA = {
                 "type": "OBJECT",
                 "properties": {
                     "text": {"type": "STRING"},
+                    # 독자는 한국어로 읽는다. 영어 사실만 받으면 폴백 브리핑이
+                    # 영어 목록 그대로 나가므로 번역을 같은 호출에서 함께 받는다.
+                    "text_ko": {"type": "STRING"},
                     "source_urls": {"type": "ARRAY", "items": {"type": "STRING"}}
                 },
-                "required": ["text", "source_urls"]
+                "required": ["text", "text_ko", "source_urls"]
             }
         },
-        "unknowns": {"type": "ARRAY", "items": {"type": "STRING"}}
+        "unknowns": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "unknowns_ko": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "headline_ko": {"type": "STRING"}
     },
     "required": [
         "verified", "reason", "event_status", "published_at",
-        "sources", "facts", "unknowns"
+        "sources", "facts", "unknowns", "unknowns_ko", "headline_ko"
     ]
 }
 
@@ -762,6 +767,15 @@ Use Google Search to independently verify this candidate:
   exact source URLs that support it.
 - Put uncertain or conflicting claims in unknowns, never in facts.
 - Return source tier as official or trusted. Write factual fields in English.
+
+[KOREAN OUTPUT]
+- The blog is written for Korean readers, so every fact also needs a Korean version.
+- fact.text_ko is a natural Korean translation of fact.text. unknowns_ko translates
+  unknowns in the same order. headline_ko is a Korean version of the candidate headline.
+- Translate only. Never add a claim, number, or guess that is missing from the English text.
+- Keep product, company, and model names in their original spelling. Keep numbers as printed.
+- Write so that someone meeting the topic for the first time can follow it.
+- Never use the middle dot character.
 """
     response_text = generate_content_with_fallback(
         client,
@@ -830,7 +844,11 @@ Use Google Search to independently verify this candidate:
                 urls.append(final_url)
         text = str(fact.get("text") or "").strip()
         if text and urls:
-            facts.append({"text": text, "source_urls": list(dict.fromkeys(urls))})
+            facts.append({
+                "text": text,
+                "text_ko": str(fact.get("text_ko") or "").strip(),
+                "source_urls": list(dict.fromkeys(urls)),
+            })
 
     errors = []
     if len(sources) < 2:
@@ -857,6 +875,10 @@ Use Google Search to independently verify this candidate:
         "unknowns": [
             str(value).strip() for value in (raw.get("unknowns") or []) if str(value).strip()
         ],
+        "unknowns_ko": [
+            str(value).strip() for value in (raw.get("unknowns_ko") or []) if str(value).strip()
+        ],
+        "headline_ko": str(raw.get("headline_ko") or "").strip(),
         "quality_warnings": errors,
     }
 
@@ -905,6 +927,94 @@ def candidate_fallback_evidence(candidate):
         ],
         "quality_warnings": ["엄격한 재검증 대신 검색 단계의 직접 원문 1개를 사용함"],
     }
+
+_HANGUL = re.compile(r"[가-힣]")
+
+
+def _has_korean(value):
+    return bool(_HANGUL.search(str(value or "")))
+
+
+def ensure_korean_evidence(client, evidence, *, headline=""):
+    """사실과 한계 문장의 한국어본을 채운다.
+
+    검증 단계는 원문과 글자 그대로 대조하려고 사실을 영어로 적는다. 수치 검증도 그
+    영어 문장을 기준으로 돈다. 문제는 글쓰기가 실패해 폴백 브리핑으로 나갈 때인데,
+    그때 영어 문장이 그대로 독자에게 노출됐다. 검증 호출이 한국어를 함께 돌려주므로
+    보통은 할 일이 없고, 빠졌을 때만 한 번의 값싼 호출로 채운다."""
+    facts = evidence.get("facts") or []
+    unknowns = evidence.get("unknowns") or []
+    unknowns_ko = list(evidence.get("unknowns_ko") or [])
+    unknowns_ko += [""] * max(0, len(unknowns) - len(unknowns_ko))
+
+    pending = []
+    for index, fact in enumerate(facts):
+        if not _has_korean(fact.get("text_ko")):
+            pending.append(("fact", index, str(fact.get("text") or "").strip()))
+    for index, value in enumerate(unknowns):
+        if not _has_korean(unknowns_ko[index]):
+            pending.append(("unknown", index, str(value).strip()))
+    if headline and not _has_korean(evidence.get("headline_ko")):
+        pending.append(("headline", 0, str(headline).strip()))
+    pending = [item for item in pending if item[2]]
+    if not pending:
+        evidence["unknowns_ko"] = unknowns_ko
+        return evidence
+
+    numbered = "\n".join(f"{position}. {text}" for position, (_, _, text) in enumerate(pending))
+    prompt = f"""아래 문장을 한국어로 옮겨라.
+
+[규칙]
+- 원문에 없는 사실, 숫자, 추측을 절대 더하지 마라. 번역만 한다.
+- 숫자는 원문 그대로 두고, 제품명과 회사명은 영문 표기를 유지한다.
+- 처음 이 주제를 보는 사람도 이해할 수 있는 자연스러운 한국어로 쓴다.
+- 가운뎃점 문자를 쓰지 마라.
+- index 는 입력에 붙은 번호를 그대로 돌려준다.
+
+{numbered}
+"""
+    schema = {
+        "type": "ARRAY",
+        "items": {
+            "type": "OBJECT",
+            "properties": {
+                "index": {"type": "NUMBER"},
+                "korean": {"type": "STRING"},
+            },
+            "required": ["index", "korean"],
+        },
+    }
+    response_text = generate_content_with_fallback(
+        client, prompt, response_schema=schema, tools=None, thinking_level=None
+    )
+    translations = {}
+    if response_text:
+        try:
+            for item in json.loads(response_text) or []:
+                position = int(item.get("index"))
+                korean = str(item.get("korean") or "").strip()
+                if korean:
+                    translations[position] = korean
+        except (TypeError, ValueError) as exc:
+            print(f"  번역 응답 파싱 실패: {exc}")
+    if not translations:
+        # 번역이 실패해도 발행은 막지 않는다. 영어 문장이라도 원문 근거는 남는다.
+        print("::warning:: 한국어 번역을 받지 못해 원문 문장을 그대로 싣습니다.")
+
+    for position, (kind, index, _) in enumerate(pending):
+        korean = translations.get(position)
+        if not korean:
+            continue
+        if kind == "fact":
+            facts[index]["text_ko"] = korean
+        elif kind == "unknown":
+            unknowns_ko[index] = korean
+        else:
+            evidence["headline_ko"] = korean
+
+    evidence["unknowns_ko"] = unknowns_ko
+    return evidence
+
 
 NEWS_HEADINGS = (
     "## 무슨 일이 벌어진 걸까?",
@@ -1222,20 +1332,45 @@ def _fallback_post_data(topic_data, evidence):
     source = evidence["sources"][0]
     publisher = str(source.get("publisher") or "원문").strip()
     source_link = f"[{publisher}]({source['url']})"
-    facts = [
-        str(item.get("text") or "").strip()
+    # 검증 단계의 사실은 영어다. 한국어본을 앞에 세우고 원문 문장은 뒤에 흐리게 남긴다.
+    # 독자는 한국어로 읽고, 확인하고 싶은 사람은 인용된 원문 표현을 그대로 대조할 수 있다.
+    def _bilingual(korean, english, suffix=""):
+        korean = str(korean or "").strip()
+        english = str(english or "").strip()
+        primary = " ".join(part for part in (korean or english, suffix) if part)
+        if korean and english and korean != english:
+            return f'{primary}<br><span class="source-original">원문: {english}</span>'
+        return primary
+
+    fact_items = [
+        # 출처 표시는 번역문 바로 뒤에 붙인다. 원문 문장 뒤로 밀리면 무엇의 근거인지 흐려진다.
+        _bilingual(item.get("text_ko"), item.get("text"), source_link)
         for item in evidence.get("facts") or []
-        if str(item.get("text") or "").strip()
+        if str(item.get("text_ko") or item.get("text") or "").strip()
     ]
     unknowns = [
         str(value).strip()
         for value in evidence.get("unknowns") or []
         if str(value).strip()
     ]
+    unknowns_ko = list(evidence.get("unknowns_ko") or [])
+    unknowns_ko += [""] * max(0, len(unknowns) - len(unknowns_ko))
+    unknown_items = [
+        _bilingual(unknowns_ko[index], value)
+        for index, value in enumerate(unknowns)
+    ]
+    headline_ko = str(evidence.get("headline_ko") or "").strip()
+    headline_display = headline_ko or headline
+    headline_original = (
+        f'<span class="source-original">원문 헤드라인: {headline}</span>\n\n'
+        if headline_ko and headline and headline_ko != headline
+        else ""
+    )
+
     fact_text = "\n\n".join(
-        f"- {text} {source_link}" for text in facts[:5]
-    ) or f"- {headline} 관련 직접 원문이 공개됐습니다. {source_link}"
-    unknown_text = "\n\n".join(f"- {text}" for text in unknowns[:4]) or (
+        f"- {item}" for item in fact_items[:5]
+    ) or f"- {headline_display} 관련 직접 원문이 공개됐습니다. {source_link}"
+    unknown_text = "\n\n".join(f"- {item}" for item in unknown_items[:4]) or (
         "- 가격, 지역별 제공 범위, 실제 도입 조건은 원문에서 다시 확인해야 합니다."
     )
     content = f"""
@@ -1246,11 +1381,13 @@ flowchart LR
     C --> D["도입 조건과 한계"]
 ```
 
-{topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다.
+{topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다. 원문이 영어인 문장은 한국어로 옮기고, 대조할 수 있도록 원문도 함께 남겼습니다.
 
 {NEWS_HEADINGS[0]}
 
-{headline} 소식이 포착됐습니다. 발행일은 {evidence.get('published_at') or '원문 표기 기준'}이며, 아래 내용은 {source_link}에서 확인할 수 있는 범위만 담았습니다.
+**한 줄 요약**: {headline_display}
+
+{headline_original}발행일은 {evidence.get('published_at') or '원문 표기 기준'}이며, 아래 내용은 {source_link}에서 확인할 수 있는 범위만 담았습니다.
 
 {fact_text}
 
@@ -1312,7 +1449,7 @@ flowchart LR
             {
                 "question": f"{topic} 소식에서 오늘 확인된 내용은 무엇인가요?",
                 "answer": (
-                    f"{headline} 관련 내용이 직접 원문에서 확인됐습니다. "
+                    f"{headline_display} 관련 내용이 직접 원문에서 확인됐습니다. "
                     "세부 조건은 글 하단 원문을 함께 확인하는 것이 안전합니다."
                 ),
             },
@@ -1325,7 +1462,11 @@ flowchart LR
             },
             {
                 "question": "이 글에서 아직 확인되지 않은 부분은 무엇인가요?",
-                "answer": unknowns[0] if unknowns else (
+                # FAQ 는 프론트매터와 JSON-LD 로도 나가므로 HTML 없는 평문만 쓴다.
+                "answer": next(
+                    (text for text in (unknowns_ko + unknowns) if str(text).strip()),
+                    None,
+                ) or (
                     "세부 제공 조건과 실제 사용 환경의 차이는 추가 확인이 필요합니다."
                 ),
             },
@@ -1705,6 +1846,9 @@ def _publish_from_candidates(client, candidates, history):
             evidence = candidate_fallback_evidence(topic_data)
         if not evidence:
             continue
+
+        # 사실 문장은 영어로 검증된다. 독자에게 나가기 전에 한국어본을 확보한다.
+        ensure_korean_evidence(client, evidence, headline=topic_data.get("headline"))
 
         topic_data["published_at"] = evidence["published_at"]
         source_urls = [source["url"] for source in evidence["sources"]]

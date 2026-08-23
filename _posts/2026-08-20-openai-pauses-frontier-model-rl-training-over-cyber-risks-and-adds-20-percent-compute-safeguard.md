@@ -66,17 +66,21 @@ OpenAI Frontier Model Safety Pause 관련 새 소식을 오늘 확인 가능한 
 
 ## 무슨 일이 벌어진 걸까?
 
-OpenAI Pauses Frontier Reinforcement Learning and Imposes 20% Compute Safeguard Overhead 소식이 포착됐습니다. 발행일은 2026-08-18이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
+**한 줄 요약**: OpenAI 가 프런티어 모델의 강화학습을 일시 중단하고, 안전장치에 컴퓨팅 20퍼센트를 더 쓰기로 했습니다
 
-- On August 18, 2026, OpenAI published an announcement titled 'Pacing model development in an era of cyber-critical capabilities' detailing updates to its safety and research controls. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+<span class="source-original">원문 헤드라인: OpenAI Pauses Frontier Reinforcement Learning and Imposes 20% Compute Safeguard Overhead</span>
 
-- OpenAI implemented a two-week pause on reinforcement learning training for deployment-bound frontier models while hardening research environments and expanding monitoring. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+발행일은 2026-08-18이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
 
-- OpenAI placed its largest planned frontier reinforcement learning run on hold while conducting smaller-scale training and evaluations to establish evidence of alignment. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- 2026년 8월 18일 OpenAI 가 'Pacing model development in an era of cyber-critical capabilities' 라는 제목의 글을 올려 안전 정책과 연구 통제 방식의 변경을 설명했습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: On August 18, 2026, OpenAI published an announcement titled 'Pacing model development in an era of cyber-critical capabilities' detailing updates to its safety and research controls.</span>
 
-- Preliminary internal evaluations indicated that OpenAI's upcoming Astra model could not be ruled out from reaching the Critical cybersecurity capability threshold under its Preparedness Framework. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- OpenAI 는 배포를 앞둔 프런티어 모델의 강화학습 훈련을 2주간 멈추고, 그동안 연구 환경을 강화하고 모니터링 범위를 넓혔습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: OpenAI implemented a two-week pause on reinforcement learning training for deployment-bound frontier models while hardening research environments and expanding monitoring.</span>
 
-- OpenAI estimated that its continuous safety monitoring system adds roughly 20 percent compute overhead to the inference workloads being monitored. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup>
+- 계획했던 가장 큰 규모의 프런티어 강화학습 실행은 보류했고, 대신 작은 규모의 훈련과 평가를 돌려 정렬(alignment) 근거를 쌓고 있습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: OpenAI placed its largest planned frontier reinforcement learning run on hold while conducting smaller-scale training and evaluations to establish evidence of alignment.</span>
+
+- 내부 예비 평가에서는 곧 나올 Astra 모델이 자사 Preparedness Framework 의 사이버보안 능력 Critical 기준에 도달할 가능성을 배제할 수 없다는 결과가 나왔습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: Preliminary internal evaluations indicated that OpenAI's upcoming Astra model could not be ruled out from reaching the Critical cybersecurity capability threshold under its Preparedness Framework.</span>
+
+- OpenAI 는 상시 안전 모니터링 시스템이 감시 대상 추론 작업에 약 20퍼센트의 컴퓨팅 부담을 더한다고 추산했습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 출처">[1]</a></sup><br><span class="source-original">원문: OpenAI estimated that its continuous safety monitoring system adds roughly 20 percent compute overhead to the inference workloads being monitored.</span>
 
 <figure class="news-source-image">
   <img src="https://images.ctfassets.net/kftzwdyauwt9/55UVJLAaFr5hqOom9Il3Ou/2a7c6a08571daf98a0643d76cc243add/index-pacing-model-development-cyber-capabilities-dark-seo.png?w=1600&amp;h=900&amp;fit=fill" alt="OpenAI 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
@@ -116,9 +120,9 @@ flowchart LR
 
 ## 아직은 선을 그어야 할 부분
 
-- The exact date when OpenAI's largest planned frontier reinforcement learning training run will resume.
+- 가장 큰 규모의 프런티어 강화학습 훈련을 언제 재개할지는 밝혀지지 않았습니다.<br><span class="source-original">원문: The exact date when OpenAI's largest planned frontier reinforcement learning training run will resume.</span>
 
-- The precise release date and final capability evaluations for the upcoming Astra model.
+- Astra 모델의 정확한 출시 시점과 최종 능력 평가 결과도 아직 공개되지 않았습니다.<br><span class="source-original">원문: The precise release date and final capability evaluations for the upcoming Astra model.</span>
 
 추가 원문이 공개되거나 제공 조건이 바뀌면 판단도 달라질 수 있습니다. 따라서 이 글은 오늘 시점의 출발점으로 활용하고, 실제 도입 전에는 연결된 원문을 다시 확인하는 것이 좋습니다.
 

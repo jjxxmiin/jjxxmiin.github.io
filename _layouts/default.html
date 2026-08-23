@@ -42,6 +42,9 @@ layout: compress
               긴 글에서는 읽는 내내 우측이 빈 공간이 되고 광고도 노출되지 않는다.
             {%- endcomment -%}
             <div class="panel-sticky">
+              <!-- 사이드바 위쪽 광고. 붙어 있는 패널의 맨 위라 노출 시간이 가장 길다. -->
+              {% include google-ad-sidebar-top.html %}
+
               <div class="access">
                 {% include_cached update-list.html lang=lang %}
                 {% include_cached trending-tags.html lang=lang %}

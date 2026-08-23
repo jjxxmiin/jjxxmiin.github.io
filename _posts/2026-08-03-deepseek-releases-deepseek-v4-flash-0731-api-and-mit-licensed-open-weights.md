@@ -72,17 +72,21 @@ DeepSeek V4-Flash API Launch 관련 새 소식을 오늘 확인 가능한 직접
 
 ## 무슨 일이 벌어진 걸까?
 
-DeepSeek Releases DeepSeek-V4-Flash API and Open Weights, Outperforming V4-Pro on Agent Benchmarks 소식이 포착됐습니다. 발행일은 2026-07-31이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
+**한 줄 요약**: DeepSeek 이 DeepSeek-V4-Flash 를 API 와 공개 가중치로 함께 내놓았고, 에이전트 벤치마크에서 V4-Pro 를 앞섰습니다
 
-- DeepSeek officially launched the DeepSeek-V4-Flash-0731 model into public beta on its API on July 31, 2026. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>
+<span class="source-original">원문 헤드라인: DeepSeek Releases DeepSeek-V4-Flash API and Open Weights, Outperforming V4-Pro on Agent Benchmarks</span>
 
-- The model weights for DeepSeek-V4-Flash-0731 were released on Hugging Face under the MIT License on July 31, 2026. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>
+발행일은 2026-07-31이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
 
-- DeepSeek-V4-Flash-0731 features a 284-billion parameter total size with 13 billion active parameters and includes an attached DSpark speculative decoding module. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>
+- DeepSeek 이 2026년 7월 31일 자사 API 에서 DeepSeek-V4-Flash-0731 모델의 공개 베타를 시작했습니다. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup><br><span class="source-original">원문: DeepSeek officially launched the DeepSeek-V4-Flash-0731 model into public beta on its API on July 31, 2026.</span>
 
-- DeepSeek-V4-Flash-0731 scored 82.7 on Terminal Bench 2.1, exceeding the 72.1 score of DeepSeek-V4-Pro-Preview. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>
+- 같은 날 DeepSeek-V4-Flash-0731 의 모델 가중치가 MIT 라이선스로 Hugging Face 에 공개됐습니다. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup><br><span class="source-original">원문: The model weights for DeepSeek-V4-Flash-0731 were released on Hugging Face under the MIT License on July 31, 2026.</span>
 
-- DeepSeek API pricing for DeepSeek-V4-Flash is set at $0.14 per 1 million cache-miss input tokens, $0.0028 per 1 million cache-hit input tokens, and $0.28 per 1 million output tokens. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup>
+- 이 모델은 전체 2,840억 개 파라미터 가운데 130억 개를 활성화해 쓰는 구조이며, DSpark 라는 추측 디코딩 모듈이 함께 붙어 있습니다. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup><br><span class="source-original">원문: DeepSeek-V4-Flash-0731 features a 284-billion parameter total size with 13 billion active parameters and includes an attached DSpark speculative decoding module.</span>
+
+- Terminal Bench 2.1 에서 82.7점을 기록해 DeepSeek-V4-Pro-Preview 의 72.1점을 앞섰습니다. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup><br><span class="source-original">원문: DeepSeek-V4-Flash-0731 scored 82.7 on Terminal Bench 2.1, exceeding the 72.1 score of DeepSeek-V4-Pro-Preview.</span>
+
+- API 가격은 캐시 미스 입력 100만 토큰당 0.14달러, 캐시 히트 입력 100만 토큰당 0.0028달러, 출력 100만 토큰당 0.28달러로 책정됐습니다. <sup class="source-citation"><a href="#source-1" aria-label="DeepSeek 출처">[1]</a></sup><br><span class="source-original">원문: DeepSeek API pricing for DeepSeek-V4-Flash is set at $0.14 per 1 million cache-miss input tokens, $0.0028 per 1 million cache-hit input tokens, and $0.28 per 1 million output tokens.</span>
 
 <figure class="news-source-image">
   <img src="https://api-docs.deepseek.com/img/deepseek-social-card.jpeg" alt="DeepSeek 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">

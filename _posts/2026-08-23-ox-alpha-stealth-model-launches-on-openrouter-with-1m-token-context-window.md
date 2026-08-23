@@ -59,17 +59,21 @@ OX Alpha Stealth Model 관련 새 소식을 오늘 확인 가능한 직접 원�
 
 ## 무슨 일이 벌어진 걸까?
 
-Anonymous Frontier Model 'OX Alpha' Stealth-Launches on OpenRouter with 1M Context Window 소식이 포착됐습니다. 발행일은 2026-08-22이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
+**한 줄 요약**: 익명의 프런티어 모델 OX Alpha 가 100만 토큰 컨텍스트 창을 달고 OpenRouter 에 조용히 등장했습니다
 
-- An anonymous model designated stealth/ox-alpha appeared on OpenRouter on August 20, 2026. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>
+<span class="source-original">원문 헤드라인: Anonymous Frontier Model 'OX Alpha' Stealth-Launches on OpenRouter with 1M Context Window</span>
 
-- Ox Alpha features a 1,048,576-token context window and a maximum output length of 131,072 tokens. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>
+발행일은 2026-08-22이며, 아래 내용은 <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>에서 확인할 수 있는 범위만 담았습니다.
 
-- The model accepts multimodal inputs including text, image, and video, and supports tool calling. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>
+- 2026년 8월 20일 OpenRouter 에 stealth/ox-alpha 라는 이름의 익명 모델이 등장했습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup><br><span class="source-original">원문: An anonymous model designated stealth/ox-alpha appeared on OpenRouter on August 20, 2026.</span>
 
-- Ox Alpha is available free of charge during its preview period, with operators claiming throughput capacity of 100 trillion tokens per day. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>
+- Ox Alpha 는 1,048,576 토큰의 컨텍스트 창과 최대 131,072 토큰의 출력 길이를 지원합니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup><br><span class="source-original">원문: Ox Alpha features a 1,048,576-token context window and a maximum output length of 131,072 tokens.</span>
 
-- Community testing reported Ox Alpha achieving an 80% Pass@1 score on a subset of the DeepSWE coding benchmark. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup>
+- 이 모델은 텍스트와 이미지, 비디오 입력을 함께 받고 도구 호출 기능도 지원합니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup><br><span class="source-original">원문: The model accepts multimodal inputs including text, image, and video, and supports tool calling.</span>
+
+- 프리뷰 기간에는 무료로 쓸 수 있으며, 운영 측은 하루 100조 토큰을 처리할 수 있다고 밝혔습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup><br><span class="source-original">원문: Ox Alpha is available free of charge during its preview period, with operators claiming throughput capacity of 100 trillion tokens per day.</span>
+
+- 커뮤니티 테스트에서는 DeepSWE 코딩 벤치마크 일부 문제에서 Pass@1 80퍼센트를 기록했다고 보고됐습니다. <sup class="source-citation"><a href="#source-1" aria-label="OpenRouter 출처">[1]</a></sup><br><span class="source-original">원문: Community testing reported Ox Alpha achieving an 80% Pass@1 score on a subset of the DeepSWE coding benchmark.</span>
 
 <figure class="news-source-image">
   <img src="https://openrouter.ai/stealth/ox-alpha/opengraph-image-1oizug?abd1ffaa6102aa5f=" alt="OpenRouter 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
@@ -104,9 +108,9 @@ flowchart LR
 
 ## 아직은 선을 그어야 할 부분
 
-- The actual owner or developer organization behind stealth/ox-alpha remains unconfirmed, with public speculation pointing toward Zhipu AI (Z.ai) or Microsoft's MAI team.
+- stealth/ox-alpha 를 실제로 만든 조직은 확인되지 않았고, Zhipu AI(Z.ai) 나 Microsoft 의 MAI 팀이라는 추측만 돌고 있습니다.<br><span class="source-original">원문: The actual owner or developer organization behind stealth/ox-alpha remains unconfirmed, with public speculation pointing toward Zhipu AI (Z.ai) or Microsoft's MAI team.</span>
 
-- Whether Ox Alpha's preliminary benchmark performance holds up across full audited coding evaluations.
+- 초기 벤치마크 성적이 정식으로 검증된 전체 코딩 평가에서도 유지될지는 아직 알 수 없습니다.<br><span class="source-original">원문: Whether Ox Alpha's preliminary benchmark performance holds up across full audited coding evaluations.</span>
 
 추가 원문이 공개되거나 제공 조건이 바뀌면 판단도 달라질 수 있습니다. 따라서 이 글은 오늘 시점의 출발점으로 활용하고, 실제 도입 전에는 연결된 원문을 다시 확인하는 것이 좋습니다.
 
