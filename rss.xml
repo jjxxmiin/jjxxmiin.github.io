@@ -1,0 +1,36 @@
+---
+permalink: /rss.xml
+sitemap: false
+---
+{%- comment -%}
+  네이버 서치어드바이저용 RSS 2.0 피드.
+
+  jekyll-feed 가 만드는 /feed.xml 은 Atom 1.0(<feed><entry>)이라 네이버가
+  "RSS 형식이 아니다"로 거절한다. 네이버는 <rss><channel><item> 구조만 받는다.
+  Atom 피드는 다른 리더가 쓰고 있으니 그대로 두고, 이 파일을 따로 제출한다.
+{%- endcomment -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.title | xml_escape }}</title>
+    <link>{{ '/' | absolute_url }}</link>
+    <description>{{ site.description | strip_newlines | strip | xml_escape }}</description>
+    <language>{{ site.lang | default: 'ko-KR' }}</language>
+    <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
+    <generator>Jekyll</generator>
+    <atom:link href="{{ '/rss.xml' | absolute_url }}" rel="self" type="application/rss+xml" />
+{%- for post in site.posts limit: 50 %}
+    <item>
+      <title>{{ post.title | xml_escape }}</title>
+      <link>{{ post.url | absolute_url }}</link>
+      <guid isPermaLink="true">{{ post.url | absolute_url }}</guid>
+      <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
+      {%- assign body = post.description | default: post.summary | default: post.excerpt %}
+      <description>{{ body | strip_html | strip_newlines | strip | truncate: 400 | xml_escape }}</description>
+      {%- for tag in post.tags %}
+      <category>{{ tag | xml_escape }}</category>
+      {%- endfor %}
+    </item>
+{%- endfor %}
+  </channel>
+</rss>

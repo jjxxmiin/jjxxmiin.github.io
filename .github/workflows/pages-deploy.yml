@@ -16,7 +16,7 @@ on:
   # workflow push event. Build once a publisher finishes, but only when it
   # actually advanced main (no-op retry runs are skipped by the job condition).
   workflow_run:
-    workflows: ["Daily AI Trend Post", "Daily OSS Trend Post"]
+    workflows: ["Daily AI Trend Post", "Daily Keyword Guide Post"]
     types:
       - completed
 
@@ -109,3 +109,24 @@ jobs:
         with:
           timeout: 600000
           error_count: 15
+
+  # 배포가 끝난 다음에 색인 요청을 보낸다. 순서가 중요하다. 아직 안 올라간 URL 을
+  # 제출하면 검색엔진이 확인하러 왔다가 404 를 보고 그냥 버린다.
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # 발행 봇의 push 는 workflow_run 으로 들어오고, 그때 github.sha 는 봇 커밋보다
+          # 뒤처져 있다. 항상 main 최신을 받아야 방금 올라온 글이 diff 에 잡힌다.
+          ref: main
+          fetch-depth: 20
+
+      - name: Ping IndexNow (Naver, Bing)
+        env:
+          # 발행 워크플로가 시작한 커밋. 그 이후 추가된 글만 골라 제출한다.
+          INDEXNOW_BASE: ${{ github.event.workflow_run.head_sha || github.event.before }}
+        run: python3 automation/ping_indexnow.py
