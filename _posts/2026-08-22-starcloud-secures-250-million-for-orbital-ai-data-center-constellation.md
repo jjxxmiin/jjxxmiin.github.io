@@ -66,6 +66,13 @@ flowchart LR
 
 우주 공간에 AI 데이터센터를 지어 지상의 전력 부족과 열식히기 문제를 해결하려는 시도가 본격적인 자금력을 얻었습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 인공지능 모델 학습과 추론에 필요한 막대한 에너지를 우주 궤도에서 해결하려는 사업이 실제 거대 투자와 엔비디아(Nvidia)의 기술 협력으로 구체화되고 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Business Wire 출처">[1]</a></sup>.
 
+> **먼저 알아둘 용어**
+>
+> - **추론**: 학습이 끝난 모델이 실제로 답을 만들어 내는 과정입니다. 이때 드는 계산 비용이 곧 사용료입니다.
+> - **지연 시간**: 요청을 보내고 첫 답이 돌아오기까지 걸리는 시간입니다.
+> - **GPU**: AI 계산을 한꺼번에 빠르게 처리하는 전용 반도체입니다. AI 비용의 대부분이 여기서 나옵니다.
+{: .prompt-info }
+
 ## 무슨 일이 벌어진 걸까?
 
 우주 컴퓨팅 스타트업 Starcloud가 23억 달러의 포스트머니 기업가치를 인정받으며 2억 5천만 달러 규모의 시리즈 A 확장 투자 라운드를 마감했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Business Wire 출처">[1]</a></sup>. 이번 투자는 맨해튼 웨스트(Manhattan West)가 주도했으며, 칩 거두인 Nvidia와 시스템 공룡 Cisco Investments, 그리고 Cedar Capital, Goanna Capital, Standard Capital이 신규 투자자로 참여했습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 기존 투자자인 Benchmark, EQT, Soma, NFX, 776 역시 참여하여 힘을 실었습니다 <sup class="source-citation"><a href="#source-3" aria-label="GeekWire 출처">[3]</a></sup>.

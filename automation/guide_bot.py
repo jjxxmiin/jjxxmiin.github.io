@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from google.genai import types  # noqa: E402
 
 import daily_trend_bot as base  # noqa: E402
+from glossary import insert_box as insert_glossary_box  # noqa: E402
 from apply_tags import tags_for  # noqa: E402
 from make_thumbnail import generate_card  # noqa: E402
 
@@ -186,6 +187,7 @@ def save(topic: dict, post: dict, evidence: dict, now) -> str:
 
     content = base.strip_emojis(post["content"]).strip()
     content = re.sub(r"^#\s+.*\n+", "", content)  # 혹시 들어온 H1 제거
+    content = insert_glossary_box(content)          # 처음 보는 독자용 용어 풀이
 
     faq = [
         {"question": base.strip_emojis(str(i.get("question", ""))).strip(),

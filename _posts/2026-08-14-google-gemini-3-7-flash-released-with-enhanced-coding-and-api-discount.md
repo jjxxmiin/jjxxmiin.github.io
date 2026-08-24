@@ -66,6 +66,15 @@ flowchart TD
 
 Google AI가 개발자와 에이전트 구축자를 위해 성능은 높이고 비용 부담은 줄인 고성능 모델을 전격 공개했습니다 <sup class="source-citation"><a href="#source-2" aria-label="Google AI for Developers 출처">[2]</a></sup>. 대규모 코드베이스 처리와 자동화 워크플로우를 고민하던 개발팀이라면 이번 출시 소식에 주목해볼 필요가 있습니다 <sup class="source-citation"><a href="#source-3" aria-label="MarkTechPost 출처">[3]</a></sup>.
 
+> **먼저 알아둘 용어**
+>
+> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
+> - **추론**: 학습이 끝난 모델이 실제로 답을 만들어 내는 과정입니다. 이때 드는 계산 비용이 곧 사용료입니다.
+> - **토큰**: AI가 글을 잘게 쪼개 세는 단위입니다. 한국어는 보통 한두 글자가 토큰 하나입니다.
+> - **컨텍스트 윈도우**: AI가 한 번에 읽고 기억할 수 있는 글의 최대 길이입니다. 이 길이를 넘으면 앞부분을 잊습니다.
+> - **벤치마크**: 같은 문제집을 여러 모델에 풀려 점수를 매기는 시험입니다. 실제 체감 성능과 다를 수 있습니다.
+{: .prompt-info }
+
 ## 무슨 일이 벌어진 걸까?
 
 Google AI가 2026년 8월 13일 Gemini 3.7 Flash 모델을 정식으로 출시했습니다 <sup class="source-citation"><a href="#source-2" aria-label="Google AI for Developers 출처">[2]</a></sup>. 이번 출시는 이전 버전인 Gemini 3.6 Flash가 나온 지 불과 3주 만에 이뤄진 매우 빠른 업데이트입니다 <sup class="source-citation"><a href="#source-1" aria-label="Google Blog 출처">[1]</a></sup>. Gemini 3.7 Flash는 소프트웨어 엔지니어링, 웹 개발, 그리고 자율형 에이전트 추론 워크플로우를 원활하게 수행할 수 있도록 전용 알고리즘 개선이 적용되었습니다 <sup class="source-citation"><a href="#source-3" aria-label="MarkTechPost 출처">[3]</a></sup>. 또한 방대한 분량의 데이터나 코드를 단번에 처리할 수 있도록 100만(1M) 토큰의 문맥 창(Context Window)을 기본 제공하며, 한 번에 생성 가능한 최대 출력은 6만 4천(64K) 토큰에 달합니다 <sup class="source-citation"><a href="#source-2" aria-label="Google AI for Developers 출처">[2]</a></sup>.

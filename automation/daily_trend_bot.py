@@ -13,6 +13,7 @@ from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 import yaml
 
 from apply_tags import tags_for
+from glossary import insert_box as insert_glossary_box
 from make_thumbnail import generate_card
 import requests
 from bs4 import BeautifulSoup
@@ -1717,6 +1718,9 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     # the hero is intentionally reused once so the article is not text-only.
     content = compact_source_citations(post_data["content"], evidence["sources"])
     content = insert_source_images(content, images)
+    # 프롬프트로 "용어를 풀어 써라"라고 해도 모델은 자주 잊는다. 본문에 실제로 쓰인
+    # 용어를 코드가 찾아 도입부 끝에 한 줄 설명을 붙인다. 모델 호출이 없어 공짜다.
+    content = insert_glossary_box(content)
     primary_source = next(
         (source for source in evidence["sources"] if source.get("tier") == "official"),
         evidence["sources"][0],

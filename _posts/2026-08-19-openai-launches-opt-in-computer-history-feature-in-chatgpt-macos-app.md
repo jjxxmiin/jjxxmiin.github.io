@@ -80,6 +80,11 @@ graph TD
 
 이번에 공개된 Computer History 기능은 내가 맥에서 어떤 앱을 오갔는지, 어떤 버튼을 누르고 키보드를 쳤는지 작업 타임라인을 파악해 ChatGPT와 Codex가 답변을 줄 때 맥락을 반영할 수 있게 도와줍니다. 기존의 스크린샷 촬영 방식에서 벗어나 훨씬 깔끔하고 안전한 방식으로 진화한 이번 업데이트의 주요 내용과 활용법을 자세히 정리해 드립니다.
 
+> **먼저 알아둘 용어**
+>
+> - **API**: 다른 프로그램에서 이 기능을 불러다 쓸 수 있게 열어 둔 창구입니다.
+{: .prompt-info }
+
 ## 무슨 일이 벌어진 걸까?
 
 OpenAI가 2026년 8월 13일과 14일에 걸쳐 macOS용 ChatGPT 데스크톱 앱에 'Computer History' 옵트인(Opt-in) 신기능을 출시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI Help Center 출처">[1]</a></sup>. 이 기능은 사용자가 직접 활성화 여부를 선택하는 방식으로 작동하며, Pro, Business, Enterprise 요금제 이용자를 대상으로 제공됩니다 <sup class="source-citation"><a href="#source-2" aria-label="9to5Mac 출처">[2]</a></sup>.

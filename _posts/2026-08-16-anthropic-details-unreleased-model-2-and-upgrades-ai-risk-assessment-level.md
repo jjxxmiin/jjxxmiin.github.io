@@ -70,6 +70,13 @@ flowchart TD
 
 Anthropic이 내부에서만 쓰던 최고 성능 AI 모델의 존재를 알리고 위험 등급을 올렸습니다. 성능이 뛰어난 신모델을 확보했음에도 일반에 출시하지 않겠다고 선을 그은 점이 핵심입니다.
 
+> **먼저 알아둘 용어**
+>
+> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
+> - **파라미터**: 모델이 학습하면서 갖게 된 숫자 값입니다. 많을수록 대체로 덩치가 크고 비싼 모델입니다.
+> - **벤치마크**: 같은 문제집을 여러 모델에 풀려 점수를 매기는 시험입니다. 실제 체감 성능과 다를 수 있습니다.
+{: .prompt-info }
+
 ## 무슨 일이 벌어진 걸까?
 
 Anthropic이 2026년 8월 14일 책임 있는 확장 정책(Responsible Scaling Policy) 프레임워크 아래 186페이지 분량의 2026년 8월 위험 보고서를 발표했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Anthropic 공식 발표 출처">[1]</a></sup> <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 이번 보고서에서 Anthropic은 현재 주력 모델인 Claude Mythos 5보다 뛰어난 성능을 가진 미공개 내부 모델 'Model 2'의 존재를 공식적으로 명시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Anthropic 공식 발표 출처">[1]</a></sup> <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. Model 2는 현재 Anthropic 임직원들이 내부 업무용으로 활발히 활용하고 있지만, 일반 대중에 공개할 계획은 전혀 없다고 설명했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Anthropic 공식 발표 출처">[1]</a></sup> <sup class="source-citation"><a href="#source-3" aria-label="Axios 출처">[3]</a></sup>.

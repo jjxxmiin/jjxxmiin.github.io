@@ -71,6 +71,15 @@ flowchart TD
 
 AI가 아무리 똑똑해져도 답답한 응답 속도 때문에 실시간 서비스 도입을 주저했던 경험이 있으신가요? OpenAI가 Cerebras와 손잡고 기존 표준 처리보다 최대 14배 빠른 GPT-5.6 Sol Ultrafast mode를 전격 공개하며 이 문제를 해결하겠다고 나섰습니다.
 
+> **먼저 알아둘 용어**
+>
+> - **토큰**: AI가 글을 잘게 쪼개 세는 단위입니다. 한국어는 보통 한두 글자가 토큰 하나입니다.
+> - **API**: 다른 프로그램에서 이 기능을 불러다 쓸 수 있게 열어 둔 창구입니다.
+> - **지연 시간**: 요청을 보내고 첫 답이 돌아오기까지 걸리는 시간입니다.
+> - **LLM**: 엄청난 양의 글을 학습해 문장을 만들어 내는 대형 AI 모델입니다. ChatGPT 가 대표적입니다.
+> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
+{: .prompt-info }
+
 ## 무슨 일이 벌어진 걸까?
 
 OpenAI가 2026년 8월 13일 Cerebras와 손을 잡고 GPT-5.6 Sol 모델용 'Ultrafast mode'의 프리뷰를 공개했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Cerebras 출처">[1]</a></sup>. 초당 최대 750토큰을 쏟아내는 이 새로운 API 서비스 계층은 그동안 실시간 서비스 구현을 가로막던 지연 시간의 벽을 허무는 데 주력합니다 <sup class="source-citation"><a href="#source-2" aria-label="Help Net Security 출처">[2]</a></sup>.
