@@ -250,6 +250,9 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             }],
             "unknowns": ["Pricing is not published."],
             "quality_warnings": ["single source"],
+            "summary_flow": [
+                "Example 새 모델 공개", "7월 25일 공식 발표", "가격 미공개",
+            ],
         }
         post = bot.generate_blog_post(
             mock.Mock(),
@@ -259,8 +262,13 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         )
         self.assertTrue(post["title_korean"])
         self.assertEqual(len(post["faq"]), 3)
+        # 그림은 하나뿐이고, 그 하나는 검증된 사실에서 나온 문구로만 만든다.
+        # 예전에는 어느 글에나 들어맞는 흐름도 3개가 자동으로 붙었다.
         self.assertTrue(post["content"].startswith("```mermaid"))
-        self.assertEqual(post["content"].count("```mermaid"), 3)
+        self.assertEqual(post["content"].count("```mermaid"), 1)
+        self.assertIn("Example 새 모델 공개", post["content"])
+        self.assertNotIn("오늘의 AI 변화", post["content"])
+        self.assertNotIn("도입 검토", post["content"])
         self.assertTrue(all(
             item["ok"]
             for item in bot._validate_mermaid_codes(
@@ -469,7 +477,7 @@ flowchart LR
         mermaid = (
             '```mermaid\n'
             'flowchart LR\n'
-            '  A["공식 발표"] --> B["도입 검토"]\n'
+            '  A["Example 새 모델 공개"] --> B["가격 10달러에서 5달러"]\n'
             '```'
         )
         chart = (
@@ -589,3 +597,95 @@ flowchart LR
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------------------
+# 요약 흐름도: 어느 글에 붙여도 말이 되는 그림은 넣지 않는다.
+# ---------------------------------------------------------------------------
+EVIDENCE_FOR_FLOW = {
+    "sources": [{"url": "https://openrouter.ai/x", "publisher": "OpenRouter",
+                 "title": "t", "published_at": "2026-08-20", "tier": "official",
+                 "reachable": True}],
+    "facts": [{"text": "Ox Alpha offers a 1,048,576-token context window.",
+               "text_ko": "Ox Alpha 는 1,048,576 토큰을 지원합니다.",
+               "source_urls": ["https://openrouter.ai/x"]}],
+    "unknowns": [],
+    "unknowns_ko": [],
+    "summary_flow": ["8월 20일 OpenRouter 공개", "컨텍스트 100만 토큰",
+                     "프리뷰 무료", "개발사 미확인"],
+}
+
+EMPTY_DIAGRAM = """flowchart LR
+    A["오늘의 AI 변화"] --> B["직접 원문 확인"]
+    B --> C["사용자와 개발자 영향"]"""
+
+REAL_DIAGRAM = """flowchart LR
+    A["OpenRouter 무료 공개"] --> B["컨텍스트 100만 토큰"]"""
+
+
+def test_빈_말_다이어그램을_찾아낸다():
+    assert bot.diagram_is_empty_talk(EMPTY_DIAGRAM, EVIDENCE_FOR_FLOW)
+
+
+def test_숫자가_있으면_빈_말이_아니다():
+    assert not bot.diagram_is_empty_talk(REAL_DIAGRAM, EVIDENCE_FOR_FLOW)
+
+
+def test_고유명사가_있으면_빈_말이_아니다():
+    diagram = 'flowchart LR\n    A["OpenRouter 공개"] --> B["무료 제공"]'
+    assert not bot.diagram_is_empty_talk(diagram, EVIDENCE_FOR_FLOW)
+
+
+def test_요약_흐름도는_검증된_문구로_만든다():
+    code = bot.build_flow_diagram(EVIDENCE_FOR_FLOW)
+    assert "컨텍스트 100만 토큰" in code
+    assert code.startswith("```mermaid")
+    assert code.rstrip().endswith("```")
+
+
+def test_빈_말_문구는_흐름도에서_걸러진다():
+    evidence = dict(EVIDENCE_FOR_FLOW, summary_flow=["사건", "영향", "한계"])
+    assert bot.build_flow_diagram(evidence) == ""
+
+
+def test_라벨의_괄호와_콜론은_지운다():
+    label = bot.clean_flow_label('가격(월 20달러): "정액"')
+    for broken in "()[]{}:\"'":
+        assert broken not in label
+
+
+def test_글머리_빈_다이어그램은_사실_기반으로_바뀐다():
+    content = f"```mermaid\n{EMPTY_DIAGRAM}\n```\n\n## 무슨 일이\n\n본문입니다.\n"
+    out = bot.replace_empty_lead_diagram(content, EVIDENCE_FOR_FLOW)
+    assert "오늘의 AI 변화" not in out
+    assert "컨텍스트 100만 토큰" in out
+    assert out.count("## 무슨 일이") == 1
+
+
+def test_쓸_만한_그림은_건드리지_않는다():
+    content = f"```mermaid\n{REAL_DIAGRAM}\n```\n\n## 무슨 일이\n\n본문입니다.\n"
+    assert bot.replace_empty_lead_diagram(content, EVIDENCE_FOR_FLOW) == content
+
+
+def test_대체할_재료가_없으면_빈_그림을_지운다():
+    evidence = dict(EVIDENCE_FOR_FLOW, summary_flow=[])
+    content = f"```mermaid\n{EMPTY_DIAGRAM}\n```\n\n## 무슨 일이\n\n본문입니다.\n"
+    out = bot.replace_empty_lead_diagram(content, evidence)
+    assert "mermaid" not in out
+    assert out.startswith("## 무슨 일이")
+
+
+def test_한국어_고유_내용이_있으면_지우지_않는다():
+    # 숫자도 영문도 없지만 사실에 나온 말을 담은 그림은 이 글의 그림이다.
+    evidence = {
+        "sources": [{"publisher": "OpenRouter"}],
+        "facts": [{"text": "", "text_ko": "무료 프리뷰 기간에는 요금이 없습니다."}],
+    }
+    diagram = 'flowchart LR\n    A["무료 프리뷰"] --> B["요금 없음"]'
+    assert not bot.diagram_is_empty_talk(diagram, evidence)
+
+
+def test_상투적인_문구가_없으면_애매해도_놔둔다():
+    evidence = {"sources": [{"publisher": "OpenRouter"}], "facts": []}
+    diagram = 'flowchart LR\n    A["어떤 흐름"] --> B["다른 흐름"]'
+    assert not bot.diagram_is_empty_talk(diagram, evidence)

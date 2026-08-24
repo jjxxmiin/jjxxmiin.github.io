@@ -728,11 +728,15 @@ EVIDENCE_SCHEMA = {
         },
         "unknowns": {"type": "ARRAY", "items": {"type": "STRING"}},
         "unknowns_ko": {"type": "ARRAY", "items": {"type": "STRING"}},
-        "headline_ko": {"type": "STRING"}
+        "headline_ko": {"type": "STRING"},
+        # 글머리 다이어그램의 노드가 될 문구. 모델에게 맡기면 "사건 -> 영향 -> 한계"
+        # 같은 빈 말이 나오므로, 검증된 사실에서 뽑은 구체적인 문구를 따로 받는다.
+        "summary_flow": {"type": "ARRAY", "items": {"type": "STRING"}}
     },
     "required": [
         "verified", "reason", "event_status", "published_at",
-        "sources", "facts", "unknowns", "unknowns_ko", "headline_ko"
+        "sources", "facts", "unknowns", "unknowns_ko", "headline_ko",
+        "summary_flow"
     ]
 }
 
@@ -777,6 +781,17 @@ Use Google Search to independently verify this candidate:
 - Keep product, company, and model names in their original spelling. Keep numbers as printed.
 - Write so that someone meeting the topic for the first time can follow it.
 - Never use the middle dot character.
+
+[SUMMARY FLOW]
+- summary_flow is 4 to 6 short Korean noun phrases that map this story at a glance.
+- Each phrase is at most 20 characters and must carry something specific to THIS story:
+  a product name, a number, a date, a price, a company.
+- Bad (banned, meaningless): 사건, 근거, 사용자 영향, 확인할 한계, 원문 확인, 도입 검토.
+- Good: "8월 20일 OpenRouter 공개", "컨텍스트 100만 토큰", "프리뷰 기간 무료",
+  "DeepSWE 80퍼센트", "개발사 미확인".
+- Order them so the reader follows what happened, then what it offers, then what is
+  still unknown. Use only facts and unknowns you just verified.
+- Never use parentheses, brackets, colons, quotation marks, or the middle dot.
 """
     response_text = generate_content_with_fallback(
         client,
@@ -880,6 +895,9 @@ Use Google Search to independently verify this candidate:
             str(value).strip() for value in (raw.get("unknowns_ko") or []) if str(value).strip()
         ],
         "headline_ko": str(raw.get("headline_ko") or "").strip(),
+        "summary_flow": [
+            str(value).strip() for value in (raw.get("summary_flow") or []) if str(value).strip()
+        ],
         "quality_warnings": errors,
     }
 
@@ -936,6 +954,93 @@ def _has_korean(value):
     return bool(_HANGUL.search(str(value or "")))
 
 
+# 사실 문장에 흔한 일반 명사. 그림이 이 글의 것인지 가리는 데 도움이 안 된다.
+_COMMON_WORDS = {
+    "모델", "사용자", "개발자", "기능", "서비스", "발표", "공개", "제공", "지원",
+    "이번", "현재", "가능", "확인", "경우", "내용", "관련", "때문", "위해", "통해",
+    "그리고", "하지만", "있습니다", "합니다", "했습니다", "됩니다", "입니다",
+}
+
+_LABEL_BANNED = re.compile(r"[\[\](){}\"\'<>:;|`·]")
+# 어떤 글에나 들어맞는 말은 그림에 넣을 값어치가 없다. 이 목록에 걸리면 버린다.
+_EMPTY_LABELS = {
+    "사건", "근거", "영향", "한계", "사용자 영향", "사용자와 개발자 영향",
+    "확인할 한계", "도입 조건과 한계", "오늘의 ai 변화", "직접 원문 확인",
+    "새 발표 확인", "도입 검토", "조건 확인", "기존 도구와 비교",
+    "작은 작업에서 시험", "비용과 조건 재확인", "제한된 범위에서 적용",
+    "추가 원문과 업데이트 대기", "요약", "결론",
+}
+
+
+def clean_flow_label(value, *, limit=22):
+    """Mermaid 노드에 넣을 수 있게 다듬는다. 괄호와 콜론은 파서를 깨뜨린다."""
+    label = _LABEL_BANNED.sub(" ", str(value or ""))
+    label = re.sub(r"\s+", " ", label).strip(" -.,")
+    if len(label) > limit:
+        cut = label[:limit].rsplit(" ", 1)[0]
+        label = cut if len(cut) >= limit // 2 else label[:limit]
+    return label.strip()
+
+
+def useful_flow_labels(evidence, *, limit=5):
+    """검증 단계가 준 요약 문구 중 쓸 만한 것만 남긴다."""
+    labels = []
+    for value in evidence.get("summary_flow") or []:
+        label = clean_flow_label(value)
+        if not label or label.casefold() in _EMPTY_LABELS:
+            continue
+        if label in labels:
+            continue
+        labels.append(label)
+    return labels[:limit]
+
+
+def build_flow_diagram(evidence):
+    """검증된 사실로 글머리 요약 흐름도를 만든다. 재료가 부족하면 그리지 않는다.
+
+    빈 말로 채운 그림은 자리만 차지하고 독자에게 아무것도 주지 않는다.
+    그럴 바에는 그림을 빼는 편이 낫다."""
+    labels = useful_flow_labels(evidence)
+    if len(labels) < 3:
+        return ""
+    lines = ["```mermaid", "flowchart TD"]
+    names = [f"N{index}" for index in range(len(labels))]
+    for name, label in zip(names, labels):
+        lines.append(f'    {name}["{label}"]')
+    for before, after in zip(names, names[1:]):
+        lines.append(f"    {before} --> {after}")
+    lines.append("```")
+    return "\n".join(lines)
+
+
+def diagram_is_empty_talk(code, evidence):
+    """이 글에만 해당하는 말이 하나도 없는 그림인지 본다.
+
+    글쓰기 프롬프트가 예시로 든 흐름을 모델이 그대로 노드 이름으로 베끼는 일이 잦다.
+    숫자도 고유명사도 없는 그림은 어느 글에 붙여도 말이 되므로 이 글의 그림이 아니다."""
+    text = str(code or "")
+    if re.search(r"\d", text):
+        return False
+
+    # 이 사건에만 나오는 말이 하나라도 들어 있으면 이 글의 그림으로 본다.
+    names = set()
+    for source in evidence.get("sources") or []:
+        names.add(str(source.get("publisher") or "").strip())
+    for fact in evidence.get("facts") or []:
+        names.update(re.findall(r"[A-Za-z][A-Za-z0-9.\-]{2,}", str(fact.get("text") or "")))
+        names.update(
+            word for word in re.findall(r"[가-힣]{2,}", str(fact.get("text_ko") or ""))
+            if word not in _COMMON_WORDS
+        )
+    if any(name and name in text for name in names):
+        return False
+
+    # 구체적인 말이 없다고 바로 버리지는 않는다. 어느 글에나 붙는 상투적인 문구가
+    # 실제로 들어 있을 때만 버린다. 애매하면 놔두는 편이 안전하다.
+    flat = re.sub(r"\s+", " ", text).casefold()
+    return any(empty in flat for empty in _EMPTY_LABELS)
+
+
 def ensure_korean_evidence(client, evidence, *, headline=""):
     """사실과 한계 문장의 한국어본을 채운다.
 
@@ -958,11 +1063,33 @@ def ensure_korean_evidence(client, evidence, *, headline=""):
     if headline and not _has_korean(evidence.get("headline_ko")):
         pending.append(("headline", 0, str(headline).strip()))
     pending = [item for item in pending if item[2]]
-    if not pending:
+    # 요약 흐름도 재료도 같은 호출에서 함께 받는다. 폴백 브리핑은 이게 없으면
+    # 그림 자리를 빈 말로 채우게 된다.
+    need_flow = len(useful_flow_labels(evidence)) < 3
+    if not pending and not need_flow:
         evidence["unknowns_ko"] = unknowns_ko
         return evidence
 
     numbered = "\n".join(f"{position}. {text}" for position, (_, _, text) in enumerate(pending))
+    material = "\n".join(
+        f"- {str(fact.get('text_ko') or fact.get('text') or '').strip()}"
+        for fact in facts
+    )
+    flow_rule = ""
+    if need_flow:
+        flow_rule = """
+[summary_flow]
+이 사건을 한눈에 보여줄 4~6단계 요약 문구를 만들어라.
+- 각 문구는 20자 이내의 한국어 명사구다.
+- 제품명, 숫자, 날짜, 가격처럼 이 사건에만 해당하는 말을 반드시 담는다.
+- 사건, 근거, 영향, 한계, 원문 확인, 도입 검토 같은 빈 말은 금지다.
+  어느 글에 붙여도 말이 되는 문구는 쓰지 마라.
+- 무슨 일이 있었는지, 무엇을 주는지, 아직 모르는 것이 무엇인지 순서로 늘어놓는다.
+- 아래 사실에 없는 내용을 지어내지 마라.
+- 괄호, 대괄호, 콜론, 따옴표, 가운뎃점을 쓰지 마라.
+
+[사실]
+""" + (material or "- 없음")
     prompt = f"""아래 문장을 한국어로 옮겨라.
 
 [규칙]
@@ -972,18 +1099,26 @@ def ensure_korean_evidence(client, evidence, *, headline=""):
 - 가운뎃점 문자를 쓰지 마라.
 - index 는 입력에 붙은 번호를 그대로 돌려준다.
 
-{numbered}
+{numbered or "- 번역할 문장 없음"}
+{flow_rule}
 """
     schema = {
-        "type": "ARRAY",
-        "items": {
-            "type": "OBJECT",
-            "properties": {
-                "index": {"type": "NUMBER"},
-                "korean": {"type": "STRING"},
+        "type": "OBJECT",
+        "properties": {
+            "translations": {
+                "type": "ARRAY",
+                "items": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "index": {"type": "NUMBER"},
+                        "korean": {"type": "STRING"},
+                    },
+                    "required": ["index", "korean"],
+                },
             },
-            "required": ["index", "korean"],
+            "summary_flow": {"type": "ARRAY", "items": {"type": "STRING"}},
         },
+        "required": ["translations", "summary_flow"],
     }
     response_text = generate_content_with_fallback(
         client, prompt, response_schema=schema, tools=None, thinking_level=None
@@ -991,14 +1126,19 @@ def ensure_korean_evidence(client, evidence, *, headline=""):
     translations = {}
     if response_text:
         try:
-            for item in json.loads(response_text) or []:
+            payload = json.loads(response_text) or {}
+            for item in payload.get("translations") or []:
                 position = int(item.get("index"))
                 korean = str(item.get("korean") or "").strip()
                 if korean:
                     translations[position] = korean
-        except (TypeError, ValueError) as exc:
+            if need_flow and payload.get("summary_flow"):
+                evidence["summary_flow"] = [
+                    str(value).strip() for value in payload["summary_flow"] if str(value).strip()
+                ]
+        except (TypeError, ValueError, AttributeError) as exc:
             print(f"  번역 응답 파싱 실패: {exc}")
-    if not translations:
+    if pending and not translations:
         # 번역이 실패해도 발행은 막지 않는다. 영어 문장이라도 원문 근거는 남는다.
         print("::warning:: 한국어 번역을 받지 못해 원문 문장을 그대로 싣습니다.")
 
@@ -1374,15 +1514,12 @@ def _fallback_post_data(topic_data, evidence):
     unknown_text = "\n\n".join(f"- {item}" for item in unknown_items[:4]) or (
         "- 가격, 지역별 제공 범위, 실제 도입 조건은 원문에서 다시 확인해야 합니다."
     )
-    content = f"""
-```mermaid
-flowchart LR
-    A["오늘의 AI 변화"] --> B["직접 원문 확인"]
-    B --> C["사용자와 개발자 영향"]
-    C --> D["도입 조건과 한계"]
-```
-
-{topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다. 원문이 영어인 문장은 한국어로 옮기고, 대조할 수 있도록 원문도 함께 남겼습니다.
+    # 예전에는 여기에 "오늘의 AI 변화 -> 직접 원문 확인 -> 영향 -> 한계" 그림이 박혀
+    # 있었다. 어느 글에 붙여도 말이 되는 그림은 읽는 사람에게 아무것도 주지 않는다.
+    # 지금은 검증된 사실로 만든 요약 흐름만 넣고, 재료가 없으면 그림을 뺀다.
+    flow_diagram = build_flow_diagram(evidence)
+    lead_visual = f"{flow_diagram}\n\n" if flow_diagram else ""
+    content = f"""{lead_visual}{topic} 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다. 원문이 영어인 문장은 한국어로 옮기고, 대조할 수 있도록 원문도 함께 남겼습니다.
 
 {NEWS_HEADINGS[0]}
 
@@ -1396,13 +1533,6 @@ flowchart LR
 
 이 소식의 핵심은 새 기능이나 발표의 이름보다 실제 사용자와 개발자의 선택이 달라지는지에 있습니다. 지금 단계에서는 원문이 밝힌 내용과 아직 공개하지 않은 내용을 분리해서 보는 것이 안전합니다.
 
-```mermaid
-flowchart TD
-    A["새 발표 확인"] --> B["기존 도구와 비교"]
-    B --> C["작은 작업에서 시험"]
-    C --> D["비용과 조건 재확인"]
-```
-
 {NEWS_HEADINGS[2]}
 
 도입을 검토한다면 현재 쓰는 도구와 바로 교체하기보다 작은 작업에서 먼저 비교해 보는 편이 좋습니다. 제공 지역, 요금, 데이터 처리 방식처럼 의사결정에 영향을 주는 조건은 실제 사용 전에 원문에서 다시 확인해야 합니다.
@@ -1410,13 +1540,6 @@ flowchart TD
 {NEWS_HEADINGS[3]}
 
 첫째, 공식 제공 범위와 사용 조건을 확인합니다. 둘째, 기존 작업 흐름에서 시간을 줄여주는지 작은 예제로 비교합니다. 셋째, 발표 내용과 실제 일반 제공 상태가 같은지 구분합니다.
-
-```mermaid
-flowchart LR
-    A["도입 검토"] --> B{{"조건 확인"}}
-    B -->|충분함| C["제한된 범위에서 적용"]
-    B -->|부족함| D["추가 원문과 업데이트 대기"]
-```
 
 {NEWS_HEADINGS[4]}
 
@@ -1550,11 +1673,17 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
   억지로 반복하지 않는다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
 - 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
 - content의 첫 요소는 반드시 전체 글을 한눈에 요약하는 Mermaid 다이어그램이어야 한다.
-  도입 문단이나 설명 문장보다 먼저 ```mermaid 코드 블록을 배치하고, 사건 → 근거 →
-  사용자 영향 → 확인할 한계의 흐름을 4~7개 노드로 간결하게 보여준다.
+  도입 문단이나 설명 문장보다 먼저 ```mermaid 코드 블록을 배치한다.
+  노드 이름에는 이 글에만 해당하는 말을 넣는다. 제품명, 숫자, 날짜, 가격, 회사 이름이다.
+  나쁜 예(절대 금지): "오늘의 AI 변화" -> "직접 원문 확인" -> "사용자와 개발자 영향"
+  -> "도입 조건과 한계". 어느 글에 붙여도 말이 되는 그림은 독자에게 아무것도 주지 않는다.
+  좋은 예: "8월 20일 OpenRouter 공개" -> "컨텍스트 100만 토큰" -> "프리뷰 무료"
+  -> "DeepSWE 80퍼센트" -> "개발사 미확인".
+  노드는 4~7개로 하고, 각 노드는 20자 이내로 쓴다.
 - Mermaid는 첫 전체 흐름도를 포함해 3~5개 넣는다. 최소한 ① 글 전체 요약,
   ② 사건 또는 제품 작동 흐름, ③ 독자의 도입 판단과 주의점 다이어그램을 각각 하나씩
-  만든다. flowchart, sequenceDiagram, timeline 등 내용에 맞는 형식을 섞고, 같은
+  만든다. 셋 모두 노드 이름에 이 글의 구체적인 사실을 담는다. 일반론만 담긴 그림은
+  넣지 말고, 그럴 바에는 그 그림을 빼라. flowchart, sequenceDiagram, timeline 등 내용에 맞는 형식을 섞고, 같은
   결론을 모양만 바꿔 반복하지 않는다. 노드와 라벨에도 facts와 unknowns에 있는
   내용만 쓰며 가짜 수치를 만들지 않는다.
 - 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
@@ -1659,6 +1788,28 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
         return _relax_post_data(post, topic_data, evidence)
     return post
 
+def replace_empty_lead_diagram(content, evidence):
+    """글머리 그림이 이 글과 무관한 빈 말이면 사실로 만든 그림으로 바꾼다.
+
+    글쓰기 지시문이 예로 든 흐름을 모델이 노드 이름으로 그대로 베끼는 일이 잦다.
+    바꿔 끼울 재료가 없으면 그냥 지운다. 빈 그림보다 없는 편이 낫다."""
+    blocks = _fenced_blocks(content, "mermaid")
+    if not blocks:
+        return content
+    first = blocks[0]
+    if not diagram_is_empty_talk(first, evidence):
+        return content
+    replacement = build_flow_diagram(evidence)
+    pattern = re.compile(r"```mermaid[ \t]*\n.*?\n```", re.S | re.I)
+    if not pattern.search(content):
+        return content
+    if replacement:
+        print("  글머리 다이어그램이 빈 말이라 사실 기반 요약으로 교체합니다.")
+        return pattern.sub(lambda _: replacement, content, count=1)
+    print("  글머리 다이어그램이 빈 말이고 대체할 재료가 없어 제거합니다.")
+    return pattern.sub("", content, count=1).lstrip()
+
+
 def _safe_slug(value):
     slug = re.sub(r"[^A-Za-z0-9]+", "-", str(value or "")).strip("-").lower()
     return slug[:120] or f"ai-news-{kst_now():%H%M%S}"
@@ -1718,6 +1869,7 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     # the hero is intentionally reused once so the article is not text-only.
     content = compact_source_citations(post_data["content"], evidence["sources"])
     content = insert_source_images(content, images)
+    content = replace_empty_lead_diagram(content, evidence)
     # 프롬프트로 "용어를 풀어 써라"라고 해도 모델은 자주 잊는다. 본문에 실제로 쓰인
     # 용어를 코드가 찾아 도입부 끝에 한 줄 설명을 붙인다. 모델 호출이 없어 공짜다.
     content = insert_glossary_box(content)

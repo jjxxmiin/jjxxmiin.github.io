@@ -62,10 +62,16 @@ article_images:
 ---
 
 ```mermaid
-flowchart LR
-    A["오늘의 AI 변화"] --> B["직접 원문 확인"]
-    B --> C["사용자와 개발자 영향"]
-    C --> D["도입 조건과 한계"]
+flowchart TD
+    N0["7월 31일 API 공개 베타"]
+    N1["MIT 라이선스 가중치 공개"]
+    N2["총 2,840억 활성 130억"]
+    N3["Terminal Bench 82.7점"]
+    N4["출력 100만 토큰 0.28달러"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
 ```
 
 DeepSeek V4-Flash API Launch 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다.
@@ -97,13 +103,6 @@ DeepSeek V4-Flash API Launch 관련 새 소식을 오늘 확인 가능한 직접
 
 이 소식의 핵심은 새 기능이나 발표의 이름보다 실제 사용자와 개발자의 선택이 달라지는지에 있습니다. 지금 단계에서는 원문이 밝힌 내용과 아직 공개하지 않은 내용을 분리해서 보는 것이 안전합니다.
 
-```mermaid
-flowchart TD
-    A["새 발표 확인"] --> B["기존 도구와 비교"]
-    B --> C["작은 작업에서 시험"]
-    C --> D["비용과 조건 재확인"]
-```
-
 <figure class="news-source-image">
   <img src="https://cdn-thumbnails.huggingface.co/social-thumbnails/models/deepseek-ai/DeepSeek-V4-Flash-0731.png" alt="Hugging Face 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
   <figcaption>Hugging Face가 원문과 함께 공개한 이미지입니다. <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731" target="_blank" rel="noopener noreferrer">출처: Hugging Face</a></figcaption>
@@ -116,13 +115,6 @@ flowchart TD
 ## 직접 써보거나 지켜볼 포인트
 
 첫째, 공식 제공 범위와 사용 조건을 확인합니다. 둘째, 기존 작업 흐름에서 시간을 줄여주는지 작은 예제로 비교합니다. 셋째, 발표 내용과 실제 일반 제공 상태가 같은지 구분합니다.
-
-```mermaid
-flowchart LR
-    A["도입 검토"] --> B{"조건 확인"}
-    B -->|충분함| C["제한된 범위에서 적용"]
-    B -->|부족함| D["추가 원문과 업데이트 대기"]
-```
 
 ## 아직은 선을 그어야 할 부분
 
