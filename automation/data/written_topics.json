@@ -2,6 +2,7 @@
   "_comment": "발행이 끝난 주제 원장. guide_bot 이 발행할 때마다 여기에 추가한다. 키는 topic id.",
   "written": {
     "클로드-요금제": "2026-08-23-claude-pricing-guide-free-pro-max-team-comparison",
-    "챗gpt-요금제": "2026-08-23-chatgpt-pricing-plans-recommendation-and-comparison-guide"
+    "챗gpt-요금제": "2026-08-23-chatgpt-pricing-plans-recommendation-and-comparison-guide",
+    "로컬-llm": "2026-08-24-2026-local-llm-model-comparison-and-gpu-specification-guide"
   }
 }
