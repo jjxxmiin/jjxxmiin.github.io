@@ -79,7 +79,8 @@
       "variants": 19,
       "both_engine": 3,
       "priority": 55,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-08-24-2026-local-llm-model-comparison-and-gpu-specification-guide"
     },
     {
       "id": "클로드-코드",
