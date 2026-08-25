@@ -1,128 +1,106 @@
 ---
 layout: post
-title: '[2026-01-05] VIBE: 3.6B 파라미터로 실현한 고효율 고해상도 이미지 편집의 혁신 - Visual Instruction
-  Based Editor 심층 분석'
+title: 'VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석'
 date: '2026-01-18'
 categories: Tech
 tags:
-  - 이미지생성
-  - Qwen
-  - 디퓨전모델
-  - 온디바이스AI
-  - 경량화
+  - VIBE
+  - Instruction Image Editing
+  - Qwen2-VL
+  - Sana
 math: true
-summary: 가벼운 모델로 구현한 2K 해상도 이미지 편집의 미래, VIBE 기술 분석
+summary: Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초·24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.02242.png
   alt: Paper Thumbnail
 ---
 
-# VIBE: Visual Instruction Based Editor - 저비용 고효율 이미지 편집의 새로운 지평
+VIBE는 2B Qwen2-VL과 1.6B Sana1.5를 합친 3.6B pipeline으로 2K image 편집을 수행하지만, 4초 결과는 NVIDIA H100 조건입니다. 24GB 안에 들어간다는 사실만으로 consumer GPU나 mobile에서도 같은 속도로 실행된다고 결론 내릴 수는 없습니다.
 
-## 1. Executive Summary (핵심 요약)
+[원문 자료](https://huggingface.co/papers/2601.02242)에 소개된 구조와 수치를 기준으로 “작아서 빠르다”는 표현을 실제 배포 조건으로 바꿔 봅니다.
 
-최근 생성형 AI 분야, 특히 이미지 편집 영역에서는 'Instruction-based image editing(지시어 기반 이미지 편집)'이 비약적인 발전을 거듭해 왔습니다. 하지만 기존의 고성능 모델들은 6B에서 20B에 이르는 거대한 파라미터 규모로 인해 막대한 컴퓨팅 자원을 요구하며, 이는 실시간 서비스나 온디바이스(On-device) 환경으로의 확장에 큰 걸림돌이 되어 왔습니다. 
+## 3.6B는 하나의 model이 아니라 역할을 나눈 합이다
 
-본 보고서에서 분석할 **VIBE(Visual Instruction Based Editor)**는 이러한 한계를 정면으로 돌파한 혁신적인 파이프라인입니다. VIBE는 현대적인 **2B 파라미터의 Qwen2-VL** 모델을 가이드로 삼고, **1.6B 파라미터의 Diffusion Transformer(DiT) 모델인 Sana1.5**를 생성 엔진으로 결합하여 단 3.6B의 파라미터만으로 기존의 거대 모델들을 상회하는 성능을 보여줍니다. 
+VIBE(Visual Instruction Based Editor)는 지시를 이해하는 module과 image를 생성하는 module을 분리합니다.
 
-핵심 성과는 다음과 같습니다:
-- **고성능 저비용**: NVIDIA H100 환경에서 별도의 최적화 없이 4초 만에 2K 해상도 이미지 편집 가능.
-- **엄격한 원본 유지(Source Consistency)**: 속성 변경, 객체 제거, 배경 수정 등에서 원본 이미지의 특징을 보존하면서 지시 사항을 정확히 수행.
-- **효율적인 아키텍처**: 24GB VRAM 내에서 구동 가능하여 일반적인 소비자용 GPU 환경에서도 활용 가능.
+| 구성 | 규모 | 역할 |
+|---|---:|---|
+| Qwen2-VL | 2B | 원본 image와 text instruction 해석 |
+| Sana1.5 DiT | 1.6B | 편집 결과 생성 |
+| 합계 | 3.6B | 전체 editing pipeline |
 
---- 
+Qwen2-VL은 “안경을 추가하되 나머지 얼굴은 유지” 같은 instruction에서 대상, 속성, 위치 관계를 context embedding으로 만듭니다. Sana1.5는 이 조건을 받아 pixel 결과를 생성합니다.
 
-## 2. Introduction & Problem Statement (연구 배경 및 문제 정의)
+이 구조의 장점은 두 역할에 같은 거대 model을 쓰지 않는다는 것입니다. 하지만 3.6B parameter가 동시에 memory에 올라가는지, vision input과 diffusion state가 얼마나 추가되는지는 별도입니다. checkpoint 크기만으로 peak VRAM을 계산할 수 없습니다.
 
-### 2.1 기존 기술의 한계: 거대 모델의 역설
-이미지 편집 분야에서 InstructPix2Pix, MagicBrush, MGIE와 같은 모델들은 텍스트 지시만으로 이미지를 수정하는 놀라운 능력을 보여주었습니다. 그러나 이들은 대부분 대규모 확산 모델(Diffusion Model)에 의존합니다. 
+## 2K 편집에서 Linear Attention이 하는 일
 
-1. **컴퓨팅 비용**: 7B 이상의 거대 언어 모델(LLM)과 결합된 이미지 생성 모델은 추론 시 막대한 VRAM과 처리 시간을 소모합니다.
-2. **처리 속도(Throughput)**: 실시간 인터랙티브 편집 환경을 구축하기에는 초당 프레임 수(FPS)가 턱없이 부족합니다.
-3. **원본 훼손 문제**: 지시어를 따르는 과정에서 편집하지 않아야 할 영역(Source image identity)까지 변형되는 'Catastrophic forgetting of source features' 현상이 빈번히 발생합니다.
+고해상도 image는 token 수가 늘어 attention 비용이 커집니다. VIBE의 생성 engine인 Sana1.5는 Linear Attention을 사용해 2K 처리의 memory·compute 증가를 줄이는 방향을 택합니다.
 
-### 2.2 VIBE의 제안: Small is the New Big
-VIBE 연구팀은 "작은 모델로도 충분히 고품질의 편집이 가능한가?"라는 질문에서 시작했습니다. 그들은 무조건적인 파라미터 확장이 아닌, **MLLM(Multimodal LLM)의 인지 능력**과 **DiT의 고해상도 생성 능력**을 유기적으로 결합함으로써 효율성의 극대화를 추구했습니다.
+```text
+원본 image + instruction
+→ Qwen2-VL context
+→ Sana1.5 diffusion transformer
+→ edited 2K image
+```
 
---- 
+이 pipeline의 목표는 두 가지를 동시에 만족하는 것입니다.
 
-## 3. Core Methodology (핵심 기술 및 아키텍처 심층 분석)
+- Edit accuracy: instruction대로 대상·속성·배경을 바꿀 것
+- Source consistency: 지시하지 않은 영역과 identity를 유지할 것
 
-### 3.1 듀얼 엔진 아키텍처: Qwen2-VL + Sana1.5
-VIBE의 구조는 크게 '이해(Understanding)'와 '생성(Generation)'의 두 축으로 나뉩니다.
+원문은 source consistency loss와 paired before/after data를 사용한다고 설명합니다. GPT-4V 등을 이용한 captioning·filtering으로 편집 data를 만들고, 속성 변경·배경 제거·객체 추가 같은 category를 함께 학습합니다.
 
-#### 3.1.1 Qwen2-VL (2B): 시각적 지시어 가이드
-Qwen2-VL은 멀티모달 이해 능력이 탁월한 소형 언어 모델입니다. VIBE에서는 사용자의 텍스트 지시어와 원본 이미지를 입력받아, 편집에 필요한 핵심 컨텍스트 임베딩을 추출합니다. 이는 단순히 텍스트를 인코딩하는 것을 넘어, 이미지 내의 공간적 관계와 객체의 특징을 파악하여 생성 모델에 전달하는 역할을 합니다.
+“원본을 완벽하게 보존한다”는 기존 표현은 주의해야 합니다. diffusion generation은 instruction을 따르며 원본 feature를 함께 유지하려는 것이고, pixel이 bit 단위로 동일하다고 제시된 것은 아닙니다. mask 밖 pixel 차이와 identity drift를 따로 평가해야 합니다.
 
-#### 3.1.2 Sana1.5 (1.6B): Linear Attention 기반의 DiT
-Sana1.5는 차세대 Diffusion Transformer 구조를 채택하고 있습니다. 특히 **Linear Attention** 메커니즘을 사용하여 고해상도 이미지 처리 시 발생하는 메모리 복잡도를 획기적으로 낮췄습니다. 이를 통해 2K 해상도에서도 연산량의 급격한 증가 없이 정교한 픽셀 생성이 가능해졌습니다.
+## 4초·24GB를 어떤 조건으로 읽어야 하나
 
-### 3.2 데이터 처리 및 학습 전략 (Data Pipeline)
-VIBE의 성능 비결 중 하나는 정교하게 설계된 데이터셋 활용에 있습니다.
+기존 글에 제시된 핵심 성능 조건은 다음과 같습니다.
 
-1. **데이터 큐레이션**: 고품질의 편집 전후 쌍(Pair) 데이터를 구축하기 위해 GPT-4V 등을 활용한 자동화된 캡셔닝 및 필터링 과정을 거쳤습니다.
-2. **멀티태스크 학습**: 속성 변경, 배경 제거, 객체 추가 등 다양한 편집 카테고리를 균형 있게 학습시켜 모델의 범용성을 확보했습니다.
-3. **Source Consistency Loss**: 편집 중 원본의 핵심 정보를 잃지 않도록 하는 손실 함수 설계를 통해 이미지의 정체성을 유지했습니다.
+- NVIDIA H100
+- 별도 최적화 없이 2048×2048 editing 약 4초
+- BF16
+- 24GB VRAM 안에서 실행 가능
+- PyTorch 기반 분산 training
 
---- 
+이 중 4초와 24GB는 같은 말이 아닙니다. 24GB device에 model이 들어가도 H100과 다른 memory bandwidth·compute 성능에서는 시간이 달라질 수 있습니다. “consumer GPU에서 가능”은 memory capacity의 후보 조건일 뿐 속도 보장이 아닙니다.
 
-## 4. Implementation Details & Experiment Setup (구현 및 실험 환경)
+기존 글은 비교 model이 1024×1024에서 10초 이상이고 VIBE는 2048×2048에서 4초라고 했지만, model 이름, sampling step, batch, precision이 함께 적혀 있지 않습니다. 다른 resolution의 시간을 직접 비교하려면 동일 hardware와 설정이 필요합니다.
 
-### 4.1 학습 환경
-- **GPU**: NVIDIA H100 클러스터 활용.
-- **Precision**: BF16 연산을 통해 메모리 효율과 학습 안정성 확보.
-- **Framework**: PyTorch 기반의 고도화된 분산 학습 환경.
+또한 PSNR·SSIM이 약 15~20% 높고 CLIP score가 SOTA 수준이라는 설명도 정확한 표가 없습니다. 상대 향상률의 기준 model과 metric 값이 없으므로 이 숫자만으로 우위를 재현할 수 없습니다.
 
-### 4.2 주요 벤치마크
-본 연구에서는 모델의 성능을 검증하기 위해 두 가지 핵심 벤치마크를 사용했습니다.
-- **ImgEdit**: 실제 사용자의 지시어와 복잡한 편집 요구 사항을 포함한 데이터셋.
-- **GEdit**: 생성된 이미지의 품질과 지시어 준수 여부를 평가하는 지표.
+## 편집 품질은 세 영역으로 분리해 본다
 
---- 
+VIBE를 평가할 때 하나의 “좋아 보임” 점수보다 다음 영역을 나누는 편이 좋습니다.
 
-## 5. Comparative Analysis (성능 평가 및 비교)
+| 영역 | 확인할 질문 |
+|---|---|
+| Instruction | 요청한 객체·속성·위치가 맞게 바뀌었나 |
+| Preservation | 지시하지 않은 배경·얼굴·문자가 유지됐나 |
+| Composition | 새 요소의 조명·경계·크기가 자연스러운가 |
 
-### 5.1 정량적 평가 결과
-VIBE는 파라미터 수가 몇 배나 더 많은 모델(예: 7B 이상의 LLaVA 기반 모델)과 비교했을 때도 대등하거나 오히려 앞선 결과를 보여주었습니다.
+Local editing은 특히 mask 안 성공과 mask 밖 보존이 충돌합니다. 안경만 추가하는 예제라면 안경 모양, 얼굴 identity, 머리카락·배경 변화량을 각각 봐야 합니다.
 
-- **CLIP Score**: 지시어와 편집된 이미지 간의 일치도에서 SOTA(State-of-the-Art) 수준 달성.
-- **PSNR/SSIM**: 원본 유지 능력 평가에서 타 모델 대비 약 15~20% 높은 수치를 기록.
-- **Inference Speed**: 타 모델이 1024x1024 해상도에서 10초 이상 소요될 때, VIBE는 2048x2048 해상도에서도 4초 내외로 처리를 완료했습니다.
+복합 instruction도 따로 시험해야 합니다. “A를 B로 바꾸고 C를 옆에 더하되 더 작게”처럼 여러 제약이 있으면 2B guide model이 어느 조건을 빠뜨리는지 확인할 수 있습니다. 정지 image에서 source consistency가 높아도 video frame 간 temporal consistency로 자동 확장되지는 않습니다.
 
-### 5.2 정성적 분석 (Expert Insight)
-전문가 관점에서 볼 때, VIBE의 가장 큰 강점은 **'Local Editing'의 정밀도**입니다. 기존 모델들은 "안경을 씌워줘"라는 명령에 얼굴 전체의 특징을 바꾸어 버리는 경우가 많았으나, VIBE는 안경이 들어갈 위치의 픽셀만을 정교하게 수정하면서 나머지 부분은 완벽하게 보존합니다. 이는 2B 규모의 Qwen2-VL이 제공하는 공간적 위치 정보(Spatial awareness)가 Sana1.5의 생성 과정에 매우 효과적으로 주입되었음을 시사합니다.
+평가 세트는 다음처럼 구성할 수 있습니다.
 
---- 
+1. 단일 속성 변경
+2. 작은 local object 추가·제거
+3. 배경 전체 변경
+4. 두 개 이상의 관계 조건
+5. text·얼굴·미세 pattern 보존
 
-## 6. Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력)
+## On-device 여부는 직접 profiling해야 한다
 
-### 6.1 크리에이티브 워크플로우의 혁신
-광고 디자인 및 콘텐츠 제작 분야에서 VIBE는 게임 체인저가 될 수 있습니다. 디자이너가 수동으로 마스킹(Masking) 작업을 할 필요 없이, 말 한마디로 제품의 색상을 바꾸거나 배경을 합성할 수 있습니다. 특히 2K 해상도 지원은 실제 인쇄물이나 고화질 웹 콘텐츠 제작에 즉시 투입 가능한 수준입니다.
+3.6B는 7B~20B pipeline보다 작다는 장점이 있지만 mobile NPU에서 “충분히 구동 가능”하다는 수치는 원문에 없습니다. On-device 판단에는 weight quantization, 지원 operator, diffusion step 수, thermal limit, image resolution이 필요합니다.
 
-### 6.2 온디바이스 AI 및 에지 컴퓨팅
-3.6B라는 모델 사이즈는 최신 모바일 프로세서나 고성능 노트북(NPU 탑재 모델)에서도 충분히 구동 가능한 크기입니다. 이는 클라우드 서버를 거치지 않는 '프라이버시 중심형 이미지 편집 서비스'의 가능성을 엽니다.
+배포 비교에서는 H100 수치를 그대로 가져오지 말고 다음을 측정해야 합니다.
 
-### 6.3 전자상거래(E-commerce) 자동화
-쇼핑몰 운영자가 수천 장의 모델 사진에서 배경을 바꾸거나 옷의 패턴을 변경하는 작업을 자동화할 때, VIBE의 고처리량(High-throughput) 특성은 운영 비용을 극적으로 절감해 줄 것입니다.
+- target GPU의 cold start와 반복 latency
+- 1K와 2K에서의 peak VRAM
+- batch 1의 diffusion step별 시간
+- Qwen2-VL과 Sana1.5의 개별 병목
+- source consistency와 instruction score
 
---- 
-
-## 7. Discussion: Limitations & Critical Critique (한계점 및 기술적 비평)
-
-시니어 과학자로서 냉철하게 분석했을 때, VIBE가 해결해야 할 과제도 명확합니다.
-
-1. **복잡한 논리적 지시 수행의 한계**: "A를 B로 바꾸고, 그 옆에 C를 놓되 C는 B보다 작게 해줘"와 같은 다단계 추론(Multi-step reasoning)이 필요한 지시에서는 2B 모델의 한계로 인해 오류가 발생할 가능성이 있습니다.
-2. **데이터 편향성**: 학습 데이터셋의 구성에 따라 특정 인종, 문화권 혹은 사물에 대해 편향된 편집 결과를 내놓을 위험이 존재합니다. 이는 소형 모델일수록 데이터의 품질에 더 민감하게 반응하기 때문입니다.
-3. **비디오 확장성**: 현재는 정지 이미지에 국한되어 있습니다. 일관성(Consistency) 유지 능력이 뛰어나다고는 하나, 이를 비디오 프레임 단위로 확장했을 때 시간적 일관성(Temporal consistency)을 확보할 수 있을지는 미지수입니다.
-
---- 
-
-## 8. Conclusion (결론 및 인사이트)
-
-VIBE는 **"무조건 큰 것이 좋은 것은 아니다"**라는 AI 업계의 새로운 격언을 증명해 냈습니다. 모델의 아키텍처를 지능적으로 설계하고, 각 컴포넌트(Qwen-VL과 Sana)의 강점을 극대화함으로써 효율성과 성능이라는 두 마리 토끼를 모두 잡았습니다.
-
-본 연구는 앞으로의 AI 모델 개발 방향이 단순히 파라미터를 늘리는 'Scaling Law'에만 의존하는 것이 아니라, 목적에 맞는 최적의 컴포넌트 조합과 정교한 데이터 엔지니어링으로 나아가야 함을 시사합니다. 개발자들과 비즈니스 리더들은 VIBE와 같은 경량화 고성능 모델을 통해 실질적인 서비스 가치를 창출하는 데 주목해야 할 것입니다.
-
-**최종 요약:** VIBE는 고해상도 이미지 편집의 대중화를 앞당길 핵심 기술이며, 특히 효율적인 자원 활용이 절실한 기업용 솔루션 시장에서 독보적인 가치를 발휘할 것으로 기대됩니다.
-
-[Original Paper Link](https://huggingface.co/papers/2601.02242)
+VIBE의 실질적 의의는 작은 model 하나가 모든 일을 한다는 것이 아니라, 소형 MLLM의 spatial instruction 이해와 효율적인 DiT 생성을 분업시킨 것입니다. 이 조합이 자신의 hardware에서도 빠르고, 편집하지 않은 영역까지 지키는지는 동일 조건의 profile과 실패 image로 확인해야 합니다.

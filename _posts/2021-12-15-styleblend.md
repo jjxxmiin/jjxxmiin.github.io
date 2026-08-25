@@ -1,142 +1,56 @@
 ---
 layout: post
-title:  "StyleBland + StyleTransfer 톺아보기"
-summary: "StyleBland + StyleTransfer 톺아보기"
+title:  "StyleGAN Blending에서 눈이 네 개 생기는 이유: 얼굴 정렬부터 Pix2PixHD까지"
+summary: "서로 다른 얼굴 StyleGAN을 섞을 때 눈과 윤곽이 무너지는 원인을 데이터 정렬과 스타일 일관성에서 찾고, paired dataset과 Pix2PixHD로 연결한 과정을 정리합니다."
 image:
   path: /assets/img/thumb/styleblend.jpg
   alt: StyleBland + StyleTransfer 톺아보기 대표 이미지
 date:   2021-12-15 09:10 -0400
 categories: Paper
 tags:
-  - 논문리뷰
+  - 이미지생성
   - 파인튜닝
+  - 컴퓨터비전
+  - 튜토리얼
 ---
 
-근래 StyleGAN에 푹 빠져서 관련자료를 쭉 읽어보았다.
+StyleGAN 두 모델을 섞었을 때 눈이 네 개로 갈라지거나 얼굴이 흐려진다면, 우선 모델보다 두 데이터셋의 얼굴 위치·비율과 그림체 일관성을 맞춰야 합니다.
 
-그 중에서 가장 관심이 가는 것은 StyleGAN을 통해 Style Transfer하는 부분!
+목표는 실사 FFHQ 얼굴과 애니메이션 얼굴 사이의 중간 generator를 만들고, 그 결과를 다시 이미지 변환 모델의 paired data로 쓰는 것이었습니다. 참고한 출발점은 [Justin Pinkney의 StyleGAN blending 글](https://www.justinpinkney.com/stylegan-network-blending/)과 [StyleGAN2 ADA](https://github.com/NVlabs/stylegan2-ada-pytorch), AnimeGANv2입니다.
 
-[Here](https://github.com/bryandlee/animegan2-pytorch) <- 이것을 보고 감동을 받음 무조건 구현해야겠다 생각함
+## 그림체가 섞인 데이터는 좋은 generator여도 후속 작업을 어렵게 합니다
 
-고퀄리티 Style Transfer을 하려고 하는데 단순 Style Transfer 방법으로는 너무 성능이 안좋고 학습도 잘 안되는데 시간을 많이 소비했다.
+처음에는 [AAHQ](https://github.com/onion-liu/aahq-dataset)의 여러 애니메이션 스타일을 한꺼번에 학습했습니다. 얼굴 생성 자체는 괜찮았지만, 샘플마다 화풍이 달라 실사와 애니메이션을 한 쌍으로 만드는 단계가 불안정했습니다. blending이 가능한 것과 일관된 style transfer 학습쌍을 얻는 것은 다른 문제였습니다.
 
-그러다 답답한 마음에 구글링을 한 결과 stylegan blending을 이용한 Style Transfer 등장!
+그래서 한 작품의 영상에서 얼굴을 모으는 쪽으로 방향을 바꿨습니다. 이 선택은 다양성을 줄이는 대신 색, 선, 눈 모양의 분포를 좁혀 후속 Pix2Pix 계열 모델이 배워야 할 변화를 단순하게 합니다. 데이터 수보다 “같은 변환 규칙을 공유하는가”가 더 중요한 구간입니다.
 
-이 [글](https://www.justinpinkney.com/stylegan-network-blending/)은 StyleGAN을 통해 Style Transfer 하는 것에 대한 거의 모든 것을 담고있었다..
+## 얼굴 정렬이 빠지면 blending이 구조부터 어긋납니다
 
-먼저 간단하게 aahq 데이터셋으로 학습을 해보자!!
----
+원문의 전처리 흐름은 영상 프레임 추출, 얼굴 검출, crop 영역 확장, 흐린 이미지 제거, 확대와 512 해상도 정리, FFHQ 방식 정렬 순서입니다. 프레임 추출에는 다음 조각을 사용했습니다.
 
-### 0. 환경
-
-- [StyleGAN2](https://github.com/NVlabs/stylegan2-ada-pytorch)
-
-- python 3.7
-- pytorch 1.8.1
-- cuda 11.1
-- cudnn 8.0.5
-
-### 1. 데이터셋을 준비합니다.
-
-- [aahq](https://github.com/onion-liu/aahq-dataset)
-
-```
-DATA
-  |- 1.png
-  |- 2.png
-  |- 3.png
-  |- ...
+```bash
+ffmpeg -i input.mp4 -vf fps=.5 output%d.jpg
 ```
 
-### 2. Pretrained StyleGAN2을 통해 transfer learning 합니다.
+얼굴 검출에는 YOLOv5를 사용하고, 얼굴 주변을 넉넉히 확장해 잘랐습니다. CLIP으로 선명한 얼굴과 흐린 얼굴을 나누고, waifu 계열 도구로 2배 확대한 뒤 512 크기로 맞췄습니다. 가장 결정적인 단계는 FFHQ alignment였습니다. 이 정렬을 생략한 데이터로 blending했을 때 실사와 애니메이션의 눈 위치가 서로 달라 “눈이 네 개”처럼 보이는 결과가 나왔습니다.
 
-```
-python dataset_tool.py --source ../../datasets/stylegan/anime --dest ./anime.zip --width 512 --height 512
-```
+이 파이프라인은 도구와 모델 파일이 생략된 작업 기록이며, 한 줄로 재현되는 완성 실행법은 아닙니다. 특히 얼굴 검출 임계값, crop 여백, 품질 필터 기준은 영상마다 다시 정해야 합니다.
 
-```
-python train.py --outdir=./training-runs --data=./anime.zip --cfg=paper512 --mirror=1 --gpus=4 --batch 8 --resume ffhq512
-```
+## 두 모델을 섞을 때는 같은 학습 조건을 맞춥니다
 
-### Blending FFHQ - AAHQ
+원문 환경은 Python 3.7, PyTorch 1.8.1, CUDA 11.1, cuDNN 8.0.5였습니다. 데이터셋 변환과 전이 학습의 핵심 명령은 다음과 같습니다.
 
-
-
-![blend](/assets/img/post_img/stylegan/transfer.PNG)
-
-
-### Blending FFHQ - Metface
-
-
-
-![blend](/assets/img/post_img/stylegan/blend.PNG)
-
-
-
-40번 정도 iteration 된건데 벌써 좋은 결과가 나오는 것 같네요! 하지만!!
-
-**다양한 스타일의 애니메이션 얼굴을 통해 학습**하여 성능이 좋은 모델이 나왔지만 **모든 이미지의 스타일이 통일되지 않아** blending해서 style transfer 데이터셋을 만드는게 어렵다는 것을 파악함
-
-특정 애니메이션 영상을 통해 **일관된 스타일**을 학습시켜보아야함
-
-요즘 사람들은 arcane 애니메이션 style transfer하는 것을 [도전](https://github.com/bryandlee/animegan2-pytorch/issues/17)을 하는 것 같다. 나도 도전해보자
-
-이번엔 진짜 처음부터 다시 만들어서 training ... AAHQ는 모든 전처리 작업이 끝난 데이터셋이라 다른 전처리가 필요없지만 custom 데이터를 만들면 밑바닥부터 전처리를 진행해야 한다.
-
-구글링 구글링 반복으로 정리한 순서는 대략적으로..
-
-```
-collect video and image
-->
-image : pass
-video : ffmpeg -i video.mp4 -filter:v fps=0.5 video%d.jpg
-->
-face detection
-->
-image filtering using clip (clear / blurred)
-->
-waifu upsampling
-->
-face alignment according to ffhq standard
-->
-train Anime StyleGAN (transfer learning!!)
-->
-FFHQ, Anime StyleGAN Blending
-->
-Make Dataset
-->
-Pix2PixHD Training
-->
-Result !!
+```bash
+python dataset_tool.py --source=./data --dest=./datasets/custom.zip
+python train.py --outdir=./training-runs --data=./datasets/custom.zip --gpus=4 --batch=8 --resume=ffhq512
 ```
 
-- arcane video crwaling
-- yolov5로 detection
-- bounding box 확장 후 crop
-- crop 후 clip으로 사용할 이미지만 걸러냄
-- waifu로 2배 해상도 높이고 다시 512x512로 resize한 뒤 학습
-- 정렬안하고 학습하면 blending시 눈이 4개 되는 현상 -> ffhq 규격에 맞게 정렬 필수
+이는 오래된 환경과 프로젝트별 경로를 전제로 한 명령입니다. 데이터 디렉터리, 체크포인트, GPU 수를 실제 환경에 맞춰야 하고, 명령만 실행하면 정렬과 품질 필터까지 자동으로 수행된다고 보면 안 됩니다.
 
-위 조건을 만족하도록 데이터셋을 잘 전처리해서 transfer learning을 다시했음 -> FFHQ 모델과 Arcane 모델을 blending 시켜서 10000장의 paired data를 만들어냄
+실사 FFHQ generator와 새 애니메이션 generator의 층을 섞은 뒤, 같은 latent에서 나온 실사 쪽 이미지와 혼합 이미지 약 1만 쌍을 만들었습니다. 이 paired dataset이 다음 변환 모델의 감독 신호가 됩니다.
 
----
+## Pix2PixHD를 택한 이유와 남는 한계
 
-### Style Transfer
+단순 Pix2Pix는 눈이 흐려지고 artifact가 두드러졌습니다. perceptual model도 흐림을 충분히 해결하지 못했습니다. 반면 Pix2PixHD는 고해상도 얼굴의 선과 눈 형태를 상대적으로 잘 유지해 최종 선택이 됐습니다.
 
-- simple pix2pix 눈 부분이 뭉개짐 (GAN Loss, pixel-wise L1 Loss * 100)
-- simple pix2pix + perceptual 좀 퀄리티가 안좋음 (GAN Loss, Perceptual Loss, Feature Loss)
-- pix2pix는 paired 이미지를 학습할 때 약간의 아티펙트가 생기기 때문에 질문을 통해 어떤 모델을 사용했는지 알아봄
-  - [issue](https://github.com/Sxela/ArcaneGAN/issues/8)
-  - [code](https://github.com/fastai/course-v3/blob/master/nbs/dl1/lesson7-superres-gan.ipynb)
-  - unet 기반 모델로 generator와 discriminator를 적절히 미리 학습한 뒤 파인튜닝 하는 방법
-  - 잘동작은 하는데 뭔가 blurring됨 그리구 fastai가 너무 축약되어 있는 라이브러리라 이해하기가 좀 복잡하긴 함
-
-- pix2pixHD를 사용하도록함(왜 이걸 먼저 안했을까! ㅜ)
-
-
-
-![result](/assets/img/post_img/stylegan/result.PNG)
-
-
-
-좋은 결과가 나왔다 !! 조금 더 자세한 스크립트는 [Github](https://github.com/jjxxmiin/anime_style_transfer_pytorch)
+이 결과를 일반적인 “아무 영상이나 넣으면 같은 품질”로 확대하면 곤란합니다. 특정 작품에 맞춘 데이터는 다른 화풍으로 잘 일반화되지 않고, 자동 얼굴 검출과 품질 분류의 오차가 그대로 학습쌍에 들어갑니다. 저장할 체크리스트는 세 가지입니다. 두 domain의 얼굴 landmark가 같은 위치인지, 한쪽 화풍이 충분히 일관적인지, paired image가 같은 정체성과 pose를 유지하는지 먼저 확인한 뒤 모델 구조를 바꾸는 편이 빠릅니다.

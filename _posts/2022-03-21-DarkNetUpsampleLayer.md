@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Upsample Layer"
+title:  "Darknet Upsample에서 음수 Stride를 쓰면 왜 Downsample이 될까?"
+summary: "Darknet upsample_layer가 stride 부호로 reverse 모드를 정하고 출력 크기와 forward·backward 호출 방향을 뒤집는 방식, scale 초기화와 정수 나눗셈 주의점을 설명합니다."
 date:   2022-03-21 16:00 -0400
 categories: DarkNet
 image:
@@ -10,192 +11,68 @@ tags:
   - DarkNet
   - 컴퓨터비전
   - C언어
+  - 아키텍처분석
 math: true
 ---
 
-## upsample\_layer
+Darknet Upsample Layer에 음수 stride를 주면 절댓값을 배율로 저장하고 `reverse=1`로 바꿔, 출력 크기를 곱하는 대신 나누는 downsample 경로를 사용합니다.
 
-### Upsample Layer란?
+이 layer는 학습 파라미터 없이 `upsample_cpu`의 방향을 감싸는 얇은 wrapper입니다. 하지만 resize, reverse와 scale의 계약을 놓치면 shape는 맞아도 값이 0이거나 예상과 다른 방향으로 누적될 수 있습니다. 원문 조각만으로 helper의 내부 보간·누적 방식을 모두 알 수는 없습니다.
 
-Upsample Layer는 Feature Maps의 크기를 키우는 Layer입니다.
+## Stride 부호가 Mode와 출력 Shape를 정합니다
 
-***
-
-### upsample\_layer.c
-
-#### forward\_upsample\_layer
+생성 함수는 먼저 일반 upsample처럼 `out_w=w*stride`와 `out_h=h*stride`를 계산합니다. Stride가 음수이면 부호를 뒤집고 reverse flag를 세운 뒤 나눗셈으로 다시 계산합니다.
 
 ```c
-void forward_upsample_layer(const layer l, network net)
-{
-    fill_cpu(l.outputs*l.batch, 0, l.output, 1);
-    if(l.reverse){
-        upsample_cpu(l.output, l.out_w, l.out_h, l.c, l.batch, l.stride, 0, l.scale, net.input);
-    }else{
-        upsample_cpu(net.input, l.w, l.h, l.c, l.batch, l.stride, 1, l.scale, l.output);
-    }
+if(stride < 0){
+    stride = -stride;
+    l.reverse = 1;
+    l.out_w = w/stride;
+    l.out_h = h/stride;
+}
+l.stride = stride;
+```
+
+입력이 13×13이고 stride 2이면 26×26, stride -2이면 정수 나눗셈 기준 6×6이 됩니다. 나누어떨어지지 않는 크기는 나머지가 버려지므로 cfg에서 의도한 shape인지 미리 계산해야 합니다. Stride 0은 곱셈에서는 지나가도 reverse나 helper에서 유효한 배율이 아니므로 호출부에서 막아야 합니다.
+
+Channel은 변하지 않고 `out_c=c`입니다. 이 layer가 channel을 재배치하거나 새 feature를 학습한다고 보면 안 됩니다.
+
+## Forward는 Output을 0으로 만든 뒤 방향을 고릅니다
+
+모든 forward는 먼저 `l.output`을 0으로 초기화합니다. 일반 mode에서는 network input을 helper의 입력으로 주고 layer output을 목적지로 둡니다.
+
+```c
+if(l.reverse){
+    upsample_cpu(l.output, l.out_w, l.out_h, l.c,
+        l.batch, l.stride, 0, l.scale, net.input);
+}else{
+    upsample_cpu(net.input, l.w, l.h, l.c,
+        l.batch, l.stride, 1, l.scale, l.output);
 }
 ```
 
-함수 이름: forward\_upsample\_layer
+Reverse mode는 작은 `l.output`과 큰 `net.input`의 위치를 바꾸고 helper의 방향 flag도 0으로 둡니다. 따라서 “동일한 upsample 결과를 resize만 작게 한 것”이 아닙니다. 정확히 어떤 값을 모으는지는 사용 중인 `upsample_cpu` 구현을 함께 확인해야 합니다.
 
-입력:&#x20;
+또 하나의 함정은 보이는 `make_upsample_layer`가 `l.scale`을 직접 설정하지 않는다는 점입니다. 구조체를 0으로 초기화했으므로 다른 parser나 호출부가 scale을 넣지 않으면 계산이 모두 0 scale을 받을 수 있습니다. 전체 버전에서 scale의 기본값이 어디서 정해지는지 확인해야 합니다.
 
-* l: layer 구조체
-* net: network 구조체
+## Backward는 Forward의 반대 방향을 호출합니다
 
-동작:&#x20;
-
-* 업샘플링 레이어를 전방향 패스(forward pass)로 처리하는 함수입니다.&#x20;
-* 입력 이미지를 업샘플링하여 출력값을 계산합니다. 이때, 출력값은 l.output에 저장됩니다.
-
-설명:
-
-* fill\_cpu() 함수는 l.output을 0으로 초기화합니다.
-* l.reverse가 참(True)일 경우, upsample\_cpu() 함수를 사용하여 l.output에 업샘플링된 이미지를 저장합니다. 이때, 입력 이미지는 net.input입니다.
-* l.reverse가 거짓(False)일 경우, upsample\_cpu() 함수를 사용하여 net.input 이미지를 업샘플링하여 l.output에 저장합니다. 이때, 출력 크기는 l.w, l.h로 설정되어 있습니다.
-* 최종적으로, 출력값은 l.output에 저장됩니다.
-
-
-
-#### backward\_upsample\_layer
+일반 upsample의 backward는 큰 출력 delta를 작은 입력 delta로 모아야 하므로 helper 방향을 0으로 호출합니다. Reverse mode에서는 반대로 `l.delta`를 입력으로 두고 방향 1을 사용합니다.
 
 ```c
-void backward_upsample_layer(const layer l, network net)
-{
-    if(l.reverse){
-        upsample_cpu(l.delta, l.out_w, l.out_h, l.c, l.batch, l.stride, 1, l.scale, net.delta);
-    }else{
-        upsample_cpu(net.delta, l.w, l.h, l.c, l.batch, l.stride, 0, l.scale, l.delta);
-    }
+if(l.reverse){
+    upsample_cpu(l.delta, l.out_w, l.out_h, l.c,
+        l.batch, l.stride, 1, l.scale, net.delta);
+}else{
+    upsample_cpu(net.delta, l.w, l.h, l.c,
+        l.batch, l.stride, 0, l.scale, l.delta);
 }
 ```
 
-함수 이름: backward\_upsample\_layer
+두 경로 모두 기존 delta와 누적되는지 덮어쓰는지는 helper 구현의 계약입니다. 이 wrapper에는 `net.delta`를 0으로 만드는 코드가 없으므로 전체 backward 초기화 순서도 확인해야 합니다.
 
-입력:&#x20;
+## Resize와 수치 Test를 함께 합니다
 
-* l: layer 구조체
-* net: network 구조체
+`resize_upsample_layer`도 생성부와 같은 규칙으로 `out_w/out_h`를 다시 계산하고 output·delta를 재할당합니다. 입력 `w,h`를 출력 크기로 오해하면 배율이 한 번 더 적용됩니다.
 
-동작:&#x20;
-
-* 업샘플링 레이어의 역전파(backward pass) 연산을 수행합니다.&#x20;
-* 입력값으로는 l과 net을 받으며, l은 현재 레이어의 정보와 이전 레이어의 출력값에 대한 정보를 담고 있으며, net은 전체 네트워크에 대한 정보를 담고 있습니다.&#x20;
-* 업샘플링 레이어는 입력값의 크기를 늘리는 작업을 수행하는데, 이를 역전파 할 때는 이전 레이어의 delta 값을 현재 레이어의 크기에 맞게 축소(upsample)하여 전달합니다. 이 과정에서 scale 값을 사용하여 크기를 조절합니다.
-
-설명:&#x20;
-
-* 이 함수는 Darknet 딥러닝 프레임워크의 업샘플링 레이어에 대한 역전파 연산을 담당합니다.&#x20;
-* Darknet에서는 입력값의 크기를 늘리는 작업을 수행하는 데에 업샘플링 레이어를 사용하며, 이 레이어의 출력값은 다음 레이어의 입력값으로 사용됩니다. 따라서 이전 레이어의 delta 값을 현재 레이어의 크기에 맞게 축소하여 전달해야 합니다.&#x20;
-* 이를 위해 upsample\_cpu() 함수를 사용하며, 이 함수에서는 입력값의 크기를 늘리는 작업을 수행합니다.&#x20;
-* scale 값을 사용하여 크기를 조절하며, reverse 값이 1인 경우에는 이전 레이어의 delta 값을 축소하여 전달하고, 0인 경우에는 net에서 이전 레이어의 delta 값을 가져와서 크기를 늘린 후 현재 레이어의 delta 값으로 사용합니다.
-
-
-
-#### resize\_upsample\_layer
-
-```c
-void resize_upsample_layer(layer *l, int w, int h)
-{
-    l->w = w;
-    l->h = h;
-    l->out_w = w*l->stride;
-    l->out_h = h*l->stride;
-    if(l->reverse){
-        l->out_w = w/l->stride;
-        l->out_h = h/l->stride;
-    }
-    l->outputs = l->out_w*l->out_h*l->out_c;
-    l->inputs = l->h*l->w*l->c;
-    l->delta =  realloc(l->delta, l->outputs*l->batch*sizeof(float));
-    l->output = realloc(l->output, l->outputs*l->batch*sizeof(float));  
-}
-```
-
-함수 이름: resize\_upsample\_layer
-
-입력:
-
-* layer \*l: upsample 레이어의 포인터
-* int w: upsample 레이어의 출력 이미지 가로 길이
-* int h: upsample 레이어의 출력 이미지 세로 길이
-
-동작:&#x20;
-
-* upsample 레이어의 출력 이미지 가로, 세로 길이를 조절하는 함수이다.&#x20;
-* 입력으로 받은 가로, 세로 길이로 레이어의 가로, 세로 길이를 업데이트하고, 이를 기반으로 출력 이미지 가로, 세로 길이를 다시 계산한다.&#x20;
-* 만약 레이어가 reverse 모드이면 출력 이미지 가로, 세로 길이는 입력 이미지 가로, 세로 길이에 stride를 나눈 값이 되고, outputs 값도 이에 맞게 계산된다.&#x20;
-* 그리고 레이어의 입력 채널 수에 맞게 outputs 값을 계산한다. 마지막으로 delta와 output을 업데이트한다.
-
-설명:&#x20;
-
-* upsample 레이어는 입력 이미지를 확대하는 역할을 한다. 이 함수는 upsample 레이어의 출력 이미지 가로, 세로 길이를 조정하는 함수이다.&#x20;
-* 이 함수는 l->w와 l->h를 입력으로 받은 가로, 세로 길이로 변경하고, 이를 기반으로 l->out\_w와 l->out\_h를 다시 계산한다.&#x20;
-* 이때, l->out\_w와 l->out\_h는 upsample 레이어의 출력 이미지의 가로, 세로 길이이다.&#x20;
-* 만약 upsample 레이어가 reverse 모드이면, l->out\_w와 l->out\_h는 입력 이미지의 가로, 세로 길이에 stride를 나눈 값이 된다.&#x20;
-* 그리고 l->outputs 값도 이에 맞게 계산된다. l->outputs는 upsample 레이어의 출력 채널 수에 맞게 출력 이미지의 픽셀 수를 나타낸다.&#x20;
-* 마지막으로 delta와 output을 업데이트하여 메모리를 할당한다.
-
-#### make\_upsample\_layer
-
-```c
-layer make_upsample_layer(int batch, int w, int h, int c, int stride)
-{
-    layer l = {0};
-    l.type = UPSAMPLE;
-    l.batch = batch;
-    l.w = w;
-    l.h = h;
-    l.c = c;
-    l.out_w = w*stride;
-    l.out_h = h*stride;
-    l.out_c = c;
-    if(stride < 0){
-        stride = -stride;
-        l.reverse=1;
-        l.out_w = w/stride;
-        l.out_h = h/stride;
-    }
-    l.stride = stride;
-    l.outputs = l.out_w*l.out_h*l.out_c;
-    l.inputs = l.w*l.h*l.c;
-    l.delta =  calloc(l.outputs*batch, sizeof(float));
-    l.output = calloc(l.outputs*batch, sizeof(float));;
-
-    l.forward = forward_upsample_layer;
-    l.backward = backward_upsample_layer;
-
-    if(l.reverse) fprintf(stderr, "downsample         %2dx  %4d x%4d x%4d   ->  %4d x%4d x%4d\n", stride, w, h, c, l.out_w, l.out_h, l.out_c);
-    else fprintf(stderr, "upsample           %2dx  %4d x%4d x%4d   ->  %4d x%4d x%4d\n", stride, w, h, c, l.out_w, l.out_h, l.out_c);
-    return l;
-}
-```
-
-함수 이름: make\_upsample\_layer
-
-입력:
-
-* batch: int 형식의 배치 크기
-* w: int 형식의 입력 너비
-* h: int 형식의 입력 높이
-* c: int 형식의 입력 채널 수
-* stride: int 형식의 업샘플링 배율 또는 다운샘플링 배율(음수)
-
-동작:
-
-* 입력으로 받은 batch, w, h, c, stride 값을 사용하여 upsample 레이어를 생성한다.
-* stride 값이 음수인 경우 다운샘플링으로 동작한다.
-* 레이어의 출력 크기(out\_w, out\_h, out\_c)와 출력 요소 수(outputs)를 계산한다.
-* 레이어의 입력 요소 수(inputs), 델타(delta), 출력(output)을 메모리에 할당하고, 0으로 초기화한다.
-* 업샘플링 레이어의 forward와 backward 함수를 설정한다.
-* 업샘플링 레이어의 정보를 출력한다.
-
-설명:
-
-* 업샘플링 레이어를 만드는 함수이다.
-* 이 함수에서 생성된 레이어는 입력 이미지를 upsample 또는 downsample하여 출력하는 역할을 한다.
-* 입력 이미지의 크기를 키우는 upsample과 크기를 줄이는 downsample이 있다.
-* 이 함수에서는 stride 값을 이용하여 upsample과 downsample을 구분하고, 역전파 함수에서 해당 연산을 처리한다.
-* 레이어의 출력 크기는 입력 크기와 stride 값에 따라 결정된다.
-* 이 함수에서는 메모리 할당과 초기화를 수행하고, forward와 backward 함수를 설정하는 작업을 한다.
+검증은 한 channel의 2×2 입력과 stride 2부터 시작하는 것이 좋습니다. Forward output shape와 각 값의 위치, scale을 바꾼 결과, backward에서 입력 delta로 돌아오는 값을 손으로 대조합니다. 그 다음 stride -2와 나누어떨어지지 않는 크기를 시험합니다. 이 글의 코드는 특정 Darknet 버전의 내부 조각이므로 다른 프레임워크의 nearest-neighbor resize와 이름만으로 동일하다고 간주하면 안 됩니다.

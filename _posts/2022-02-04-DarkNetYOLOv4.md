@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - YOLOv4"
+title:  "YOLOv4 Bag of Freebies와 Specials, 무엇이 추론 비용을 늘릴까?"
+summary: "YOLOv4의 Mosaic·SAT·CmBN 같은 학습 전용 기법과 SPP·PAN·SAM·Mish 같은 구조 변경을 구분하고, CSPDarknet-53 조합과 실험 결과를 읽는 법을 정리합니다."
 date:   2022-02-04 16:00 -0400
 categories: DarkNet
 image:
@@ -10,385 +11,39 @@ tags:
   - DarkNet
   - YOLO
   - 컴퓨터비전
-  - AI보안
-  - 경량화
+  - 논문리뷰
+  - 아키텍처분석
 math: true
 ---
 
-## YOLOv4
+YOLOv4에서 추론 비용 없이 먼저 시험할 항목은 Mosaic·label smoothing·CIoU 같은 Bag of Freebies이고, SPP·PAN·SAM·Mish처럼 forward graph에 남는 Bag of Specials는 latency를 다시 측정해야 합니다.
 
-* Paper : [https://arxiv.org/abs/2004.10934](https://arxiv.org/abs/2004.10934)
+[YOLOv4 논문](https://arxiv.org/abs/2004.10934)은 당시 객체 탐지에 쓰이던 많은 기법을 나열하는 데 그치지 않고, 일반 GPU에서 속도와 정확도를 함께 얻는 조합을 실험합니다. 이름이 많아 보이지만 “학습 때만 비용을 내는가, 추론에도 남는가”로 나누면 선택이 쉬워집니다.
 
-기존 YOLOv3까지 저자셨던 `Joseph Redmon`이 참여하지 않았습니다.
+## Bag of Freebies는 학습 비용으로 추론 품질을 삽니다
 
-YOLOv4는 YOLOv3이후에 나온 딥러닝의 정확도를 개선하는 다양한 방법을 적용해 YOLO의 성능을 극대화 하는 방법을 설명합니다.
+Bag of Freebies는 학습 과정만 바꾸고 배포된 모델의 계산 그래프를 크게 늘리지 않는 기법입니다. 원문에는 photometric·geometric distortion, CutOut·Random Erase·Hide-and-Seek·GridMask, MixUp·CutMix·Mosaic 같은 augmentation이 포함됩니다. GAN으로 occlusion을 만들거나 style을 바꾸는 방법도 같은 목적입니다.
 
+Regularization 쪽에는 DropBlock, label smoothing, class label refinement가 있고, bounding box regression에는 MSE 대신 IoU·GIoU·DIoU·CIoU 계열 손실을 사용할 수 있습니다. 이 가운데 무엇이든 많이 쌓는다고 좋아지는 것은 아닙니다. 작은 데이터에서는 강한 augmentation이 label 의미를 훼손할 수 있고, box loss를 바꾸면 target encoding과 gradient 크기도 함께 확인해야 합니다.
 
+YOLOv4가 채택한 학습 조합에는 Mosaic, Self-Adversarial Training, Cross mini-Batch Normalization, DropBlock, label smoothing, CIoU loss 등이 들어갑니다. 이들은 추론 graph를 키우지 않는다는 공통점이 있지만 학습 시간과 구현 복잡도는 공짜가 아닙니다.
 
-![1](/assets/img/post_img/darknetbook/yolov4_bench1.PNG)
+## Bag of Specials는 효과와 Latency를 함께 봅니다
 
+Bag of Specials는 receptive field를 넓히거나 feature를 합치고 attention을 넣는 등 구조를 바꿔 정확도를 높이며, 보통 추론 비용이 조금 늘어납니다. SPP와 ASPP는 서로 다른 범위의 context를 모으고, FPN·PAN·NAS-FPN·BiFPN 계열은 여러 scale feature를 결합합니다. SE와 SAM은 중요한 channel 또는 spatial feature에 가중치를 줍니다.
 
+Activation의 ReLU, LReLU, PReLU, ReLU6, SELU, Swish, Mish도 후보이며, NMS 변형으로 soft-NMS와 DIoU-NMS 등이 소개됩니다. 특정 논문에서 효과가 있었다는 사실과 내 detector의 end-to-end latency가 좋아진다는 것은 별개입니다. 특히 attention과 feature pyramid는 메모리 이동 비용까지 실제 장치에서 측정해야 합니다.
 
-위에 표를 보면 속도는 유사하지만 정확도가 매우 많이 개선되었습니다.
+## 최종 조합은 분류 1등 Backbone만 고른 결과가 아닙니다
 
+YOLOv4의 backbone은 CSPDarknet-53, neck은 SPP와 PAN, head는 YOLOv3 계열입니다. ImageNet 분류에서 가장 높은 점수를 내는 backbone이 객체 탐지에서도 반드시 최선은 아닙니다. 탐지는 입력 해상도와 receptive field, 여러 scale의 feature 보존, 연산량과 메모리까지 함께 요구하기 때문입니다.
 
+논문은 CSPResNeXt-50과 CSPDarknet-53 등을 비교하고, detector에 필요한 조건을 따져 CSPDarknet-53을 선택합니다. Neck에는 SPP로 receptive field를 넓히고 PAN으로 bottom-up과 top-down feature 흐름을 결합합니다. 즉 backbone 한 개의 순위가 아니라 전체 경로의 조합입니다.
 
-![1](/assets/img/post_img/darknetbook/od.PNG)
+선택 과정을 재현하려면 한 번에 여러 요소를 바꾸지 않는 편이 좋습니다. baseline에서 augmentation과 loss를 먼저 고정하고, backbone·neck·activation을 하나씩 바꾸면서 AP, AP50, AP75, FPS와 memory를 함께 기록해야 각 개선의 원인을 알 수 있습니다.
 
+## 내 프로젝트에 적용하는 현실적인 순서
 
+첫 단계는 baseline의 입력 크기, batch, 학습 schedule과 평가 코드를 고정하는 것입니다. 그다음 Mosaic와 label smoothing, box loss처럼 추론 비용이 없는 변경을 시험합니다. 작은 객체가 문제라면 SPP·PAN의 feature 경로를 검토하고, latency 여유가 있을 때 activation이나 attention을 비교합니다. 마지막으로 NMS 변형이 precision·recall 균형에 미치는 영향을 봅니다.
 
-최근 표준화된 Object Detection의 모델 구조에 대해 요약하면 위와 같습니다. 깔끔하게 정리되서 한눈에 보기 쉽습니다.
-
-YOLOv4는 다양한 기법들을 2가지 범주로 묶어서 설명합니다.
-
-* BOF(Bag Of Freebies)
-* BOS(Bag Of Specials)
-
-#### Bag Of Freebies
-
-추론속도는 유지하지만 학습 전략을 바꾸거나 학습 비용을 증가시켜 정확도를 높이는 방법
-
-##### Data Augmentation
-
-원본 데이터셋의 과적합을 막고 적은 데이터셋의 효과를 극대화하기 위한 방법
-
-* Photometric Distortions : brightness, contrast, hue, saturation, noise
-* Geometric Distortions : random scaling, cropping, flipping, rotating
-* CutOut
-* Random Erase
-* MixUp
-* CutMix
-* GAN
-
-
-
-![1](/assets/img/post_img/darknetbook/cutmix.PNG)
-
-
-
-여기서 Random Erase는 CutOut과 비슷한데 CutOut은 제거한 영역을 0으로 채우는 반면, Random Erase는 랜덤한 값으로 채웁니다.
-
-##### Semantic Distribution Bias
-
-데이터셋에 특정 라벨이 많거나 하는 경우에 대한 불균형을 해결하기위한 방법
-
-* Hard Negative Example Mining
-
-Hard Negative란 Negative를 Positive라고 예측하기 쉬운 데이터입니다. 그래서 Hard Negative Mining이란 Hard Negative 데이터를 모아서 원래 데이터에 추가해서 학습하는 방법입니다. 이로인해 False Negative 오류에 강해집니다.
-
-* Focal Loss
-
-분류하기 쉬운 샘플의 경우 학습에 기여도는 낮기 때문에 비효율적이다. 이러한 문제를 해결하기 위한 새로운 손실 함수다.
-
-$$Cross entropy = -log(p_t)$$
-
-$$Focal Loss = -(1 - p_t)^{\gamma}log(p_t), \quad \gamma \geq 0$$
-
-기존 Cross Entropy에 $$(1 - p_t^{\gamma})$$라는 factor가 하나 포함되어있고 이 factor의 scale은 $$\gamma$$로 조절합니다. 이로인해 쉬운 예제의 경우 손실에 기여도를 낮출수 있다.
-
-* Label Smoothing
-
-데이터셋 라벨링의 실수 가능성을 포함하는 방법입니다.
-
-고양이 사진이 있는 경우 라벨을 \[고양이: 1 | 개: 0] 으로 정답을 라벨링하는 것이 아니라 \[고양이: 0.9 | 개: 0.1]로 합니다.
-
-```
-new labels = one hot labels * (1 - label smoothing value) + label smoothing value / num classes
-
-IF 0.2인 경우
-
-1 * (1 - 0.2) + 0.2 / 2 = 0.9
-0 * (1 - 0.2) + 0.2 / 2 = 0.1
-```
-
-##### Bounding Box Regression
-
-* GIOU(Generalized Intersection over Union)
-* CIOU(Complete Intersection over Union)
-* DIOU(Distance Intersection over Union)
-
-
-
-![1](/assets/img/post_img/darknetbook/iou.PNG)
-
-
-
-#### Bag Of Specials
-
-약간의 추론 속도 증가를 통해 정확도를 높이는 방법
-
-##### SPP
-
-SPM(Spatial Pytamid Matching)에 의해 개발 된 모듈입니다. 원래 SPM 방법은 특징 맵을 동일한 d x d 블록으로 나눈 뒤, spatial pyramid를 형성하고 bag-of-word를 사용해 features를 추출합니다.
-
-SPP는 딥러닝에 최적화 하기 위해 CNN와 SPM을 결합하고 bag-of word 대신 maxpooling을 사용합니다.
-
-##### ASPP
-
-ASPP(Atrous Spatial Pyramid Pooling)은 향상된 SPP로 DeepLapV3에서 제안된 방법입니다. 다양한 dilated ratio(6, 12, 18, 24)를 가지고 합성곱 연산을 한 뒤 concat하여 연산합니다.
-
-약 7% 추론시간이 증가하지만 5.7% 정확도가 향상됩니다.
-
-##### RFB
-
-RFB(Receptive Field Block Net)
-
-##### SE
-
-SE(Squeeze-and-Excitation)
-
-
-
-![1](/assets/img/post_img/darknetbook/se.PNG)
-
-
-
-약 2% 연산량이 증가지만 1% 정확도가 향상 된다. 하지만 GPU에서 추론시간이 10% 증가한다.
-
-##### SAM
-
-SAM(Spatial Attention module) 0.1% 연산량이 증가하고 0.5% 정확도가 향상된다. GPU 추론시간에 영향이 없다.
-
-
-
-![1](/assets/img/post_img/darknetbook/sam.PNG)
-
-
-
-##### SFAM
-
-SPAM(Scale-wise Feature Aggregation Module)은 SE 모듈을 사용해 multi scale이 연결 된 특징 맵에서 channelwise level re-weighting을 합니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/sfam.PNG)
-
-
-
-SFAM 논문에서 사용 된 모델의 전체적인 흐름을 나타냅니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/sfam2.PNG)
-
-
-
-(a) : FFMv1 (b) : FFMv2 (c) : TUM
-
-
-
-![1](/assets/img/post_img/darknetbook/sfam3.PNG)
-
-
-
-SFAM을 묘사한 그림입니다.
-
-##### ASFF
-
-ASFF(Adaptively Spatial Feature Fusion)
-
-
-
-![1](/assets/img/post_img/darknetbook/asff.PNG)
-
-
-
-##### BiFPN
-
-multi input weighted residual connections는 scale-wise level re-weighting을 실행한 다음 다른 스케일의 특징 맵을 추가하기 위해서 제안됩니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/bifpn.PNG)
-
-
-
-##### Activation Function
-
-* LReLU, PReLU : ReLU가 0보다 작은 경우 기울기가 0이라는 문제를 해결
-* ReLU6 ,Hard-Swish : Quantization network를 위해 설계됨
-* SeLU : 네트워크를 정규화하기 위해서 사용된다.
-* Mish
-* ...
-
-활성화 함수는 ReLU나 기존 활성화 함수 조합으로 생겨난 것이 많고 궁금한 내용만 찾아보시면 될 것 같습니다.
-
-##### NMS
-
-* NMS
-* Soft NMS
-
-
-
-![1](/assets/img/post_img/darknetbook/nms.PNG)
-
-
-
-겹치는 bouning box를 후처리 해주는 작업은 위에 식으로 표현할 수 있습니다.
-
-#### Selection of Architecture
-
-* Objective
-  * Input Network Resolution
-  * Convolution Layer Number
-  * Parameter Number
-  * Number of Layer Output
-* CSPResNeXt50 : ImageNet(Classification)
-* CSPDarkNet53 : MS COCO(Object Detection)
-
-classification이 최적인 모델이라고 해서 detector에서도 최적이 아닙니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/table.PNG)
-
-
-
-* 높은 입력 해상도 : 작은 크기의 객체를 검출
-* 더 많은 계층 : 증가 된 해상도를 커버하기 위한 더 높은 receptive field
-* 더 많은 매개변수 : 크기가 다른 여러개의 객체를 검출하는 모델의 용량을 늘리기 위함
-
-제일 합당한 모델은 DarkNet이라고 할 수 있습니다.
-
-YOLOv3는 CSPDarkNet53에 SPP 블록을 추가하고 YOLOv3에서 사용되는 FPN대신 PANet을 사용합니다.
-
-**CSP**
-
-CSP(Cross-Stage-Partial-Connections)
-
-
-
-![1](/assets/img/post_img/darknetbook/csp.PNG)
-
-
-
-특징 맵 채널의 절반만 Residual Block을 통과하기 때문에 Bottleneck layer를 사용 할 필요가 없습니다.
-
-**New Method**
-
-* SAT
-* Mosaic
-  * 4개의 학습 이미지를 혼합한다.
-  * Mini Batch가 크지 않아도 된다.(혼합 자체로 효과적임)
-
-
-
-![1](/assets/img/post_img/darknetbook/mosaic.PNG)
-
-
-
-* modified SAM
-* modified PAN
-
-
-
-![1](/assets/img/post_img/darknetbook/new.PNG)
-
-
-
-* Cross mini-Batch Normalization(CmBN)
-
-
-
-![1](/assets/img/post_img/darknetbook/cmbn.PNG)
-
-
-
-**Activation**
-
-* ReLU, LReLU, PReLU, ReLU6, SELU, Swish, Mish
-
-**Bouding box regression loss**
-
-* MSE, IoU, GIoU, CIoU, DIoU
-
-**Data Augmentation**
-
-* CutOut, MixUp, CutMix
-
-**Regularization method**
-
-* DropOut, DropPath, Spatial DropOut, or DropBlock
-
-**Normalization of the network activations by their mean and variance**
-
-* Batch Normalization (BN)
-* Cross-GPU Batch Normalization (CGBN or SyncBN)
-* Filter Response Normalization (FRN)
-* Cross-Iteration Batch Normalization (CBN)
-
-**Skip-connections**
-
-* Residual connections
-* Weighted residual connections
-* Multi-input weighted residual connections
-* Cross stage partial connections (CSP)
-
-#### YOLOv4
-
-* Backbone : CSPDarkNet53
-* Neck : SPP, PAN
-* Head : Yolov3
-* Bag of Freebies for backbone : CutMix, Mosaic, DropBlock, Class label smoothing
-* Bag of Specials for backbone : Mish, CSP, Muiti-input weighted residual connections(MiWRC)
-* Bag of Freebies for detector : CIoU, CmBN, DropBlock, Mosaic, Self Adversarial Training, Eliminate grid sensitivity, Using multiple anchors for a single ground truth, Cosine anneling scheduler, Optimal hyper parameters, Random training shapes
-* Bag of Specials for detector : Mish, SPP, SAM, PAN, DIoU NMS
-
-#### Experiments
-
-* training steps : 8,000,000
-* batch size : 128 / mini batch size 32
-* learning rate : 0.1 warm-up : 1000
-* momentum : 0.9 / weight decay : 0.005
-* BoF experiments : data augmentation 검증
-* BoS experiments : activation function 검증
-* genetic algorithm : hyper parameter search (lr : 0.00261, momentum : 0.949, IoU thresholds : 0.213, loss normalizer : 0.07)
-
-
-
-![1](/assets/img/post_img/darknetbook/table2.PNG)
-
-
-
-
-
-
-![1](/assets/img/post_img/darknetbook/table3.PNG)
-
-
-
-* S : Eliminate grid sensitivity : sigmoid에 1.0을 초과하는 계수를 곱해 object가 검출되지 않는 grid의 영향을 제거한다.
-* M : Mosaic
-* IT : IoU threshold (single GT > IoU threshold)
-* GA : genetic algorithm (hyperparameter search)
-* LS : class label smoothing
-* CBN : CmBN
-* CA : cosine anneling
-* DM : dynamic minibatch size
-* OA : optimized anchors
-
-
-
-![1](/assets/img/post_img/darknetbook/table4.PNG)
-
-
-
-* classification accuracy가 높다고 detector accuracy가 항상 높은건 아닙니다.
-* CSPResNet50의 classification accurac가 높지만 detector accuracy는 CSPDarkNet53이 더 높습니다.
-* CSPResNet50에 BoF, Mish를 사용하면 classification accuracy는 높아지지만 detector accuracy는 낮아집니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/table5.PNG)
-
-
-
-* CSPDarkNet53에 BoF, Mish를 사용하면 detector accuracy가 높아집니다.
-* BOF, BOS를 추가한 뒤 mini batch size가 성능에 거의 영향을 미치지 않습니다.
-  * 즉, 고가의 GPU는 불필요합니다.
-
-#### Result
-
-
-
-![1](/assets/img/post_img/darknetbook/result.PNG)
+YOLOv4의 표에 나온 개선 폭은 해당 데이터셋과 조합에서 측정된 값입니다. augmentation끼리 충돌하거나 BatchNorm 통계가 작은 batch에서 불안정할 수 있으며, GPU 종류가 달라지면 같은 FLOPs라도 속도가 달라집니다. “논문의 최종 recipe를 전부 복사”하기보다 무료 기법과 유료 기법을 분리해 ablation하는 것이 이 논문에서 가져갈 가장 실용적인 방법입니다.

@@ -1,227 +1,79 @@
 ---
 layout: post
-title: "SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까?"
-summary: "AI가 실제 개발자로 취업하고 돈을 벌 수 있을까? OpenAI의 SWE-Lancer 연구를 통해 그 가능성을 분석합니다!"
+title: "SWE-Lancer에서 AI는 100만 달러 중 얼마를 벌었나: $403K의 의미"
+summary: "실제 Upwork 작업 1,488개를 코드 구현과 매니저 판단으로 나눈 SWE-Lancer, 최고 $403K 점수를 과대해석하지 않는 법"
 image:
   path: /assets/img/thumb/SWELancer.jpg
   alt: "SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까? 대표 이미지"
 date: 2025-02-24
 categories: Paper
 tags:
+  - SWELancer
   - AI코딩
+  - 소프트웨어평가
   - LLM
-  - 논문리뷰
 math: true
 ---
 
-# **SWE-Lancer: LLM이 실제 소프트웨어 엔지니어링으로 돈을 벌 수 있을까?**
+SWE-Lancer에서 가장 높은 결과는 100만 달러 중 40만 3천 달러에 해당했지만, 이는 AI가 실제로 취업해 받은 수입이 아니라 통과한 프리랜서 작업의 보상액을 합산한 벤치마크 점수입니다.
 
-- 📖 논문: [https://arxiv.org/abs/2502.12115v2](https://arxiv.org/abs/2502.12115v2)  
-- 🖥️ 깃허브: [https://github.com/openai/SWELancer-Benchmark](https://github.com/openai/SWELancer-Benchmark)  
-- 🤖 프로젝트: [https://github.com/openai/SWELancer-Benchmark](https://github.com/openai/SWELancer-Benchmark)  
+- [논문](https://arxiv.org/abs/2502.12115v2)
+- [벤치마크 GitHub](https://github.com/openai/SWELancer-Benchmark)
 
-> **🔍 연구 기관:** OpenAI  
-> **✍️ 저자:** Samuel Miserendino, Michele Wang, Tejal Patwardhan, Johannes Heidecke  
-> **📅 논문 발표:** 2025년 2월 19일  
+![SWE-Lancer 작업 예시](/assets/img/post_img/swe_lancer/3.PNG)
 
----
+## 실제 작업의 가격을 평가 가중치로 쓴다
 
-## 🎯 SWE-Lancer란?
-SWE-Lancer는 **AI가 실제 소프트웨어 엔지니어링 작업을 수행하고 돈을 벌 수 있는지** 평가하는 **최초의 현실적 벤치마크**입니다.  
+SWE-Lancer는 Upwork에서 채택된 소프트웨어 작업 1,488개를 모았고, 작업에 걸린 보상액은 합계 100만 달러입니다. 개별 금액은 50달러부터 32,000달러까지 분포합니다. 모델이 해결한 작업의 원래 보상액을 더하면 “얼마를 벌 수 있었는가”라는 직관적인 점수가 됩니다.
 
-🔹 **기존 AI 코딩 벤치마크와의 차이점:**  
-- **실제 프리랜서 시장(Upwork)에서 채택된 1,488개의 작업**을 기반으로 평가  
-- **실제 개발자들이 받은 보상을 기준으로 LLM의 수익 능력 평가**  
-- **소프트웨어 엔지니어로서의 개별 작업 수행 (IC SWE Tasks)** + **기술 매니저 역할 (SWE Manager Tasks) 포함**  
-- **단순 코드 생성이 아니라 풀스택 개발 및 의사결정 능력까지 테스트**  
+다만 높은 가격의 과제 하나가 낮은 가격 과제 여러 개보다 총액에 더 큰 영향을 줍니다. 따라서 달러 점수와 작업 성공률은 함께 봐야 합니다. 이 수치에는 실제 고객과의 소통, 배포 뒤 유지보수, 모델 사용 비용과 작업 시간까지 포함되지 않습니다.
 
-💡 **한 마디로?**  
+## 구현과 선택을 서로 다른 시험으로 나눈다
 
-**LLM이 개발자로 취업하고, 실제 돈을 벌 수 있는지를 평가하는 최초의 현실적 실험!**  
+![IC SWE와 Manager 작업](/assets/img/post_img/swe_lancer/1.PNG)
 
+SWE-Lancer에는 두 종류의 문제가 있습니다.
 
+| 유형 | 모델이 해야 할 일 | 대표 사례 |
+|---|---|---|
+| IC SWE Tasks | 코드베이스를 이해하고 버그 수정이나 기능 추가를 구현 | API 중복 호출 수정, 앱 내 비디오 재생 추가 |
+| SWE Manager Tasks | 여러 개발자의 해결책을 비교해 가장 나은 안을 선택 | 데이터베이스 최적화 방식 선택 |
 
-![3](/assets/img/post_img/swe_lancer/3.PNG)
+IC 과제는 코드를 직접 바꾸고 end-to-end 테스트를 통과해야 합니다. Manager 과제는 이미 나온 대안 중 옳은 선택을 해야 합니다. 둘의 점수 차이는 “코드를 고르는 능력”과 “완성된 변경을 구현하는 능력”이 같지 않다는 점을 보여 줍니다.
 
+공개된 Diamond Set은 전체 중 엄선된 502개로, IC 237개와 Manager 265개를 포함합니다. 보상액은 각각 236,300달러와 264,500달러, 합계 500,800달러입니다.
 
+## $403K는 절반을 해결했다는 뜻이 아니다
 
-과연 잘 벌었을까?
+![모델별 SWE-Lancer 결과](/assets/img/post_img/swe_lancer/4.PNG)
 
----
+| 모델 | IC SWE 수행률 | SWE Manager 수행률 | 100만 달러 기준 점수 |
+|---|---:|---:|---:|
+| GPT-4o | 8.6% | 38.7% | $304K |
+| o1 | 20.3% | 46.3% | $380K |
+| Claude 3.5 Sonnet | **26.2%** | **47.0%** | **$403K** |
 
-## 🔥 SWE-Lancer의 핵심 기술
+Claude 3.5 Sonnet이 세 모델 중 가장 높은 403,000달러를 기록했지만, IC 성공률은 26.2%입니다. 총액 40.3%와 구현 과제 40.3% 성공을 같은 뜻으로 읽으면 안 됩니다. 세 모델 모두 Manager 과제보다 IC 구현 과제에서 더 낮았다는 점도 중요합니다.
 
-### **1️⃣ 프리랜서 개발 작업을 그대로 평가**  
-✅ Upwork에서 실제로 진행된 **1,488개의 소프트웨어 개발 작업**을 데이터셋으로 사용  
-✅ 금액은 총 **100만 달러**, 개별 작업당 **$50~$32,000**까지 다양  
-✅ AI 모델이 코드를 작성하면, 실제 개발자가 만든 코드와 비교해 평가  
+![작업 유형별 성능](/assets/img/post_img/swe_lancer/5.PNG)
 
-### **2️⃣ 2가지 유형의 평가 방식**  
+이 결과는 “AI가 초급 개발자를 대체했다”는 직급 판정도 아닙니다. 벤치마크가 직접 보여 주는 것은 주어진 코드베이스와 평가 조건에서 어떤 작업을 통과하고 어떤 해결책을 선택했는지입니다.
 
+## 재현 명령은 저장소를 받은 뒤의 일부 절차다
 
+원문에 실린 uv 기반 환경 설정과 실행 흐름은 다음과 같습니다.
 
-![1](/assets/img/post_img/swe_lancer/1.PNG)
-
-
-
-| **평가 유형** | **설명** |
-|-------------|--------|
-| 🛠️ **IC SWE Tasks** | AI가 직접 코드를 수정하고 새로운 기능을 구현하는 작업 |
-| 🧑‍💼 **SWE Manager Tasks** | AI가 여러 개발자의 해결책을 비교하고 최적의 해결책을 선택하는 작업 |
-
-✅ **IC SWE Tasks (개발자 역할)**  
-- 버그 수정부터 새로운 기능 추가까지 다양한 작업 수행  
-- 예제: **"API 중복 호출 문제 해결 ($250)"**, **"앱 내 비디오 재생 기능 추가 ($16,000)"**  
-- 기존 벤치마크는 단순 코드 평가만 했지만, SWE-Lancer는 **전체 코드베이스 맥락을 이해해야 함**  
-
-✅ **SWE Manager Tasks (팀 리드 역할)**  
-- 여러 프리랜서 개발자의 코드 제안 중 최적의 선택을 해야 함  
-- 예제: **"가장 효율적인 데이터베이스 최적화 방식 선택하기"**  
-- 단순 코드 생성이 아니라 **기술적 의사결정 및 평가 능력** 테스트  
-
-### **3️⃣ 현실적인 검증 방식**  
-✅ 모든 작업은 **전문 소프트웨어 엔지니어들이 3단계 검증을 거쳐 평가**  
-✅ 기존 코딩 벤치마크처럼 단순한 **unit test 기반 평가가 아니라, 실제 end-to-end 테스트 사용**  
-✅ 모델이 실제로 **수익을 창출할 수 있는지를 평가하는 최초의 연구**  
-
----
-
-## 💎 SWE-Lancer Diamond Set이란?
-
-
-
-![1](/assets/img/post_img/swe_lancer/2.PNG)
-
-
-
-**SWE-Lancer Diamond Set**은 **1,488개 전체 작업 중, 가장 엄선된 502개 작업**을 포함하는 공개 벤치마크입니다.  
-
-💰 **총 보상 금액: $500,800**  
-
-🔹 **Diamond Set의 특징**  
-- **237개 IC SWE Tasks** (총 보상 $236,300)  
-- **265개 SWE Manager Tasks** (총 보상 $264,500)  
-- 실제 Upwork에서 완료된 프로젝트들로 구성  
-- **AI 모델의 코딩 능력과 기술 의사결정 능력을 모두 평가**  
-
-💡 **쉽게 말해?**  
-Diamond Set은 **SWE-Lancer의 핵심 데이터셋**이며, 연구자들이 **AI 모델의 실제 경제적 가치를 실험할 수 있도록 공개된 부분**입니다!  
-
----
-
-## 📊 벤치마크 성능 평가  
-
-SWE-Lancer에서 **최신 LLM 모델들의 성능을 평가**해 보았습니다. 결과는?  
-
-
-
-![4](/assets/img/post_img/swe_lancer/4.PNG)
-
-
-
-
-
-
-![5](/assets/img/post_img/swe_lancer/5.PNG)
-
-
-
-| **모델** | **IC SWE 수행률** | **SWE Manager 수행률** | **총 수익 ($1M 중)** |
-|---------|-----------------|-----------------|----------------|
-| GPT-4o | 8.6% | 38.7% | $304K (30.4%) |
-| o1 (OpenAI) | 20.3% | 46.3% | $380K (38.0%) |
-| Claude 3.5 Sonnet | 26.2% | 47.0% | **$403K (40.3%)** |
-
-📌 **Claude 3.5 Sonnet이 가장 높은 수익을 창출!**  
-📌 **AI 모델이 전체 작업의 약 40%를 수행 가능**  
-📌 **여전히 절반 이상의 작업에서는 인간 개발자가 필요**  
-
-💡 **결론?**  
-현재의 LLM은 **초급~중급 개발자 수준의 작업 일부는 수행할 수 있지만, 아직 고급 개발자의 역할을 대체하기엔 부족**하다.  
-
----
-
----
-
-## 📦 설치 및 실행 방법 (GitHub)
-SWE-Lancer를 직접 실행하고 싶은 분들을 위한 가이드입니다.  
-
-### **1️⃣ 환경 설정**
-
-Python 3.11을 권장합니다.  
-
-**패키지 설치:**  
-```bash
+~~~bash
 uv sync
 source .venv/bin/activate
 for proj in nanoeval alcatraz nanoeval_alcatraz; do
   uv pip install -e project/"$proj"
 done
-```
 
-또는 virtualenv 사용:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-for proj in nanoeval alcatraz nanoeval_alcatraz; do
-  pip install -e project/"$proj"
-done
-```
-
-### **2️⃣ Docker 이미지 빌드**
-
-**Apple Silicon (M1, M2) 또는 ARM64 시스템:**
-
-```bash
-docker buildx build -f Dockerfile --ssh default=$SSH_AUTH_SOCK -t swelancer .
-```
-
-**Intel 기반 Mac (x86_64) 또는 AMD64 시스템:**
-
-```bash
-docker buildx build -f Dockerfile_x86 --platform linux/amd64 --ssh default=$SSH_AUTH_SOCK -t swelancer .
-```
-
-### **3️⃣ 환경 변수 설정**
-sample.env 파일을 .env로 복사하여 API 키 및 환경 변수 설정:
-
-```bash
 cp sample.env .env
-```
-
-### **4️⃣ SWE-Lancer 실행**
-
-```bash
 uv run python run_swelancer.py
-```
+~~~
 
-실행 후 로그가 출력되며, 모델 설정 및 평가 옵션을 run_swelancer.py에서 조정할 수 있습니다.
+이 조각은 저장소를 이미 받은 상태를 전제로 하며, sample.env에 필요한 API 키와 환경 변수를 채우는 과정은 포함하지 않습니다. Docker 이미지를 빌드할 때도 Apple Silicon·ARM64용 Dockerfile과 x86_64·AMD64용 Dockerfile_x86이 다르고 SSH 에이전트를 전달하는 명령이 사용됩니다.
 
----
-
-## 🔮 향후 발전 방향  
-
-### **1️⃣ AI 개발자의 생산성 향상**
-- 현재 AI는 **단순한 작업 수행에는 강하지만, 복잡한 작업에서는 여전히 인간 개발자가 필요**  
-- **코드 품질 개선, 디버깅, 장기 프로젝트 관리 등의 능력 강화 필요**  
-
-### **2️⃣ SWE Manager Tasks 성능 향상**
-- AI가 단순 코딩뿐만 아니라 **개발 의사결정 능력까지 향상될 필요**  
-- 현재는 **가장 좋은 코드 선택하는 능력이 부족**  
-
-### **3️⃣ 더 현실적인 평가 방법 추가**
-- 현재는 **Upwork 기반 데이터셋이지만, GitHub, 기업용 프로젝트로 확장 필요**  
-- 실제 기업 환경에서 **AI가 개발자로 고용될 수 있는지 테스트하는 단계로 발전 가능**  
-
----
-
-## 🎯 결론: LLM, 진짜 개발자가 될 수 있을까?  
-SWE-Lancer는 **AI가 소프트웨어 엔지니어로서 실제 돈을 벌 수 있는지를 평가한 최초의 벤치마크**입니다.  
-
-✅ **현재 AI는 초급~중급 개발자 수준의 작업은 일부 수행 가능**  
-✅ **하지만 여전히 인간 개발자의 창의력과 고급 문제 해결 능력이 필요**  
-✅ **앞으로 AI는 단순 코딩을 넘어, 개발자로서의 종합적 사고력을 키우는 방향으로 발전할 것**  
-
-📢 **AI가 실제 개발자로 취업하는 시대가 올까요? SWE-Lancer는 그 가능성을 열어가는 첫걸음입니다! 🚀**  
+따라서 곧바로 복사해 실행하는 단일 설치법이라기보다 2025년 2월 저장소 구조를 설명하는 출발점으로 봐야 합니다. 재현할 때는 평가 모델 설정, 아키텍처에 맞는 이미지, 환경 변수, end-to-end 판정 기준을 고정해야 모델 간 달러 점수를 공정하게 비교할 수 있습니다.

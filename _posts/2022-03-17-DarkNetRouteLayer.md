@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Route Layer"
+title:  "Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법"
+summary: "Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w·out_h·out_c가 0이 되는 조건, delta 누적 방식을 설명합니다."
 date:   2022-03-17 16:00 -0400
 categories: DarkNet
 image:
@@ -10,208 +11,64 @@ tags:
   - DarkNet
   - 컴퓨터비전
   - C언어
+  - 아키텍처분석
 math: true
 ---
 
-## route\_layer
+Darknet Route Layer의 출력 channel이 예상과 다르다면 각 입력의 flat `input_size` 합만 보지 말고, 모든 입력 layer의 `out_w`와 `out_h`가 같은지도 함께 확인해야 합니다.
 
-### forward\_route\_layer
+Route는 여러 이전 출력을 더하는 layer가 아니라 batch마다 순서대로 concatenate하는 layer입니다. 코드 조각은 Darknet의 `layer` 구조체와 `copy_cpu`·`axpy_cpu`를 전제로 하며, 단독 실행 예제가 아닙니다.
+
+## Forward는 Batch마다 같은 Offset에 복사합니다
+
+`make_route_layer`는 `input_sizes`의 합을 `outputs`와 `inputs`로 저장하고 그 크기의 output·delta를 할당합니다. Forward에서는 연결된 layer index를 순회하고, 한 입력이 차지할 시작 위치를 `offset`으로 관리합니다.
 
 ```c
-void forward_route_layer(const route_layer l, network net)
-{
-    int i, j;
-    int offset = 0;
-    for(i = 0; i < l.n; ++i){
-        int index = l.input_layers[i];
-        float *input = net.layers[index].output;
-        int input_size = l.input_sizes[i];
-        for(j = 0; j < l.batch; ++j){
-            copy_cpu(input_size, input + j*input_size, 1, l.output + offset + j*l.outputs, 1);
-        }
-        offset += input_size;
+for(i = 0; i < l.n; ++i){
+    int index = l.input_layers[i];
+    float *input = net.layers[index].output;
+    int input_size = l.input_sizes[i];
+    for(j = 0; j < l.batch; ++j){
+        copy_cpu(input_size,
+            input + j*input_size, 1,
+            l.output + offset + j*l.outputs, 1);
     }
+    offset += input_size;
 }
 ```
 
-함수 이름: forward\_route\_layer
+중요한 점은 batch `j`마다 목적지 시작이 `j*l.outputs+offset`이라는 사실입니다. 모든 batch의 첫 입력을 이어 붙인 뒤 다음 입력을 복사하는 layout이 아닙니다. 포팅할 때 concatenate axis를 channel로 정했더라도 batch stride가 `l.outputs`인지 확인해야 합니다.
 
-입력:
+## Flat 크기 합과 Spatial Shape는 다른 계약입니다
 
-* const route\_layer l: route layer 구조체
-* network net: neural network 구조체
-
-동작:
-
-* 입력으로 받은 neural network의 route layer를 순전파(forward propagation) 진행
-* route layer에 연결된 모든 input layer의 출력을 하나로 이어붙여(l.output) 반환
-
-설명:
-
-* l.input\_layers: route layer와 연결된 input layer의 인덱스를 저장하는 int 배열
-* l.input\_sizes: route layer와 연결된 input layer의 출력 크기를 저장하는 int 배열
-* l.batch: mini-batch 크기
-* l.outputs: route layer 출력의 크기
-* 각 input layer의 출력을 mini-batch 단위로 이어붙여서 route layer의 출력을 만듦
-* copy\_cpu 함수: OpenBLAS 라이브러리 함수로, 배열의 복사를 수행함
-
-
-
-### backward\_route\_layer
+`resize_route_layer`는 첫 입력의 `out_w`, `out_h`, `out_c`를 기준으로 시작하고 나머지 출력 수를 계속 더합니다. 너비와 높이가 같으면 channel을 더하지만, 둘 중 하나가 다르면 다음처럼 출력 shape metadata를 0으로 만듭니다.
 
 ```c
-void backward_route_layer(const route_layer l, network net)
-{
-    int i, j;
-    int offset = 0;
-    for(i = 0; i < l.n; ++i){
-        int index = l.input_layers[i];
-        float *delta = net.layers[index].delta;
-        int input_size = l.input_sizes[i];
-        for(j = 0; j < l.batch; ++j){
-            axpy_cpu(input_size, 1, l.delta + offset + j*l.outputs, 1, delta + j*input_size, 1);
-        }
-        offset += input_size;
-    }
+if(next.out_w == first.out_w && next.out_h == first.out_h){
+    l->out_c += next.out_c;
+}else{
+    l->out_h = l->out_w = l->out_c = 0;
 }
 ```
 
-함수 이름: backward\_route\_layer
+그 뒤에도 `l->outputs`는 각 flat output 수의 합이며 메모리도 그 합으로 재할당됩니다. 즉 배열은 이어 붙일 수 있어도 다음 convolution이 해석할 유효한 `w×h×c` shape는 없을 수 있습니다. 출력 개수만 맞는다는 이유로 성공으로 판단하면 안 됩니다.
 
-입력:
+여러 feature map을 channel 방향으로 합치려면 spatial 크기를 먼저 맞춰야 합니다. Route 바로 앞 layer들의 `out_w/out_h/out_c/outputs`를 표로 적으면 설정 오류를 빠르게 찾을 수 있습니다.
 
-* route\_layer l: route\_layer 구조체
-* network net: 네트워크 구조체
+## Backward는 조각을 원래 Layer로 더합니다
 
-동작:
-
-* route\_layer의 역전파를 수행함
-* route\_layer에 입력된 레이어들의 delta 값을 계산하여 더함
-
-설명:
-
-* route\_layer는 여러 입력 레이어들의 출력을 합침(concatenate)으로써 이전 레이어의 출력을 다음 레이어의 입력으로 사용할 수 있도록 함
-* 따라서, route\_layer의 입력으로 사용된 모든 레이어들의 delta 값을 계산해야 함
-* 이를 위해, route\_layer에 입력된 레이어들의 delta 값을 더해줌
-* offset 변수는 입력 레이어들의 출력이 route\_layer의 출력에 어디서부터 복사되는지를 나타내는 인덱스 역할을 함
-
-
-
-### resize\_route\_layer
+Backward는 forward와 같은 offset으로 `l.delta` 조각을 찾지만, 원본 layer의 delta에는 복사하지 않고 `axpy_cpu`로 더합니다.
 
 ```c
-void resize_route_layer(route_layer *l, network *net)
-{
-    int i;
-    layer first = net->layers[l->input_layers[0]];
-    l->out_w = first.out_w;
-    l->out_h = first.out_h;
-    l->out_c = first.out_c;
-    l->outputs = first.outputs;
-    l->input_sizes[0] = first.outputs;
-    for(i = 1; i < l->n; ++i){
-        int index = l->input_layers[i];
-        layer next = net->layers[index];
-        l->outputs += next.outputs;
-        l->input_sizes[i] = next.outputs;
-        if(next.out_w == first.out_w && next.out_h == first.out_h){
-            l->out_c += next.out_c;
-        }else{
-            printf("%d %d, %d %d\n", next.out_w, next.out_h, first.out_w, first.out_h);
-            l->out_h = l->out_w = l->out_c = 0;
-        }
-    }
-    l->inputs = l->outputs;
-    l->delta =  realloc(l->delta, l->outputs*l->batch*sizeof(float));
-    l->output = realloc(l->output, l->outputs*l->batch*sizeof(float));
-
-}
+axpy_cpu(input_size, 1,
+    l.delta + offset + j*l.outputs, 1,
+    delta + j*input_size, 1);
 ```
 
-함수 이름: resize\_route\_layer
+한 이전 layer가 다른 경로에도 연결될 수 있으므로 gradient를 덮어쓰면 안 됩니다. 호출 전에 원본 delta를 언제 0으로 초기화하는지는 전체 network 실행부의 책임입니다. 같은 layer가 여러 route에 사용될 때 `+=`가 누적을 보존합니다.
 
-입력:&#x20;
+## 작은 Tensor로 검증할 세 가지
 
-* route\_layer \*l (route\_layer 구조체 포인터)
-* network \*net (network 구조체 포인터)
+첫째, 크기 2와 3인 입력을 batch 2로 만들어 결과가 각 batch 안에서 `[2개, 3개]` 순으로 배치되는지 봅니다. 둘째, backward delta를 서로 다른 값으로 넣어 두 원본 delta의 정확한 구간에 더해지는지 확인합니다. 셋째, flat outputs가 우연히 같더라도 spatial 너비·높이가 다른 입력을 넣어 shape metadata가 0이 되는지 봅니다.
 
-동작:&#x20;
-
-* route\_layer 구조체의 출력 크기와 입력 크기를 업데이트하고 메모리를 재할당한다.&#x20;
-* 입력 레이어 중 첫 번째 레이어의 출력 크기를 사용하여 route\_layer의 출력 크기 및 출력 채널 수를 초기화한다.&#x20;
-* 그런 다음 나머지 입력 레이어를 확인하고 출력 크기를 누적한다.&#x20;
-* 모든 입력 레이어의 출력 크기가 같은 경우 출력 채널 수를 증가시킨다.&#x20;
-* 그렇지 않은 경우 출력 크기와 출력 채널 수를 0으로 설정한다. 마지막으로 메모리를 재할당한다.
-
-설명:&#x20;
-
-* route\_layer는 입력 레이어에서 여러 출력을 결합하는 데 사용되는 레이어이다.&#x20;
-* 이 함수는 route\_layer의 출력 크기와 입력 크기를 업데이트하고 메모리를 재할당하는 데 사용된다.&#x20;
-* 또한 입력 레이어의 출력 크기가 다른 경우 경고 메시지를 출력한다.&#x20;
-* 이 함수는 네트워크에서 route\_layer를 다시 크기 조정해야 할 때 호출된다.
-
-
-
-### make\_route\_layer
-
-```c
-route_layer make_route_layer(int batch, int n, int *input_layers, int *input_sizes)
-{
-    fprintf(stderr,"route ");
-    route_layer l = {0};
-    l.type = ROUTE;
-    l.batch = batch;
-    l.n = n;
-    l.input_layers = input_layers;
-    l.input_sizes = input_sizes;
-    int i;
-    int outputs = 0;
-    for(i = 0; i < n; ++i){
-        fprintf(stderr," %d", input_layers[i]);
-        outputs += input_sizes[i];
-    }
-    fprintf(stderr, "\n");
-    l.outputs = outputs;
-    l.inputs = outputs;
-    l.delta =  calloc(outputs*batch, sizeof(float));
-    l.output = calloc(outputs*batch, sizeof(float));;
-
-    l.forward = forward_route_layer;
-    l.backward = backward_route_layer;
-
-    return l;
-}
-```
-
-함수 이름: make\_route\_layer
-
-입력:
-
-* batch: int형, 배치 크기
-* n: int형, 이전 레이어의 개수
-* input\_layers: int형 배열, 이전 레이어의 인덱스를 저장한 배열
-* input\_sizes: int형 배열, 이전 레이어의 출력 크기를 저장한 배열
-
-동작:&#x20;
-
-* 입력으로 받은 정보를 바탕으로 route 레이어를 생성하고 초기화한다.&#x20;
-* 출력값과 입력값의 크기를 계산하고, delta와 output 메모리를 동적 할당한다. forward와 backward 함수를 할당하고 생성된 레이어를 반환한다.
-
-설명:&#x20;
-
-* make\_route\_layer 함수는 입력으로 받은 정보를 바탕으로 route 레이어를 생성하고 초기화하는 함수이다. 이 함수는 생성된 route\_layer 구조체를 반환한다.
-* 배치 크기(batch), 이전 레이어의 개수(n), 이전 레이어의 인덱스(input\_layers), 이전 레이어의 출력 크기(input\_sizes)를 인자로 받는다.
-* 출력값과 입력값의 크기를 계산하고, delta와 output 메모리를 동적 할당한다. forward와 backward 함수를 할당하고 생성된 레이어를 반환한다.
-* route\_layer 구조체를 초기화하기 위해 다음 필드를 설정한다.
-  * type: ROUTE
-  * batch: 입력으로 받은 배치 크기(batch)
-  * n: 입력으로 받은 이전 레이어의 개수(n)
-  * input\_layers: 입력으로 받은 이전 레이어의 인덱스(input\_layers)
-  * input\_sizes: 입력으로 받은 이전 레이어의 출력 크기(input\_sizes)
-  * outputs: 이전 레이어의 출력 크기를 모두 합한 값
-  * inputs: 이전 레이어의 출력 크기를 모두 합한 값
-  * delta: 크기가 outputs \* batch인 0으로 초기화된 float형 배열
-  * output: 크기가 outputs \* batch인 0으로 초기화된 float형 배열
-  * forward: forward\_route\_layer 함수의 포인터
-  * backward: backward\_route\_layer 함수의 포인터
-* 마지막으로 생성된 route\_layer 구조체를 반환한다.
+Route는 파라미터가 없어 단순해 보이지만, 실제 오류는 숫자 합보다 layout 계약에서 발생합니다. 입력 layer 순서를 바꾸면 channel 의미도 바뀌므로 checkpoint와 cfg의 route 순서를 함께 유지해야 합니다.

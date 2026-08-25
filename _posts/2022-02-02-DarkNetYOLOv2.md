@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - YOLOv2"
+title:  "YOLOv2에 Anchor Box를 넣었는데 mAP가 떨어진 이유: Recall부터 다시 보기"
+summary: "YOLOv2에서 anchor box가 recall은 높였지만 초기 mAP는 소폭 낮춘 이유와 k-means anchor, direct location prediction, passthrough, multi-scale 학습의 역할을 연결합니다."
 date:   2022-02-02 16:00 -0400
 categories: DarkNet
 image:
@@ -9,236 +10,42 @@ image:
 tags:
   - DarkNet
   - YOLO
+  - 컴퓨터비전
+  - 논문리뷰
   - 파인튜닝
 math: true
 ---
 
-## YOLOv2
+YOLOv2에서 anchor box를 처음 넣었을 때 mAP가 69.5에서 69.2로 조금 내려간 것은 실패가 아니라, 더 많은 후보를 찾는 recall 81→88의 이득을 위치 예측 안정화가 아직 점수로 바꾸지 못한 상태였습니다.
 
-* Paper : [https://arxiv.org/abs/1612.08242](https://arxiv.org/abs/1612.08242)
+[YOLOv2·YOLO9000 논문](https://arxiv.org/abs/1612.08242)은 YOLOv1의 빠른 단일 단계 탐지를 유지하면서 정확도와 recall을 단계적으로 개선합니다. 각 기법의 숫자를 따로 외우기보다 “후보를 늘리고, 좌표를 안정화하고, 작은 특징을 보존한다”는 순서로 보면 설계가 읽힙니다.
 
-기존 YOLO의 낮은 검출율과 상당 수의 localization error를 해결하기 위해 여러가지 실험을 진행한 논문입니다.
+## Anchor는 후보를 늘리지만 자동으로 정확해지지 않습니다
 
+Fully connected 예측부를 convolutional anchor 방식으로 바꾸면 다양한 위치와 모양의 후보를 더 많이 만들 수 있습니다. 논문 실험에서 anchor 도입 직후 recall은 81에서 88로 올랐지만 mAP는 69.5에서 69.2로 소폭 떨어졌습니다. 놓치는 객체는 줄었어도 box 위치나 score ranking이 충분히 정교하지 않으면 precision까지 함께 좋아지지 않는다는 뜻입니다.
 
+Anchor 모양은 손으로 고르지 않고 학습 데이터의 box를 k-means로 군집화했습니다. 거리로 Euclidean distance 대신 `1-IoU`를 사용해 크기가 큰 box에 군집이 과도하게 끌리는 것을 줄였습니다. 논문은 `k=5`를 정확도와 복잡도의 절충으로 선택했습니다.
 
-![1](/assets/img/post_img/darknetbook/exp.PNG)
+실무에서는 데이터셋의 box 크기·aspect ratio 분포가 바뀌면 원래 anchor를 그대로 쓰기보다 다시 군집화해야 합니다. anchor 개수만 늘리면 출력량과 중복 후보도 늘기 때문에 NMS와 학습 assignment까지 같이 봐야 합니다.
 
+## Direct location prediction이 좌표 학습을 안정화합니다
 
+초기 anchor 방식은 cell에서 멀리 떨어진 위치도 제한 없이 예측할 수 있어 학습 초기에 불안정했습니다. YOLOv2는 sigmoid로 중심 offset을 cell 안에 제한하는 direct location prediction을 사용합니다. 이 변경은 논문에서 약 5 mAP 개선으로 이어졌습니다.
 
-### Better
+입력 크기를 416처럼 홀수 배수로 택한 것도 최종 feature map을 13×13으로 만들어 중앙 cell 하나가 생기게 하려는 선택입니다. 큰 객체가 이미지 중앙에 놓이는 경우가 많은 데이터에서 중앙 위치 표현이 명확해집니다. 다만 이는 데이터 경향에 기대는 설계이므로 다른 입력 비율에서 무조건 같은 이득을 보장하지 않습니다.
 
-`YOLOv2`
+## BatchNorm·고해상도·passthrough가 서로 다른 문제를 고칩니다
 
-#### Batch Normalization
+모든 convolution layer에 Batch Normalization을 적용해 약 2 mAP를 얻고, 분류 사전학습 단계부터 고해상도 입력에 적응시켜 약 4 mAP를 더했습니다. 탐지 head를 convolution만으로 구성하고 backbone에는 Darknet-19를 사용했습니다.
 
-모든 Convolution Layer에 기존에 사용한 Dropout을 제거하고 Batch Normalization을 추가함으로 mAP가 2% 향상됩니다.
+작은 객체는 깊은 13×13 feature만으로 세부 정보가 사라질 수 있습니다. passthrough layer는 앞쪽의 26×26×512 feature를 공간 정보가 채널로 재배치된 13×13×2048 형태로 바꿔 뒤의 feature와 연결합니다. 논문에서 이 연결은 약 1% 성능 향상을 보였습니다.
 
-#### High Resolution Classifier
+이 세 개선은 대체 관계가 아닙니다. BatchNorm은 최적화, 고해상도 사전학습은 입력 변화, passthrough는 fine-grained feature 손실을 각각 다룹니다. 성능이 낮을 때 어느 축이 문제인지 구분해야 합니다.
 
-먼저 Classifier Network를 448x448 해상도로 10 epoch동안 fine-tuning 시킵니다. 그리고 마지막 Convolutional Layer와 Avgpooling Layer, Softmax Layer를 없애고 Detectionㅇ을 위한 Layer 4개를 추가함으로 mAP가 4% 향상됩니다.
+## Multi-scale과 YOLO9000을 해석할 때의 한계
 
-#### Convolutional
+YOLOv2는 학습 중 10 batch마다 입력 크기를 320부터 608 사이로 바꿔 하나의 네트워크가 속도와 정확도 요구에 따라 여러 해상도에서 동작하도록 학습합니다. 낮은 해상도는 빠르고 높은 해상도는 더 정확하다는 선택지가 생깁니다. 보고된 FPS는 당시 환경의 결과이므로 현재 runtime의 latency 대신 사용할 수 없습니다.
 
-기존의 Yolo는 마지막 Layer로 Fully Connected Layer를 사용하여 Bounding Box를 예측합니다. 이것을 Convolutional Layer로 바꾸었습니다.
+YOLO9000은 COCO 탐지 데이터와 ImageNet 분류 데이터를 WordTree 계층으로 결합해 9천 개가 넘는 class를 다룹니다. 탐지 데이터가 없는 class는 분류 이미지로 학습하고, COCO는 더 자주 sampling했습니다. 156개 공통 class에서 16 mAP, 전체에서 19.7 mAP를 보고했으며 동물에는 강하고 의류처럼 fine-grained label에는 약했습니다.
 
-최종 Feature Map을 홀수로 만들기 위해서 448x448 입력 이미지를 416x416으로 만듭니다. 이렇게 홀수로 만듦으로 인해서 중심점은 하나만 존재합니다.(짝수인 경우 중심점이 4개 입니다.) 중심점이 여러개라면 작은 Object의 검출이 어려울 수 있습니다. 최종적으로 13x13의 크기를 갖는 Feature Map을 얻습니다.
-
-#### Anchor Boxes
-
-기존 YOLO와 다르게(objectness, x, y, w, h, c, x, y, w, h, c) YOLOv2에서는 Anchor Box의 개수만큼(objectness, x, y, w, h, c, objectness, x, y, w, h, c, ...) 클래스, 객체의 유무를 예측합니다.
-
-Anchor box를 사용함으로써 mAP는 살짝 감소하지만 recall이 높아져서 예측을 더 많이 할 수 있습니다.
-
-* no anchor box = mAP : 69.5 | recall : 81%
-* anchor box = mAP : 69.2 | recall : 88%
-
-#### New Network
-
-DarkNet 19를 새롭게 제안합니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/darknet.PNG)
-
-
-#### Dimension Clusters
-
-
-
-![1](/assets/img/post_img/darknetbook/cluster.PNG)
-
-
-
-자동적으로 Anchor Box를 선택하기 위해서 K-means Clustering 알고리즘을 사용합니다. 그리고 K-means Clustering에서 유클리디안 거리를 사용하지 않고 아래와 같은 거리를 사용합니다.
-
-`d(box, centroid) = 1 - IOU(box, centroid)`
-
-k가 커지면 clustering의 결과와 label사이의 IOU가 커지기 때문에 recall이 상승하지만 모델의 복잡도가 상승하는 trade-off 관계를 가지기 때문에 k를 5로 선택합니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/box1.PNG)
-
-
-
-#### Direct location prediction
-
-Anchor Box를 사용하면 학습 초기에 모델이 불안정해지는 문제를 해결할 수 있었는데 그 원인은 Box의 좌표가 랜덤하게 예측되기 때문입니다. 그래서 RPN종류의 모델은 $$t_x, t_y$$를 예측하고 중심 좌표를 아래와 같이 계산합니다.
-
-$$x = (t_x * w_a) - x_a$$
-
-$$y = (t_y * h_a) - y_a$$
-
-예를 들어서 $$t_x = 1$$인 경우 box를 오른쪽으로 이동시킬 것이고 $$tx=-1$$인 경우 box를 왼쪽으로 이동시킬 것 입니다. 이 공식은 제약이 없기 때문에 box를 예측한 위치에 관계 없이 Anchor Box의 위치가 어디에도 나올 수 있다는 **문제점** 을 가지고 있습니다.
-
-YOLOv2는 위에 문제점을 해결하기 위해서 제약조건을 줍니다. YOLOv2에서는 grid cell에 상대적인 좌표를 유추하도록 하였습니다. x, y의 위치가 grid cell 내부에만 존재하도록 제약을 주기 때문에 0 \~ 1사이의 값을 갖게 됩니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/kmean.PNG)
-
-
-
-$$P_r(object) * IOU(b, objcet) = \sigma(t_o)$$
-
-* $$c_x, c_y$$ : 각 grid cell의 좌상단 끝에 offset
-* $$p_x, p_y, p_w, p_h$$ : 우선 순위 anchor box의 x, y, w, h
-* $$t_x, t_y, t_w, t_h$$ : 예측한 bounding box의 x, y, w, h
-* $$b_x, b_y, b_w, b_h$$ : 예측한 bounding box의 값을 조정해 Ground Truth와 IOU를 계산하기 위한 bounding box
-* $$t_o$$ : object인지 아닌지
-
-$$t_x, t_y$$는 0의 값을 가져 $$b_x, b_y$$가 중심 좌표(0.5)가 되기를 원하고 $$t_w, t_h$$도 0의 값을 가져 $$p_w, p_h$$가 $$b_w, b_h$$와 같아지기를 원합니다. exp 함수의 특성상 음수가 나오면 양수가 되고 양수면 더 큰 값이 나오게 하기 떄문에 학습에 조금 더 긍정적인 영향을 미칠 수 있습니다.
-
-Dimension Cluster, Direct location prediction을 적용하는 경우 mAP가 5% 상승합니다.
-
-#### Fine-Grained Feature
-
-Yolov2는 13x13 feature map을 예측하는데 13x13은 큰 object를 검출하는데 충분하지만 작은 object를 검출하는데 좀 더 세밀한 특징을 원합니다. 이러한 문제를 해결하기 위해서 SSD같은 경우는 여러 level의 특징 맵에서 검출을 합니다. YOLOv2의 경우 26x26 feature map을 그대로 가져오는 방법을 사용합니다.
-
-```
-26 x 26 x 512 --> 13 x 13 x 2048
-```
-
-이를 통해서 mAP가 1% 상승합니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/pass.PNG)
-
-
-
-#### Multi-Scale Training
-
-* 416x416 입력 이미지를 사용합니다. fully connected layer를 제거했기 때문에 입력 크기는 어떤 것이 들어와도 문제가 없습니다.
-* 다양한 해상도를 가지는 이미지에서 동작하기 원하기 때문에 다양한 해상도를 학습시킵니다. 10번 배치마다 32배수로 resize 됩니다.(320, 352, 608) 가장 작은 때는 320x320이고 가장 클 때는 608x608입니다.
-* 낮은 해상도의 경우 성능이 꽤 좋습니다. 228x228 입력 이미지의 경우 초당 90 프레임이 나오며 mAP는 Fast R-CNN과 비슷합니다.
-
-### Faster
-
-#### Darknet
-
-* 3x3 filter를 사용하고 모든 pooling 이후 channel 수를 2배로 합니다.
-* 19개의 convolutional layer
-* 5개의 maxpooling layer
-* batch normalization
-* Imagenet Top-1 : 72.9% Top-5 : 91.2%
-
-#### Training for classification
-
-* 160 epoch
-* SGD(learning rate = 0.1)
-* polynomial rate decay : a power of 4
-* weight decay : 0.00005
-* momentum : 0.9
-* 처음에 224x224로 finetuning하고 448x448 fine tuning
-
-#### Training for detection
-
-* 마지막 convolutional layer를 제거하고 3x3x1024 convolutional layer 추가
-* 그 뒤에 1x1 convolutional layer 추가
-* 5개의 bounding box를 예측
-* 125개의 예측값 = 5 x (5(objectness, x, y, w, h) + 20(class))
-* 160 epoch
-* weight decay : 0.00005
-* momentum : 0.9
-
-
-
-![1](/assets/img/post_img/darknetbook/bench1.PNG)
-
-
-
-
-
-
-![1](/assets/img/post_img/darknetbook/bench2.PNG)
-
-
-
-### Stronger
-
-`YOLO9000`
-
-* Detection과 Classification 데이터 셋을 섞어서 학습 합니다.
-* Detection문제를 다루는 Pascal VOC, COCO 데이터 셋은 개, 고양이, 자동차와 같이 포괄적인 라벨링을 합니다.
-* Classification문제를 다루는 ImageNet 데이터 셋은 개(Norfolk terrier, Yorkshire terrier, ...)과 같이 세밀한 라벨링을 합니다.
-
-위와 같이 Detection, Classification 데이터 셋을 합치기 위해서는 일관적인 라벨링이 필요합니다.
-
-보통 Classification을 하는 경우에는 Softmax를 사용하는데 Softmax는 각 클래스가 상호 배타적이라고 가정합니다. 하지만 Norfolk terrier, Yorkshire terrier는 개로 분류되야 합니다. 그래서 YOLO9000을 만들기 위해서 라벨이 상호 배타적이지 않다는 가정을 한 Multi-label model을 사용합니다.
-
-#### Hierachical classification
-
-ImageNet의 라벨은 WordNet기반으로 구성됩니다. WordNet은 Language Dataset로 개념과 단어 사이의 관계를 표현합니다. 예를 들어 Yorkshire terrier는 terrier의 하의어고 terrier는 hunting dog 타입이며 hunting dog는 dog 타입입니다. YOLO9000은 ImageNet이 가지는 개념으로부터 계층적 트리(WordTree)를 만들어서 문제를 단순화 시킵니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/eq1.PNG)
-
-
-
-terrier노드에서는 위와 같이 계산됩니다. 만약 Norfolk terrior라는 것을 알고 싶다면 아래와 같이 계산됩니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/eq2.PNG)
-
-
-
-분류 문제로 모든 이미지에는 obejct가 존재한다고 가정합니다. 즉, $$Pr(physical object) = 1$$
-
-WordTree를 만들기 위해서 1000개의 클래스를 가지고 있는 ImageNet을 사용해 DarkNet-19 모델을 학습시킵니다. WordTree를 만들기 위해서는 중간 중간 노드를 추가 해야하기 때문에 1369개가 되고 실제 label을 역추적해서 Norfolk terrier는 개, 포유류라는 라벨도 같이 얻게 됩니다. 결국 조건부 확률을 계산하기 위해서 1369개의 class확률을 예측해야합니다.
-
-하의어에 대해서 Softmax를 계산합니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/tree.PNG)
-
-
-
-* top-1 : 71.9%
-* top-5 : 90.4%
-
-Classification의 경우 개의 종류가 불분명하다면 개에 대해서는 높은 신뢰도를 전파하지만 하의어에는 낮은 신뢰도를 전파합니다. Detection의 경우 bounding box에 있는 object가 무엇인지 높은 신뢰도를 갖는 경로를 따라가고 threshold가 나오기 전까지 계속 내려갑니다.
-
-#### Dataset combination with WordTree
-
-
-
-![1](/assets/img/post_img/darknetbook/tree2.PNG)
-
-
-
-COCO와 ImageNet을 합쳐서 WordTree를 만듭니다.
-
-#### Joint classification and detection
-
-* COCO와 ImageNet의 상위 9000개의 클래스 데이터 셋을 조합해 매우 큰 Detector를 학습시켰습니다.
-* WordTree는 총 9418개의 클래스를 갖고 ImageNet의 데이터 수가 COCO보다 많기 때문에 COCO를 4배 over sampling합니다.
-* 학습할 떄 classification과 detection을 섞어서 사용 합니다.
-* Detection image의 경우 기존 loss를 역전파를 합니다.
-* Classification loss는 label이 dog라면 WordTree의 상위 노드는 알 수 있지만 하위 노드는 알 수 없기 때문에 하위 노드에 에러를 할당하고 상위 노드에만 역전파를 진행합니다.
-* Classification image의 경우 classification loss만 역전파를 합니다. 이렇게 하면 bounding box를 검출시 classification 확률이 높아집니다. bounding box도 ground truth와 0.3 IOU 이상인 경우만 objectness loss를 역전파 합니다.
-* Detection 성능(mAP) : 19.7%, 전혀 본적없는 label 추가 성능(mAP) : 16.0%
-* 동물 데이터는 학습을 잘하지만 의류 데이터는 학습을 잘 못합니다.
+결론적으로 anchor 도입을 평가할 때 mAP 하나만 보지 말고 recall, localization, class별 precision을 함께 봐야 합니다. 후보가 늘어난 뒤 direct location, 데이터 맞춤 anchor, passthrough까지 연결돼야 YOLOv2의 개선이 완성됩니다.

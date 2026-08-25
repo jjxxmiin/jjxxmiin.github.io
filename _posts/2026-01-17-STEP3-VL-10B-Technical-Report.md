@@ -1,136 +1,103 @@
 ---
 layout: post
-title: '[2026-01-14] 10B 모델의 반란: STEP3-VL-10B가 증명한 고효율 멀티모달 추론의 미래와 기술적 심층 분석'
+title: 'STEP3-VL-10B가 200B 모델보다 효율적일까: PaCoRe 성능과 추론 비용 점검'
 date: '2026-01-17'
 categories: Tech
 tags:
-  - 멀티모달
-  - 아키텍처분석
-  - Qwen
-  - 강화학습
-  - Gemini
+  - STEP3-VL
+  - 멀티모달 추론
+  - PaCoRe
+  - Test-time Compute
 math: true
-summary: 10B 규모로 200B급 성능을 압도하는 차세대 멀티모달 AI 기술 분석
+summary: STEP3-VL-10B의 fully unfrozen 1.2T-token pretraining과 1k+ RL, PaCoRe 병렬 추론이 작은 parameter 수를 실제 비용 절감으로 이어 주는지 벤치마크와 한계로 살펴봅니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.09668.png
   alt: Paper Thumbnail
 ---
 
-# 10B 모델의 반란: STEP3-VL-10B가 증명한 고효율 멀티모달 추론의 미래와 기술적 심층 분석
+STEP3-VL-10B는 10B parameter로 큰 멀티모달 모델과 경쟁하는 점이 인상적이지만, PaCoRe가 여러 추론 경로를 병렬 실행하므로 “작은 모델 = 항상 싼 추론”으로 볼 수는 없습니다. 단일 경로와 PaCoRe의 latency·token 사용량을 나눠 측정해야 효율성을 판단할 수 있습니다.
 
-## 1. 핵심 요약 (Executive Summary)
+[기술 보고서 원문](https://huggingface.co/papers/2601.09668)에 소개된 학습·추론 구조와 기존 글의 수치를 기준으로 핵심을 점검합니다.
 
-인공지능 연구의 흐름이 단순히 파라미터 수를 늘리는 '거대 모델(Large-scale Models)'의 시대를 지나, 효율성과 고도화된 추론 능력을 결합한 '고성능 컴팩트 모델(High-performance Compact Models)'의 시대로 급격히 전환되고 있습니다. 최근 발표된 **STEP3-VL-10B** 기술 보고서는 이러한 패러다임 변화를 상징하는 기념비적인 결과물입니다.
+## 10B라는 크기만으로 비용을 판단할 수 없는 이유
 
-STEP3-VL-10B는 불과 100억 개의 파라미터를 가진 경량 모델임에도 불구하고, 10배에서 20배 더 큰 모델들(GLM-4.6V-106B, Qwen3-VL-235B 등)은 물론, Gemini 2.5 Pro와 같은 현존 최고 수준의 상용 모델과 대등하거나 이를 능가하는 성능을 기록했습니다. 이 모델의 핵심 혁신은 **1.2조 개의 멀티모달 토큰을 활용한 완전 비동결(Fully Unfrozen) 통합 사전 학습**, **1,000회 이상의 반복적인 강화 학습(RL)**, 그리고 테스트 시점의 계산 자원을 최적화하는 **PaCoRe(Parallel Coordinated Reasoning)** 알고리즘에 있습니다. 본 분석에서는 STEP3-VL-10B가 어떻게 물리적 한계를 극복하고 '체급'을 뛰어넘는 지능을 구현했는지 기술적으로 정밀 분석합니다.
+STEP3-VL-10B는 Qwen3-8B decoder와 perception encoder를 결합한 약 10B 규모의 모델입니다. parameter 수만 비교하면 GLM-4.6V-106B나 Qwen3-VL-235B보다 훨씬 작습니다.
 
----
+그러나 실제 비용은 세 층으로 나뉩니다.
 
-## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
+| 단계 | 비용을 만드는 요소 |
+|---|---|
+| Pretraining | 1.2T multimodal token, 전체 module update |
+| Post-training | 1,000회 이상 RL iteration |
+| Inference | 단일 경로 또는 PaCoRe의 병렬 경로 수 |
 
-### 2.1. Scaling Law의 함정과 효율성의 한계
-전통적인 Scaling Law에 따르면, 모델의 성능은 파라미터 수, 데이터 양, 그리고 컴퓨팅 자원에 비례하여 향상됩니다. 하지만 최근 멀티모달 LLM(MLLM) 분야에서는 파라미터 수가 늘어날수록 발생하는 지연 시간(Latency) 증가, 천문학적인 추론 비용, 그리고 데이터 처리의 비효율성이라는 세 가지 벽에 부딪히고 있습니다.
+작은 checkpoint는 memory와 한 번의 forward 비용에 유리할 수 있지만, 많은 학습 token과 반복 RL이 들어갔습니다. PaCoRe까지 사용하면 한 질문에 model을 여러 번 실행할 수 있습니다. 따라서 “235B보다 작다”와 “같은 답을 더 적은 총 연산으로 낸다”는 별도 주장입니다.
 
-### 2.2. 시각적 이해와 논리적 추론의 괴리
-기존의 많은 MLLM들은 시각적 정보를 단순히 언어 토큰으로 변환하여 언어 모델(LLM)에 주입하는 방식을 취해왔습니다. 이 과정에서 시각적 세부 사항이 유실되거나, 시각 정보와 논리적 추론이 유기적으로 결합되지 못하는 '환각(Hallucination)' 현상이 빈번하게 발생했습니다. 특히 수학적 난제나 복잡한 기하학적 문제를 시각적으로 해석하는 영역에서는 거대 모델들조차 취약한 모습을 보였습니다.
+10B가 smartphone에서 곧바로 실행 가능한 크기라는 기존 설명도 근거가 부족합니다. weight precision, vision token 수, KV cache, context 길이, runtime 지원을 모르면 device memory와 속도를 정할 수 없습니다.
 
-### 2.3. STEP3-VL의 도전 과제
-STEP3-VL-10B 연구팀은 "작은 모델이 거대 모델의 추론 지능을 가질 수 있는가?"라는 질문에 집중했습니다. 그들은 단순히 데이터 양을 늘리는 것이 아니라, 모델의 아키텍처 내부에서 시각과 언어가 완전히 융합되는 '내재적 시너지(Intrinsic Synergy)'를 구축하고, 추론 단계에서 사고의 깊이를 조절할 수 있는 메커니즘을 설계하는 것을 목표로 삼았습니다.
+## 성능을 만든 세 가지 단계
 
----
+### Fully unfrozen unified pretraining
 
-## 3. 핵심 기술 및 아키텍처 심층 분석 (Core Methodology)
+많은 MLLM이 vision encoder를 고정하고 connector나 language 쪽만 조정하는 것과 달리, STEP3-VL-10B는 perception encoder와 Qwen3-8B decoder를 모두 update하며 1.2T multimodal token으로 학습했다고 설명합니다.
 
-STEP3-VL-10B의 성능을 견인하는 기술적 기둥은 크게 세 가지로 요약됩니다.
+같은 gradient가 vision과 language module을 함께 바꾸므로, perception feature가 language reasoning에 맞춰 조정될 여지가 있습니다. 반대로 frozen encoder보다 training memory와 compute가 커지고, 데이터 구성에 성능이 더 크게 의존합니다.
 
-### 3.1. 완전 비동결 통합 사전 학습 (Fully Unfrozen Unified Pre-training)
-대부분의 MLLM은 학습 효율을 위해 사전 학습된 Vision Encoder를 동결(Frozen)시킨 상태에서 Connector만 학습시키거나 제한적으로 튜닝합니다. 그러나 STEP3-VL-10B는 **Perception Encoder와 Qwen3-8B 디코더 전체를 완전히 비동결하여 1.2T 멀티모달 토큰으로 학습**했습니다.
+기존 글은 1.2T token이 과적합을 막는다고 단정했지만 token 수만으로 과적합 여부를 알 수는 없습니다. 중복, 품질, benchmark contamination과 modality 비율이 함께 공개돼야 합니다.
 
-*   **기술적 의의**: 이 방식은 시각 인코더가 단순히 이미지를 묘사하는 법을 배우는 것을 넘어, 언어 모델의 논리 체계에 최적화된 시각적 특징(Visual Features)을 추출하도록 강제합니다. 즉, '보는 행위'와 '생각하는 행위'가 동일한 그래디언트 흐름 속에서 최적화됩니다.
-*   **데이터 스케일**: 1.2T 토큰은 10B 모델에게는 매우 거대한 데이터셋입니다. 이는 모델이 과적합(Overfitting)을 피하면서도 고차원의 일반화 능력을 갖추게 하는 원동력이 되었습니다.
+### 1k+ RL iterations
 
-### 3.2. 1,000회 이상의 강화 학습 반복 (Scaled Post-training via 1k+ RL Iterations)
-일반적인 모델들이 수차례의 SFT(Supervised Fine-Tuning)와 한두 번의 RLHF를 거치는 것과 달리, STEP3-VL-10B는 1,000번이 넘는 강화 학습 반복 사이클을 수행했습니다.
+Post-training에는 1,000회가 넘는 RL iteration이 제시됩니다. 목표는 수학·code 문제의 reasoning path와 self-correction을 강화하는 것입니다.
 
-*   **Self-Correction 메커니즘**: 모델이 스스로 생성한 답변의 오류를 탐지하고 수정하는 과정을 강화 학습 보상 함수에 통합했습니다. 
-*   **추론 경로의 최적화**: 수학 및 코드 문제 해결 과정에서 최적의 추론 경로(Chain-of-Thought)를 찾도록 모델을 압박함으로써, 단순한 지식 암기가 아닌 논리적 전개 능력을 극대화했습니다.
+여기서 iteration 수가 곧 correction 능력의 품질을 뜻하지는 않습니다. reward가 final answer만 보는지 중간 reasoning도 평가하는지, 같은 문제에 과도하게 맞춰지지 않았는지가 중요합니다. 원문 요약에는 reward 구성과 data 세부가 충분히 적혀 있지 않습니다.
 
-### 3.3. PaCoRe (Parallel Coordinated Reasoning)
-이 모델의 가장 독창적인 부분은 **PaCoRe**라 불리는 테스트 시점 계산(Test-time Compute) 스케일링 기술입니다.
+### PaCoRe 병렬 협업 추론
 
-*   **개념**: 사용자의 질문에 대해 단일 답변을 생성하는 대신, 여러 개의 시각적 가설(Visual Hypotheses)을 병렬적으로 탐색하고 이를 종합하여 최종 결론을 도출합니다.
-*   **작동 원리**: 복잡한 시각적 장면에 대해 다양한 각도나 세부 사항에 집중하는 여러 추론 경로를 병렬로 실행합니다. 이후, 'Coordinated' 단계에서 이러한 정보들을 교차 검증하여 가장 신뢰도 높은 추론 결과를 선택합니다. 
-*   **효과**: 이는 마치 한 명의 전문가가 고민하는 대신, 여러 명의 전문가가 동시에 토론하여 정답을 찾는 것과 유사한 효과를 내며, 특히 MathVision이나 AIME와 같은 고난도 추론 벤치마크에서 비약적인 성능 향상을 가져왔습니다.
+PaCoRe(Parallel Coordinated Reasoning)는 질문 하나에 여러 visual hypothesis와 reasoning path를 병렬 생성하고, coordinated 단계에서 결과를 교차 검토해 답을 선택합니다.
 
----
+```text
+이미지·질문
+→ 여러 visual/reasoning path 병렬 생성
+→ 후보 간 검토·조정
+→ 최종 답 선택
+```
 
-## 4. 구현 및 실험 환경 (Implementation Details)
+이 방법은 첫 경로의 실수를 줄일 수 있지만 경로 수만큼 계산과 memory가 늘 수 있습니다. 같은 benchmark에서 PaCoRe off, 경로 수별 성능, latency를 함께 봐야 model 자체의 능력과 test-time scaling 효과를 구분할 수 있습니다.
 
-### 4.1. 베이스 모델 및 아키텍처 구성
-*   **LLM Backbone**: Qwen3-8B. 최신 아키텍처를 기반으로 하여 효율적인 어텐션 메커니즘과 높은 처리량을 보장합니다.
-*   **Vision Encoder**: 언어 모델과 정렬된 전용 Perception Encoder를 채택하여 해상도 변화와 복잡한 텍스트-이미지 관계를 정교하게 포착합니다.
+## 벤치마크 표는 재현 조건과 함께 읽어야 한다
 
-### 4.2. 학습 인프라
-*   초대규모 데이터셋인 1.2T 토큰 처리를 위해 수천 개의 GPU 클러스터에서 분산 학습이 진행되었을 것으로 추정됩니다. 특히 완전 비동결 학습은 메모리 요구량이 상당하므로, ZeRO-3와 같은 메모리 최적화 기술과 FlashAttention-3 등이 적극 활용되었을 것입니다.
+기존 글에 제시된 표는 다음과 같습니다.
 
----
+| Benchmark | STEP3-VL-10B | GLM-4.6V-106B | Qwen3-VL-235B | Gemini 2.5 Pro | Seed-1.5-VL |
+|---|---:|---:|---:|---:|---:|
+| MMBench | 92.2% | 88.5% | 91.1% | 90.4% | 89.2% |
+| MMMU | 80.11% | 72.4% | 78.9% | 79.5% | 77.8% |
+| AIME2025 | 94.43% | 82.1% | 89.4% | 85.0% | 81.5% |
+| MathVision | 75.95% | 65.2% | 72.1% | 74.2% | 68.9% |
 
-## 5. 성능 평가 및 비교 (Comparative Analysis)
+표 안에서는 STEP3-VL-10B가 네 benchmark 모두 가장 높습니다. 하지만 다음 조건이 글에 없습니다.
 
-벤치마크 결과는 놀라움을 넘어 충격적인 수준입니다.
+- 각 model의 prompt와 sampling 설정
+- PaCoRe 경로 수와 test-time token budget
+- image resolution과 context 조건
+- 평가 시점과 contamination 검사
+- 여러 실행의 분산
 
-| 벤치마크 (Benchmark) | STEP3-VL-10B | GLM-4.6V-106B | Qwen3-VL-235B | Gemini 2.5 Pro | Seed-1.5-VL |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **MMBench** | **92.2%** | 88.5% | 91.1% | 90.4% | 89.2% |
-| **MMMU** | **80.11%** | 72.4% | 78.9% | 79.5% | 77.8% |
-| **AIME2025** | **94.43%** | 82.1% | 89.4% | 85.0% | 81.5% |
-| **MathVision** | **75.95%** | 65.2% | 72.1% | 74.2% | 68.9% |
+특히 AIME2025 94.43%는 기존 글도 contamination과 benchmark overfitting 가능성을 한계로 지적했습니다. 높은 수치 자체를 의심하거나 믿는 것으로 끝내지 말고 공개된 data cutoff와 독립 평가에서 재현되는지 확인해야 합니다.
 
-### 5.1. 시사점 분석
-1.  **체급 파괴**: 10B 모델이 235B 모델(Qwen3-VL)보다 높은 성능을 낸다는 것은, 이제 모델의 크기가 성능을 결정짓는 유일한 지표가 아님을 의미합니다.
-2.  **추론 지능의 정점**: AIME2025(수학 경시대회 수준)에서 94.43%를 기록한 것은 소형 모델이 고도의 논리적 추론 능력을 소유할 수 있음을 보여주는 강력한 증거입니다.
-3.  **범용성**: MMBench와 MMMU에서의 고득점은 단순 특정 분야 편향이 아닌, 일반적인 시각 이해 능력 또한 최상위권임을 입증합니다.
+MMBench·MMMU의 높은 점수는 해당 평가에서 시각 이해가 강하다는 신호지만, 의료 image나 robot perception의 안전성을 입증하지는 않습니다. task가 달라지면 별도 domain test가 필요합니다.
 
----
+## 배포 전에 비교할 네 가지 숫자
 
-## 6. 실제 적용 분야 및 글로벌 파급력 (Real-World Application)
+STEP3-VL-10B를 큰 API model의 대안으로 검토한다면 같은 workload에서 다음을 측정해야 합니다.
 
-STEP3-VL-10B는 단순한 연구용 모델을 넘어 산업 전반에 혁신적 변화를 가져올 수 있는 잠재력을 가집니다.
+1. 단일 추론의 peak memory와 latency
+2. PaCoRe 경로 수별 정확도·latency·output token
+3. image 한 장과 여러 장에서의 vision token 비용
+4. domain test의 정확도와 hallucination·abstention 비율
 
-### 6.1. 온디바이스 AI 및 엣지 컴퓨팅 (Edge Computing)
-10B 파라미터는 최신 스마트폰이나 고성능 워크스테이션에서 로컬로 구동 가능한 사이즈입니다. 
-*   **개인 비서**: 클라우드 연결 없이 이미지와 비디오를 분석하여 즉각적인 피드백을 제공하는 보안 중심의 AI 서비스가 가능해집니다.
-*   **자율주행 및 로보틱스**: 실시간으로 시각 데이터를 해석하고 복잡한 명령을 수행해야 하는 로봇 시스템에서, 지연 시간이 짧으면서도 강력한 추론력을 갖춘 STEP3-VL은 핵심 두뇌가 될 수 있습니다.
+PaCoRe 없이도 충분한 task라면 10B 크기의 이점을 크게 얻을 수 있습니다. 반대로 높은 benchmark 점수가 PaCoRe에 크게 의존하고 응답 시간이 길다면 parameter 효율이 service efficiency로 이어지지 않을 수 있습니다.
 
-### 6.2. 의료 및 정밀 과학 분석
-복잡한 의료 영상(X-ray, MRI)을 분석하거나 과학 실험 데이터를 해석하는 데 있어, PaCoRe를 통한 다각도 검증 시스템은 진단 오류를 줄이고 신뢰도를 높이는 데 기여할 수 있습니다.
+재현성 측면에서는 1.2T token의 구성, RL data와 reward, training infrastructure가 공개돼야 합니다. 기존 글에서 “수천 GPU, ZeRO-3, FlashAttention-3를 썼을 것”이라고 적은 부분은 추정일 뿐 보고된 사실이 아니므로 구현 조건에서 제외해야 합니다.
 
-### 6.3. 고등 교육 및 연구 보조
-수학적 난제 해결 능력을 바탕으로 학생들에게 복잡한 수식을 시각적으로 설명하거나, 새로운 과학적 가설을 검증하는 연구 파트너로서의 역할이 기대됩니다.
-
----
-
-## 7. 한계점 및 기술적 비평 (Discussion & Critical Critique)
-
-하지만 이 모델을 장밋빛 시각으로만 볼 수는 없습니다. 전문가로서 몇 가지 비판적 지점을 제기합니다.
-
-### 7.1. 데이터 오염(Data Contamination) 의혹
-10B 모델이 AIME2025에서 94%가 넘는 점수를 기록한 것은 상식적으로 믿기 힘든 수치입니다. OpenAI o1과 같은 모델들도 수조 원의 자원을 들여 도달한 수준입니다. 혹시 테스트 데이터가 학습 데이터에 포함되었거나, 특정 벤치마크에 과도하게 최적화된 '벤치마크 오버피팅'이 아닌지에 대한 철저한 검증이 필요합니다.
-
-### 7.2. PaCoRe의 추론 비용 문제
-PaCoRe는 테스트 시점의 계산을 늘려 성능을 확보합니다. 이는 10B라는 모델 사이즈에도 불구하고, 실제 답변을 내놓는 데 걸리는 시간(Latency)은 거대 모델보다 더 길어질 수 있음을 의미합니다. 효율적인 모델이라는 타이틀 뒤에 '느린 추론 속도'라는 반전이 숨어있을 가능성이 큽니다.
-
-### 7.3. 훈련 데이터의 투명성 부족
-1.2T 멀티모달 토큰의 구성 요소가 무엇인지 구체적으로 명시되지 않았습니다. 어떤 데이터를 어떻게 정제했는지가 성능의 80%를 결정하는 만큼, 이에 대한 투명한 공개 없이는 진정한 재현성을 확보하기 어렵습니다.
-
----
-
-## 8. 결론 및 인사이트 (Conclusion)
-
-STEP3-VL-10B는 **"모델의 지능은 파라미터 수가 아니라, 데이터의 질과 추론 아키텍처의 정교함에 결정된다"**는 사실을 만천하에 공표했습니다. 
-
-이 모델이 제시한 '완전 비동결 사전 학습'과 '병렬 협업 추론(PaCoRe)' 방식은 향후 출시될 많은 경량 모델들의 표준 아키텍처가 될 가능성이 높습니다. 이제 우리는 무조건 큰 모델을 찾는 것이 아니라, 특정 목적에 최적화된 '똑똑한 소형 모델'을 선택하는 시대로 진입했습니다. 개발자와 기업들은 거대 모델의 API 비용에 매몰되기보다, 이러한 고성능 오픈소스 모델을 활용해 자신들만의 고유한 도메인 지식을 결합하는 전략을 세워야 할 것입니다.
-
-STEP3-VL-10B는 단순한 기술적 성취를 넘어, AI 대중화와 효율적 지능 구현을 향한 거대한 도약입니다.
-
-[Original Paper Link](https://huggingface.co/papers/2601.09668)
+STEP3-VL-10B의 중요한 질문은 작은 모델이 큰 모델을 이겼느냐가 아닙니다. 같은 정확도 목표에서 fully unfrozen training과 RL에 든 비용, PaCoRe에 든 test-time compute, 실제 배포 memory를 합쳐도 더 효율적인가입니다.

@@ -1,222 +1,73 @@
 ---
 layout: post
-title:  "Data Formulator 2: AI 기반 반복적 데이터 시각화 자동화"
-summary: "Microsoft Research의 AI 기반 데이터 시각화 솔루션"
+title:  "Data Formulator 2로 차트를 반복 수정하는 법: Shelf·Threads·AI 변환"
+summary: "자연어만 믿지 않고 차트 인코딩, 파생 필드, 탐색 분기를 함께 관리하는 Data Formulator 2의 핵심 흐름"
 image:
   path: /assets/img/thumb/DataFormulator2.jpg
   alt: "Data Formulator 2: AI 기반 반복적 데이터 시각화 자동화 대표 이미지"
 date: 2025-02-16 16:00 -0400  
 categories: Paper
 tags:
-  - ChatGPT
-  - 논문리뷰
+  - 데이터시각화
+  - DataFormulator
+  - 데이터분석
 math: true
 ---
 
-## 🔍 Data Formulator 2란?
-**Data Formulator 2**는 **AI를 활용하여 데이터 변환과 시각화 과정을 자동화하고 최적화하는 최신 데이터 분석 도구**입니다.  
-기존 데이터 시각화 툴과 달리 **사용자 인터페이스(UI)와 자연어 입력(NL)을 결합하여 보다 직관적인 데이터 분석 환경을 제공합니다.**  
-특히, **반복적인 데이터 변환과 차트 생성이 필요한 분석가들에게 강력한 도구가 될 수 있습니다.**  
+Data Formulator 2의 핵심은 차트를 한 번 자동 생성하는 데 있지 않고, 축과 색상은 직접 지정하면서 파생 필드와 탐색 분기는 AI로 반복 수정하는 데 있습니다.
 
-✔ **기존 데이터 시각화 툴의 단점을 개선하고, AI 기반 데이터 변환을 통해 효율성을 극대화한 혁신적인 솔루션!**  
-
-- Github: [https://github.com/microsoft/data-formulator](https://github.com/microsoft/data-formulator)
+- Github: [microsoft/data-formulator](https://github.com/microsoft/data-formulator)
 - Paper: [Data Formulator 2: Iteratively Creating Rich Visualizations with AI](https://arxiv.org/abs/2408.16119)
 
+![Data Formulator 2 화면](/assets/img/post_img/df2/1.PNG)
 
+## 차트 의도는 Shelf에 먼저 고정한다
 
-![df2](/assets/img/post_img/df2/1.PNG)
+일반적인 자연어 차트 생성은 결과가 마음에 들지 않을 때 무엇을 바꿔야 할지 모호합니다. Data Formulator 2의 Concept Encoding Shelf는 이 문제를 UI와 자연어로 나눕니다. Year는 X축, Entity는 색상처럼 원본 필드의 시각적 역할을 드래그 앤 드롭으로 지정하고, 데이터에 없는 Renewable Energy Percentage는 자연어 설명을 붙여 새 필드로 요청합니다.
 
+![Concept Encoding Shelf](/assets/img/post_img/df2/2.PNG)
 
+따라서 좋은 시작점은 “멋진 차트를 만들어 줘”가 아니라 다음처럼 역할과 계산을 분리하는 것입니다.
 
----
+~~~text
+X축: Year
+색상: Entity
+Y축 파생 필드: Renewable Energy Percentage
+설명: 각 나라별 재생에너지 비율을 계산
+~~~
 
-## 🚀 기존 데이터 시각화 도구의 한계와 Data Formulator 2의 해결책
+이렇게 하면 차트 인코딩을 바꿀지, 계산 정의를 고칠지 판단하기 쉽습니다.
 
-### ❌ 기존 데이터 시각화 도구의 한계
-1. **모든 차트를 수동으로 설정해야 하는 비효율성**  
-   - 기존 툴은 X축, Y축, 색상, 크기 등의 속성을 수동으로 설정해야 하며, 반복적인 작업이 많음  
+## 파생 필드는 결과보다 계산을 확인한다
 
-2. **데이터 변환을 직접 수행해야 하는 번거로움**  
-   - 대부분의 도구는 사용자가 **데이터를 직접 변환**해야 하며, 새로운 필드를 생성하려면 **프로그래밍이 필요**  
+AI 변환은 기존 데이터에서 재생에너지 비율을 계산해 새 필드를 만들거나, 연도별 국가 순위를 Rank로 추가할 수 있습니다. 코드를 직접 쓰지 않아도 탐색을 시작할 수 있다는 장점이 있지만, 생성된 필드 이름만 보고 계산이 맞다고 단정해서는 안 됩니다.
 
-3. **비선형적 데이터 탐색을 지원하지 못함**  
-   - 기존 AI 기반 도구는 단일 흐름(Single-turn)으로 동작하여, 사용자가 차트와 데이터를 다시 조정하려면 **처음부터 다시 작업해야 함**  
+실제로 사용할 때는 분모에 어떤 발전원이 포함됐는지, 비율 단위가 맞는지, 동률 순위가 어떻게 처리됐는지를 먼저 확인해야 합니다. Data Formulator 2는 변환 요청과 차트 조작을 연결해 주는 도구이지, 데이터 정의까지 대신 책임지는 검증기는 아닙니다.
 
----
+![파생 필드를 포함한 시각화 흐름](/assets/img/post_img/df2/5.PNG)
 
-### ✅ Data Formulator 2의 해결책
+## Data Threads로 탐색을 덮어쓰지 않는다
 
+Data Threads는 분석 과정을 하나의 직선이 아니라 재사용 가능한 분기로 남깁니다. 예를 들어 전체 국가의 CO2 배출량 차트에서 상위 5개 국가만 보는 가지를 만든 뒤, 원본 쪽으로 돌아가 재생에너지 비율을 추가하고 전 세계 평균과 비교하는 별도 가지를 만들 수 있습니다.
 
+![Data Threads의 분기 구조](/assets/img/post_img/df2/6.PNG)
 
-| 기존 문제점 | Data Formulator 2의 해결 방식 |
-|------------|--------------------------------|
-| **차트 속성 수동 설정** | **UI + 자연어 입력(NL) 결합하여 직관적 조작 가능** |
-| **데이터 변환의 어려움** | **AI가 자동으로 데이터 변환 수행** |
-| **비선형적 데이터 탐색 미지원** | **Data Threads를 활용한 시각화 버전 관리 지원** |
+이 기능이 유용한 순간은 “이전 결과로 돌아가고 싶다”보다 “두 가설을 나란히 비교하고 싶다”일 때입니다. 기준 차트를 먼저 남기고 필터, 파생 필드, 비교 기준마다 새 분기를 만들면 어떤 변환이 결론을 바꿨는지 추적하기 쉬워집니다.
 
+## 연구 결과와 설치 범위를 구분한다
 
+논문에 소개된 사용자 연구에는 데이터 분석가 8명이 참여해 16개 차트를 만들었습니다. 표에 제시된 평균 작업 시간은 1차 세션 20분, 2차 세션 33분입니다. 참가자 피드백은 직관성과 ChatGPT 대비 시각화 생성 경험을 긍정적으로 평가했지만, 이 두 시간만으로 기존 도구보다 얼마나 빨라졌는지 계산할 비교 기준은 제시되지 않았습니다.
 
----
+원문이 제시한 최소 설치·실행 흐름은 다음과 같습니다.
 
-## 🏆 Data Formulator 2의 핵심 기술
-
-
-
-![df2](/assets/img/post_img/df2/2.PNG)
-
-
-
-
-
-
-![df2](/assets/img/post_img/df2/3.PNG)
-
-
-
-
-
-
-![df2](/assets/img/post_img/df2/4.PNG)
-
-
-
-### 1️⃣ Concept Encoding Shelf: UI + 자연어 입력을 통한 차트 생성
-Data Formulator 2에서는 사용자가 **필드를 드래그 앤 드롭하여 차트 속성을 지정**할 수 있으며,  
-자연어 입력을 통해 **새로운 필드를 정의하고 AI가 자동으로 데이터를 변환하도록 지시할 수 있습니다.**  
-
-✔ **프로그래밍 없이도 복잡한 데이터 변환과 시각화 가능!**  
-
-#### 🎨 차트 생성 예시
-```plaintext
-1. 사용자가 "Year"를 X축으로, "Entity"를 색상으로 설정  
-2. Y축에 "Renewable Energy Percentage"라는 새로운 필드 추가  
-3. 추가 설명으로 "각 나라별 재생에너지 비율을 계산" 입력  
-4. AI가 자동으로 데이터 변환을 수행하고 적절한 차트를 생성
-```
-
----
-
-### 2️⃣ Data Threads: 데이터 히스토리 및 재사용 기능
-기존 AI 기반 데이터 분석 툴들은 비선형적 데이터 탐색을 지원하지 않아 분석 과정에서 여러 차트 버전을 만들기가 어려웠습니다.
-Data Formulator 2는 "Data Threads" 기능을 제공하여, 사용자가 이전 차트를 손쉽게 재사용하고 수정할 수 있도록 지원합니다.
-
-✔ 반복적인 데이터 분석 과정을 더욱 효율적으로 수행 가능!
-
-#### 🔄 Data Threads 활용 예시
-```plaintext
-1. "전체 국가"의 CO2 배출량 시각화 → "상위 5개 국가" 필터 적용  
-2. 원본 데이터를 재사용하여 "재생에너지 비율" 추가  
-3. 이전 결과를 활용하여 "전 세계 평균과 비교하는 차트" 생성  
-4. 특정 버전으로 돌아가 수정 후 다시 분석 가능  
-```
-
----
-
-### 3️⃣ AI 기반 데이터 변환 (Automated Data Transformation)
-기존 데이터 분석 툴은 사용자가 데이터 변환을 직접 수행해야 했지만,
-Data Formulator 2는 AI가 데이터를 분석하고 자동으로 새로운 필드를 생성하거나 변환 작업을 수행할 수 있습니다.
-
-✔ 데이터 변환 코드를 작성하지 않아도 AI가 자동으로 처리!
-
-#### 🔄 AI 데이터 변환 예시
-```plaintext
-- 기존 데이터: 국가별 연도별 전력 생산량(재생에너지, 화석연료, 원자력)  
-- 사용자 입력: "각 나라의 재생에너지 비율을 계산하고 순위를 매겨줘"  
-- AI 수행 작업:
-  1. 재생에너지 비율 계산 → 새로운 필드 "Renewable Energy Percentage" 생성  
-  2. 각 연도별 국가별 순위 매김 → 새로운 필드 "Rank" 생성  
-  3. 변환된 데이터를 기반으로 차트 생성  
-```
-
----
-
-## 📊 Data Formulator 2의 실험 결과 및 성능 분석
-
-
-
-![df2](/assets/img/post_img/df2/5.PNG)
-
-
-
-
-
-![df2](/assets/img/post_img/df2/6.PNG)
-
-
-
-### 🧪 사용자 연구 결과
-Data Formulator 2의 효과를 검증하기 위해, 8명의 데이터 분석가를 대상으로 사용자 연구를 진행했습니다.
-연구에서는 16개의 차트를 반복적으로 생성하는 분석 세션을 수행했으며,
-
-✔ Data Formulator 2가 반복적인 데이터 분석 작업을 보다 효율적으로 수행할 수 있도록 지원한다는 결과가 도출됨!
-
-
-### 📌 사용자 테스트 결과 요약
-
-
-
-| 항목 |	결과 |
-|------|------|
-|참가자 수 |	8명 |
-|생성 차트 수 |	16개 |
-|평균 작업 시간 |	1차 세션: 20분 / 2차 세션: 33분|
-|Feedback |	"기존 도구보다 훨씬 빠르고 직관적" (P1), "ChatGPT보다 효과적으로 시각화를 생성할 수 있음" (P2) |
-
-
-
-✔ 특히, Data Formulator 2는 데이터 변환 및 차트 생성 속도를 획기적으로 단축!
-
----
-
-## 🏆 Data Formulator 2
-
-
-
-![df2](/assets/img/post_img/df2/7.PNG)
-
-
-
-
-
-
-![df2](/assets/img/post_img/df2/8.PNG)
-
-
-
-
-
-
-![df2](/assets/img/post_img/df2/9.PNG)
-
-
-
-
-
-
-![df2](/assets/img/post_img/df2/10.PNG)
-
-
-
-### 💡 Data Formulator 2가 기존 툴보다 뛰어난 이유  
-✔ UI + 자연어 입력 조합으로 손쉬운 차트 생성  
-✔ AI 자동 데이터 변환으로 복잡한 전처리 불필요  
-✔ Data Threads 기능으로 반복적인 데이터 분석을 효율적으로 수행 가능  
-✔ Python 패키지 및 Codespaces 지원으로 손쉬운 실행 가능
-
----
-
-## ⚙ Data Formulator 2 설치 및 실행 방법
-🔹 Option 1: Python PIP을 통한 설치
-```bash
-# install data_formulator
+~~~bash
 pip install data_formulator
+data_formulator
 
-# start data_formulator
-data_formulator 
-
-# alternatively, you can run data formulator with this command
+# 대체 실행 방식
 python -m data_formulator
-```
+~~~
 
-📍 기본 실행 주소: http://localhost:5000
+기본 접속 주소는 다음과 같습니다: http://localhost:5000
+
+다만 이 명령은 원문의 간단한 시작 예시이므로, 사용 중인 Python 환경과 모델 연결을 포함한 완전한 운영 절차로 받아들이기보다 도구의 상호작용 방식을 확인하는 출발점으로 보는 편이 안전합니다.

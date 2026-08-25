@@ -1,290 +1,140 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Maxpool"
+title:  "Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적"
+summary: "Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다."
 date:   2022-03-09 16:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetMaxpool.jpg
   alt: DarkNet 시리즈 - Maxpool 대표 이미지
 tags:
-  - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - Darknet소스분석
+  - MaxPooling
+  - 역전파디버깅
 math: true
 ---
 
-## maxpool
+Darknet Maxpool의 backward가 잘못된 주소를 쓸 수 있는 직접적인 조건은 **forward의 어떤 pooling window에서도 유효한 입력을 찾지 못해 `indexes[out_index]`가 -1로 남는 경우**다. 출력 shape와 padding을 정할 때 window가 입력과 실제로 겹치는지까지 확인해야 한다.
 
-#### Max Pooling Layer 란?
+## 출력 크기와 padding offset은 따로 계산된다
 
-Max Pooling Layer는 Convolutional Neural Network(CNN)의 구성 요소 중 하나입니다. CNN은 이미지, 음성 또는 비디오와 같은 입력 데이터를 처리할 때 사용됩니다. 이전의 Convolutional Layer에서 생성된 feature map을 다운 샘플링하여 공간 해상도를 줄이는 역할을 합니다. 이를 통해 네트워크가 과적합되는 것을 방지하고 연산 속도를 높일 수 있습니다.
-
-Max Pooling Layer는 각 feature map에서 가장 큰 값을 선택하여 출력합니다. 이를 통해 feature map의 크기가 줄어들고, 이미지의 위치 이동에 대한 불변성(invariance)이 증가합니다. 예를 들어, 어떤 이미지 내에서 개의 얼굴이 있을 때, 개의 위치가 다르더라도 Max Pooling Layer는 개의 특징을 인식하도록 도와줍니다.
-
-일반적으로, Max Pooling Layer는 2x2의 윈도우와 2의 스트라이드(stride)를 사용하여 작동합니다. 이는 입력 feature map을 2배로 다운샘플링하여 크기를 줄입니다. 그러나 윈도우 크기와 스트라이드 크기는 문제에 따라 다를 수 있습니다. Max Pooling Layer는 학습 가능한 매개 변수가 없기 때문에, 네트워크 파라미터 수를 줄이고 과적합을 방지하는 데 도움이 됩니다.
-
-
-
-#### make\_maxpool\_layer
+생성 함수는 다음 식으로 출력 크기를 정한다.
 
 ```c
-maxpool_layer make_maxpool_layer(int batch, int h, int w, int c, int size, int stride, int padding)
-{
-    maxpool_layer l = {0};
-    l.type = MAXPOOL;
-    l.batch = batch;
-    l.h = h;
-    l.w = w;
-    l.c = c;
-    l.pad = padding;
-    l.out_w = (w + padding - size)/stride + 1;
-    l.out_h = (h + padding - size)/stride + 1;
-    l.out_c = c;
-    l.outputs = l.out_h * l.out_w * l.out_c;
-    l.inputs = h*w*c;
-    l.size = size;
-    l.stride = stride;
-    int output_size = l.out_h * l.out_w * l.out_c * batch;
-    l.indexes = calloc(output_size, sizeof(int));
-    l.output =  calloc(output_size, sizeof(float));
-    l.delta =   calloc(output_size, sizeof(float));
-    l.forward = forward_maxpool_layer;
-    l.backward = backward_maxpool_layer;
+l.out_w = (w + padding - size)/stride + 1;
+l.out_h = (h + padding - size)/stride + 1;
+l.out_c = c;
+```
 
-    fprintf(stderr, "max          %d x %d / %d  %4d x%4d x%4d   ->  %4d x%4d x%4d\n", size, size, stride, w, h, c, l.out_w, l.out_h, l.out_c);
-    return l;
+정수 나눗셈이므로 나머지는 버려진다. 출력 buffer와 argmax index buffer는 batch까지 곱해 같은 길이로 만든다.
+
+```c
+int output_size = l.out_h*l.out_w*l.out_c*batch;
+l.indexes = calloc(output_size, sizeof(int));
+l.output = calloc(output_size, sizeof(float));
+l.delta = calloc(output_size, sizeof(float));
+```
+
+forward에서 window의 시작 offset은 padding 전체가 아니라 절반의 음수다.
+
+```c
+int w_offset = -l.pad/2;
+int h_offset = -l.pad/2;
+```
+
+따라서 출력식의 `+padding`과 실제 좌표 이동의 `-pad/2`를 한 쌍으로 봐야 한다. 특히 홀수 padding은 C 정수 나눗셈 때문에 양쪽이 정확히 대칭이라고 가정하면 안 된다.
+
+layer를 만들기 전에 확인할 최소 조건은 `size > 0`, `stride > 0`, `out_w > 0`, `out_h > 0`이다. 이 함수는 잘못된 인자로 나온 음수 shape을 자체적으로 막지 않는다.
+
+## forward는 max 값과 원본 주소를 함께 저장한다
+
+loop 순서는 batch → channel → 출력 y → 출력 x → window y → window x다. 출력 인덱스는 CHW 배치 배치로 계산한다.
+
+```c
+int out_index = j + w*(i + h*(k + c*b));
+float max = -FLT_MAX;
+int max_i = -1;
+```
+
+window 안의 원본 좌표와 입력 인덱스를 구한 뒤, 범위를 벗어난 값은 `-FLT_MAX`로 취급한다.
+
+```c
+int cur_h = h_offset + i*l.stride + n;
+int cur_w = w_offset + j*l.stride + m;
+int index = cur_w
+    + l.w*(cur_h + l.h*(k + b*l.c));
+
+int valid = cur_h >= 0 && cur_h < l.h &&
+            cur_w >= 0 && cur_w < l.w;
+float val = valid ? net.input[index] : -FLT_MAX;
+```
+
+현재 값이 기존 max보다 **클 때만** 값과 주소를 갱신한다.
+
+```c
+max_i = (val > max) ? index : max_i;
+max   = (val > max) ? val   : max;
+```
+
+같은 최댓값이 여러 개면 loop에서 먼저 만난 입력이 선택된다. 선택된 주소는 backward를 위해 `l.indexes`에 저장된다.
+
+```c
+l.output[out_index] = max;
+l.indexes[out_index] = max_i;
+```
+
+padding 값 자체는 output 후보가 될 수 없도록 `-FLT_MAX`를 사용한다. 그러나 window 전체가 범위 밖이면 `val > max`가 한 번도 참이 아니어서 output은 `-FLT_MAX`, index는 -1로 남는다.
+
+## backward는 argmax 위치로 delta를 scatter한다
+
+Maxpool에는 학습 weight가 없다. backward는 각 출력 delta를 forward에서 선택한 입력 위치에 더한다.
+
+```c
+for(i = 0; i < h*w*c*l.batch; ++i){
+    int index = l.indexes[i];
+    net.delta[index] += l.delta[i];
 }
 ```
 
-함수 이름: make\_maxpool\_layer&#x20;
+pooling window가 겹치면 하나의 입력이 여러 output에서 선택될 수 있으므로 `=`가 아니라 `+=`를 쓴다.
 
-입력:
+이 함수에는 `index >= 0` 검사나 `net.delta` NULL 검사가 없다. 따라서 forward와 backward 사이에 `indexes`가 유지되고 모든 값이 유효한 입력 주소라는 전제가 필요하다. 디버깅할 때는 backward에서 문제가 난 주소만 보지 말고 forward 직후 다음을 확인한다.
 
-* batch: int 형태의 배치 크기
-* h: int 형태의 입력 이미지 높이
-* w: int 형태의 입력 이미지 너비
-* c: int 형태의 입력 이미지 채널 수
-* size: int 형태의 맥스풀링 필터 크기
-* stride: int 형태의 맥스풀링 스트라이드 크기
-* padding: int 형태의 패딩 크기
-
-동작:&#x20;
-
-* 맥스풀링 레이어를 생성하고 초기화한 뒤 반환한다.&#x20;
-* 출력 크기를 계산하고, 메모리를 동적으로 할당하여 초기화하며, 순전파와 역전파 함수를 설정한다.
-
-설명:
-
-* l: maxpool\_layer 구조체 변수
-* l.type: 레이어 타입으로 MAXPOOL로 설정
-* l.out\_c: 출력 이미지 채널 수로 입력 이미지 채널 수와 같게 설정
-* l.outputs: 출력 이미지의 크기(높이x너비x채널 수)로 출력 크기 계산
-* l.inputs: 입력 이미지의 크기(높이x너비x채널 수)로 입력 크기 계산
-* l.indexes: 맥스풀링 연산에서 최댓값 위치를 기록하기 위한 배열 동적 할당
-* l.output: 맥스풀링 연산 결과를 저장하기 위한 배열 동적 할당
-* l.delta: 역전파 과정에서 계산된 그래디언트를 저장하기 위한 배열 동적 할당
-* l.forward: 맥스풀링 레이어의 순전파 연산 함수 포인터 설정
-* l.backward: 맥스풀링 레이어의 역전파 연산 함수 포인터 설정
-* fprintf: 디버깅용으로 맥스풀링 레이어의 크기를 출력
-
-
-
-#### forward\_maxpool\_layer
-
-```c
-void forward_maxpool_layer(const maxpool_layer l, network net) {
-    int b,i,j,k,m,n;
-    int w_offset = -l.pad/2;
-    int h_offset = -l.pad/2;
-    int h = l.out_h;
-    int w = l.out_w;
-    int c = l.c;
-
-    for(b = 0; b < l.batch; ++b){
-        for(k = 0; k < c; ++k){
-            for(i = 0; i < h; ++i){
-                for(j = 0; j < w; ++j){
-                    int out_index = j + w*(i + h*(k + c*b));
-                    float max = -FLT_MAX;
-                    int max_i = -1;
-                    for(n = 0; n < l.size; ++n){
-                        for(m = 0; m < l.size; ++m){
-                            int cur_h = h_offset + i*l.stride + n;
-                            int cur_w = w_offset + j*l.stride + m;
-                            int index = cur_w + l.w*(cur_h + l.h*(k + b*l.c));
-                            int valid = (cur_h >= 0 && cur_h < l.h &&
-                                         cur_w >= 0 && cur_w < l.w);
-                            float val = (valid != 0) ? net.input[index] : -FLT_MAX;
-                            max_i = (val > max) ? index : max_i;
-                            max   = (val > max) ? val   : max;
-                        }
-                    }
-                    l.output[out_index] = max;
-                    l.indexes[out_index] = max_i;
-                }
-            }
-        }
-    }
-}
+```text
+min(indexes) >= 0
+max(indexes) < batch*c*h*w
+output에 -FLT_MAX가 남지 않음
 ```
 
-함수 이름: forward\_maxpool\_layer
+유효한 입력 값 자체가 정확히 `-FLT_MAX`인 경우에도 비교가 strict `>`라 index가 갱신되지 않을 수 있다. 일반적인 feature 값에서는 드문 조건이지만 코드의 경계로는 남아 있다.
 
-입력:
+## resize와 image view에서 놓치기 쉬운 점
 
-* const maxpool\_layer l: Max pooling 레이어를 나타내는 구조체
-* network net: 신경망 구조를 나타내는 구조체
-
-동작:&#x20;
-
-* 주어진 Max pooling 레이어 구조체 l과 신경망 구조체 net를 사용하여 Max pooling 레이어를 순전파하는 함수이다. 이 함수는 입력값에서 Max pooling 연산을 수행하여 출력값을 계산한다. Max pooling 연산은 각 윈도우 내의 최댓값을 찾아 출력값으로 사용한다.
-
-설명:&#x20;
-
-* 이 함수는 Max pooling 레이어에서 사용되는 forward propagation 함수이다. 입력값으로는 Max pooling 레이어를 나타내는 구조체 l과 신경망 구조체 net이 주어진다. Max pooling 레이어의 출력값은 구조체 l의 output 배열에 저장된다. Max pooling 레이어의 출력값을 계산하기 위해, 입력값에서 Max pooling 연산을 수행하는데, 이를 위해 입력값에서 윈도우를 이동하면서 각 윈도우 내의 최댓값을 찾아 출력값으로 사용한다.
-* 이 함수는 입력값의 배치 크기 l.batch, 출력값의 높이 l.out\_h, 출력값의 너비 l.out\_w, 채널 수 l.c, 패딩 크기 l.pad, 스트라이드 크기 l.stride, 윈도우 크기 l.size 등의 정보를 사용한다. 이 함수에서는 입력값에서 윈도우를 이동하면서 각 윈도우 내의 최댓값을 찾고, 구조체 l의 output 배열에 저장한다. 최댓값의 위치 정보를 저장하기 위해 구조체 l의 indexes 배열도 함께 업데이트한다.
-* 이 함수는 for문을 사용하여 입력값의 모든 위치에 대해 Max pooling 연산을 수행한다. 구체적으로는 입력값의 배치별로, 채널별로, 출력값의 위치별로 입력값에서 윈도우를 이동하면서 최댓값을 찾는다. 입력값에서 윈도우를 이동하기 위해 h\_offset과 w\_offset을 사용하며, 이 값은 패딩 정보와 스트라이드 정보를 이용하여 계산된다. 최댓값을 찾을 때는 윈도우 내의 모든 값과 비교하면서 최댓값과 최댓값의 위치를 찾는다. 최댓값은 출력값으로 사용되며, 최댓값의 위치 정보는 indexes 배열에 저장된다.
-* 마지막으로, 이 함수는 입력값과 출력값의 메모리 할당 및 해제 등을 수행한다.
-
-
-
-#### backward\_maxpool\_layer
+입력 크기가 바뀌면 `resize_maxpool_layer`가 shape를 다시 계산하고 세 buffer를 `realloc`한다.
 
 ```c
-void backward_maxpool_layer(const maxpool_layer l, network net)
-{
-    int i;
-    int h = l.out_h;
-    int w = l.out_w;
-    int c = l.c;
-    for(i = 0; i < h*w*c*l.batch; ++i){
-        int index = l.indexes[i];
-        net.delta[index] += l.delta[i];
-    }
-}
+l->out_w = (w + l->pad - l->size)
+           / l->stride + 1;
+l->out_h = (h + l->pad - l->size)
+           / l->stride + 1;
+l->outputs = l->out_w*l->out_h*l->c;
+
+l->indexes = realloc(l->indexes,
+    output_size*sizeof(int));
+l->output = realloc(l->output,
+    output_size*sizeof(float));
+l->delta = realloc(l->delta,
+    output_size*sizeof(float));
 ```
 
-함수 이름: backward\_maxpool\_layer
+늘어난 영역은 `calloc`처럼 0으로 초기화되지 않는다. forward는 output과 indexes를 덮어쓰지만 delta의 초기화는 다른 학습 경로가 책임져야 한다. `realloc` 실패 여부도 검사하지 않는다.
 
-입력:&#x20;
-
-* maxpool\_layer l (maxpool 레이어 구조체)
-* network net (뉴럴 네트워크 구조체)
-
-동작:&#x20;
-
-* maxpool 레이어의 역전파를 수행하여, 뉴럴 네트워크의 delta 값을 업데이트한다.&#x20;
-* 역전파 수행을 위해, maxpool 레이어에서 사용된 max 값을 가지는 원소들의 인덱스를 l.indexes 배열에 저장해 놓았으며, 이를 이용하여 delta 값을 해당 인덱스의 원소에 더해준다.
-
-설명:&#x20;
-
-* 입력으로 들어온 maxpool 레이어 구조체 l과 뉴럴 네트워크 구조체 net을 이용하여, maxpool 레이어의 역전파를 수행한다.&#x20;
-* l.indexes 배열에는 max 값을 가지는 원소들의 인덱스가 저장되어 있으므로, 이를 이용하여 net.delta 배열의 해당 인덱스의 원소에 l.delta 배열의 값을 더해준다.&#x20;
-* 이렇게 하면, maxpool 레이어로 전달된 델타 값이 이전 레이어로 역전파되며, 네트워크의 학습이 이루어진다.
-
-
-
-#### get\_maxpool\_image
+시각화 helper는 새 픽셀 buffer를 만들지 않는다.
 
 ```c
-image get_maxpool_image(maxpool_layer l)
-{
-    int h = l.out_h;
-    int w = l.out_w;
-    int c = l.c;
-    return float_to_image(w,h,c,l.output);
-}
+return float_to_image(w, h, c, l.output);
 ```
 
-함수 이름: get\_maxpool\_image&#x20;
+`get_maxpool_image`와 `get_maxpool_delta`가 반환한 image는 layer의 output 또는 delta를 그대로 가리키는 view다. view를 수정하면 layer buffer가 바뀌며, 독립 image라고 생각하고 `free_image`하면 layer가 소유한 포인터를 해제할 수 있다.
 
-입력:&#x20;
-
-* maxpool\_layer 구조체 l&#x20;
-
-동작:&#x20;
-
-* max pooling 레이어의 출력값을 이미지 형태로 변환하여 반환합니다.&#x20;
-
-설명:
-
-* max pooling 레이어의 출력값을 특정 크기의 이미지로 변환한 후, float\_to\_image 함수를 이용하여 image 형태로 변환하여 반환합니다.&#x20;
-* 출력값을 이미지 형태로 변환하는 이유는 이미지를 시각화하여 max pooling 레이어가 어떤 작업을 수행하는지 쉽게 이해할 수 있기 때문입니다.
-
-
-
-#### get\_maxpool\_delta
-
-```c
-image get_maxpool_delta(maxpool_layer l)
-{
-    int h = l.out_h;
-    int w = l.out_w;
-    int c = l.c;
-    return float_to_image(w,h,c,l.delta);
-}
-```
-
-함수 이름: get\_maxpool\_delta
-
-입력:&#x20;
-
-* maxpool\_layer l (maxpool 레이어 구조체)
-
-동작:&#x20;
-
-* 입력으로 받은 maxpool 레이어의 출력값에 대한 delta 값을 가지고 새로운 이미지를 생성하여 반환합니다.&#x20;
-* 생성된 이미지는 float\_to\_image 함수를 통해 float 형식으로 변환됩니다.
-
-설명:&#x20;
-
-* maxpool 레이어는 입력 이미지를 최대값 풀링 연산을 통해 축소한 후 출력값을 생성합니다.&#x20;
-* 이때, 손실 함수의 역전파를 위해 이전 레이어에서 전달된 delta 값을 maxpool 레이어에서도 그대로 전달해야 합니다.&#x20;
-* 이 함수는 이러한 delta 값을 이용하여 새로운 이미지를 생성하고 반환합니다. 이때, 생성된 이미지의 너비, 높이, 채널 수는 maxpool 레이어의 출력값과 동일합니다.
-
-
-
-#### resize\_maxpool\_layer
-
-```c
-void resize_maxpool_layer(maxpool_layer *l, int w, int h)
-{
-    l->h = h;
-    l->w = w;
-    l->inputs = h*w*l->c;
-
-    l->out_w = (w + l->pad - l->size)/l->stride + 1;
-    l->out_h = (h + l->pad - l->size)/l->stride + 1;
-    l->outputs = l->out_w * l->out_h * l->c;
-    int output_size = l->outputs * l->batch;
-
-    l->indexes = realloc(l->indexes, output_size * sizeof(int));
-    l->output = realloc(l->output, output_size * sizeof(float));
-    l->delta = realloc(l->delta, output_size * sizeof(float));
-}
-```
-
-함수 이름: resize\_maxpool\_layer 입력:
-
-* maxpool\_layer \*l : maxpool 레이어 구조체 포인터
-* int w : 변경할 너비
-* int h : 변경할 높이
-
-동작:&#x20;
-
-* 입력받은 maxpool 레이어 구조체 포인터(\*l)의 w와 h 필드를 입력받은 값으로 변경하고, 그에 따라 다른 필드들도 새로 계산하여 업데이트한다. 새롭게 계산된 필드들은 다음과 같다:
-* inputs : 입력 이미지 데이터의 총 개수(h \* w \* c)
-* out\_w : 출력 이미지의 너비
-* out\_h : 출력 이미지의 높이
-* outputs : 출력 이미지 데이터의 총 개수(out\_w \* out\_h \* c)
-* indexes : 출력값 중 최댓값의 위치를 저장하는 배열을 output\_size 크기로 재할당한다.
-* output : 출력값을 저장하는 배열을 output\_size 크기로 재할당한다.
-* delta : 출력값에 대한 미분값(gradient)을 저장하는 배열을 output\_size 크기로 재할당한다.
-
-설명:&#x20;
-
-* 이 함수는 maxpool 레이어의 크기를 조정하기 위한 함수이다.&#x20;
-* 입력받은 maxpool 레이어 구조체 포인터(\*l)의 w와 h 필드를 변경한 뒤, 이 값에 따라 다른 필드들도 업데이트한다. 이 때, maxpool 레이어는 입력 이미지에서 stride와 size를 기반으로 최댓값을 추출하여 출력 이미지를 생성하는 레이어이다.&#x20;
-* 이 함수에서는 입력 이미지 데이터의 총 개수(inputs), 출력 이미지의 너비(out\_w)와 높이(out\_h), 출력 이미지 데이터의 총 개수(outputs)를 새롭게 계산한다.&#x20;
-* 또한, 출력값 중 최댓값의 위치를 저장하는 배열(indexes), 출력값을 저장하는 배열(output), 그리고 출력값에 대한 미분값(gradient)을 저장하는 배열(delta)을 재할당한다.&#x20;
-* 이렇게 필요한 필드들을 새롭게 계산하고 재할당함으로써, maxpool 레이어의 크기를 조정할 수 있다.
+Maxpool 결과가 이상할 때는 “최댓값을 뽑는 단순한 layer”라는 설명보다 **출력식, 실제 window 시작 offset, 저장된 argmax 주소, backward의 무조건 scatter**를 한 줄씩 맞춰야 한다. 그 네 값이 일치해야 parameter가 없는 layer도 안전하다.

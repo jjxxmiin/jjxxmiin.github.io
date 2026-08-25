@@ -1,345 +1,173 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Local Layer"
+title:  "Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정"
+summary: "Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다."
 date:   2022-03-06 15:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetLocalLayer.jpg
   alt: DarkNet 시리즈 - Local Layer 대표 이미지
 tags:
-  - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - Darknet소스분석
+  - LocalLayer
+  - GEMM
 math: true
 ---
 
-## local\_layer
+Darknet의 Local Layer는 **출력 위치마다 별도의 필터와 bias를 사용하기 때문에 같은 필터를 모든 위치에 공유하는 convolution보다 파라미터가 `out_h × out_w`배 많다.** `forward_local_layer`의 바깥쪽 `j` loop와 위치별 weight offset이 이 차이를 그대로 보여준다.
 
-### local\_out\_height
+아래 코드는 Darknet의 `im2col_cpu`, `gemm`, activation, BLAS helper와 workspace가 준비됐다는 전제의 내부 구현이다. 이 조각만으로 독립 실행할 수 없다.
+
+## 출력 크기와 파라미터 수를 먼저 계산하기
+
+출력 높이와 너비는 pad 여부에 따라 계산식이 갈린다.
 
 ```c
 int local_out_height(local_layer l)
 {
     int h = l.h;
-    if (!l.pad) h -= l.size;
+    if(!l.pad) h -= l.size;
     else h -= 1;
     return h/l.stride + 1;
 }
 ```
 
-함수 이름: local\_out\_height&#x20;
-
-입력:&#x20;
-
-* local\_layer l: 로컬 레이어 구조체
-
-동작:&#x20;
-
-* 입력으로 받은 로컬 레이어의 높이(height)에 대한 출력 높이(output height)를 계산한다.&#x20;
-* 패딩(padding)이 적용되어 있지 않은 경우 필터(filter) 크기(size)만큼 높이를 줄이고, 패딩이 적용된 경우 높이에서 1만큼 빼준다.&#x20;
-* 그리고 나서 출력 높이를 계산하기 위해 stride로 나누고 1을 더해준다.&#x20;
-
-설명:&#x20;
-
-* 이 함수는 로컬 레이어의 출력 높이를 계산하는 함수로, 필터와 입력 데이터의 크기, 스트라이드 등의 정보를 이용해 계산한다.&#x20;
-* 이 계산은 로컬 레이어의 순전파(forward propagation) 단계에서 필요하며, 출력 높이를 계산하는 것은 출력 데이터의 크기를 결정하는 중요한 요소 중 하나이다.
-
-
-
-### local\_out\_width
+너비도 같은 방식이다. pad가 없으면 일반적인 `floor((h-size)/stride)+1`, pad가 있으면 `(h-1)/stride+1` 형태가 된다. 생성 함수는 여기서 `locations`를 만든다.
 
 ```c
-int local_out_width(local_layer l)
-{
-    int w = l.w;
-    if (!l.pad) w -= l.size;
-    else w -= 1;
-    return w/l.stride + 1;
+int out_h = local_out_height(l);
+int out_w = local_out_width(l);
+int locations = out_h*out_w;
+
+l.out_h = out_h;
+l.out_w = out_w;
+l.out_c = n;
+l.outputs = out_h*out_w*n;
+l.inputs = w*h*c;
+```
+
+한 위치의 필터 묶음은 `size*size*c*n`개 weight를 가진다. Local Layer 전체는 위치마다 이 묶음이 필요하다.
+
+```c
+l.weights = calloc(
+    c*n*size*size*locations, sizeof(float));
+l.weight_updates = calloc(
+    c*n*size*size*locations, sizeof(float));
+
+l.biases = calloc(l.outputs, sizeof(float));
+l.bias_updates = calloc(l.outputs, sizeof(float));
+```
+
+bias도 filter당 하나가 아니라 `out_h*out_w*n`, 즉 출력 원소마다 하나씩이다. 입력이 커질 때 메모리가 빠르게 늘어나는 이유를 layer 이름이 아니라 이 할당식에서 확인할 수 있다.
+
+## forward는 위치마다 다른 GEMM을 호출한다
+
+각 batch의 출력은 먼저 위치별 bias로 채워진다.
+
+```c
+for(i = 0; i < l.batch; ++i){
+    copy_cpu(l.outputs, l.biases, 1,
+             l.output + i*l.outputs, 1);
 }
 ```
 
-함수 이름: local\_out\_width&#x20;
-
-입력:&#x20;
-
-* local\_layer l (로컬 레이어 구조체)&#x20;
-
-동작:&#x20;
-
-* 로컬 레이어의 출력 너비를 계산하여 반환합니다.&#x20;
-
-설명:&#x20;
-
-* 입력 이미지에 대해 로컬 필터링을 수행한 후 출력 이미지의 너비를 계산합니다.&#x20;
-* 너비는 패딩이 적용된 경우 입력 너비에서 필터 크기를 뺀 값에 1을 더한 후, 스트라이드로 나누어 계산됩니다.
-
-
-
-### forward\_local\_layer
+입력을 `im2col_cpu`로 펼치면 workspace에는 각 출력 위치의 receptive field가 열 단위로 놓인다. 이후 위치 `j`마다 그 위치 전용 weight block을 선택한다.
 
 ```c
-void forward_local_layer(const local_layer l, network net)
-{
-    int out_h = local_out_height(l);
-    int out_w = local_out_width(l);
-    int i, j;
-    int locations = out_h * out_w;
+for(j = 0; j < locations; ++j){
+    float *a = l.weights
+        + j*l.size*l.size*l.c*l.n;
+    float *b = net.workspace + j;
+    float *c = output + j;
 
-    for(i = 0; i < l.batch; ++i){
-        copy_cpu(l.outputs, l.biases, 1, l.output + i*l.outputs, 1);
-    }
+    int m = l.n;
+    int n = 1;
+    int k = l.size*l.size*l.c;
 
-    for(i = 0; i < l.batch; ++i){
-        float *input = net.input + i*l.w*l.h*l.c;
-        im2col_cpu(input, l.c, l.h, l.w,
-                l.size, l.stride, l.pad, net.workspace);
-        float *output = l.output + i*l.outputs;
-        for(j = 0; j < locations; ++j){
-            float *a = l.weights + j*l.size*l.size*l.c*l.n;
-            float *b = net.workspace + j;
-            float *c = output + j;
-
-            int m = l.n;
-            int n = 1;
-            int k = l.size*l.size*l.c;
-
-            gemm(0,0,m,n,k,1,a,k,b,locations,1,c,locations);
-        }
-    }
-    activate_array(l.output, l.outputs*l.batch, l.activation);
+    gemm(0, 0, m, n, k, 1,
+         a, k, b, locations,
+         1, c, locations);
 }
 ```
 
-함수 이름: forward\_local\_layer&#x20;
+`a`는 `j`가 바뀔 때마다 `size*size*c*n`만큼 이동한다. `b`와 `c`는 시작 주소만 한 칸 옮기고 leading dimension으로 `locations`를 사용한다. 따라서 한 번의 큰 convolution GEMM이 아니라 위치별 `n×k` weight와 `k×1` patch를 반복해 곱한다.
 
-입력:&#x20;
-
-* const local\_layer l&#x20;
-* network net&#x20;
-
-동작:&#x20;
-
-* 로컬 레이어의 순전파 연산을 수행합니다.&#x20;
-* 입력 데이터를 im2col 방식으로 전처리하고, 커널과의 행렬곱을 계산하여 출력값을 얻습니다.&#x20;
-* 마지막으로 활성화 함수를 적용합니다.&#x20;
-
-설명:
-
-* l: 로컬 레이어의 정보를 담고 있는 구조체
-* net: 네트워크 정보를 담고 있는 구조체
-* out\_h: 출력값의 높이
-* out\_w: 출력값의 너비
-* locations: 출력값의 전체 크기
-* biases: 로컬 레이어의 편향값
-* input: 네트워크의 입력 데이터
-* output: 로컬 레이어의 출력값
-* weights: 로컬 레이어의 가중치값
-* a: 커널과 입력값을 행렬곱하기 위한 배열
-* b: im2col 방식으로 전처리된 입력값
-* c: 출력값을 저장하기 위한 배열
-* m, n, k: 행렬곱을 위한 매개변수
-* activate\_array: 활성화 함수를 적용하는 함수
-
-
-
-### backward\_local\_layer
+모든 batch와 위치 계산이 끝난 뒤 activation을 한 번 적용한다.
 
 ```c
-void backward_local_layer(local_layer l, network net)
-{
-    int i, j;
-    int locations = l.out_w*l.out_h;
+activate_array(l.output,
+               l.outputs*l.batch,
+               l.activation);
+```
 
-    gradient_array(l.output, l.outputs*l.batch, l.activation, l.delta);
+## backward와 update는 무엇을 누적하나
 
-    for(i = 0; i < l.batch; ++i){
-        axpy_cpu(l.outputs, 1, l.delta + i*l.outputs, 1, l.bias_updates, 1);
-    }
+역전파는 activation gradient를 먼저 곱하고, batch마다 출력 delta를 bias update에 더한다.
 
-    for(i = 0; i < l.batch; ++i){
-        float *input = net.input + i*l.w*l.h*l.c;
-        im2col_cpu(input, l.c, l.h, l.w,
-                l.size, l.stride, l.pad, net.workspace);
+```c
+gradient_array(l.output,
+    l.outputs*l.batch,
+    l.activation, l.delta);
 
-        for(j = 0; j < locations; ++j){
-            float *a = l.delta + i*l.outputs + j;
-            float *b = net.workspace + j;
-            float *c = l.weight_updates + j*l.size*l.size*l.c*l.n;
-            int m = l.n;
-            int n = l.size*l.size*l.c;
-            int k = 1;
+axpy_cpu(l.outputs, 1,
+    l.delta + i*l.outputs, 1,
+    l.bias_updates, 1);
+```
 
-            gemm(0,1,m,n,k,1,a,locations,b,locations,1,c,n);
-        }
+weight update는 위치별 output delta와 im2col patch의 outer product다.
 
-        if(net.delta){
-            for(j = 0; j < locations; ++j){
-                float *a = l.weights + j*l.size*l.size*l.c*l.n;
-                float *b = l.delta + i*l.outputs + j;
-                float *c = net.workspace + j;
+```c
+float *a = l.delta + i*l.outputs + j;
+float *b = net.workspace + j;
+float *c = l.weight_updates
+    + j*l.size*l.size*l.c*l.n;
 
-                int m = l.size*l.size*l.c;
-                int n = 1;
-                int k = l.n;
+gemm(0, 1, l.n,
+     l.size*l.size*l.c, 1,
+     1, a, locations,
+     b, locations, 1, c,
+     l.size*l.size*l.c);
+```
 
-                gemm(1,0,m,n,k,1,a,m,b,locations,0,c,locations);
-            }
+이전 layer의 delta가 필요하면 반대 방향으로 weight를 곱해 workspace의 각 column을 만들고 `col2im_cpu`로 겹치는 위치를 입력 shape에 합친다. `net.delta`가 NULL이면 이 계산은 생략된다.
 
-            col2im_cpu(net.workspace, l.c,  l.h,  l.w,  l.size,  l.stride, l.pad, net.delta+i*l.c*l.h*l.w);
-        }
-    }
+update에서는 전체 위치를 포함한 weight 수를 다시 계산한다.
+
+```c
+int locations = l.out_w*l.out_h;
+int size = l.size*l.size*l.c*l.n*locations;
+
+axpy_cpu(size, -decay*batch,
+         l.weights, 1,
+         l.weight_updates, 1);
+axpy_cpu(size, learning_rate/batch,
+         l.weight_updates, 1,
+         l.weights, 1);
+scal_cpu(size, momentum,
+         l.weight_updates, 1);
+```
+
+weight decay를 update buffer에 더한 뒤 학습률을 적용하고, 남은 update에는 momentum을 곱한다. bias는 decay 없이 학습률과 momentum만 적용한다.
+
+## 생성 코드에서 초기화 범위를 확인해야 하는 이유
+
+weight 배열은 모든 위치를 포함해 할당하지만, 제시된 초기화 loop의 범위에는 `locations`가 없다.
+
+```c
+float scale = sqrt(2./(size*size*c));
+for(i = 0; i < c*n*size*size; ++i){
+    l.weights[i] = scale*rand_uniform(-1, 1);
 }
 ```
 
-함수 이름: backward\_local\_layer
+`calloc`으로 만든 나머지 위치의 weight는 0인 채 남는다. `forward_local_layer`는 위치 `j`마다 서로 다른 block을 읽으므로, 이 코드 그대로라면 첫 위치 block만 난수 초기화되고 뒤 위치들은 0에서 시작한다. 의도된 초기화인지 확인하려면 loop 상한이 할당 크기와 같은지 대조해야 한다.
 
-입력:&#x20;
+추가로 layer를 구성할 때 다음을 검사하면 shape 오류를 빨리 찾을 수 있다.
 
-* local\_layer 구조체 l
-* network 구조체 net
+1. `out_h`, `out_w`가 양수이며 기대한 pad 규칙과 맞는가?
+2. network workspace가 `out_h*out_w*size*size*c` 원소를 담는가?
+3. weight와 weight update가 `locations`까지 포함해 할당·초기화됐는가?
+4. bias 길이가 `n`이 아니라 `locations*n`이라는 점을 반영했는가?
+5. forward와 backward에서 같은 위치별 offset을 사용하는가?
 
-동작:&#x20;
-
-* local\_layer를 역전파하는 함수입니다.&#x20;
-* 출력값에 대한 델타를 계산하고, 바이어스 업데이트 및 가중치 업데이트를 수행합니다.&#x20;
-* 이후 입력값에 대한 델타를 계산합니다.
-
-설명:
-
-* l.delta: 출력값의 델타를 저장하는 배열
-* l.bias\_updates: 바이어스 업데이트를 저장하는 배열
-* l.weight\_updates: 가중치 업데이트를 저장하는 배열
-* net.workspace: im2col 연산의 결과를 저장하는 배열
-* net.delta: 이전 레이어의 델타를 저장하는 배열
-
-1. 출력값에 대한 델타를 계산합니다.
-2. 모든 배치에 대해 바이어스 업데이트를 수행합니다.
-3. 모든 배치에 대해 im2col 연산을 수행합니다.
-4. 모든 배치 및 위치에 대해 가중치 업데이트를 수행합니다.
-5. 이전 레이어의 델타를 계산하고 net.delta 배열에 저장합니다.
-
-
-
-### update\_local\_layer
-
-```c
-void update_local_layer(local_layer l, update_args a)
-{
-    float learning_rate = a.learning_rate*l.learning_rate_scale;
-    float momentum = a.momentum;
-    float decay = a.decay;
-    int batch = a.batch;
-
-    int locations = l.out_w*l.out_h;
-    int size = l.size*l.size*l.c*l.n*locations;
-    axpy_cpu(l.outputs, learning_rate/batch, l.bias_updates, 1, l.biases, 1);
-    scal_cpu(l.outputs, momentum, l.bias_updates, 1);
-
-    axpy_cpu(size, -decay*batch, l.weights, 1, l.weight_updates, 1);
-    axpy_cpu(size, learning_rate/batch, l.weight_updates, 1, l.weights, 1);
-    scal_cpu(size, momentum, l.weight_updates, 1);
-}
-```
-
-함수 이름: update\_local\_layer
-
-입력:
-
-* local\_layer l: 로컬 레이어 객체
-* update\_args a: 업데이트 인자 객체
-
-동작:&#x20;
-
-* 로컬 레이어의 가중치와 편향을 업데이트하는 함수입니다.&#x20;
-* 업데이트는 경사 하강법을 사용하여 수행됩니다.&#x20;
-* 편향은 배치 크기로 나눈 학습률과 모멘텀을 사용하여 업데이트하고, 가중치는 학습률과 가중치 감쇠, 모멘텀을 사용하여 업데이트합니다.
-
-설명:
-
-* local\_layer: 로컬 레이어 객체로, 로컬 레이어의 출력, 가중치, 편향 등의 정보를 저장합니다.
-* update\_args: 업데이트 인자 객체로, 학습률, 모멘텀, 가중치 감쇠, 배치 크기 등의 업데이트에 필요한 정보를 저장합니다.
-* axpy\_cpu(): 벡터 덧셈과 스칼라 곱을 수행하는 함수입니다.
-* scal\_cpu(): 벡터를 스칼라로 곱하는 함수입니다.
-
-
-
-### make\_local\_layer
-
-```c
-local_layer make_local_layer(int batch, int h, int w, int c, int n, int size, int stride, int pad, ACTIVATION activation)
-{
-    int i;
-    local_layer l = {0};
-    l.type = LOCAL;
-
-    l.h = h;
-    l.w = w;
-    l.c = c;
-    l.n = n;
-    l.batch = batch;
-    l.stride = stride;
-    l.size = size;
-    l.pad = pad;
-
-    int out_h = local_out_height(l);
-    int out_w = local_out_width(l);
-    int locations = out_h*out_w;
-    l.out_h = out_h;
-    l.out_w = out_w;
-    l.out_c = n;
-    l.outputs = l.out_h * l.out_w * l.out_c;
-    l.inputs = l.w * l.h * l.c;
-
-    l.weights = calloc(c*n*size*size*locations, sizeof(float));
-    l.weight_updates = calloc(c*n*size*size*locations, sizeof(float));
-
-    l.biases = calloc(l.outputs, sizeof(float));
-    l.bias_updates = calloc(l.outputs, sizeof(float));
-
-    // float scale = 1./sqrt(size*size*c);
-    float scale = sqrt(2./(size*size*c));
-    for(i = 0; i < c*n*size*size; ++i) l.weights[i] = scale*rand_uniform(-1,1);
-
-    l.output = calloc(l.batch*out_h * out_w * n, sizeof(float));
-    l.delta  = calloc(l.batch*out_h * out_w * n, sizeof(float));
-
-    l.workspace_size = out_h*out_w*size*size*c;
-
-    l.forward = forward_local_layer;
-    l.backward = backward_local_layer;
-    l.update = update_local_layer;
-
-    l.activation = activation;
-
-    fprintf(stderr, "Local Layer: %d x %d x %d image, %d filters -> %d x %d x %d image\n", h,w,c,n, out_h, out_w, n);
-
-    return l;
-}
-```
-
-함수 이름: make\_local\_layer&#x20;
-
-입력:
-
-* int batch: 배치 크기
-* int h: 입력 이미지 높이
-* int w: 입력 이미지 너비
-* int c: 입력 이미지 채널 수
-* int n: 필터 수
-* int size: 필터 크기
-* int stride: 스트라이드
-* int pad: 패딩
-* ACTIVATION activation: 활성화 함수
-
-동작:&#x20;
-
-* 로컬 레이어를 생성하고 초기화한 후 반환한다.
-
-설명:
-
-* 로컬 레이어를 초기화하기 위해 필요한 파라미터를 입력으로 받는다.
-* 로컬 레이어의 출력 크기와 필요한 메모리를 계산한다.
-* 로컬 레이어의 가중치, 편향, 출력, 델타, 가중치 업데이트, 편향 업데이트 등을 저장할 메모리를 할당한다.
-* 가중치는 sqrt(2./(size_size_c))로 스케일링된 값으로 초기화하며, 편향은 0으로 초기화한다.
-* 로컬 레이어의 forward, backward, update 함수를 설정한다.
-* 초기화된 로컬 레이어를 반환한다.
+Local Layer를 이해하는 가장 빠른 방법은 convolution이라는 이름과 비교하는 것이 아니라, `j`가 변할 때 `a` 포인터가 이동하는지 보는 것이다. **위치마다 weight 주소가 달라진다는 한 줄이 파라미터 수, 연산 구조, 초기화 범위까지 모두 결정한다.**

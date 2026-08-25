@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Short Layer"
+title:  "Darknet Shortcut이 단순 x+F(x)가 아닌 이유: alpha·beta와 Gradient 경로"
+summary: "Darknet shortcut_layer가 현재 입력과 이전 layer 출력을 alpha·beta로 섞고 activation을 적용하는 순서, backward의 두 갈래 delta 누적과 resize 제약을 코드로 설명합니다."
 date:   2022-03-18 16:00 -0400
 categories: DarkNet
 image:
@@ -10,178 +11,58 @@ tags:
   - DarkNet
   - 컴퓨터비전
   - C언어
+  - 아키텍처분석
 math: true
 ---
 
-## shortcut\_layer
+Darknet Shortcut Layer를 일반적인 `x+F(x)`로만 옮기면 안 되는 이유는 현재 입력과 지정한 이전 layer 출력에 `alpha`와 `beta`가 적용되고, 그 합 뒤에 activation까지 실행되기 때문입니다.
 
-### shortcut layer 란?
+이 글의 코드는 `shortcut_cpu`와 activation helper가 있는 Darknet 전체를 전제로 한 핵심 조각입니다. 서로 다른 shape를 어떻게 대응시키는지는 helper 내부 계약까지 확인해야 하므로 아래 layer 코드만으로 임의 크기 residual 연결이 안전하다고 가정할 수 없습니다.
 
-ResNet에서 제안된 skip connection과 유사합니다.
+## Forward 순서는 복사·가중합·Activation입니다
 
-잠시 출력을 저장하고 그 후에 layer의 출력과 합치는 작업에서 사용 됩니다.
-
-### shortcut.c
-
-#### forward\_shortcut\_layer
+먼저 현재 `net.input`을 layer output으로 복사합니다. 다음으로 `l.index`가 가리키는 이전 layer 출력을 `shortcut_cpu`로 섞고, 마지막에 activation을 적용합니다.
 
 ```c
-void forward_shortcut_layer(const layer l, network net)
-{
-    copy_cpu(l.outputs*l.batch, net.input, 1, l.output, 1);                                                                  // network input -> layer output
-    shortcut_cpu(l.batch, l.w, l.h, l.c, net.layers[l.index].output, l.out_w, l.out_h, l.out_c, l.alpha, l.beta, l.output);  // layer output += i-th layer output
-    activate_array(l.output, l.outputs*l.batch, l.activation);
-}
+copy_cpu(l.outputs*l.batch, net.input, 1, l.output, 1);
+shortcut_cpu(
+    l.batch,
+    l.w, l.h, l.c, net.layers[l.index].output,
+    l.out_w, l.out_h, l.out_c,
+    l.alpha, l.beta, l.output);
+activate_array(l.output, l.outputs*l.batch, l.activation);
 ```
 
-함수 이름: forward\_shortcut\_layer
+따라서 비교 테스트에서 단순 합과 다른 결과가 나왔다면 먼저 `alpha`·`beta`와 activation 설정을 봐야 합니다. Activation을 각 branch에 따로 적용한 뒤 더하는 구현도 이 코드와 같지 않습니다.
 
-입력:
+`make_shortcut_layer`는 현재 출력 shape `w,h,c`와 연결 대상 shape `w2,h2,c2`를 모두 저장합니다. 두 shape가 다를 수 있는 필드는 마련돼 있지만, 실제 매핑 규칙은 이 원문에 포함되지 않은 `shortcut_cpu`가 결정합니다.
 
-* const layer l: 현재 layer 정보
-* network net: 현재 network 정보
+## Backward는 두 Branch에 Delta를 누적합니다
 
-동작:
-
-* 현재 layer의 출력값으로 네트워크 입력값을 복사
-* 현재 layer의 출력값에 shortcut 연결된 이전 layer의 출력값을 더해줌
-* 현재 layer의 출력값에 활성화 함수를 적용
-
-설명:
-
-* shortcut 연결을 통해 다른 layer의 출력값을 현재 layer의 출력값에 더해줌으로써, 네트워크의 학습 효율성을 높이기 위한 레이어
-* forward\_shortcut\_layer 함수는 해당 layer의 forward propagation을 수행하며, 입력값을 현재 layer의 출력값으로 복사하고 shortcut 연결된 이전 layer의 출력값을 더해주며 활성화 함수를 적용하는 역할을 수행함
-
-
-
-#### backward\_shortcut\_layer
+Backward의 첫 단계는 이미 저장한 `l.output`으로 activation gradient를 `l.delta`에 곱하는 것입니다. 그 다음 현재 입력 경로와 이전 layer 경로로 gradient를 나눠 보냅니다.
 
 ```c
-void backward_shortcut_layer(const layer l, network net)
-{
-    gradient_array(l.output, l.outputs*l.batch, l.activation, l.delta);                                                       // layer delta -> activation grad
-    axpy_cpu(l.outputs*l.batch, l.alpha, l.delta, 1, net.delta, 1);                                                           // network delta += alpha * layer delta
-    shortcut_cpu(l.batch, l.out_w, l.out_h, l.out_c, l.delta, l.w, l.h, l.c, 1, l.beta, net.layers[l.index].delta);           // i-th layer delta += layer delta
-}
+gradient_array(l.output, l.outputs*l.batch, l.activation, l.delta);
+axpy_cpu(l.outputs*l.batch, l.alpha, l.delta, 1, net.delta, 1);
+shortcut_cpu(
+    l.batch,
+    l.out_w, l.out_h, l.out_c, l.delta,
+    l.w, l.h, l.c,
+    1, l.beta, net.layers[l.index].delta);
 ```
 
-함수 이름: backward\_shortcut\_layer
+현재 경로에는 `alpha*l.delta`가 더해지고, 지정한 이전 layer의 delta에는 beta가 반영된 경로가 누적됩니다. 어느 쪽도 기존 gradient를 무조건 덮어쓰지 않습니다. Residual branch가 여러 곳에서 사용될 수 있기 때문입니다.
 
-입력:
+Activation gradient에 들어가는 값이 `l.output`이라는 점도 포팅 시 중요합니다. Darknet activation helper는 활성화된 출력값을 기대하는 구현이 있으므로 pre-activation을 대신 넘기면 결과가 달라질 수 있습니다.
 
-* const layer l: shortcut layer의 정보를 담고 있는 구조체
-* network net: 신경망을 구성하는 layer들의 정보를 담고 있는 구조체
+## Resize는 현재 Input·Output 크기 일치를 전제로 합니다
 
-동작:
+`resize_shortcut_layer`는 변경 전에 `l->w == l->out_w`와 `l->h == l->out_h`를 assert합니다. 이 조건을 통과한 뒤 새 `w,h`를 input과 output 양쪽에 적용하고 `outputs=w*h*out_c`로 메모리를 다시 잡습니다.
 
-* layer output의 activation gradient를 계산하여 layer delta에 저장한다.
-* network delta에 alpha값과 layer delta값을 곱하여 더해준다.
-* i-th layer delta에는 beta값과 layer delta값을 곱하여 더해준다.
+채널은 새 인자로 받지 않고 기존 `out_c`를 유지합니다. 따라서 resize가 모든 차원을 자유롭게 바꾸는 함수는 아닙니다. 생성 당시 서로 다른 spatial shape를 둔 shortcut에는 이 함수가 그대로 적용되지 않을 수 있습니다.
 
-설명:&#x20;
+## 손계산 Test로 Branch를 분리합니다
 
-* Shortcut layer는 입력값과 이전 layer의 출력값을 더하여 출력값을 만들어낸다.&#x20;
-* 따라서 forward pass에서는 이전 layer의 출력값을 현재 layer의 입력값과 더하여 출력값을 계산하게 된다.&#x20;
-* Backward pass에서는 현재 layer의 출력값에 대한 activation gradient를 계산하고, 이전 layer의 delta값에도 현재 layer의 delta값을 더하여 전파하게 된다.
+같은 shape의 작은 배열에서 activation을 linear로 두고 `alpha=1, beta=1` 결과를 먼저 확인합니다. 이어 alpha 또는 beta 하나를 0으로 바꿔 어느 branch가 사라지는지 확인하면 파라미터 의미를 혼동하지 않을 수 있습니다. Backward에서도 두 목적지 delta를 0으로 시작해 각각 예상 scale로 더해지는지 봅니다.
 
-
-
-#### resize\_shortcut\_layer
-
-```c
-void resize_shortcut_layer(layer *l, int w, int h)
-{
-    assert(l->w == l->out_w);
-    assert(l->h == l->out_h);
-    l->w = l->out_w = w;
-    l->h = l->out_h = h;
-    l->outputs = w*h*l->out_c;
-    l->inputs = l->outputs;
-    l->delta =  realloc(l->delta, l->outputs*l->batch*sizeof(float));
-    l->output = realloc(l->output, l->outputs*l->batch*sizeof(float));
-}
-```
-
-함수 이름: resize\_shortcut\_layer
-
-입력:
-
-* layer \*l: 크기를 조정할 shortcut layer의 포인터
-* int w: 새로운 너비
-* int h: 새로운 높이
-
-동작:
-
-* l의 w와 out\_w가 같아야 함을 확인(assert)
-* l의 h와 out\_h가 같아야 함을 확인(assert)
-* l의 w와 out\_w를 w로 업데이트
-* l의 h와 out\_h를 h로 업데이트
-* l의 outputs를 w, h, out\_c의 곱으로 업데이트
-* l의 inputs를 outputs와 같게 업데이트
-* l의 delta 메모리를 outputs \* batch 크기만큼 재할당
-* l의 output 메모리를 outputs \* batch 크기만큼 재할당
-
-설명:&#x20;
-
-* 이 함수는 shortcut layer의 크기를 조정하는 역할을 한다.&#x20;
-* shortcut layer는 input과 output의 크기가 같아야 하기 때문에 l의 w와 out\_w, h와 out\_h가 같은지 확인하고 같지 않으면 에러를 발생시킨다.&#x20;
-* 그 후 w와 h로 각각 크기를 조정해주고, outputs와 inputs를 업데이트한다.&#x20;
-* 마지막으로, delta와 output 메모리를 새로운 outputs \* batch 크기로 재할당한다.
-
-
-
-#### make\_shortcut\_layer
-
-```c
-layer make_shortcut_layer(int batch, int index, int w, int h, int c, int w2, int h2, int c2)
-{
-    fprintf(stderr, "res  %3d                %4d x%4d x%4d   ->  %4d x%4d x%4d\n",index, w2,h2,c2, w,h,c);
-    layer l = {0};
-    l.type = SHORTCUT;
-    l.batch = batch;
-    l.w = w2;
-    l.h = h2;
-    l.c = c2;
-    l.out_w = w;
-    l.out_h = h;
-    l.out_c = c;
-    l.outputs = w*h*c;
-    l.inputs = l.outputs;
-
-    l.index = index;
-
-    l.delta =  calloc(l.outputs*batch, sizeof(float));
-    l.output = calloc(l.outputs*batch, sizeof(float));;
-
-    l.forward = forward_shortcut_layer;
-    l.backward = backward_shortcut_layer;
-
-    return l;
-}
-```
-
-함수 이름: make\_shortcut\_layer
-
-입력:
-
-* batch: 배치 크기
-* index: 레이어 인덱스
-* w: 입력 이미지 가로 크기
-* h: 입력 이미지 세로 크기
-* c: 입력 이미지 채널 수
-* w2: shortcut 연결되는 레이어의 가로 크기
-* h2: shortcut 연결되는 레이어의 세로 크기
-* c2: shortcut 연결되는 레이어의 채널 수
-
-동작:
-
-* shortcut 레이어를 생성하고, 필드 값들을 초기화한다.
-
-설명:
-
-* shortcut 레이어는 skip connection을 구현하는 데 사용되는 레이어이다.
-* 입력 이미지의 크기와 shortcut으로 연결되는 레이어의 출력 크기가 같은 경우에 사용된다.
-* 출력 크기는 입력 이미지의 크기와 같고, 입력 이미지와 shortcut으로 연결되는 레이어의 출력을 더한 결과가 출력값이 된다.
-* l.delta와 l.output은 모두 출력값을 저장하는 배열이다.
-* l.forward와 l.backward는 해당 레이어에서의 순전파와 역전파 연산을 수행하는 함수 포인터이다.
-* fprintf 함수를 사용하여 현재 shortcut 레이어의 정보를 출력한다.
+그 다음에만 서로 다른 shape를 시험합니다. 이때 출력된 shape와 실제 `shortcut_cpu`의 index 대응을 함께 검증해야 합니다. 이 원문 조각은 residual 개념을 보여주지만, arbitrary projection이나 channel 변환 layer를 자동으로 만들어 주지는 않습니다.

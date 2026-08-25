@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Dropout Layer"
+title: "DarkNet Dropout은 추론 때 왜 아무것도 하지 않나"
+summary: "DarkNet의 inverted dropout이 학습 중 살아남은 값과 기울기를 1/(1-p)로 키우고, 추론에서는 입력을 그대로 두는 이유와 resize 구현 주의점을 설명합니다."
 date:   2022-02-21 16:00 -0400
 categories: DarkNet
 image:
@@ -8,176 +9,81 @@ image:
   alt: DarkNet 시리즈 - Dropout Layer 대표 이미지
 tags:
   - DarkNet
-  - 반도체
-  - 컴퓨터비전
+  - Dropout
+  - 정규화
+  - 역전파
 math: true
 ---
 
-## dropout\_layer
+DarkNet의 Dropout Layer는 학습 중 입력을 확률 `p`로 0으로 만들고 살아남은 값은 `1/(1-p)`배로 키우기 때문에, 추론 때는 별도 보정 없이 그대로 통과합니다.
 
-### Dropout Layer란?
+## 순전파는 입력 배열을 제자리에서 바꾼다
 
-Dropout Layer는 딥러닝에서 오버피팅을 방지하기 위한 regularization 기법 중 하나입니다. 이 레이어는 학습 중에 일부 뉴런을 무작위로 선택하여 출력을 0으로 만드는 과정을 수행합니다. 이렇게 함으로써 네트워크가 특정 뉴런에 과도하게 의존하지 않도록 하고, 뉴런의 가중치가 전체 데이터셋에 대해 일반화되도록 합니다.
+`make_dropout_layer`는 입력과 출력 수를 같게 두고, 각 원소의 난수를 기억할 `batch × inputs` 크기 배열만 할당합니다. 별도의 `output` 버퍼는 만들지 않습니다.
 
-Dropout Layer는 일반적으로 fully connected layer나 convolutional layer 다음에 추가됩니다. 학습 중에 Dropout Layer를 통과한 출력값은 실제로 학습에 사용되지 않습니다. 대신, 학습이 완료된 후에는 모든 뉴런을 사용하여 출력을 계산합니다. 이는 일종의 앙상블 학습과 유사한 효과를 가지며, 오버피팅을 줄이고 일반화 성능을 향상시킵니다.
+학습 모드의 순전파는 `net.input`을 직접 수정합니다.
 
-Dropout Layer의 사용 여부와 dropout 비율은 하이퍼파라미터로써 조절됩니다. 이 값은 신경망의 복잡성과 데이터셋의 크기에 따라 조정될 수 있습니다. 또한, Dropout Layer의 사용 여부와 비율은 네트워크의 일반화 성능과 학습 속도에 큰 영향을 미칩니다.
-
-
-
-### forward\_dropout\_layer
-
-```c
-void forward_dropout_layer(dropout_layer l, network net)
-{
-    int i;
-    if (!net.train) return;
-    for(i = 0; i < l.batch * l.inputs; ++i){
-        float r = rand_uniform(0, 1);
-        l.rand[i] = r;
-        if(r < l.probability) net.input[i] = 0;
-        else net.input[i] *= l.scale;
-    }
+~~~c
+float r = rand_uniform(0, 1);
+l.rand[i] = r;
+if(r < l.probability) {
+    net.input[i] = 0;
+}else{
+    net.input[i] *= l.scale;
 }
-```
+~~~
 
-함수 이름: forward\_dropout\_layer
+`l.scale`은 생성 시 다음 값으로 정해집니다.
 
-입력:
+$$
+scale = \frac{1}{1-p}
+$$
 
-* dropout\_layer l: dropout layer의 구조체
-* network net: neural network의 구조체
+예를 들어 절반을 버리는 설정이라면 살아남은 값은 두 배가 됩니다. 평균적인 크기를 학습 시점에 미리 맞추는 inverted dropout 방식이므로 `net.train`이 거짓일 때 함수는 즉시 반환하고 입력에 `1-p`를 다시 곱하지 않습니다.
 
-동작:
+## 역전파는 같은 난수 마스크를 재사용한다
 
-* neural network에서 dropout layer를 수행하는 forward propagation 함수
-* dropout layer는 입력값의 일부를 0으로 만들어주는 역할을 한다.
-* 만약 현재가 학습 모드인 경우, 각 입력값에 대해 확률 p(주어진 확률값)보다 작은 값인 경우 해당 입력값을 0으로 설정한다. 그렇지 않은 경우 해당 입력값을 (1-p)배 해준다.
-* 이때, dropout layer는 입력값이 0으로 바뀐 비율만큼의 scale factor를 유지한다. (이후 backpropagation 시 활용)
+순전파에서 저장한 `l.rand[i]`를 그대로 읽어, 버린 입력 위치의 기울기도 0으로 만듭니다. 살아남은 위치는 순전파와 같은 scale을 곱합니다.
 
-설명:
-
-* dropout layer는 overfitting을 방지하기 위한 regularization 방법 중 하나로, 특히 deep neural network에서 효과적이다.
-* 학습 시, dropout layer는 입력값 중 일부를 무작위로 선택하여 0으로 만들어준다. 이는 모델이 특정 feature에 과도하게 의존하지 않도록 하여, generalization 능력을 향상시켜준다.
-* 테스트 시, dropout layer는 사용되지 않는다. 대신 학습 시 사용된 확률 p를 이용하여 입력값에 (1-p)를 곱해줌으로써, 학습 시 dropout이 적용된 모델의 예측 결과를 보정해준다.
-* dropout layer는 fully connected layer와 convolutional layer 모두에서 사용될 수 있다.
-
-
-
-### backward\_dropout\_layer
-
-```c
-void backward_dropout_layer(dropout_layer l, network net)
-{
-    int i;
-    if(!net.delta) return;
-    for(i = 0; i < l.batch * l.inputs; ++i){
-        float r = l.rand[i];
-        if(r < l.probability) net.delta[i] = 0;
-        else net.delta[i] *= l.scale;
-    }
+~~~c
+if(r < l.probability) {
+    net.delta[i] = 0;
+}else{
+    net.delta[i] *= l.scale;
 }
-```
+~~~
 
-함수 이름: backward\_dropout\_layer
+이렇게 해야 순전파에서 사라진 연결이 역전파에서 다시 살아나지 않습니다. `net.delta`가 없으면 아무 작업도 하지 않습니다.
 
-입력:&#x20;
+역전파 함수 자체에는 `net.train` 검사가 없으므로, 추론 순전파 뒤에 이 함수를 호출하면 현재 입력에 대응하지 않는 이전 `rand` 값이 사용될 수 있습니다. 상위 학습 루프가 dropout 역전파를 학습 때만 호출한다는 전제가 필요합니다.
 
-* dropout\_layer l: 드롭아웃 레이어 구조체
-* network net: 신경망 구조체
+## probability 범위는 호출자가 지켜야 한다
 
-동작:&#x20;
+생성 함수에는 `probability` 범위 검사가 없습니다. 값은 0 이상 1 미만이어야 합니다.
 
-* 드롭아웃 레이어의 역전파(forward pass)를 수행한다.&#x20;
-* 역전파 시, 랜덤하게 선택된 입력 값에 대해서만 그래디언트(gradient)를 계산하여 출력값을 갱신한다.
+- 음수이면 어떤 원소도 정상적인 의미로 drop되지 않습니다.
+- 1이면 `1/(1-probability)`에서 0으로 나누게 됩니다.
+- 1보다 크면 scale 부호까지 바뀝니다.
 
-설명:
+CPU와 GPU 경로 모두 같은 `inputs × batch` 크기의 마스크를 준비하며, GPU가 활성화되면 별도 forward·backward 함수 포인터와 CUDA 배열을 연결합니다.
 
-* 네트워크가 학습 상태인 경우에만 드롭아웃 레이어의 역전파를 수행한다.
-* 랜덤하게 선택된 입력 값에 대한 그래디언트는 계산하지 않고 0으로 설정하여 출력값을 갱신한다.
-* 그 외의 입력 값에 대해서는 scale 값에 따라 그래디언트를 계산하여 출력값을 갱신한다.
+## resize 함수는 새 inputs를 CPU 상태에 반영하지 않는다
 
+원문 `resize_dropout_layer`는 `inputs` 인자를 받지만 CPU `rand` 재할당에는 기존 `l->inputs`를 사용합니다. `l->inputs`와 `l->outputs`를 새 값으로 대입하는 코드도 없습니다.
 
-
-### resize\_dropout\_layer
-
-```c
+~~~c
 void resize_dropout_layer(dropout_layer *l, int inputs)
 {
-    l->rand = realloc(l->rand, l->inputs*l->batch*sizeof(float));
-    #ifdef GPU
+    l->rand = realloc(l->rand,
+                      l->inputs*l->batch*sizeof(float));
+#ifdef GPU
     cuda_free(l->rand_gpu);
-
-    l->rand_gpu = cuda_make_array(l->rand, inputs*l->batch);
-    #endif
+    l->rand_gpu = cuda_make_array(l->rand,
+                                  inputs*l->batch);
+#endif
 }
-```
+~~~
 
-함수 이름: resize\_dropout\_layer
+새 입력 수가 이전과 다르면 CPU 루프가 보는 길이, CPU 마스크 할당, GPU 마스크 할당이 서로 어긋날 수 있습니다. 동적 입력 크기를 쓰려면 사용 중인 DarkNet 버전에서 이 함수가 보완됐는지 확인하고, resize 뒤 `inputs`, `outputs`, 두 마스크 크기를 함께 검증해야 합니다.
 
-입력:&#x20;
-
-* dropout\_layer 구조체 포인터 l
-* int inputs
-
-동작:&#x20;
-
-* dropout 레이어의 랜덤 드롭아웃 마스크를 입력 수에 맞게 조절한다.&#x20;
-* 입력 수가 이전에 설정된 입력 수보다 작은 경우, 마스크를 새로운 크기에 맞게 조정한다.&#x20;
-* GPU 버전의 경우 CUDA 메모리를 다시 할당하고, 업데이트된 랜덤 드롭아웃 마스크를 복사한다.
-
-설명:&#x20;
-
-* 입력으로 받은 dropout\_layer 구조체 포인터 l의 rand 배열의 크기를 inputs_l->batch_sizeof(float)로 재할당한다.&#x20;
-* GPU가 활성화되어 있는 경우, 이전에 할당된 CUDA 메모리를 해제하고 새로운 크기에 맞게 다시 할당한다.&#x20;
-* 이후, 새로운 rand 배열을 CUDA 메모리로 복사한다.
-
-
-
-### make\_dropout\_layer
-
-```c
-dropout_layer make_dropout_layer(int batch, int inputs, float probability)
-{
-    dropout_layer l = {0};
-    l.type = DROPOUT;
-    l.probability = probability;
-    l.inputs = inputs;
-    l.outputs = inputs;
-    l.batch = batch;
-    l.rand = calloc(inputs*batch, sizeof(float));
-    l.scale = 1./(1.-probability);
-    l.forward = forward_dropout_layer;
-    l.backward = backward_dropout_layer;
-    #ifdef GPU
-    l.forward_gpu = forward_dropout_layer_gpu;
-    l.backward_gpu = backward_dropout_layer_gpu;
-    l.rand_gpu = cuda_make_array(l.rand, inputs*batch);
-    #endif
-    fprintf(stderr, "dropout       p = %.2f               %4d  ->  %4d\n", probability, inputs, inputs);
-    return l;
-}
-```
-
-함수 이름: make\_dropout\_layer&#x20;
-
-* 입력: batch(int): 배치 크기
-* inputs(int): 입력 크기
-* probability(float): 드롭아웃 확률&#x20;
-
-동작:&#x20;
-
-* 드롭아웃 레이어를 생성하고 초기화한다.&#x20;
-
-설명:
-
-* 드롭아웃 레이어 구조체를 선언하고 초기화한다.
-* 드롭아웃 레이어의 타입을 DROPOUT으로 설정한다.
-* 드롭아웃 확률, 입력 크기, 출력 크기, 배치 크기를 설정한다.
-* 입력 크기와 출력 크기가 같으므로 l.outputs = l.inputs로 설정한다.
-* 배치 크기와 입력 크기를 곱한 만큼의 크기를 갖는 난수 배열 l.rand를 생성하고 초기화한다.
-* 스케일링 파라미터 l.scale을 계산한다.
-* forward\_dropout\_layer와 backward\_dropout\_layer 함수를 설정한다.
-* GPU를 사용하는 경우, forward\_dropout\_layer\_gpu와 backward\_dropout\_layer\_gpu 함수도 설정하고, 난수 배열 l.rand\_gpu를 생성하고 초기화한다.
-* 생성한 드롭아웃 레이어의 정보를 출력한다.
-* 생성한 드롭아웃 레이어 구조체를 반환한다.
+이 글의 코드는 독립 실행 예제가 아니라 오래된 DarkNet 내부 구현 조각입니다. 값이 예상보다 커졌다면 추론 보정보다 먼저 학습 중 scale이 두 번 적용되지 않았는지와 dropout 층이 입력을 제자리 수정한다는 사실을 확인하는 편이 빠릅니다.

@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - GEMM"
+title: "DarkNet GEMM 인자 읽는 법: TA·TB·lda·BETA"
+summary: "DarkNet GEMM 호출을 C=βC+αop(A)op(B)로 해석하고, 네 가지 전치 분기와 leading dimension이 실제 메모리 인덱스에 미치는 영향을 설명합니다."
 date:   2022-02-22 16:00 -0400
 categories: DarkNet
 image:
@@ -8,337 +9,98 @@ image:
   alt: DarkNet 시리즈 - GEMM 대표 이미지
 tags:
   - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - GEMM
+  - 행렬곱
+  - OpenMP
 math: true
 ---
 
-## gemm
+DarkNet의 GEMM 호출은 `C = BETA × C + ALPHA × op(A) × op(B)`이며, `TA`와 `TB`가 두 입력을 어떤 메모리 인덱스로 읽을지 결정합니다.
 
-### GEMM 이란?
+## M·N·K는 결과 모양부터 말한다
 
-참고 자료 : [https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/](https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/)
+GEMM의 결과 `C`는 `M × N`이고 두 행렬이 공유하는 축은 `K`입니다.
 
-* `General Matrix to Matrix Multiplication`
-* 1979년에 만들어진 BLAS 라이브러리의 일부 입니다.
-* 두개의 입력 행렬을 곱해서 출력을 얻는 방법 입니다.
+$$
+C_{M \times N}
+=
+\beta C_{M \times N}
++
+\alpha
+op(A)_{M \times K}
+op(B)_{K \times N}
+$$
 
-딥러닝에서 대부분의 연산은 `output = input * weight + bias`로 표현이 됩니다. 여기서 `input`, `output`, `weight`를 행렬로 표현해서 GEMM을 사용해 연산할 수 있습니다.
+`TA = 0`이면 A를 그대로, 1이면 전치해서 사용합니다. `TB`도 같은 규칙입니다. `lda`, `ldb`, `ldc`는 단순히 논리적 열 개수라고 외우기보다, 각 행 또는 전치된 접근의 다음 줄로 이동할 때 쓰는 메모리 간격으로 보는 편이 정확합니다.
 
-#### Fully Connected Layer
+원문에 나온 대표 호출은 다음과 같습니다.
 
-`fully connected layer`는 위와 같이 표현할 수 있습니다.
-
-#### Convolutional Layer
-
-* `im2col` : 3차원 이미지 배열을 2차원 배열로 변환합니다.
-
-`convolutional layer`는 위와 같이 표현할 수 있습니다. 위 그림의 경우는 `stride`가 `kernel size`와 같은 경우를 의미합니다.
-
-***
-
-### gemm.c
-
-#### gemm
-
+~~~c
 gemm(0,0,m,n,k,1,a,k,b,n,1,c,n);
+~~~
 
-```c
-void gemm(int TA, int TB, int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float BETA,
-        float *C, int ldc)
-{
-    gemm_cpu(TA,  TB,  M, N, K, ALPHA, A, lda, B, ldb, BETA, C, ldc);
-}
-```
+이는 A와 B를 전치하지 않고 `C = C + A × B`를 계산합니다. `BETA`가 1이므로 C를 덮어쓰지 않고 기존 값에 누적한다는 점이 중요합니다.
 
-함수 이름: gemm&#x20;
+GEMM이 딥러닝 연산에서 왜 자주 쓰이는지는 원문이 연결한 [Pete Warden의 설명](https://petewarden.com/2015/04/20/why-gemm-is-at-the-heart-of-deep-learning/)도 함께 참고할 수 있습니다.
 
-입력:
+## BETA를 먼저 적용한 뒤 네 함수로 갈린다
 
-* int TA: 행렬 A의 전치 여부 (0: 전치하지 않음, 1: 전치함)
-* int TB: 행렬 B의 전치 여부 (0: 전치하지 않음, 1: 전치함)
-* int M: 행렬 C의 행의 수
-* int N: 행렬 C의 열의 수
-* int K: 행렬 A의 열의 수 (행렬 B의 행의 수와 같아야 함)
-* float ALPHA: 스칼라 값
-* float \*A: 행렬 A의 포인터
-* int lda: 행렬 A의 행 단위 크기
-* float \*B: 행렬 B의 포인터
-* int ldb: 행렬 B의 행 단위 크기
-* float BETA: 스칼라 값
-* float \*C: 행렬 C의 포인터
-* int ldc: 행렬 C의 행 단위 크기
+`gemm`은 이 소스에서 `gemm_cpu`를 그대로 호출하는 얇은 래퍼입니다. CPU 함수는 먼저 C의 모든 원소에 `BETA`를 곱합니다.
 
-동작:&#x20;
-
-* 행렬-행렬 곱셈 연산을 수행함.
-
-설명:&#x20;
-
-* 이 함수는 CPU 상에서 행렬-행렬 곱셈 연산을 수행하는 함수이다.&#x20;
-* gemm\_cpu 함수를 호출하여 이 연산을 수행한다.&#x20;
-* 행렬 A와 행렬 B의 크기와 전치 여부, 스칼라 값 ALPHA와 BETA 등을 입력으로 받고, 연산 결과인 행렬 C를 출력으로 반환한다.
-
-
-
-#### gemm\_cpu
-
-```c
-void gemm_cpu(int TA, int TB, int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float BETA,
-        float *C, int ldc)
-{
-    //printf("cpu: %d %d %d %d %d %f %d %d %f %d\n",TA, TB, M, N, K, ALPHA, lda, ldb, BETA, ldc);
-    int i, j;
-    for(i = 0; i < M; ++i){
-        for(j = 0; j < N; ++j){
-            C[i*ldc + j] *= BETA;
-        }
-    }
-    if(!TA && !TB)
-        gemm_nn(M, N, K, ALPHA, A,lda, B, ldb, C, ldc);
-    else if(TA && !TB)
-        gemm_tn(M, N, K, ALPHA, A,lda, B, ldb, C, ldc);
-    else if(!TA && TB)
-        gemm_nt(M, N, K, ALPHA, A,lda, B, ldb, C, ldc);
-    else
-        gemm_tt(M, N, K, ALPHA, A,lda, B, ldb, C, ldc);
-}
-```
-
-함수 이름: gemm\_cpu
-
-입력:
-
-* int TA: A 행렬의 전치 여부를 나타내는 플래그
-* int TB: B 행렬의 전치 여부를 나타내는 플래그
-* int M: C 행렬의 행 수
-* int N: C 행렬의 열 수
-* int K: A, B 행렬에서 공유하는 차원의 크기
-* float ALPHA: A, B 행렬의 곱에 대한 가중치
-* float \*A: A 행렬의 포인터
-* int lda: A 행렬의 행 당 원소 수
-* float \*B: B 행렬의 포인터
-* int ldb: B 행렬의 행 당 원소 수
-* float BETA: C 행렬에 대한 가중치
-* float \*C: C 행렬의 포인터
-* int ldc: C 행렬의 행 당 원소 수
-
-동작:&#x20;
-
-* CPU에서 행렬 곱셈 연산을 수행한다.&#x20;
-* A, B, C 세 개의 행렬을 인자로 받고, A와 B의 곱에 가중치 ALPHA를 곱한 결과를 C 행렬에 더한다.
-
-설명:&#x20;
-
-* gemm\_cpu 함수는 CPU에서 행렬 곱셈 연산을 수행한다.&#x20;
-* 이 함수는 A, B, C 세 개의 포인터와 다양한 인자를 받아서, 행렬 곱셈 연산 결과를 C 행렬에 저장한다.&#x20;
-* 함수 내부에서는 TA와 TB 인자를 사용하여 A와 B 행렬이 전치되어 있는지 여부를 확인하고, 이에 따라 gemm\_nn, gemm\_tn, gemm\_nt, gemm\_tt 함수 중 하나를 호출한다.&#x20;
-* 이 함수들은 다양한 행렬 곱셈 연산 방법을 구현하고 있다.&#x20;
-* 따라서 gemm\_cpu 함수는 이를 이용하여 입력으로 받은 행렬 A, B의 곱에 가중치 ALPHA를 곱한 결과를 C 행렬에 더한다.&#x20;
-* 이 때 BETA 인자를 사용하여 기존의 C 행렬 값에 대한 가중치를 조절할 수 있다.
-
-
-
-#### gemm\_nn
-
-```c
-void gemm_nn(int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc)
-{
-    int i,j,k;
-    #pragma omp parallel for
-    for(i = 0; i < M; ++i){
-        for(k = 0; k < K; ++k){
-            register float A_PART = ALPHA*A[i*lda+k];
-            for(j = 0; j < N; ++j){
-                C[i*ldc+j] += A_PART*B[k*ldb+j];
-            }
-        }
+~~~c
+for(i = 0; i < M; ++i){
+    for(j = 0; j < N; ++j){
+        C[i*ldc + j] *= BETA;
     }
 }
-```
+~~~
 
-함수 이름: gemm\_nn
+그다음 전치 플래그 조합으로 네 구현 중 하나를 고릅니다.
 
-입력:
+- `gemm_nn`: A와 B 모두 그대로
+- `gemm_tn`: A만 전치
+- `gemm_nt`: B만 전치
+- `gemm_tt`: A와 B 모두 전치
 
-* M: 행렬 A의 행의 개수
-* N: 행렬 B의 열의 개수
-* K: 행렬 A의 열의 개수 또는 행렬 B의 행의 개수
-* ALPHA: 행렬 A와 행렬 B의 곱셈 결과에 곱해지는 스칼라 값
-* A: 크기 M x K의 행렬 A
-* lda: 행렬 A의 leading dimension
-* B: 크기 K x N의 행렬 B
-* ldb: 행렬 B의 leading dimension
-* C: 크기 M x N의 행렬 C
+함수 이름의 첫 글자는 A, 둘째 글자는 B의 논리적 사용 방향입니다. 예를 들어 `tn`을 두 행렬 모두 전치한다고 읽으면 실제 인덱스와 맞지 않습니다.
 
-동작:
+## 인덱스를 보면 전치가 명확해진다
 
-* 행렬 A와 B를 곱하여 행렬 C를 계산하는 General Matrix Multiply(GEMM) 연산을 수행한다.
-* i, k, j 세 개의 for 루프를 사용하여 행렬 C의 각 요소를 계산한다.
-* i 루프에서는 행렬 A의 각 행을 순회하며, k 루프에서는 행렬 A의 각 열과 행렬 B의 각 행을 순회하며, j 루프에서는 행렬 B의 각 열을 순회하며 행렬 C의 각 요소를 계산한다.
-* OpenMP를 사용하여 병렬 처리한다.
+NN 경로는 A의 i행 k열과 B의 k행 j열을 읽습니다.
 
-설명:
+~~~c
+A[i*lda + k] * B[k*ldb + j]
+~~~
 
-* General Matrix Multiply(GEMM) 연산은 인공 신경망에서 가장 많이 사용되는 연산 중 하나이다.
-* GEMM 연산을 수행하는 방법은 여러 가지가 있으며, 이 함수에서는 A 행렬을 순회하면서 A와 B의 곱을 계산한다.
-* OpenMP는 멀티코어 CPU에서 병렬 처리를 수행할 수 있는 라이브러리로, 이를 사용하여 성능을 향상시킨다.
+NT 경로는 B를 `B[j*ldb + k]`로 읽습니다. 저장된 B의 j행을 논리적 곱셈에서는 전치된 열처럼 사용하는 방식입니다.
 
+~~~c
+A[i*lda + k] * B[j*ldb + k]
+~~~
 
+TN 경로는 A를 `A[k*lda + i]`로 읽고 B는 그대로 읽습니다.
 
-#### gemm\_nt
+~~~c
+A[k*lda + i] * B[k*ldb + j]
+~~~
 
-```c
-void gemm_nt(int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc)
-{
-    int i,j,k;
-    #pragma omp parallel for
-    for(i = 0; i < M; ++i){
-        for(j = 0; j < N; ++j){
-            register float sum = 0;
-            for(k = 0; k < K; ++k){
-                sum += ALPHA*A[i*lda+k]*B[j*ldb + k];
-            }
-            C[i*ldc+j] += sum;
-        }
-    }
-}
-```
+TT 경로는 두 전치 접근을 함께 사용합니다.
 
-함수 이름: gemm\_nt
+~~~c
+A[i + k*lda] * B[k + j*ldb]
+~~~
 
-입력:
+호출을 디버깅할 때는 `TA/TB` 이름만 보지 말고 이 인덱스가 각 버퍼의 실제 할당 범위 안에 있는지, 그리고 lda·ldb가 저장된 행 간격과 맞는지를 확인해야 합니다.
 
-* M: A 행렬의 행 개수
-* N: B 행렬의 열 개수
-* K: A 행렬의 열 개수 (동시에 B 행렬의 행 개수)
-* ALPHA: A와 B 행렬의 곱셈 결과에 곱해질 스칼라 값
-* \*A: A 행렬의 포인터
-* lda: A 행렬의 행 당 원소 개수
-* \*B: B 행렬의 포인터
-* ldb: B 행렬의 행 당 원소 개수
-* \*C: C 행렬의 포인터
-* ldc: C 행렬의 행 당 원소 개수
+## 합성곱에서는 im2col이 B를 만든다
 
-동작:
+DarkNet 합성곱층은 이미지의 겹치는 커널 영역을 `im2col`로 펼쳐 2차원 B 행렬을 만들고, 필터 행렬 A와 GEMM을 수행합니다. 완전연결층은 배치 입력과 가중치를 바로 행렬로 봅니다. 서로 다른 층이 같은 GEMM을 재사용할 수 있는 이유입니다.
 
-* 행렬 A와 B를 곱한 후, C 행렬에 더해주는 연산을 수행한다.
-* A와 B 행렬을 곱하기 위해 A는 그대로, B는 전치(transpose)된 형태로 사용된다.
-* A의 i번째 행과 B의 j번째 열을 곱한 값을 C의 i번째 행 j번째 열에 누적하여 더해준다.
+네 CPU 구현은 모두 바깥 i 루프에 OpenMP `parallel for`를 사용합니다. 하지만 이 코드 조각에는 다음 검사가 없습니다.
 
-설명:
+- M·N·K가 실제 버퍼 모양과 일치하는지
+- lda·ldb·ldc가 각 할당 범위를 넘지 않는지
+- A·B·C가 겹치는 메모리인지
+- C를 새 결과로 쓸 때 BETA가 0인지, 누적할 때 1인지
 
-* 이 함수는 B 행렬이 전치된 형태로 입력으로 들어올 때 A와 B를 곱한 후 C 행렬에 더해주는 연산을 수행한다.
-* 함수 내부에서는 OpenMP를 이용하여 병렬 처리를 수행하며, i, j, k 세 개의 for 루프를 이용하여 행렬의 원소 곱셈 및 덧셈 연산을 수행한다.
-
-
-
-#### gemm\_tn
-
-```c
-void gemm_tn(int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc)
-{
-    int i,j,k;
-    #pragma omp parallel for
-    for(i = 0; i < M; ++i){
-        for(k = 0; k < K; ++k){
-            register float A_PART = ALPHA*A[k*lda+i];
-            for(j = 0; j < N; ++j){
-                C[i*ldc+j] += A_PART*B[k*ldb+j];
-            }
-        }
-    }
-}
-```
-
-함수 이름: gemm\_tn
-
-입력:
-
-* int M: 행렬 A의 행의 수
-* int N: 행렬 B의 열의 수
-* int K: 행렬 A의 열의 수 또는 행렬 B의 행의 수
-* float ALPHA: 곱해지는 상수
-* float \*A: 행렬 A의 데이터 포인터
-* int lda: 행렬 A의 행 간격
-* float \*B: 행렬 B의 데이터 포인터
-* int ldb: 행렬 B의 행 간격
-* float \*C: 출력 행렬 C의 데이터 포인터
-* int ldc: 출력 행렬 C의 행 간격
-
-동작:&#x20;
-
-* 행렬 A와 B의 전치행렬인 AT와 BT를 곱하고 ALPHA를 곱한 값을 출력 행렬 C에 더한다.
-
-설명:&#x20;
-
-* 이 함수는 행렬 A와 B의 전치행렬인 AT와 BT를 곱한 결과를 출력하는 함수이다.&#x20;
-* 이때 ALPHA를 곱한 값이 출력 행렬 C에 더해진다.&#x20;
-* 내부적으로는 OpenMP를 사용하여 병렬 처리를 수행한다.
-
-
-
-#### gemm\_tt
-
-```c
-void gemm_tt(int M, int N, int K, float ALPHA,
-        float *A, int lda,
-        float *B, int ldb,
-        float *C, int ldc)
-{
-    int i,j,k;
-    #pragma omp parallel for
-    for(i = 0; i < M; ++i){
-        for(j = 0; j < N; ++j){
-            register float sum = 0;
-            for(k = 0; k < K; ++k){
-                sum += ALPHA*A[i+k*lda]*B[k+j*ldb];
-            }
-            C[i*ldc+j] += sum;
-        }
-    }
-}
-```
-
-함수 이름: gemm\_tt
-
-입력:
-
-* int M: 행렬 C의 행 개수
-* int N: 행렬 C의 열 개수
-* int K: 행렬 A의 열 개수 (행렬 B의 행 개수)
-* float ALPHA: 스칼라 값
-* float \*A: M x K 크기의 행렬 A
-* int lda: 행렬 A의 열 개수
-* float \*B: K x N 크기의 행렬 B
-* int ldb: 행렬 B의 열 개수
-* float \*C: M x N 크기의 행렬 C
-* int ldc: 행렬 C의 열 개수
-
-동작:
-
-* 두 개의 행렬 A와 B를 곱한 결과를 행렬 C에 누적한다.
-* A와 B는 전치(transpose)되어 있다고 가정한다.
-* OpenMP를 사용하여 병렬처리한다.
-
-설명:
-
-* 일반적으로 행렬 곱셈 연산에서는 A x B와 B x A는 다르다. 그러나 gemm\_tt 함수에서는 A와 B 모두 전치된 상태에서 곱셈을 수행하기 때문에 A^T x B^T = (B x A)^T와 같은 결과를 얻는다.
-* i, j, k의 순서로 3중 for 루프를 수행하며, 각각 C\[i_ldc+j], A\[i+k_lda], B\[k+j\*ldb]의 값을 참조한다.
-* 각각의 C\[i\*ldc+j]의 값을 계산하기 위해 sum 변수를 사용하여 누적 합을 계산한다.
-* OpenMP를 사용하여 병렬처리하여 성능을 향상시킨다.
+또한 여기 나온 함수는 독립 실행 예제가 아니며 DarkNet의 행렬 버퍼와 컴파일 설정 안에서 사용됩니다. 값이 이상하면 연산 수식보다 먼저 `C`의 초기값과 BETA, 전치 플래그, 세 leading dimension을 한 호출 단위로 적어 보는 것이 가장 빠릅니다.

@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - YOLOv1"
+title:  "YOLOv1 출력 7×7×30은 어떻게 읽을까? 98개 Box와 Loss까지"
+summary: "YOLOv1의 7×7 grid가 왜 30개 값을 내고 총 98개 box를 예측하는지, confidence와 class probability의 결합부터 좌표 loss의 약점까지 계산해 설명합니다."
 date:   2022-02-01 16:00 -0400
 categories: DarkNet
 image:
@@ -10,156 +11,44 @@ tags:
   - DarkNet
   - YOLO
   - 컴퓨터비전
+  - 논문리뷰
 math: true
 ---
 
-## YOLOv1
+YOLOv1의 `7×7×30` 출력은 49개 grid cell마다 두 box의 좌표·confidence 10개와 20개 class probability를 한 번에 예측한 결과입니다.
 
-* Paper : [https://arxiv.org/abs/1506.02640](https://arxiv.org/abs/1506.02640)
+[YOLOv1 논문](https://arxiv.org/abs/1506.02640)의 핵심은 객체 탐지를 proposal 생성과 분류의 여러 단계로 나누지 않고, 이미지에서 bounding box와 class probability를 하나의 regression 문제로 푼 데 있습니다. 숫자 구조를 먼저 이해하면 confidence, loss, 작은 물체 약점이 한 흐름으로 이어집니다.
 
-Object Detection에 대한 새로운 접근법(one stage object detection) YOLO(You Only Look Once)가 처음 제안된 논문입니다.
+## 7×7×30에서 98개 box가 나오는 계산
 
-* 통합된 구조(bounding box + class probability)를 가지기 때문에 빠릅니다.
-* `45 FPS / 155 FPS(Fast)`
+입력을 `S×S` grid로 나누고 객체 중심이 들어간 cell이 그 객체를 담당합니다. 원래 설정은 `S=7`, cell마다 `B=2`개의 box와 `C=20`개의 class probability를 예측합니다. 한 box에는 중심 `x,y`, 크기 `w,h`, confidence까지 다섯 값이 필요합니다.
 
-#### Unified Detection
+$$
+7\times7\times(B\times5+C)
+=7\times7\times(2\times5+20)
+=7\times7\times30
+$$
 
+따라서 box 후보는 `7×7×2=98`개입니다. class probability는 box별이 아니라 cell별로 공유됩니다. confidence는 객체가 있을 가능성과 예측 box의 IoU를 함께 반영하며, 추론에서는 class probability와 결합해 class별 score를 만듭니다.
 
+여기서 흔한 오해는 30개 값이 모두 class 점수라는 생각입니다. tensor를 파싱할 때 앞의 box 좌표·confidence 영역과 뒤의 20 class 값을 모델이 사용한 실제 layout에 맞게 분리해야 합니다.
 
-![1](/assets/img/post_img/darknetbook/yolov1_fig1.PNG)
+## 하나의 네트워크가 위치와 분류를 같이 배웁니다
 
+구조는 GoogLeNet의 영향을 받은 24개 convolution layer와 2개 fully connected layer입니다. 더 빠른 버전은 convolution layer를 9개로 줄였습니다. 논문은 ImageNet 분류로 앞부분을 사전 학습하고, 탐지 학습에서는 입력 해상도를 224에서 448로 높였습니다.
 
+속도는 기본 모델이 초당 45 frame, fast 버전이 155 frame으로 보고됐습니다. 이 값은 당시 논문의 하드웨어와 구현에서 얻은 결과이므로 오늘의 장치에서 그대로 기대할 수 있는 수치가 아닙니다. 아키텍처의 의미는 “한 번의 forward pass로 98개 후보와 class를 함께 낸다”는 데 있습니다.
 
-* S x S grid (S = 7)
-* B(num of bounding box) = 2
+## Loss가 좌표와 배경을 다르게 다루는 이유
 
+YOLOv1 loss는 위치, confidence, 분류 오차를 한 식에 합칩니다. 위치 오차에는 `λ_coord=5`를 주고 객체가 없는 box의 confidence에는 `λ_noobj=0.5`를 적용합니다. 배경 cell이 훨씬 많기 때문에 모든 confidence 오차를 같은 비중으로 두면 학습이 배경에 끌릴 수 있습니다.
 
+폭과 높이는 그대로 빼지 않고 제곱근 차이를 사용합니다. 큰 box의 같은 절대 오차보다 작은 box의 오차를 상대적으로 더 중요하게 다루려는 선택입니다. 한 cell의 두 predictor 가운데 ground truth와 IoU가 높은 하나가 그 객체의 좌표 학습을 책임집니다.
 
-$$Confidence Score : Pr(Object) * IOU^{truth}_{pred}$$
+실제 디버깅에서는 전체 loss 하나만 보지 말고 좌표, object confidence, no-object confidence, class 항을 나눠 보는 편이 좋습니다. 객체가 없는 항이 지배하면 `λ_noobj`와 positive assignment를, 위치만 불안정하면 좌표 표현과 입력 정규화를 먼저 확인할 수 있습니다.
 
-* C(num of class) = 20
+## 빠른 대신 작은 객체와 정밀 위치에 약합니다
 
+한 grid cell이 제한된 수의 box와 하나의 class 분포를 담당하므로 가까이 모인 작은 객체에 불리합니다. 새로운 aspect ratio나 배치로 일반화하는 데도 한계가 있고, localization error가 후속 YOLO 버전의 주요 개선 대상이 됐습니다.
 
-
-$$Confidence Class probability : Pr(Class_i | Object)$$
-
-* output tensor : 7 x 7 x (B x 5(x, y, w, h, confidence) + C)
-* test time
-
-
-
-$$Pr(Class_i | Object) * Pr(Object) * IOU^{truth}_{pred} = Pr(Class_i) * IOU^{truth}_{pred}$$
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1.PNG)
-
-
-
-#### Network Design
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_fig2.PNG)
-
-
-
-* GoogLeNet 기반 모델
-* Convolution Layer : 24개, 9개(Fast)
-* Fully Connected Layer : 2개
-
-#### Loss Function
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_loss.PNG)
-
-
-
-* $$i$$ : Object가 존재하는 Grid Cell
-* $$j$$ : Predictor Bounding Box
-* $$1^{obj}_{i, j}$$ : Object가 존재하는 경우 grid cell의 predictor bounding box
-* $$1^{noobj}_{i, j}$$ : Object가 존재하지 않는 경우 grid cell의 predictor bounding box
-* $$1^{obj}_{i}$$ : Object가 존재하는 경우 grid cell
-
-이미지 대부분에는 object가 없을 것이고 confidence는 전부 0으로 수렴하려고 할 것 입니다. 그로 인해 발생되는 gradient가 너무 커지는 현상을 막아주기 위해서 추가 parameter를 사용합니다.
-
-* $$\lambda_{coord}$$ : x, y, w, h loss의 균형을 위한 parameter. (defalut : 5)
-* $$\lambda_{noobj}$$ : object loss의 균형을 위한 parameter. (defalut : 0.5)
-
-1. x, y의 loss를 구합니다.
-2. w, h의 loss를 구합니다. (가로, 세로의 제곱근을 예측합니다.)
-3. confidence score의 loss를 구합니다. ($$C_i = 1$$)
-4. confidence score의 loss를 구합니다. ($$C_i = 0$$)
-5. conditional class probability의 loss를 구합니다.
-
-#### Training
-
-* ImageNet 1000-class competition dataset으로 20개의 convolution layer, avg pooling layer, fully connected layer를 가진 모델에 pretraining 합니다. 합니다.
-* randomly initialized weights를 가지는 4개의 convolution layer와 2개의 fully connected layer를 추가합니다.
-* 세부적인 시각정보를 위해 해상도를 224 x 224에서 448 x 448로 늘렸습니다.
-* bounding box의 폭과 높이를 정규화(0 \~ 1) 하였습니다.
-* 마지막 Layer에 linear activation function을 사용하였고 나머지 다른 layer에는 leaky relu를 사용합니다.
-
-**parameters**
-
-* `epoch` : 135
-* `batch` : 64
-* `momentum` : 0.9
-* `weight decay` : 0.0005
-* `learning rate` : 0.001 -> 0.01 -> 0.001 -> 0.0001
-  * `75 epoch` : 0.01
-  * `30 epoch` : 0.001
-  * `30 epoch` : 0.0001
-* `dropout rate` : 0.5
-* `data augmentation`
-  * random scaling
-  * HSV 색상 공간에서 최대 1.5배 까지 exposure과 saturation을 임의로 조정합니다.
-
-#### Inference
-
-* one stage라서 매우 빠릅니다.
-* 이미지당 98개의 bounding box와 각 box에 대한 class probability를 예측합니다.
-* 각 object당 하나의 bounding box로 예측한다.
-* 큰 object나 여러개의 셀의 테두리에 근처에 있는 물체는 예측하기 어렵습니다. NMS로 해결할 수 있지만 R-CNN 만큼 성능에 크게 영향을 미치지는 않습니다.
-
-#### Limitation
-
-* Small Object가 모여 있으면 잘 검출하지 못합니다.
-* Localization Error가 높습니다.
-
-#### Benchmark
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_bench1.PNG)
-
-
-
-* Yolo는 빠르고 강력합니다.
-* Yolo 이전에 사용된 real time object detection 보다 성능이 좋습니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_bench2.PNG)
-
-
-
-* Yolo가 Fast-RCNN 보다 Localization Error가 좋지 않습니다.
-* Yolo가 Fast-RCNN 보다 Background Error가 좋습니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_bench3.PNG)
-
-
-
-* Yolo와 Fast-RCNN을 결합해서 사용하면 좋습니다.
-
-
-
-![1](/assets/img/post_img/darknetbook/yolov1_bench4.PNG)
-
-
-
-* 클래스 별로 정확도를 비교한 표 입니다.
+따라서 YOLOv1을 구현할 때 확인할 순서는 명확합니다. 출력 크기가 `7×7×30`인지, 98개 box 좌표를 올바르게 복원했는지, confidence와 class probability를 곱했는지, 마지막으로 중복 box를 제거했는지 봅니다. 이 글은 원 논문의 고정 설정을 설명하며, 다른 class 수나 grid 크기를 쓰는 변형에서는 마지막 차원과 box 개수를 다시 계산해야 합니다.

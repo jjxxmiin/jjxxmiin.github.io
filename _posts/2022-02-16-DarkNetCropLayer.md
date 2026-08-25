@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Crop Layer"
+title: "DarkNet Crop Layer는 학습과 추론에서 어디를 자르나"
+summary: "DarkNet Crop Layer의 랜덤 크롭·좌우 반전, 추론 시 중앙 크롭, 값 범위 변환과 빈 역전파 구현을 코드 기준으로 점검합니다."
 date:   2022-02-16 16:00 -0400
 categories: DarkNet
 image:
@@ -8,228 +9,77 @@ image:
   alt: DarkNet 시리즈 - Crop Layer 대표 이미지
 tags:
   - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - Crop
+  - 데이터증강
+  - 전처리
 math: true
 ---
 
-## crop\_layer
+DarkNet의 Crop Layer는 학습 중에는 임의 위치를 자르고 선택적으로 좌우 반전하며, 추론 중에는 반전 없이 중앙 영역을 잘라냅니다.
 
-input(image, feature map)을 crop하기 위한 layer입니다.
+## 학습 크롭은 배치 전체에 한 번 정해진다
 
-### get\_crop\_image
+`forward_crop_layer`는 출력 크기가 입력 안에 들어온다는 전제에서 세 값을 먼저 고릅니다.
 
-```c
-image get_crop_image(crop_layer l)
-{
-    int h = l.out_h;
-    int w = l.out_w;
-    int c = l.out_c;
-    return float_to_image(w,h,c,l.output);
+~~~c
+int flip = (l.flip && rand()%2);
+int dh = rand()%(l.h - l.out_h + 1);
+int dw = rand()%(l.w - l.out_w + 1);
+~~~
+
+`dh`와 `dw`는 가능한 시작 위치를 끝점까지 포함해 선택합니다. `flip`이 참이면 열 인덱스를 오른쪽에서 왼쪽으로 계산하고, 아니면 `j + dw`를 그대로 사용합니다.
+
+이 세 값은 batch 반복문보다 앞에서 계산되므로 한 번의 호출에 들어온 모든 배치 항목이 같은 오프셋과 반전 여부를 공유합니다. 이미지마다 독립적인 랜덤 크롭을 기대했다면 이 코드의 동작과 다릅니다.
+
+## 추론은 반전 없는 중앙 크롭이다
+
+`net.train`이 거짓이면 앞에서 뽑은 난수를 덮어쓰고 중앙 위치를 사용합니다.
+
+~~~c
+if(!net.train){
+    flip = 0;
+    dh = (l.h - l.out_h)/2;
+    dw = (l.w - l.out_w)/2;
 }
-```
+~~~
 
-함수 이름: get\_crop\_image
+입력은 `batch → channel → row → column` 순서로 순회하며, 출력에는 채널별 크롭 영역이 연속해서 저장됩니다. `get_crop_image`는 이 `output` 포인터를 `out_w × out_h × out_c` 이미지 뷰로 바꿉니다.
 
-입력:&#x20;
+학습과 추론 결과가 다르게 보일 때는 모델보다 먼저 랜덤 위치·반전과 중앙 크롭의 차이를 확인해야 합니다.
 
-* crop\_layer 타입 변수 l
+## noadjust가 값 범위를 결정한다
 
-동작:&#x20;
+기본값에서는 선택한 입력 값에 2를 곱하고 1을 뺍니다.
 
-* 입력으로 받은 crop\_layer 타입 변수 l의 output 배열에서 데이터를 가져와서 float\_to\_image 함수를 통해 이미지 형태로 변환하여 반환합니다.
-
-설명:&#x20;
-
-* 입력으로 받은 crop\_layer 타입 변수 l은 이미지 데이터를 잘라내기 위한 정보들을 가지고 있습니다.&#x20;
-* 이 함수는 그 정보를 기반으로 잘라낸 이미지 데이터를 가져와서 float\_to\_image 함수를 통해 이미지 형태로 변환하고 반환합니다.&#x20;
-* 이 함수는 이미지 인식 분야에서 많이 사용됩니다.
-
-
-
-### forward\_crop\_layer
-
-```c
-void forward_crop_layer(const crop_layer l, network net)
-{
-    int i,j,c,b,row,col;
-    int index;
-    int count = 0;
-    int flip = (l.flip && rand()%2);
-    int dh = rand()%(l.h - l.out_h + 1);
-    int dw = rand()%(l.w - l.out_w + 1);
-    float scale = 2;
-    float trans = -1;
-    if(l.noadjust){
-        scale = 1;
-        trans = 0;
-    }
-    if(!net.train){
-        flip = 0;
-        dh = (l.h - l.out_h)/2;
-        dw = (l.w - l.out_w)/2;
-    }
-    for(b = 0; b < l.batch; ++b){
-        for(c = 0; c < l.c; ++c){
-            for(i = 0; i < l.out_h; ++i){
-                for(j = 0; j < l.out_w; ++j){
-                    if(flip){
-                        col = l.w - dw - j - 1;    
-                    }else{
-                        col = j + dw;
-                    }
-                    row = i + dh;
-                    index = col+l.w*(row+l.h*(c + l.c*b));
-                    l.output[count++] = net.input[index]*scale + trans;
-                }
-            }
-        }
-    }
+~~~c
+float scale = 2;
+float trans = -1;
+if(l.noadjust){
+    scale = 1;
+    trans = 0;
 }
-```
 
-함수 이름: forward\_crop\_layer
+l.output[count++] = net.input[index]*scale + trans;
+~~~
 
-입력:
+입력이 0에서 1 사이라면 기본 경로의 출력은 -1에서 1 범위가 됩니다. `noadjust`가 켜져 있으면 값은 그대로 복사됩니다.
 
-* const crop\_layer l: crop\_layer 타입의 l 변수. 크롭 레이어의 정보를 담고 있음.
-* network net: network 타입의 net 변수. 신경망 정보를 담고 있음.
+생성 함수가 `angle`, `saturation`, `exposure`를 구조체에 저장하기는 하지만, 이 글에 나온 `forward_crop_layer` 본문은 세 값을 사용하지 않습니다. 따라서 이 코드 조각만으로 회전·채도·노출 증강까지 수행한다고 해석해서는 안 됩니다.
 
-동작:
+## 실행 전 크기와 역전파 한계를 확인한다
 
-* 랜덤으로 좌우 반전과 이미지를 잘라낸 후, 크롭 레이어의 출력값을 계산하여 l.output 배열에 저장함.
+출력 높이나 너비가 입력보다 크면 랜덤 오프셋의 나머지 연산이 유효하지 않습니다. 생성 또는 resize 직후 다음 조건을 먼저 확인해야 합니다.
 
-설명:
+- `out_h <= h`
+- `out_w <= w`
+- `batch × out_h × out_w × out_c`만큼 출력이 할당됐는지
 
-* 크롭 레이어는 입력 이미지를 랜덤으로 자른 후, 출력 이미지를 생성함.
-* 입력 이미지의 크기는 l.h x l.w x l.c이고, 출력 이미지의 크기는 l.out\_h x l.out\_w x l.out\_c임.
-* 좌우 반전 여부는 l.flip 값에 따라 랜덤으로 결정됨.
-* 잘라낸 이미지의 위치는 l.h, l.w에서 각각 l.out\_h, l.out\_w 크기만큼 랜덤하게 선택됨.
-* 크롭 레이어는 네트워크가 학습 중일 때만 좌우 반전을 하고 이미지를 잘라냄. 학습이 아닐 때는 좌우 반전을 하지 않고 이미지 중앙에서 잘라냄.
-* scale과 trans 값은 이미지를 정규화하기 위해 사용됨.
+`resize_crop_layer`는 생성 시 `crop_height / h`로 저장한 하나의 `scale`을 새 가로와 세로 모두에 적용합니다. 원래 크롭의 가로·세로 비율이 서로 달랐다면 resize 뒤 출력 크기가 처음 의도와 달라질 수 있습니다.
 
+가장 큰 한계는 역전파 함수가 완전히 비어 있다는 점입니다.
 
-
-### backward\_crop\_layer
-
-```c
+~~~c
 void backward_crop_layer(const crop_layer l, network net){}
-```
+~~~
 
-함수 이름: backward\_crop\_layer
-
-입력:&#x20;
-
-* crop\_layer l
-* network net
-
-동작:&#x20;
-
-* crop\_layer의 역전파를 수행합니다.&#x20;
-* 이 함수는 backward 연산을 수행하지 않습니다.
-
-설명:&#x20;
-
-* crop\_layer는 입력 이미지의 일부분을 무작위로 잘라내어 출력으로 내보내는 레이어입니다.&#x20;
-* 이 함수는 해당 레이어에서의 역전파를 구현합니다.&#x20;
-* 그러나 이 레이어는 역전파를 위한 학습 가능한 매개변수를 가지고 있지 않습니다.&#x20;
-* 따라서 이 함수는 빈 함수로 남겨둡니다.
-
-
-
-### resize\_crop\_layer
-
-```c
-void resize_crop_layer(layer *l, int w, int h)
-{
-    l->w = w;
-    l->h = h;
-
-    l->out_w =  l->scale*w;
-    l->out_h =  l->scale*h;
-
-    l->inputs = l->w * l->h * l->c;
-    l->outputs = l->out_h * l->out_w * l->out_c;
-
-    l->output = realloc(l->output, l->batch*l->outputs*sizeof(float));
-}
-```
-
-함수 이름: resize\_crop\_layer
-
-입력:&#x20;
-
-* layer \*l: 크롭 레이어 구조체 포인터
-* int w: 새로운 가로 크기
-* int h: 새로운 세로 크기
-
-동작:&#x20;
-
-* 크롭 레이어의 가로 세로 크기를 변경하고, 출력 크기를 다시 계산하고, 출력 배열의 크기를 재할당한다.
-
-설명:&#x20;
-
-* 입력으로 받은 크롭 레이어 구조체 포인터를 사용하여 가로와 세로 크기를 변경한다.&#x20;
-* 그 후, 새로운 가로와 세로 크기를 사용하여 출력 크기를 다시 계산하고, 입력 크기와 출력 크기를 사용하여 출력 배열의 크기를 재할당한다.
-
-
-
-### make\_crop\_layer
-
-```c
-crop_layer make_crop_layer(int batch, int h, int w, int c, int crop_height, int crop_width, int flip, float angle, float saturation, float exposure)
-{
-    fprintf(stderr, "Crop Layer: %d x %d -> %d x %d x %d image\n", h,w,crop_height,crop_width,c);
-    crop_layer l = {0};
-    l.type = CROP;
-    l.batch = batch;
-    l.h = h;
-    l.w = w;
-    l.c = c;
-    l.scale = (float)crop_height / h;
-    l.flip = flip;
-    l.angle = angle;
-    l.saturation = saturation;
-    l.exposure = exposure;
-    l.out_w = crop_width;
-    l.out_h = crop_height;
-    l.out_c = c;
-    l.inputs = l.w * l.h * l.c;
-    l.outputs = l.out_w * l.out_h * l.out_c;
-    l.output = calloc(l.outputs*batch, sizeof(float));
-    l.forward = forward_crop_layer;
-    l.backward = backward_crop_layer;
-
-    return l;
-}
-```
-
-함수 이름: make\_crop\_layer&#x20;
-
-입력:
-
-* batch: int, 미니배치 크기
-* h: int, 입력 이미지의 높이
-* w: int, 입력 이미지의 너비
-* c: int, 입력 이미지의 채널 수
-* crop\_height: int, 자를 영역의 높이
-* crop\_width: int, 자를 영역의 너비
-* flip: int, 자르기 전 이미지를 수평으로 뒤집을지 여부
-* angle: float, 이미지 회전 각도
-* saturation: float, 이미지 포화도 조절 값
-* exposure: float, 이미지 노출 조절 값
-
-동작:
-
-* 입력된 값을 바탕으로 crop\_layer 구조체를 생성하고 초기화한다.
-* 출력되는 영상의 크기를 계산한다.
-* 필요한 입력 및 출력 공간을 할당한다.
-* forward\_crop\_layer 함수와 backward\_crop\_layer 함수를 설정한다.
-* 초기화된 crop\_layer 구조체를 반환한다.
-
-설명:&#x20;
-
-* 이 함수는 crop\_layer를 생성하고 초기화하는 함수이다.&#x20;
-* crop\_layer는 입력된 이미지에서 주어진 크기의 영역을 잘라내는 역할을 한다.&#x20;
-* 입력된 인자를 바탕으로 crop\_layer 구조체를 생성하고 초기화한 후 반환한다.&#x20;
-* 이때 forward\_crop\_layer 함수와 backward\_crop\_layer 함수를 설정해 주어야 한다.
+크롭 층에 학습 파라미터가 없다는 사실과 입력 기울기를 전달할 필요가 없다는 판단은 같은 말이 아닙니다. 이 구현은 `net.delta`로 기울기를 돌려놓지 않으므로, Crop Layer 뒤까지 학습하려는 네트워크에 넣기 전 상위 구조의 사용 방식을 확인해야 합니다. 이 글의 코드는 DarkNet 내부 구현 조각이며 단독 실행 예제가 아닙니다.

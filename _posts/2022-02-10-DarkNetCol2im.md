@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Col2im"
+title:  "Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유"
+summary: "Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다."
 date:   2022-02-10 16:00 -0400
 categories: DarkNet
 image:
@@ -10,116 +11,69 @@ tags:
   - DarkNet
   - 컴퓨터비전
   - C언어
+  - 아키텍처분석
 math: true
 ---
 
-## col2im
+Darknet `col2im`이 `data_im[index] += val`을 쓰는 이유는 convolution window가 겹칠 때 하나의 원본 pixel 위치로 여러 column 값이 돌아오므로, 마지막 값으로 덮지 않고 모든 기여를 합쳐야 하기 때문입니다.
 
-* columns을 이미지로 변환해주는 것을 말합니다.
+`im2col`은 convolution을 행렬 연산으로 바꾸기 위해 입력의 local patch를 column 형태로 펼칩니다. `col2im`은 그 반대 방향으로 값을 scatter하지만, 겹친 patch 때문에 일반적인 의미의 완벽한 역함수는 아닙니다. 원문의 C 코드는 Darknet 내부 helper 조각이며 독립 실행 프로그램이 아닙니다.
 
-### col2im\_add\_pixel
+## 한 Pixel에 여러 Kernel 위치가 도착합니다
+
+예를 들어 stride 1의 3×3 kernel을 생각하면 이미지 중앙 pixel은 주변 여러 window에 반복해서 들어갑니다. Backward에서 column gradient를 이미지 gradient로 돌릴 때 그 반복 항목은 모두 같은 중앙 위치의 기여입니다. 하나씩 대입하면 마지막 window의 값만 남습니다.
+
+핵심 helper는 padding을 실제 이미지 좌표에서 빼고, 경계 밖이면 건너뛴 뒤 값을 더합니다.
 
 ```c
 void col2im_add_pixel(float *im, int height, int width, int channels,
-                        int row, int col, int channel, int pad, float val)
+        int row, int col, int channel, int pad, float val)
 {
     row -= pad;
     col -= pad;
 
     if (row < 0 || col < 0 ||
         row >= height || col >= width) return;
-    im[col + width*(row + height*channel)] += val;
+
+    int index = col + width*(row + height*channel);
+    im[index] += val;
 }
 ```
 
-함수 이름: col2im\_add\_pixel
+`channels` 인자는 이 helper의 index 식에서 직접 쓰이지 않지만, 호출 계약과 shape 정보를 나타냅니다. 배열을 호출 전에 0으로 초기화하지 않으면 이전 값 위에 다시 누적된다는 점도 중요합니다.
 
-입력:
+## Flatten된 c에서 Offset을 복원합니다
 
-* im: 1차원 배열 형태의 이미지 데이터
-* height: 이미지 높이
-* width: 이미지 너비
-* channels: 이미지 채널 수
-* row: 적용할 픽셀의 y 좌표
-* col: 적용할 픽셀의 x 좌표
-* channel: 적용할 채널 번호
-* pad: 패딩 크기
-* val: 추가할 값
+`col2im_cpu`는 먼저 output 공간 크기를 계산합니다.
 
-동작:
+$$
+height_{col}=\frac{height+2\,pad-ksize}{stride}+1
+$$
 
-* col2im 함수 내부에서 사용되며, 이미지의 특정 위치에 값을 더합니다.
-* 주어진 row, col, channel 값을 이용해 이미지의 해당 위치에 val 값을 더합니다.
-* 패딩이 적용된 이미지에서는 row, col 값에 pad 값을 뺀 위치에 값을 더합니다.
-* 이미지를 1차원 배열로 저장한 경우, 해당 위치에 있는 값을 수정합니다.
-
-설명:
-
-* 이미지 처리에서 특정 위치에 값을 더하는 연산은 다양한 곳에서 사용됩니다.
-* 이 함수는 col2im 함수 내부에서 사용되며, 패딩이 적용된 이미지의 이미지 값을 복원하는 과정에서 호출됩니다.
-* 패딩이 적용된 이미지는 출력 이미지의 크기와 다르기 때문에, col2im 함수에서는 입력 이미지의 값을 출력 이미지의 각 위치에 매핑해야 합니다.
-* 이를 위해 출력 이미지의 위치에 해당하는 입력 이미지의 위치를 계산하는 과정에서, 패딩이 적용된 입력 이미지의 특정 위치에 값을 더해주어야 합니다.
-* 이 함수는 이미지를 1차원 배열로 저장한 경우, 주어진 row, col, channel 값을 이용해 해당 위치의 값을 수정합니다.
-
-
-
-### col2im\_cpu
+폭도 같은 방식입니다. Column의 channel 수는 `channels×ksize×ksize`이고, loop의 `c`에는 입력 channel과 kernel 내부 row·column 위치가 함께 접혀 있습니다.
 
 ```c
-//This one might be too, can't remember.
-void col2im_cpu(float* data_col,
-         int channels,  int height,  int width,
-         int ksize,  int stride, int pad, float* data_im)
-{
-    int c,h,w;
-    int height_col = (height + 2*pad - ksize) / stride + 1;
-    int width_col = (width + 2*pad - ksize) / stride + 1;
+int w_offset = c % ksize;
+int h_offset = (c / ksize) % ksize;
+int c_im = c / ksize / ksize;
 
-    int channels_col = channels * ksize * ksize;
-    for (c = 0; c < channels_col; ++c) {
-        int w_offset = c % ksize;
-        int h_offset = (c / ksize) % ksize;
-        int c_im = c / ksize / ksize;
-        for (h = 0; h < height_col; ++h) {
-            for (w = 0; w < width_col; ++w) {
-                int im_row = h_offset + h * stride;
-                int im_col = w_offset + w * stride;
-                int col_index = (c * height_col + h) * width_col + w;
-                double val = data_col[col_index];
-                col2im_add_pixel(data_im, height, width, channels,
-                        im_row, im_col, c_im, pad, val);
-            }
-        }
+for (h = 0; h < height_col; ++h) {
+    for (w = 0; w < width_col; ++w) {
+        int im_row = h_offset + h * stride;
+        int im_col = w_offset + w * stride;
+        int col_index = (c * height_col + h) * width_col + w;
+        col2im_add_pixel(data_im, height, width, channels,
+            im_row, im_col, c_im, pad, data_col[col_index]);
     }
 }
 ```
 
-함수 이름: col2im\_cpu
+이 식을 포팅할 때 정수 나눗셈 순서와 memory layout을 유지해야 합니다. `c_im`은 실제 입력 channel이고, 나머지 둘은 kernel 안의 위치입니다. padding은 helper에서 빼므로 loop에서 다시 빼면 좌표가 두 번 이동합니다.
 
-입력:
+## 작은 손계산으로 검증하는 방법
 
-* data\_col: 1D 배열 형태로 입력된 이미지 데이터 (channels\_col x height\_col x width\_col)
-* channels: 이미지의 채널 수
-* height: 이미지의 높이
-* width: 이미지의 너비
-* ksize: 커널의 크기
-* stride: 스트라이드의 크기
-* pad: 패딩의 크기
-* data\_im: 3D 배열 형태로 변환된 이미지 데이터 (channels x height x width)
+가장 쉬운 시험은 한 channel의 작은 이미지, 2×2 kernel, stride 1, padding 0입니다. Column buffer를 모두 1로 채워 되돌리면 모서리는 적게, 중앙은 더 많이 겹쳐 큰 값이 나와야 합니다. 모든 pixel이 1이 되면 누적을 놓쳤을 가능성이 큽니다.
 
-동작:
+다음으로 padding 1을 주고 경계 밖 항목이 배열을 쓰지 않는지 확인합니다. stride를 2로 바꾸면 겹침 횟수가 줄어드는지도 볼 수 있습니다. Forward의 im2col과 조합해 비교할 때는 `col2im(im2col(x))=x`를 기대하면 안 됩니다. 각 pixel은 patch에 등장한 횟수만큼 곱해진 형태가 되므로 overlap count로 나누거나 기대값을 따로 계산해야 합니다.
 
-* 주어진 data\_col을 col2im 변환하여 data\_im에 저장함
-* col2im 변환은 convolution 연산 시 입력 데이터를 커널의 모양에 맞게 재배열하는 과정을 말함
-* col2im 변환을 통해 커널과의 행렬 곱셈 연산을 대신할 수 있어 계산 비용을 줄일 수 있음
-
-설명:
-
-* channels\_col은 커널의 크기와 입력 이미지의 채널 수를 곱한 값임
-* height\_col과 width\_col은 커널의 크기와 스트라이드, 패딩 정보를 이용하여 계산됨
-* for문을 이용하여 channels\_col, height\_col, width\_col에 대해 반복하며 col2im 변환 수행
-* channels\_col을 기준으로 w\_offset과 h\_offset을 계산하여 커널 내에서의 위치 정보를 획득함
-* c\_im을 계산하여 현재 위치가 입력 이미지의 어느 채널인지 판단함
-* for문을 이용하여 height\_col과 width\_col에 대해 반복하며 col2im\_add\_pixel 함수를 호출하여 data\_im에 값을 저장함
-* col2im\_add\_pixel 함수는 이미지를 col2im 변환한 결과인 data\_im에 값을 저장하는 함수임
-* col2im\_add\_pixel 함수는 입력 이미지의 위치 정보와 값을 이용하여 data\_im에 값을 저장함
+이 코드는 CPU 기준 index 흐름을 이해하기에 좋지만, 다른 framework의 column 순서나 NHWC layout과 바로 호환된다는 보장은 없습니다. shape, padding 정의, stride, column memory order 네 가지가 모두 같을 때만 같은 위치로 값이 돌아옵니다.

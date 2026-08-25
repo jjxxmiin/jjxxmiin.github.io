@@ -1,156 +1,116 @@
 ---
 layout: post
-title:  "EfficientDet 톺아보기 1"
-summary: "EfficientNet 논문 읽어보기"
+title:  "EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유"
+summary: "Depth·width·resolution을 따로 키울 때의 한계와 φ 하나로 균형을 맞추는 EfficientNet 핵심"
 image:
   path: /assets/img/thumb/EfficientDet.jpg
   alt: EfficientDet 톺아보기 1 대표 이미지
 date:   2019-11-23 13:00 -0400
 categories: Paper
 tags:
-  - 논문리뷰
+  - EfficientNet
+  - CompoundScaling
   - 컴퓨터비전
+  - 논문리뷰
 math: true
 ---
 
-## EfficientDet
+이 글의 결론은 **EfficientNet이 depth, width, input resolution 중 하나만 키우지 않고, 세 축을 고정된 비율로 함께 확장해 주어진 연산량 안에서 정확도를 높이려 했다는 것**입니다.
 
-(EfficientDet: Scalable and Efﬁcient Object Detection)
+## 한 축만 키우면 왜 부족한가
 
-- EfficientDet Paper : [Here](https://arxiv.org/abs/1911.09070)
-- EfficientNet Paper : [Here](https://arxiv.org/abs/1905.11946)
-- EfficientNet Official Code : [Here](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet)
+CNN의 크기를 조절하는 대표적인 축은 세 가지입니다.
 
-## EfficientNet
-EfficientNet을 보기전에 EfficientNet의 핵심 concept을 빠르게 보고 넘어가는게 좋을 것 같다.
+- depth: layer 또는 반복 block의 깊이
+- width: 각 layer의 channel 수
+- resolution: 입력 이미지 해상도
 
-이진원님의 [pr12 논문 읽기](https://www.youtube.com/watch?v=Vhz0quyvR7I)를 참조 했다.
+![Depth·width·resolution 비교](/assets/img/post_img/EfficientDet/net_figure1.PNG)
 
+한 축을 키우면 모델 표현력이 늘 수 있지만 계산량도 함께 증가합니다. 원문의 그래프에서는 각 축을 따로 올릴 때 성능이 증가하다가 어느 지점부터 한계가 나타납니다.
 
+![각 scaling 축의 성능 변화](/assets/img/post_img/EfficientDet/net_figure3.PNG)
 
-![net_figure1](/assets/img/post_img/EfficientDet/net_figure1.PNG){: width="500" height="400"}{: .center}
+EfficientNet의 질문은 “어느 축이 가장 좋은가?”가 아니라 **제한된 연산량 안에서 세 축의 비율을 어떻게 맞출 것인가**입니다.
 
+## Compound Scaling 수식 읽기
 
+EfficientNet은 하나의 계수 φ로 세 축을 함께 조절합니다.
 
-EfficientNet은 Convolution Neural Network를 속도나 정확도 측면에서 network의 depth와 width, resolution을 조절해서 효과적이게 만들어 보자는 핵심 아이디어를 가지고 있다.
+$$
+d = \alpha^\phi
+$$
 
-즉, `depth`, `width`, `resolution`의 scale을 조절하는 compound scaling 방법에 대한 논문이다.
+$$
+w = \beta^\phi
+$$
 
+$$
+r = \gamma^\phi
+$$
 
+- d: depth scale
+- w: width scale
+- r: resolution scale
+- α, β, γ: grid search로 찾는 고정 비율
+- φ: 사용자가 모델 규모에 맞춰 정하는 계수
 
-![net_figure2](/assets/img/post_img/EfficientDet/net_figure2.PNG){: .center}
+세 비율에는 다음 조건을 둡니다.
 
+$$
+\alpha \cdot \beta^2 \cdot \gamma^2
+\approx 2
+$$
 
+$$
+\alpha \ge 1,\quad
+\beta \ge 1,\quad
+\gamma \ge 1
+$$
 
-- `depth` : 모델의 깊이
-- `width` : layer의 channels
-- `resolution` : input image resolution
+![Compound Scaling](/assets/img/post_img/EfficientDet/net_figure4.PNG)
 
-위에 compound scaling이 이 논문이 원하는 것이고 이것을 위해 해결해야하는 문제를 아래와 같이 정의한다.
+Width와 resolution에 제곱이 붙는 것은 원문에 제시된 연산량 근사 조건의 일부입니다. 이 수식이 모든 hardware의 실제 latency를 직접 보장한다는 뜻으로 읽기보다, 세 축을 함께 늘리기 위한 설계 제약으로 보는 편이 맞습니다.
 
-#### CNN
+## Base model에서 확장 계수를 찾는 순서
 
+원문은 CNN을 stage의 반복으로 표현합니다.
 
+![CNN stage 표현](/assets/img/post_img/EfficientDet/net_formula1.PNG)
 
-![net_formula1](/assets/img/post_img/EfficientDet/net_formula1.PNG){: .center}
+각 stage i에는 layer Fᵢ가 Lᵢ번 반복되고, 입력 tensor는 높이 H, 너비 W, channel C를 가집니다. 이미 정의된 base model을 놓고 정해진 연산 목표 안에서 정확도를 최대화하는 scale을 찾는 문제입니다.
 
+![EfficientNet scaling 문제](/assets/img/post_img/EfficientDet/net_formula2.PNG)
 
+실제 탐색 흐름은 두 단계로 정리돼 있습니다.
 
-- i : stage
-- $$F_{i}^{L_i}$$ : layer $$F_i$$는 stage i에서 $$L_i$$만큼 반복된다는 뜻
-- $$X$$ : input tensor
-- $$H, W, C$$ : spatial dimension(w, h), chnnel dimension(c)
-- example : input tensor(244, 224, 3) --> output tensor(7, 7, 512)
+1. φ=1로 두고 α, β, γ를 grid search합니다.
+2. 찾은 α, β, γ를 고정하고 φ를 올려 더 큰 모델을 만듭니다.
 
-ResNet으로 예를들면 ResNet은 5stage가 있고 각 stage는 downsampling을 하는 것 빼고는 동일한 convolution type을 갖는다. 그래서 위와 같이 정의할 수 있는 것이다.
+Base model은 MnasNet과 비슷한 구조이며, MobileNetV2의 inverted bottleneck인 MBConv를 사용합니다.
 
-#### Problem
+![EfficientNet base model](/assets/img/post_img/EfficientDet/net_figure5.PNG)
 
+이 순서에서 놓치기 쉬운 점은 모델마다 세 비율을 매번 따로 손으로 바꾸는 것이 아니라, 먼저 균형을 찾고 이후에는 φ로 함께 확장한다는 것입니다.
 
+## 이 글에서 EfficientDet을 다루지 않는 이유
 
-![net_formula2](/assets/img/post_img/EfficientDet/net_formula2.PNG){: .center}
+파일명과 첫 링크에는 EfficientDet이 있지만 기존 본문은 길이 때문에 EfficientDet 설명을 다음 글로 미뤘고, 실제 내용은 EfficientNet에 집중했습니다. 따라서 제목에서 EfficientDet의 구조와 동작까지 설명한다고 약속하지 않았습니다.
 
+원문에 포함된 benchmark와 CAM 그림도 EfficientNet의 compound scaling을 읽는 자료입니다.
 
+![EfficientNet ImageNet 성능](/assets/img/post_img/EfficientDet/net_benchmark1.PNG)
 
-- hat을 붙이는 이유는 이미 정의한 base model을 사용하고 있기 때문이다.
-- 연산량을 정해놓은 목표 안에서 정확성을 최대화 시키는 값을 찾는다는 뜻이다.
+![데이터셋별 비교](/assets/img/post_img/EfficientDet/net_benchmark2.PNG)
 
+![Compound scaling CAM 비교](/assets/img/post_img/EfficientDet/net_cam.PNG)
 
+이 표의 수치는 논문의 base model, 데이터셋과 연산 조건에 묶여 있습니다. 실용적으로 저장할 핵심은 다음 세 문장입니다.
 
-![net_figure3](/assets/img/post_img/EfficientDet/net_figure3.PNG){: .center}
+1. Depth, width, resolution은 각각 비용과 효과가 다릅니다.
+2. EfficientNet은 α, β, γ의 균형을 먼저 찾습니다.
+3. 그 비율을 고정한 뒤 φ로 모델 규모를 함께 키웁니다.
 
+근거와 그림은 [EfficientNet 논문](https://arxiv.org/abs/1905.11946), [EfficientDet 논문](https://arxiv.org/abs/1911.09070), 기존 [EfficientNet 공식 코드 링크](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet), [PR12 논문 읽기](https://www.youtube.com/watch?v=Vhz0quyvR7I)로 돌아가 확인할 수 있습니다.
 
-
-이 그래프는 depth, width, resolution을 각자 올려보면서 성능을 평가한 것이다. 커질수록 올라가지만 어느지점에서 한계가 보인다.
-
-### Compound Scaling
-
-
-
-![net_figure4](/assets/img/post_img/EfficientDet/net_figure4.PNG){: .center}
-
-
-
-이 문제를 해결하기 위해서 아래와 같이 network의 depth와 width,resolution을 조절해서 최적의 모델을 찾는 것이다.
-
-depth: $$d = \alpha^\phi$$
-
-width: $$w = \beta^\phi$$
-
-resolution: $$r = \gamma^\phi$$
-
-$$\alpha \cdot \beta^2 \cdot \gamma^2 \approx 2$$
-
-$$\alpha \geq 1,\beta \geq 1,\gamma \geq 1$$
-
-$$\alpha , \beta , \gamma$$는 grid search를 통해서 찾은 값.
-
-$$\phi$$는 직접 결정하는 값
-
-### Base Model
-
-
-
-![net_figure5](/assets/img/post_img/EfficientDet/net_figure5.PNG){: .center}
-
-
-
-base model 기준으로 최적의 depth, width, resolution을 찾아가는 것이다. base model은 구조를 MnasNet과 유사하게 만들었고 여기서 나오는
-MBConv는 MobileNetv2에서 나온 inverted bottleneck 구조다.
-
-처음에는 $$\phi$$값을 1로하고 $$\alpha,\beta,\gamma$$값을 grid search로 찾은 뒤 고정시키고 $$\phi$$를 조금씩 올리는 방법을 사용한다.
-
-### Benchmark
-
-
-
-![benchmark1](/assets/img/post_img/EfficientDet/net_benchmark1.PNG){: .center}
-
-
-
-ImageNet에서의 performance다. 파라미터수가 기존 모델에 비해 작지만 그 이상의 성능을 가진다.
-
-
-
-![benchmark2](/assets/img/post_img/EfficientDet/net_benchmark2.PNG){: .center}
-
-
-
-데이터셋 별로 비교한 표
-
-### CAM
-
-
-
-![benchmark2](/assets/img/post_img/EfficientDet/net_cam.PNG){: .center}
-
-
-
-기존 방법에 비해 compound scaling을 사용하면 맨 마지막 열에 있는 그림과 같이 매우 class의 형태를 잘찾는 것을 알 수 있다.
-CAM에 대해서는 흥미가 있어서 포스트를 작성해볼 예정이다.
-
-
-적다보니 길어져서 EfficientDet은 그 다음 포스트로 미뤄야 할 것 같다.
-
-### Reference
-- [https://www.youtube.com/watch?v=Vhz0quyvR7I](https://www.youtube.com/watch?v=Vhz0quyvR7I)
+범위는 EfficientDet 실행법이 아니라 그 backbone 이해에 필요한 EfficientNet scaling 개념까지입니다.

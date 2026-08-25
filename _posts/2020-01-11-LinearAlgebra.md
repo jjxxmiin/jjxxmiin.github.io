@@ -1,408 +1,130 @@
 ---
 layout: post
-title:  "선형대수학 끄적이기"
-summary: "훑어보기 위해 적어본 선형 대수학 기초 + PCA, LDA"
+title:  "PCA와 LDA가 헷갈릴 때 보는 선형대수: 고유벡터부터 차원축소까지"
+summary: "벡터·기저·고유값·공분산을 하나의 흐름으로 연결하고 PCA와 LDA가 각각 무엇을 보존하려는지 비교합니다."
 image:
   path: /assets/img/thumb/LinearAlgebra.jpg
   alt: 선형대수학 끄적이기 대표 이미지
 date:   2020-01-11 16:00 -0400
 categories: Basics
 tags:
-  - AI트렌드
+  - 선형대수
+  - PCA
+  - LDA
 math: true
 ---
 
-가끔 기억 안날때 보려고 한줄식으로 매우 간략하게 적었다. 자세한 내용을 알고 싶으시면 [[Here](https://www.edwith.org/linearalgebra4ai/joinLectures/14072)] 이 곳 수업에서 알아보시는 것을 추천한다.
+PCA와 LDA의 차이는 한 문장으로 정리된다. **PCA는 데이터 전체의 분산을 최대한 보존하는 축을 찾고, LDA는 같은 클래스는 모으면서 다른 클래스는 멀어지는 축을 찾는다.** 이 차이를 이해하려면 벡터, 기저, 고유벡터, 공분산이 어떻게 연결되는지만 잡으면 된다.
 
-기하학적인 정의는 [Here](https://www.youtube.com/watch?v=jNwf-JUGWgg) 유튜브에 알기 쉽게 나와 있었다.
+더 긴 강의가 필요하면 [AI를 위한 선형대수](https://www.edwith.org/linearalgebra4ai/joinLectures/14072), 기하학적 직관은 [영상 자료](https://www.youtube.com/watch?v=jNwf-JUGWgg)를 함께 볼 수 있다.
 
-## 벡터
+## 벡터와 행렬은 무엇을 표현하나
 
-- vector = 크기 + 방향
-- **순서가 정해져 있다.**
-- one-dimension
-- lowercase
-- 표현 : $$x = [1,2,3] \in \mathbb{R}^3$$ (3차원 벡터)
+벡터는 크기와 방향을 가진 순서 있는 값의 묶음이다.
 
----
+$$x=[1,2,3]\in\mathbb{R}^3$$
 
-## 행렬
-- row vector, column vertor
-- 행렬곱 : $$AB \neq BA$$
-- uppercase
+행렬은 여러 벡터를 모은 배열이면서, 벡터를 다른 공간으로 바꾸는 선형 변환으로 볼 수 있다. 행렬곱은 순서에 따라 결과가 달라 일반적으로 $$AB\ne BA$$다.
 
-#### 정방행렬
+자주 쓰는 형태는 다음과 같다.
 
-$$
-\begin{pmatrix}
-x_{11} & \cdots & x_{1n} \\
-\vdots & \ddots & \vdots \\  
-x_{n1} & \cdots & x_{nn}
-\end{pmatrix}
-$$
+- 전치행렬 $$A^T$$: 행과 열을 바꾼다.
+- 항등행렬 $$I$$: 곱해도 대상을 바꾸지 않는다.
+- 대각행렬: 대각선 밖의 값이 0이다.
+- trace $$Tr(A)$$: 정방행렬 대각 원소의 합이다.
 
-- 행과 열의 길이가 같은 정사각 행렬
+선형방정식은 벡터 내적으로 짧게 표현할 수 있다.
 
-#### 항등 행렬(Identity Matrix)
+$$a_1x_1+a_2x_2+\cdots+a_nx_n=b$$
 
-$$
-\begin{bmatrix}
-1 & 0 & 0 \\
-0 & 1 & 0 \\
-0 & 0 & 1
-\end{bmatrix}
-$$
+$$a^Tx=b$$
 
-- 가운데 값이 1이고 나머지가 0
-- 어떤 행렬과 곱해져도 그 행렬이 나온다.
-- 행렬 x 역행렬 = 항등행렬
-- 직사각행렬은 안된다.
+여러 재료 벡터에 계수를 곱해 더하는 것을 linear combination이라 한다. 그 조합으로 만들 수 있는 모든 벡터의 집합이 span이다. 따라서 방정식의 해가 있는지는 목표 벡터가 재료 벡터의 span 안에 있는가와 연결된다.
 
-#### 전치행렬
+## 선형 독립과 기저가 중요한 이유
 
-$$
-\begin{pmatrix}
-x_{11} & x_{12} & x_{13} \\
-x_{21} & x_{22} & x_{23}
-\end{pmatrix} \Rightarrow \begin{pmatrix}
-x_{11} & x_{21} \\
-x_{12} & x_{22} \\
-x_{13} & x_{23}
-\end{pmatrix}
-$$
+벡터 집합의 선형 조합이 0이 되는 계수가 모두 0뿐이면 선형 독립이다. 한 벡터가 나머지 벡터의 조합으로 만들어진다면 선형 종속이다.
 
-- transpose matrix
+기저(basis)는 두 조건을 동시에 만족한다.
 
-#### 대각행렬
+1. 벡터들이 선형 독립이다.
+2. 그 벡터들이 공간 전체를 span한다.
 
-$$
-diag(x_1, x_2, x_3) = \begin{pmatrix}
-x_1 & 0 & 0 \\
-0 & x_2 & 0 \\  
-0 & 0 & x_3
-\end{pmatrix}
-$$
+예를 들어 다음 집합은 $$\mathbb{R}^3$$의 표준 기저다.
 
-- diagonal matrix
+$$\{(1,0,0),(0,1,0),(0,0,1)\}$$
 
-**대각합(trace)**
+기저를 바꾼다는 것은 같은 데이터를 다른 좌표축으로 표현한다는 뜻이다. PCA와 LDA도 결국 목적에 맞는 새 축을 골라 그 위에 데이터를 투영한다.
 
-$$
-X = \begin{pmatrix}
-x_1 & 0 & 0 \\
-0 & x_2 & 0 \\  
-0 & 0 & x_3
-\end{pmatrix}
-$$
+두 벡터의 내적이 0이면 서로 직교(orthogonal)한다. 직교하면서 각 길이가 1이면 orthonormal이다. 직교하는 축은 중복된 방향 정보를 줄여 새 좌표계를 해석하기 쉽게 만든다.
 
-$$Tr(X) = x_1 + x_2 +x_3$$
+## 고유벡터는 변환 뒤에도 방향이 남는 축이다
 
----
-### linear equation
+행렬 $$A$$로 변환해도 방향은 같고 크기만 $$\lambda$$배가 되는 벡터 $$x$$를 고유벡터라고 한다.
 
-$$a_1 x_1 + a_2 x_2 + \cdots + a_n x_n = b$$
-
-$$a^T x = b$$ 위에 식과 같은식인데 transpose를 해주는 이유는 shape을 맞추기 위함
-
-- $$a$$ : 계수(coefficient)
-
----
-
-### linear combination
-`span` : 벡터 v1, v2의 선형 조합으로 만들어지는 space
-
-
-$$
-\begin{bmatrix}
-60 \\
-65 \\
-55
- \end{bmatrix} x_1 + \begin{bmatrix}
-5.5 \\
-5.0 \\
-6.0 \end{bmatrix} x_2 + \begin{bmatrix}
-1 \\
-0 \\
-1
-\end{bmatrix} x_3 = \begin{bmatrix}
-66 \\
-74 \\
-78
-\end{bmatrix}
-$$
-
-$$a_1 x_1 + a_2 x_2 + a_3 x_3 = b$$
-
-재료 벡터 $$a_1, a_2, a_3$$의 span안에 b가 존재한다면 값이 존재한다.
-
----
-
-$$
-\begin{bmatrix}
-1 \\
-1 \\
-1 \end{bmatrix}\begin{bmatrix}
-1 & 2 & 3
-\end{bmatrix} = \begin{bmatrix}
-1 & 2 & 3 \\
-1 & 2 & 3 \\
-1 & 2 & 3
-\end{bmatrix}
-$$
-
-반대로 진행하면??
-
-$$
-\begin{bmatrix}
-1 & 2 & 3 \\
-1 & 2 & 3 \\
-1 & 2 & 3
-\end{bmatrix} = \begin{bmatrix}
-1 \\
-1 \\
-1 \end{bmatrix}\begin{bmatrix}
-1 & 2 & 3
-\end{bmatrix}
-$$
-
-만약 3x3 matrix가 일정한 값이 아니라면 위와 같이 분해하는건 불가능하다. 하지만 근사하게는 만들어 줄 수 있을 것이다.
-
-
----
-
-### 선형 독립 / 선형 종속
-
-- linearly independent, linearly dependent
-
-$$
-\begin{bmatrix}
-1 \\
-0 \\
-0
- \end{bmatrix} x_1 + \begin{bmatrix}
-0 \\
-1 \\
-0 \end{bmatrix} x_2 + \begin{bmatrix}
-0 \\
-0 \\
-1
-\end{bmatrix} x_3 = \begin{bmatrix}
-0 \\
-0 \\
-0
-\end{bmatrix}
-$$
-
-이 경우 x1, x2, x3가 나오는 경우의 수는 셋다 0인 경우의 수 밖에 없다. 그렇다면 이것이 선형 독립(linearly independent)
-
-$$
-\begin{bmatrix}
-1 \\
-0 \\
-1
- \end{bmatrix} x_1 + \begin{bmatrix}
-1 \\
-0 \\
-0 \end{bmatrix} x_2 + \begin{bmatrix}
-0 \\
-0 \\
-1
-\end{bmatrix} x_3 = \begin{bmatrix}
-0 \\
-0 \\
-0
-\end{bmatrix}
-$$
-
-이 경우 x1, x2, x3가 나오는 경우의 수 무수히 많다. 그렇다면 이것이 선형 종속(linearly dependent)
-
----
-
-### Basis
-- 벡터공간의 축들을 만들 수 있는 벡터들의 집합
-- 공간을 구성하는 벡터
-- 벡터의 집합이 linearly independent하고 그 벡터의 집합이 전체 벡터의 space를 span하는 것이 basis다.
-
-$$
-\begin{bmatrix}
-1 \\
-0 \\
-1
- \end{bmatrix} x_1 + \begin{bmatrix}
-1 \\
-0 \\
-0 \end{bmatrix} x_2 + \begin{bmatrix}
-0 \\
-0 \\
-1
-\end{bmatrix} x_3 = \begin{bmatrix}
-0 \\
-0 \\
-0
-\end{bmatrix}
-$$
-
-벡터의 집합 $$\left \{ (1,0,0),(0,1,0),(0,0,1) \right \}$$은 $$ \mathbb{R}^3$$의 $$basis$$다.
-
----
-
-### 고유값 / 고유벡터
-- eigenvalue, eigenvector
-
-
+$$Ax=\lambda x$$
 
 ![fig](/assets/img/post_img/linear/fig.PNG)
 
+$$\lambda$$는 고유값이다. 자세한 그림은 [Eigenvalues and eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)에서도 확인할 수 있다.
 
-- [https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors)
+정방행렬의 고유값 분해는 다음 흐름으로 읽으면 된다.
 
-선형 변환($$A$$)을 할 때 크기만 변하고 방향이 변하지 않는 벡터
+1. $$det(A-\lambda I)=0$$을 만족하는 고유값을 구한다.
+2. 각 고유값에 대응하는 고유벡터를 구한다.
+3. 고유벡터를 열로 모은 행렬을 $$V$$, 고유값 대각행렬을 $$D$$라 하면 $$A=VDV^{-1}$$로 나타낸다.
 
-$$Ax = \lambda x$$
+모든 행렬이 같은 방식으로 분해되는 것은 아니다. 원문에서 다루지 않은 직사각행렬까지 확장하려면 SVD를 별도로 살펴봐야 한다.
 
-여기서 $$\lambda$$가 eigenvalue, $$x$$는 eigenvector다.
+## PCA는 분산이 큰 방향을 남긴다
 
----
-
-### Orthogonal / Orthonormal
-
-**Orthogonal**
-- 기호 : $$\perp$$
-- 직교하다.
-- 직교하기 때문에 선형독립이다.
-- 두 벡터의 내적이 0이다.
-
-**Orthonormal**
-- Orthogonal하다.
-- 길이가 1인 벡터로 이루어져 있다.
-
----
-
-## PCA(Principal Component Analysis)
-- 주성분 분석
-- 차원 축소(dimensionality reduction), 변수 추출(feature extraction)
-- 공분산 행렬의 eigenvector
-- 데이터의 구조를 잘 살려주면서 dimension reduction하는 방법
-
-
+PCA는 클래스 라벨을 사용하지 않고 데이터의 분산을 가장 많이 보존하는 직교 축을 찾는다.
 
 ![fig1](/assets/img/post_img/linear/fig1.PNG){: .center}
 
+먼저 각 feature에서 평균을 빼 중심을 원점으로 옮긴다.
 
+$$X'=X-m$$
 
-- [https://machine-learning-course.readthedocs.io/en/latest/content/unsupervised/pca.html](https://machine-learning-course.readthedocs.io/en/latest/content/unsupervised/pca.html)
+그다음 공분산 행렬을 만든다.
 
-데이터의 variance를 최대한 보존하면서 서로 orthgonal하는 새로운 basis를 찾아, high dimension space의 표본들을 선형 연관성이 없는 low dimension으로 변환하는 방법
+$$C=\frac{X'^TX'}{n}$$
 
-- 2차원 벡터를 1차원 벡터로 축소시키는 최적의 방법은 variance를 최대로 만들어주는 eigenvector에 정사영 시키는 것
+대각 원소는 각 feature의 분산, 나머지 원소는 feature 쌍의 공분산이다. 공분산 행렬의 고유벡터는 데이터가 퍼진 축을, 고유값은 그 축의 분산 크기를 나타낸다.
 
-### 순서
-1. 공분산 행렬을 구한다.
-2. 공분산 행렬을 eigendecomposition 한다.
-3. eigenvalue가 큰 순서대로 정렬한다.
-4. 관심이 있는 dimension까지만 사용하고 $$X$$와 eigenvector를 내적한다.
+PCA 순서는 다음과 같다.
 
----
+1. 데이터를 중심화하고 공분산 행렬을 구한다.
+2. 공분산 행렬을 고유값 분해한다.
+3. 고유값이 큰 순서로 고유벡터를 정렬한다.
+4. 필요한 차원 수만큼 축을 골라 $$X$$를 투영한다.
 
-## 공분산 행렬
-- feature들의 상관관계의 정도(커지면 작아지고, 작아지면 커지고, 커지면 커지고, 작아지면 작아지는 정도)
+가장 큰 고유값의 축을 남기면 투영 뒤에도 분산을 많이 보존한다. 그러나 “분산이 크다”와 “예측에 중요하다”는 같은 말이 아니다. 클래스 구분에 중요한 작은 변화가 버려질 수 있으므로, PCA 결과만 보고 분류 성능이 좋아진다고 단정하면 안 된다.
 
-- 상관관계를 알기 위해서 각 feature를 내적해서 유사성을 찾는다.
+## LDA는 클래스 사이 간격을 키운다
 
-**내적의 기하학적 의미**
-
-$$A \cdot B = \left | A \right | \left | B \right | \cos \theta$$
-
-- 각도에 따라서 A와 B가 얼마나 유사 한지 알 수 있다. 각도가 90도라면 연관성이 없고 0도라면 방향이 같기 때문에 유사하다는 것을 알 수 있다.
-
-### 순서
-- 각 행 별로 평균을 구한 뒤 빼준다.
-
-$$X' = X - m$$
-
-- 내적하고 $$X$$의 수만큼 나누어준다.
-
-$$ \frac{X'^T \cdot X'}{n}$$
-
-- 행렬의 대각은 분산식이 되고 나머지는 공분산식이 된다.
-
-$$
-\begin{pmatrix}
-var(x_1) & cov(x_1, x_2)  & cov(x_1, x_3)\\
-cov(x_2, x_1) & var(x_2) & cov(x_2, x_3)\\
-cov(x_3, x_1) & cov(x_3, x_2) & var(x_1)
-\end{pmatrix}
-$$
-
-- 공분산 행렬 완성
-
----
-
-## 고유값 분해(eigendecomposition)
-
-1. 주어진 데이터 $$A$$
-2. $$det(A - \lambda I) = 0$$를 만족하는 $$\lambda$$를 찾는다.
-3. $$\lambda$$를 대입하여 고유벡터행렬 $$V$$를 찾는다.
-4. $$A = VDV^{-1}$$로 부터 대각화 행렬을 얻어야한다. ($$D = V^{-1}AV$$)
-
-고윳값 분해를 이용하는 것은 A가 정사각 행렬일 경우만 가능한 방법이다. 직사각행렬일때는 어떻게 해야하나?? 그때 나오는게 특이값 분해(SVD)가 있다. 특이값 분해는 생략한다.
-
----
-
-## LDA(Linear Discriminant analysis)
-- dimension 축소가 아닌 dimension 분리의 목적
-- 각 클래스의 집단 내부의 분산은 작다.
-- 서로 다른 클래스 사이의 분산은 커야한다.
-
-
+LDA는 라벨을 이용해 클래스 내부 분산은 작고 클래스 사이 분산은 큰 축을 찾는다.
 
 ![fig2](/assets/img/post_img/linear/fig2.PNG){: .center}
 
+두 클래스의 평균을 $$m_1,m_2$$라고 하고, 클래스 내부 scatter를 다음처럼 구한다.
 
+$$S_i=\sum_{x\in w_i}(x-m_i)(x-m_i)^T$$
 
-- [https://www.youtube.com/watch?v=M4HpyJHPYBY](https://www.youtube.com/watch?v=M4HpyJHPYBY)
+$$S_w=S_1+S_2$$
 
-### Fisher linear discriminant
+클래스 사이 scatter는 평균 차이로 표현한다.
 
-Fisher가 제안한 linear discriminant의 목적함수
+$$S_b=(m_1-m_2)(m_1-m_2)^T$$
 
-$$S_i = \sum_{s \in w_i} (X - m_i)(X - m_i)^T$$
+찾고 싶은 방향 $$w$$는 클래스 사이 분산은 크게, 내부 분산은 작게 만드는 방향이다.
 
-$$S_1 + S_2 = S_w$$
+$$J(w)=\frac{w^TS_bw}{w^TS_ww}$$
 
-$$J(w) = \frac{\left | m_1 - m_2 \right |}{S_1^2 + S_2^2} = \frac{w^T S_b^{LDA}w}{w^T S_w^{LDA}w}$$
+이를 풀면 다음 고유값 문제와 연결된다.
 
-분자는 최대화시켜야하고 분모를 최소화 시키는 값을 찾아야한다. 그러기 위해서는 $$w$$에 대해서 미분한 값이 0이 되는(수평)값을 찾아야한다. 아래 식이 $$J(w)$$를 미분해 0이 나오는 식을 풀어낸 것이다.
+$$S_w^{-1}S_bw=\lambda w$$
 
-$$S^{-1}_w S_b w = \lambda w$$
+계산 흐름은 평균 계산 → $$S_w$$와 $$S_b$$ 계산 → 고유값 분해 → 필요한 축 선택 → 데이터 투영 순서다. 수식 전개는 [PCA/LDA 개념 자료](https://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)에서 이어서 볼 수 있다.
 
-식을 풀어내는 방식은 [이 곳](https://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)을 참조해서 보는 것을 추천한다.
-
-### 순서
-- 전체, 각 클래스의 평균을 계산한다.
-
-$$m_1 = \frac{1}{N_1} \sum_{x \in w_1} x$$
-
-$$m_2 = \frac{1}{N_2} \sum_{x \in w_2} x$$
-
-- 서로 다른 클래스 사이의 분산을 계산한다.
-
-$$S_1 = \sum_{x \in w_1} (x - m_1)(x - m_1)^T$$
-
-$$S_2 = \sum_{x \in w_2} (x - m_2)(x - m_2)^T$$
-
-$$S_w = S_1 + S_2$$
-
-- 각 클래스 내부의 분산을 계산한다.
-
-$$S_b = (m_1 - m_2)(m_1 - m_2)^T$$
-
-- eigendecomposition을 한다.
-
-$$S_w^{-1} S_b w = \lambda w$$
-
-- 관심이 있는 dimension까지만 사용하고 $$X$$와 eigenvector를 내적한다.
-
-## Reference
-- [https://www.edwith.org/linearalgebra4ai/joinLectures/14072](https://www.edwith.org/linearalgebra4ai/joinLectures/14072)
-- [https://www.youtube.com/watch?v=jNwf-JUGWgg](https://www.youtube.com/watch?v=jNwf-JUGWgg)
+선택 기준은 목적에서 출발하면 된다. 라벨 없이 압축하거나 시각화하려면 PCA, 라벨을 이용해 클래스 분리를 강조하려면 LDA를 검토한다. 둘 다 원래 정보를 일부 버리는 투영이므로, 축을 줄인 뒤에는 설명된 분산이나 분류 성능을 실제 데이터로 다시 확인해야 한다.

@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Replicate 끄적이기"
-summary: "자신의 인공지능 모델을 Replicate로 배포하기"
+title:  "Replicate 모델 배포 전 꼭 계산할 것: Cold Start와 Cog setup·predict 분리"
+summary: "Replicate의 사용량 기반 GPU 실행이 항상 빠른 API를 뜻하지 않는 이유를 lifecycle로 설명하고, Cog의 환경 정의와 모델 1회 로드·요청별 추론 구조를 점검합니다."
 image:
   path: /assets/img/thumb/replicate.jpg
   alt: Replicate 끄적이기 대표 이미지
@@ -12,98 +12,25 @@ tags:
   - 파이썬
   - MLOps
   - 반도체
-  - 디퓨전모델
+  - 튜토리얼
 math: true
 ---
 
-## 인공지능 모델 배포의 두 가지 어려움
+Replicate는 요청이 드문 GPU 모델의 초기 검증에는 편리하지만, 첫 요청부터 일정한 응답시간이 필요한 서비스라면 cold start와 상시 배포 비용을 먼저 비교해야 합니다.
 
-최근에 개인이나 회사에서 인공지능 모델을 배포하는 작업이 점점 더 중요해지고 있는 추세다. 하지만 인공지능 모델을 배포하려면 크게 두 가지 문제에 직면하게 된다.
+이 글은 2024년 2월 1일에 작성된 사용 기록입니다. 당시 가격표와 lifecycle 설명을 현재 요금·보장치로 간주하면 안 되며, 여기서는 [Replicate 모델 탐색 화면](https://replicate.com/explore)과 [Cog](https://github.com/replicate/cog)를 선택할 때 확인할 구조에 집중합니다.
 
-1) GPU를 대여 혹은 구매하기에는 돈이 부족하다.
+## 사용량 기반 과금과 즉시 응답은 같은 말이 아닙니다
 
-2) 빠르고 효율적으로 배포 개발하고 싶다.
+원문이 정리한 lifecycle은 Offline, Booting, Active, Idle 네 단계입니다. 요청이 없을 때 instance가 꺼지고 새 요청이 오면 다시 켜지므로, 실행 시간만 줄이는 대신 첫 요청 대기시간이 생길 수 있습니다. Active 작업 뒤 짧은 시간 안에 요청이 이어지면 instance를 유지하고, 그렇지 않으면 다시 Offline으로 돌아가는 형태였습니다.
 
-일반적으로는 AWS나 다른 클라우드 호스팅 서비스를 이용하여 GPU를 대여하고, 시간당 비용을 지불하는 방식을 선택한다. 하지만 돈이 없는 개인 개발자나 빠르게 시장 검증을 위한 프로덕션을 만드는 팀에게는 이런 시스템이 부담스럽다.
+![2024년 당시 Replicate 가격표](/assets/img/post_img/replicate/2.png)
 
-이런 문제를 해결하기 위해, 사람들은 대부분 AWS Lambda와 비슷한 결제 구조를 가진 GPU 클라우드 호스팅 서비스를 원하고 있다. 즉, 사용한 만큼만 비용이 발생하는 시스템을 찾고 있는 것이다.
+가격표와 “약 10초” 같은 사용 기억은 특정 시점·모델·hardware의 관찰입니다. 예산을 잡을 때는 model inference 시간뿐 아니라 요청 빈도, boot 대기, 실패·재시도, 상시 instance 필요 여부를 나눠야 합니다. 느린 첫 응답을 허용할 수 있는 prototype과 실시간 API는 같은 배포 결정을 내리기 어렵습니다.
 
-그래서 이런 요구에 맞춰서, [Replicate](https://replicate.com/explore)라는 서비스가 등장했다. 이 서비스는 사용자가 사용한 만큼만 비용을 지불하는, 매우 유연한 결제 시스템을 제공한다. 이로써, 개발자들은 자신의 예산 내에서 인공지능 모델을 효과적으로 배포할 수 있게 됐다.
+## Cog는 Docker 환경과 API 계약을 나눠 적습니다
 
-'Replicate'는 GPU 호스팅을 지원하는 클라우드 플랫폼으로, 다른 사용자가 만든 API를 활용하거나, 직접 API를 쉽게 구축하여 사용할 수 있는 플랫폼이다. 사용 시에는 요금이 부과되지만, 로컬 환경에서 충분히 검증한 후에 배포하면 적절하게 활용할 수 있다.
-
-## Replicate 입문
-
-Replicate를 활용하면, 다른 사람들이 만든 기능을 접속해볼 수 있는 화면을 확인할 수 있다.
-
-
-
-![1](/assets/img/post_img/replicate/1.png)
-
-
-
-- Playground: 웹 상에서 직접 코드를 실행하고 결과를 확인할 수 있는 기능이다. 이를 통해 실시간으로 모델의 동작을 시뮬레이션해 볼 수 있다.
-
-- API: Replicate는 사용자에게 API 호출을 위한 코드를 제공한다.
-
-- Examples: Replicate는 API를 만든 사람이 다양한 예제 코드를 공유할 수 있다.
-
-위의 3가지 기능만 알면, 자신의 계정 키를 통해 쉽게 Replicate를 사용해볼 수 있다. 하지만 한번만 사용해도 요금이 청구되니, 이 점을 주의해야한다.
-
-## Replicate 금액 시스템
-
-Replicate의 금액 시스템도 한번 알아보자.
-
-
-
-![2](/assets/img/post_img/replicate/2.png)
-
-
-
-위 표는 2024년 2월 1일 기준의 금액 테이블이다. 나는 대략적으로 Replicate에서 서비스를 몇 번 이용해본 결과, Diffusion 기반 모델들은 Nvidia A40 GPU(Large)로 10초 정도 소요되었던 것으로 기억한다.
-
-## Replicate 라이프사이클 이해하기
-
-아쉽게도 Replicate는 내가 만든 API나 다른 사람이 만든 API가 항상 동작 중인 상태는 아니다. 시스템은 크게 4가지 단계로 구성되어 있다.
-
-- Offine: 아무도 사용하지 않으면 컴퓨터(도커 인스턴스)를 꺼놓는다.
-
-- Booting: 접속이 들어오면 컴퓨터(도커 인스턴스)를 킨다. 이때 많은 시간이 소요되지만 돈은 지불되지 않는다.
-
-- Active: 동작 중인 상태다. 이 동작이 끝나기 10초 내로 다른 요청이 들어오는 경우, Active 상태를 유지한다.
-
-- Idle: Active 상태에서 10초 내로 다른 요청이 없을 시, Offline으로 넘어간다.
-
-
-여기서 가장 큰 문제는 모든 요청에 대해서 빠르게 서비스를 할 수 없다는 것이다. 이 점을 고려하여 Replicate를 사용할 때는 시간과 비용을 잘 계산해야 한다.
-
-이러한 문제를 위해 따로 배포를 위한 서비스도 제공하지만 Booting과 Idle을 진행하는 시간에도 금액이 소비된다는 문제점이 있다.
-
-## 나만의 Replicate 모델 배포하기
-
-Replicate의 가장 큰 장점 중 하나는, 남의 것만을 사용하는 것이 아니라 자신의 코드를 쉽게 배포할 수 있다는 점이다.
-
-Replicate는 도커 시스템을 패키징하여, 자체적으로 만든 오픈소스인 [COG](https://github.com/replicate/cog) 포맷에 맞추어 환경 설정과 추론 코드를 작성하면, 아주 손쉽게 코드 배포를 진행할 수 있다.
-
-### Highlight
-
-📦 Docker containers without the pain. Writing your own Dockerfile can be a bewildering process. With Cog, you define your environment with a simple configuration file and it generates a Docker image with all the best practices: Nvidia base images, efficient caching of dependencies, installing specific Python versions, sensible environment variable defaults, and so on.
-
-🤬️ No more CUDA hell. Cog knows which CUDA/cuDNN/PyTorch/Tensorflow/Python combos are compatible and will set it all up correctly for you.
-
-✅ Define the inputs and outputs for your model with standard Python. Then, Cog generates an OpenAPI schema and validates the inputs and outputs with Pydantic.
-
-🎁 Automatic HTTP prediction server: Your model's types are used to dynamically generate a RESTful HTTP API using FastAPI.
-
-🥞 Automatic queue worker. Long-running deep learning models or batch processing is best architected with a queue. Cog models do this out of the box. Redis is currently supported, with more in the pipeline.
-
-☁️ Cloud storage. Files can be read and written directly to Amazon S3 and Google Cloud Storage. (Coming soon.)
-
-🚀 Ready for production. Deploy your model anywhere that Docker images run. Your own infrastructure, or Replicate.
-
-### 환경 설정을 위한 cog.yaml 설정 예시
-
-'cog.yaml' 파일을 통해 환경 설정을 할 수 있다. 아래는 그 예시다.
+Cog는 직접 Dockerfile을 모두 작성하는 대신 `cog.yaml`에 system package, Python, Python package와 predictor entry point를 선언하는 형식입니다.
 
 ```yaml
 build:
@@ -117,15 +44,13 @@ build:
 predict: "predict.py:Predictor"
 ```
 
-이 설정 파일은 도커나 다양한 환경 파일을 파이썬으로 작성해본 사람이라면 쉽게 이해할 수 있을 것이다.
+이 내용은 원문 예시이지 현재 호환성이 검증된 dependency 조합이 아닙니다. 특히 오래된 PyTorch pin과 Python version은 사용하려는 model·CUDA 조합에서 다시 검증해야 합니다. Cog가 image를 만들어 준다는 사실이 잘못된 version 조합까지 자동으로 고쳐 준다는 뜻은 아닙니다.
 
-'build' 항목에서는 GPU 사용 여부, 필요한 시스템 패키지, 사용할 파이썬 버전, 파이썬 패키지 등을 설정하고, 'predict' 항목에서는 예측을 수행할 파이썬 파일과 클래스를 지정한다.
+파일 구조는 최소한 weight, `predict.py`, `cog.yaml`로 나뉩니다. 큰 weight를 build context에 어떻게 둘지와 image 재빌드 비용도 모델마다 달라집니다.
 
-이렇게 설정 파일을 작성하면, Replicate는 이 파일을 기반으로 적절한 환경을 구축하고 동작시킨다.
+## setup에는 1회 Loading, predict에는 요청별 연산을 둡니다
 
-### 추론 프로세스를 위한 predict.py 설정 예시
-
-'predict.py' 파일을 통해 추론 프로세스를 설정할 수 있다. 아래는 그 예시다.
+`BasePredictor`의 `setup`은 model을 memory에 올리고, `predict`는 typed input을 받아 전처리·추론·후처리를 수행합니다.
 
 ```python
 from cog import BasePredictor, Input, Path
@@ -133,81 +58,25 @@ import torch
 
 class Predictor(BasePredictor):
     def setup(self):
-        """Load the model into memory to make running multiple predictions efficient"""
         self.model = torch.load("./weights.pth")
 
-    # The arguments and types the model takes as input
-    def predict(self,
-          image: Path = Input(description="Grayscale input image")
+    def predict(
+        self,
+        image: Path = Input(description="Grayscale input image")
     ) -> Path:
-        """Run a single prediction on the model"""
         processed_image = preprocess(image)
         output = self.model(processed_image)
         return postprocess(output)
 ```
 
-이 코드는 'cog' 라이브러리의 'BasePredictor' 클래스를 상속받아서, 'setup' 메소드와 'predict' 메소드를 재정의한다.
+Model loading을 predict 안에 넣으면 요청마다 weight를 다시 읽을 수 있으므로 분리의 의미가 사라집니다. 반대로 setup이 오래 걸리면 cold start가 길어집니다. 어느 쪽 비용인지 먼저 측정해야 합니다.
 
-'setup' 메소드에서는 모델을 메모리에 로드하고, 'predict' 메소드에서는 입력으로 받은 이미지를 전처리하고, 모델에 통과시킨 후, 후처리를 통해 최종 결과를 반환한다.
+이 조각에는 `preprocess`와 `postprocess` 정의, device 이동, evaluation mode, 오류 처리와 실제 weight 형식이 없습니다. 그러므로 그대로 실행되는 colorization server가 아니라 predictor interface의 뼈대입니다. 반환 `Path`가 실제 생성 파일을 가리키는지도 구현해야 합니다.
 
-이렇게 설정 파일을 작성하면, Replicate는 이 파일을 기반으로 예측 작업을 수행한다.
+## Local 검증에서 배포까지의 Gate
 
-파일구조는 대략 아래와 같다. (너무 간편하지만 도커를 빌드하고 컨테이너를 실행하는 시간에 대한 효율성을 잘 고려해서 코드를 작성하자.)
+원문 흐름은 local `cog predict`로 단일 입력을 시험하고, image build와 Docker 실행으로 HTTP prediction을 확인한 다음, Replicate model을 만든 뒤 login과 push를 수행하는 순서입니다. CLI 설치, account key, Docker와 NVIDIA runtime, 실제 namespace·model 이름이 준비돼야 하므로 원문의 placeholder 명령은 완성 실행법이 아닙니다.
 
-```
-weights.pth
-predict.py
-cog.yaml
-```
+배포 전에는 같은 input을 local predictor와 container API에서 비교하고, 두 번째 요청이 첫 요청보다 얼마나 빨라지는지 측정합니다. 잘못된 input type이 validation에서 거부되는지, model exception이 어떤 응답으로 보이는지도 확인해야 합니다. Playground·API·Examples는 남의 model을 시험할 때 유용하지만 한 번의 호출도 과금될 수 있다는 원문의 주의도 남습니다.
 
-### 로컬에서 테스트
-
-로컬에서는 아래의 명령어를 통해 테스트를 진행할 수 있다.
-
-```sh
-$ cog predict -i image=@input.jpg
---> Building Docker image...
---> Running Prediction...
---> Output written to output.jpg
-```
-
-### 빌드 및 배포 테스트
-
-빌드 및 배포 테스트는 아래의 명령어를 통해 진행할 수 있다.
-
-```sh
-$ cog build -t my-colorization-model
---> Building Docker image...
---> Built my-colorization-model:latest
-
-$ docker run -d -p 5000:5000 --gpus all my-colorization-model
-
-$ curl http://localhost:5000/predictions -X POST \
-    -H 'Content-Type: application/json' \
-    -d '{"input": {"image": "https://.../input.jpg"}}'
-```
-
-
-### Replicate에 배포하기
-
-Replicate에 모델을 배포하기 위해서는 아래의 순서를 따른다.
-
-1) Replicate에 로그인한다.
-
-2) Dashboard로 이동한다.
-
-3) 'Models' 메뉴로 이동한다.
-
-4) 'Create a new model' 버튼을 클릭한다.
-- 모델의 'Name'을 작성한다.
-- 'Hardware'를 선택한다.
-- 'What kind of model are you planning to create?' 항목에서 'Custom Cog model'을 선택한다.
-
-5) 이후에는 로컬에서 아래의 명령어를 통해 로그인하고, 모델을 push한다.
-
-```sh
-cog login
-cog push r8.im/[user name]/[model name]
-```
-
-이렇게 하면 Replicate에 모델이 배포된다.
+결정 기준은 간단합니다. 호출이 드물고 infrastructure를 빨리 검증하려면 사용량 기반 방식이 매력적입니다. 일정한 latency와 높은 이용률이 중요하면 cold start를 없애는 별도 배포가 나을 수 있지만 idle 시간 비용이 생깁니다. 이 글의 2024년 화면과 숫자 대신 배포 시점의 실제 조건으로 다시 계산해야 합니다.

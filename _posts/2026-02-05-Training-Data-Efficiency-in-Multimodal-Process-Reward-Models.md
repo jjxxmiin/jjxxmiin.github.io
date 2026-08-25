@@ -1,111 +1,49 @@
 ---
 layout: post
-title: '[2026-02-04] 데이터 10%로 구현하는 초고성능 시각적 추론: Multimodal Process Reward Model(MPRM)의
-  효율성 혁신과 BIS 방법론 심층 분석'
+title: "MPRM 학습 데이터 10%가 100%보다 나았던 이유: BIS 선택 기준"
 date: '2026-02-05'
 categories: Tech
 tags:
   - 멀티모달
   - 강화학습
-  - 로보틱스
   - Qwen
-  - 온디바이스AI
+  - 경량화
+  - 벤치마크
 math: true
-summary: 10%의 데이터로 성능을 압도하는 MPRM 효율화 기술, BIS의 핵심 원리와 산업적 파격성 분석
+summary: "Multimodal Process Reward Model의 Monte Carlo annotation이 빠르게 포화되는 문제와, label mixture·reliability를 결합한 BIS로 정보량 높은 10%를 고르는 방법 및 전제 조건을 설명합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.04145.png
   alt: Paper Thumbnail
 ---
 
-## 1. 핵심 요약 (Executive Summary)
+BIS가 고른 MPRM data 10%가 전체보다 나았던 이유는 **모든 reasoning step을 반복 학습하지 않고, positive·negative가 함께 있어 판별에 도움이 되면서 Monte Carlo label이 신뢰할 만한 sample에 집중했기 때문**입니다. 다만 이미 비싼 rollout annotation을 만든 뒤의 selection이라는 전제가 있습니다.
 
-인공지능의 추론 능력이 비약적으로 발전함에 따라, 단순히 최종 결과만을 평가하는 결과 보상 모델(Outcome Reward Model, ORM)을 넘어 추론의 각 단계(Step)를 정밀하게 평가하는 **프로세스 보상 모델(Process Reward Model, PRM)**이 필수적인 요소로 자리 잡았습니다. 특히 시각 정보가 결합된 멀티모달 환경에서의 **MPRM(Multimodal Process Reward Model)**은 MLLM(Multimodal Large Language Models)의 논리적 무결성을 보장하는 핵심 엔진입니다.
+## Process Reward Data는 왜 빨리 포화되는가
 
-본 분석에서 다루는 연구는 기존 MPRM 학습이 방대한 양의 **몬테카를로(Monte Carlo, MC) 어노테이션** 데이터에 의존하며, 이 과정에서 발생하는 막대한 비용과 데이터 중복 문제를 정면으로 다룹니다. 연구진은 MPRM 학습 성능이 무작위 샘플링 시 매우 빠르게 포화(Saturation)된다는 점에 착안하여, 데이터의 '질'을 정량화할 수 있는 **BIS(Balanced-Information Score)**를 제안했습니다. 이 방법론은 전체 데이터의 **단 10%만 사용하고도 전체 데이터를 사용했을 때보다 뛰어난 성능**을 보여주었으며, 이는 향후 MLLM 학습 비용 최적화와 추론 효율성 제고에 있어 중대한 이정표가 될 것입니다.
+Outcome Reward Model은 최종 answer만 맞는지 봅니다. Process Reward Model은 reasoning의 각 step이 정답으로 이어지는지 평가해 중간 오류를 찾습니다. Image가 포함된 MPRM에서는 visual evidence를 올바르게 읽었는지까지 판단해야 하므로 step annotation이 더 복잡합니다.
 
-## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
+각 step의 가치를 추정하려고 수십·수백 번 rollout해 최종 성공 확률을 계산하는 Monte Carlo annotation을 사용할 수 있습니다. 하지만 모든 candidate가 거의 맞거나 거의 틀린 묶음은 model에게 decision boundary를 많이 알려주지 않습니다. 비슷한 sample을 더 넣어도 learning curve가 빠르게 평평해지는 이유입니다.
 
-### 2.1. 시각적 추론의 복잡성과 PRM의 등장
-기존의 LLM은 주로 텍스트 기반의 연쇄 사고(Chain-of-Thought, CoT)를 통해 논리적 결론에 도달했습니다. 하지만 이미지나 비디오가 포함된 멀티모달 환경에서의 추론은 훨씬 더 복잡한 층위를 가집니다. 시각적 단서를 올바르게 해석했는지, 그 해석을 바탕으로 논리적 도약을 수행했는지를 단계별로 검증하지 않으면, 모델은 최종 답변은 맞지만 중간 과정이 틀린 '환각(Hallucination)' 현상에 빠지기 쉽습니다.
+원문은 random sampling에서도 약 20% 지점부터 성능 상승이 완만해지는 saturation을 관찰합니다. 더 많은 data가 해롭다는 일반 결론이 아니라, 이 corpus 안에 중복된 학습 신호가 많았다는 결과입니다.
 
-### 2.2. 데이터 구축의 경제성 문제
-MPRM을 학습시키기 위해서는 각 추론 단계마다 수십, 수백 번의 시뮬레이션을 돌려 해당 단계가 정답으로 이어질 확률을 계산하는 MC 어노테이션이 필요합니다. 이는 엄청난 컴퓨팅 자원을 소모합니다. 본 연구의 문제 의식은 바로 여기서 시작됩니다. "과연 이 방대한 MC 데이터가 모두 필요한가?"
+## BIS는 Mixture와 Reliability를 함께 본다
 
-### 2.3. 연구의 목표
-본 논문은 MPRM 학습 데이터 내의 **중복성(Redundancy)**을 정량적으로 증명하고, 어떤 데이터가 모델의 그래디언트 업데이트(Gradient Update)에 가장 기여하는지를 이론적으로 분석합니다. 이를 통해 학습 효율성을 극대화할 수 있는 데이터 선택 전략을 수립하는 것이 핵심 목표입니다.
+Balanced-Information Score(BIS)는 두 신호를 결합합니다. Label mixture는 한 묶음 안에 positive와 negative step이 얼마나 균형 있게 있는지 봅니다. 한쪽 label만 가득하면 구분을 배우기 어렵습니다. Label reliability는 Monte Carlo score가 해당 step의 가치를 얼마나 안정적으로 나타내는지 평가합니다.
 
-## 3. 핵심 기술 및 아키텍처 심층 분석 (Core Methodology)
+BIS는 기존 rollout 신호를 집계하므로 별도 selection model을 요구하지 않습니다. 높은 score는 “판단 경계가 있어 정보는 많고, 그 label을 믿을 근거도 있는” sample을 뜻합니다. 단순 hard mining처럼 무조건 어려운 sample만 고르면 annotation noise가 큰 사례까지 포함될 수 있는데, reliability가 이를 걸러내려는 역할을 합니다.
 
-### 3.1. 이론적 프레임워크: 그래디언트 정보량의 원천
-연구진은 MPRM의 학습 과정을 수학적으로 모델링하여, 손실 함수(Loss Function)의 그래디언트가 유의미하게 발생하는 조건을 두 가지 핵심 요소로 압축했습니다.
+원문은 mixture와 reliability의 곱으로 개념을 설명하지만 실제 적용에서는 score 정의와 rollout 수를 원 논문 설정에 맞춰야 합니다. 이 글만으로 완전한 구현 식을 복원할 수는 없습니다.
 
-1.  **레이블 혼합도(Label Mixtures, $M$):** 특정 추론 단계에서 긍정적(Positive)인 단계와 부정적(Negative)인 단계가 얼마나 균형 있게 섞여 있는지를 나타냅니다. 모든 샘플이 맞거나 틀린 데이터는 모델에게 새로운 정보를 제공하지 못합니다.
-2.  **레이블 신뢰도(Label Reliability, $R$):** MC 스코어가 얼마나 명확하게 해당 단계의 가치를 대변하는지를 측정합니다. 평균적인 MC 스코어가 극단값(0 또는 1)에 가까울수록 신뢰도가 높다고 판단합니다.
+## 10% Result는 Random 10%와 비교해야 한다
 
-### 3.2. BIS (Balanced-Information Score) 알고리즘
-BIS는 위에서 정의한 혼합도($M$)와 신뢰도($R$)를 결합한 점수입니다. 흥미로운 점은 BIS를 계산하기 위해 별도의 추가 모델이나 비용이 필요하지 않다는 것입니다. 이미 생성된 MC 신호를 롤아웃(Rollout) 수준에서 집계하여 다음과 같이 산출합니다.
+InternVL2.5-8B와 Qwen2.5-VL-7B, VisualProcessBench 및 MC-annotated corpus가 실험에 사용됩니다. Subset은 5%, 10%, 20%, 50%, 100%로 비교합니다. BIS 10%로 학습한 InternVL2.5-8B가 full data model보다 높고 random subsampling 대비 상대 4.1% 개선됐다는 결과가 보고됩니다.
 
--   **Mixture Score ($M$):** 배치 내에서 긍정/부정 샘플의 엔트로피를 측정.
--   **Reliability Score ($R$):** 각 단계별 MC 점수의 분산과 평균의 관계를 이용해 확신도를 측정.
--   **BIS = $M \times R$** (간략화된 개념도)
+여기서 핵심 비교는 10% 대 100%만이 아닙니다. 같은 10%를 random, hard mining, BIS로 골랐을 때 차이가 나야 selection 기준의 가치가 드러납니다. Backbone이 바뀐 Qwen에서도 같은 경향이 관찰됐지만 모든 corpus와 online RL에 일반화됐다고 확정할 수는 없습니다.
 
-이 점수가 높은 샘플들, 즉 '판단이 모호하면서도 데이터 자체의 근거는 확실한' 샘플들을 우선적으로 학습에 투입함으로써 학습 곡선의 가파른 상승을 유도합니다.
+## Annotation 품질이 나쁘면 BIS도 틀린다
 
-## 4. 구현 및 실험 환경 (Implementation Details & Experiment Setup)
+BIS는 기존 MC signal에 의존합니다. Rollout policy가 편향됐거나 시각 정보를 잘못 읽으면 reliability 계산도 그 오류 안에서 이뤄집니다. 이미 만들어진 static dataset의 선택에는 유용하지만 data가 계속 바뀌는 online learning에서 같은 효율이 나는지는 추가 검증이 필요합니다.
 
-### 4.1. 백본 모델 (Backbones)
-본 연구의 범용성을 입증하기 위해 서로 다른 아키텍처를 가진 두 가지 강력한 오픈소스 모델을 사용했습니다.
--   **InternVL2.5-8B:** 비전 타워와 언어 모델이 강력하게 결합된 구조로, 시각 이해 능력이 뛰어납니다.
--   **Qwen2.5-VL-7B:** 최근 가장 각광받는 멀티모달 모델 중 하나로, 세밀한 시각적 추론에 강점을 보입니다.
-
-### 4.2. 데이터셋 및 벤치마크
--   **VisualProcessBench:** 시각적 추론의 각 단계를 평가하기 위해 설계된 정밀 벤치마크입니다.
--   **MC-annotated Corpus:** 수만 개의 시각적 추론 경로와 각 경로의 단계별 MC 점수가 포함된 대규모 데이터셋을 기초 데이터로 활용했습니다.
-
-### 4.3. 학습 설정
--   데이터 서브샘플링 비율: 5%, 10%, 20%, 50%, 100%.
--   비교군: Random Subsampling, 하드 마이닝 전략, 그리고 제안된 BIS.
-
-## 5. 성능 평가 및 비교 (Comparative Analysis)
-
-### 5.1. 10%의 기적
-실험 결과는 놀라웠습니다. **BIS를 통해 선택된 10%의 데이터**만으로 학습된 InternVL2.5-8B 모델은 **전체 데이터(100%)를 사용한 모델보다 높은 성능**을 기록했습니다. 구체적으로 Random Subsampling 대비 **상대적 4.1%의 성능 향상**을 보였습니다.
-
-### 5.2. 데이터 포화 지점의 발견
-연구에 따르면 MPRM 학습은 약 20% 지점에서 이미 성능이 극도로 완만해지는 'Saturation' 현상을 보입니다. 이는 기존의 거대 기업들이 수행하던 '무지성'식 데이터 수집이 얼마나 비효율적인지를 단적으로 보여주는 사례입니다.
-
-### 5.3. 일반화 성능
-Qwen2.5-VL 모델에서도 동일한 경향성이 관찰되었습니다. 이는 BIS가 특정 아키텍처에 종속된 기법이 아니라, 보상 모델 학습의 근본적인 원리를 관통하는 방법론임을 입증합니다.
-
-## 6. 실제 적용 분야 및 글로벌 파급력 (Real-World Application & Impact)
-
-### 6.1. 자율 주행 및 로보틱스 (Autonomous Systems)
-로봇이 복잡한 환경에서 작업을 수행할 때, 각 동작 단계의 정당성을 실시간으로 평가해야 합니다. BIS를 통해 학습된 가벼우면서도 강력한 MPRM은 온디바이스(On-device) 환경에서 로봇의 추론 정확도를 비약적으로 높일 수 있습니다.
-
-### 6.2. 의료 영상 분석 및 진단 지원 (Medical AI)
-의료 AI에서 '왜 이런 진단을 내렸는가'에 대한 단계별 설명력은 필수적입니다. MPRM은 의사의 진단 과정을 모사하여 영상의 각 부위를 분석하는 단계를 검증할 수 있으며, BIS는 희귀 질병과 같이 데이터가 부족한 분야에서 데이터 효율성을 극대화할 수 있습니다.
-
-### 6.3. AI 에이전트 및 서비스 비용 절감
-대규모 MLLM 서비스를 운영하는 기업 입장에서 데이터 레이블링과 컴퓨팅 비용은 가장 큰 지출 항목입니다. 학습 데이터를 1/10로 줄이면서도 성능을 유지할 수 있다는 것은 수십억 원 이상의 인프라 비용 절감으로 직결됩니다.
-
-## 7. 기술적 비평 및 한계점 (Discussion: Limitations & Critique)
-
-### 7.1. MC 신호의 의존성
-BIS의 가장 큰 장점이자 단점은 **기존에 생성된 MC 신호를 활용한다**는 점입니다. 만약 초기 MC 데이터 자체가 편향되어 있거나 품질이 극도로 낮다면, BIS 역시 잘못된 데이터를 '중요하다'고 판단할 위험이 있습니다. 즉, 'Garbage In, Garbage Out' 문제에서 자유롭지 못합니다.
-
-### 7.2. 정적 데이터셋의 한계
-본 연구는 이미 구축된 데이터셋 내에서의 선택(Selection)에 집중하고 있습니다. 실시간으로 데이터를 생성하며 학습하는 온라인 강화학습(Online RL) 환경에서도 BIS가 동일한 효율성을 보일지는 추가적인 검증이 필요합니다.
-
-### 7.3. 시각적 복잡도와의 상관관계
-이미지의 복잡도가 극도로 높은 경우(예: 수천 개의 객체가 포함된 위성 사진), 단순히 단계별 MC 점수만으로 데이터의 가치를 판단하는 것이 충분할까요? 시각적 특징의 엔트로피를 BIS 공식에 직접적으로 통합하는 시도가 부족해 보입니다.
-
-## 8. 결론 및 인사이트 (Conclusion)
-
-본 연구는 '데이터의 양이 곧 성능'이라는 기존의 믿음에 강력한 의문을 제기하며, **'데이터의 정보적 가치'**에 집중할 때 비로소 진정한 효율성을 달성할 수 있음을 증명했습니다. BIS 방법론은 단순하면서도 이론적 근거가 탄탄하여, 현업의 AI 엔지니어들이 즉각적으로 적용할 수 있는 실용적인 도구입니다.
-
-앞으로의 MLLM 경쟁은 누가 더 많은 GPU를 가졌느냐가 아니라, **누가 더 똑똑하게 데이터를 골라내어 학습시키느냐**의 싸움이 될 것입니다. 시각적 추론의 무결성을 확보하기 위한 MPRM의 진화는 이제 막 시작되었으며, BIS는 그 여정에서 비용과 성능이라는 두 마리 토끼를 잡는 핵심 열쇠가 될 것입니다.
-
-**Chief AI Scientist's View:** 
-"이 기술은 단순한 데이터 샘플링 기법이 아닙니다. 모델이 '무엇을 모르는지'와 '무엇을 확실히 배워야 하는지'를 수치화했다는 점에서 능동적 학습(Active Learning)의 정수를 보상 모델에 이식한 쾌거라고 평가할 수 있습니다."
+실무에서는 먼저 MC annotation 자체를 표본 검수하고, BIS score 구간별 label error를 확인합니다. 다음으로 random 10%와 BIS 10%의 task별 성능 및 training cost를 비교하고, rare visual pattern이 selection에서 사라지지 않았는지 봅니다. BIS의 메시지는 “data를 90% 버려도 된다”가 아니라 **gradient에 새로운 정보를 주지 않는 반복 sample을 비싼 training에서 우선 제외하라**는 것입니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.04145)

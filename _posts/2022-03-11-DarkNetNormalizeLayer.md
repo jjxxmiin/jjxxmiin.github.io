@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Normalize Layer"
+title:  "Darknet Normalize Layer 역전파가 정확하지 않은 이유: 채널 정규화와 delta 덮어쓰기"
 date:   2022-03-11 16:00 -0400
 categories: DarkNet
 image:
@@ -8,14 +8,23 @@ image:
   alt: DarkNet 시리즈 - Normalize Layer 대표 이미지
 tags:
   - DarkNet
-  - 컴퓨터비전
+  - Normalize Layer
   - C언어
+summary: "Darknet normalization_layer의 채널별 순방향 계산을 코드로 추적하고, 원본 주석이 밝힌 근사 역전파와 net.delta 덮어쓰기 문제를 점검합니다."
 math: true
 ---
 
-## normalize layer
+이 구현에서 가장 먼저 확인할 점은 `backward_normalization_layer`가 정확한 미분이 아니라는 사실입니다. 소스에도 `TODO This is approximate`라고 적혀 있고, 앞 레이어의 `net.delta`에 더하지 않고 덮어씁니다.
 
-### forward\_normalization\_layer
+## 순방향은 같은 위치의 여러 채널을 묶는다
+
+이 레이어는 너비와 높이를 바꾸지 않습니다. 배치마다 입력을 제곱한 뒤, 같은 `(x, y)` 위치에서 인접한 채널의 제곱값을 `norms`에 모읍니다. 마지막 두 연산은 코드 그대로 다음 관계를 만듭니다.
+
+$$
+y_i = x_i\left(\kappa + \alpha\sum_{j \in W(i)}x_j^2\right)^{-\beta}
+$$
+
+여기서 $W(i)$는 `size`와 채널 경계로 정해지는 범위입니다. 공간 이웃을 훑는 필터가 아니라, 동일한 픽셀 위치에서 채널 방향으로 이동하는 계산이라는 점이 핵심입니다.
 
 ```c
 void forward_normalization_layer(const layer layer, network net)
@@ -50,40 +59,11 @@ void forward_normalization_layer(const layer layer, network net)
 }
 ```
 
-함수 이름: forward\_normalization\_layer
+`norms`를 채널마다 처음부터 다시 합산하지 않는 것도 읽을 포인트입니다. 채널 0의 합을 만든 뒤, 다음 채널에서는 직전 합을 복사하고 범위를 벗어난 `prev`를 빼고 새로 들어온 `next`를 더합니다. 이 슬라이딩 방식 때문에 `size`가 홀수인지 짝수인지, 채널 수보다 큰지에 따라 실제 포함 인덱스를 직접 추적해야 합니다. 경계 채널 하나로 작은 입력을 만들어 `norms`를 출력해 보면 설정 해석을 가장 빨리 검증할 수 있습니다.
 
-입력:&#x20;
+## 역전파는 정규화 항의 미분을 생략한다
 
-* layer (layer 구조체)
-* net (network 구조체)
-
-동작:&#x20;
-
-* 입력 데이터에 대한 정규화를 수행하는 함수입니다.&#x20;
-* 입력 데이터는 layer 구조체와 network 구조체에서 가져옵니다.&#x20;
-* 함수는 주어진 입력 데이터에서 입력 크기와 일치하는 정규화된 출력을 계산합니다.&#x20;
-* 계산에는 입력 데이터의 각 채널에 대해 스퀘어드 값, 노름, 입력 데이터의 텐서 값을 사용합니다.&#x20;
-* 계산이 완료되면 출력 데이터가 layer 구조체의 출력 포인터로 설정됩니다.
-
-설명:
-
-* layer: 정규화를 수행할 레이어의 정보를 담고 있는 layer 구조체입니다.
-* net: 입력 데이터를 담고 있는 network 구조체입니다.
-* w, h, c: layer 구조체의 너비, 높이, 채널 수입니다.
-* batch: 입력 데이터의 배치 크기입니다.
-* squared: 입력 데이터의 각 채널에 대한 스퀘어드 값입니다.
-* norms: 입력 데이터의 각 채널에 대한 노름 값입니다.
-* input: 입력 데이터의 텐서 값입니다.
-* kappa: 노름 계산에 사용되는 값입니다.
-* alpha: 노름 계산에 사용되는 값입니다.
-* size: 노름 계산에 사용되는 필터 크기입니다.
-* beta: 출력 데이터에 대한 승수 값입니다.
-* output: 정규화된 출력 데이터의 포인터입니다.
-* 입력 데이터의 각 채널에 대해 스퀘어드 값을 계산하고, 노름 값을 계산합니다. 그리고 나서 이 값들을 사용하여 입력 데이터를 정규화된 출력으로 계산합니다. 마지막으로, 계산된 출력 값이 layer 구조체의 출력 포인터로 설정됩니다.
-
-
-
-### backward\_normalization\_layer
+역전파 코드는 두 벡터 연산뿐입니다. `norms^{-beta}`를 `net.delta`에 쓴 다음 위에서 내려온 `layer.delta`를 곱합니다.
 
 ```c
 void backward_normalization_layer(const layer layer, network net)
@@ -99,28 +79,17 @@ void backward_normalization_layer(const layer layer, network net)
 }
 ```
 
-함수 이름: backward\_normalization\_layer
+즉, 순방향의 `norms`가 입력 제곱들의 합으로 만들어진다는 의존 관계를 미분에 반영하지 않습니다. 더구나 주석처럼 `net.delta`를 누적하지 않고 덮어쓰므로, 같은 입력으로 여러 경로의 기울기가 합쳐져야 하는 구조라면 기존 값이 사라질 수 있습니다. 이 함수만 보고 완전한 LRN 역전파라고 가정하면 안 됩니다.
 
-입력:&#x20;
+확인 순서는 간단합니다.
 
-* layer (정규화 레이어 구조체)
-* net (신경망 구조체)
+1. 수치 미분 결과와 `net.delta`를 작은 텐서에서 비교합니다.
+2. 호출 전 `net.delta`가 0으로 초기화되는 구조인지 확인합니다.
+3. 분기 네트워크라면 덮어쓰기가 다른 경로의 기울기를 지우는지 추적합니다.
 
-동작:&#x20;
+## 리사이즈는 네 개의 버퍼를 함께 바꿔야 한다
 
-* 정규화 레이어의 역전파를 수행하고, 입력값에 대한 델타 값을 계산합니다.
-
-설명:
-
-* 이 함수는 정규화 레이어의 역전파를 수행하는 함수입니다.
-* 입력으로는 정규화 레이어 구조체(layer)와 신경망 구조체(net)가 필요합니다.
-* 함수 내부에서는 먼저 정규화 레이어의 베타 값에 대한 거듭제곱 계산을 수행합니다.
-* 이후, 정규화 레이어의 델타 값과 거듭제곱 계산 결과를 곱한 뒤, 입력값에 대한 델타 값을 계산합니다.
-* 계산된 결과는 net.delta에 덮어쓰기 되며, 정확도에는 약간의 오차가 있을 수 있습니다.
-
-
-
-### resize\_normalization\_layer
+`resize_normalization_layer`는 `w`, `h`, 출력 모양, `inputs`, `outputs`를 갱신하고 `output`, `delta`, `squared`, `norms`를 모두 재할당합니다.
 
 ```c
 void resize_normalization_layer(layer *layer, int w, int h)
@@ -140,31 +109,11 @@ void resize_normalization_layer(layer *layer, int w, int h)
 }
 ```
 
-함수 이름: resize\_normalization\_layer
+`c`와 `batch`는 그대로 두고 공간 크기만 바꾸는 함수입니다. 각 `realloc`의 반환값을 곧바로 원래 포인터에 대입하므로, 할당 실패를 처리해야 하는 환경이라면 임시 포인터를 거쳐 확인하는 보완이 필요합니다. 커진 영역의 값도 `calloc`처럼 자동으로 0이 된다고 기대할 수 없습니다.
 
-입력:
+## 생성 시 보존되는 크기와 매개변수
 
-* layer \*layer: normalization\_layer 구조체의 포인터
-* int w: normalization\_layer의 가로 크기
-* int h: normalization\_layer의 세로 크기
-
-동작:
-
-* 입력으로 받은 normalization\_layer의 가로, 세로 크기를 업데이트합니다.
-* layer의 출력 크기 및 입력 크기를 업데이트합니다.
-* layer의 출력, 델타, 제곱, norms 배열을 새로운 크기에 맞게 다시 할당합니다.
-
-설명:
-
-* 이 함수는 normalization layer의 크기를 조정하기 위해 사용됩니다.
-* 입력으로 받은 가로, 세로 크기를 이용해 layer 구조체의 필드 값을 업데이트합니다.
-* 이 함수는 입력 크기, 출력 크기 및 출력 배열의 크기를 재할당합니다.
-* realloc 함수를 사용하여 메모리를 재할당하므로, 이전에 할당되어 있던 메모리를 자동으로 해제합니다.
-* 이 함수는 입력으로 받은 normalization\_layer의 포인터를 직접 수정하므로, 반환 값은 없습니다.
-
-
-
-### make\_normalization\_layer
+생성 함수는 입력과 출력 모양을 같게 두고 `kappa`, `size`, `alpha`, `beta`를 저장합니다. 네 버퍼는 모두 `h * w * c * batch`개의 `float`로 0 초기화되며, 순방향과 역전파 함수 포인터가 연결됩니다.
 
 ```c
 layer make_normalization_layer(int batch, int w, int h, int c, int size, float alpha, float beta, float kappa)
@@ -194,31 +143,4 @@ layer make_normalization_layer(int batch, int w, int h, int c, int size, float a
 }
 ```
 
-함수 이름: make\_normalization\_layer
-
-입력:
-
-* int batch: 배치 크기
-* int w: normalization\_layer의 가로 크기
-* int h: normalization\_layer의 세로 크기
-* int c: normalization\_layer의 채널 수
-* int size: normalization을 수행하는 윈도우의 크기
-* float alpha: 정규화의 강도를 결정하는 매개변수
-* float beta: 정규화 상수
-* float kappa: 정규화를 수행할 때 추가하는 값
-
-동작:
-
-* 입력으로 받은 값들을 이용해 normalization\_layer 구조체를 만듭니다.
-* layer의 필드 값을 초기화합니다.
-* 입력과 출력 배열을 할당합니다.
-* layer의 forward, backward 함수를 설정합니다.
-
-설명:
-
-* 이 함수는 normalization layer를 만들기 위해 사용됩니다.
-* 입력으로 받은 값들을 이용해 normalization\_layer 구조체를 만듭니다.
-* layer의 type 필드는 NORMALIZATION으로 설정됩니다.
-* layer의 출력, 델타, 제곱, norms 배열을 초기화합니다.
-* layer의 forward, backward 함수를 설정합니다.
-* 이 함수는 normalization\_layer 구조체를 반환합니다.
+이 레이어를 수정하거나 이식할 때는 네 가지를 한 묶음으로 봐야 합니다. 순방향의 채널 범위, `norms`의 버퍼 크기, 역전파의 근사 여부, `net.delta`의 쓰기 방식입니다. 출력 모양만 같다는 이유로 일반적인 항등 변환처럼 취급하면 학습 단계의 차이를 놓치게 됩니다.
