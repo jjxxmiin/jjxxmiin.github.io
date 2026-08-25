@@ -1,208 +1,52 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Matrix"
+title:  "Darknet matrix를 복사·분할할 때 생기는 버그: 행 포인터 소유권과 CSV 처리"
+summary: "Darknet matrix가 행마다 따로 할당되는 구조를 바탕으로 resize, hold-out, pop_column, CSV 입출력과 top-k 정확도의 경계 조건을 설명합니다."
 date:   2022-03-08 16:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetMatrix.jpg
   alt: DarkNet 시리즈 - Matrix 대표 이미지
 tags:
-  - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - Darknet소스분석
+  - Matrix
+  - C메모리관리
 math: true
 ---
 
-## matrix
+Darknet의 `matrix`는 **하나의 연속 2차원 배열이 아니라 `float *` 행을 각각 할당한 포인터 배열**이다. 그래서 행을 hold-out할 때는 값이 아니라 포인터 소유권이 이동하고, resize나 free도 바깥 배열과 각 행을 따로 처리해야 한다.
 
-### free\_matrix
+## make·copy·free가 행마다 도는 이유
 
-```c
-void free_matrix(matrix m)
-{
-    int i;
-    for(i = 0; i < m.rows; ++i) free(m.vals[i]);
-    free(m.vals);
-}
-```
-
-함수 이름: free\_matrix
-
-입력:&#x20;
-
-* matrix m (2차원 배열)
-
-동작:&#x20;
-
-* 2차원 배열 m의 할당된 메모리를 해제하는 함수입니다.&#x20;
-* 행마다 할당된 메모리를 우선 해제한 뒤, 마지막으로 2차원 배열 자체의 메모리를 해제합니다.
-
-설명:&#x20;
-
-* 이 함수는 Darknet 라이브러리에서 사용되는 함수로, 2차원 배열로 이루어진 행렬(matrix)의 메모리를 해제합니다.&#x20;
-* 이 함수는 C언어에서 동적으로 할당한 메모리를 해제하는 함수 중 하나인 free() 함수를 사용합니다.&#x20;
-* Darknet 라이브러리에서는 행렬(matrix)을 사용하여 다양한 계산을 수행하므로, 행렬 계산을 마치고 나서는 메모리를 해제해주어야 합니다.
-
-
-
-### matrix\_topk\_accuracy
+`make_matrix`는 먼저 `rows`개의 행 포인터를 만들고 각 행에 `cols`개의 float를 할당한다.
 
 ```c
-float matrix_topk_accuracy(matrix truth, matrix guess, int k)
+matrix make_matrix(int rows, int cols)
 {
-    int *indexes = calloc(k, sizeof(int));
-    int n = truth.cols;
-    int i,j;
-    int correct = 0;
-    for(i = 0; i < truth.rows; ++i){
-        top_k(guess.vals[i], n, k, indexes);
-        for(j = 0; j < k; ++j){
-            int class = indexes[j];
-            if(truth.vals[i][class]){
-                ++correct;
-                break;
-            }
-        }
+    matrix m;
+    m.rows = rows;
+    m.cols = cols;
+    m.vals = calloc(m.rows, sizeof(float *));
+    for(int i = 0; i < m.rows; ++i){
+        m.vals[i] = calloc(m.cols, sizeof(float));
     }
-    free(indexes);
-    return (float)correct/truth.rows;
-}
-```
-
-함수 이름: matrix\_topk\_accuracy
-
-입력:
-
-* truth: 참 값 행렬(matrix) (float 타입)
-* guess: 예측 값 행렬(matrix) (float 타입)
-* k: 상위 k개의 클래스를 가져오기 위한 값 (int 타입)
-
-동작:
-
-* 예측 값 행렬에서 각 샘플마다 가장 높은 k개의 값이 들어있는 인덱스를 가져온다.
-* 참 값 행렬에서 해당 샘플의 클래스가 k개 중 하나인 경우 정확한 예측으로 간주하고 정확한 예측 수를 계산한다.
-* 모든 샘플에 대한 정확도를 계산하여 반환한다.
-
-설명:
-
-* 이 함수는 상위 k개의 클래스에 대해 정확도를 계산하는 데 사용된다.
-* 입력된 truth와 guess 행렬은 예측 모델의 출력 값과 실제 참 값을 나타낸다.
-* k는 가져올 상위 클래스의 수를 정의한다. 예를 들어, k=1인 경우, 가장 높은 값이 들어있는 인덱스를 가져와서 하나의 클래스로 예측을 수행한다.
-* 이 함수는 모든 샘플에 대해 예측과 참 값이 얼마나 일치하는지를 계산하여 정확도를 반환한다.
-
-
-
-### scale\_matrix
-
-```c
-void scale_matrix(matrix m, float scale)
-{
-    int i,j;
-    for(i = 0; i < m.rows; ++i){
-        for(j = 0; j < m.cols; ++j){
-            m.vals[i][j] *= scale;
-        }
-    }
-}
-```
-
-함수 이름: scale\_matrix
-
-입력:&#x20;
-
-* matrix m (스케일링을 적용할 행렬)
-* float scale (적용할 스케일 값)
-
-동작:&#x20;
-
-* 주어진 행렬의 모든 원소에 주어진 스케일 값을 곱해 스케일링을 적용함
-
-설명:&#x20;
-
-* 입력으로 주어진 행렬 m의 모든 원소에 스케일 값을 곱해 행렬을 스케일링하는 함수입니다.&#x20;
-* 스케일링이란, 행렬의 모든 원소에 일정한 값을 곱하는 연산으로, 행렬을 확대 또는 축소시키는 효과를 줄 수 있습니다.&#x20;
-* 이 함수에서는 주어진 스케일 값만큼 모든 원소를 곱하여 스케일링을 적용합니다.
-
-
-
-### resize\_matrix
-
-```c
-matrix resize_matrix(matrix m, int size)
-{
-    int i;
-    if (m.rows == size) return m;
-    if (m.rows < size) {
-        m.vals = realloc(m.vals, size*sizeof(float*));
-        for (i = m.rows; i < size; ++i) {
-            m.vals[i] = calloc(m.cols, sizeof(float));
-        }
-    } else if (m.rows > size) {
-        for (i = size; i < m.rows; ++i) {
-            free(m.vals[i]);
-        }
-        m.vals = realloc(m.vals, size*sizeof(float*));
-    }
-    m.rows = size;
     return m;
 }
 ```
 
-함수 이름: resize\_matrix
-
-입력:&#x20;
-
-* matrix m (크기를 조정할 행렬)
-* int size (조정된 행렬의 행 개수)
-
-동작:&#x20;
-
-* 입력으로 주어진 행렬 m의 행 개수를 size로 조정하고, 그 결과를 반환한다.&#x20;
-* size가 m.rows보다 작으면, m의 마지막 size \~ m.rows-1 행을 제거한다.&#x20;
-* size가 m.rows보다 크면, m의 행 개수를 size로 늘리고, 새로 추가된 행은 0으로 초기화한다.
-
-설명:&#x20;
-
-* 입력으로 주어진 행렬 m의 행 개수를 조정하는 함수이다.&#x20;
-* 행렬의 크기를 조정할 때, realloc 함수를 사용하여 메모리를 할당하거나 해제한다.&#x20;
-* 새로운 행은 0으로 초기화하기 위해 calloc 함수를 사용한다.
-
-
-
-### matrix\_add\_matrix
+따라서 `m.vals[0]`부터 전체 원소가 연속한다는 보장은 없다. 해제할 때도 모든 행을 먼저 free하고 마지막에 포인터 배열을 해제한다.
 
 ```c
-void matrix_add_matrix(matrix from, matrix to)
+void free_matrix(matrix m)
 {
-    assert(from.rows == to.rows && from.cols == to.cols);
-    int i,j;
-    for(i = 0; i < from.rows; ++i){
-        for(j = 0; j < from.cols; ++j){
-            to.vals[i][j] += from.vals[i][j];
-        }
+    for(int i = 0; i < m.rows; ++i){
+        free(m.vals[i]);
     }
+    free(m.vals);
 }
 ```
 
-함수 이름: matrix\_add\_matrix
-
-입력:
-
-* matrix from: 더해지는 행렬
-* matrix to: 더해지는 대상 행렬
-
-동작:
-
-* from 행렬의 각 요소들을 to 행렬의 해당 요소들과 더한 후, 그 결과를 to 행렬의 해당 요소에 다시 저장한다.
-
-설명:
-
-* from과 to 행렬의 크기가 같아야 한다.
-* from과 to 행렬은 함수 내에서 변경되므로, 원본 행렬을 보존해야 하는 경우 복사본을 만들어서 사용해야 한다.
-
-
-
-### copy\_matrix
+`copy_matrix`는 행과 값을 모두 새로 만드는 deep copy다.
 
 ```c
 matrix copy_matrix(matrix m)
@@ -211,116 +55,60 @@ matrix copy_matrix(matrix m)
     c.rows = m.rows;
     c.cols = m.cols;
     c.vals = calloc(c.rows, sizeof(float *));
-    int i;
-    for(i = 0; i < c.rows; ++i){
+    for(int i = 0; i < c.rows; ++i){
         c.vals[i] = calloc(c.cols, sizeof(float));
-        copy_cpu(c.cols, m.vals[i], 1, c.vals[i], 1);
+        copy_cpu(c.cols, m.vals[i], 1,
+                 c.vals[i], 1);
     }
     return c;
 }
 ```
 
-함수 이름: copy\_matrix&#x20;
+복사본의 값을 바꿔도 원본은 바뀌지 않으며 두 matrix를 각각 해제할 수 있다. 반대로 구조체 대입 `matrix b = a`만 하면 `vals`와 모든 행 주소를 공유한다.
 
-입력:&#x20;
+## resize와 pop_column은 무엇을 실제로 줄이나
 
-* matrix m (복사할 행렬)&#x20;
-
-동작:&#x20;
-
-* 입력된 행렬 m을 복사하여 새로운 행렬 c를 생성하고 반환함. 새로운 행렬 c는 입력된 행렬 m과 같은 크기를 가지며, 동일한 값을 가지도록 함.&#x20;
-
-설명:
-
-* 함수는 입력된 행렬 m을 복사하여 새로운 행렬 c를 생성하고 반환함.
-* 새로운 행렬 c는 입력된 행렬 m과 같은 크기를 가지며, 동일한 값을 가지도록 함.
-* 입력된 행렬 m과 새로운 행렬 c는 다른 메모리 공간에 저장됨.
-* 함수 내부에서는 메모리 할당을 위해 calloc 함수를 사용함.
-
-
-
-### make\_matrix
+`resize_matrix`는 열 수는 유지하고 행 수만 바꾼다. 커질 때는 행 포인터 배열을 늘리고 새 행을 0으로 만들며, 작아질 때는 뒤쪽 행을 먼저 해제한다.
 
 ```c
-matrix make_matrix(int rows, int cols)
+matrix resize_matrix(matrix m, int size)
 {
-    int i;
-    matrix m;
-    m.rows = rows;
-    m.cols = cols;
-    m.vals = calloc(m.rows, sizeof(float *));
-    for(i = 0; i < m.rows; ++i){
-        m.vals[i] = calloc(m.cols, sizeof(float));
+    if(m.rows < size){
+        m.vals = realloc(
+            m.vals, size*sizeof(float*));
+        for(int i = m.rows; i < size; ++i){
+            m.vals[i] = calloc(
+                m.cols, sizeof(float));
+        }
+    }else if(m.rows > size){
+        for(int i = size; i < m.rows; ++i){
+            free(m.vals[i]);
+        }
+        m.vals = realloc(
+            m.vals, size*sizeof(float*));
     }
+    m.rows = size;
     return m;
 }
 ```
 
-함수 이름: make\_matrix
-
-입력:&#x20;
-
-* (int) rows: 생성할 행의 수
-* (int) cols - 생성할 열의 수
-
-동작:&#x20;
-
-* rows와 cols 크기의 matrix를 생성하고 0으로 초기화
-
-설명:&#x20;
-
-* 입력으로 주어진 크기(rows \* cols)로 matrix를 생성하고, 행렬의 값을 0으로 초기화한 후 생성된 matrix를 반환하는 함수입니다.
-
-
-
-### hold\_out\_matrix
+`matrix`가 값으로 전달되므로 `realloc`이 바꾼 `vals` 주소는 반환값을 받아야 호출부에 남는다.
 
 ```c
-matrix hold_out_matrix(matrix *m, int n)
-{
-    int i;
-    matrix h;
-    h.rows = n;
-    h.cols = m->cols;
-    h.vals = calloc(h.rows, sizeof(float *));
-    for(i = 0; i < n; ++i){
-        int index = rand()%m->rows;
-        h.vals[i] = m->vals[index];
-        m->vals[index] = m->vals[--(m->rows)];
-    }
-    return h;
-}
+m = resize_matrix(m, new_rows);
 ```
 
-함수 이름: hold\_out\_matrix
+반환값을 버리면 호출부는 이전 주소를 계속 들고 있을 수 있다. 또한 코드는 `realloc` 실패를 검사하지 않으므로 호출 환경에서 메모리 부족 처리까지 해주지는 않는다.
 
-입력:&#x20;
-
-* matrix \*m (포인터)
-* int n
-
-동작:&#x20;
-
-* 입력으로 받은 matrix 포인터 m에서 무작위로 n개의 샘플을 추출하여 그 샘플들로 이루어진 새로운 matrix h를 생성하고 반환한다. 이때, m에서 추출된 샘플들은 m에서 제거된다.
-
-설명:&#x20;
-
-* hold-out 기법은 머신러닝 모델의 성능을 평가하기 위해 데이터셋을 학습 데이터와 테스트 데이터로 나누는 방법 중 하나이다.&#x20;
-* 이 함수는 입력으로 받은 matrix 포인터 m에서 무작위로 n개의 샘플을 추출하여 테스트 데이터셋으로 사용하기 위한 matrix h를 생성하고, 이러한 샘플들을 m에서 제거함으로써 학습 데이터셋을 구성하는 데 사용한다.&#x20;
-* 반환되는 matrix h는 테스트 데이터셋으로 사용되며, 학습 데이터셋은 입력으로 받은 matrix 포인터 m에서 추출된 샘플을 제외한 나머지 샘플들로 구성된다.
-
-
-
-### pop\_column
+`pop_column`은 제거할 열을 새 배열로 복사하고 뒤 열을 왼쪽으로 당긴 뒤 논리적인 `cols`만 1 줄인다.
 
 ```c
 float *pop_column(matrix *m, int c)
 {
     float *col = calloc(m->rows, sizeof(float));
-    int i, j;
-    for(i = 0; i < m->rows; ++i){
+    for(int i = 0; i < m->rows; ++i){
         col[i] = m->vals[i][c];
-        for(j = c; j < m->cols-1; ++j){
+        for(int j = c; j < m->cols-1; ++j){
             m->vals[i][j] = m->vals[i][j+1];
         }
     }
@@ -329,172 +117,86 @@ float *pop_column(matrix *m, int c)
 }
 ```
 
-함수 이름: pop\_column
+각 행의 실제 할당 크기는 줄이지 않는다. 반환된 `col`은 호출자가 해제해야 하고, `c`가 유효 범위인지 함수가 검사하지 않는다는 점도 함께 봐야 한다.
 
-입력:&#x20;
+## hold_out_matrix는 행을 복사하지 않고 넘긴다
 
-* matrix \*m (포인터 변수, 삭제될 열을 포함하는 행렬)
-* int c (정수, 삭제할 열의 인덱스)
-
-동작:&#x20;
-
-* 입력된 행렬에서 해당 열의 데이터를 꺼내어 배열 형태로 리턴하고, 입력된 행렬에서 해당 열의 데이터를 삭제한다.
-
-설명:&#x20;
-
-* 입력된 행렬의 열을 하나 제거하고 그 열의 데이터를 배열 형태로 리턴하는 함수이다.&#x20;
-* 입력된 행렬의 c번째 열의 데이터를 col 배열에 저장하고, 해당 열을 제거한 후 열의 개수를 감소시킨다.&#x20;
-* 삭제된 열 이후의 열은 모두 왼쪽으로 한 칸씩 이동하여 메모리 상에 유지된다.
-
-
-
-### csv\_to\_matrix
+`hold_out_matrix`는 임의의 행 주소를 새 matrix `h`에 넣고, 원본 active 구간의 마지막 행 주소를 빈자리에 옮긴다.
 
 ```c
-matrix csv_to_matrix(char *filename)
-{
-    FILE *fp = fopen(filename, "r");
-    if(!fp) file_error(filename);
+int index = rand()%m->rows;
+h.vals[i] = m->vals[index];
+m->vals[index] = m->vals[--(m->rows)];
+```
 
-    matrix m;
-    m.cols = -1;
+이 방식은 값을 복사하지 않고 선택한 행의 소유권을 `m`에서 `h`로 이동한다. `m->rows`를 매번 줄이므로 같은 active 행이 다시 선택되지 않는다.
 
-    char *line;
+그 결과 해제 규칙이 중요하다.
 
-    int n = 0;
-    int size = 1024;
-    m.vals = calloc(size, sizeof(float*));
-    while((line = fgetl(fp))){
-        if(m.cols == -1) m.cols = count_fields(line);
-        if(n == size){
-            size *= 2;
-            m.vals = realloc(m.vals, size*sizeof(float*));
-        }
-        m.vals[n] = parse_fields(line, m.cols);
-        free(line);
-        ++n;
+- `h.vals[i]`와 남은 `m.vals[i]`는 서로 다른 행을 소유한다.
+- `free_matrix(h)`는 hold-out된 행을 해제한다.
+- `free_matrix(*m)`은 감소한 `m.rows` 안의 나머지 행만 해제한다.
+- 원본 `m.vals` 포인터 배열의 capacity는 줄이지 않지만, `rows` 밖 주소를 다시 행처럼 사용하면 안 된다.
+
+`n > m->rows`이면 반복 중 `rand()%m->rows`의 분모가 0이 될 수 있다. 호출 전에 `0 <= n <= rows`를 확인해야 한다.
+
+## CSV 로드는 파일과 열 수를 어떻게 다루나
+
+`csv_to_matrix`는 1,024개 행 포인터로 시작해 필요할 때 두 배로 늘린다. 첫 줄의 field 수를 전체 matrix의 `cols`로 사용한다.
+
+```c
+int n = 0;
+int size = 1024;
+m.vals = calloc(size, sizeof(float*));
+
+while((line = fgetl(fp))){
+    if(m.cols == -1){
+        m.cols = count_fields(line);
     }
-    m.vals = realloc(m.vals, n*sizeof(float*));
-    m.rows = n;
-    return m;
+    if(n == size){
+        size *= 2;
+        m.vals = realloc(
+            m.vals, size*sizeof(float*));
+    }
+    m.vals[n] = parse_fields(line, m.cols);
+    free(line);
+    ++n;
 }
 ```
 
-함수 이름: csv\_to\_matrix
+마지막에는 행 포인터 배열을 실제 행 수로 줄인다. 그러나 제시된 함수에는 `fclose(fp)`가 없다. 이 경로를 반복 호출한다면 열린 파일이 계속 남을 수 있으므로 읽기가 끝난 지점의 close 여부를 확인해야 한다.
 
-입력:&#x20;
+빈 파일이면 `m.cols`가 초기값 `-1`로 남는다. 행마다 field 수가 다른 경우에도 첫 줄의 열 수를 기준으로 `parse_fields`를 호출한다. 따라서 loader를 신뢰하기 전에 빈 파일과 열 수 불일치를 별도로 검사하는 편이 안전하다.
 
-* char\* filename: 읽어들일 CSV 파일 이름
-
-동작:&#x20;
-
-* CSV 파일을 읽어들여 matrix 구조체로 변환하는 함수입니다.&#x20;
-* 파일을 읽어들일 때, 각 라인의 컬럼 수를 파악하고, 필드 값을 파싱하여 matrix 구조체에 저장합니다.
-
-설명:&#x20;
-
-* 입력받은 파일 이름으로 파일을 열어서 파일이 없으면 에러를 발생시키고, 파일을 성공적으로 열었을 때, matrix 구조체를 초기화합니다.&#x20;
-* 그 다음, 파일에서 한 줄씩 읽어들여 각 라인의 컬럼 수를 파악합니다. 라인의 컬럼 수가 처음 읽어들인 경우, matrix 구조체의 컬럼 수로 설정합니다.&#x20;
-* 이후, 각 라인의 필드 값을 파싱하여 matrix 구조체에 저장합니다. 만약, 필드 값 파싱 도중 에러가 발생하면 프로그램이 종료됩니다.&#x20;
-* 모든 라인을 읽어들인 후, 메모리를 최적화하기 위해 matrix 구조체가 저장된 메모리의 크기를 조정합니다.&#x20;
-* 마지막으로, matrix 구조체의 행 수를 저장하고, matrix 구조체를 반환합니다.
-
-
-
-### matrix\_to\_csv
+`matrix_to_csv`라는 이름도 파일 저장으로 오해하기 쉽다. 이 함수는 파일명을 받지 않고 `printf`로 표준 출력에 CSV를 쓴다.
 
 ```c
-void matrix_to_csv(matrix m)
-{
-    int i, j;
+if(j > 0) printf(",");
+printf("%.17g", m.vals[i][j]);
+```
 
-    for(i = 0; i < m.rows; ++i){
-        for(j = 0; j < m.cols; ++j){
-            if(j > 0) printf(",");
-            printf("%.17g", m.vals[i][j]);
-        }
-        printf("\n");
+## top-k 정확도의 shape 전제
+
+각 row의 예측에서 상위 `k` 인덱스를 뽑고, truth의 그 위치 중 하나라도 0이 아니면 correct를 1 증가시킨다.
+
+```c
+top_k(guess.vals[i], truth.cols,
+      k, indexes);
+
+for(int j = 0; j < k; ++j){
+    int class_id = indexes[j];
+    if(truth.vals[i][class_id]){
+        ++correct;
+        break;
     }
 }
 ```
 
-```
-0,0,0
-0,0,0
-0,0,0
-```
+마지막 반환값은 `correct / truth.rows`다. 함수 내부에는 다음 조건을 검사하는 assert가 없다.
 
-* 위와 같은 형태로 출력됩니다.
+1. truth와 guess의 row 수가 같은가?
+2. 두 matrix의 class 열 수가 같은가?
+3. `1 <= k <= truth.cols`인가?
+4. `truth.rows > 0`인가?
 
-함수 이름: matrix\_to\_csv
-
-입력:&#x20;
-
-* matrix m (CSV 파일로 저장할 행렬)
-
-동작:&#x20;
-
-* 입력으로 주어진 행렬을 CSV 파일 형식으로 출력합니다. 각 행과 열은 쉼표로 구분되며, 각 행의 끝에는 개행 문자가 포함됩니다.
-
-설명:&#x20;
-
-* 함수는 주어진 행렬을 인자로 받아서, 각 원소를 CSV 파일 형식으로 출력합니다. 이 함수는 주로 행렬의 데이터를 저장하거나 출력하는 데 사용됩니다.
-
-
-
-### print\_matrix
-
-```c
-void print_matrix(matrix m)
-{
-    int i, j;
-    printf("%d X %d Matrix:\n",m.rows, m.cols);
-    printf(" __");
-    for(j = 0; j < 16*m.cols-1; ++j) printf(" ");
-    printf("__ \n");
-
-    printf("|  ");
-    for(j = 0; j < 16*m.cols-1; ++j) printf(" ");
-    printf("  |\n");
-
-    for(i = 0; i < m.rows; ++i){
-        printf("|  ");
-        for(j = 0; j < m.cols; ++j){
-            printf("%15.7f ", m.vals[i][j]);
-        }
-        printf(" |\n");
-    }
-    printf("|__");
-    for(j = 0; j < 16*m.cols-1; ++j) printf(" ");
-    printf("__|\n");
-}
-```
-
-```
-__                                               __
-
-|                                                   |
-|        0.0000000       0.0000000       0.0000000  |
-|        0.0000000       0.0000000       0.0000000  |
-|        0.0000000       0.0000000       0.0000000  |
-|__                                               __|
-
-```
-
-* 위와 같은 형태로 출력됩니다.
-
-함수 이름: print\_matrix
-
-입력:&#x20;
-
-* matrix m (출력하고자 하는 행렬)
-
-동작:&#x20;
-
-* 입력으로 받은 행렬을 예쁘게 포맷팅하여 출력한다. 각 요소는 15.7f 형식으로 출력되며, 행과 열의 경계에는 선으로 구분된 테두리가 그려진다.
-
-설명:&#x20;
-
-* 이 함수는 주어진 행렬을 예쁘게 출력하기 위해 만들어졌다.&#x20;
-* 입력으로 받은 행렬을 이중 for 루프를 통해 순회하며, 각 요소를 15.7f 형식으로 출력한다.&#x20;
-* 이때 각 행과 열의 경계에는 선으로 구분된 테두리가 그려진다.
+이 조건이 깨지면 정확도가 틀리는 데 그치지 않고 범위를 벗어난 메모리를 읽거나 0으로 나눌 수 있다. Darknet matrix helper를 안전하게 쓰는 기준은 단순하다. **행 포인터를 새로 만들었는지, 다른 matrix로 넘겼는지, 논리 shape만 줄였는지를 함수마다 구분하고 shape 전제를 호출 전에 확인해야 한다.**

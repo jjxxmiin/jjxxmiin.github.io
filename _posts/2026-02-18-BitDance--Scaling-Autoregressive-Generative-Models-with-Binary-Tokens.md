@@ -1,127 +1,86 @@
 ---
 layout: post
-title: '[2026-02-15] BitDance: 바이너리 토큰과 디퓨전의 결합, 자동회귀 모델의 새로운 지평을 열다'
+title: '2^256 바이너리 토큰이 코드북을 없앨까: BitDance FID 1.24와 30.2배 속도의 조건'
 date: '2026-02-18'
 categories: Tech
 tags:
-  - 디퓨전모델
-  - 경량화
-  - 온디바이스AI
+  - BitDance
+  - BinaryToken
+  - AutoregressiveGeneration
+  - DiffusionHead
   - 이미지생성
-  - 트랜스포머
 math: true
-summary: 바이너리 토큰과 디퓨전 헤드로 AR 모델의 한계를 돌파한 BitDance 기술 분석
+summary: 256비트 토큰과 Binary Diffusion Head가 거대한 Softmax를 피하는 방법, FID 1.24와 30.2배 수치의 적용 범위를 설명합니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.14041.png
   alt: Paper Thumbnail
 ---
 
-# BitDance: 바이너리 토큰과 디퓨전의 결합, 자동회귀 모델의 새로운 지평을 열다
+BitDance의 256비트 토큰은 $2^{256}$개짜리 Softmax를 만들지 않고도 매우 큰 상태 공간을 표현하지만, 그 모든 상태를 실제로 고르게 사용하는 거대한 코드북이 생긴다는 뜻은 아닙니다. 분류 head 대신 작은 diffusion process로 다음 binary vector를 생성하고, 여러 patch를 묶어 예측해 속도를 되찾는 구조입니다.
 
-## 1. Executive Summary (핵심 요약)
+## 코드북 크기를 늘릴수록 Softmax가 커지는 문제
 
-최근 생성형 AI 분야는 확산 모델(Diffusion Models)과 자동회귀 모델(Autoregressive Models, AR)이라는 두 거대한 축을 중심으로 발전해 왔습니다. 하지만 기존의 AR 모델은 고정된 코드북(Codebook) 크기에 갇혀 표현력의 한계를 겪거나, Softmax 연산의 비용 문제로 인해 대규모 토큰 공간을 활용하는 데 어려움이 있었습니다.
+전통적인 AR 이미지 모델은 patch를 8,192개나 16,384개 codebook index 중 하나로 바꾼 뒤 다음 index를 분류합니다. codebook이 커지면 출력 layer와 Softmax 비용도 커지고, 일부 code만 쓰이는 collapse를 관리해야 합니다. 반대로 codebook이 작으면 복잡한 texture를 같은 index로 뭉갤 수 있습니다.
 
-오늘 분석할 **BitDance**는 이러한 패러다임을 완전히 뒤바꾸는 혁신적인 아키텍처를 제시합니다. 핵심은 간단하면서도 강력합니다. 인덱스 기반의 이산적 토큰 대신 **바이너리 토큰(Binary Tokens)**을 사용하고, 이를 생성하기 위해 **바이너리 디퓨전 헤드(Binary Diffusion Head)**를 도입한 것입니다. 
+BitDance tokenizer는 patch를 $d$차원 binary vector로 바꿉니다. 예를 들어 $d=256$이면
 
-BitDance는 각 토큰이 $2^{256}$이라는 가늠조차 하기 힘든 방대한 상태를 가질 수 있게 함으로써 압도적인 표현력을 확보했습니다. 결과적으로 ImageNet 256x256 벤치마크에서 **FID 1.24**라는 AR 모델 사상 최고의 성적을 거두었으며, 'Next-patch Diffusion' 기법을 통해 기존 모델 대비 **최대 30배 이상의 추론 속도 향상**을 달성했습니다. 본 분석에서는 BitDance가 어떻게 기술적 난제를 해결했는지, 그리고 이것이 향후 AI 생태계에 어떤 영향을 미칠지 심층적으로 파헤쳐 보겠습니다.
+$$
+b\in\{-1,1\}^{256}
+$$
 
----
+이고 이론적인 조합 수는 $2^{256}$입니다. 학습 forward에서는 `sign` 함수로 이진화하고, 미분할 때는 Straight-Through Estimator(STE)를 사용합니다.
 
-## 2. Introduction & Problem Statement (연구 배경 및 문제 정의)
+여기서 중요한 차이는 $2^{256}$개의 embedding row를 메모리에 만드는 것이 아니라 256개의 bit를 출력한다는 점입니다. 이론적 조합 수가 크다는 사실만으로 tokenizer가 각 조합을 의미 있게 쓰거나 미세 색조를 손실 없이 보존한다는 보장은 없습니다.
 
-### 2.1 기존 자동회귀(AR) 모델의 병목 현상
-전형적인 AR 이미지 생성 모델(예: VQGAN, DALL-E, LlamaGen)은 이미지를 격자 형태의 이산적 토큰으로 변환한 뒤, 이를 순차적으로 예측합니다. 이 과정에서 발생하는 치명적인 문제점은 다음과 같습니다.
+## Binary Diffusion Head가 분류를 대신한다
 
-1.  **코드북의 제한(Codebook Constraint):** 대부분의 모델은 8,192 또는 16,384 크기의 유한한 코드북을 사용합니다. 이는 고해상도 이미지의 복잡한 텍스처를 담아내기에 턱없이 부족하며, 코드북 붕괴(Codebook Collapse) 현상을 방지하기 위한 정교한 트레이닝 기법이 요구됩니다.
-2.  **Softmax의 저주:** 토큰 공간이 커질수록 마지막 레이어의 Softmax 연산량과 파라미터 수가 기하급수적으로 증가합니다. 만약 우리가 $2^{256}$개의 상태를 표현하고 싶다면, 기존의 분류(Classification) 방식으로는 설계 자체가 불가능합니다.
-3.  **순차적 추론의 비효율성:** 토큰을 하나씩 생성하는 방식은 고해상도(1024x1024 이상) 환경에서 극심한 추론 지연을 초래합니다.
+다음 token을 한 class로 고르는 대신 Transformer context를 조건으로 Gaussian noise에서 binary vector를 복원합니다. 원문은 continuous-space diffusion과 MSE loss를 사용한다고 설명합니다.
 
-### 2.2 BitDance의 등장 배경
-BitDance 연구팀은 질문을 던졌습니다. "왜 우리는 굳이 인덱스를 분류해야 하는가?" 그들은 이진 벡터(Binary Vector) 자체가 훌륭한 토큰이 될 수 있음을 간파했습니다. 하지만 이진 벡터는 미분이 불가능하며, 고차원 공간에서의 샘플링이 어렵다는 문제가 있습니다. BitDance는 이 지점에서 **디퓨전(Diffusion)**을 솔루션으로 끌어들입니다.
+이 선택은 거대한 class vocabulary를 피하지만, 단일 linear layer와 Softmax보다 head가 단순해지는 것은 아닙니다. token 하나를 얻기 위해 여러 denoising step과 schedule, sampling hyperparameter가 필요합니다. 전체 비용은 다음 두 항의 균형입니다.
 
----
+- AR backbone이 몇 번 context를 계산하는가
+- 각 위치의 diffusion head가 몇 step을 도는가
 
-## 3. Core Methodology (핵심 기술 및 아키텍처 심층 분석)
+BitDance가 빠른 이유를 binary token 하나로만 설명할 수 없는 이유입니다.
 
-BitDance의 혁신은 크게 세 가지 축으로 나뉩니다: **Binary Tokenization**, **Binary Diffusion Head**, 그리고 **Next-patch Diffusion**입니다.
+## Next-patch Diffusion은 순차 길이를 줄인다
 
-### 3.1 Binary Tokenization: $2^{256}$의 무한한 표현력
-기존 VQ-VAE가 이미지 패치를 특정 인덱스로 매핑했다면, BitDance의 인코더는 패치를 $d$-차원(예: $d=256$)의 바이너리 벡터 $b \in \{-1, 1\}^d$로 매핑합니다. 
+일반 AR은 $x_i$가 나와야 $x_{i+1}$을 생성합니다. Next-patch Diffusion은 Transformer가 여러 미래 patch의 context를 제공하고 diffusion head가 binary token 묶음을 병렬로 denoise합니다. 완전 병렬 생성은 아니지만 한 patch씩 기다리는 횟수를 줄입니다.
 
--   **정보 밀도:** 단일 토큰이 가질 수 있는 경우의 수가 $2^{256}$개에 달합니다. 이는 우주의 원자 수보다도 많은 수치로, 사실상 연속적인 공간에 가까운 표현력을 제공하면서도 이진화된 데이터의 효율성을 유지합니다.
--   **양자화(Quantization):** 학습 시에는 `sign` 함수를 사용하고, 역전파를 위해 Straight-Through Estimator(STE)를 적용하여 미분 불가능성 문제를 해결합니다.
+원문은 260M 모델이 1.4B 모델보다 품질이 높으면서 8.7배 빠른 비교와, 1024×1024 생성에서 최대 30.2배 속도 향상·1~2초 생성을 제시합니다. 이 세 숫자는 같은 비교라고 가정하면 안 됩니다.
 
-### 3.2 Binary Diffusion Head: 분류에서 생성으로의 전환
-이 모델의 가장 천재적인 부분입니다. 이전 토큰들을 기반으로 다음 바이너리 토큰을 예측할 때, Softmax를 통한 분류 대신 **연속 공간 디퓨전(Continuous-space Diffusion)**을 사용합니다.
+| 수치 | 확인해야 할 조건 |
+|---|---|
+| 8.7배 | 260M과 1.4B의 hardware, batch, sampling 설정 |
+| 30.2배 | 비교 AR baseline과 생성 patch 수 |
+| 1~2초 | GPU 종류, 정밀도, CFG, 해상도별 step |
+| FID 1.24 | ImageNet 256×256 평가와 sampling budget |
 
-1.  **과정:** 트랜스포머의 출력(Context)을 조건으로 하여, 가우시안 노이즈에서 시작해 점진적으로 다음 바이너리 토큰의 형태를 복원해 나갑니다.
-2.  **손실 함수:** 평균 제곱 오차(MSE) 기반의 디퓨전 로스를 사용하므로, 수만 개의 클래스를 분류할 때 발생하는 크로스 엔트로피 손실의 불안정성을 피할 수 있습니다.
-3.  **결과:** $2^{256}$개의 클래스를 가진 분류 문제를 단 몇 단계의 디퓨전 샘플링 문제로 치환함으로써 압도적인 유연성을 확보했습니다.
+이 글에는 해당 hardware와 batch의 세부 표가 없습니다. 따라서 모바일이나 실시간 비디오 속도로 곧바로 환산할 수 없습니다.
 
-### 3.3 Next-patch Diffusion: 병렬 추론의 극대화
-기존 AR 모델은 토큰 $x_i$를 생성해야만 $x_{i+1}$을 생성할 수 있었습니다. BitDance는 이를 확장하여 **여러 개의 패치를 동시에 생성**하는 기법을 제안합니다.
+## FID 1.24가 보여주는 범위와 남는 손실
 
--   **작동 원리:** 특정 시점 $t$에서 트랜스포머가 미래의 패치들에 대한 컨텍스트 정보를 미리 제공하고, 디퓨전 헤드가 이 정보를 바탕으로 병렬적으로 여러 바이너리 토큰을 디노이징합니다.
--   **이점:** 품질 저하를 최소화하면서도 추론 단계를 획기적으로 줄여, 260M 파라미터 모델이 1.4B 파라미터 모델보다 더 뛰어난 성능을 내면서도 8.7배 빠르게 동작하게 만듭니다.
+학습은 먼저 8×8 또는 16×16 downsampling 비율의 binary tokenizer를 만든 뒤 이를 고정하고, Transformer와 diffusion head를 학습하는 두 단계로 설명됩니다. ImageNet 256×256에서 FID 1.24를 기록하고 VAR·LlamaGen보다 낫다는 결과가 핵심입니다. CFG로 품질과 조건 준수의 균형도 조절합니다.
 
----
+FID는 생성 분포의 유사도를 요약하지만 다음을 직접 보장하지 않습니다.
 
-## 4. Implementation Details & Experiment Setup (구현 및 실험 환경)
+- 한 이미지의 글자나 객체 관계가 정확한지
+- binary quantization의 banding이나 작은 색 변화 손실
+- text-to-image prompt를 세밀하게 따르는지
+- 데이터가 적은 특수 도메인에서도 같은 bit 활용률이 나오는지
 
-### 4.1 데이터셋 및 모델 구성
--   **데이터:** ImageNet (256x256, 512x512) 및 대규모 멀티모달 데이터셋(텍스트-이미지 페어).
--   **모델 사이즈:** 260M(Small)부터 대규모 파라미터까지 확장 가능하도록 설계.
--   **토크나이저:** 8x8 또는 16x16 다운샘플링 비율을 가진 바이너리 VQ-VAE.
+$2^{256}$이라는 표현력은 상한이고, tokenizer의 reconstruction error와 bit entropy가 실제 유효 용량을 결정합니다.
 
-### 4.2 학습 전략
--   **2단계 학습:** 먼저 강력한 바이너리 토크나이저를 학습시킨 후, 고정된 토크나이저 위에서 바이너리 디퓨전 헤드를 포함한 트랜스포머를 학습시킵니다.
--   **CFG(Classifier-Free Guidance):** 디퓨전 모델의 핵심 기법인 CFG를 적극적으로 활용하여 이미지의 퀄리티와 프롬프트 준수 능력을 조절합니다.
+## 재현할 때는 세 구성요소를 따로 비교한다
 
----
+BitDance를 기존 VQ AR 모델과 비교하려면 end-to-end FID와 시간만 보지 말고 다음 ablation이 필요합니다.
 
-## 5. Comparative Analysis (성능 평가 및 비교)
+1. 같은 backbone에서 index token과 binary token의 reconstruction 품질
+2. 같은 token에서 Softmax head와 diffusion head의 step별 비용
+3. 한 patch 생성과 next-patch 묶음 생성의 품질 저하
+4. 256×256과 1024×1024에서 최대 메모리와 P95 latency
+5. bit별 사용 빈도, 상관관계와 tokenizer collapse
 
-### 5.1 양적 지표 (Quantitative Results)
-BitDance는 ImageNet 256x256 벤치마크에서 경이로운 수치를 기록했습니다.
--   **FID (Fréchet Inception Distance):** **1.24** 달성. 이는 기존 SOTA AR 모델인 VAR나 LlamaGen을 상회하는 수치입니다.
--   **효율성:** 260M 파라미터만으로도 1.4B 규모의 모델들을 능가하는 가성비를 보여주었습니다.
-
-### 5.2 추론 속도 (Inference Speed)
-고해상도 이미지(1024x1024) 생성 시, 기존 AR 모델들이 수십 초가 걸리던 작업을 BitDance는 'Next-patch Diffusion' 덕분에 단 1~2초 내에 완료합니다. 논문에 따르면 기존 모델 대비 **30.2x 속도 향상**이 관찰되었습니다.
-
-### 5.3 시각적 품질 (Qualitative Analysis)
-공개된 결과물을 보면, 바이너리 토큰 특유의 높은 정보 밀도 덕분에 머리카락, 질감, 복잡한 패턴 등 세밀한 디테일이 뭉개지지 않고 정확하게 표현됩니다. 특히 텍스트-이미지 생성 시 프롬프트 내의 복잡한 관계를 정확히 이해하고 이미지에 투영하는 능력이 탁월합니다.
-
----
-
-## 6. Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력)
-
-필자는 BitDance의 기술이 단순한 연구를 넘어 산업계에 미칠 파급력이 막대하다고 봅니다.
-
-1.  **모바일 및 엣지 AI:** 260M라는 경량화된 파라미터로 고성능 생성이 가능하다는 점은 스마트폰 내장형 온디바이스 AI(On-device AI) 시장의 게임 체인저가 될 것입니다.
-2.  **실시간 비디오 생성:** 고해상도 생성 속도가 비약적으로 향상됨에 따라, AR 기반의 비디오 생성 모델들이 겪던 고질적인 속도 문제를 해결할 실마리를 제공했습니다.
-3.  **디자인 및 콘텐츠 제작:** 30배 빠른 생성 속도는 디자이너들이 실시간으로 피드백을 주고받으며 결과물을 수정하는 '인터랙티브 생성' 환경을 구축할 수 있게 합니다.
-4.  **차세대 파운데이션 모델:** 텍스트와 이미지를 동일한 '바이너리 토큰' 체계로 통합할 경우, 진정한 의미의 멀티모달 통합 모델로 발전할 가능성이 큽니다.
-
----
-
-## 7. Discussion: Limitations & Critical Critique (한계점 및 기술적 비평)
-
-전문가로서 BitDance에 대한 비판적 시각도 유지해야 합니다.
-
--   **디퓨전 헤드의 복잡성:** 기존의 단순한 선형 레이어(Linear Layer) + Softmax 대신 디퓨전 과정을 매 스텝 반복해야 한다는 점은 아키텍처의 복잡도를 높입니다. 비록 전체 속도는 빠르지만, 구현의 난이도가 높고 하이퍼파라미터 튜닝이 까다로울 수 있습니다.
--   **바이너리 토큰의 손실:** $2^{256}$이 크긴 하지만, 결국 이산화 과정에서의 정보 손실은 존재합니다. 아주 미세한 색상 변화나 그라데이션에서 밴딩 현상(Artifacts)이 발생할 가능성이 있으며, 이에 대한 심층적인 연구가 더 필요합니다.
--   **데이터 의존성:** 높은 엔트로피를 가진 바이너리 토큰을 제대로 학습시키기 위해서는 압도적으로 많은 양의 고품질 데이터가 필수적입니다. 데이터가 부족한 도메인에서도 동일한 성능을 낼 수 있을지는 의문입니다.
-
----
-
-## 8. Conclusion (결론 및 인사이트)
-
-BitDance는 **"생성이 분류보다 효율적일 수 있다"**는 역설적인 명제를 증명해 냈습니다. 바이너리 토큰이라는 고밀도 표현 방식과 디퓨전이라는 강력한 샘플링 도구를 결합함으로써, 자동회귀 모델이 가졌던 고질적인 속도와 품질의 트레이드오프를 깨트렸습니다.
-
-이 기술은 향후 생성 AI 아키텍처가 나아가야 할 방향을 제시하고 있습니다. 이제 우리는 더 이상 수만 개의 인덱스를 관리하는 거대한 코드북에 집착할 필요가 없습니다. BitDance가 열어젖힌 '이진화된 생성'의 시대는 더 가볍고, 더 빠르며, 더 정교한 AI의 미래를 약속하고 있습니다.
-
-**필자의 한 줄 평:** "BitDance는 AR 모델에게 날개를 달아준 격이다. 이제 속도 때문에 디퓨전 모델만 고집하던 시대는 끝났다."
+작은 260M model이라는 이유만으로 on-device가 되는 것도 아닙니다. tokenizer, AR backbone, diffusion head의 전체 메모리와 지원 kernel을 함께 봐야 합니다. BitDance의 실질적 기여는 “무한한 codebook”이 아니라, 큰 discrete state를 거대한 분류 문제로 만들지 않는 출력 설계와 순차 생성을 묶음 단위로 줄인 데 있습니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.14041)

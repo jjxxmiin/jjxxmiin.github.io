@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "HazardNet 톺아보기"
-summary: "도로위에 위험물을 감지하는 방법에 대한 논문"
+title:  "도로 위험물 데이터가 없을 때: HazardNet이 합성 장애물을 아무 곳에나 놓지 않은 이유"
+summary: "실제 도로 잔해가 드문 상황에서 HazardNet이 3D object randomization과 도로·차선의 semantic constraint를 결합해 synthetic·real·hybrid 학습 데이터를 만든 방식을 설명합니다."
 image:
   path: /assets/img/thumb/HazardNet.jpg
   alt: HazardNet 톺아보기 대표 이미지
@@ -9,150 +9,47 @@ date:   2024-02-10 16:00 -0400
 categories: Paper
 tags:
   - 논문리뷰
+  - 컴퓨터비전
+  - 아키텍처분석
 math: true
 ---
 
-## 도로 위의 위험물 감지 : 어떻게 정의하고, 어떻게 접근해야할까?
+도로 위험물 합성 데이터는 물체의 색과 자세만 무작위화해서는 부족하며, 실제 차량 경로나 인접 차선처럼 장애물이 의미 있게 존재할 위치에 배치해야 합니다.
 
-최근에 도로 위의 위험물을 감지하는 프로젝트를 진행하게 되었다. 이를 위해 가장 먼저 고민해야 할 문제는 바로 '위험물'이라는 개념을 어떻게 정의할 것일까에 대한 문제를 정의하는 것이다. 이는 프로젝트의 방향성을 결정짓는 중요한 요소이며, 이에 대한 정의 없이는 올바른 방향으로 나아갈 수 없다.
+HazardNet의 출발점은 detector 선택보다 “무엇을 위험물로 부를 것인가”와 “드문 positive example을 어떻게 만들 것인가”입니다. 실제 도로에는 위험물이 자주 나타나지 않아 대량의 현실 label을 모으기 어렵고, 정상 도로 데이터는 상대적으로 풍부합니다.
 
-이 문제에 대해 다양한 의견을 살펴보던 중, Nvidia와 Stanford에서 작성한 'HazardNet: Road Debris Detection by Augmentation of Synthetic Models'이라는 논문을 발견하였다. 이 논문은 매우 흥미로운 접근 방식을 제시하고 있다.
+## 문제 정의가 Data 생성 범위를 결정합니다
 
-## HazardNet: 합성 모델의 증강을 통한 도로 잔해 감지
+원문이 다루는 대상에는 골판지 상자, 크고 작은 돌, 타이어와 바퀴, pallet, 사체, 나무통, traffic cone, barrel, mattress, 분리된 muffler, 쓰레기통, 표지판 기둥과 trailer 등이 포함됩니다. 모두 외형이 크게 다르므로 하나의 “debris” class가 배워야 할 분포가 넓습니다.
 
-이 논문은 현실 세계에서 발견되기 어려운 위험물을 검출하는 데 도움을 주는 학습 방법을 제안한다. 실제 현실에서는 위험물을 마주치는 상황이 드물기 때문에, 충분한 데이터를 확보하는 것이 큰 문제다.
+배경 데이터도 highway, freeway, 교외·도심·시골 도로, 비포장길, 실내외 parking lot처럼 다양하게 모았습니다. 시간은 낮·밤·새벽과 황혼·일출과 일몰, 날씨는 맑음·구름·비·눈·안개 등을 포함합니다. 먼저 이 환경 다양성을 확보한 뒤 synthetic object를 추가합니다.
 
-하지만 이 논문은 이러한 문제를 해결하기 위한 3가지 방법을 제안한다.
+![HazardNet 데이터 생성 흐름](/assets/img/post_img/hazardnet/1.png)
 
-- Semantic Augmentation: 의미론적 증강은 기존의 데이터에 다양한 변형을 가해 새로운 데이터를 생성하는 방법이다. 이를 통해 학습 데이터의 다양성을 높이고, 모델의 일반화 성능을 향상시킬 수 있다.
+실무에서 먼저 적을 것은 model 이름이 아니라 위험물 목록, 탐지해야 할 거리와 크기, 차량 진행에 실제 위협이 되는 위치입니다. 이 정의가 없으면 합성 데이터 수만 늘고 평가할 positive 기준은 흔들립니다.
 
-- Domain Randomization: 도메인 무작위화는 학습 데이터의 배경이나 조명 등의 요소를 무작위로 변화시켜, 모델이 특정 환경에 과적합되는 것을 방지하는 방법이다. 이를 통해 모델이 다양한 환경에서도 잘 동작할 수 있게 한다.
+## Domain Randomization은 외형 차이를 넓힙니다
 
-- HazardNet: HazardNet은 위험물 검출을 위한 신경망이다. 이 논문에서 제안하는 방법을 통해 학습된 모델은, 실제 환경에서 발생할 수 있는 다양한 위험물을 효과적으로 감지할 수 있다.
+논문 흐름은 20개의 3D model을 수집하고 simulator에서 instance segmentation mask를 만듭니다. Object의 3D 위치와 yaw·pitch·roll, color tone, material, fog나 blur에 따른 visibility를 무작위로 sampling합니다. 조명, 날씨와 하루 중 시간도 환경 조건에 포함됩니다.
 
-## 어떤 프로세스를 가지는가?
+목적은 synthetic과 real image 사이의 색·texture·shadow 차이에 model이 과도하게 의존하지 않도록 외형 분포를 넓히는 것입니다. 하지만 randomization만으로는 “어디에 나타나는가”라는 의미를 보장하지 않습니다. 하늘이나 건물 벽에 debris를 붙인 image는 다양해 보여도 도로 장애물 학습에는 부적절할 수 있습니다.
 
+## Semantic Augmentation은 놓일 장소를 제한합니다
 
+마지막 합성 단계는 randomization된 object를 real road image에 배치합니다. 이때 자율주행차의 planned path, 왼쪽·오른쪽 인접 차선 또는 shoulder처럼 도로 잔해가 존재할 수 있는 위치를 사용합니다.
 
-![1](/assets/img/post_img/hazardnet/1.png)
+![도로 의미를 반영한 합성 배치](/assets/img/post_img/hazardnet/4.png)
 
+이 semantic constraint는 단순 복붙과 HazardNet 접근을 가르는 핵심입니다. Detector가 “특이한 작은 물체”만 외우는 대신, 주행 가능한 도로 영역을 막는 물체와 다른 도로 요소를 구분하도록 학습 신호를 만듭니다. 합성 mask와 실제 배경 label이 맞물려야 하므로 object 경계와 배치 위치의 label도 함께 점검해야 합니다.
 
+학습 데이터는 Sim, Real, Hybrid(Sim+Real)로 나눠 비교합니다. 실제 positive가 조금이라도 있다면 합성만으로 끝내지 않고 hybrid가 어떤 차이를 내는지 확인할 수 있는 설계입니다.
 
-위험물이 존재하지 않는 데이터셋은 실제로 꽤 많이 존재한다. 이러한 데이터를 활용하여, HazardNet는 다음과 같은 프로세스를 거친다.
+## 평가는 크기별 실패를 숨기지 않아야 합니다
 
-- 도로 이미지와 라벨링 데이터 준비: 우선, 도로 이미지와 해당 이미지에 대한 라벨링 데이터를 준비한다.
+평가에는 mAP, true positive rate, false positive rate, precision과 recall이 사용됩니다. Object 높이에 따라 small 8~25 pixel, medium 25~100 pixel, large 100 pixel 초과로 나누고 전체 결과도 봅니다. 원문은 크기 bucket mAP에 small 0.5, medium 1, large 5의 가중치를 적용합니다.
 
-- 환경 정보 추출: 이미지에서 환경에 대한 정보를 추출한다. 이 정보에는 시간, 장소, 날씨 등이 포함된다.
+![HazardNet 정량 평가](/assets/img/post_img/hazardnet/6.png)
 
-- Synthetic Model Generation: 추출한 환경 정보를 바탕으로, 유사한 환경을 가지는 합설 모델을 생성한다.
+따라서 최종 숫자 하나만 보면 작은 원거리 hazard의 실패가 가려질 수 있습니다. 크기별 mAP와 false positive를 따로 보고, 실제 운행에서 중요한 크기 구간이 논문의 가중치와 같은지 다시 정해야 합니다.
 
-- Domain Randomization: 생성한 모델의 도메인을 랜덤화한다. 이 과정에서 3D 포즈, 색조, 가시성 등의 요소가 변화한다.
-
-- Semantic Model Augmentation: 위험물이 실제로 존재할 수 있는 곳, 즉 도로 위에 Synthetic Model을 배치한다.
-
-- HazardNet 학습: 마지막으로, HazardNet을 통해 위험물 감지 모델을 학습한다.
-
-## Synthetic Model Generation
-
-- 20개의 다양한 모델 수집 : 골판지 상자, 크고 작은 돌, 타이어, 바퀴, 나무 팔레트, 도로 위의 사체, 나무 통, 교통 콘, 배럴, 매트리스, 분리된 머플러, 쓰레기통, 교통 표지판 기둥, 분리된 트레일러 등 다양한 사물들이 포함되어 있다.
-
-- 3D 정보 : 위도, 경도, 방향(요, 피치, 롤), 조명, 날씨 조건 등이 고려되어 있다.
-
-- 환경 조건 : 날씨 조건, 하루 중 시간 등 다양한 환경 변수들이 반영되어 있다.
-
-- 시뮬레이터를 통해 인스턴스 분할 마스크 생성 : 각각의 모델을
-
-
-
-![2](/assets/img/post_img/hazardnet/2.png)
-
-
-
-## Domain randomization on objects
-
-- 합성 모델과 실제 이미지 사이의 차이는 색상, 질감, 그림자와 같은 외관을 포함한다.
-
-- 따라서 합성 모델 생성에서는 시뮬레이터 내에서 모델을 무작위로 배치하여 다양한 색상과 질감을 부여하기 위해 도메인 랜덤화를 적용한다.
-
-- 구체적으로, 시뮬레이터 내에서 다양한 도로 파편 모델은 3D 위치, 3D 방향, 색조, 재질 및 안개 또는 흐림에 따른 가시성을 무작위로 샘플링하여 생성된다.
-
-
-![3](/assets/img/post_img/hazardnet/3.png)
-
-
-
-## Semantic model augmentation
-
-- 데이터 생성의 마지막 단계에서는 실제 이미지를 도메인 랜덤화된 합성 모델로 보강한다.
-
-- 증강 과정에서는 도로 파편과 같은 도로 위의 이상한 물체가 차량의 경로를 막는 의미를 인코딩해야 한다.
-
-- 도로 파편이 발생할 수 있는 위치에 대한 의미 제약을 추가함으로써 DNNs는 도로 파편을 다른 도로 요소와 효과적으로 정확히 구별하는 데 더 효과적으로 학습할 수 있다.
-
-- 따라서 합성 모델은 자율 주행 차량의 계획된 경로나 인근 차선(좌우 차선 또는 어깨)에 배치된다.
-
-
-
-![4](/assets/img/post_img/hazardnet/4.png)
-
-
-
-## HazardNet Architecture
-
-
-
-
-![5](/assets/img/post_img/hazardnet/5.png)
-
-
-
-## Data collection and labeling
-
-- 먼저, 실제 도로 파편이 없는 실데이터가 Sim 데이터를 위해 수집되었습니다. 이 데이터는 다양한 위치, 조명 조건, 낮과 밤, 그리고 날씨 조건에서 수집되었다.
-
-- 도로 유형: 고속도로, 자유도로, 교외 도로, 도심 도로, 시골 도로, 진흙길, 실내/외 주차장.
-
-- 시간: 주간, 야간, 새벽/황혼, 일몰/일출.
-
-- 날씨: 맑음, 태양, 달, 구름, 비, 눈, 안개.
-
-- 물체: 승용차, 자동차, 응급 차량, 대형 트럭, 자전거, 오토바이, 스쿠터, 다양한 교통 수단을 이용하는 보행자들.
-
-
-
-## Quantitative evaluation
-
-
-
-![6](/assets/img/post_img/hazardnet/6.png)
-
-
-
-HazardNet이 세 가지 훈련 데이터셋(Sim, Real 및 Hybrid: Sim + Real)에서 훈련된 성능을 양적으로 측정하기 위해 평균 정밀도(mAP), 실제 양성 비율(TPR), 거짓 양성 비율(FPR), 정밀도 및 재현율을 계산한다.
-
-mAP에 대해서, 두 테스트 데이터셋을 각각 small (8-25 픽셀 높이), medium (25-100 픽셀 높이), large (100 픽셀 이상 높이) 및 전체로 나누어 난이도로 분류한다.
-
-모든 테스트 인스턴스를 평가할 때, 각 버킷에 대한 mAP를 객체 크기에 비례하도록 가중치를 적용한다. small, medium 및 large 객체에 대한 해당 가중치는 각각 0.5, 1 및 5입니다.
-
-## Qualitative evaluation
-
-
-
-![7](/assets/img/post_img/hazardnet/7.png)
-
-
-
-
-
-
-![8](/assets/img/post_img/hazardnet/8.png)
-
-
-
-## Conclusion
-
-- 우리는 길거리의 장애물을 감지하기 위한 새로운 학습 프레임워크인 'HazardNet'을 제안하였다.
-
-- 적은 수의 합성 모델들을 활용하여, 실제로는 한 번도 보지 못했던 실제 이미지 속의 장애물들을 정확히 감지하는 데 도움을 줄 수 있었다.
-
-- 이러한 방법론은 광대한 스케일의 다양한 응용 분야에도 적용될 수 있음을 보여주었다.
+이 글의 원문에는 architecture diagram은 있지만 layer별 수치 설명은 없습니다. 그림만 보고 재현 가능한 network 사양을 만들어 냈다고 말할 수 없습니다. 가져갈 수 있는 결론은 제한된 3D asset도 domain randomization과 semantic placement를 결합하면 드문 real hazard 학습을 보완할 수 있다는 점이며, 실제 안전 성능은 새로운 도로·날씨·크기별 real test로 확인해야 합니다.

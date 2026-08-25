@@ -1,129 +1,124 @@
 ---
 layout: post
-title: '[2026-01-21] 로봇의 언어 이해를 혁신하는 BayesianVLA: Information Collapse 해결과 베이지안 분해
-  기술의 심층 분석'
+title: 'BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p'
 date: '2026-01-24'
 categories: Tech
 tags:
-  - 로보틱스
-  - 멀티모달
-  - 파인튜닝
-  - 온디바이스AI
-  - 트랜스포머
+  - BayesianVLA
+  - Vision-Language-Action
+  - Information Collapse
+  - Robot Learning
 math: true
-summary: VLA 모델의 치명적 결함인 '정보 붕괴'를 해결하는 베이지안 접근법 분석
+summary: Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior·posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD 성과를 점검합니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.15197.png
   alt: Paper Thumbnail
 ---
 
-# 로봇의 언어 이해를 혁신하는 BayesianVLA: Information Collapse 해결과 베이지안 분해 기술의 심층 분석
+BayesianVLA는 로봇이 화면만 보고 익숙한 action을 반복하는 shortcut을 줄이기 위해 vision-only prior와 vision-language posterior를 비교합니다. SimplerEnv OOD 성공률은 34.5%에서 45.8%로 올라 11.3 percentage point 개선됐지만, 여전히 절반이 넘는 episode는 성공하지 못했습니다.
 
-## 1. Executive Summary (핵심 요약)
+[원문 자료](https://huggingface.co/papers/2601.15197)에 소개된 “information collapse”를 수식과 실제 평가 단위로 살펴봅니다.
 
-최근 로보틱스 분야에서는 시각(Vision), 언어(Language), 그리고 행동(Action)을 단일 신경망으로 통합한 **VLA(Vision-Language-Action)** 모델이 비약적인 발전을 거듭하고 있습니다. 하지만 이러한 모델들이 실제 환경, 특히 학습 데이터셋에 포함되지 않은 '분포 외(Out-of-Distribution, OOD)' 상황에서 언어 지시사항을 무시하고 시각 정보에만 의존해 동작하는 **'정보 붕괴(Information Collapse)'** 현상이 심각한 문제로 대두되었습니다.
+## 로봇은 왜 language instruction을 무시하나
 
-본 분석에서 다룰 **BayesianVLA**는 이러한 고질적인 문제를 '베이지안 분해(Bayesian Decomposition)'와 '잠재 액션 쿼리(Latent Action Queries)'라는 혁신적인 방법론으로 해결한 연구입니다. 핵심 기여는 다음과 같습니다:
-1.  **현상 진단**: VLA 모델이 시각 정보만으로 다음 행동을 예측할 수 있는 데이터셋 편향 때문에 언어 지시사항을 무시하게 됨을 수학적으로 증명했습니다.
-2.  **방법론 제시**: 시각 정보만을 고려하는 'Prior'와 언어 지시사항을 포함하는 'Posterior'를 분리하는 이중 브랜치 아키텍처를 제안했습니다.
-3.  **목적 함수 최적화**: 조건부 점별 상호 정보량(Conditional Pointwise Mutual Information, PMI)을 최대화하여, 모델이 '언어 지시사항 없이는 설명할 수 없는 행동'을 선택하도록 강제했습니다.
-4.  **성과**: 추가적인 데이터 수집 없이도 SimplerEnv OOD 벤치마크에서 기존 모델 대비 11.3%의 성능 향상을 기록하며 로봇 제어의 강건성을 입증했습니다.
+Robot trajectory data는 goal을 이미 암시하는 경우가 많습니다. Arm이 apple 앞에 있고 camera가 target을 중심으로 찍었다면 “apple을 집어라”라는 문장 없이도 vision $v$만으로 다음 action $a$를 맞힐 수 있습니다.
 
----
+이때 instruction $\ell$이 action 예측에 주는 추가 정보가 작아집니다.
 
-## 2. Introduction & Problem Statement (연구 배경 및 문제 정의)
+$$
+I(A;L\\mid V)\\approx0
+$$
 
-### 2.1 VLA 모델의 현주소와 한계
-RT-2, OpenVLA 등 대규모 멀티모달 모델(VLM)을 기반으로 한 로봇 정책은 복잡한 조작 작업을 수행하는 데 탁월한 능력을 보여왔습니다. 이들은 수만 건의 로봇 궤적 데이터를 학습하여 시각적 상황을 이해하고 텍스트로 된 명령어를 실행합니다. 하지만 연구팀은 한 가지 의문을 제기했습니다. "과연 이 로봇들이 진짜로 명령어를 '이해'하고 움직이는가?"
+Model은 training loss를 낮추기 위해 더 쉬운 visual shortcut을 사용하고 language를 noise처럼 취급할 수 있습니다. 익숙한 장면에서는 성공해도 background, camera angle, 지시 대상이 바뀌면 instruction에 민감하게 반응하지 못합니다.
 
-### 2.2 Information Collapse: 언어가 사라진 로봇 제어
-현실의 로봇 학습 데이터셋(예: BridgeV2, OXE)은 대부분 '목표 지향적(Goal-driven)'입니다. 즉, 로봇이 사과를 집으려 할 때 화면에는 이미 사과 앞에 로봇 팔이 위치해 있거나, 특정 물체에 집중된 구도로 데이터가 구성됩니다. 이 경우, 모델 입장에서는 굳이 "사과를 집어라"라는 텍스트를 읽지 않아도 시각적 특징 $v$만으로 다음 행동 $a$를 90% 이상의 확률로 맞출 수 있습니다.
+이를 확인하는 간단한 test는 같은 image에 instruction만 바꾸는 것입니다.
 
-수학적으로 표현하면, 시각 정보가 주어졌을 때 행동과 명령어 사이의 조건부 상호 정보량(Conditional Mutual Information) $I(A; L | V)$가 0에 가깝게 수렴하는 현상이 발생합니다. 이를 **Information Collapse**라고 정의합니다. 이 현상이 발생하면 모델은 언어 입력을 노이즈로 취급하고 무시하게 되며, 결과적으로 명령어를 조금만 비틀거나 새로운 환경에 놓이면 엉뚱한 행동을 하게 됩니다.
+```text
+같은 장면 + "빨간 컵을 집어라"
+같은 장면 + "오른쪽 컵을 집어라"
+→ action distribution이 실제로 달라지는가?
+```
 
----
+Success rate만 보면 vision으로 우연히 맞힌 것과 language를 사용한 것을 구분하기 어렵습니다. Counterfactual instruction test가 필요한 이유입니다.
 
-## 3. Core Methodology (핵심 기술 및 아키텍처 심층 분석)
+## Prior와 Posterior를 어떻게 분리하나
 
-BayesianVLA의 핵심은 모델이 행동을 결정할 때 "시각적으로 당연한 행동"과 "언어 명령어 때문에 수행해야 하는 행동"을 구분하게 만드는 것입니다.
+BayesianVLA는 action policy를 다음처럼 분해합니다.
 
-### 3.1 베이지안 분해 (Bayesian Decomposition)
-저자들은 정책 $\pi(a | v, \ell)$을 다음과 같이 베이지안 법칙을 이용해 재정의합니다.
+$$
+\\pi(a\\mid v,\\ell)
+\\propto
+p(a\\mid v)
+\\cdot
+\\frac{p(\\ell\\mid v,a)}{p(\\ell\\mid v)}
+$$
 
-$$\pi(a | v, \ell) \propto p(a | v) \cdot \frac{p(\ell | v, a)}{p(\ell | v)}$$
+- Prior $p(a|v)$: language 없이 vision만 보고 가능한 action을 예측
+- Posterior $\\pi(a|v,\\ell)$: vision과 instruction을 모두 보고 action을 예측
+- Ratio: 특정 action이 instruction을 얼마나 더 잘 설명하는지 반영
 
-여기서 $p(a | v)$는 **Prior(사전 확률)**로, 언어 지시 없이 시각 정보만으로 예측되는 행동의 분포입니다. 오른쪽의 분수 항은 **PMI(Pointwise Mutual Information)**를 의미하며, 이는 행동 $a$가 수행되었을 때 지시사항 $\ell$이 얼마나 잘 설명되는지를 나타냅니다.
+Architecture도 두 branch를 둡니다. Prior branch는 visual token만 받고, posterior branch는 visual·language token을 함께 받습니다. Latent action query는 전체 token interaction을 모아 최종 action 표현을 만드는 learnable query입니다.
 
-### 3.2 Dual-branch 아키텍처와 Latent Action Queries
-BayesianVLA는 단일 트랜스포머 기반의 VLA를 두 개의 브랜치로 확장합니다.
-1.  **Prior Branch ($p(a|v)$)**: 언어 입력을 제외하고 시각 토큰만을 입력받아 가능한 행동의 분포를 학습합니다. 이는 환경에서 발생 가능한 일반적인 움직임을 담당합니다.
-2.  **Posterior Branch ($\pi(a|v, \ell)$)**: 시각과 언어 정보를 모두 입력받습니다. 여기서 핵심은 **Latent Action Queries**입니다. 기존 VLA가 모든 비전 토큰을 통해 액션을 직접 예측했다면, BayesianVLA는 별도의 학습 가능한 쿼리 토큰을 사용하여 시각과 언어 사이의 상호작용을 집계(Aggregate)하고 최종 액션 토큰을 생성합니다.
+Conditional pointwise mutual information은 두 log probability 차이로 표현됩니다.
 
-### 3.3 PMI 기반의 목적 함수
-단순히 두 브랜치를 학습시키는 것에 그치지 않고, 연구팀은 다음과 같은 손실 함수를 설계했습니다.
+$$
+PMI(a;\\ell\\mid v)
+=
+\\log\\pi(a\\mid v,\\ell)
+-
+\\log p(a\\mid v)
+$$
 
-$$\mathcal{L} = \mathcal{L}_{MLE}(\pi) + \alpha \cdot \text{PMI}(a; \ell | v)$$
+Vision-only prior가 낮게 보는 action이라도 instruction을 넣은 posterior가 높게 평가하면 PMI가 커집니다. 바로 “화면만 보면 뜻밖이지만 명령 때문에 해야 하는 행동”입니다.
 
-여기서 $\text{PMI}(a; \ell | v) = \log \pi(a|v, \ell) - \log p(a|v)$입니다. 이 수식은 모델이 Prior($p(a|v)$)가 낮게 예측하더라도 언어 명령($\ell$)에 부합하는 행동($\pi$)을 선택했을 때 큰 보상을 줍니다. 즉, **"시각적으로는 생소하지만 언어가 시킨 행동"**을 하도록 강제하는 장치입니다.
+## 목적 함수의 부호와 균형을 확인해야 한다
 
----
+기존 글에는 다음 식이 적혀 있습니다.
 
-## 4. Implementation Details & Experiment Setup (구현 및 실험 환경)
+$$
+\\mathcal L
+=
+\\mathcal L_{MLE}(\\pi)
++
+\\alpha\\,PMI(a;\\ell\\mid v)
+$$
 
-### 4.1 Base Model: OpenVLA
-본 연구는 가장 성능이 뛰어난 오픈소스 VLA 모델인 **OpenVLA (7B)**를 베이스 모델로 사용했습니다. Llama-2 기반의 아키텍처에 SigLIP 시각 인코더가 결합된 구조입니다.
+동시에 prose는 PMI를 최대화한다고 설명합니다. 보통 loss를 최소화한다면 양의 PMI 항을 더하는 식은 PMI를 줄이는 방향이므로, 실제 구현이 negative PMI를 쓰는지, objective를 최대화하는 표기인지 원문에서 부호를 확인해야 합니다. 이 요약 식만 복사해 training code로 옮기면 반대 최적화를 할 수 있습니다.
 
-### 4.2 데이터셋 및 학습 전략
-- **BridgeV2**: 실제 로봇 데이터셋을 사용하여 Fine-tuning을 진행했습니다.
-- **Low-rank Adaptation (LoRA)**: 효율적인 학습을 위해 파라미터 전체를 업데이트하는 대신 LoRA를 적용했습니다.
-- **학습 파라미터**: $\alpha$ (PMI 가중치) 값에 따른 민감도 분석을 통해 최적의 밸런스를 찾았습니다.
+$\\alpha$도 trade-off를 만듭니다.
 
-### 4.3 벤치마크 환경
-- **SimplerEnv**: Google Robot 데이터를 기반으로 한 시뮬레이션 환경으로, 배경 변화(OOD) 및 카메라 각도 변화에 대한 강건성을 테스트합니다.
-- **RoboCasa**: 주방 환경에서의 복잡한 멀티태스크 조작 능력을 평가합니다.
+- 너무 작으면 posterior가 prior와 비슷해 language 무시가 남을 수 있습니다.
+- 너무 크면 유용한 visual evidence보다 instruction 차이에 과민해질 수 있습니다.
+- Prior가 부정확하면 PMI 기준 자체가 흔들립니다.
 
----
+BayesianVLA는 OpenVLA 7B를 base로 BridgeV2 data와 LoRA를 사용했다고 설명합니다. 추가 robot trajectory를 모으지 않았다는 장점은 있지만 dual branch와 prior 학습이 계산 없이 생기는 것은 아닙니다.
 
-## 5. Comparative Analysis (성능 평가 및 비교)
+## 34.5%에서 45.8%가 의미하는 범위
 
-### 5.1 OOD 환경에서의 압도적 성능
-SimplerEnv의 **Visual Matching (Out-of-Distribution)** 테스트 결과는 놀랍습니다.
-- **OpenVLA (Baseline)**: 34.5% 성공률
-- **BayesianVLA**: **45.8% 성공률** (+11.3%p 향상)
+SimplerEnv Visual Matching OOD 결과는 다음과 같습니다.
 
-기존 모델들이 배경 색상이나 조명이 바뀌면 언어 지시사항을 잊어버리고 방황하는 반면, BayesianVLA는 언어 명령과의 상호 정보량을 극대화했기 때문에 환경 변화 속에서도 목표 물체를 정확히 찾아냈습니다.
+| Model | Success rate |
+|---|---:|
+| OpenVLA baseline | 34.5% |
+| BayesianVLA | 45.8% |
+| Difference | +11.3%p |
 
-### 5.2 RoboCasa: 복잡한 태스크 수행 능력
-다양한 가전제품을 조작해야 하는 RoboCasa 환경에서도 BayesianVLA는 기존 SOTA 모델인 Octo나 RT-1-X보다 높은 일반화 성능을 보였습니다. 특히 "전자레인지 문을 열고 사과를 넣어라"와 같이 명령어가 행동 결정에 결정적인 역할을 하는 태스크에서 차별화된 성능을 입증했습니다.
+상대 증가율로 계산하면 약 32.8%이지만, robot reliability 관점에서는 절대 성공률 45.8%를 함께 봐야 합니다. “11.3% 향상”만 적으면 relative percent인지 percentage point인지 혼동됩니다.
 
----
+원문은 RoboCasa에서도 Octo·RT-1-X보다 높은 일반화를 보였다고 설명하지만 정확한 task별 표는 없습니다. Microwave를 열고 apple을 넣는 복합 instruction처럼 language가 action 분기에 중요한 task에서 실제 어느 step이 실패했는지 봐야 합니다.
 
-## 6. Real-World Application & Impact (실제 적용 분야 및 파급력)
+OOD benchmark 상승도 real robot safety를 보장하지 않습니다. Simulation의 background·camera 변화와 실제 friction, sensor noise, collision은 다른 문제입니다.
 
-BayesianVLA의 등장은 로봇 산업에 몇 가지 중요한 비즈니스적 시사점을 제공합니다.
+## 언어 의존성을 실제로 평가하는 방법
 
-1.  **데이터 효율적 업그레이드**: 새로운 데이터를 수집하는 비용은 천문학적입니다. BayesianVLA는 기존 데이터를 '해석하는 방식'을 바꿈으로써 추가 비용 없이 모델의 지능을 한 단계 높였습니다.
-2.  **가정용 및 서비스 로봇의 안정성**: 가정 환경은 조명, 가구 배치 등이 매일 달라지는 OOD의 연속입니다. 사용자의 음성 명령을 시각 정보보다 우선순위에 두고 처리할 수 있는 BayesianVLA의 메커니즘은 서비스 로봇의 신뢰도를 높이는 핵심 기술이 될 것입니다.
-3.  **HCI (Human-Computer Interaction)의 강화**: 사용자가 명령어를 조금 수정(예: "빨간 컵" -> "오른쪽 컵")했을 때, 로봇이 민감하게 반응하여 행동을 수정할 수 있게 됩니다. 이는 진정한 의미의 협동 로봇 구현을 앞당깁니다.
+BayesianVLA가 맞는지 확인하려면 일반 success 외에 instruction sensitivity를 따로 측정합니다.
 
----
+1. 같은 scene에서 target noun·color·position만 바꿉니다.
+2. Instruction을 제거하거나 무관한 문장으로 바꾼 prior를 측정합니다.
+3. Posterior action과 prior action의 차이를 기록합니다.
+4. Vision과 language가 충돌하는 case에서 어느 쪽을 따라야 맞는지 label합니다.
+5. OOD success와 collision·timeout을 함께 봅니다.
 
-## 7. Discussion: Limitations & Critical Critique (한계점 및 기술적 비평)
+대화형 correction이나 장기 instruction은 기존 글도 미검증 한계로 남깁니다. 한 문장 명령에서 PMI가 유용해도 “아니, 왼쪽 것이 아니라 뒤의 컵” 같은 history를 처리하려면 temporal language context가 필요합니다.
 
-본 연구가 훌륭한 성과를 거두었음에도 불구하고, 시니어 사이언티스트의 시각에서 몇 가지 비판적 지점을 짚어보겠습니다.
-
-**첫째, 연산 비용의 증가입니다.** 이중 브랜치 구조와 PMI 계산은 추론 시에는 단일화될 수 있지만, 학습 과정에서 메모리 점유율과 연산 시간을 늘립니다. 특히 대규모 파라미터를 가진 VLM 기반 모델에서 이러한 오버헤드는 실시간 학습(On-device learning)에 제약이 될 수 있습니다.
-
-**둘째, Prior 모델의 의존성입니다.** 만약 Prior 브랜치 $p(a|v)$가 너무 강력하게 학습되어 버리면, 오히려 유용한 시각적 단서까지 PMI 계산 과정에서 상쇄될 위험이 있습니다. 즉, '시각적 상식'과 '언어적 지시' 사이의 적절한 균형점에 대한 이론적 가이드라인이 부족합니다.
-
-**셋째, 정적인 텍스트 명령의 한계입니다.** 현재는 단일 문장 명령어를 다루고 있지만, 실제 환경에서의 로봇은 대화의 맥락이나 동적인 피드백을 수용해야 합니다. BayesianVLA의 프레임워크가 시계열적인 대화 맥락에서도 동일한 효과를 낼지는 미지수입니다.
-
----
-
-## 8. Conclusion (결론 및 인사이트)
-
-BayesianVLA는 VLA 모델이 빠지기 쉬운 '지름길 학습(Shortcut Learning)'의 함정을 수학적 통찰력으로 간파하고 이를 베이지안 기법으로 우아하게 해결했습니다. "행동은 언어를 증명해야 한다"는 PMI 기반의 철학은 단순한 성능 향상을 넘어, AI 모델이 입력을 처리하는 '의도'를 제어할 수 있는 가능성을 보여주었습니다.
-
-앞으로의 로봇 AI는 단순히 거대해지는 것을 넘어, 인간의 명령어를 시각적 노이즈 속에서도 정확히 추출해내는 '강건한 인지 구조'를 갖춰야 합니다. BayesianVLA는 그 여정에서 매우 중요한 이정표가 될 것입니다. 개발자들과 비즈니스 리더들은 이제 '데이터의 양'만큼이나 '데이터 내 정보의 흐름(Information Flow)'을 어떻게 설계할 것인지 고민해야 할 때입니다.
-
-[Original Paper Link](https://huggingface.co/papers/2601.15197)
+BayesianVLA의 핵심은 language를 무조건 vision보다 우선하는 것이 아닙니다. Vision만으로 설명되는 action과 instruction 때문에 달라져야 하는 action을 분리해, model이 실제로 두 입력을 모두 사용했는지 측정 가능하게 만든 것입니다.

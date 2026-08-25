@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Avgpool"
+title:  "Darknet avgpool은 일반 Average Pooling이 아니다: Global Average 코드 읽기"
+summary: "Darknet avgpool_layer가 window와 stride 없이 채널마다 h×w 전체를 평균내는 Global Average Pooling인 이유와 backward에서 gradient를 균등 분배하는 방식을 설명합니다."
 date:   2022-02-06 16:00 -0400
 categories: DarkNet
 image:
@@ -10,183 +11,71 @@ tags:
   - DarkNet
   - 컴퓨터비전
   - C언어
+  - 아키텍처분석
 math: true
 ---
 
-## avgpool
+Darknet의 `avgpool_layer`는 작은 window를 미끄러뜨리는 일반 average pooling이 아니라, 각 채널의 `h×w` 전체를 하나의 값으로 줄이는 Global Average Pooling입니다.
 
-### Average Pooling Layer 란?
+이 차이는 이름보다 출력 shape에서 바로 드러납니다. 생성 함수는 `out_w=1`, `out_h=1`, `out_c=c`로 정하고 출력 개수를 채널 수 `c`로 둡니다. 원문의 조각은 Darknet 내부 구조체와 메모리 함수를 전제로 하므로 단독 컴파일 예제가 아니라 layer 동작을 읽기 위한 핵심 부분입니다.
 
-Feature Map의 평균 값을 계산해 전파시키는 Layer 입니다.
+## 출력은 채널마다 정확히 하나입니다
 
-```c
-//avgpool_layer.h
-
-typedef layer avgpool_layer;
-```
-
-#### make\_avgpool\_layer
+생성부의 중요한 값은 다음 네 줄입니다.
 
 ```c
-avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
-{
-    fprintf(stderr, "avg                     %4d x%4d x%4d   ->  %4d\n",  w, h, c, c);
-    avgpool_layer l = {0};
-    l.type = AVGPOOL;
-    l.batch = batch;
-    l.h = h;
-    l.w = w;
-    l.c = c;
-    l.out_w = 1;
-    l.out_h = 1;
-    l.out_c = c;
-    l.outputs = l.out_c;
-    l.inputs = h*w*c;
-    int output_size = l.outputs * batch;
-    l.output =  calloc(output_size, sizeof(float));
-    l.delta =   calloc(output_size, sizeof(float));
-    l.forward = forward_avgpool_layer;
-    l.backward = backward_avgpool_layer;
-
-    return l;
-}
+l.out_w = 1;
+l.out_h = 1;
+l.out_c = c;
+l.outputs = l.out_c;
 ```
 
-함수 이름: make\_avgpool\_layer
+일반 average pooling이라면 kernel, stride, padding에 따라 여러 spatial output이 생깁니다. 여기에는 그런 인자가 없습니다. 입력이 `w×h×c`이면 출력은 `1×1×c`입니다. Batch까지 포함한 `output`과 `delta` 메모리도 `batch*c`만큼만 할당합니다.
 
-입력:&#x20;
+이 layer를 classifier 직전에 두면 각 feature channel이 이미지 전체에서 얼마나 활성화됐는지를 하나의 값으로 요약할 수 있습니다. Fully connected layer로 공간 전체를 연결하는 것보다 파라미터를 늘리지 않는다는 장점이 있습니다.
 
-* batch: 배치 크기
-* w: 너비
-* h: 높이
-* c: 채널 수
+## Forward는 h×w 전체의 합을 나눕니다
 
-동작:&#x20;
+Forward의 인덱스는 batch `b`와 channel `k`를 고정하고 spatial 위치 `i` 전체를 순회합니다.
 
-* Average pooling 레이어를 생성합니다.
-
-설명:&#x20;
-
-* 이 함수는 Average pooling 레이어를 생성합니다.&#x20;
-* 입력으로는 배치 크기(batch), 너비(w), 높이(h), 채널 수(c)를 받습니다.
-* 함수는 먼저 생성된 레이어를 초기화하고, 필드에 각 값을 할당합니다. 그 다음, 출력 크기와 입력 크기를 계산하고, 메모리를 동적으로 할당합니다. 이 함수에서는 l.output과 l.delta를 메모리 할당합니다.
-* 마지막으로, 레이어의 forward와 backward 함수를 각각 forward\_avgpool\_layer와 backward\_avgpool\_layer 함수로 설정하고, 레이어를 반환합니다.
-* Average pooling 레이어는 입력 데이터를 정해진 영역으로 나누어 각 영역의 평균값을 계산합니다. 이를 통해 입력 데이터의 공간적인 정보를 유지하면서, 데이터의 크기를 줄일 수 있습니다. 이는 Convolutional Neural Network에서 특징 맵의 크기를 줄이는데에 주로 사용됩니다.
-
-
-
-#### forward\_avgpool\_layer
-
-<pre class="language-c"><code class="lang-c"><strong>void forward_avgpool_layer(const avgpool_layer l, network net)
-</strong>{
-    int b,i,k;
-
-    for(b = 0; b &#x3C; l.batch; ++b){
-        for(k = 0; k &#x3C; l.c; ++k){
-            int out_index = k + b*l.c;
-            l.output[out_index] = 0;
-            for(i = 0; i &#x3C; l.h*l.w; ++i){
-                int in_index = i + l.h*l.w*(k + b*l.c);
-                l.output[out_index] += net.input[in_index];
-            }
-            l.output[out_index] /= l.h*l.w;
+```c
+for(b = 0; b < l.batch; ++b){
+    for(k = 0; k < l.c; ++k){
+        int out_index = k + b*l.c;
+        l.output[out_index] = 0;
+        for(i = 0; i < l.h*l.w; ++i){
+            int in_index = i + l.h*l.w*(k + b*l.c);
+            l.output[out_index] += net.input[in_index];
         }
+        l.output[out_index] /= l.h*l.w;
     }
 }
-</code></pre>
+```
 
-함수 이름: forward\_avgpool\_layer
+예를 들어 한 채널이 `2×2`이고 값이 1, 3, 5, 7이라면 출력은 4가 됩니다. 공간 구역별 평균 네 개가 아니라 채널 전체의 평균 하나입니다. 포팅 결과 shape가 `out_h×out_w`로 남아 있다면 다른 pooling 구현을 옮긴 것입니다.
 
-입력:&#x20;
+메모리 layout은 spatial index가 가장 안쪽이고, 그 위로 channel과 batch가 놓입니다. framework 간 NCHW·NHWC 변환이 개입하면 같은 평균이라도 엉뚱한 축을 줄일 수 있으므로 축을 먼저 확인해야 합니다.
 
-* l: avgpool\_layer 구조체
-* net: network 구조체
+## Backward는 같은 Gradient를 모든 위치에 더합니다
 
-동작:&#x20;
-
-* Average pooling 레이어의 forward 연산을 수행합니다.
-
-설명:&#x20;
-
-* 이 함수는 Average pooling 레이어의 forward 연산을 수행합니다. 입력으로는 avgpool\_layer 구조체와 network 구조체를 받습니다.
-* 함수는 먼저 입력 데이터를 순회하면서, 입력 데이터를 필터 크기(h, w)로 나누어 평균값을 계산합니다. 이를 통해 출력 데이터의 크기를 줄입니다. 이후 평균값을 출력 데이터에 저장합니다.
-* Average pooling 레이어는 입력 데이터를 정해진 영역으로 나누어 각 영역의 평균값을 계산합니다. 이를 통해 입력 데이터의 공간적인 정보를 유지하면서, 데이터의 크기를 줄일 수 있습니다. 이는 Convolutional Neural Network에서 특징 맵의 크기를 줄이는데에 주로 사용됩니다.
-
-
-
-#### backward\_avgpool\_layer
+출력 `y`가 한 채널의 `n=h×w`개 입력 평균이라면 각 입력에 대한 미분은 `1/n`입니다. 따라서 backward는 채널의 출력 gradient를 모든 spatial 위치에 똑같이 나눠 더합니다.
 
 ```c
-void backward_avgpool_layer(const avgpool_layer l, network net)
-{
-    int b,i,k;
-
-    for(b = 0; b < l.batch; ++b){
-        for(k = 0; k < l.c; ++k){
-            int out_index = k + b*l.c;
-            for(i = 0; i < l.h*l.w; ++i){
-                int in_index = i + l.h*l.w*(k + b*l.c);
-                net.delta[in_index] += l.delta[out_index] / (l.h*l.w);
-            }
+for(b = 0; b < l.batch; ++b){
+    for(k = 0; k < l.c; ++k){
+        int out_index = k + b*l.c;
+        for(i = 0; i < l.h*l.w; ++i){
+            int in_index = i + l.h*l.w*(k + b*l.c);
+            net.delta[in_index] += l.delta[out_index] / (l.h*l.w);
         }
     }
 }
 ```
 
-함수 이름: backward\_avgpool\_layer
+여기서 `+=`도 중요합니다. 앞 layer의 delta가 다른 경로에서도 누적될 수 있기 때문에 덮어쓰지 않습니다. 이 layer로 들어오기 전에 `net.delta`를 언제 0으로 만드는지는 전체 네트워크 실행부의 책임입니다.
 
-입력:
+## resize와 한계를 확인합니다
 
-* l: avgpool 레이어 구조체&#x20;
-* net: 네트워크 구조체
+`resize_avgpool_layer`는 새 `w,h`와 `inputs=w*h*c`를 갱신합니다. 출력은 여전히 채널당 하나이므로 다시 할당할 공간 크기가 변하지 않습니다. 채널 수까지 바꾸는 resize로 읽으면 안 됩니다.
 
-동작:
-
-* 이 함수는 avgpool 레이어의 역전파(backpropagation)를 수행한다.&#x20;
-* 입력값으로 avgpool 레이어 구조체 l과 네트워크 구조체 net을 받아들인다.&#x20;
-* 각 배치(b)와 필터(k)에 대해, 델타값(delta)의 평균을 계산하고, 이를 각각의 입력값에 더해주어 역전파를 수행한다.&#x20;
-* 이를 통해 avgpool 레이어의 입력값에 대한 미분값(gradient)을 계산할 수 있다.
-
-설명:
-
-* 이 함수는 avgpool 레이어의 역전파를 구현한 것이다.&#x20;
-* avgpool 레이어는 입력값을 작은 사각 영역으로 나누어 평균값을 구한 후 출력값으로 내보내는 레이어이다. 따라서 이 함수에서는 각각의 입력값에 대한 미분값을 구하는 것이 핵심이다.&#x20;
-* 델타값(delta)는 출력값과 동일한 차원을 가지고 있으며, 이 값은 이전 레이어의 미분값을 받아들이는 역할을 한다.&#x20;
-* 역전파 과정에서는, 이전 레이어의 미분값과 현재 레이어의 출력값을 이용하여 현재 레이어의 입력값에 대한 미분값을 계산한다.&#x20;
-* avgpool 레이어의 경우 입력값을 평균화하는 과정이 필요하므로, 델타값의 평균을 구하여 각각의 입력값에 더해주어야 한다.&#x20;
-* 이를 위해 출력값의 인덱스(out\_index)와 입력값의 인덱스(in\_index)를 계산하여 값을 업데이트한다.
-
-
-
-#### resize\_avgpool\_layer
-
-```c
-void resize_avgpool_layer(avgpool_layer *l, int w, int h)
-{
-    l->w = w;
-    l->h = h;
-    l->inputs = h*w*l->c;
-}
-```
-
-함수 이름: resize\_avgpool\_layer
-
-입력:&#x20;
-
-* l: avgpool\_layer 구조체 포인터
-* w: 너비
-* h: 높이
-
-동작:&#x20;
-
-* Average pooling 레이어의 입력 데이터 크기를 조정한다.
-
-설명:&#x20;
-
-* 이 함수는 Average pooling 레이어의 입력 데이터 크기를 조정하는데 사다.&#x20;
-* 입력으로는 avgpool\_layer 구조체 포인터와 새로운 입력 이미지의 폭(w)과 높이(h)를 받는다.
-* 이 함수는 Average pooling 레이어의 w, h, inputs 변수를 입력받은 값으로 갱신한다.&#x20;
-* 이때, c는 그대로 유지된다.&#x20;
-* Average pooling 레이어는 입력 데이터를 필터 크기(h, w)로 나누어 평균값을 계산하기 때문에, 입력 이미지 크기가 바뀌면 입력 데이터 크기(inputs)도 바뀌어야 한다.
-
-된
+Global Average Pooling은 spatial 위치 정보를 모두 없앱니다. 분류 head에는 유용하지만 위치를 보존해야 하는 detection feature 중간에 무심코 넣으면 복구할 수 없습니다. 구현을 검증할 때는 출력 shape가 `batch×c`인지, 각 채널 평균이 맞는지, backward 합이 입력 위치마다 `delta/(h*w)`인지 세 가지만 작은 tensor로 확인하면 됩니다.

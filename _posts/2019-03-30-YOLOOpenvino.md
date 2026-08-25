@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "라즈베리파이에서 Openvino 끄적이기"
-summary: "라즈베리파이에서 YOLOv3를 Openvino를 활용하여 실행하기"
+title:  "NCS2에서 YOLOv3가 실행되지 않을 때: FP16 IR 변환과 입력 Shape 점검"
+summary: "라즈베리파이 3와 Neural Compute Stick 2에서 YOLO를 추론하기 위해 weights를 PB와 OpenVINO IR로 바꾸는 흐름을 정리합니다. FP16 지정, 416×416 입력, NHWC·NCHW 변환, MYRIAD 대상 설정에서 생기는 실패를 당시 코드 조각으로 짚습니다."
 image:
   path: /assets/img/thumb/YOLOOpenvino.jpg
   alt: 라즈베리파이에서 Openvino 끄적이기 대표 이미지
@@ -10,240 +10,98 @@ categories: Basics
 tags:
   - YOLO
   - 온디바이스AI
+  - 컴퓨터비전
+  - 경량화
+  - 튜토리얼
 ---
 
-### Dependency
-- raspberry pi 3
-- Neural Compute Stick 2
-- WebCam
+NCS2에서 YOLO가 로드되지 않는다면 먼저 IR이 FP16으로 만들어졌는지, 모델 입력이 416×416인지, 애플리케이션이 MYRIAD 장치와 올바른 tensor 순서를 쓰는지 확인해야 합니다.
 
-### requirement
-- opencv 4.0.0
-- [openvino](https://jjxxmiin.github.io/pi/2019/03/08/NCS2/)
+## YOLO 버전에 따라 변환 경로가 다르다
 
----
+이 기록의 장비는 Raspberry Pi 3, Neural Compute Stick 2, webcam이며 OpenCV 4.0.0과 [OpenVINO 설치 과정](https://jjxxmiin.github.io/pi/2019/03/08/NCS2/)을 전제로 합니다. YOLOv3와 tiny 모델은 `tensorflow-yolo-v3` 변환기를, YOLOv1·v2는 `darkflow`를 거쳐 TensorFlow `.pb`를 만든 뒤 Model Optimizer로 IR을 생성합니다.
 
-## YOLOv3
-yolov3를 사용할 경우에 보기
+YOLOv3 경로에서 사용한 저장소와 고정 revision은 다음과 같습니다.
 
-### YOLOv3 모델 다운로드 받기
-- [YOLOv3 weight](https://pjreddie.com/media/files/yolov3.weights)
-
-- [YOLOv3-tiny weight](https://pjreddie.com/media/files/yolov3-tiny.weights)
-
-- [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names)
-
-### pb 변환기 실행
-
-1. [깃허브](https://github.com/mystic123/tensorflow-yolo-v3) 다운로드
-```
+```bash
 git clone https://github.com/mystic123/tensorflow-yolo-v3.git
-```
-
-
-2. checkout
-```
 cd tensorflow-yolo-v3
 git checkout ed60b90
 ```
 
-3. 변환 실행
+가중치와 class 이름은 원문의 [YOLOv3 weights](https://pjreddie.com/media/files/yolov3.weights), [YOLOv3-tiny weights](https://pjreddie.com/media/files/yolov3-tiny.weights), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names)를 사용합니다.
 
-- yolov3
-```
+다음은 필요한 인자를 보여주는 당시 명령 조각입니다. 원문처럼 줄만 나눠 붙여 넣으면 별도 명령으로 해석되므로, 실제 실행 시 하나의 명령으로 연결하고 파일 위치와 의존성을 맞춰야 합니다.
+
+```text
 python convert_weights_pb.py
---class_names coco.names
---data_format NHWC
---weights_file yolov3.weights
+  --class_names coco.names
+  --data_format NHWC
+  --weights_file yolov3.weights
 ```
 
-- yolov3-tiny
-```
-python convert_weights_pb.py
---class_names coco.names
---data_format NHWC
---weights_file yolov3-tiny.weights
---tiny
-```
+tiny 모델은 weight 파일을 `yolov3-tiny.weights`로 바꾸고 `--tiny`를 추가합니다. 생성된 graph summary에서 input을 확인한 뒤 IR 변환 인자를 정합니다.
 
-### 변환하고 summary 확인
+![YOLO PB 그래프 입력 요약](/assets/img/post_img/intel/yolo_summary.PNG)
 
+## IR 변환에서 FP16을 빼면 생기는 문제
 
+YOLOv3의 Model Optimizer 호출에는 input shape, data type, YOLO custom operation 설정이 함께 필요합니다.
 
-![summary](/assets/img/post_img/intel/yolo_summary.PNG)
-
-
-
-### IR 변환기 실행
-
-```
+```text
 python mo_tf.py
---input_model yolov3.pb
---input_shape  [1,416,416,3]
---data_type FP16
---tensorflow_use_custom_operations_config extensions/front/tf/yolo_v3.json
+  --input_model yolov3.pb
+  --input_shape [1,416,416,3]
+  --data_type FP16
+  --tensorflow_use_custom_operations_config extensions/front/tf/yolo_v3.json
 ```
 
-- input shape는 summary에서 봤듯이 batch size가 -1로 되어있었기 때문에 잘 조정하시면 됩니다.
-- bin,xml 이 잘 만들어졌으면 라즈베리파이로 가져가서 실행을 시켜봅시다.
+이 역시 여러 줄 실행 스크립트가 아니라 인자 구조를 보여주는 핵심 조각입니다. 각 인자를 같은 `python mo_tf.py` 호출에 전달해야 합니다. graph summary의 batch가 `-1`이면 실제 추론용 batch와 공간 크기로 정해야 합니다.
 
+이 기록의 NCS2 MYRIAD 대상은 FP32 IR을 지원하지 않아 `--data_type FP16`이 필수였습니다. 변환이 끝나면 같은 모델에서 나온 `.xml`과 `.bin`을 라즈베리파이로 함께 옮깁니다. YOLOv1·v2는 `darkflow`에서 `--savepb`로 PB를 만들고, `yolo_v1_v2.json` custom operation 설정을 사용하는 별도 경로입니다. 버전별 변환 파일을 섞지 않는 것이 중요합니다.
 
----
+## OpenCV와 Inference Engine에서 확인할 입력
 
-
-## YOLOv1,v2
-yolov1,v2를 사용하고 싶을때 보기
-
-
-### YOLOv1,v2 모델 다운로드 받기
-
-- [YOLOv1](https://pjreddie.com/darknet/yolov1/)
-- [YOLOv2](https://pjreddie.com/darknet/yolov2/)
-
-- [Config File](https://github.com/pjreddie/darknet) : 여기서 cfg폴더를 가져오면 됩니다.
-
-
-### pb 변환기 실행
-1. [깃허브](https://github.com/thtrieu/darkflow#dependencies) 다운로드
-```
-git clone https://github.com/thtrieu/darkflow.git
-```
-
-2. darkflow 설치
-
-- [READ](https://github.com/thtrieu/darkflow/blob/master/README.md#getting-started)
-
-- darkflow를 시작하려면 모듈을 설치해야한다.
-```
-cd darkflow
-python setup.py build_ext --inplace
-pip install .
-```
-
-3. 변환 실행
-```
-python ./flow
---model <path_to_model>/<model_name>.cfg
---load <path_to_model>/<model_name>.weights
---savepb
-```
-
-### IR 변환기 실행
-```
-python ./mo_tf.py
---input_model <path_to_model>/<model_name>.pb       \
---batch 1                                       \
---data_type FP16
---tensorflow_use_custom_operations_config <OPENVINO_INSTALL_DIR>/deployment_tools/model_optimizer/extensions/front/tf/yolo_v1_v2.json
-```
-
----
-
-이제 라즈베리파이에 올려서 실행을 시켜보도록 하자. 라즈베리파이에 올리기 위한 `.xml`,`.bin`을 라즈베리파이로 옮기고 그 후에 간단한 테스트를 진행해볼것이다.
-
-### 단순 opencv를 이용한 테스트
+OpenCV DNN 경로의 핵심은 IR 두 파일을 함께 읽고 대상 장치를 MYRIAD로 지정하는 것입니다.
 
 ```python
-import cv2 as cv
-import time
-
-xml_path = '/home/pi/workspace/IR/tiny-yolov3.xml'
-bin_path = '/home/pi/workspace/IR/tiny-yolov3.bin'
-
-## Load the model
 net = cv.dnn.readNet(xml_path, bin_path)
-## Specify target device
 net.setPreferableTarget(cv.dnn.DNN_TARGET_MYRIAD)
 
-
-## Read an image
 frame = cv.imread('test.jpeg')
-frame = cv.resize(frame,(416,416))
-
-## Prepare input blob and perform an inference
+frame = cv.resize(frame, (416, 416))
 blob = cv.dnn.blobFromImage(frame, size=(416, 416), ddepth=cv.CV_8U)
 net.setInput(blob)
-start = time.time()
 out = net.forward()
-end = time.time()
-
-print("inference time : ",(end - start))
 ```
 
----
+이 조각은 forward 시간과 raw output을 얻는 부분까지만 포함합니다. YOLO box를 decoding하고 class 이름을 붙이는 완전한 검출 애플리케이션은 아닙니다.
 
-### openvino IE엔진을 이용한 테스트
-
-**MYRIAD.. NCS2는 FP32는 지원하지 않습니다..**
-inference를 NCS2로 진행하기 위해서는 `data_type`이 FP16이어야 한다. FP32는 지원을 하지 않기 때문에 꼭 `.xml`,`.bin`으로 변환시킬때 `data_type`을 FP16으로 해야합니다. 이것때문에 귀찮은 일을 반복했네요..
+당시 OpenVINO Inference Engine API에서는 `IENetwork`로 XML/BIN을 읽고 `IEPlugin(device='MYRIAD')`으로 로드했습니다. 이미지 배열은 batch 축을 더한 뒤 NHWC에서 NCHW로 순서를 바꿉니다.
 
 ```python
-from openvino.inference_engine import IENetwork, IEPlugin
-import numpy as np
-import cv2 as cv
-import time
-
-xml_path = '/home/pi/workspace/IR/tiny-yolov3.xml'
-bin_path = '/home/pi/workspace/IR/tiny-yolov3.bin'
-
-## network 생성
-net = IENetwork(model = xml_path,weights = bin_path)
-'''
-print("input : ",net.inputs)
-print("input shape :",net.inputs['inputs'].shape)
-print("output : ",net.outputs.keys())
-print("output shape :",net.outputs['detector/yolo-v3-tiny/Conv_9/BiasAdd/YoloRegion'].shape)
-print("output shape :",net.outputs['detector/yolo-v3-tiny/Conv_12/BiasAdd/YoloRegion'].shape)
-
-print("net layer :",*list(net.layers.keys()),sep='\n')
-'''
-## device에
-plugin = IEPlugin(device='MYRIAD')
-exec_net = plugin.load(net)
-
-start = time.time()
-
-frame = cv.imread('test.jpeg')
-resized_image = cv.resize(frame, (416, 416), interpolation = cv.INTER_CUBIC)
-prepimg = resized_image[np.newaxis, :, :, :]     ## Batch size axis add
-## position trans
-prepimg = prepimg.transpose((0, 3, 1, 2))  ## NHWC to NCHW
-
-end = time.time()
-
-print('image process time : ',end - start)
-
-start = time.time()
-
-## inference
-res = exec_net.infer({'inputs':prepimg})
-
-end = time.time()
-
-print('inference time : ',end-start)
+resized_image = cv.resize(frame, (416, 416), interpolation=cv.INTER_CUBIC)
+prepimg = resized_image[np.newaxis, :, :, :]
+prepimg = prepimg.transpose((0, 3, 1, 2))
+res = exec_net.infer({'inputs': prepimg})
 ```
 
-### 결과
+입력 이름 `inputs`는 원문 모델을 기준으로 합니다. 다른 graph라면 네트워크의 실제 input key와 output layer를 확인해야 합니다.
 
+## 변환 성공과 실제 검출 성공을 구분하기
 
+![NCS2 YOLO 추론 시간 출력](/assets/img/post_img/intel/inference.PNG)
 
-![summary](/assets/img/post_img/intel/inference.PNG)
+원문에서는 OpenCV 경로의 첫 추론이 더 느려 보였지만 반복 실행에서는 두 방식의 시간 차이가 크지 않았습니다. 한 번의 숫자만으로 방식을 고르기보다 초기 호출과 반복 호출을 나눠 관찰할 필요가 있습니다.
 
+실패를 좁힐 때는 다음 순서가 유용합니다.
 
+- PB graph summary에서 input shape와 input 이름을 확인합니다.
+- YOLO 버전에 맞는 custom operations JSON을 사용합니다.
+- IR이 `FP16`인지, XML과 BIN이 같은 변환 결과인지 확인합니다.
+- 애플리케이션의 resize 크기와 Model Optimizer의 shape를 맞춥니다.
+- NHWC 입력을 NCHW로 옮겼는지 확인합니다.
+- OpenCV 또는 Inference Engine의 target을 MYRIAD로 지정합니다.
+- forward 결과만 얻은 코드를 완전한 box decoding 예제로 오해하지 않습니다.
 
-**둘다 계속돌려보니까 알게된건데 처음 추론할 때 opencv가 느리게 보이지만 계속 추론시키면 시간 차이가 그렇게 크지 않습니다.**
-
----
-
-## 참조
-
-### YOLO 모델 생성
-- [https://github.com/PINTO0309/OpenVINO-YoloV3](https://github.com/PINTO0309/OpenVINO-YoloV3)
-- [https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/](https://richardstechnotes.com/2018/12/01/running-yolov3-with-openvino-on-cpu-and-not-ncs-2/)
-- [https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase](https://software.intel.com/en-us/articles/OpenVINO-IE-Samples#object-detection-SSD-showcase)
-- [https://software.intel.com/en-us/articles/OpenVINO-Using-TensorFlow#converting-a-darknet-yolo-model](https://software.intel.com/en-us/articles/OpenVINO-Using-TensorFlow#converting-a-darknet-yolo-model)
-- [https://cocodataset.org/#overview](https://cocodataset.org/#overview)
-
-
-### 추론
-- [https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html](https://docs.openvinotoolkit.org/latest/_ie_bridges_python_docs_api_overview.html)
+이 글은 2019년 OpenVINO API와 특정 Git revision을 기록한 자료입니다. [YOLO 변환 참고 저장소](https://github.com/PINTO0309/OpenVINO-YoloV3)와 [당시 TensorFlow 변환 안내](https://software.intel.com/en-us/articles/OpenVINO-Using-TensorFlow#converting-a-darknet-yolo-model)를 해당 환경과 대조해 사용해야 하며, 게시된 조각만으로 설치부터 화면 출력까지 모두 실행된다고 가정하면 안 됩니다.

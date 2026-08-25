@@ -1,254 +1,126 @@
 ---
 layout: post
-title: "DICEPTION: 하나의 Diffusion 모델로 모든 시각 지각 태스크 해결"
-summary: "DICEPTION은 다양한 컴퓨터 비전 태스크를 하나의 확산 모델로 수행하는 범용 AI 모델입니다. 적은 데이터로도 높은 성능을 발휘하며, 깊이 추정, 객체 분할, 표면 법선 추정 등 다양한 작업을 수행할 수 있습니다."
+title: "DICEPTION 하나로 깊이·법선·분할을 다 잘할까: 벤치마크가 보여준 성능 차이"
+summary: "DICEPTION이 여러 vision perception 출력을 RGB 이미지로 통합하는 방식과 50-shot 적응 구조를 설명하고, 깊이·표면 법선·entity segmentation 표에서 드러난 태스크별 강약을 비교합니다."
 image:
   path: /assets/img/thumb/Diception.jpg
   alt: "DICEPTION: 하나의 Diffusion 모델로 모든 시각 지각 태스크 해결 대표 이미지"
 date: 2025-03-04
 categories: Paper
 tags:
-  - 디퓨전모델
-  - 컴퓨터비전
-  - 파인튜닝
-  - 로보틱스
-  - 이미지생성
+  - DICEPTION
+  - Vision Perception
+  - Diffusion Model
+  - Multi-task Learning
 math: true
 ---
 
-## DICEPTION
+DICEPTION은 깊이·표면 법선·분할을 한 diffusion backbone과 RGB 출력 형식으로 통합하지만, 모든 태스크에서 전용 모델을 이긴 것은 아닙니다. 깊이 데이터셋에 따라 우열이 바뀌고 작은 객체 분할에서는 비교 모델과 큰 차이가 나므로, “하나로 모두 해결”보다 유지할 모델 수와 태스크별 정확도의 교환으로 봐야 합니다.
 
-> **논문:** [DICEPTION: A Generalist Diffusion Model for Vision Perception](https://arxiv.org/abs/2502.17157)  
-> **저자:** Canyu Zhao, Mingyu Liu, Huanyi Zheng, Muzhi Zhu, Zhiyue Zhao, Hao Chen, Tong He, Chunhua Shen  
-> **기관:** Zhejiang University, Shanghai AI Laboratory  
-> **논문 발표:** 2025년 2월 25일  
-> **프로젝트 웹사이트:** [aim-uofa.github.io/Diception](https://aim-uofa.github.io/Diception/)  
-> **Hugging Face 데모:** [DICEPTION-Demo](https://huggingface.co/spaces/Canyu/Diception-Demo)  
+자료는 [논문](https://arxiv.org/abs/2502.17157), [프로젝트 페이지](https://aim-uofa.github.io/Diception/), [Hugging Face 데모](https://huggingface.co/spaces/Canyu/Diception-Demo)에 공개돼 있습니다.
 
+![DICEPTION 전체 구조](/assets/img/post_img/diception/1.png)
 
+## 하나의 모델이라는 말의 정확한 의미
 
-![1](/assets/img/post_img/diception/1.png)
+DICEPTION이 묶는 과제는 단안 깊이 추정, 표면 법선 추정, entity·semantic segmentation, pose estimation, point-prompted segmentation입니다. 기존 방식처럼 과제마다 완전히 다른 네트워크를 두기보다, 각 목표 출력을 이미지처럼 표현해 같은 diffusion model이 생성하도록 학습합니다.
 
+![DICEPTION 지원 과제](/assets/img/post_img/diception/2.png)
 
+![여러 perception 출력 예시](/assets/img/post_img/diception/3.PNG)
 
----
+공유 모델의 장점은 파라미터와 학습 표현을 재사용할 수 있다는 것입니다. 하지만 출력 형식이 같아졌다고 과제 자체가 같아지는 것은 아닙니다. 깊이는 연속적인 거리, 법선은 방향 벡터, semantic segmentation은 클래스, entity segmentation은 개별 객체를 구분해야 합니다.
 
-## DICEPTION 모델 개요  
+따라서 범용성은 다음 두 질문으로 나눠야 합니다.
 
-DICEPTION은 **Diffusion 모델 기반의 범용 비전 지각 모델**입니다. 기존 컴퓨터 비전 모델들은 특정 태스크(예: 객체 탐지, 의미론적 분할, 깊이 추정)를 수행하는 개별적인 모델로 훈련되었지만, DICEPTION은 **하나의 모델이 여러 태스크를 동시에 해결**할 수 있도록 설계되었습니다.
+1. 같은 backbone이 여러 과제의 출력을 만들 수 있는가?
+2. 각 출력이 전용 모델과 비교해 필요한 정확도를 만족하는가?
 
-기존의 범용 모델과 비교했을 때 DICEPTION의 가장 큰 특징은 **적은 데이터로도 높은 성능을 유지**할 수 있다는 점입니다. 예를 들어, SAM-vit-h 모델은 10억 개 이상의 픽셀 수준 주석 데이터로 학습되었지만, DICEPTION은 단 60만 개의 이미지 데이터만으로도 SAM과 동등한 성능을 보입니다.
+DICEPTION은 첫 질문에 대한 통합 구조를 제시하고, 두 번째 질문에는 태스크별로 다른 결과를 보입니다.
 
+## 서로 다른 정답을 RGB로 통일하는 방법
 
-### **DICEPTION이 해결하는 태스크**  
-DICEPTION은 다음과 같은 시각 지각 태스크를 지원합니다.
+DICEPTION은 목표를 RGB 이미지로 바꿉니다.
 
-- **깊이 추정 (Monocular Depth Estimation)**: 단일 이미지에서 3D 깊이 정보를 예측  
-- **표면 법선 추정 (Surface Normal Estimation)**: 이미지의 각 픽셀에 대한 표면 기울기 벡터를 예측  
-- **객체 분할 (Instance Segmentation)**: 이미지 내 객체별 경계를 구분  
-- **의미론적 분할 (Semantic Segmentation)**: 픽셀 단위로 객체 종류를 분류  
-- **포즈 추정 (Pose Estimation)**: 인체 및 물체의 2D/3D 위치와 자세를 예측  
-- **포인트 프롬프트 분할 (Point-Prompted Segmentation)**: 특정 점을 기준으로 영역을 분할  
+| 태스크 | 원래 의미 | 통합 출력 |
+|---|---|---|
+| 깊이 추정 | 픽셀별 거리 | RGB depth map |
+| 표면 법선 | 픽셀별 방향 벡터 | 방향을 인코딩한 RGB |
+| entity segmentation | 객체별 영역 | 색상 mask 후 clustering |
+| semantic segmentation | 클래스별 영역 | RGB mask 후 K-Means |
 
+![RGB 기반 perception 학습](/assets/img/post_img/diception/4.png)
 
+이 표현 덕분에 diffusion model의 이미지 생성·복원 방식을 여러 태스크에 공통으로 적용할 수 있습니다. 입력 RGB 이미지로부터 목표 RGB 표현을 생성하도록 학습하고, 과제에 따라 그 결과를 거리·법선·분할로 다시 해석합니다.
 
-![2](/assets/img/post_img/diception/2.png)
+여기에는 중요한 한계가 있습니다. entity segmentation의 색상 출력은 그 자체로 최종 객체 목록이 아니며 clustering이 필요하고, semantic segmentation에도 K-Means 후처리가 들어갑니다. 하나의 생성 형식을 쓴다는 것이 후처리까지 완전히 동일하다는 뜻은 아닙니다.
 
+또한 생성된 색이 조금 흔들리는 문제가 깊이 값의 오차와 객체 ID의 분리 오류에서 서로 다른 영향을 낼 수 있습니다. 실제 도입에서는 RGB 출력의 시각적 품질뿐 아니라, 원래 태스크 단위로 되돌린 결과를 평가해야 합니다.
 
+## 60만 이미지와 50-shot 주장은 무엇을 뜻하나
 
+원문은 DICEPTION이 약 60만 이미지로 학습되고, 10억 개 이상의 픽셀 수준 주석을 사용한 SAM-vit-h와 비슷한 성능을 보인다고 설명합니다. 다만 “이미지 수”와 “픽셀 주석 수”는 단위가 다르므로 숫자 60만 대 10억만으로 데이터 효율을 직접 계산할 수는 없습니다. 어떤 과제와 평가에서 동등했는지까지 함께 봐야 합니다.
 
+새 태스크 적응에는 50개 샘플과 전체 가중치의 1% 미만 업데이트가 제시됩니다. 이는 backbone 전체를 다시 학습하지 않는 few-shot fine-tuning의 장점입니다.
 
+학습 흐름은 세 단계로 정리됩니다.
 
-![3](/assets/img/post_img/diception/3.png)
+1. 여러 perception 과제의 RGB 표현을 사전학습합니다.
+2. 특정 과제의 소량 데이터로 일부 파라미터를 미세 조정합니다.
+3. 기존 표현을 새 데이터셋이나 과제에 전이합니다.
 
+50개 샘플은 결과를 보장하는 마법의 기준이 아닙니다. 그 샘플이 실제 배포 장면을 대표하는지, 라벨이 일관적인지, 학습하지 않은 조건에서 일반화되는지 별도 검증이 필요합니다.
 
+## 표를 보면 잘하는 과제와 약한 과제가 갈린다
 
----
+깊이 추정은 낮을수록 좋은 지표입니다.
 
-## DICEPTION의 주요 특징  
-
-### **1. 단일 모델로 다양한 태스크 수행**  
-기존 컴퓨터 비전 모델들은 각 태스크별로 개별적인 네트워크 구조를 사용해야 했습니다. 하지만 DICEPTION은 **하나의 모델이 모든 태스크를 해결할 수 있도록 설계**되었습니다.  
-
-- 동일한 Diffusion 모델을 활용하여 **다양한 태스크를 일관된 방식으로 처리**  
-- 태스크 간 파라미터 공유를 통해 **추론 속도 향상 및 메모리 사용량 절감**  
-- 특정 태스크를 수행하는 전용 모델(SAM, MiDaS, DepthAnything)과 비교해도 **경쟁력 있는 성능 유지**  
-
-### **2. 적은 데이터로도 높은 성능 발휘**  
-DICEPTION은 60만 개의 데이터만 사용하고도, 10억 개 이상의 데이터로 학습된 SAM-vit-h와 비슷한 성능을 보입니다.  
-
-- 데이터가 제한적인 상황에서도 **일반화 성능이 우수**  
-- 모델이 학습한 태스크 외에도 **Few-shot 및 Zero-shot 학습 가능**  
-- 새로운 태스크로의 적응(Fine-tuning)이 빠르고 효율적  
-
-### **3. RGB 기반 태스크 표현 방식**  
-DICEPTION은 모든 태스크의 출력을 **RGB 이미지 형식으로 변환**하여 일관된 출력을 유지합니다.  
-
-
-
-| 태스크 | 기존 모델 출력 | DICEPTION 출력 |
-|--------|--------------|---------------|
-| 깊이 추정 | Grayscale Depth Map | RGB 변환 |
-| 표면 법선 추정 | 벡터 필드 | RGB 변환 |
-| 객체 분할 | 바이너리 마스크 | RGB 변환 후 클러스터링 |
-| 의미론적 분할 | 범주별 마스크 | RGB 변환 후 K-Means 처리 |
-
-
-
-이 방식 덕분에 모델의 구조가 단순해지고, 태스크 간 전이 학습(Transfer Learning)이 용이해졌습니다.
-
-### **4. 빠른 적응(Few-Shot Learning & Fine-tuning)**  
-DICEPTION은 **매우 적은 데이터(50개 샘플)**와 **1% 미만의 가중치 업데이트**만으로도 새로운 태스크에 적응할 수 있습니다.  
-즉, 새로운 데이터셋이 주어지더라도 전체 모델을 다시 학습할 필요 없이, 소량의 데이터로 빠르게 성능을 개선할 수 있습니다.
-
----
-
-## DICEPTION의 동작 원리  
-
-
-
-![4](/assets/img/post_img/diception/4.png)
-
-
-
-### **1. Diffusion 모델을 활용한 시각 지각 태스크 해결**  
-DICEPTION은 **확산 모델(Diffusion Model)** 을 활용하여 시각 지각 태스크를 해결합니다. Diffusion 모델은 **이미지 생성 및 복원**에 강점을 가지며, 특히 다양한 태스크를 하나의 모델로 통합하는 데 유리한 구조를 제공합니다.
-
-- 입력 이미지에 **노이즈를 추가한 후, 원본 이미지를 복원**하는 방식으로 훈련  
-- 훈련 과정에서 다양한 태스크(깊이 추정, 객체 분할 등)의 목표 출력을 학습  
-- 최종적으로, 주어진 입력에 대한 가장 적합한 태스크 출력을 생성하도록 모델이 최적화됨  
-
-### **2. 태스크별 데이터 매핑 방식**  
-DICEPTION은 태스크별 목표 출력을 Diffusion 모델이 학습할 수 있도록 **다양한 데이터 매핑 기법을 활용**합니다.
-
-
-
-| 태스크 | 입력 데이터 | 목표 출력 |
-|--------|-----------|----------|
-| 깊이 추정 | RGB 이미지 | RGB 깊이 맵 |
-| 객체 분할 | RGB 이미지 | 색상 기반 분할 마스크 |
-| 표면 법선 추정 | RGB 이미지 | 법선 방향이 인코딩된 RGB 맵 |
-
-
-
-이 방식 덕분에 Diffusion 모델이 태스크별 출력을 **일관된 방식으로 처리**할 수 있으며, 적은 데이터로도 높은 성능을 유지할 수 있습니다.
-
-### **3. 모델의 훈련 과정**  
-DICEPTION의 훈련 과정은 크게 3단계로 나뉩니다.
-
-1. **사전 학습 (Pretraining)**  
-   - 대규모 범용 데이터셋을 활용하여 Diffusion 모델을 기본적인 시각 지각 태스크에 맞춰 훈련  
-   - 다양한 태스크를 통합적으로 수행할 수 있도록 **RGB 기반 태스크 표현 방식** 학습  
-
-2. **미세 조정 (Fine-tuning)**  
-   - 특정 태스크(예: 깊이 추정, 객체 분할)에 대한 추가 학습 진행  
-   - 소량의 데이터로도 빠르게 적응 가능 (Few-shot Learning)  
-
-3. **태스크 전이 학습 (Transfer Learning)**  
-   - 기존에 학습한 태스크 정보를 활용하여 새로운 태스크에 적용  
-   - 예를 들어, 의미론적 분할을 학습한 모델이 객체 분할 태스크에도 쉽게 적용될 수 있음  
-
----
-
-## 벤치마크 성능 비교  
-
-DICEPTION은 여러 벤치마크에서 기존 태스크별 전용 모델(SAM-vit-h, DepthAnything 등)과 비교하여 동등하거나 뛰어난 성능을 보였습니다.  
-
-
-
-![7](/assets/img/post_img/diception/7.PNG)
-
-
-
-
-
-
-![8](/assets/img/post_img/diception/8.png)
-
-
-
-### 깊이 추정(Depth Estimation) 성능 비교  
-
-
-
-| 모델 | KITTI(↓) | NYUv2(↓) | ScanNet(↓) | DIODE(↓) | ETH3D(↓) |
-|------|--------|--------|---------|------|------|
+| 모델 | KITTI ↓ | NYUv2 ↓ | ScanNet ↓ | DIODE ↓ | ETH3D ↓ |
+|---|---:|---:|---:|---:|---:|
 | MiDaS | 0.236 | 0.111 | 0.121 | 0.332 | 0.184 |
 | DepthAnything | 0.080 | 0.043 | 0.043 | 0.261 | 0.058 |
 | DICEPTION | 0.075 | 0.072 | 0.075 | 0.243 | 0.053 |
 
+![DICEPTION 깊이 비교](/assets/img/post_img/diception/7.PNG)
 
+DICEPTION은 KITTI·DIODE·ETH3D에서 표의 DepthAnything보다 낮지만, NYUv2와 ScanNet에서는 높습니다. “깊이 추정이 더 좋다”는 한 문장보다 실외·실내를 포함한 대상 데이터셋과 가까운 열을 봐야 합니다.
 
-DepthAnything 대비 유사한 성능을 유지하면서도 학습 데이터는 훨씬 적게 사용.  
+표면 법선에서도 같은 패턴이 나타납니다.
 
----
-
-### 표면 법선(Surface Normal) 추정 성능 비교  
-
-
-
-| 모델 | NYUv2 (↓) | ScanNet (↓) | DIODE-indoor (↓) |
-|------|-----------|-------------|------------------|
+| 모델 | NYUv2 ↓ | ScanNet ↓ | DIODE-indoor ↓ |
+|---|---:|---:|---:|
 | StableNormal | 19.707 | 17.248 | 13.701 |
 | DICEPTION | 18.302 | 19.348 | 17.946 |
 
+NYUv2에서는 DICEPTION이 낮고, ScanNet과 DIODE-indoor에서는 StableNormal이 낮습니다.
 
+entity segmentation은 더 분명한 차이가 있습니다.
 
-표면 법선 추정에서도 기존 SOTA 모델들과 유사한 성능을 유지.  
-
----
-
-### 객체 분할(Entity Segmentation) 성능 비교  
-
-
-
-| 모델 | AR-small (↑) | AR-medium (↑) | AR-large (↑) |
-|------|--------------|---------------|-------------|
+| 모델 | AR-small ↑ | AR-medium ↑ | AR-large ↑ |
+|---|---:|---:|---:|
 | EntityV2 | 0.313 | 0.551 | 0.683 |
 | DICEPTION | 0.121 | 0.439 | 0.637 |
 
+![DICEPTION 벤치마크](/assets/img/post_img/diception/8.png)
 
+큰 객체보다 작은 객체에서 격차가 큽니다. 범용 모델 하나로 운영을 단순화하려 해도 작은 객체 recall이 핵심인 서비스라면 이 수치를 먼저 검토해야 합니다.
 
-객체 분할에서는 일부 성능 감소가 보이지만, 적은 데이터로도 학습 가능.  
+## 범용 모델을 선택할 때의 판단 기준
 
----
+![DICEPTION 적용 예시](/assets/img/post_img/diception/9.png)
 
-## DICEPTION의 활용 분야  
+DICEPTION이 매력적인 경우는 한 시스템에서 깊이·법선·분할을 함께 연구하고, 공통 backbone을 유지하며 새 과제에 적은 파라미터로 적응하고 싶을 때입니다. 반대로 한 과제의 최고 성능만 중요하거나 작은 객체 분할이 핵심이면 전용 모델이 더 나을 수 있습니다.
 
+실험 계획은 다음처럼 세울 수 있습니다.
 
+1. 실제 서비스에 필요한 과제와 출력 단위를 정합니다.
+2. 공개 표에서 가장 가까운 데이터셋 열을 고릅니다.
+3. RGB 결과를 원래 깊이·법선·객체로 되돌리는 후처리까지 측정합니다.
+4. 50-shot 조정 전후와 전용 모델을 같은 검증 세트에서 비교합니다.
+5. 정확도뿐 아니라 모델 수, 메모리, 태스크 전환 비용을 함께 기록합니다.
 
-![8](/assets/img/post_img/diception/9.png)
+![DICEPTION 활용 범위](/assets/img/post_img/diception/10.png)
 
+기존 글에 적힌 실시간 로봇 상호작용이나 의료 영상 zero-shot 성능은 이 표에서 직접 검증되지 않았습니다. 일반 RGB perception 결과가 곧 안전한 제어 또는 의료 판단이 되는 것도 아닙니다.
 
-
-
-
-
-![8](/assets/img/post_img/diception/10.png)
-
-
-
-### 1. 로봇 비전 시스템  
-- 자율 주행 및 로봇 비전 시스템에서 다양한 시각 태스크 수행  
-- 실시간 객체 탐지 및 상호작용 가능  
-
-### 2. 의료 영상 분석  
-- X-ray, CT 스캔 등의 의료 영상에서 병변 감지 및 분할 수행  
-- 데이터가 적은 의료 영상에서도 Zero-shot 학습 가능  
-
----
-
-## 향후 발전 방향  
-
-- 작은 객체 감지 성능 개선: 작은 객체에 대한 분할 성능 향상 연구  
-- 실시간 모델 최적화: 모바일 및 엣지 디바이스에서의 실행 최적화  
-- 다중 태스크 학습 개선: 태스크 간 상호 학습을 통해 성능 향상  
-
----
-
-## 결론  
-
-DICEPTION은 다양한 시각 지각 태스크를 하나의 모델로 통합할 수 있는 강력한 AI 모델로,  
-기존의 태스크별 전용 모델 대비 적은 데이터와 연산 자원으로도 높은 성능을 제공합니다.  
-
-미래의 범용 시각 모델 연구에 중요한 기여를 할 것으로 기대됩니다.  
+DICEPTION의 의미는 모든 전용 모델이 필요 없어졌다는 선언보다, 서로 다른 vision perception 문제를 하나의 생성 인터페이스로 얼마나 묶을 수 있는지 보여준 데 있습니다. 최종 선택은 “범용인가”가 아니라 “내 태스크에서 어느 정도의 성능 차이를 감수하고 운영 단순화를 얻는가”로 내려야 합니다.

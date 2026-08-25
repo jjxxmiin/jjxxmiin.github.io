@@ -1,6 +1,7 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - CRNN Layer"
+title: "DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나"
+summary: "DarkNet CRNN이 입력·순환·출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다."
 date:   2022-02-15 16:00 -0400
 categories: DarkNet
 image:
@@ -8,298 +9,94 @@ image:
   alt: DarkNet 시리즈 - CRNN Layer 대표 이미지
 tags:
   - DarkNet
-  - 컴퓨터비전
-  - C언어
+  - CRNN
+  - Convolution
+  - BPTT
 math: true
 ---
 
-## crnn\_layer
+DarkNet의 CRNN Layer는 완전연결 연산 대신 세 개의 2차원 합성곱을 사용해 공간 형태를 유지한 채 시간별 hidden state를 갱신합니다.
 
-cnn과 rnn을 결합한 layer 입니다.
+## 세 합성곱의 역할이 서로 다르다
 
-rnn에서 fully connected 연산을 convolutional 연산으로 바뀌어진 것 외에 딱히 변화가 없습니다.
+`make_crnn_layer`는 전체 batch를 `steps`로 나눠 한 시점의 batch를 정하고, 다음 세 층을 만듭니다.
 
-### increment\_layer
+- `input_layer`: 입력 채널 `c`에서 `hidden_filters`로 변환
+- `self_layer`: 이전 hidden 필터에서 다음 hidden 필터로 변환
+- `output_layer`: hidden 필터에서 `output_filters`로 변환
 
-```c
-static void increment_layer(layer *l, int steps)
-{
-    int num = l->outputs*l->batch*steps;
-    l->output += num;
-    l->delta += num;
-    l->x += num;
-    l->x_norm += num;
+세 층 모두 `3 × 3` 커널, stride 1, padding 1을 사용하므로 코드상 높이와 너비는 유지됩니다. state 크기는 `h × w × hidden_filters`이고, 초기 상태까지 담기 위해 `steps + 1` 구간을 할당합니다.
+
+~~~c
+batch = batch / steps;
+l.hidden = h * w * hidden_filters;
+l.state = calloc(l.hidden*batch*(steps+1), sizeof(float));
+~~~
+
+CRNN의 `output`과 `delta`는 별도 버퍼가 아니라 `output_layer`의 배열을 그대로 가리킵니다.
+
+## 한 스텝은 입력과 이전 state를 더한다
+
+각 시간 단계에서 먼저 현재 입력을 `input_layer`에, 현재 `l.state`를 `self_layer`에 통과시킵니다. 학습 모드이면 state 포인터를 다음 구간으로 이동한 뒤 새 state를 만듭니다.
+
+~~~c
+forward_convolutional_layer(input_layer, s);
+
+s.input = l.state;
+forward_convolutional_layer(self_layer, s);
+
+float *old_state = l.state;
+if(net.train) l.state += l.hidden*l.batch;
+~~~
+
+`shortcut`이 켜져 있으면 새 state에 이전 state를 복사하고, 꺼져 있으면 0으로 시작합니다. 어느 쪽이든 입력 합성곱 출력과 순환 합성곱 출력을 더한 뒤, 합쳐진 state를 `output_layer`에 넣습니다.
+
+$$
+state_t =
+shortcut(state_{t-1}) +
+input_conv(x_t) +
+self_conv(state_{t-1})
+$$
+
+여기서 `shortcut(state)`는 옵션이 꺼져 있을 때 0입니다. 마지막에는 입력 포인터와 세 하위 층의 출력·delta 포인터를 다음 시점만큼 이동합니다.
+
+## 역전파는 마지막 시점에서 시작한다
+
+`backward_crnn_layer`는 세 하위 층의 포인터를 `steps - 1`만큼 먼저 전진시킨 뒤, 마지막 시점부터 0까지 역순으로 돕니다. 각 시점에서 입력 합성곱 출력과 self 합성곱 출력을 다시 합쳐 당시 state를 구성하고 다음 순서로 역전파합니다.
+
+1. `output_layer`의 기울기를 hidden 쪽 `self_layer.delta`로 보냅니다.
+2. `self_layer`를 역전파해 이전 state 방향의 기울기를 계산합니다. 첫 시점에서는 이전 state delta를 받지 않도록 `s.delta = 0`으로 둡니다.
+3. self delta를 `input_layer.delta`로 복사하고, shortcut이 있으면 이전 시점 self delta에도 누적합니다.
+4. 해당 시점의 원래 입력과 `net.delta` 위치를 지정해 `input_layer`를 역전파합니다.
+
+~~~c
+if (i == 0) s.delta = 0;
+backward_convolutional_layer(self_layer, s);
+
+copy_cpu(l.hidden*l.batch, self_layer.delta, 1,
+         input_layer.delta, 1);
+if (i > 0 && l.shortcut) {
+    axpy_cpu(l.hidden*l.batch, 1, self_layer.delta, 1,
+             self_layer.delta - l.hidden*l.batch, 1);
 }
-```
+~~~
 
-함수 이름: increment\_layer
+학습 파라미터 갱신은 별도 CRNN 수식이 아니라 입력·self·출력 합성곱 각각에 `update_convolutional_layer`를 호출하는 방식입니다.
 
-입력:&#x20;
+## 적용 전에는 포인터 전제를 확인한다
 
-* layer 포인터 l
-* int steps
+`increment_layer`는 `output`, `delta`, `x`, `x_norm` 네 포인터를 한 시점 크기만큼 직접 이동합니다. 이 때문에 배열을 넘지 않도록 생성 시 사용한 `batch × steps`와 호출 시 시퀀스 배치 구성이 정확히 맞아야 합니다.
 
-동작:&#x20;
+~~~c
+int num = l->outputs*l->batch*steps;
+l->output += num;
+l->delta += num;
+l->x += num;
+l->x_norm += num;
+~~~
 
-* l의 output, delta, x, x\_norm 포인터를 steps \* l->outputs \* l->batch 만큼 증가시킴
+또한 하위 합성곱 생성 함수는 배치 정규화를 켤 때만 `x`와 `x_norm`을 할당합니다. 그런데 `increment_layer`는 두 포인터를 조건 없이 이동하므로, 배치 정규화를 끈 구성에서 이 코드가 안전한지는 사용 중인 DarkNet 버전과 컴파일 환경을 반드시 확인해야 합니다.
 
-설명:&#x20;
+`shortcut` 경로도 대조가 필요합니다. 순전파는 새 state에 이전 state를 먼저 복사한 뒤 input·self 출력을 더하지만, 제시된 역전파가 output 층 입력을 재구성할 때는 input·self 출력만 더하고 이전 state를 포함하지 않습니다. shortcut을 켠 경우에도 이 코드가 순전파와 같은 값을 복원하는지 사용 중인 브랜치에서 확인해야 합니다.
 
-* 이 함수는 미니배치 처리를 위해 필요한 함수 중 하나로, 각 레이어의 포인터를 미니배치에 따라 적절히 이동시켜주는 역할을 합니다.&#x20;
-* 이동시켜야 하는 양은 steps \* l->outputs \* l->batch 로 계산됩니다.&#x20;
-* 이 함수를 사용하면 한 번에 처리해야 하는 미니배치의 크기를 조절할 수 있습니다.
-
-
-
-### forward\_crnn\_layer
-
-```c
-void forward_crnn_layer(layer l, network net)
-{
-    network s = net;
-    s.train = net.train;
-    int i;
-    layer input_layer = *(l.input_layer);
-    layer self_layer = *(l.self_layer);
-    layer output_layer = *(l.output_layer);
-
-    fill_cpu(l.outputs * l.batch * l.steps, 0, output_layer.delta, 1);
-    fill_cpu(l.hidden * l.batch * l.steps, 0, self_layer.delta, 1);
-    fill_cpu(l.hidden * l.batch * l.steps, 0, input_layer.delta, 1);
-    if(net.train) fill_cpu(l.hidden * l.batch, 0, l.state, 1);
-
-    for (i = 0; i < l.steps; ++i) {
-        s.input = net.input;
-        forward_convolutional_layer(input_layer, s);
-
-        s.input = l.state;
-        forward_convolutional_layer(self_layer, s);
-
-        float *old_state = l.state;
-        if(net.train) l.state += l.hidden*l.batch;
-        if(l.shortcut){
-            copy_cpu(l.hidden * l.batch, old_state, 1, l.state, 1);
-        }else{
-            fill_cpu(l.hidden * l.batch, 0, l.state, 1);
-        }
-        axpy_cpu(l.hidden * l.batch, 1, input_layer.output, 1, l.state, 1);
-        axpy_cpu(l.hidden * l.batch, 1, self_layer.output, 1, l.state, 1);
-
-        s.input = l.state;
-        forward_convolutional_layer(output_layer, s);
-
-        net.input += l.inputs*l.batch;
-        increment_layer(&input_layer, 1);
-        increment_layer(&self_layer, 1);
-        increment_layer(&output_layer, 1);
-    }
-}
-```
-
-함수 이름: forward\_crnn\_layer
-
-입력:
-
-* layer l: CRNN 레이어
-* network net: 레이어가 속한 네트워크
-
-동작:
-
-* CRNN 레이어의 forward 연산을 수행한다.
-* 입력 데이터를 한 스텝씩 처리하며, 입력 레이어, self 레이어, 출력 레이어를 차례대로 거친다.
-* 각 스텝에서 입력, self 레이어의 출력을 더하여 state를 구하고, 출력 레이어를 거쳐 출력을 계산한다.
-* 각 스텝에서 사용된 레이어의 인덱스를 1씩 증가시킨다.
-
-설명:
-
-* CRNN(Convolutional Recurrent Neural Network)은 컨볼루션 레이어와 순환 레이어가 결합된 구조를 가지는 딥러닝 모델이다.
-* 이 함수는 CRNN 레이어의 forward 연산을 수행하는 함수이다.
-* 입력으로는 CRNN 레이어와 레이어가 속한 네트워크가 들어온다.
-* 함수 내부에서는 입력 데이터를 한 스텝씩 처리하며, 입력 레이어, self 레이어, 출력 레이어를 차례대로 거친다.
-* 각 스텝에서 입력, self 레이어의 출력을 더하여 state를 구하고, 출력 레이어를 거쳐 출력을 계산한다.
-* 함수 내부에서는 각 스텝에서 사용된 레이어의 인덱스를 1씩 증가시킨다.
-
-
-
-### backward\_crnn\_layer
-
-```c
-void backward_crnn_layer(layer l, network net)
-{
-    network s = net;
-    int i;
-    layer input_layer = *(l.input_layer);
-    layer self_layer = *(l.self_layer);
-    layer output_layer = *(l.output_layer);
-
-    increment_layer(&input_layer, l.steps-1);
-    increment_layer(&self_layer, l.steps-1);
-    increment_layer(&output_layer, l.steps-1);
-
-    l.state += l.hidden*l.batch*l.steps;
-    for (i = l.steps-1; i >= 0; --i) {
-        copy_cpu(l.hidden * l.batch, input_layer.output, 1, l.state, 1);
-        axpy_cpu(l.hidden * l.batch, 1, self_layer.output, 1, l.state, 1);
-
-        s.input = l.state;
-        s.delta = self_layer.delta;
-        backward_convolutional_layer(output_layer, s);
-
-        l.state -= l.hidden*l.batch;
-        /*
-           if(i > 0){
-           copy_cpu(l.hidden * l.batch, input_layer.output - l.hidden*l.batch, 1, l.state, 1);
-           axpy_cpu(l.hidden * l.batch, 1, self_layer.output - l.hidden*l.batch, 1, l.state, 1);
-           }else{
-           fill_cpu(l.hidden * l.batch, 0, l.state, 1);
-           }
-         */
-
-        s.input = l.state;
-        s.delta = self_layer.delta - l.hidden*l.batch;
-        if (i == 0) s.delta = 0;
-        backward_convolutional_layer(self_layer, s);
-
-        copy_cpu(l.hidden*l.batch, self_layer.delta, 1, input_layer.delta, 1);
-        if (i > 0 && l.shortcut) axpy_cpu(l.hidden*l.batch, 1, self_layer.delta, 1, self_layer.delta - l.hidden*l.batch, 1);
-        s.input = net.input + i*l.inputs*l.batch;
-        if(net.delta) s.delta = net.delta + i*l.inputs*l.batch;
-        else s.delta = 0;
-        backward_convolutional_layer(input_layer, s);
-
-        increment_layer(&input_layer, -1);
-        increment_layer(&self_layer, -1);
-        increment_layer(&output_layer, -1);
-    }
-}
-```
-
-함수 이름: backward\_crnn\_layer
-
-입력:&#x20;
-
-* layer l: 역전파를 수행할 CRNN 레이어
-* network net: 레이어를 포함하는 네트워크
-
-동작:&#x20;
-
-* CRNN 레이어의 역전파를 수행합니다.&#x20;
-* 먼저, 입력 레이어, self 레이어, output 레이어에 대한 포인터를 초기화합니다.&#x20;
-* 그런 다음, l.steps 번 반복하면서 각 스텝에서 다음을 수행합니다.&#x20;
-* 입력 레이어와 self 레이어의 출력 값을 합쳐서 l.state에 저장한 후, 출력 레이어의 역전파를 수행합니다.&#x20;
-* 그 후, self 레이어의 역전파를 수행하고, 이전 스텝의 self 레이어 업데이트 델타를 현재 스텝의 입력 레이어 업데이트 델타로 복사합니다.&#x20;
-* 마지막으로, 현재 스텝의 입력 데이터에 대한 역전파를 수행합니다.
-
-설명:&#x20;
-
-* 이 함수는 CRNN 레이어의 역전파를 수행하는 함수로, 네트워크가 학습 중인 경우에 사용됩니다.&#x20;
-* l은 역전파를 수행할 레이어를 나타내는 layer 구조체이며, net은 레이어를 포함하는 네트워크를 나타내는 network 구조체입니다.&#x20;
-* 이 함수는 각 레이어의 출력 값을 계산하고 델타 값을 업데이트합니다.
-
-
-
-### update\_crnn\_layer
-
-```c
-void update_crnn_layer(layer l, update_args a)
-{
-    update_convolutional_layer(*(l.input_layer),  a);
-    update_convolutional_layer(*(l.self_layer),   a);
-    update_convolutional_layer(*(l.output_layer), a);
-}
-```
-
-함수 이름: update\_crnn\_layer
-
-입력:
-
-* layer l: 업데이트할 CRNN 레이어
-* update\_args a: 업데이트에 사용할 인자들 (learning rate, momentum 등)
-
-동작:&#x20;
-
-* 주어진 업데이트 인자들을 사용하여 입력으로 주어진 CRNN 레이어의 input\_layer, self\_layer, output\_layer를 각각 업데이트하는 함수입니다.
-* update\_convolutional\_layer 함수를 호출하여 각 레이어를 업데이트합니다.
-
-설명:&#x20;
-
-* CRNN 레이어는 입력 시퀀스를 처리하기 위한 컨볼루션 레이어와 RNN 레이어의 결합입니다.&#x20;
-* 이 함수는 그 중 컨볼루션 레이어를 업데이트하는 함수입니다.&#x20;
-* 이 함수는 입력으로 받은 update\_args를 사용하여 각 레이어의 파라미터를 업데이트합니다.&#x20;
-* 먼저, input\_layer, self\_layer, output\_layer 각각에 대해 update\_convolutional\_layer 함수를 호출하여 그 레이어의 파라미터를 업데이트합니다.&#x20;
-* 이 함수는 컨볼루션 레이어의 파라미터를 업데이트하기 위해 사용되는 함수입니다.
-
-
-
-### make\_crnn\_layer
-
-```c
-layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int output_filters, int steps, ACTIVATION activation, int batch_normalize)
-{
-    fprintf(stderr, "CRNN Layer: %d x %d x %d image, %d filters\n", h,w,c,output_filters);
-    batch = batch / steps;
-    layer l = {0};
-    l.batch = batch;
-    l.type = CRNN;
-    l.steps = steps;
-    l.h = h;
-    l.w = w;
-    l.c = c;
-    l.out_h = h;
-    l.out_w = w;
-    l.out_c = output_filters;
-    l.inputs = h*w*c;
-    l.hidden = h * w * hidden_filters;
-    l.outputs = l.out_h * l.out_w * l.out_c;
-
-    l.state = calloc(l.hidden*batch*(steps+1), sizeof(float));
-
-    l.input_layer = malloc(sizeof(layer));
-    fprintf(stderr, "\t\t");
-    *(l.input_layer) = make_convolutional_layer(batch*steps, h, w, c, hidden_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
-    l.input_layer->batch = batch;
-
-    l.self_layer = malloc(sizeof(layer));
-    fprintf(stderr, "\t\t");
-    *(l.self_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, hidden_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
-    l.self_layer->batch = batch;
-
-    l.output_layer = malloc(sizeof(layer));
-    fprintf(stderr, "\t\t");
-    *(l.output_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, output_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
-    l.output_layer->batch = batch;
-
-    l.output = l.output_layer->output;
-    l.delta = l.output_layer->delta;
-
-    l.forward = forward_crnn_layer;
-    l.backward = backward_crnn_layer;
-    l.update = update_crnn_layer;
-
-    return l;
-}
-```
-
-함수 이름: make\_crnn\_layer
-
-입력:
-
-* int batch: 배치 크기
-* int h: 입력 이미지 높이
-* int w: 입력 이미지 너비
-* int c: 입력 이미지 채널 수
-* int hidden\_filters: 숨겨진 레이어에서 사용되는 필터 수
-* int output\_filters: 출력 레이어에서 사용되는 필터 수
-* int steps: 시퀀스 길이 (스텝 수)
-* ACTIVATION activation: 활성화 함수 유형
-* int batch\_normalize: 배치 정규화 여부
-
-동작:&#x20;
-
-* CRNN 레이어를 만들고 초기화합니다.
-
-설명:&#x20;
-
-* 이 함수는 입력 이미지의 높이, 너비, 채널 수 및 시퀀스 길이와 같은 인수를 사용하여 CRNN(Convolutional Recurrent Neural Network) 레이어를 만듭니다.&#x20;
-* 이 레이어는 숨겨진 레이어와 출력 레이어 각각에 대해 3x3 커널과 같은 하이퍼파라미터를 사용한 1D 컨볼루션 레이어를 포함합니다.&#x20;
-* 이 함수는 이러한 레이어를 만들고 초기화한 후 CRNN 레이어를 반환합니다.
+이 글의 조각은 독립 실행 코드가 아닙니다. 특히 추론 모드에서는 학습 모드와 state 포인터 이동 조건이 다르므로, 여러 시퀀스를 연속 처리할 때 state를 언제 초기화하거나 유지하는지도 상위 호출부에서 함께 확인해야 합니다.

@@ -1,160 +1,111 @@
 ---
 layout: post
-title: "🔥 MotionFollower: GPU 메모리 80% 절약하면서 비디오 모션 완벽 편집하는 혁신 기술"
-summary: "80% 적은 GPU로 더 높은 품질의 비디오 모션 편집이 가능한 MotionFollower 기술을 소개합니다. 복잡한 배경, 급격한 카메라 움직임에서도 자연스러운 모션 편집을 구현하는 혁신적 확산 모델의 모든 것."
+title: "MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석"
+summary: "MotionFollower의 pose·reference controller, reconstruction·editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과 PSNR·SSIM·LPIPS·FID를 과장 없이 비교합니다."
 image:
   path: /assets/img/thumb/MotionFollower.jpg
   alt: "🔥 MotionFollower: GPU 메모리 80% 절약하면서 비디오 모션 완벽 편집하는 혁신 기술 대표 이미지"
 date: 2025-03-14
 categories: Paper
 tags:
-  - 트랜스포머
-  - 디퓨전모델
-  - 경량화
+  - MotionFollower
+  - Video Motion Editing
+  - Diffusion Model
+  - GPU Memory
 math: true
 ---
 
-
+MotionFollower의 비교표에서 GPU 메모리는 42.6GB에서 9.8GB로 줄어 약 77% 감소했으며, 정확히 80%는 아닙니다. 같은 표에서 화질 지표도 개선됐지만, 측정한 영상 길이·해상도·batch 조건이 이 글에 없으므로 9.8GB를 모든 영상의 요구량으로 일반화하면 안 됩니다.
 
 <video src="/assets/img/post_img/motionfollower/0.mp4" width="100%" height="auto" controls preload="auto"></video>
 
+자료는 [GitHub](https://github.com/Francis-Rings/MotionFollower), [프로젝트 페이지](https://francis-rings.github.io/MotionFollower/), [논문](https://arxiv.org/abs/2405.20325)에 연결돼 있습니다.
 
+## 무엇을 바꾸고 무엇을 남기는 모델인가
 
-> **TL;DR**: MotionFollower는 비디오에서 모션만 정밀하게 편집하는 AI 기술로, 기존 모델 대비 GPU 메모리를 80% 절약하면서도 더 높은 품질을 구현합니다. 복잡한 배경과 카메라 움직임이 있는 영상에서도 안정적인 결과를 보여줍니다.
+MotionFollower의 목표는 영상 전체를 새로 만드는 것이 아니라 인물의 motion을 target pose에 맞게 바꾸면서 외형, 배경, camera movement를 원본에 가깝게 유지하는 것입니다.
 
-## 비디오 모션 편집의 게임 체인저: MotionFollower
+이 작업에는 서로 충돌하는 요구가 있습니다.
 
-영상에서 인물의 움직임만 바꾸고 싶다면? 배경과 스타일은 그대로 유지하면서 모션만 정교하게 수정할 수 있는 기술이 마침내 등장했습니다. 그것도 **기존보다 훨씬 적은 컴퓨팅 자원으로 말이죠.**
+- target pose를 강하게 적용하면 원본 인물과 배경이 흔들릴 수 있습니다.
+- 원본을 너무 강하게 복원하면 motion이 충분히 바뀌지 않을 수 있습니다.
+- 한 frame이 좋아도 시간축에서 깜빡임이 생길 수 있습니다.
 
-**MotionFollower**는 최신 확산 모델(Diffusion Model) 기술을 활용해 비디오 모션 편집의 한계를 뛰어넘은 혁신적인 모델입니다. 특히 주목할 점은 **GPU 메모리 사용량을 80%나 절감**하면서도 더 높은 품질의 결과물을 만들어낸다는 것입니다.
-
-## 왜 이 기술이 중요한가요?
-
-
+비교 대상인 MotionEditor는 ControlNet과 attention injection을 사용하며 원문 표에서 42.6GB를 요구합니다. MotionFollower는 무거운 attention 기반 주입을 두 개의 CNN controller와 score guidance로 바꾸어 이 충돌을 다룹니다.
 
 ![MotionFollower 아키텍처](/assets/img/post_img/motionfollower/1.png)
 
+## 두 controller와 두 branch의 역할
 
+MotionFollower에는 입력 역할이 다른 controller가 있습니다.
 
-### AI 비디오 편집의 현실적 문제
+- Pose controller는 목표 영상의 pose 정보를 받아 바꿀 움직임을 지정합니다.
+- Reference controller는 원본 인물 외형과 배경 정보를 전달합니다.
 
-지금까지의 AI 비디오 편집 기술은 주로 **스타일 변경, 배경 교체, 인물 외형 변경**에만 집중했습니다. 그러나 실제 영상 제작 현장에서는 **인물의 모션만 정확하게 편집**하는 니즈가 상당합니다.
+그리고 diffusion 과정은 두 branch로 나뉩니다.
 
-현재까지 가장 뛰어난 모션 편집 모델인 **MotionEditor**는 다음과 같은 문제점을 갖고 있었습니다:
-
-- 🔴 **42.6GB의 엄청난 GPU 메모리 요구량** (RTX 4090도 버거워함)
-- 🔴 **카메라가 크게 움직이는 영상에서 심각한 품질 저하**
-- 🔴 **복잡한 배경이 있는 영상에서 일관성 유지 실패**
-
-이러한 문제들로 인해 실무에서 활용하기 어려웠던 AI 모션 편집 기술, **MotionFollower**는 이 모든 문제를 해결했습니다.
-
-## MotionFollower의 혁신적 접근법
-
-
+- Reconstruction branch는 원본 영상의 중요한 정보를 복원합니다.
+- Editing branch는 target motion을 적용합니다.
+- Score regularization은 두 branch의 score를 조정합니다.
 
 ![MotionFollower 핵심 구조](/assets/img/post_img/motionfollower/2.PNG)
 
+기존 attention injection이 feature를 직접 끼워 넣는 방식이라면, MotionFollower는 score guidance로 원본 복원 방향과 편집 방향을 조절합니다. 원문은 이 방식이 shadow flickering을 줄이고 복잡한 배경과 camera motion에서 일관성을 높인다고 설명합니다.
 
+이 구조를 이해할 때 “배경 완벽 보존”이라는 표현은 피하는 편이 좋습니다. reconstruction branch가 있어도 작은 물체 왜곡이 현재 한계로 적혀 있기 때문입니다. pose 추종, 외형 보존, 배경 보존, 시간 일관성을 별도 항목으로 평가해야 합니다.
 
-### 1. 초경량 컨트롤러로 메모리 사용량 격감
+## 메모리와 네 품질 지표는 각각 다른 말을 한다
 
-기존 MotionEditor는 무거운 **ControlNet**과 **어텐션 메커니즘(Attention Mechanism)**에 의존했습니다. 반면 MotionFollower는 두 개의 경량화된 컨트롤러를 도입했습니다:
+원문 비교표는 다음과 같습니다.
 
-- **포즈 컨트롤러(Pose Controller)**: 목표 영상의 포즈 정보만 추출하여 모션 편집 담당
-- **레퍼런스 컨트롤러(Reference Controller)**: 원본 영상의 외형과 배경 정보 보존
+| 모델 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | FID ↓ | GPU 메모리 ↓ |
+|---|---:|---:|---:|---:|---:|
+| MotionEditor | 17.34 | 0.68 | 0.34 | 31.98 | 42.6GB |
+| MotionFollower | 20.85 | 0.75 | 0.22 | 26.30 | 9.8GB |
 
-이 두 컨트롤러는 **CNN 기반 컨볼루션 연산만 사용**하여 연산량을 대폭 줄이면서도 품질은 높게 유지합니다. 특히 메모리를 많이 소모하는 어텐션 연산을 제거한 것이 핵심입니다.
+이 값에서 계산되는 변화는 다음과 같습니다.
 
-### 2. 스코어 가이던스로 일관성 유지
+- 메모리: `(42.6-9.8)/42.6 ≈ 77.0%` 감소
+- PSNR: 약 20.2% 증가
+- SSIM: 약 10.3% 증가
+- LPIPS: 약 35.3% 감소
+- FID: 약 17.8% 감소
 
-MotionFollower는 **스코어 함수(Score Function)** 기반의 가이던스 시스템을 적용했습니다. 이는:
+기존 글은 PSNR·SSIM을 묶어 “화질 20%”, LPIPS·FID를 묶어 “자연스러움 35%”라고 표현했습니다. 하지만 두 지표의 변화율은 서로 다릅니다. 각각의 방향과 수치를 따로 읽는 편이 정확합니다.
 
-- 🔄 **원본 영상의 배경과 카메라 움직임 완벽 보존**
-- 🔄 **타겟 모션만 정확하게 적용**
-- 🔄 **프레임 간 자연스러운 연결성 유지**
+또한 낮은 FID와 LPIPS가 target motion을 정확히 따라갔다는 뜻은 아닙니다. 결과가 원본과 비슷한지, 분포상 자연스러운지, pose가 맞는지는 서로 다른 질문입니다. motion 편집 평가에는 target pose 오차와 frame 간 안정성도 함께 봐야 합니다.
 
-기존 모델들의 **어텐션 주입(Attention Injection)** 방식은 종종 노이즈와 깜빡임(Shadow Flickering) 문제를 유발했지만, 스코어 가이던스는 이러한 문제를 해결했습니다.
+## 어떤 영상에서 실패를 먼저 찾아야 하나
 
-### 3. 이중 브랜치 구조로 안정성 확보
+원문이 직접 밝힌 현재 한계는 두 가지입니다.
 
-MotionFollower는 두 개의 병렬 프로세스를 운영합니다:
+1. 아주 작은 소품이나 객체가 편집 중 왜곡될 수 있습니다.
+2. 600 frame을 넘는 긴 영상에서는 시간이 갈수록 품질이 낮아질 수 있습니다.
 
-- **복원 브랜치(Reconstruction Branch)**: 원본 영상의 중요 정보 유지
-- **편집 브랜치(Editing Branch)**: 타겟 모션 적용
-- **스코어 정규화(Score Regularization)**: 두 결과를 최적으로 융합
+기존 글은 600 frame과 10분 이상을 같은 조건처럼 적었지만, 600 frame이 몇 분인지는 frame rate에 따라 달라집니다. 예를 들어 실험 조건이 제시되지 않은 상태에서는 “10분까지 안정적”이라고 환산할 수 없습니다.
 
-이 구조는 **공간적(배경, 인물 외형)** 및 **시간적(프레임 간 연결성)** 일관성을 모두 유지하면서 모션만 정교하게 변경할 수 있게 합니다.
+테스트 영상은 다음 축으로 나누는 편이 좋습니다.
 
-## 놀라운 성능 향상: 수치로 증명된 우수성
+| 조건 | 확인할 실패 |
+|---|---|
+| 정적 camera·단순 배경 | 기본 pose 추종 |
+| 빠른 camera movement | 배경과 외형 drift |
+| 복잡한 배경 | 경계 flicker와 재구성 |
+| 손에 작은 소품 | 객체 소실·형태 왜곡 |
+| frame 수 증가 | 누적되는 시간 불일치 |
 
-MotionFollower는 기존 모델보다 **압도적으로 우수한 성능**을 보여줍니다:
+특히 춤과 스포츠처럼 빠른 motion에서는 target pose만 보지 말고 손·발, 의상 무늬, 접촉한 물체가 frame 사이에서 유지되는지 확대해 봐야 합니다.
 
+## 9.8GB로 실행된다는 숫자 전에 확인할 것
 
+MotionFollower를 실제로 선택하려면 같은 입력 조건에서 MotionEditor 또는 현재 pipeline과 비교해야 합니다.
 
-| 모델 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | FID ↓ | GPU 메모리 ↓ |  
-|---|---|---|---|---|---|  
-| MotionEditor | 17.34 | 0.68 | 0.34 | 31.98 | 42.6GB |  
-| **MotionFollower** | **20.85** | **0.75** | **0.22** | **26.30** | **9.8GB** |  
+1. 해상도, frame 수, batch와 precision을 고정합니다.
+2. peak GPU memory와 총 처리 시간을 함께 기록합니다.
+3. pose 추종과 배경·외형 보존을 별도 점수와 영상으로 봅니다.
+4. 작은 물체와 camera movement가 있는 실패 세트를 따로 둡니다.
+5. 긴 영상을 구간별로 잘랐을 때 경계와 identity가 유지되는지 확인합니다.
 
+9.8GB는 24GB급 GPU보다 낮은 수치지만, “일반 gaming GPU에서 어떤 설정으로든 실행된다”는 보장은 아닙니다. 모델 가중치, video decoder, 입력 buffer와 출력 저장 공간도 실행 환경에 포함됩니다.
 
-
-이 결과가 의미하는 바:
-
-- ✅ **화질 20% 향상**: PSNR과 SSIM 수치 모두 크게 개선
-- ✅ **자연스러움 35% 향상**: LPIPS와 FID 수치 감소
-- ✅ **GPU 메모리 80% 절감**: 9.8GB로 일반 게이밍 GPU에서도 구동 가능
-
-## 실제 적용 사례: 어떤 상황에서 강점을 보이나?
-
-MotionFollower는 특히 다음과 같은 까다로운 상황에서 탁월한 성능을 발휘합니다:
-
-### 1. 복잡한 배경이 있는 영상
-
-기존 모델은 복잡한 배경이 있는 영상에서 배경 정보를 유지하지 못하고 왜곡을 일으켰습니다. MotionFollower는 **레퍼런스 컨트롤러**를 통해 배경 정보를 완벽하게 유지합니다.
-
-### 2. 급격한 카메라 움직임이 있는 영상
-
-카메라가 빠르게 움직이는 영상에서 MotionEditor는 심각한 블러(Blur)와 왜곡 현상을 보였지만, MotionFollower는 **스코어 가이던스** 덕분에 카메라 움직임을 자연스럽게 유지합니다.
-
-### 3. 정교한 모션 조정이 필요한 영상
-
-댄스 영상이나 스포츠 영상과 같이 **섬세한 모션 조정**이 필요한 경우, MotionFollower는 인물의 자세와 움직임을 정확하게 변경하면서도 외형과 배경은 완벽하게 보존합니다.
-
-## 미래 발전 방향과 현재 한계
-
-MotionFollower는 혁신적인 기술이지만, 완벽하지는 않습니다:
-
-### 현재 한계
-
-- 🔍 **매우 작은 물체(소품 등)의 일관성 유지**: 경우에 따라 작은 물체가 편집 과정에서 왜곡될 수 있음
-- 🔍 **초장시간 영상(10분 이상)**: 600프레임을 넘어가는 영상에서는 시간이 지날수록 품질 저하 가능성
-
-### 향후 개선 방향
-
-연구팀은 이러한 한계를 극복하기 위해 다음과 같은 방향으로 연구를 진행 중입니다:
-
-- 🔬 **고해상도 객체 유지를 위한 인페인팅(Inpainting) 기법 개발**
-- 🔬 **장시간 영상 처리를 위한 시간 축 정규화(Temporal Regularization) 강화**
-- 🔬 **실시간 편집을 위한 추가 최적화 연구**
-
-## 실제 사용해보기
-
-MotionFollower를 직접 사용해보고 싶다면 다음 링크를 참조하세요:
-
-- 📂 **GitHub 코드**: [https://github.com/Francis-Rings/MotionFollower](https://github.com/Francis-Rings/MotionFollower)
-- 🌐 **프로젝트 페이지**: [https://francis-rings.github.io/MotionFollower/](https://francis-rings.github.io/MotionFollower/)
-- 📝 **연구 논문**: [https://arxiv.org/abs/2405.20325](https://arxiv.org/abs/2405.20325)
-
-## 결론: 비디오 편집의 새로운 지평
-
-MotionFollower는 **적은 컴퓨팅 자원**으로 **더 높은 품질**의 모션 편집을 가능하게 함으로써 AI 비디오 편집 분야에 새로운 지평을 열었습니다. 이 기술은 다음과 같은 분야에서 큰 변화를 가져올 것으로 예상됩니다:
-
-- 🎬 **영화 및 방송 제작**: 배우의 움직임을 후보정하거나 스턴트 장면 편집
-- 🕺 **콘텐츠 크리에이터**: 춤이나 운동 영상에서 더 나은 퍼포먼스 구현
-- 🎮 **게임 개발**: 캐릭터 애니메이션 제작 및 편집 효율화
-- 📱 **모바일 앱**: 일반 사용자도 접근 가능한 고품질 모션 편집 솔루션
-
-이 혁신적인 기술이 앞으로 어떻게 발전하고 활용될지 기대가 됩니다.   
-여러분은 MotionFollower를 어떤 용도로 활용하고 싶으신가요? 
-
-댓글로 여러분의 생각을 공유해주세요! 👇
+MotionFollower의 의미는 품질을 포기해 메모리만 줄인 것이 아니라, 이 비교 조건에서 메모리와 네 품질 지표를 동시에 개선했다는 데 있습니다. 다만 실무 판단은 제목의 80%가 아니라 자신의 해상도와 영상 길이에서 재현되는 peak memory, pose 정확도, 시간 일관성으로 내려야 합니다.

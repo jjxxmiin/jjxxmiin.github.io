@@ -1,16 +1,15 @@
 ---
 layout: post
-title: 이걸 왜 이제 알았을까? 90분짜리 팟캐스트를 통째로 굽는 MS VibeVoice 솔직 리뷰
+title: 'VibeVoice로 90분 팟캐스트를 한 번에 만들까: 7.5Hz 토큰과 중단된 공식 지원'
 date: '2026-03-01 18:30:18'
 categories: Tech
 tags:
-  - 음성AI
-  - 경량화
-  - 디퓨전모델
-  - 로보틱스
-  - 컨텍스트윈도우
-summary: 마이크로소프트의 오픈소스 TTS 프레임워크인 VibeVoice의 혁신적인 아키텍처(7.5Hz 토크나이저, LLM+Diffusion)와
-  실제 로컬 구동 후기, 그리고 공식 레포지토리 삭제 사태 이면의 한계점까지 개발자의 시선에서 솔직하게 분석한 리뷰입니다.
+  - VibeVoice
+  - 장문TTS
+  - 다중화자
+  - AudioTokenizer
+  - Diffusion
+summary: 7.5Hz 토크나이저와 LLM·Diffusion 구조가 4명·90분 음성을 다루는 방식, community fork 의존과 환각 한계를 짚습니다.
 author: AI Trend Bot
 github_url: https://github.com/microsoft/VibeVoice
 image:
@@ -19,40 +18,30 @@ image:
     Podcast Generation
 ---
 
-> 🎯 **한 마디로 정리해볼게요 (TL;DR)**
-- **미친 컨텍스트 유지력**: 한 번의 추론(Single-pass)으로 최대 4명의 화자가 등장하는 **90분짜리 오디오**를 통째로 생성합니다.
-- **하이브리드 아키텍처**: 7.5Hz의 초저프레임 토크나이저와 LLM + Diffusion 구조를 섞어 연산량을 혁신적으로 줄였습니다.
-- **슬픈 비하인드 스토리**: 악용 우려로 MS 공식 레포의 코드가 내려갔지만, ComfyUI 커뮤니티의 8bit 양자화 노드 덕분에 로컬에서도 쾌적하게 굴려볼 수 있어요.
+VibeVoice는 원문 기준 최대 4명의 화자와 90분 audio를 한 번의 긴 generation으로 다루도록 설계됐지만, 공식 TTS code가 내려간 상태에서는 community fork·quantization·hardware 조합을 production 지원으로 볼 수 없습니다. 장문 일관성의 가능성과 유지보수·voice misuse·script hallucination의 위험을 함께 검증해야 합니다.
 
-요즘 사이드 프로젝트로 'AI 팟캐스트 자동 생성기'를 끄적이고 있었거든요. 텍스트를 던져주면 두 명의 호스트가 티키타카하는 걸 상상하면서요. 그런데 시중의 전통적인 TTS API들을 붙여보니 하나같이 '길이 제한'의 벽에 부딪히더라고요. 문장 단위로 잘라서 생성하고 이어 붙이다 보니, 화자가 넘어갈 때마다 대화가 뚝뚝 끊기는 그 특유의 '로봇 느낌'… 다들 개발하시면서 한 번쯤 겪어보셨죠?
+## 7.5Hz가 긴 대화를 가능하게 하는 이유
 
-그러다 최근 깃허브와 AI 커뮤니티를 뜨겁게 달궜던 녀석을 뒤늦게 돌려봤습니다. 바로 마이크로소프트가 선보인 오픈소스 프레임워크, **VibeVoice**입니다. 주말 내내 이걸로 삽질(?)을 좀 해봤는데… 와, 이거 진짜 물건인 것 같아요. 왜 이제야 알았나 싶더라고요.
+기존 TTS가 높은 frame rate로 audio token을 만들면 90분 sequence가 매우 길어집니다. VibeVoice는 acoustic과 semantic 정보를 7.5Hz의 ultra-low frame-rate token으로 압축해 context가 다뤄야 할 step 수를 줄입니다. 원문은 1.5B와 7B model, 최대 90분, 최대 4명 speaker를 제시합니다.
 
-커피 한잔하시면서, 제가 주말 동안 느꼈던 충격과 기술적 흥미로움을 같이 나눠볼까요? ☕️
+낮은 token rate는 memory를 줄이는 대신 tokenizer가 한 step에 더 많은 음성 정보를 담아야 한다는 뜻입니다. 미세한 발음, 호흡, 배경 소리와 화자 구분을 얼마나 보존하는지는 길이 수치만으로 알 수 없습니다. “90분 생성 가능”과 90분 전체가 같은 품질·화자 identity를 유지한다는 주장도 구분해야 합니다.
 
-### 🚀 Deep Dive: 90분짜리 오디오를 굽는 마법, 대체 원리가 뭘까?
+## LLM은 대화 흐름을, Diffusion은 음향을 맡는다
 
-공식 문서를 읽으면서 가장 소름 돋았던 부분은 바로 **아키텍처 설계**였습니다. 기존의 전통적인 TTS 모델들은 텍스트를 받아 멜 스펙트로그램(Mel-spectrogram)으로 변환하고, 그걸 다시 보코더(Vocoder)로 소리 내는 방식을 주로 썼거든요. 이 방식의 치명적인 단점은 '긴 문맥'을 기억하지 못한다는 거예요.
+원문은 VibeVoice를 LLM과 next-token diffusion의 hybrid로 설명합니다. LLM이 긴 script와 turn context를 처리하고, diffusion component가 acoustic texture를 생성합니다. 문장별 TTS를 따로 호출해 붙이는 방식보다 pause와 speaker turn을 한 context에서 학습할 여지가 있습니다.
 
-하지만 VibeVoice는 접근법 자체가 달라요. 이 녀석은 텍스트를 단순히 '읽는' 게 아니라, **LLM이 대화의 흐름을 이해하고 Diffusion 모델이 소리의 질감을 입히는 'Next-token diffusion' 구조**를 채택했어요.
+그 대신 두 계층의 오류가 함께 나타납니다.
 
-더 기가 막힌 건 **7.5Hz 초저프레임(Ultra-low frame rate) 토크나이저**의 도입입니다. 과거 모델들이 고주파수로 오디오 토큰을 잘게 쪼개다 보니 메모리가 터져나갔다면, VibeVoice는 Acoustic과 Semantic 토큰을 7.5Hz라는 말도 안 되는 저프레임으로 압축하거든요. 오디오 품질은 유지하면서 연산량은 확 줄인 거죠. 덕분에 컨텍스트 윈도우가 엄청나게 넓어져서 '90분'이라는 경이로운 오디오 생성 길이가 가능해진 거예요.
+- LLM 쪽에서는 script에 없는 말이나 과도한 숨소리가 추가될 수 있습니다.
+- Diffusion·tokenizer 쪽에서는 voice가 섞이거나 texture가 불안정할 수 있습니다.
+- 두 사람이 동시에 말하는 overlap에서는 single line으로 뭉개지는 문제가 언급됩니다.
+- Emotion과 speed는 direction cue를 조정해야 할 수 있습니다.
 
-| 비교 항목 | 기존 전통적 TTS (일반 API) | **MS VibeVoice** 🌟 |
-| :--- | :--- | :--- |
-| **최대 생성 길이** | 보통 1~2분 내외 (문단 단위) | **최대 90분** (단일 패스 처리) |
-| **다중 화자 처리** | 화자별로 API 따로 호출 후 오디오 병합 | **최대 4명** 동시 처리 (자연스러운 턴 교차) |
-| **핵심 아키텍처** | Text -> Mel-spectrogram -> Vocoder | **LLM (문맥 이해) + Diffusion (어쿠스틱 생성)** |
-| **프레임 레이트** | 50Hz ~ 100Hz (연산량 폭발) | **7.5Hz (초저프레임 연속 음성 토크나이저)** |
+긴 audio를 한 번에 만들면 중간 오류 하나를 수정할 때 전체를 다시 생성해야 하는지도 중요한 workflow 질문입니다.
 
-### 💻 Hands-on: 로컬에서 직접 굴려본 후기 (ComfyUI 최고!)
+## Speaker tag 예시는 실행 코드가 아니다
 
-"이론은 알겠고, 그래서 내 그래픽카드로 돌아가?"
-아마 이 질문이 가장 먼저 떠오르실 텐데요. 결론부터 말씀드리면, **네, 돌아갑니다!**
-
-사실 1.5B나 7B 모델을 풀(Full) 가중치로 올리려면 VRAM이 꽤 넉넉해야 합니다. 하지만 우리에겐 위대한 오픈소스 커뮤니티가 있죠. `Enemyx-net/VibeVoice-ComfyUI` 같은 커스텀 노드와 4-bit, 8-bit 양자화(Quantization) 모델을 활용하면 RTX 3060이나 4070 Ti 같은 **12GB VRAM 환경에서도 충분히 프로덕션 레벨의 오디오를 뽑아낼 수 있습니다**. 맥 유저분들 소리 질러! Apple Silicon MPS도 기본 지원하더라고요 🎉
-
-ComfyUI에 노드를 올리고, 스크립트를 작성하는 방식도 개발자 친화적입니다. 대본 쓰듯이 화자 태그만 달아주면 됩니다.
+원문은 ComfyUI에서 사용할 script 형태로 다음 예시를 보여줍니다.
 
 ```text
 [S1]: (한숨) 코딩하다 막힐 때마다 산책을 가는데, 어제는 산책하다가 아예 길을 잃었어요.
@@ -61,31 +50,28 @@ ComfyUI에 노드를 올리고, 스크립트를 작성하는 방식도 개발자
 [S2]: 역시, 최고의 디버깅 툴은 든든한 국밥이죠!
 ```
 
-과연 성능은 어땠을까요?
-**미쳤습니다.** 두 화자가 숨을 들이마시는 타이밍, 말끝을 흐리는 느낌, 심지어 서로 대화를 주고받을 때의 미세한 간격(Pause)까지 너무 자연스럽게 이어지더라고요. 여러 API를 엮어서 고생했던 지난날이 주마등처럼 스쳐 지나갔습니다.
+이 block은 speaker와 direction cue 문법을 보여주는 입력 예시입니다. Model download, ComfyUI node 설치, checkpoint·quantization 선택, seed, output format, VRAM 설정이 없으므로 완전한 실행 가이드가 아닙니다.
 
-### 🤔 Honest Review: 공식 문서엔 없는 '진짜' 장단점
+원문은 Enemyx-net/VibeVoice-ComfyUI와 4-bit·8-bit model을 사용하면 RTX 3060·4070 Ti 같은 12GB VRAM에서도 실행 가능하고 Apple Silicon MPS도 지원한다고 설명합니다. 해상도에 해당하는 audio 설정, model size, 생성 길이와 속도 표가 없어 “12GB에서 90분이 쾌적하다”는 보장으로 읽을 수 없습니다.
 
-물론 며칠 써보니 완벽하기만 한 건 아니었어요. 개발자 시선에서 느낀 솔직한 아쉬움도 공유해 볼게요.
+## 공식 코드 철수는 기능보다 큰 운영 변수다
 
-1. **마이크로소프트의 오픈소스 '철수' 사태** 🚨
-사실 이 부분이 가장 뼈아픕니다. MS가 작년(2025년) 8월에 야심 차게 공개했다가, "의도치 않은 방식(악용)으로 사용되는 사례"가 발견되면서 불과 며칠 만인 9월 5일에 TTS 코드를 깃허브에서 싹 내려버렸어요. 현재 우리가 쓰는 건 커뮤니티가 재빠르게 포크(Fork)해둔 백업본이죠. 공식적인 업데이트 지원을 기대하기 어렵다는 건 프로덕션 도입을 망설이게 하는 가장 큰 허들이에요. (대신 ASR 모델은 올해 2026년 1월에 새롭게 공개되었으니 위안으로 삼아야겠네요)
+원문에 따르면 Microsoft는 2025년 8월 공개 뒤 악용 사례 우려로 9월 5일 TTS code를 내렸고, 현재 사용 흐름은 community backup에 의존합니다. 2026년 1월 ASR model이 나왔다는 설명도 TTS maintenance가 재개됐다는 뜻은 아닙니다.
 
-2. **할루시네이션(환각)과 Overlap 처리의 한계**
-LLM 기반이다 보니 텍스트에 없는 '헛소리'나 과도한 숨소리를 자기 맘대로 넣을 때가 종종 있습니다. 또, 두 사람이 동시에 말하는 구간(Overlap)을 대본에 넣으면, 모델이 당황해서 목소리를 단일 라인으로 뭉개버리거나 불안정해지더라고요. 대본을 정말 '대본답게' 겹치는 부분 없이 잘 깎아야 해요.
+도입 전에 확인할 항목은 다음과 같습니다.
 
-3. **프롬프트 엔지니어링의 필요성**
-단순히 텍스트만 넣는다고 끝이 아니라, 감정선이나 속도를 조절하려면 가벼운 디렉션 큐(Lightweight direction cues)를 적절히 섞어주는 보이지 않는 노가다가 좀 필요해요.
+1. 실제 사용하는 fork와 commit이 무엇인가
+2. Weight·code license와 배포 가능한 범위
+3. Security fix와 dependency update 담당자
+4. Model 출처와 file checksum
+5. Voice sample의 동의·삭제·output 표시 정책
 
-### 🏁 마무리하며: 음성 AI의 넥스트 스텝
+장기 지원이 없는 fork는 demo에는 유용해도 business-critical production에서는 취약점과 model compatibility를 스스로 관리해야 합니다.
 
-다소 불안정한 메인터넌스 상황에도 불구하고, VibeVoice가 보여준 아키텍처적 성취는 대단해요. **"TTS는 텍스트를 읽는 것이 아니라, 대화를 연기하는 것이다"**라는 철학을 기술로 증명해 냈으니까요.
+## 90분 데모보다 구간별 실패율을 측정한다
 
-이제 팟캐스트, 오디오북, 게임 NPC 대화 시스템을 구축할 때 문장 단위로 쪼개고 붙이는 번거로운 작업은 곧 구시대의 유물이 될 것 같습니다. 한 번의 추론으로 90분짜리 몰입감 넘치는 오디오를 만들어내는 세상, 진짜 코앞까지 왔네요.
+평가는 30초·10분·90분으로 길이를 늘리고, 각 구간에서 speaker identity, script word error, 빠진 문장, 추가 발화, pause, overlap 실패, 생성 시간과 peak VRAM을 기록해야 합니다. 같은 seed 반복에서 어느 정도 변하는지도 봅니다.
 
-사이드 프로젝트에 음성 AI 도입을 고민 중이시라면, 당장 이번 주말에 ComfyUI 켜고 VibeVoice 양자화 모델 한 번 돌려보시는 건 어떨까요? 삽질의 고통보다 결과물의 감동이 훨씬 클 거라고 확신합니다. 😎
+Podcast와 audiobook prototype처럼 후편집이 가능한 작업은 장문 generation의 이득이 큽니다. 반면 정확한 대본 준수와 즉시 수정, 공식 support가 중요한 service라면 문장·scene 단위 TTS가 더 관리하기 쉬울 수 있습니다. VibeVoice의 기술적 의미는 “90분 완성품을 버튼 한 번에 보장”하는 데 아니라, 7.5Hz token과 hybrid generator로 long-form speech context를 작게 만드는 방향을 보여준 데 있습니다.
 
-## References
-- https://github.com/microsoft/VibeVoice
-- https://github.com/Enemyx-net/VibeVoice-ComfyUI
-- https://vibevoice.live
+참고: [Microsoft VibeVoice 저장소](https://github.com/microsoft/VibeVoice), [Community ComfyUI node](https://github.com/Enemyx-net/VibeVoice-ComfyUI)

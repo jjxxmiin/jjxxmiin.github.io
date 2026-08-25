@@ -1,23 +1,26 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Layer"
+title:  "Darknet layer 구조를 해제할 때 왜 터질까: LAYER_TYPE과 free_layer 소유권"
+summary: "Darknet의 LAYER_TYPE enum이 실행 분기를 만드는 방식과 free_layer가 선택적 버퍼를 해제할 때 확인해야 할 메모리 소유권을 짚습니다."
 date:   2022-03-04 16:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetLayer.jpg
   alt: DarkNet 시리즈 - Layer 대표 이미지
 tags:
-  - DarkNet
-  - YOLO
-  - 컴퓨터비전
+  - Darknet소스분석
+  - 레이어구조체
+  - C메모리관리
 math: true
 ---
 
-## layer
+Darknet의 `layer`는 종류별 별도 클래스를 쓰는 대신 **`LAYER_TYPE`으로 동작을 구분하고, 하나의 큰 구조체에 필요한 포인터만 채우는 방식**이다. 그래서 `free_layer`의 핵심은 포인터가 NULL인지보다 그 메모리를 이 layer가 실제로 소유하는지 확인하는 데 있다.
+
+## LAYER_TYPE은 이름 목록이 아니라 분기 기준이다
+
+`darknet.h`의 enum은 parser가 만든 layer의 종류를 표시한다.
 
 ```c
-// darknet.h
-
 typedef enum {
     CONVOLUTIONAL,
     DECONVOLUTIONAL,
@@ -52,112 +55,63 @@ typedef enum {
 } LAYER_TYPE;
 ```
 
-이 코드는 열거형(enum)으로 LAYER\_TYPE이라는 타입을 정의하고 있습니다. LAYER\_TYPE은 다양한 레이어 유형을 정의하고 있으며, 각 레이어 유형은 해당하는 이름으로 정의되어 있습니다.
+이 값만으로 convolution이나 LSTM이 계산되지는 않는다. 생성 함수가 `l.type`과 `forward`, `backward`, `update` 함수 포인터, shape, buffer를 함께 채워야 완전한 layer가 된다.
 
-다음은 각 레이어 유형과 그에 해당하는 이름입니다.
+새 종류를 enum에 추가하는 것만으로 구현이 끝나지 않는 이유도 같다. parser가 해당 section을 인식하고 생성 함수를 호출하는지, network 실행부가 함수 포인터를 호출하는지, 필요한 버퍼가 resize와 free 경로에 들어가는지까지 이어져야 한다.
 
-* CONVOLUTIONAL: 컨볼루션(Convolution) 레이어
-* DECONVOLUTIONAL: 디컨볼루션(Deconvolution) 레이어
-* CONNECTED: 완전 연결(Fully Connected) 레이어
-* MAXPOOL: 맥스 풀링(Max Pooling) 레이어
-* SOFTMAX: 소프트맥스(Softmax) 레이어
-* DETECTION: 객체 검출(Detection) 레이어
-* DROPOUT: 드롭아웃(Dropout) 레이어
-* CROP: 크롭(Crop) 레이어
-* ROUTE: 루트(Route) 레이어
-* COST: 비용(Cost) 레이어
-* NORMALIZATION: 정규화(Normalization) 레이어
-* AVGPOOL: 평균 풀링(Average Pooling) 레이어
-* LOCAL: 로컬(Local) 레이어
-* SHORTCUT: 숏컷(Shortcut) 레이어
-* ACTIVE: 활성화(Activation) 레이어
-* RNN: 순환 신경망(Recurrent Neural Network) 레이어
-* GRU: 게이트 순환 유닛(Gated Recurrent Unit) 레이어
-* LSTM: 장단기 메모리(Long Short-Term Memory) 레이어
-* CRNN: 합성곱 순환 신경망(Convolutional Recurrent Neural Network) 레이어
-* BATCHNORM: 배치 정규화(Batch Normalization) 레이어
-* NETWORK: 네트워크(Network) 레이어
-* XNOR: 이진화(Binary) 레이어
-* REGION: 지역(Region) 레이어
-* YOLO: YOLO(You Only Look Once) 레이어
-* ISEG: 인스턴스 분할(Instance Segmentation) 레이어
-* REORG: 리오그(Reorg) 레이어
-* UPSAMPLE: 업샘플(Upsample) 레이어
-* LOGXENT: 로그-엔트로피(Log-entropy) 레이어
-* L2NORM: L2 노름(L2 Norm) 레이어
-* BLANK: 빈(Blank) 레이어
+## free_layer는 어떤 포인터를 해제하나
 
-이 함수는 LAYER\_TYPE이라는 열거형을 정의한 것이므로 입력값과 동작은 없습니다.
-
-
-
-### free\_layer
+일반 layer 경로는 구조체의 선택적 CPU 포인터를 하나씩 검사해 해제한다.
 
 ```c
-void free_layer(layer l)
-{
-    if(l.type == DROPOUT){
-        if(l.rand)           free(l.rand);
-        return;
-    }
-    if(l.cweights)           free(l.cweights);
-    if(l.indexes)            free(l.indexes);
-    if(l.input_layers)       free(l.input_layers);
-    if(l.input_sizes)        free(l.input_sizes);
-    if(l.map)                free(l.map);
-    if(l.rand)               free(l.rand);
-    if(l.cost)               free(l.cost);
-    if(l.state)              free(l.state);
-    if(l.prev_state)         free(l.prev_state);
-    if(l.forgot_state)       free(l.forgot_state);
-    if(l.forgot_delta)       free(l.forgot_delta);
-    if(l.state_delta)        free(l.state_delta);
-    if(l.concat)             free(l.concat);
-    if(l.concat_delta)       free(l.concat_delta);
-    if(l.binary_weights)     free(l.binary_weights);
-    if(l.biases)             free(l.biases);
-    if(l.bias_updates)       free(l.bias_updates);
-    if(l.scales)             free(l.scales);
-    if(l.scale_updates)      free(l.scale_updates);
-    if(l.weights)            free(l.weights);
-    if(l.weight_updates)     free(l.weight_updates);
-    if(l.delta)              free(l.delta);
-    if(l.output)             free(l.output);
-    if(l.squared)            free(l.squared);
-    if(l.norms)              free(l.norms);
-    if(l.spatial_mean)       free(l.spatial_mean);
-    if(l.mean)               free(l.mean);
-    if(l.variance)           free(l.variance);
-    if(l.mean_delta)         free(l.mean_delta);
-    if(l.variance_delta)     free(l.variance_delta);
-    if(l.rolling_mean)       free(l.rolling_mean);
-    if(l.rolling_variance)   free(l.rolling_variance);
-    if(l.x)                  free(l.x);
-    if(l.x_norm)             free(l.x_norm);
-    if(l.m)                  free(l.m);
-    if(l.v)                  free(l.v);
-    if(l.z_cpu)              free(l.z_cpu);
-    if(l.r_cpu)              free(l.r_cpu);
-    if(l.h_cpu)              free(l.h_cpu);
-    if(l.binary_input)       free(l.binary_input);
-}
-
+if(l.biases)           free(l.biases);
+if(l.bias_updates)     free(l.bias_updates);
+if(l.scales)           free(l.scales);
+if(l.scale_updates)    free(l.scale_updates);
+if(l.weights)          free(l.weights);
+if(l.weight_updates)   free(l.weight_updates);
+if(l.delta)            free(l.delta);
+if(l.output)           free(l.output);
 ```
 
-함수 이름: free\_layer
+recurrent layer가 쓰는 state 계열과 batch normalization 통계, Adam의 `m`, `v`, binary buffer도 같은 방식으로 처리한다.
 
-입력:&#x20;
+```c
+if(l.state)            free(l.state);
+if(l.prev_state)       free(l.prev_state);
+if(l.forgot_state)     free(l.forgot_state);
+if(l.state_delta)      free(l.state_delta);
+if(l.mean)             free(l.mean);
+if(l.variance)         free(l.variance);
+if(l.rolling_mean)     free(l.rolling_mean);
+if(l.rolling_variance) free(l.rolling_variance);
+if(l.m)                free(l.m);
+if(l.v)                free(l.v);
+```
 
-* layer 구조체 (layer 타입 포인터 변수 l)
+구조체는 값으로 전달되지만 내부 포인터는 원본과 같은 주소를 가리킨다. 함수가 끝나도 호출부의 `layer` 포인터 값은 NULL로 바뀌지 않는다. 같은 layer에 `free_layer`를 다시 호출하거나 해제 뒤 포인터를 읽으면 안전하지 않다.
 
-동작:&#x20;
+## DROPOUT만 일찍 반환하는 이유를 코드로 확인하기
 
-* layer 구조체에서 동적으로 할당한 모든 메모리를 해제하는 함수.&#x20;
-* DROPOUT 레이어인 경우 l.rand 변수만 해제하고 함수를 종료한다.
+함수 첫 분기는 DROPOUT을 특별 취급한다.
 
-설명:&#x20;
+```c
+if(l.type == DROPOUT){
+    if(l.rand) free(l.rand);
+    return;
+}
+```
 
-* 이 함수는 입력으로 전달된 layer 구조체에서 동적으로 할당된 모든 메모리를 해제한다.&#x20;
-* 할당된 메모리가 없는 경우 아무런 동작도 하지 않는다. DROPOUT 레이어인 경우 l.rand 변수만 해제하고 함수를 종료한다.&#x20;
-* 나머지 레이어의 경우, layer 구조체에서 사용하는 모든 변수를 순회하며 할당된 메모리가 있는 경우 메모리를 해제한다.&#x20;
-* 각 변수에 대한 메모리 해제는 malloc 함수를 사용하여 할당된 것과 동일한 방식으로 이루어진다.
+따라서 DROPOUT에서는 `rand`만 해제하고 `output`, `delta`를 포함한 나머지 목록으로 내려가지 않는다. 이는 해당 포인터를 다른 layer와 같은 방식으로 소유한다고 가정하면 안 된다는 강한 신호다. 생성 코드를 함께 읽어 실제로 어떤 buffer를 빌려 쓰는지 확인해야 한다.
+
+반대로 일반 경로에 이름이 있다고 해서 항상 할당된 것은 아니다. NULL 검사는 다양한 layer가 하나의 구조체를 공유하게 해주지만, 잘못된 비-NULL 포인터나 이미 해제된 포인터까지 보호하지는 못한다.
+
+메모리 문제를 추적할 때는 다음을 layer 생성 함수와 짝지어 본다.
+
+1. `calloc`, `malloc`, `realloc`한 각 포인터가 free 목록에 있는가?
+2. 포인터 배열이라면 배열 자체뿐 아니라 각 원소도 해제하는가?
+3. 다른 layer나 network가 빌려준 포인터를 여기서 다시 free하지 않는가?
+4. DROPOUT처럼 조기 반환하는 종류가 추가 버퍼를 소유하지 않는가?
+5. resize가 이전 주소를 바꾼 뒤 모든 참조가 갱신되는가?
+
+앞선 ISEG 생성 코드는 `counts`, `sums`, 그리고 `sums[i]`를 동적 할당하지만, 여기 제시된 `free_layer` 목록에는 그 이름이 보이지 않는다. 이 소스 조합만 기준으로 보면 별도 해제 경로가 있는지 반드시 더 확인해야 한다. `free_layer`를 “모든 것을 알아서 정리하는 함수”로 믿기보다 **생성 함수의 할당 목록과 한 줄씩 대조하는 것**이 가장 확실한 검토 방법이다.

@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "DarkNet 시리즈 - Option List"
+title:  "Darknet data.cfg 옵션이 조용히 잘못 읽히는 이유: '=' 파싱과 문자열 수명"
 date:   2022-03-12 16:00 -0400
 categories: DarkNet
 image:
@@ -8,14 +8,17 @@ image:
   alt: DarkNet 시리즈 - Option List 대표 이미지
 tags:
   - DarkNet
-  - YOLO
-  - 컴퓨터비전
+  - Config Parser
+  - C언어
+summary: "Darknet option_list.c가 설정 한 줄을 key와 value로 나누는 과정, used 추적, 기본값 처리, 원본 문자열에 기대는 메모리 소유권을 코드 중심으로 점검합니다."
 math: true
 ---
 
-## option\_list
+Darknet의 옵션 파서는 `key=value` 한 줄을 직접 잘라 보관하므로, `=`이 없는 줄과 문자열 수명을 먼저 점검해야 합니다. 특히 현재 `read_option`은 `=`이 전혀 없는 줄을 정상적으로 거부하지 못합니다.
 
-### read\_data\_cfg
+## 설정 파일은 줄 단위로 읽고 원본 버퍼를 보관한다
+
+`read_data_cfg`는 파일을 열어 `fgetl`로 한 줄씩 읽고, `strip`으로 앞뒤를 정리합니다. 빈 줄과 `#`·`;`로 시작하는 줄은 즉시 해제하며, 나머지는 `read_option`에 넘깁니다.
 
 ```c
 list *read_data_cfg(char *filename)
@@ -25,8 +28,9 @@ list *read_data_cfg(char *filename)
     char *line;
     int nu = 0;
     list *options = make_list();
-    while((line=fgetl(file)) != 0){
-        ++ nu;
+
+    while((line = fgetl(file)) != 0){
+        ++nu;
         strip(line);
         switch(line[0]){
             case '\0':
@@ -36,7 +40,9 @@ list *read_data_cfg(char *filename)
                 break;
             default:
                 if(!read_option(line, options)){
-                    fprintf(stderr, "Config file error line %d, could parse: %s\n", nu, line);
+                    fprintf(stderr,
+                        "Config file error line %d, could parse: %s\n",
+                        nu, line);
                     free(line);
                 }
                 break;
@@ -47,25 +53,122 @@ list *read_data_cfg(char *filename)
 }
 ```
 
-함수 이름: read\_data\_cfg
+파싱에 성공한 `line`은 이 함수에서 해제하지 않습니다. 그 이유는 다음 단계에서 `key`와 `val`이 별도 복사본이 아니라 그 한 줄 안을 가리키기 때문입니다. 따라서 정리 코드를 바꿀 때는 노드와 `kvp`만 볼 것이 아니라, 원본 줄을 누가 언제 해제하는지도 함께 정해야 합니다.
 
-입력:&#x20;
+## read_option의 경계 조건에는 실제 함정이 있다
 
-* filename (char \*): 읽을 파일의 이름
+`read_option`은 처음 만난 `=`을 널 문자로 바꿉니다. `key`는 문자열 시작점, `val`은 그 바로 다음 문자를 가리킵니다.
 
-동작:&#x20;
+```c
+int read_option(char *s, list *options)
+{
+    size_t i;
+    size_t len = strlen(s);
+    char *val = 0;
 
-* 지정된 파일에서 데이터 구성 파일을 읽어들이고 각 설정 옵션을 구문 분석하여 연결 리스트로 반환한다.
+    for(i = 0; i < len; ++i){
+        if(s[i] == '='){
+            s[i] = '\0';
+            val = s+i+1;
+            break;
+        }
+    }
+    if(i == len-1) return 0;
 
-설명:
+    char *key = s;
+    option_insert(options, key, val);
+    return 1;
+}
+```
 
-* 지정된 파일을 열고 파일을 성공적으로 열지 못한 경우 오류 메시지를 출력한다.
-* 파일에서 한 줄씩 읽으며 각 줄의 첫 문자를 확인하여 옵션을 구문 분석한다.
-* 읽은 옵션을 옵션 연결 리스트에 추가하고 이를 반환한다.
+이 조건문을 입력별로 대입하면 차이가 드러납니다.
 
+- `width=416`: `key`와 `val`이 나뉘어 저장됩니다.
+- `width=`: `=`이 마지막 문자라서 0을 반환합니다.
+- `width`: 반복문이 `i == len`으로 끝나므로 `i == len-1`이 거짓입니다. 결국 `val == 0`인 항목이 삽입됩니다.
+- `=416`: 빈 키도 별도 검사 없이 삽입됩니다.
 
+따라서 “`=`이 없으면 오류”라고 이해하면 현재 코드와 다릅니다. 최소한 `val`이 설정되었는지, 키와 값이 비어 있지 않은지를 검사해야 안전합니다. `option_insert` 역시 문자열을 복사하지 않고 포인터만 저장합니다.
 
-### get\_metadata
+```c
+void option_insert(list *l, char *key, char *val)
+{
+    kvp *p = malloc(sizeof(kvp));
+    p->key = key;
+    p->val = val;
+    p->used = 0;
+    list_insert(l, p);
+}
+```
+
+`val`은 대개 할당 블록의 중간 주소이므로 따로 `free(val)`할 수 없습니다. 이 표현을 유지한다면 원본 시작 주소인 `key`와 `kvp`, 리스트 노드의 해제 책임을 일관되게 설계해야 합니다.
+
+## 조회는 값을 반환하는 동시에 used 상태를 바꾼다
+
+`option_find`는 키가 일치하면 `used = 1`로 바꾸고 값 포인터를 반환합니다. 단순 조회처럼 보이지만 리스트 상태를 변경하는 함수입니다.
+
+```c
+char *option_find(list *l, char *key)
+{
+    node *n = l->front;
+    while(n){
+        kvp *p = (kvp *)n->val;
+        if(strcmp(p->key, key) == 0){
+            p->used = 1;
+            return p->val;
+        }
+        n = n->next;
+    }
+    return 0;
+}
+
+void option_unused(list *l)
+{
+    node *n = l->front;
+    while(n){
+        kvp *p = (kvp *)n->val;
+        if(!p->used){
+            fprintf(stderr, "Unused field: '%s = %s'\n", p->key, p->val);
+        }
+        n = n->next;
+    }
+}
+```
+
+그래서 `option_unused`는 단순히 파일에 있던 모든 옵션이 아니라, 조회되지 않은 옵션을 찾아내는 진단 도구입니다. 철자가 틀린 설정이나 이 빌드에서 사용하지 않는 필드를 찾는 데 유용하지만, 조회 함수가 호출되기만 해도 사용된 것으로 표시된다는 한계가 있습니다.
+
+문자열·정수·실수 조회 함수는 모두 이 함수 위에 얹혀 있습니다.
+
+```c
+char *option_find_str(list *l, char *key, char *def)
+{
+    char *v = option_find(l, key);
+    if(v) return v;
+    if(def) fprintf(stderr, "%s: Using default '%s'\n", key, def);
+    return def;
+}
+
+int option_find_int(list *l, char *key, int def)
+{
+    char *v = option_find(l, key);
+    if(v) return atoi(v);
+    fprintf(stderr, "%s: Using default '%d'\n", key, def);
+    return def;
+}
+
+float option_find_float_quiet(list *l, char *key, float def)
+{
+    char *v = option_find(l, key);
+    if(v) return atof(v);
+    return def;
+}
+```
+
+`quiet` 변형은 기본값 사용 메시지만 생략합니다. 키가 있으면 똑같이 `used`가 바뀝니다. 또한 `atoi`와 `atof` 결과를 바로 쓰므로, 잘못된 문자열과 실제 0을 구별하거나 범위를 확인하는 검증은 이 코드에 없습니다.
+
+## metadata를 읽을 때 값의 사용 시점을 지켜야 한다
+
+`get_metadata`는 먼저 `names`를 찾고, 없으면 `labels`를 찾습니다. 둘 다 없으면 오류를 출력하고, 클래스 수는 기본값 2로 읽습니다.
 
 ```c
 metadata get_metadata(char *file)
@@ -86,351 +189,6 @@ metadata get_metadata(char *file)
 }
 ```
 
-함수 이름: get\_metadata
+중요한 순서는 `get_labels(name_list)`가 `free_list(options)`보다 먼저 실행된다는 점입니다. `name_list`가 옵션 줄 내부를 가리키므로, 리스트를 정리한 뒤 이 포인터를 다시 쓰는 구조로 순서를 바꾸면 수명 문제가 생길 수 있습니다.
 
-입력:&#x20;
-
-* char \*file (메타데이터 파일 이름)
-
-동작:&#x20;
-
-* 지정된 메타데이터 파일을 읽고, 이름 또는 레이블 목록을 찾아서 가져와서 metadata 구조체를 반환함.
-
-설명:
-
-* 함수는 metadata 구조체를 반환하며, 이 구조체는 클래스 수와 레이블 이름을 저장함.
-* 함수는 지정된 메타데이터 파일을 읽어들이고, "names" 또는 "labels" 필드에서 레이블 이름을 찾음.
-* 레이블 이름은 쉼표(,)로 구분된 문자열로 구성되며, get\_labels() 함수를 사용하여 리스트로 변환함.
-* 함수는 "classes" 필드에서 클래스 수를 찾음.
-* 함수는 메타데이터 파일에서 읽은 모든 필드를 해제함.
-
-
-
-### read\_option
-
-```c
-int read_option(char *s, list *options)
-{
-    size_t i;
-    size_t len = strlen(s);
-    char *val = 0;
-    for(i = 0; i < len; ++i){
-        if(s[i] == '='){
-            s[i] = '\0';
-            val = s+i+1;
-            break;
-        }
-    }
-    if(i == len-1) return 0;
-    char *key = s;
-    option_insert(options, key, val);
-    return 1;
-}
-```
-
-함수 이름: read\_option
-
-입력:&#x20;
-
-* char 포인터 s (설정 파일에서 읽은 한 줄의 문자열)
-* list 포인터 options (설정 값을 저장하는 연결 리스트)
-
-동작:&#x20;
-
-* 입력으로 받은 문자열 s를 key-value 쌍으로 분리하고, key와 value를 options 리스트에 추가한다.
-
-설명:
-
-* s 문자열에서 '=' 문자를 찾아 그 위치를 기준으로 key와 value를 구분한다.
-* key와 value를 options 리스트에 추가한다.
-* 설정 파일에서 한 줄을 잘못 읽거나 '=' 문자가 없는 경우에는 0을 반환하여 오류를 나타낸다.
-
-
-
-### option\_insert
-
-```c
-void option_insert(list *l, char *key, char *val)
-{
-    kvp *p = malloc(sizeof(kvp));
-    p->key = key;
-    p->val = val;
-    p->used = 0;
-    list_insert(l, p);
-}
-```
-
-함수 이름: option\_insert&#x20;
-
-입력:
-
-* l: option\_insert를 수행할 list 구조체 포인터
-* key: 삽입할 key 문자열 포인터
-* val: 삽입할 value 문자열 포인터
-
-동작:&#x20;
-
-* 주어진 key와 val을 새로운 kvp 구조체에 저장하고, used는 0으로 초기화한 뒤, list l에 새로운 kvp 구조체를 삽입한다.
-
-설명:&#x20;
-
-* option\_insert 함수는 key와 value를 갖는 새로운 kvp 구조체를 생성하여, 입력받은 list l에 삽입하는 함수이다.&#x20;
-* kvp 구조체는 key와 val, 그리고 이 kvp가 사용되었는지를 나타내는 used 필드로 이루어져 있다.&#x20;
-* option\_insert 함수는 주어진 key와 val로 새로운 kvp 구조체를 생성하고, used를 0으로 초기화한 뒤, 이를 list l에 삽입한다.
-
-
-
-### option\_unused
-
-```c
-void option_unused(list *l)
-{
-    node *n = l->front;
-    while(n){
-        kvp *p = (kvp *)n->val;
-        if(!p->used){
-            fprintf(stderr, "Unused field: '%s = %s'\n", p->key, p->val);
-        }
-        n = n->next;
-    }
-}
-```
-
-함수 이름: option\_unused&#x20;
-
-입력:&#x20;
-
-* list 포인터 l&#x20;
-
-동작:&#x20;
-
-* l 리스트에 있는 모든 kvp(key-value pair)들 중에 사용되지 않은 kvp들을 찾아서 stderr로 출력한다.&#x20;
-
-설명:
-
-* 이 함수는 list l에 있는 kvp들 중에 사용되지 않은 kvp들을 찾아서 출력하는 함수이다.
-* l은 linked list 구조체의 포인터이다.
-* kvp 구조체는 key-value pair를 나타내는 구조체로 key와 val로 이루어져 있다.
-* n은 linked list에서 현재 검사 중인 노드를 가리키는 포인터이다.
-* while문은 linked list의 모든 노드를 검사한다.
-* p는 현재 노드의 kvp를 가리키는 포인터이다.
-* 만약 현재 kvp가 사용되지 않았으면, 해당 kvp의 key와 val을 stderr로 출력한다.
-* n은 다음 노드를 가리키는 포인터로 업데이트된다.
-
-
-
-### option\_find
-
-```c
-char *option_find(list *l, char *key)
-{
-    node *n = l->front;
-    while(n){
-        kvp *p = (kvp *)n->val;
-        if(strcmp(p->key, key) == 0){
-            p->used = 1;
-            return p->val;
-        }
-        n = n->next;
-    }
-    return 0;
-}
-```
-
-함수 이름: option\_find&#x20;
-
-입력:&#x20;
-
-* list 포인터 l
-* char 포인터 key&#x20;
-
-동작:&#x20;
-
-* 주어진 key로 list l에서 kvp 구조체의 key와 비교하여 일치하는 key를 찾고 해당하는 kvp 구조체의 val 포인터를 반환하고, 사용된 kvp 구조체의 used 값을 1로 설정한다.&#x20;
-
-설명:&#x20;
-
-* option\_find 함수는 주어진 key에 해당하는 값(val)을 찾는 함수로, 이를 위해 key-value pair(kvp) 구조체를 활용한다.&#x20;
-* l은 kvp 구조체를 모아둔 list를 가리키는 포인터이며, key는 찾고자 하는 값의 key를 가리키는 포인터이다.&#x20;
-* 반환값은 찾은 값(val)의 포인터이며, 해당하는 key가 없을 경우 0을 반환한다.
-
-
-
-### option\_find\_str
-
-```c
-char *option_find_str(list *l, char *key, char *def)
-{
-    char *v = option_find(l, key);
-    if(v) return v;
-    if(def) fprintf(stderr, "%s: Using default '%s'\n", key, def);
-    return def;
-}
-```
-
-함수 이름: option\_find\_str
-
-입력:
-
-* list \*l: 옵션 리스트
-* char \*key: 검색할 옵션 키
-* char \*def: 옵션이 없을 경우 반환할 기본값
-
-동작:
-
-* 주어진 리스트에서 주어진 키를 검색하고 해당하는 값이 있다면 반환한다.
-* 값이 없는 경우, 기본값(def)을 반환하고 해당하는 키와 기본값을 에러 메시지로 출력한다.
-
-설명:
-
-* 이 함수는 주어진 리스트에서 특정 옵션의 값을 검색하는 함수이다.
-* 만약 해당하는 옵션의 값이 있다면 문자열 형태로 반환한다.
-* 옵션이 없는 경우, 기본값(def)을 반환하고 해당하는 키와 기본값을 에러 메시지로 출력한다.
-* 이 함수는 YOLO와 같은 딥러닝 모델에서 사용되는 옵션 값을 가져오는 데 사용된다.
-
-
-
-### option\_find\_int
-
-```c
-int option_find_int(list *l, char *key, int def)
-{
-    char *v = option_find(l, key);
-    if(v) return atoi(v);
-    fprintf(stderr, "%s: Using default '%d'\n", key, def);
-    return def;
-}
-```
-
-함수 이름: option\_find\_int
-
-입력:
-
-* list \*l: 연결 리스트 포인터
-* char \*key: 찾으려는 옵션 키 문자열 포인터
-* int def: 기본값
-
-동작:
-
-* 입력된 연결 리스트에서 주어진 옵션 키를 찾아 해당 값의 정수형을 반환한다.
-* 해당 옵션 키가 없을 경우 기본값을 반환하고 표준 오류 출력에 해당 옵션 키와 기본값을 출력한다.
-
-설명:
-
-* 입력된 연결 리스트는 옵션 키와 값의 쌍을 저장하고 있다.
-* option\_find 함수를 이용해 주어진 옵션 키에 해당하는 값 문자열 포인터를 찾는다.
-* 찾은 문자열 포인터를 atoi 함수를 이용해 정수형으로 변환하고 반환한다.
-* 해당 옵션 키가 없을 경우 표준 오류 출력에 해당 옵션 키와 기본값을 출력하고 기본값을 반환한다.
-
-
-
-### option\_find\_int\_quiet
-
-```c
-int option_find_int_quiet(list *l, char *key, int def)
-{
-    char *v = option_find(l, key);
-    if(v) return atoi(v);
-    return def;
-}
-```
-
-함수 이름: option\_find\_int\_quiet
-
-입력:
-
-* list \*l: 설정 파일에서 읽어온 설정들이 저장된 list 구조체 포인터
-* char \*key: 읽어올 설정의 이름
-* int def: 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우 사용할 기본값
-
-동작:
-
-* 입력으로 받은 key에 해당하는 값을 설정 파일에서 찾습니다.
-* 해당 값이 존재할 경우 int 형태로 변환하여 반환합니다.
-* 해당 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-* 출력을 하지 않습니다.
-
-설명:
-
-* 이 함수는 설정 파일에서 int 형태의 값을 읽어오기 위해 사용됩니다.
-* 입력으로 받은 설정 파일(list 구조체)에서 key에 해당하는 값을 찾습니다.
-* 찾은 값을 atoi 함수를 이용하여 int 형태로 변환합니다.
-* 만약 key에 해당하는 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-* 이 함수는 설정 파일에서 읽어온 int 값을 반환합니다.
-* 만약 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우, 기본값 def를 사용합니다.
-* 이 함수는 출력을 하지 않습니다.
-
-
-
-### option\_find\_float\_quiet
-
-```c
-float option_find_float_quiet(list *l, char *key, float def)
-{
-    char *v = option_find(l, key);
-    if(v) return atof(v);
-    return def;
-}
-```
-
-함수 이름: option\_find\_float\_quiet
-
-입력:
-
-* list \*l: 설정 파일에서 읽어온 설정들이 저장된 list 구조체 포인터
-* char \*key: 읽어올 설정의 이름
-* float def: 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우 사용할 기본값
-
-동작:
-
-* 입력으로 받은 key에 해당하는 값을 설정 파일에서 찾습니다.
-* 해당 값이 존재할 경우 float 형태로 변환하여 반환합니다.
-* 해당 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-* 출력을 하지 않습니다.
-
-설명:
-
-* 이 함수는 설정 파일에서 float 형태의 값을 읽어오기 위해 사용됩니다.
-* 입력으로 받은 설정 파일(list 구조체)에서 key에 해당하는 값을 찾습니다.
-* 찾은 값을 atof 함수를 이용하여 float 형태로 변환합니다.
-* 만약 key에 해당하는 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-* 이 함수는 설정 파일에서 읽어온 float 값을 반환합니다.
-* 만약 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우, 기본값 def를 사용합니다.
-* 이 함수는 출력을 하지 않습니다.
-
-
-
-### option\_find\_float
-
-```c
-float option_find_float(list *l, char *key, float def)
-{
-    char *v = option_find(l, key);
-    if(v) return atof(v);
-    fprintf(stderr, "%s: Using default '%lf'\n", key, def);
-    return def;
-}
-```
-
-함수 이름: option\_find\_float
-
-입력:
-
-* list \*l: 설정 파일에서 읽어온 설정들이 저장된 list 구조체 포인터
-* char \*key: 읽어올 설정의 이름
-* float def: 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우 사용할 기본값
-
-동작:
-
-* 입력으로 받은 key에 해당하는 값을 설정 파일에서 찾습니다.
-* 해당 값이 존재할 경우 float 형태로 변환하여 반환합니다.
-* 해당 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-
-설명:
-
-* 이 함수는 설정 파일에서 float 형태의 값을 읽어오기 위해 사용됩니다.
-* 입력으로 받은 설정 파일(list 구조체)에서 key에 해당하는 값을 찾습니다.
-* 찾은 값을 atof 함수를 이용하여 float 형태로 변환합니다.
-* 만약 key에 해당하는 값이 존재하지 않을 경우 기본값 def를 사용합니다.
-* 이 함수는 설정 파일에서 읽어온 float 값을 반환합니다.
-* 만약 설정 파일에서 해당 key에 대한 값을 찾지 못했을 경우, 기본값 def를 사용하고 사용한 값을 stderr에 출력합니다.
+설정 문제를 추적할 때는 다음 네 가지를 함께 보면 됩니다. 원문 한 줄에 `=`이 실제로 있는지, 변환 전에 문자열 형식이 맞는지, 필요한 키가 `used`로 표시됐는지, 옵션 리스트를 정리한 뒤에도 내부 포인터를 보관하고 있지 않은지입니다.

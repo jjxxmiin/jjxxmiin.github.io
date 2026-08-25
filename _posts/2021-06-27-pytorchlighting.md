@@ -1,367 +1,253 @@
 ---
 layout: post
-title:  "Pytorch lightning 끄적이기"
-summary: "Pytorch lightning 끄적이기"
+title:  "PyTorch Lightning, 코드가 짧아져도 헷갈리는 이유: GAN 학습 구조 읽기"
+summary: "DataModule·LightningModule·Trainer가 각각 맡는 역할을 MNIST GAN 예제로 나누고, callback과 multi-GPU 설정을 적용할 때의 경계를 설명합니다."
 image:
   path: /assets/img/thumb/pytorchlighting.jpg
   alt: Pytorch lightning 끄적이기 대표 이미지
 date:   2021-06-27 09:10 -0400
 categories: OpenSource
 tags:
-  - 파이썬
-  - 반도체
-  - 오픈소스
+  - PyTorchLightning
+  - GAN
+  - 학습파이프라인
 ---
 
-> 조금씩이라도 자주 써야겠다.
+PyTorch Lightning의 장점은 학습 코드를 없애는 것이 아니라 **데이터 준비, 모델 계산, 최적화, 실행 환경의 책임을 정해진 위치로 옮기는 것**이다. 이 경계를 모르면 코드는 짧아져도 오류가 어디서 생겼는지 더 찾기 어렵다.
 
-## Pytorch Lighting
+- [PyTorch Lightning GitHub](https://github.com/PyTorchLightning/pytorch-lightning)
+- [공식 문서](https://pytorch-lightning.readthedocs.io/en/latest/)
+- 원문에서 살펴본 [basic GAN 예제](https://github.com/PyTorchLightning/lightning-tutorials/blob/main/lightning_examples/basic-gan/gan.py)
 
-항상 이런게 있구나 써봐야지 하면서 이제 써보는 Pytorch Lighting.. 진작 써볼껄.. 너무 편한거 같은 생김새와 실제로 사용할 때 매력적인 snippet들!
+> 아래 코드는 2021년 당시 예제의 API를 해설하기 위한 기록이다. 설치한 Lightning 버전의 공식 문서와 호출 인자가 같은지 확인한 뒤 사용해야 하며, 그대로 실행되는 최신 완성 예제로 보아서는 안 된다.
 
+## 무엇을 어느 클래스에 넣을까
 
-- [Github](https://github.com/PyTorchLightning/pytorch-lightning)
+원문의 구조는 세 부분으로 나뉜다.
 
+- `LightningDataModule`: 다운로드, split, transform, DataLoader
+- `LightningModule`: network, forward, loss, training step, optimizer
+- `Trainer`: epoch, device, precision, callback, logging 실행
 
-사실 public github만 보아도 사용법을 바로 습득할 수 있다. 한번 보고 넘어갑시다 ^^
+모델의 `nn.Module` 계층 자체는 일반 PyTorch와 같다. Lightning으로 옮긴다고 convolution이나 linear layer를 다시 작성하는 것은 아니다. 반복해서 쓰던 학습 loop와 장치·분산 실행 코드를 framework가 호출할 hook에 배치하는 것이다.
 
-먼저 사용하기 쉽다는 것은 무엇을 보고 알수 있을까?
-
-- 하나의 클래스에서 모든 학습/추론
-- multigpu distributed training
-- 16-bit precision
-- Metrics
-- Logging
-- Early Stopping
-- Visualization
-- ...
-
-일단 Trick을 엄청 많이 사용할 수 있다. Competition 같은 곳에서 쓰이면 좋은 성능을 발휘할듯..?
-
-1. 설치하기
-
-```sh
-pip install pytorch-lightning
-```
-
-2. 차근차근 시작하기
-
-- [https://pytorch-lightning.readthedocs.io/en/latest/](https://pytorch-lightning.readthedocs.io/en/latest/)
-
-문서 예제를 하나 보면서 알아봅시다.
-
-일단 공식예제이니 구조, 스타일이 잘 잡혀있을것이라 예상합니다.
-너무 쉽지 않으면서 너무 어렵지 않은.. 최대한 라이브러리를 활용하는.. 코드가..
-
-- [https://github.com/PyTorchLightning/lightning-tutorials/blob/main/lightning_examples/basic-gan/gan.py](https://github.com/PyTorchLightning/lightning-tutorials/blob/main/lightning_examples/basic-gan/gan.py)
-
-이 예제를 보면 좋겠습니다. Pytorch를 사용하시는 분들에게 설명할게 없습니다 ㅜ 그냥 코드가 간단한것만 보고 넘어가겠습니다.
-
-### 라이브러리 import
-
-```python
-import os
-from collections import OrderedDict
-
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
-from torch.utils.data import DataLoader, random_split
-from torchvision.datasets import MNIST
-```
-
-### Hyperparameters 셋팅
+원문 hyperparameter는 GPU 유무에 따라 batch 크기를 바꾸고 CPU 절반을 worker로 사용했다.
 
 ```python
 PATH_DATASETS = os.environ.get('PATH_DATASETS', '.')
-AVAIL_GPUS = min(1, torch.cuda.device_count())
-BATCH_SIZE = 256 if AVAIL_GPUS else 64
+AVAILABLE_GPUS = min(1, torch.cuda.device_count())
+BATCH_SIZE = 256 if AVAILABLE_GPUS else 64
 NUM_WORKERS = int(os.cpu_count() / 2)
 ```
 
-### DataLoader
+이 값들은 당시 예제의 시작점이지 모든 머신의 최적값이 아니다. worker와 batch를 바꿨다면 학습 시간과 metric도 함께 기록해야 비교할 수 있다.
+
+## DataModule은 데이터 생명주기를 모은다
+
+MNIST 예제에서 `prepare_data`는 다운로드, `setup`은 split과 dataset 구성, 각 `*_dataloader`는 loader 반환을 맡는다.
 
 ```python
 class MNISTDataModule(LightningDataModule):
-
     def __init__(
         self,
-        data_dir: str = PATH_DATASETS,
-        batch_size: int = BATCH_SIZE,
-        num_workers: int = NUM_WORKERS,
+        data_dir=PATH_DATASETS,
+        batch_size=BATCH_SIZE,
+        num_workers=NUM_WORKERS,
     ):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
-
         self.transform = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize((0.1307, ), (0.3081, )),
+            transforms.Normalize((0.1307,), (0.3081,)),
         ])
 
-        self.dims = (1, 28, 28)
-        self.num_classes = 10
-
     def prepare_data(self):
-        ## download
         MNIST(self.data_dir, train=True, download=True)
         MNIST(self.data_dir, train=False, download=True)
 
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
-            mnist_full = MNIST(self.data_dir, train=True, transform=self.transform)
-            self.mnist_train, self.mnist_val = random_split(mnist_full, [55000, 5000])
+            full = MNIST(
+                self.data_dir,
+                train=True,
+                transform=self.transform,
+            )
+            self.mnist_train, self.mnist_val = random_split(
+                full, [55000, 5000]
+            )
 
         if stage == 'test' or stage is None:
-            self.mnist_test = MNIST(self.data_dir, train=False, transform=self.transform)
-
-    def train_dataloader(self):
-        return DataLoader(
-            self.mnist_train,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-        )
-
-    def val_dataloader(self):
-        return DataLoader(self.mnist_val, batch_size=self.batch_size, num_workers=self.num_workers)
-
-    def test_dataloader(self):
-        return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=self.num_workers)
+            self.mnist_test = MNIST(
+                self.data_dir,
+                train=False,
+                transform=self.transform,
+            )
 ```
 
-0DataModule이 어색할 수 있지만 이는 기존 pytorch dataloader와 동일합니다. DataLoader를 처리할 때 사용되는 코드를 모아놓은 클래스입니다.
+loader는 저장된 dataset을 반환한다.
 
+```python
+def train_dataloader(self):
+    return DataLoader(
+        self.mnist_train,
+        batch_size=self.batch_size,
+        num_workers=self.num_workers,
+    )
+```
 
-### Model 정의하기
+이 분리의 이점은 모델과 데이터 다운로드 경로를 섞지 않는 것이다. 반대로 `setup`이 실행되기 전에 `self.mnist_train`을 사용하면 dataset이 없다는 오류가 난다. 어떤 hook에서 어떤 속성이 준비되는지 아는 것이 중요하다.
+
+## GAN은 왜 `training_step`이 복잡한가
+
+Generator와 Discriminator는 일반 `nn.Module`로 정의한다. 원문 Generator는 latent vector를 MNIST 이미지 shape으로 바꾸고, Discriminator는 이미지를 펼쳐 real/fake 값을 출력한다.
 
 ```python
 class Generator(nn.Module):
-
-    def __init__(self, latent_dim, img_shape):
+    def __init__(self, latent_dim, image_shape):
         super().__init__()
-        self.img_shape = img_shape
-
-        def block(in_feat, out_feat, normalize=True):
-            layers = [nn.Linear(in_feat, out_feat)]
-            if normalize:
-                layers.append(nn.BatchNorm1d(out_feat, 0.8))
-            layers.append(nn.LeakyReLU(0.2, inplace=True))
-            return layers
-
+        self.image_shape = image_shape
         self.model = nn.Sequential(
-            *block(latent_dim, 128, normalize=False),
-            *block(128, 256),
-            *block(256, 512),
-            *block(512, 1024),
-            nn.Linear(1024, int(np.prod(img_shape))),
+            nn.Linear(latent_dim, 128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(128, 256),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(256, int(np.prod(image_shape))),
             nn.Tanh(),
         )
 
     def forward(self, z):
-        img = self.model(z)
-        img = img.view(img.size(0), *self.img_shape)
-        return img
-
-
-class Discriminator(nn.Module):
-
-    def __init__(self, img_shape):
-        super().__init__()
-
-        self.model = nn.Sequential(
-            nn.Linear(int(np.prod(img_shape)), 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(256, 1),
-            nn.Sigmoid(),
-        )
-
-    def forward(self, img):
-        img_flat = img.view(img.size(0), -1)
-        validity = self.model(img_flat)
-
-        return validity
+        image = self.model(z)
+        return image.view(image.size(0), *self.image_shape)
 ```
 
-모델 정의는 그대로 하시면 됩니다. 이 부분은 변하지 않습니다.
-
-### Train / Test
+LightningModule에는 두 network와 loss, optimizer를 모은다.
 
 ```python
 class GAN(LightningModule):
-
-    def __init__(
-        self,
-        channels,
-        width,
-        height,
-        latent_dim: int = 100,
-        lr: float = 0.0002,
-        b1: float = 0.5,
-        b2: float = 0.999,
-        batch_size: int = BATCH_SIZE,
-        **kwargs
-    ):
+    def __init__(self, channels, width, height, latent_dim=100,
+                 lr=0.0002, b1=0.5, b2=0.999):
         super().__init__()
         self.save_hyperparameters()
 
-        ## networks
-        data_shape = (channels, width, height)
-        self.generator = Generator(latent_dim=self.hparams.latent_dim, img_shape=data_shape)
-        self.discriminator = Discriminator(img_shape=data_shape)
-
-        self.validation_z = torch.randn(8, self.hparams.latent_dim)
-
-        self.example_input_array = torch.zeros(2, self.hparams.latent_dim)
+        shape = (channels, width, height)
+        self.generator = Generator(latent_dim, shape)
+        self.discriminator = Discriminator(shape)
 
     def forward(self, z):
         return self.generator(z)
 
-    def adversarial_loss(self, y_hat, y):
-        return F.binary_cross_entropy(y_hat, y)
-
-    def training_step(self, batch, batch_idx, optimizer_idx):
-        imgs, _ = batch
-
-        ## sample noise
-        z = torch.randn(imgs.shape[0], self.hparams.latent_dim)
-        z = z.type_as(imgs)
-
-        ## train generator
-        if optimizer_idx == 0:
-
-            ## generate images
-            self.generated_imgs = self(z)
-
-            ## log sampled images
-            sample_imgs = self.generated_imgs[:6]
-            grid = torchvision.utils.make_grid(sample_imgs)
-            self.logger.experiment.add_image('generated_images', grid, 0)
-
-            ## ground truth result (ie: all fake)
-            ## put on GPU because we created this tensor inside training_loop
-            valid = torch.ones(imgs.size(0), 1)
-            valid = valid.type_as(imgs)
-
-            ## adversarial loss is binary cross-entropy
-            g_loss = self.adversarial_loss(self.discriminator(self(z)), valid)
-            tqdm_dict = {'g_loss': g_loss}
-            output = OrderedDict({'loss': g_loss, 'progress_bar': tqdm_dict, 'log': tqdm_dict})
-            return output
-
-        ## train discriminator
-        if optimizer_idx == 1:
-            ## Measure discriminator's ability to classify real from generated samples
-
-            ## how well can it label as real?
-            valid = torch.ones(imgs.size(0), 1)
-            valid = valid.type_as(imgs)
-
-            real_loss = self.adversarial_loss(self.discriminator(imgs), valid)
-
-            ## how well can it label as fake?
-            fake = torch.zeros(imgs.size(0), 1)
-            fake = fake.type_as(imgs)
-
-            fake_loss = self.adversarial_loss(self.discriminator(self(z).detach()), fake)
-
-            ## discriminator loss is the average of these
-            d_loss = (real_loss + fake_loss) / 2
-            tqdm_dict = {'d_loss': d_loss}
-            output = OrderedDict({'loss': d_loss, 'progress_bar': tqdm_dict, 'log': tqdm_dict})
-            return output
-
-    def configure_optimizers(self):
-        lr = self.hparams.lr
-        b1 = self.hparams.b1
-        b2 = self.hparams.b2
-
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
-        return [opt_g, opt_d], []
-
-    def on_epoch_end(self):
-        z = self.validation_z.type_as(self.generator.model[0].weight)
-
-        ## log sampled images
-        sample_imgs = self(z)
-        grid = torchvision.utils.make_grid(sample_imgs)
-        self.logger.experiment.add_image('generated_images', grid, self.current_epoch)
+    def adversarial_loss(self, prediction, target):
+        return F.binary_cross_entropy(prediction, target)
 ```
 
-이 부분이 pytorch lightening의 매력입니다. 모든 학습 절차를 깔끔하게 클래스로 만들어 사용하면 됩니다.
-
-### Main
+GAN은 Generator와 Discriminator optimizer를 번갈아 실행하므로 원문 `training_step`은 `optimizer_idx`에 따라 두 갈래로 나뉜다.
 
 ```python
-dm = MNISTDataModule()
-model = GAN(*dm.size())
-trainer = Trainer(gpus=AVAIL_GPUS, max_epochs=5, progress_bar_refresh_rate=20)
-trainer.fit(model, dm)
+def training_step(self, batch, batch_idx, optimizer_idx):
+    images, _ = batch
+    z = torch.randn(images.shape[0], self.hparams.latent_dim)
+    z = z.type_as(images)
+
+    if optimizer_idx == 0:
+        valid = torch.ones(images.size(0), 1).type_as(images)
+        generated = self(z)
+        return self.adversarial_loss(
+            self.discriminator(generated), valid
+        )
+
+    if optimizer_idx == 1:
+        valid = torch.ones(images.size(0), 1).type_as(images)
+        fake = torch.zeros(images.size(0), 1).type_as(images)
+
+        real_loss = self.adversarial_loss(
+            self.discriminator(images), valid
+        )
+        fake_loss = self.adversarial_loss(
+            self.discriminator(self(z).detach()), fake
+        )
+        return (real_loss + fake_loss) / 2
 ```
 
-#### Early Stopping, Model Checkpoint
+```python
+def configure_optimizers(self):
+    optimizer_g = torch.optim.Adam(
+        self.generator.parameters(),
+        lr=self.hparams.lr,
+        betas=(self.hparams.b1, self.hparams.b2),
+    )
+    optimizer_d = torch.optim.Adam(
+        self.discriminator.parameters(),
+        lr=self.hparams.lr,
+        betas=(self.hparams.b1, self.hparams.b2),
+    )
+    return [optimizer_g, optimizer_d], []
+```
+
+이 코드는 `Discriminator`와 data module 등 앞뒤 정의가 필요한 핵심 조각이다. 특히 여러 optimizer를 다루는 hook signature는 설치한 버전과 맞춰야 한다.
+
+## Trainer와 callback은 실행 정책을 맡는다
+
+당시 예제의 실행부는 data module, model, Trainer를 연결한다.
 
 ```python
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+data = MNISTDataModule()
+model = GAN(channels=1, width=28, height=28)
+trainer = Trainer(
+    gpus=AVAILABLE_GPUS,
+    max_epochs=5,
+    progress_bar_refresh_rate=20,
+)
+trainer.fit(model, data)
+```
 
+checkpoint와 early stopping은 callback으로 분리한다.
+
+```python
 checkpoint_callback = ModelCheckpoint(
     filepath=os.path.join('checkpoints', '{epoch:d}'),
-    verbose=True,
     save_last=True,
     save_top_k=3,
     monitor='val_acc',
-    mode='max'
+    mode='max',
 )
 
 early_stopping = EarlyStopping(
     monitor='val_acc',
     patience=10,
-    verbose=True,
-    mode='max'
+    mode='max',
 )
-
-trainer = pl.Trainer(..., callback=[checkpoint_callback, early_stopping])
 ```
 
-#### Multi GPU, Mixed Precision
+여기에는 실질적인 전제가 있다. `val_acc`를 실제 validation 단계에서 log하지 않으면 두 callback이 감시할 값이 없다. callback을 붙이기 전에 metric 이름과 mode가 “클수록 좋은 값인지, 작을수록 좋은 값인지” 확인해야 한다.
+
+multi-GPU와 mixed precision도 당시에는 Trainer 인자로 설정했다.
 
 ```python
-## before lightning
-def forward(self, x):
-    x = x.cuda(0)
-    layer_1.cuda(0)
-    x_hat = layer_1(x)
-
-## after lightning
-def forward(self, x):
-    x_hat = layer_1(x)
+trainer = Trainer(
+    gpus=gpus,
+    amp_backend='native',
+    precision=16,
+)
 ```
 
-위에 처럼 이제는 cuda 할당을 적을 필요 없다!
+TensorBoard logger 역시 Trainer에 연결한다.
 
 ```python
-trainer = pl.Trainer(gpus=gpus,
-                     amp_backend='native',
-                     precision=16,
-                     ...)
-```
-
-#### Visualization
-
-```python
-from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import TensorBoardLogger
-
-logger = TensorBoardLogger("tb_logs", name="my_model")
+logger = TensorBoardLogger('tb_logs', name='my_model')
 trainer = Trainer(logger=logger)
 ```
 
-코드는 확실히 simple is best 입니다. 너무 간단한게 조금 단점일 수도 있겠네요 ㅎ.. 간단히 훑어본거니 공식 페이지에서 자세히 한번 살펴보세요 ㅎ
+## 짧아진 코드에서 오히려 더 확인할 것
+
+framework가 대신 실행하는 코드가 많아질수록 경계 검증이 중요하다.
+
+- `prepare_data`와 `setup`의 책임을 섞지 않았는가?
+- `training_step`이 반환한 loss가 원하는 optimizer에 연결되는가?
+- validation에서 callback이 감시할 metric을 같은 이름으로 남겼는가?
+- 생성한 tensor가 batch와 같은 device·dtype을 쓰는가?
+- multi-GPU나 16-bit를 켜기 전 단일 GPU baseline이 정상인가?
+- 예제 작성 시점의 Trainer 인자가 내 설치 버전과 일치하는가?
+
+Lightning은 복잡성을 제거하기보다 반복되는 실행 정책을 framework 쪽으로 옮긴다. 그래서 잘 쓰는 기준은 줄 수가 아니라, **문제가 생겼을 때 data·model·optimization·runtime 중 어느 층을 봐야 하는지 바로 알 수 있는가**다.

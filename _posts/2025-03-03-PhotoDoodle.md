@@ -1,226 +1,94 @@
 ---
 layout: post
-title: "PhotoDoodle: 예술적 이미지 편집을 위한 새로운 접근법"
-summary: "PhotoDoodle은 소량의 샘플 데이터만으로도 개별적인 예술적 스타일을 학습하여 이미지에 자연스럽게 장식 요소를 추가하는 혁신적인 AI 모델입니다."
+title: "PhotoDoodle은 30~50쌍으로 스타일을 배울까: 배경 보존 구조와 실행 코드 함정"
+summary: "PhotoDoodle의 OmniEditor 사전학습과 EditLoRA 미세조정, positional encoding cloning이 배경을 보존하는 방식, 비교·ablation 결과와 예제 코드의 해상도 주의점을 정리합니다."
 image:
   path: /assets/img/thumb/PhotoDoodle.jpg
   alt: "PhotoDoodle: 예술적 이미지 편집을 위한 새로운 접근법 대표 이미지"
 date: 2025-03-03
 categories: Paper
 tags:
-  - 이미지생성
-  - 파인튜닝
-  - 디퓨전모델
-  - 트랜스포머
-  - 오픈소스
+  - PhotoDoodle
+  - 이미지 편집
+  - LoRA
+  - Diffusion Transformer
 math: true
 ---
 
-# PhotoDoodle: 예술적 이미지 편집의 혁신
+PhotoDoodle은 사진 전체를 새 스타일로 다시 그리는 모델보다, 원본 배경을 남기면서 몬스터·빛·윤곽선 같은 장식 요소를 특정 스타일로 추가하려는 작업에 맞습니다. 새 스타일은 30~50쌍의 편집 전·후 예제로 학습하지만, 그 전에 350만 쌍으로 학습한 OmniEditor가 있다는 조건을 빼면 “소량 학습”의 의미가 달라집니다.
 
+![PhotoDoodle 편집 예시](/assets/img/post_img/photodoodle/1.png)
 
+자료는 [논문](https://arxiv.org/abs/2502.14397), [프로젝트 저장소](https://github.com/showlab/PhotoDoodle), [공개 모델](https://huggingface.co/nicolaus-huang/PhotoDoodle)에서 확인할 수 있습니다.
 
-![1](/assets/img/post_img/photodoodle/1.png)
+## 30~50쌍만으로 가능한 이유
 
+PhotoDoodle의 학습은 두 단계입니다.
 
+1. `OmniEditor`가 350만 쌍의 이미지 편집 데이터로 일반적인 편집 능력을 먼저 학습합니다.
+2. `EditLoRA`가 특정 장식 스타일을 30~50쌍의 예제로 미세 조정합니다.
 
-## 🎨 예술적 이미지 편집을 위한 새로운 패러다임, PhotoDoodle
+![PhotoDoodle 2단계 학습](/assets/img/post_img/photodoodle/2.png)
 
-최근 AI 기술의 발전으로 이미지 생성과 편집의 경계가 허물어지고 있습니다. 그러나 기존의 이미지 편집 모델들은 스타일을 유지하면서 자연스럽게 장식 요소를 추가하는 것이 어려웠습니다. 이 과정에서 아티스트들이 원하는 스타일을 반영하기 위해 많은 수작업이 필요하며, 편집된 이미지가 원본과 조화롭게 어우러지는 것이 쉽지 않았습니다.
+즉, 30~50쌍으로 이미지 편집 모델 전체를 처음부터 만드는 것이 아닙니다. 이미 편집 관계를 학습한 Diffusion Transformer(DiT)에 작은 LoRA 조정을 더해 새로운 스타일을 붙이는 구조입니다.
 
-📌 **논문 링크**: [https://arxiv.org/abs/2502.14397](https://arxiv.org/abs/2502.14397)  
-📌 **프로젝트 페이지**: [https://github.com/showlab/PhotoDoodle](https://github.com/showlab/PhotoDoodle)  
-📌 **Hugging Face Model**: [https://huggingface.co/nicolaus-huang/PhotoDoodle](https://huggingface.co/nicolaus-huang/PhotoDoodle)  
+이 차이는 데이터 준비에도 영향을 줍니다. 예제 쌍은 “어떤 사진에 어떤 요소가 어떻게 추가됐는가”를 보여줘야 합니다. 서로 관계없는 완성 이미지 30장을 모으는 것과 같은 조건이 아닙니다. 소량이라는 장점은 쌍의 일관성과 품질이 중요하다는 한계와 함께 읽어야 합니다.
 
-PhotoDoodle은 이러한 한계를 극복하기 위해 개발된 **Diffusion Transformer (DiT) 기반의 새로운 이미지 편집 모델**입니다. **소량의 샘플(30~50쌍의 이미지)만으로도 개별 아티스트의 스타일을 학습**하여, 배경을 유지하면서 자연스럽게 장식 요소를 추가할 수 있습니다. 이를 통해, 단순한 이미지 보정이 아닌, 창의적이고 예술적인 변형이 가능합니다. 또한, 다양한 도구와 결합하여 보다 직관적인 인터페이스로 활용할 수도 있습니다.
+원문이 소개한 스타일은 만화풍 몬스터, 마법 효과, 3D 효과, 손그림 윤곽선, 네온, 판타지 장식이며 예시 해상도는 768×512입니다.
 
----
+![PhotoDoodle 스타일 예시](/assets/img/post_img/photodoodle/3.png)
 
-## 🚀 1. PhotoDoodle의 핵심 개요
+## 배경을 유지하는 두 가지 장치
 
+PhotoDoodle이 해결하려는 갈등은 분명합니다. 지시한 장식은 충분히 바뀌어야 하지만, 그 밖의 사진은 가능한 한 원본을 유지해야 합니다.
 
+OmniEditor에는 이를 위한 두 요소가 소개됩니다.
 
-![2](/assets/img/post_img/photodoodle/2.png)
+- `Position Encoding Cloning`: 원본과 편집 결과의 공간 위치 대응을 유지
+- `Noise-Free Conditioning`: 원본 조건을 노이즈 없이 제공해 배경 왜곡을 줄임
 
+EditLoRA는 그 위에서 특정 스타일의 형태와 질감을 조정합니다. 따라서 편집 결과가 좋지 않을 때도 문제를 나눠 볼 수 있습니다.
 
+| 증상 | 먼저 확인할 부분 |
+|---|---|
+| 배경 구도가 크게 변함 | OmniEditor 조건과 위치 대응 |
+| 장식은 생기지만 스타일이 약함 | 스타일 LoRA와 예제 쌍 |
+| 프롬프트와 다른 요소가 추가됨 | 텍스트 지시와 학습 예제의 관계 |
+| 원본 대상까지 덮어씀 | 조건 이미지와 편집 범위 |
 
-PhotoDoodle은 **두 단계의 학습 과정**을 통해 동작합니다:
+이 표는 자동으로 원인을 확정하는 진단기가 아니라, 어느 단계의 입력을 비교할지 정하는 체크리스트입니다.
 
-1. **OmniEditor Pre-training**: 대규모 이미지 편집 데이터(3.5M 쌍)로 사전 학습하여 **일반적인 이미지 편집 능력을 습득**
-2. **EditLoRA Fine-tuning**: 특정 예술가의 스타일을 학습할 수 있도록 **소량의 예제(30~50 쌍)로 미세 조정**
+## 비교 점수와 ablation에서 확인되는 것
 
-이 과정 덕분에, **PhotoDoodle은 배경의 일관성을 유지하면서도 사용자 정의된 예술적 변형을 적용할 수 있습니다.**
-
-### 🎯 주요 기능
-✅ **배경을 유지하면서 자연스러운 이미지 편집**  
-✅ **소량의 예제만으로도 특정 아티스트의 스타일 학습 가능**  
-✅ **Diffusion Transformer (DiT) 기반으로 고해상도 이미지 편집 가능**  
-✅ **다양한 스타일 지원 (예: 몬스터 삽화, 마법 효과, 3D 스타일, 윤곽선 드로잉 등)**  
-✅ **텍스트 기반 프롬프트로 직관적인 이미지 변형 가능**  
-✅ **높은 정확도로 스타일을 재현하는 AI 기반 자동화 기능 제공**  
-
----
-
-## 🏗️ 2. PhotoDoodle의 내부 아키텍처
-
-PhotoDoodle은 **Diffusion Transformer (DiT)** 모델을 기반으로 설계되었습니다. 이 모델은 이미지 편집을 위한 고급 기능을 제공하며, **자연스러운 스타일 변형과 세밀한 조정이 가능하도록 최적화**되었습니다.
-
-### 🟢 **OmniEditor: 일반적인 이미지 편집을 위한 사전 학습 모델**
-- 3.5M 개의 이미지 편집 데이터셋을 활용한 대규모 학습
-- **위치 정보 복제(Position Encoding Cloning)** 를 활용하여 원본과 편집본 간의 일관성 유지
-- **노이즈 프리 조건부 생성(Noise-Free Conditioning)** 으로 배경 왜곡 방지
-- 다양한 스타일을 적용하기 위해 텍스트 프롬프트를 기반으로 조정 가능
-
-### 🔵 **EditLoRA: 소량의 데이터로 스타일 학습**
-- **LoRA(Low-Rank Adaptation)** 를 활용하여 특정 스타일을 효율적으로 미세 조정
-- **30~50쌍의 이미지 데이터만으로도 새로운 스타일 학습 가능**
-- 배경을 유지하면서 아티스트의 스타일을 자연스럽게 적용
-- **복잡한 스타일 조합도 가능하여 창의적인 편집을 지원**
-- **미리 학습된 모델을 활용하여 사용자 맞춤형 이미지 변환 가능**
-
-
----
-
-## 🎨 3. PhotoDoodle의 스타일 예제
-
-PhotoDoodle은 다양한 스타일을 지원하며, Hugging Face를 통해 공개된 모델을 활용할 수 있습니다.
-
-
-
-| 스타일 | 설명 | 해상도 |
-|:------:|:-----------------|:----:|
-| Cartoon Monster | 만화풍 몬스터 삽화 추가 | 768x512 |
-| Magic Effects | 마법 효과, 빛나는 장식 요소 | 768x512 |
-| 3D Effects | 입체적 효과 추가 | 768x512 |
-| Hand-drawn Outline | 수작업 스타일의 윤곽선 강조 | 768x512 |
-| Glowing Neon | 네온 빛 효과 적용 | 768x512 |
-| Fantasy Landscape | 신비로운 풍경 스타일 적용 | 768x512 |
-
-
-
-
-
-
-![3](/assets/img/post_img/photodoodle/3.png)
-
-
-
----
-
-## 🔍 4. PhotoDoodle 실험 결과
-
-PhotoDoodle은 최신 AI 이미지 편집 모델과 비교하여 뛰어난 성능을 보여주었습니다. 
-실험 결과에 따르면, **기존의 편집 모델보다 자연스럽고 정교한 결과를 제공**하는 것으로 나타났습니다. 
-
-### **비교 실험 결과**
-
-
-
-![4](/assets/img/post_img/photodoodle/4.png)
-
-
-
-
-
+원문이 제시한 비교 결과는 다음과 같습니다.
 
 | 모델 | CLIP Score ↑ | GPT Score ↑ | CLIPimg ↑ |
-|------|------------|------------|------------|
+|---|---:|---:|---:|
 | Instruct-Pix2Pix | 0.237 | 38.201 | 0.806 |
 | Magic Brush | 0.234 | 36.555 | 0.811 |
 | SDEdit(FLUX) | 0.230 | 34.329 | 0.704 |
-| **PhotoDoodle (Ours)** | **0.261** | **51.159** | **0.871** |
+| PhotoDoodle | 0.261 | 51.159 | 0.871 |
 
+![PhotoDoodle 비교 결과](/assets/img/post_img/photodoodle/4.png)
 
+세 점수에서 PhotoDoodle이 표의 비교 모델보다 높습니다. 다만 이 수치가 모든 스타일과 모든 사진에서 사람의 선호를 보장하는 것은 아닙니다. 특정 장식의 모양이 맞는지, 원본 인물이나 배경이 보존됐는지는 실제 사용 예제로 따로 봐야 합니다.
 
-PhotoDoodle은 **스타일 재현력, 이미지 일관성, 편집 품질**에서 기존 모델들을 뛰어넘는 성능을 보였습니다.
-
-이러한 결과는 **PhotoDoodle의 강력한 스타일 학습 및 변형 능력**을 입증하며, 향후 다양한 응용 분야에서 활용 가능성을 높여줍니다.
-
-### **Ablation Study (성능 기여 요소 분석)**
-
-PhotoDoodle의 주요 구성 요소가 결과에 미치는 영향을 분석하기 위해 **Ablation Study**를 수행하였습니다. 주요 실험은 다음과 같습니다:
-
-
-
-![5](/assets/img/post_img/photodoodle/5.png)
-
-
-
-
-
+구성 요소를 뺀 실험은 역할을 더 선명하게 보여줍니다.
 
 | 실험 구성 | CLIP Score ↑ | GPT Score ↑ | CLIPimg ↑ |
-|------|------------|------------|------------|
+|---|---:|---:|---:|
 | OmniEditor 제거 | 0.225 | 31.786 | 0.699 |
-| Positional Encoding Cloning 미사용 | 0.231 | 34.891 | 0.712 |
+| Position Encoding Cloning 미사용 | 0.231 | 34.891 | 0.712 |
 | EditLoRA 제거 | 0.219 | 29.476 | 0.658 |
-| **Full Model (PhotoDoodle)** | **0.261** | **51.159** | **0.871** |
+| 전체 모델 | 0.261 | 51.159 | 0.871 |
 
+![PhotoDoodle ablation](/assets/img/post_img/photodoodle/5.png)
 
+OmniEditor, 위치 정보 복제, EditLoRA를 각각 뺐을 때 세 지표가 모두 낮아집니다. 이 결과는 소량 LoRA만으로 전체 성능이 만들어진 것이 아니라, 일반 편집 사전학습과 공간 보존 장치가 함께 작동한다는 해석을 뒷받침합니다.
 
-이 실험을 통해 **OmniEditor와 EditLoRA가 편집 품질에 중요한 영향을 미친다는 것**을 확인할 수 있었습니다. 특히 **Positional Encoding Cloning이 일관된 스타일 변환을 유지하는 데 기여**하며, **EditLoRA가 특정 스타일의 학습 및 적용을 정밀하게 수행**한다는 점이 실험을 통해 검증되었습니다.
+## 공개 코드 실행 순서와 해상도 주의점
 
-즉, PhotoDoodle의 **핵심 기술들이 서로 보완적으로 작용하여 최적의 성능을 발휘**한다는 것을 확인할 수 있었습니다.
-
----
-
-## 📊 5. PhotoDoodle의 확장 가능성 및 미래 전망
-PhotoDoodle은 현재까지도 강력한 기능을 제공하지만, 향후 더욱 다양한 분야에서 활용될 가능성이 큽니다. 이를 위해 몇 가지 확장 계획을 고려할 수 있습니다.
-
-
-
-![6](/assets/img/post_img/photodoodle/6.png)
-
-
-
-### ✅ 1. 더 많은 스타일 지원
-현재 지원하는 스타일 외에도 추가적인 예술적 스타일을 지속적으로 학습할 계획입니다.
-
-- 수채화, 유화, 만화 스타일 추가
-- 사용자 맞춤형 스타일 생성 기능 개발
-- AI가 자동으로 적절한 스타일을 추천하는 시스템 구현
-
-### ✅ 2. 비디오 편집 기능 추가
-현재는 정적인 이미지 편집에 초점을 맞추고 있지만, 비디오에도 같은 스타일을 적용할 수 있도록 확장할 계획입니다.
-
-- 프레임 단위로 일관된 스타일을 유지하면서 변환
-- 특정 오브젝트에만 스타일을 적용하는 기능
-- 비디오 장면에 추가적인 애니메이션 효과 적용
-
-### ✅ 3. 모바일 및 웹 애플리케이션 지원
-현재는 연구 및 개발자 중심의 오픈소스 프로젝트이지만, 일반 사용자를 위한 웹/모바일 애플리케이션 형태로 발전 가능합니다.
-
-- 모바일 앱을 통해 누구나 쉽게 이미지 변환 가능
-- 웹 기반 편집기를 제공하여 다양한 사용자 접근성 증가
-- SNS 플랫폼과의 연동을 통한 원클릭 스타일 변환 기능 추가
-
-### ✅ 4. AI와 인간 협업 모델 구축
-단순한 이미지 변환을 넘어서, 사용자의 의도를 반영하여 AI가 스타일을 추천하고 함께 디자인하는 방향으로 발전할 수 있습니다.
-
-- 사용자의 스타일을 분석하여 최적의 편집 추천
-- 음성 또는 자연어 입력을 통한 직관적인 이미지 편집
-- 다양한 아티스트와 협업하여 독창적인 AI 스타일 컬렉션 구축
-
-
----
-
-## 🎯 6. 결론
-PhotoDoodle은 소량의 데이터만으로도 특정 아티스트의 스타일을 학습하고, 배경을 유지하면서 자연스러운 이미지 변환을 수행할 수 있는 혁신적인 AI 모델입니다.
-
-**🚀 핵심 정리:**  
-✅ 기존 모델 대비 더 정밀한 스타일 복제 가능  
-✅ 배경 보존 및 자연스러운 스타일 변환 지원  
-✅ 텍스트 프롬프트를 활용한 직관적인 이미지 편집  
-✅ 디지털 아트, 게임, 소셜 미디어, 마케팅 등 다양한 활용 가능  
-✅ 향후 비디오 편집, 모바일/웹 애플리케이션 지원 예정  
-
----
-
-## 🛠️ 7. GitHub 코드 실행 방법
-
-PhotoDoodle을 직접 실행해 보고 싶다면, 아래 절차를 따라 환경을 설정한 후 코드 실행이 가능합니다.
-
-### 📌 환경 설정 및 설치
+환경 설정 예시는 다음과 같습니다.
 
 ```bash
 git clone https://github.com/showlab/PhotoDoodle.git
@@ -231,43 +99,67 @@ conda activate doodle
 pip install -r requirements.txt
 ```
 
-### 📌 실행
+추론 코드는 먼저 FLUX.1-dev 기반 `FluxPipeline`을 bfloat16으로 GPU에 올립니다. 이어 `pretrain.safetensors`를 불러와 pipeline에 합친 뒤, 실제 스타일 LoRA인 `sksmagiceffects.safetensors`를 추가합니다.
 
 ```python
 from src.pipeline_pe_clone import FluxPipeline
 import torch
 from PIL import Image
 
-pretrained_model_name_or_path = "black-forest-labs/FLUX.1-dev"
 pipeline = FluxPipeline.from_pretrained(
-    pretrained_model_name_or_path,
+    "black-forest-labs/FLUX.1-dev",
     torch_dtype=torch.bfloat16,
-).to('cuda')
+).to("cuda")
 
-pipeline.load_lora_weights("nicolaus-huang/PhotoDoodle", weight_name="pretrain.safetensors")
+pipeline.load_lora_weights(
+    "nicolaus-huang/PhotoDoodle",
+    weight_name="pretrain.safetensors"
+)
 pipeline.fuse_lora()
 pipeline.unload_lora_weights()
 
-pipeline.load_lora_weights("nicolaus-huang/PhotoDoodle", weight_name="sksmagiceffects.safetensors")
+pipeline.load_lora_weights(
+    "nicolaus-huang/PhotoDoodle",
+    weight_name="sksmagiceffects.safetensors"
+)
+```
 
-height=768
-width=512
+원문의 다음 조각에는 해상도 순서가 엇갈릴 수 있는 지점이 있습니다.
 
-validation_image = "assets/1.png"
-validation_prompt = "add a halo and wings for the cat by sksmagiceffects"
-condition_image = Image.open(validation_image).resize((height, width)).convert("RGB")
+```python
+height = 768
+width = 512
 
-result = pipeline(prompt=validation_prompt, 
-                  condition_image=condition_image,
-                  height=height,
-                  width=width,
-                  guidance_scale=3.5,
-                  num_inference_steps=20,
-                  max_sequence_length=512).images[0]
+condition_image = Image.open("assets/1.png") \
+    .resize((height, width)).convert("RGB")
+
+result = pipeline(
+    prompt="add a halo and wings for the cat by sksmagiceffects",
+    condition_image=condition_image,
+    height=height,
+    width=width,
+    guidance_scale=3.5,
+    num_inference_steps=20,
+    max_sequence_length=512,
+).images[0]
 
 result.save("output.png")
 ```
 
-이제 **output.png** 파일에서 결과 이미지를 확인할 수 있습니다.
+PIL의 `resize` 튜플은 코드상 첫 값과 둘째 값을 그대로 가로·세로로 사용하지만, pipeline에는 `height`와 `width`를 이름으로 따로 전달합니다. 현재 값으로는 조건 이미지가 768×512로 만들어지고 생성 요청은 높이 768, 너비 512가 됩니다. 조건 이미지와 생성 캔버스의 방향을 맞추려면 이 순서를 실제 파일 크기와 함께 확인해야 합니다.
 
----
+또한 이 코드는 CUDA GPU와 모델 가중치가 준비됐다는 전제의 핵심 추론 조각입니다. 메모리 요구량, 다운로드 실패, 입력 파일 확인, 여러 이미지 일괄 처리까지 포함한 완전한 애플리케이션은 아닙니다.
+
+## 내 스타일 데이터로 시험할 때의 기준
+
+![PhotoDoodle 활용 방향](/assets/img/post_img/photodoodle/6.png)
+
+첫 실험은 다양한 스타일을 한꺼번에 섞기보다 한 종류의 장식으로 시작하는 편이 결과를 해석하기 쉽습니다. 학습에 쓰지 않은 사진을 배경 종류별로 준비하고 다음 세 항목을 따로 비교합니다.
+
+1. 프롬프트에 요청한 장식이 생성됐는가
+2. 장식의 스타일이 예제와 일관적인가
+3. 장식 밖의 배경과 대상이 유지됐는가
+
+PhotoDoodle은 정지 이미지 편집을 다룬 모델입니다. 기존 글에 적힌 비디오, 모바일 앱, 자동 스타일 추천은 가능한 확장 아이디어이지 현재 표의 실험으로 검증된 기능은 아닙니다. 공개된 코드와 점수로 판단할 수 있는 범위는 개인화된 장식 스타일, 원본 보존, 단일 이미지 추론입니다.
+
+따라서 도입 기준도 “30장만 있으면 된다”가 아니라 “일관된 편집 쌍 30~50개를 만들 수 있고, 배경 보존과 스타일 재현을 별도 검증할 수 있는가”가 되어야 합니다.

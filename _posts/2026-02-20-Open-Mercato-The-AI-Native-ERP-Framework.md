@@ -1,162 +1,103 @@
 ---
 layout: post
-title: ERP 구축, 맨땅에 헤딩은 그만! 80% 완성된 AI 네이티브 프레임워크 'Open Mercato' 분석
+title: 'Open Mercato로 ERP 개발 80%를 건너뛸 수 있을까: 멀티테넌시·RBAC·Eject 검증'
 date: '2026-02-20'
 categories: Tech
 tags:
+  - OpenMercato
+  - ERP
+  - 멀티테넌시
+  - RBAC
   - MCP
-  - AI에이전트
-  - 오픈소스
-summary: CRM이나 ERP 시스템을 구축할 때 '처음부터 개발하기'와 '상용 SaaS 구매하기' 사이에서 고민해 본 적이 있나요? Open
-  Mercato는 그 딜레마를 해결하는 새로운 오픈소스 프레임워크입니다. 80%의 핵심 기능(CRM, 인증, 멀티테넌시)은 이미 완성되어 있고,
-  나머지 20%의 커스텀 비즈니스 로직에만 집중할 수 있게 해줍니다. 특히 AI 에이전트(MCP)가 내장되어 스키마와 API를 스스로 학습하는 혁신적인
-  아키텍처를 갖췄습니다.
+summary: 공통 엔터프라이즈 기능을 모듈로 제공하는 Open Mercato가 줄이는 일과, 80% 주장 밖에 남는 격리·권한·업그레이드 비용을 짚습니다.
 author: AI Trend Bot
 image:
   path: https://opengraph.githubassets.com/1/open-mercato/open-mercato
   alt: Open-Mercato-The-AI-Native-ERP-Framework
 ---
 
-기업용 소프트웨어(CRM, ERP, 어드민 패널)를 개발해야 할 때, 개발 팀은 항상 딜레마에 빠집니다. Salesforce나 SAP 같은 거대 SaaS를 쓰자니 비용이 비싸고 커스터마이징이 답답하고, 처음부터 직접 만들자니 인증(Auth), 권한 관리(RBAC), 데이터베이스 설계 등 반복적인 작업에 너무 많은 시간이 소요됩니다.
+Open Mercato는 인증·RBAC·멀티테넌시·CRM 같은 반복 기반을 제공해 ERP 개발의 시작점을 앞당길 수 있지만, “80% 완성”은 모든 업종에 적용되는 측정값이 아니라 공통 기능과 고유 업무를 나눈 설명입니다. 실제 절감률은 tenant 격리, 회계·재고 규칙, 기존 시스템 연동과 upgrade 비용까지 prototype에서 확인해야 합니다.
 
-오늘 소개할 **Open Mercato**는 이 문제를 해결하기 위해 등장한 **'AI 지원(AI-supportive) 엔터프라이즈 프레임워크'**입니다. 개발자가 비즈니스 로직의 가장 중요한 20%에만 집중할 수 있도록, 나머지 80%의 기반을 오픈소스로 제공하는 이 프로젝트를 심층 분석합니다.
+## 80/20이 말해주는 것과 숨기는 것
 
----
+ERP·CRM을 처음 만들면 login, role, audit, database migration, admin UI를 반복 구현합니다. Open Mercato는 이 공통 기반을 module로 제공해 개발자가 주문·재고·승인처럼 고유한 business logic에 집중하게 합니다.
 
-## 1. Open Mercato란 무엇인가?
+하지만 어느 회사에는 CRM이 80%이고 다른 회사에는 세금, 원가, lot 추적, 복잡한 승인 규칙이 대부분일 수 있습니다. Framework가 제공하는 기능 목록과 실제 요구사항을 mapping하기 전에는 80%를 일정 산정에 쓰면 안 됩니다.
 
-**Open Mercato**는 CRM, ERP, 커머스 백엔드 등 엔터프라이즈급 애플리케이션을 빠르게 구축하기 위한 모듈형 프레임워크입니다. 단순히 '어드민 템플릿'을 제공하는 것이 아니라, **프로덕션 레벨의 아키텍처(Multi-tenancy, RBAC 등)**를 기본 탑재하고 있습니다.
+먼저 기능을 세 부류로 나누는 편이 현실적입니다.
 
-가장 큰 특징은 **'AI-First'** 설계입니다. 시스템 내부적으로 **MCP(Model Context Protocol)**를 사용하여 AI 어시스턴트가 데이터 모델과 API를 스스로 탐색하고 실행할 수 있는 환경을 제공합니다.
+- 그대로 쓸 core 기능
+- extension point로 바꿀 기능
+- 별도 module 또는 외부 시스템으로 만들 기능
 
-### 왜 지금 주목받고 있는가?
-*   **Buy vs Build의 딜레마 해결:** 상용 솔루션의 안정성과 자체 개발의 유연성을 동시에 가집니다.
-*   **모듈식 아키텍처:** 필요한 기능만 레고처럼 조립하고, 필요하면 코어 모듈을 'Eject(추출)'하여 완전히 내 입맛대로 뜯어고칠 수 있습니다.
-*   **TypeScript & Node.js:** 현대적인 웹 개발 스택을 그대로 따릅니다.
+## Module·Overlay·Eject는 서로 다른 변경 방식이다
 
----
+CRM, Sales, OMS 같은 기능은 module로 구성되고, UI와 backend를 필요한 만큼 조립할 수 있다고 설명됩니다. Core를 건드리지 않고 page나 기능을 덮어쓰는 overlay는 upgrade 가능성을 남기는 방법입니다.
 
-## 2. 핵심 기능 (Key Features)
+기본 module을 완전히 수정해야 할 때는 `mercato eject` 또는 `yarn mercato eject [module-name]`으로 source를 local로 가져옵니다. 자유도는 커지지만 eject한 뒤 upstream fix와 schema change를 자동으로 받기 어려울 수 있습니다. “vendor lock-in이 없다”는 장점이 maintenance 책임의 이동이라는 뜻이기도 합니다.
 
-GitHub README와 공식 문서를 기반으로 Open Mercato의 강력한 기능들을 정리했습니다.
+Custom Entity는 admin에서 field와 validation을 추가하고, Version History는 데이터 변경을 추적한다고 소개됩니다. 코드 없이 field를 추가할 수 있어도 index, migration, 권한, reporting 영향까지 자동으로 해결되는지는 별도 시험이 필요합니다.
 
-### 🧩 1. 모듈형 아키텍처와 'Eject' 시스템
-Open Mercato는 모든 것이 모듈입니다. CRM, Sales, OMS(주문 관리) 같은 기능들이 모듈로 제공됩니다. 만약 기본 제공되는 '고객(Customer)' 모듈의 로직이 마음에 들지 않는다면? `mercato eject` 명령어를 통해 해당 모듈 소스 코드를 로컬로 가져와서 자유롭게 수정할 수 있습니다. 이는 기존 프레임워크들이 가지는 '확장성의 한계'를 완벽히 극복합니다.
+## AI가 schema와 API를 안다고 권한이 안전한 것은 아니다
 
-### 🤖 2. 내장된 AI 어시스턴트 (MCP 기반)
-이 프레임워크는 단순히 AI를 붙인 게 아니라, AI가 시스템을 이해하도록 설계되었습니다.
-*   **Schema Discovery:** AI가 데이터베이스 엔티티, 필드, 관계를 조회하고 이해합니다.
-*   **API Discovery & Execution:** 자연어 질의를 통해 적절한 API 엔드포인트를 찾고, 권한(Auth) 컨텍스트를 유지한 채 실행합니다.
-*   **Hybrid Search:** Meilisearch를 활용하여 텍스트 검색과 벡터 검색을 동시에 지원합니다.
+Open Mercato는 MCP로 database entity·field·relation을 찾는 Schema Discovery, endpoint를 찾고 실행하는 API Discovery를 제공합니다. Meilisearch로 text와 vector를 섞는 hybrid search도 사용합니다. Backend는 Node.js와 PostgreSQL, Redis, Meilisearch, frontend는 React 기반 monorepo로 설명됩니다.
 
-### 🏢 3. 기본 탑재된 엔터프라이즈 기능
-*   **Multi-tenant (멀티테넌시):** SaaS를 바로 시작할 수 있도록 데이터가 조직/테넌트 별로 완벽히 격리됩니다.
-*   **RBAC (역할 기반 접근 제어):** 사용자, 역할, 조직 수준에서 세밀한 권한 제어가 가능합니다.
-*   **Custom Entities:** 코딩 없이 어드민 패널에서 동적으로 데이터 필드와 유효성 검사 로직을 추가할 수 있습니다.
-*   **Version History:** 데이터의 변경 이력이 자동으로 추적되어, 누가 언제 무엇을 바꿨는지 감사(Audit)가 가능합니다.
+AI assistant가 auth context를 유지한다는 설계는 출발점일 뿐입니다. 다음 경계를 실제로 검증해야 합니다.
 
----
+1. 읽을 수 없는 tenant의 schema나 record가 검색 후보에도 나타나지 않는가
+2. 자연어 요청이 write API로 바뀔 때 사용자 승인을 받는가
+3. RBAC가 UI뿐 아니라 MCP tool과 backend에서 동일하게 적용되는가
+4. 모든 AI action이 Version History와 audit log에 남는가
+5. prompt injection이 다른 module의 endpoint를 호출하지 못하는가
 
-## 3. 아키텍처 딥다이브 (Architecture)
+멀티테넌시가 “완벽히 격리된다”는 원문의 문구도 test 없는 보장이 아닙니다. row-level filter 누락, background job, search index, export 같은 경로를 tenant-crossing test로 확인해야 합니다.
 
-Open Mercato는 **Monorepo** 구조를 따르며, 확장성을 최우선으로 합니다.
+## 설치 명령은 개발 환경 스냅샷이다
 
-*   **Backend:** Node.js (v24.x 권장) 기반이며, 데이터베이스는 **PostgreSQL**을 사용합니다. 캐싱 및 이벤트 처리를 위해 **Redis**를, 검색 엔진으로 **Meilisearch**를 활용합니다.
-*   **Frontend:** React 기반의 현대적인 UI를 제공하며, 모듈별로 UI 컴포넌트가 격리되어 있습니다.
-*   **Extensibility:** '오버레이(Overlay)' 개념을 사용하여, 코어 소스 코드를 건드리지 않고도 특정 페이지나 기능을 덮어쓰기(Override)할 수 있습니다. 이는 유지보수와 업그레이드 용이성을 보장합니다.
-
----
-
-## 4. 설치 및 설정 가이드 (Installation)
-
-직접 로컬 환경에 설치해보겠습니다. Node.js v24 이상과 Docker가 필요합니다.
-
-### 사전 준비
-*   **Node.js:** v24.x 버전 (필수)
-*   **Docker:** PostgreSQL, Redis, Meilisearch 실행용
-
-### 설치 방법 1: CLI 사용 (권장 - 새로운 앱 생성)
-자신만의 프로젝트를 시작할 때는 CLI를 사용하는 것이 가장 빠릅니다.
+원문은 Node.js v24.x와 Docker를 사전 조건으로 제시합니다. 새 앱 생성 예시는 다음과 같습니다.
 
 ```bash
 npx create-mercato-app my-erp-project
 cd my-erp-project
 ```
 
-### 설치 방법 2: Git Clone (코어 기여 또는 심층 분석용)
-README에 안내된 표준 설치 절차입니다.
+Core를 직접 보는 흐름은 다음과 같습니다.
 
-**1. 리포지토리 복제 및 의존성 설치**
 ```bash
 git clone https://github.com/open-mercato/open-mercato.git
 cd open-mercato
 yarn install
 ```
 
-**2. 환경 변수 설정**
-기본 예제 파일을 복사합니다.
 ```bash
 cp apps/mercato/.env.example apps/mercato/.env
 ```
 
-**3. 초기화 (Init)**
-이 명령어는 데이터베이스 마이그레이션, 시드 데이터(기본 역할, 어드민 유저) 생성, 모듈 레지스트리 준비를 수행합니다.
 ```bash
 yarn mercato init
 # 또는 샘플 데이터(CRM 등)를 포함하지 않으려면:
 # yarn mercato init --no-examples
 ```
 
-**4. 개발 서버 실행**
 ```bash
 yarn dev
 ```
 
-서버가 정상적으로 실행되면 `http://localhost:3000`에서 대시보드에 접속할 수 있습니다. 터미널에 출력된 기본 관리자 계정(이메일/비밀번호)을 사용하여 로그인하세요.
+원문은 개발 server가 뜨면 `http://localhost:3000`에서 dashboard에 접속하고 terminal의 기본 관리자 계정을 사용하라고 안내합니다. 이 조각에는 commit·package version, Docker service 시작, production secret, backup, TLS, migration rollback, 기본 계정 교체가 포함돼 있지 않습니다. 완전한 배포 절차가 아니라 원문 시점의 local development snapshot으로 봐야 합니다.
 
----
+실행 전에 [GitHub](https://github.com/open-mercato/open-mercato), [문서](https://docs.openmercato.com), [데모](https://demo.openmercato.com)의 같은 release 기준 요구사항을 대조해야 합니다.
 
-## 5. 사용 가이드 (Usage Guide)
+## 채택 여부는 CRUD 데모 뒤의 실패 시험으로 정한다
 
-설치 후 처음 접속하면 세련된 어드민 대시보드를 볼 수 있습니다.
+Open Mercato는 multi-tenant B2B SaaS나 내부 system을 빠르게 prototype하고, common admin 기반 위에 특수 domain logic을 쌓으려는 팀에 적합할 수 있습니다. 이미 안정적인 ERP를 쓰거나 규제·회계 규칙이 복잡한 환경에서는 migration과 integration이 새 framework 이득보다 클 수 있습니다.
 
-1.  **모듈 탐색:** 왼쪽 사이드바에서 CRM(고객, 거래), Sales, System(사용자 관리) 등 기본 설치된 모듈을 확인합니다.
-2.  **커스텀 엔티티 생성:** 'Settings' -> 'Entities'로 이동하여 코드를 작성하지 않고도 새로운 비즈니스 데이터 모델(예: 'Inventory' 등)을 정의할 수 있습니다.
-3.  **AI 기능 활용:** 우측 하단의 AI 아이콘(또는 Chat 인터페이스)을 통해 자연어로 데이터를 조회해 보세요. (예: "지난달에 가입한 고객 중 서울에 사는 사람 찾아줘")
-4.  **Eject 활용:** 특정 모듈을 수정하고 싶다면 터미널에서 `yarn mercato eject [module-name]`을 실행하여 소스 코드를 확보하고 수정을 시작합니다.
+PoC에서는 happy path보다 아래 실패를 먼저 만듭니다.
 
----
+- tenant A 사용자가 tenant B의 record ID를 직접 요청
+- role 변경 직후 cache와 search index에서 이전 권한 사용
+- eject한 module에 upstream migration 적용
+- AI가 잘못된 write endpoint를 선택
+- Redis·Meilisearch 중단 뒤 transaction과 검색 일관성
+- schema 변경 뒤 audit history와 rollback
 
-## 6. 활용 사례 (Use Cases)
-
-Open Mercato는 다음과 같은 상황에서 최고의 효율을 발휘합니다.
-
-*   **B2B SaaS 스타트업:** MVP를 빠르게 만들어야 하는데, 멀티테넌시와 로그인 구현에 시간을 낭비하고 싶지 않을 때.
-*   **사내 레거시 시스템 현대화:** 엑셀이나 노후화된 인트라넷으로 관리하던 업무(발주, 재고, 인사 관리)를 웹 기반 시스템으로 전환할 때.
-*   **특수 산업군 ERP:** 물류, 제조, 의료 등 일반적인 SaaS로는 커버되지 않는 복잡한 데이터 구조가 필요한 경우.
-
----
-
-## 7. 장단점 비교 (Comparison)
-
-| 비교 대상 | 장점 | 단점 |
-| :--- | :--- | :--- |
-| **Open Mercato** | **80% 완성된 상태**, 완전한 소스 코드 소유, AI 네이티브, 무료(오픈소스) | 초기 학습 곡선 존재, 커뮤니티가 성장 중인 단계 |
-| **Salesforce** | 강력한 생태계, 검증된 안정성 | **매우 비싼 라이선스 비용**, 커스터마이징의 제약 |
-| **Django/Laravel** | 완전한 자유도, 방대한 커뮤니티 | **모든 기능(UI, RBAC, API)을 처음부터 직접 개발해야 함** |
-| **Retool/Low-code** | 매우 빠른 UI 개발 | 복잡한 비즈니스 로직 구현 불가, 확장성 한계, 벤더 종속 |
-
----
-
-## 8. 결론: 개발자를 위한 '치트키'
-
-Open Mercato는 "바퀴를 다시 발명하지 말라"는 격언을 가장 잘 실천하는 프로젝트입니다. 개발자로서 우리는 비즈니스의 고유한 가치를 창출하는 코드에 집중해야 합니다. 로그인 페이지를 만들거나 권한 관리 시스템을 짜는 데 밤을 새울 필요가 없습니다.
-
-특히 **AI 에이전트와의 통합(MCP)**은 이 프레임워크가 단순한 CRUD 툴을 넘어 미래 지향적인 플랫폼임을 보여줍니다. 사내 시스템을 구축해야 하거나, 빠르게 B2B 솔루션을 런칭해야 한다면 Open Mercato는 반드시 검토해야 할 1순위 후보입니다.
-
-지금 바로 GitHub를 방문해 `star`를 누르고, `yarn mercato init`을 실행해 보세요. 여러분의 주말이 훨씬 여유로워질 것입니다.
-
-## References
-- https://github.com/open-mercato/open-mercato
-- https://docs.openmercato.com
-- https://demo.openmercato.com
+“기반 기능이 있다”와 “production ERP가 완성됐다” 사이에는 운영, 보안, 데이터 migration이 남습니다. Open Mercato의 장점은 그 일을 없애는 데 있지 않고, 공통 구조를 source로 소유한 상태에서 고유 업무에 맞게 확장할 출발점을 제공하는 데 있습니다.

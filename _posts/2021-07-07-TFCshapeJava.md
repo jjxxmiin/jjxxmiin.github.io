@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Tensorflow 1.13.1 에서 JAVA, C#에 포팅할 모델을 만드는 방법"
-summary: "Tensorflow 1.13.1 에서 JAVA, C#에 포팅할 모델을 만드는 방법"
+title:  "TensorFlow 1.13.1 모델이 Java·C#에서 안 열릴 때: SavedModel과 frozen PB 구분법"
+summary: "TensorFlow 1.13.1의 다중 출력 Keras 모델을 Java용 SavedModel과 C#용 frozen graph로 나눠 저장하고, 입력·출력 노드 이름까지 점검하는 방법을 정리합니다."
 image:
   path: /assets/img/thumb/TFCshapeJava.jpg
   alt: Tensorflow 1.13.1 에서 JAVA, C#에 포팅할 모델을 만드는 방법 대표 이미지
@@ -9,177 +9,77 @@ date:   2021-07-01 09:10 -0400
 categories: OpenSource
 tags:
   - 오픈소스
+  - 파이썬
+  - MLOps
+  - 튜토리얼
 ---
 
-> 보통 제가 읽으려고 글을 쓰는데 혹시 부족한게 있다면 댓글이나 메일을 부탁드립니다. 개선하겠습니다.
+TensorFlow 1.13.1 모델을 Java와 C#에서 읽히게 하려면 같은 파일을 재사용하지 말고, Java에는 SavedModel 디렉터리를, TensorFlowSharp 기반 C#에는 상수로 고정한 frozen graph 파일을 준비해야 합니다.
 
-오늘은 개인적인 일로 Tensorflow를 JAVA, C#에 포팅하기위해 모델을 저장하는 방법을 정리하려 합니다.
+## 먼저 맞춰야 할 것은 모델보다 입출력 계약입니다
 
-사실 사소한건데 맨날 안적어놓으면 또 찾느라 시간 낭비가 되네요 ㅠㅠ
+원문의 모델은 한 이미지 입력에서 다섯 개 결과를 내고, 출력마다 숫자 클래스를 예측하는 다중 출력 구조입니다. 이때 이식 코드가 알아야 할 것은 가중치 파일 이름만이 아닙니다. 입력 텐서 이름, 출력 개수와 순서, 각 출력 텐서 이름이 모두 호출부와 같아야 합니다.
 
-TensorFlow 2.0 version 부터는 설명이 잘 나와 있어서 쉽게 쉽게 할 수 있지만 TensorFlow 1.13.1 version을 예전에 사용하고 지금도 2.0으로 다시 짜기 어려워서 가끔 쓰게 됩니다.
+예시의 입력 이름은 `image`, Java용 signature의 출력 키는 `0`부터 `4`까지입니다. 실제 모델이 다섯 출력인지, 각 출력의 클래스 수가 무엇인지는 `model.inputs`와 `model.outputs`를 먼저 확인해야 합니다. 원문 조각에는 `num_len`, `num_classes`, `W`, `H`, `C`, `models.CNN5`가 프로젝트 밖에서 정의되므로 그대로 실행되는 독립 스크립트는 아닙니다.
 
----
+## Java에는 SavedModel 디렉터리를 만듭니다
 
-사실 출력이 여러개인 부분을 다루는게 제일 문제도 많기 때문에 출력을 여러개로 하는 모델을 사용합니다.
+Java의 SavedModel 로더가 기대하는 결과는 단일 파일이 아니라 다음 구조입니다.
 
-## Model
+```text
+saved_model/
+├── saved_model.pb
+└── variables/
+    ├── variables.data-00000-of-00001
+    └── variables.index
+```
 
-각 출력이 10개의 클래스를 가지며 출력이 5개인 모델 입니다.
+Keras 모델을 만든 뒤 기존 H5 가중치를 읽고, TensorFlow 1.x 세션과 signature를 연결해 내보냅니다. 핵심은 입력과 다섯 출력의 매핑입니다.
 
 ```python
-def get_model(input_shape, num_len=5, num_classes=10):
-    input_tensor = Input(input_shape)
-    x = input_tensor
+model.load_weights("weights.h5")
+prediction_signature = tf.saved_model.signature_def_utils.predict_signature_def(
+    {"image": model.input},
+    {
+        "0": model.outputs[0],
+        "1": model.outputs[1],
+        "2": model.outputs[2],
+        "3": model.outputs[3],
+        "4": model.outputs[4],
+    },
+)
 
-    for i, n_cnn in enumerate([1, 2, 1, 2, 1]):
-        with tf.name_scope('layer%d' % (i+1)) as scope:
-            for j in range(n_cnn):
-                x = Conv2D(32*2**min(i, 3),
-                           kernel_size=3,
-                           padding='same',
-                           kernel_initializer='he_uniform',
-                           name='cnn_%d_%d' % (i+1, j+1))(x)
-                x = BatchNormalization(name='batch_norm_%d_%d' % (i+1, j+1))(x)
-                x = Activation('relu',
-                               name='activate_%d_%d' % (i+1, j+1))(x)
-            x = MaxPooling2D(2,
-                             name='maxpool_%d_%d' % (i+1, j+1))(x)
-
-    x = Flatten()(x)
-    output = []
-
-    for i in range(num_len):
-        output.append(Dense(num_classes,
-                            activation='softmax',
-                            name='dense_%d' % i)(x))
-
-    model = Model(inputs=input_tensor, outputs=output)
-
-    return model
-```
-
-학습이나 추론이 중점이 아니고 포팅할때 사용할 모델을 만드는데 초점이 있는 글이기에 학습과 추론은 생략합니다.
-
-## JAVA
-
-자바에서는 모델 폴더를 넣어주어야합니다..
-
-```
-model/
-  variables/
-    variables.data-00000-of-00001
-    variables.index
-  saved_model.pb
-```
-
-이건 ~
-
-```python
-import os
-import numpy as np
-import tensorflow as tf
-import keras.backend as K
-import matplotlib.pyplot as plt
-import models
-
-input_shape = (W, H, C)
-
-load_path = "./model.h5"
-
-# model
-model = models.get_model(input_shape,
-                         num_len=10,
-                         num_classes=5)
-
-model.load_weights(load_path)
-
-signature = tf.saved_model.signature_def_utils.predict_signature_def(
-        inputs={'image': model.input}, outputs={'0': model.output[0],
-                                                '1': model.output[1],
-                                                '2': model.output[2],
-                                                '3': model.output[3],
-                                                '4': model.output[4]})
-
-builder = tf.saved_model.builder.SavedModelBuilder(os.path.join('./freeze_models', load_path))
-legacy_init_op = tf.group(tf.tables_initializer(), name='legacy_init_op')
-
+builder = tf.saved_model.builder.SavedModelBuilder("./saved_model")
 builder.add_meta_graph_and_variables(
-        sess=K.get_session(),
-        tags=[tf.saved_model.tag_constants.SERVING],
-        main_op=tf.local_variables_initializer(),
-        legacy_init_op=legacy_init_op,
-        signature_def_map={
-            tf.saved_model.signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY:
-                signature
-        })
-
+    sess=K.get_session(),
+    tags=[tf.saved_model.tag_constants.SERVING],
+    signature_def_map={"predict": prediction_signature},
+)
 builder.save()
 ```
 
-`freeze_models` 폴더 안에 모델 이름으로 생성 된 폴더를 JAVA에서 실행시킬때 넣어주면 됩니다.
+이 코드는 원문의 핵심 조각입니다. 모델 생성부와 입력 크기, 가중치 경로를 현재 프로젝트 값으로 채워야 하며, Java 쪽에서도 `predict` signature와 같은 키를 사용해야 합니다.
 
-`outputs` 부분은 모델에 맞게 바꾸어주셔야 합니다.
+## C#에는 변수를 상수로 고정한 PB가 필요합니다
 
----
-
-## TensorFlowShape
-
-- [https://github.com/migueldeicaza/TensorFlowSharp/](https://github.com/migueldeicaza/TensorFlowSharp/)
-
-- `.pb` 모델을 넣어주어야합니다.
+원문은 C# 바인딩으로 [TensorFlowSharp](https://github.com/migueldeicaza/TensorFlowSharp/)를 사용합니다. 이 경로에서는 학습용 변수를 그대로 둔 체크포인트가 아니라, 그래프와 가중치를 한 파일에 담은 frozen `.pb`를 만듭니다. 추론 그래프가 되도록 learning phase를 먼저 0으로 두는 것도 중요합니다.
 
 ```python
-from keras.optimizers import *
-import tensorflow as tf
-import keras.backend as K
-import models
-
 K.set_learning_phase(0)
+model.load_weights("weights.h5")
+print(model.outputs)
 
-
-def freeze_session(session, keep_var_names=None, output_names=None, clear_devices=True):
-    graph = session.graph
-    with graph.as_default():
-        freeze_var_names = list(set(v.op.name for v in tf.global_variables()).difference(keep_var_names or []))
-        output_names = output_names or []
-        output_names += [v.op.name for v in tf.global_variables()]
-        input_graph_def = graph.as_graph_def()
-        if clear_devices:
-            for node in input_graph_def.node:
-                node.device = ""
-        frozen_graph = tf.graph_util.convert_variables_to_constants(
-            session, input_graph_def, output_names, freeze_var_names)
-        return frozen_graph
-
-
-def freeze(m, save_name):
-    print([out.op.name for out in m.outputs])
-    frozen_graph = freeze_session(K.get_session(),
-                                  output_names=[out.op.name for out in m.outputs])
-    tf.io.write_graph(graph_or_graph_def=frozen_graph,
-                  logdir="./frozen_models",
-                  name="frozen_graph.pb",
-                  as_text=False)
-
-    print("[INFO] Model h5 -> pb")
-
-if __name__ == "__main__":
-    # config
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    sess = tf.Session(config=config)
-    sess.run(tf.global_variables_initializer())
-    K.set_session(sess)
-
-    input_shape = (W, H, C)
-    tf.keras.backend.set_learning_phase(0)
-    model = models.get_model(input_shape,
-                             num_len=10,
-                             num_classes=5)
-
-    model.load_weights("./model.h5")
-    freeze(model, './frozen_graph.pb')
+frozen_graph = freeze_session(
+    K.get_session(),
+    output_names=[out.op.name for out in model.outputs],
+)
+tf.train.write_graph(frozen_graph, ".", "model.pb", as_text=False)
 ```
 
-`frozen_models` 폴더 안에 생성 된 `frozon_graph.pb` 파일을 C#에서 실행시킬때 넣어주면 됩니다.
+`freeze_session`은 `convert_variables_to_constants`로 출력 노드에 필요한 변수만 상수화합니다. 따라서 출력 이름을 임의로 적기보다, 출력된 `model.outputs`와 `out.op.name`을 C# 호출 코드와 대조하는 편이 안전합니다.
+
+## 파일이 있어도 실패할 때 보는 순서
+
+첫째, Java에서 `saved_model.pb`만 복사하고 `variables` 폴더를 빠뜨리지 않았는지 확인합니다. 둘째, C#에서 SavedModel 디렉터리를 frozen graph처럼 열거나 그 반대로 사용하지 않았는지 봅니다. 셋째, 입력 `image`와 다섯 출력의 이름·순서가 배포 코드와 같은지 점검합니다. 넷째, 학습 모드가 남아 BatchNorm이나 Dropout 동작이 달라지지 않았는지 확인합니다.
+
+이 글의 코드는 TensorFlow 1.13.1과 세션 기반 Keras를 전제로 한 레거시 절차입니다. 최신 TensorFlow의 eager execution이나 다른 C# 런타임에 그대로 적용된다고 가정하면 안 됩니다. 다만 “Java는 SavedModel, TensorFlowSharp C#은 frozen PB, 그리고 양쪽 모두 텐서 이름을 계약으로 관리한다”는 진단 순서는 오래된 모델을 복구할 때도 유효합니다.
