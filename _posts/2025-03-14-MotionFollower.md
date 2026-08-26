@@ -2,16 +2,22 @@
 layout: post
 title: "MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석"
 summary: "MotionFollower의 pose·reference controller, reconstruction·editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과 PSNR·SSIM·LPIPS·FID를 과장 없이 비교합니다."
+description: "MotionFollower가 pose·reference controller와 reconstruction·editing branch로 인물 동작을 바꾸는 원리, 9.8GB 수치와 시간 일관성 검증법을 설명합니다."
+faq:
+  - question: "9.8GB GPU면 모든 영상을 처리할 수 있나요?"
+    answer: "보장되지 않습니다. 해상도, frame 수, dtype과 sampling 조건에 따라 peak memory가 달라지므로 같은 설정으로 profile해야 합니다."
+  - question: "동작 품질은 Pose 점수만 보면 되나요?"
+    answer: "아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경·camera 보존, frame flicker를 따로 평가해야 합니다."
+  - question: "42.6GB와 9.8GB 비교를 어떻게 읽나요?"
+    answer: "글의 동일 비교 조건에서 약 77% 감소한 결과입니다. 자신의 hardware와 입력 조건에서 end-to-end memory와 시간을 다시 재야 합니다."
 image:
   path: /assets/img/thumb/MotionFollower.jpg
-  alt: "🔥 MotionFollower: GPU 메모리 80% 절약하면서 비디오 모션 완벽 편집하는 혁신 기술 대표 이미지"
+  alt: "MotionFollower: GPU 메모리 80% 절약하면서 비디오 모션 완벽 편집하는 혁신 기술 대표 이미지"
 date: 2025-03-14
 categories: Paper
 tags:
-  - MotionFollower
-  - Video Motion Editing
-  - Diffusion Model
-  - GPU Memory
+  - 디퓨전모델
+  - 논문리뷰
 math: true
 ---
 
@@ -20,6 +26,9 @@ MotionFollower의 비교표에서 GPU 메모리는 42.6GB에서 9.8GB로 줄어 
 <video src="/assets/img/post_img/motionfollower/0.mp4" width="100%" height="auto" controls preload="auto"></video>
 
 자료는 [GitHub](https://github.com/Francis-Rings/MotionFollower), [프로젝트 페이지](https://francis-rings.github.io/MotionFollower/), [논문](https://arxiv.org/abs/2405.20325)에 연결돼 있습니다.
+
+
+MotionFollower의 9.8GB는 특정 실험 조건의 peak memory이며 어떤 길이·해상도에서도 같은 요구량이라는 뜻이 아닙니다. 동작 정확도, 인물·배경 보존, frame 일관성과 실제 memory를 자신의 영상 조건에서 함께 재야 합니다.
 
 ## 무엇을 바꾸고 무엇을 남기는 모델인가
 
@@ -109,3 +118,37 @@ MotionFollower를 실제로 선택하려면 같은 입력 조건에서 MotionEdi
 9.8GB는 24GB급 GPU보다 낮은 수치지만, “일반 gaming GPU에서 어떤 설정으로든 실행된다”는 보장은 아닙니다. 모델 가중치, video decoder, 입력 buffer와 출력 저장 공간도 실행 환경에 포함됩니다.
 
 MotionFollower의 의미는 품질을 포기해 메모리만 줄인 것이 아니라, 이 비교 조건에서 메모리와 네 품질 지표를 동시에 개선했다는 데 있습니다. 다만 실무 판단은 제목의 80%가 아니라 자신의 해상도와 영상 길이에서 재현되는 peak memory, pose 정확도, 시간 일관성으로 내려야 합니다.
+
+## Motion과 보존 영역을 따로 채점한다
+
+Target pose와 생성 인물의 주요 관절 거리를 재고, 발 미끄러짐과 손·얼굴의 세부를 사람이 확인합니다. 동시에 reference의 옷·얼굴·배경·camera movement가 얼마나 남았는지 별도 점수로 둡니다. Pose만 잘 맞고 identity가 바뀌거나, 배경은 같지만 motion이 약하면 모두 실패입니다.
+
+영상은 시작·중간·끝 frame뿐 아니라 빠른 전환과 가림 구간을 확인해야 합니다. 같은 인물이 다시 나타난 뒤 외형이 달라지거나 pose가 급변할 수 있습니다. frame별 metric의 평균과 함께 최악 구간, flicker 빈도, 오류가 연속된 길이를 기록합니다.
+
+## 9.8GB를 재현하는 Profile
+
+입력 해상도, frame 수, batch, dtype, sampling step, model·decoder 포함 범위를 고정합니다. 모델 로딩 직후 memory와 실제 generation peak를 분리하고, 길이와 해상도를 한 축씩 늘립니다. OOM이 나지 않아도 swapping이나 offload 때문에 latency가 급증할 수 있어 총 처리 시간도 함께 봐야 합니다.
+
+기존 방식과 비교할 때 동일한 pose, reference, output 크기를 사용합니다. memory 감소가 preprocessing·postprocessing을 제외한 값인지 확인하고 quality metric이 같은 checkpoint 조건인지 봅니다. MotionFollower가 유용한지는 낮은 memory 숫자보다 목표 GPU에서 통과본의 품질과 처리 시간이 재현되는지로 결정됩니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA·MoE·MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8·MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
+- [BitNet b1.58은 GPU 없이도 빠를까? 3값 가중치와 전용 커널의 조건]({% post_url 2026-03-16-The-Magic-of-1-Bit-Choosing-Addition-Over-Multiplication-A-Deep-Dive-into-Microsoft-BitNet-b158-Architecture %}) — 가중치를 -1·0·1로 제한하는 BitNet b1.58이 메모리와 행렬 연산을 줄이는 원리, 학습 방식과 실제 가속에 필요한 커널 조건을 정리합니다.
+- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M·25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng·영어 중심·감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 9.8GB GPU면 모든 영상을 처리할 수 있나요?
+
+보장되지 않습니다. 해상도, frame 수, dtype과 sampling 조건에 따라 peak memory가 달라지므로 같은 설정으로 profile해야 합니다.
+
+### 동작 품질은 Pose 점수만 보면 되나요?
+
+아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경·camera 보존, frame flicker를 따로 평가해야 합니다.
+
+### 42.6GB와 9.8GB 비교를 어떻게 읽나요?
+
+글의 동일 비교 조건에서 약 77% 감소한 결과입니다. 자신의 hardware와 입력 조건에서 end-to-end memory와 시간을 다시 재야 합니다.

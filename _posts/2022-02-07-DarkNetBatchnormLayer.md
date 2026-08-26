@@ -2,6 +2,7 @@
 layout: post
 title:  "Darknet BatchNorm은 학습과 추론에서 왜 다른 Mean을 쓸까?"
 summary: "Darknet batchnorm_layer의 forward·backward 코드를 따라 mini-batch mean·variance와 rolling statistics, scale·bias, standalone layer의 복사 조건을 단계별로 설명합니다."
+description: "Darknet BatchNorm의 mini-batch·rolling 통계, gamma·beta, cache와 backward 순서를 따라 학습·추론 차이와 포팅 실패 조건을 설명합니다."
 date:   2022-02-07 16:00 -0400
 categories: DarkNet
 image:
@@ -9,10 +10,15 @@ image:
   alt: DarkNet 시리즈 - Batchnorm Layer 대표 이미지
 tags:
   - DarkNet
-  - 컴퓨터비전
-  - C언어
-  - 아키텍처분석
+  - 파인튜닝
 math: true
+faq:
+  - question: "Darknet BatchNorm은 학습과 추론에서 어떤 통계를 쓰나요?"
+    answer: "학습에서는 현재 mini-batch의 mean과 variance를 쓰고 rolling 값을 갱신하며, 추론에서는 저장된 rolling_mean과 rolling_variance를 사용합니다."
+  - question: "Darknet의 rolling update 0.99와 다른 프레임워크 momentum을 그대로 맞춰도 되나요?"
+    answer: "안 됩니다. Momentum이 기존 통계와 새 통계 중 어느 쪽의 가중치를 뜻하는지 API마다 다를 수 있어 실제 update 식을 비교해야 합니다."
+  - question: "BatchNorm checkpoint에는 scale과 bias만 저장하면 되나요?"
+    answer: "아닙니다. 추론 재현을 위해 rolling mean과 variance도 함께 저장하고 올바른 training flag로 불러와야 합니다."
 ---
 
 Darknet BatchNorm은 학습할 때 현재 mini-batch의 mean·variance를 쓰고, 추론할 때 학습 중 누적한 rolling_mean·rolling_variance를 써야 같은 입력을 batch 구성과 무관하게 처리할 수 있습니다.
@@ -66,3 +72,49 @@ Backward는 먼저 출력 delta를 채널별로 더해 `bias_updates`를 만듭�
 Standalone BATCHNORM이면 완성된 `l.delta`를 `net.delta`로 복사합니다. 결합형 layer에서는 호출 관계가 다를 수 있으므로 이 마지막 분기를 떼어 옮길 때 주의해야 합니다.
 
 작은 tensor 검증에서는 채널별 학습 출력의 평균이 0에 가깝고 분산이 정규화됐는지, scale=1·bias=0에서 식과 같은지 확인합니다. 그 뒤 training을 끄고 rolling 통계를 쓴 결과를 비교합니다. BatchNorm은 batch가 매우 작으면 현재 통계 추정이 불안정하다는 한계도 있습니다. 코드를 그대로 옮기는 것과 새 학습 조건에서 통계가 신뢰할 만한 것은 별개의 문제입니다.
+
+## Momentum 의미를 어떻게 비교해야 하나요?
+
+Darknet 조각은 `rolling = 0.99×rolling + 0.01×current`를 직접 실행합니다. 다른 API에서 momentum 0.99가 같은 식을 뜻할 수도 있고 새 통계 쪽 가중치를 뜻할 수도 있으므로 인자 이름만 맞추면 안 됩니다. 초기 rolling 값과 첫 batch 통계를 간단한 숫자로 두고 한 step 뒤 값이 같은지 계산하면 변환 오류를 바로 찾을 수 있습니다.
+
+재개 학습에서도 차이가 납니다. Weight만 불러오고 rolling 통계를 0에서 다시 시작하면 첫 추론 결과가 이전 checkpoint와 다르고, 새 데이터 통계가 충분히 쌓이기 전까지 흔들립니다. Fine-tuning에서 BatchNorm을 고정했다면 gamma·beta gradient뿐 아니라 rolling update도 멈췄는지 구분해야 합니다.
+
+## Variance와 Epsilon 차이는 왜 결과를 바꾸나요?
+
+분산 계산이 표본분산인지 모집단분산인지, 분모에 어떤 원소 수를 쓰는지에 따라 작은 batch에서 값이 달라집니다. Darknet의 helper가 사용하는 정의를 확인하지 않고 프레임워크 기본 BatchNorm으로 바꾸면 동일 weight와 통계라도 출력이 완전히 같지 않을 수 있습니다. Epsilon을 제곱근 안에 더하는지, 값이 얼마인지도 낮은 variance 채널에서 큰 차이를 만듭니다.
+
+상수로 채운 channel은 variance가 0이므로 epsilon 없이는 0으로 나누게 됩니다. 이 입력으로 NaN이 없는지, scale=1과 bias=0에서 출력이 기대 범위인지 확인합니다. Half precision 포팅에서는 mean과 variance 누적을 어떤 정밀도로 하는지도 봐야 작은 값이 사라지지 않습니다.
+
+## Batch가 작을 때 나타나는 실패를 어떻게 구분하나요?
+
+한 batch에 서로 비슷한 샘플만 들어오거나 batch가 한 장이면 현재 통계가 데이터 분포를 대표하지 못할 수 있습니다. 학습 loss는 줄지만 evaluation mode에서 성능이 급락하고, batch 구성에 따라 같은 이미지 출력이 바뀌는 현상이 단서입니다. 데이터 shuffle, 유효 BatchNorm batch와 channel별 variance를 기록해 원인을 확인합니다.
+
+Gradient accumulation은 optimizer가 보는 유효 batch를 키우지만 BatchNorm 통계를 계산하는 forward mini-batch까지 자동으로 키우지는 않습니다. 이 둘을 같은 것으로 말하면 해결책을 잘못 고릅니다. 통계를 고정하거나 다른 정규화를 검토할 수 있지만, 먼저 학습·추론 flag와 저장된 rolling 값이 정상이라는 전제부터 확인해야 합니다.
+
+## Convolution과 결합할 때 무엇을 조심하나요?
+
+Standalone layer는 입력을 output으로 복사하지만 convolution 결합형은 convolution 결과가 이미 output에 있습니다. 포팅하면서 무조건 `net.input`을 복사하면 convolution 출력을 원본 입력으로 덮어 정규화 대상이 바뀝니다. 호출 직전 output의 shape와 생산자를 추적해야 합니다.
+
+추론 최적화에서 BatchNorm을 convolution weight와 bias에 fold할 수 있지만, rolling 통계·gamma·beta·epsilon이 모두 확정된 evaluation 상태여야 합니다. 학습 중 fold된 weight를 다시 update하거나 잘못된 variance 정의를 쓰면 원본 graph와 달라집니다. 몇 개의 고정 입력에서 fold 전후 최대 오차를 비교한 뒤 최적화해야 합니다.
+
+## 자주 남는 질문
+
+### Darknet BatchNorm은 학습과 추론에서 어떤 통계를 쓰나요?
+
+학습에서는 현재 mini-batch의 mean과 variance를 쓰고 rolling 값을 갱신하며, 추론에서는 저장된 rolling_mean과 rolling_variance를 사용합니다.
+
+### Darknet의 rolling update 0.99와 다른 프레임워크 momentum을 그대로 맞춰도 되나요?
+
+안 됩니다. Momentum이 기존 통계와 새 통계 중 어느 쪽의 가중치를 뜻하는지 API마다 다를 수 있어 실제 update 식을 비교해야 합니다.
+
+### BatchNorm checkpoint에는 scale과 bias만 저장하면 되나요?
+
+아닙니다. 추론 재현을 위해 rolling mean과 variance도 함께 저장하고 올바른 training flag로 불러와야 합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DarkNet Crop Layer는 학습과 추론에서 어디를 자르나]({% post_url 2022-02-16-DarkNetCropLayer %}) — DarkNet Crop Layer의 랜덤 크롭·좌우 반전, 추론 시 중앙 크롭, 값 범위 변환과 빈 역전파 구현을 코드 기준으로 점검합니다.
+- [Darknet Region Layer 학습이 멈추는 이유: 빈 backward와 objectness delta 추적]({% post_url 2022-03-14-DarkNetRegionLayer %}) — Darknet region_layer의 출력 인덱스와 박스 좌표, 학습 delta 할당 순서를 따라가며 비어 있는 backward, truth 경계, 마스크 scale 형 변환, 추론 출력 변경을 점검합니다.
+- [Darknet Upsample에서 음수 Stride를 쓰면 왜 Downsample이 될까?]({% post_url 2022-03-21-DarkNetUpsampleLayer %}) — Darknet upsample_layer가 stride 부호로 reverse 모드를 정하고 출력 크기와 forward·backward 호출 방향을 뒤집는 방식, scale 초기화와 정수 나눗셈 주의점을 설명합니다.
+<!-- internal-links:end -->

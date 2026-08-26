@@ -12,12 +12,11 @@ tags:
 summary: Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록
   강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가 매번 완전히 새로운 구조와 감각적인 디자인을
   설계하도록 만듭니다.
-author: AI Trend Bot
+description: 'Hallmark가 테마와 품질 게이트로 AI 생성 UI의 반복 패턴을 줄이는 방식과 실제 브랜드 적합성·키보드 접근성·반응형 기능성·사람 검수 비용을 정리합니다.'
 github_url: https://github.com/Nutlope/hallmark
 image:
   path: https://opengraph.githubassets.com/1/Nutlope/hallmark
-  alt: 'Rejecting AI Factory UIs: How Hallmark Rewires the Design Sense of Coding
-    Agents'
+  alt: "Nutlope/hallmark GitHub 저장소 대표 이미지"
 project:
   stars: 14985
   forks: 750
@@ -33,26 +32,6 @@ project:
   files: 282
 mermaid: true
 chart: true
-faq:
-- question: Hallmark는 어떤 에디터에서 사용할 수 있나요?
-  answer: 현재 Claude Code, Cursor, 그리고 OpenAI Codex와 같이 로컬 프로젝트 폴더의 규칙 파일을 읽을 수 있는
-    주요 AI 코딩 어시스턴트에서 모두 사용 가능합니다. `.cursor/rules`나 `.claude/skills` 폴더에 설정 파일을 넣어두면
-    자동으로 인식합니다.
-- question: '내부적으로 프론트엔드 프레임워크 제약이 있나요? (예: React만 가능한가요?)'
-  answer: 아닙니다. Hallmark는 디자인의 '구조와 원칙'을 AI에게 강제하는 프롬프트 기반의 스킬입니다. 따라서 React, Vue,
-    Svelte, 심지어 순수 HTML/CSS를 사용할 때도 AI가 해당 언어에 맞춰 Hallmark의 원칙(비대칭, 여백 등)을 적용해 코드를
-    작성합니다.
-- question: '''57개의 게이트''는 실제로 코드를 컴파일해서 테스트하는 건가요?'
-  answer: 아닙니다. Hallmark는 AI가 자신의 결과물을 출력하기 전에 내부 추론 과정(Self-critique)을 거치도록 강제하는
-    프롬프트 엔지니어링 기술입니다. AI 모델 스스로 57개의 체크리스트를 바탕으로 자신이 짠 코드를 리뷰하고, 위반 사항이 있으면 수정 후 최종
-    답변을 내놓는 방식입니다.
-- question: 기존에 작업하던 프로젝트에 도입하면 코드가 전부 망가지지 않을까요?
-  answer: 기본 `build` 명령을 쓰면 충돌이 있을 수 있지만, Hallmark는 이를 대비해 `audit`과 `redesign`이라는
-    명령어를 제공합니다. `audit`을 사용하면 기존 코드를 건드리지 않고 평가만 받을 수 있으며, `redesign`을 통해 기존 데이터와
-    텍스트를 보존한 채 스타일만 안전하게 바꿀 수 있습니다.
-- question: 회사 상업용 프로젝트에 무료로 사용해도 되나요?
-  answer: 네, Hallmark는 GitHub에 오픈소스로 공개되어 있으며 MIT 라이선스를 따르고 있습니다. 개인 프로젝트는 물론 기업의
-    상업용 제품 개발에도 자유롭게 도입하여 사용할 수 있습니다.
 ---
 
 > **TL;DR (한 줄 요약)**
@@ -363,6 +342,20 @@ Nutlope의 Hallmark는 이 흐름에 제동을 거는 신선한 시도입니다.
 앞으로 코딩 에이전트는 더 강력해질 것입니다. 그럴수록 Hallmark처럼 에이전트의 '취향'을 날카롭게 다듬어주는 규칙 셋(Skill) 생태계는 점점 더 중요해질 것입니다. 오늘 여러분의 사이드 프로젝트에 이 깐깐한 아트 디렉터를 한 번 초대해 보는 것은 어떨까요? 아마도 평소에 보지 못했던, 사람의 온기가 느껴지는 코드를 만나게 될 것입니다.
 
 ---
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Nutlope/hallmark)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [addyosmani/agent-skills: AI 코딩 에이전트에게 시니어 개발자의 업무 방식을 가르치다]({% post_url 2026-07-16-addyosmaniagent-skills-Teaching-AI-Coding-Agents-the-Workflows-of-Senior-Developers %}) — 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항 명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스…
+- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
+- [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
+<!-- internal-links:end -->
 
 ## FAQ (자주 묻는 질문)
 

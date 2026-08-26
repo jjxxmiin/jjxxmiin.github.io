@@ -1,71 +1,57 @@
 ---
 layout: post
-title: 🤯 아직도 iptables 늪에서 허우적대시나요? eBPF가 리눅스 커널의 멱살을 잡고 캐리하는 작동 원리
+title: 'eBPF를 이 노드에 올릴 수 있을까: 커널·BTF·Verifier 사전 점검'
 date: '2026-05-31 07:08:56'
 categories: Tech
 tags:
   - 인프라
-  - 오픈소스
-  - AI트렌드
-summary: 쿠버네티스 환경에서 O(N)의 성능 저하를 일으키는 iptables의 한계를 극복하고, 리눅스 커널 코어에서 안전하게 샌드박싱된 코드를
-  실행해 O(1)의 네트워크 및 옵저버빌리티 성능을 끌어내는 eBPF의 내부 아키텍처와 현업 적용 시의 트레이드오프를 철저히 파헤칩니다.
-author: AI Trend Bot
+  - AI에이전트
+summary: 'eBPF 도입 전 Linux 커널 버전만 보지 않고 필요한 hook·helper·BTF, JIT, 권한, NIC mode와 Verifier 적재를 노드별로 확인하는 절차를 정리합니다.'
+description: 'eBPF 프로그램을 배포하기 전 커널 hook·helper·BTF·JIT·NIC 지원, Verifier 로그, 권한과 배포판 backport를 노드별 preflight로 확인하는 방법입니다.'
 github_url: https://github.com/EveryInc/compound-engineering-plugin
+faq:
+  - question: 'Linux 커널 버전만 알면 eBPF 지원 여부를 판단할 수 있나요?'
+    answer: '아닙니다. 배포판 backport와 build config, 필요한 hook·helper·BTF·JIT, NIC driver와 보안 정책이 달라 실제 노드에서 기능 probe와 적재 시험을 해야 합니다.'
+  - question: 'Verifier를 통과하면 eBPF 프로그램이 안전한가요?'
+    answer: '메모리·제어 흐름 등 커널이 검사하는 조건을 통과했다는 뜻이지 정책 로직이 옳다는 보장은 아닙니다. test packet, 범위 제한과 canary·detach 절차가 필요합니다.'
+  - question: 'BCC 예제는 모든 서버에서 그대로 실행되나요?'
+    answer: '아닙니다. 커널 header·compiler·BCC와 권한, 함수·interface 이름이 필요합니다. 배포판과 노드 image에 맞춰 의존성과 attach mode를 확인해야 합니다.'
 image:
   path: https://opengraph.githubassets.com/1/EveryInc/compound-engineering-plugin
-  alt: Are You Still Drowning in the iptables Swamp? How eBPF Hard-Carries the Linux
-    Kernel
+  alt: "EveryInc/compound-engineering-plugin GitHub 저장소 대표 이미지"
 ---
 
-🔗 **Reference Links**
-- [eBPF Foundation](https://ebpf.io/)
-- [Cilium Project](https://cilium.io/)
-- [BPF Compiler Collection (BCC)](https://github.com/iovisor/bcc)
+eBPF 도입 가능 여부는 ‘커널 5.x 이상’ 같은 한 줄로 판정할 수 없습니다. 사용할 hook과 helper, BTF·JIT, 배포판 backport, NIC driver와 보안 권한을 실제 노드에서 확인해야 합니다. Verifier 적재 시험과 안전한 detach까지 통과해야 같은 node image에 배포할 근거가 생깁니다.
 
-🔥 **1. Kube-proxy의 비명 소리, 들어보셨나요? (The Hook)**
+이 글은 [eBPF](https://ebpf.io/), [Cilium](https://cilium.io/)과 [BCC](https://github.com/iovisor/bcc)를 참고해 kernel prerequisite와 검증 순서를 정리합니다. 특정 기능의 최소 버전은 프로젝트·배포판 문서를 확인해야 하며, 원문의 예제는 production drop 프로그램이 아니라 학습용 조각으로 읽어야 합니다.
 
-새벽 3시, 온콜(On-call) 알림이 울립니다. "API 서버 응답 지연 발생". App 로그는 깨끗하고, DB 슬로우 쿼리도 없습니다. 범인은 네트워크. 클러스터 노드에 접속해 `iptables-save | wc -l`을 치는 순간, **10만 줄**이 넘어가는 룰셋을 보며 헛웃음이 나옵니다.
+## 커널 버전보다 어떤 기능을 먼저 목록화할까?
 
-네, 우리가 매일 쓰는 쿠버네티스 `kube-proxy`의 민낯입니다. 서비스(Service) 하나를 띄울 때마다 추가되는 무수한 iptables 룰들은 리눅스 넷필터(Netfilter)를 통과하며 패킷을 리니어하게(O(N)) 검사합니다. 트래픽이 몰리면? 커널이 패킷 길을 찾느라 CPU를 다 써버리죠.
+도입할 제품이 사용하는 program type과 attach point를 적습니다. XDP, tc, cgroup socket, tracepoint, kprobe·uprobe는 필요한 kernel 기능과 실패 영향이 다릅니다. 사용 helper, Map type, BTF·CO-RE, ring buffer와 JIT 의존성도 버전별 기능표로 만듭니다. ‘eBPF 지원’이라는 넓은 체크 하나로는 실제 프로그램 적재를 예측할 수 없습니다.
 
-> "리눅스 커널을 수정하지 않고, 커널의 동작을 내 마음대로 조작할 수는 없을까?" 이것이 모든 인프라 엔지니어들의 오랜 갈증이었습니다.
+배포판 kernel은 upstream 버전 숫자가 같아도 patch와 backport가 다를 수 있습니다. 반대로 오래된 base version에 일부 기능이 backport됐을 수도 있습니다. `/boot/config` 또는 제공되는 kernel config, BTF 파일 존재, lockdown·LSM과 unprivileged BPF 설정을 node image별로 확인합니다. managed Kubernetes라면 provider가 허용하는 kernel flag와 agent 권한도 별도입니다.
 
-💡 **2. eBPF: 리눅스 커널에 상륙한 자바스크립트 (TL;DR)**
+NIC와 driver는 XDP mode에 영향을 줍니다. native driver mode, generic fallback 또는 hardware offload 중 무엇을 사용할지 확인하고 실제 interface·bond·virtual device에서 attach probe를 실행합니다. 기능은 동작하지만 fallback 때문에 기대한 성능이 나오지 않는 경우를 ‘지원’으로만 표시해서는 안 됩니다.
 
-**한 마디로 요약하자면, eBPF는 '리눅스 커널을 위한 자바스크립트'입니다.**
-
-웹 브라우저가 DOM을 조작하기 위해 자바스크립트 엔진(V8)을 샌드박스 형태로 돌리듯, 리눅스 커널도 시스템 콜, 네트워크 스택, 커널 함수 호출(Kprobes) 이벤트가 발생할 때마다 여러분이 짠 코드를 커널 스페이스에서 직접 실행해 줍니다. 재부팅? 필요 없습니다. 커널 모듈 작성? 안 해도 됩니다. 완전히 고립된 샌드박스 내에서 빛의 속도로 동작하는 커널 확장 플러그인인 셈이죠.
-
-🛠️ **3. Under the Hood: eBPF는 어떻게 커널을 해킹(?)하는가**
-
-솔직히 처음 이 아키텍처를 봤을 땐 의구심이 들었습니다. "유저가 짠 코드를 커널 코어에서 돌린다고? 널 포인터 참조 한 번이면 커널 패닉(Kernel Panic)으로 서버가 뻗어버릴 텐데?" 현업에서 리눅스 커널 모듈을 다뤄보신 분들이라면 이 불안감에 100% 공감하실 겁니다.
-
-이 불안감을 해소하고 eBPF를 마법으로 만들어주는 핵심 기믹이 바로 **BPF Verifier(검증기)** 와 **JIT(Just-In-Time) 컴파일러**입니다.
-
-**작동 파이프라인 심층 해부:**
-1. **C/Rust 언어 작성**: 개발자가 제한된 기능만 허용된 C 언어(혹은 Rust)로 eBPF 프로그램을 작성합니다.
-2. **LLVM 컴파일**: 이를 x86이나 ARM 같은 아키텍처 종속적인 어셈블리가 아닌, 범용적인 eBPF 전용 바이트코드(Bytecode)로 컴파일합니다.
-3. **bpf() 시스템 콜**: 유저 스페이스에서 이 바이트코드를 커널로 밀어 넣습니다.
-4. **BPF Verifier 🌟 (통곡의 벽)**: 여기가 아키텍처의 꽃입니다! 커널이 코드를 분석해 무한 루프가 없는지, 분기문이 유효한지, 허가되지 않은 메모리 영역(Out-of-bounds)을 찌르지 않는지 악랄할 정도로 깐깐하게 시뮬레이션하고 검증합니다. 여기서 통과하지 못하면 커널은 코드 적재를 가차 없이 거부합니다.
-5. **JIT 컴파일 & 실행**: 검증을 통과하면 커널 내부에 있는 JIT 컴파일러가 이를 네이티브 머신 코드로 변환하여 오버헤드 없이 미친 듯한 속도로 실행합니다.
-
-**BPF Map (상태 공유의 마법):**
-이때 eBPF 프로그램은 커널 스페이스에서 돌지만, 그 설정값이나 수집한 메트릭을 유저 스페이스와 어떻게 통신할까요? 바로 **BPF Map**이라는 Key-Value 자료구조를 사용합니다. 유저 스페이스 앱이 BPF Map에 '차단할 IP 목록'을 `Update` 해두면, 커널 단의 eBPF 프로그램이 패킷을 받을 때마다 이 Map에서 `Lookup`하여 실시간으로 동작을 결정합니다.
-
-📊 **아키텍처 비교: iptables vs eBPF (Cilium)**
-
-이론만 들으면 와닿지 않죠. 왜 Kube-proxy 대신 eBPF 기반의 Cilium이 업계 표준이 되고 있는지 표로 정리해 봤습니다.
-
-| 비교 항목 | Legacy (iptables / Kube-proxy) | Modern (eBPF / Cilium) |
+| 점검 영역 | 확인할 항목 | 실패 시 선택 |
 | :--- | :--- | :--- |
-| **패킷 라우팅 복잡도** | **O(N)** (룰이 수만 개로 늘어날수록 성능 수직 낙하) | **O(1)** (BPF Map 해시 테이블을 통한 즉각적인 룩업) |
-| **패킷 개입 지점** | TCP/IP 스택을 전부 거치고 메모리 할당 후 Netfilter 처리 | 네트워크 카드(NIC)에서 패킷을 받자마자 **XDP** 레벨에서 즉시 처리 |
-| **Context Switch** | 유저/커널 스페이스 간 잦은 전환으로 CPU 오버헤드 큼 | 커널 내부에서 패킷을 조작하고 바로 포워딩하여 오버헤드 Zero |
-| **관측성(Observability)** | IP, 포트 등 제한적인 L4 수준의 패킷 정보만 확인 가능 | 앱 수정 없이 L7(HTTP, gRPC, 쿼리) 레벨의 심도 있는 메트릭 추출 |
+| Kernel | program·Map·helper, config, JIT | 기능 축소, node image upgrade |
+| Portability | BTF, CO-RE, 배포판 backport | image별 artifact 또는 재컴파일 |
+| Network | NIC driver, XDP mode, MTU | tc/generic 경로 또는 지원 제외 |
+| Security | capability, lockdown, LSM, seccomp | 전용 agent와 최소 권한 설계 |
+| Operations | attach 목록, logs, detach·rollback | canary 전 runbook 보완 |
 
-💻 **Under the Hood: XDP로 DDoS 트래픽 O(1) 드랍하기**
+## eBPF 프로그램은 어떤 단계를 거쳐 적재되는가?
 
-말뿐인 추상적 설명은 질색입니다. 네트워크 카드로 들어오는 악성 패킷을 리눅스 커널이 인지하기도 전에(즉, `sk_buff` 구조체를 메모리에 할당하기도 전에) 드랍시켜버리는 가장 로우레벨(XDP - eXpress Data Path)의 eBPF C 코드를 보시죠.
+C나 Rust source는 compiler를 거쳐 eBPF bytecode가 되고 user-space loader가 `bpf()` system call 등으로 kernel에 요청합니다. Verifier는 register 상태, pointer 범위, stack과 제어 흐름을 분석해 허용할 수 없는 접근이 있으면 적재를 거부합니다. 통과한 program은 설정에 따라 JIT된 native code로 실행되고 지정 hook에 attach됩니다.
+
+‘컴파일 성공’과 ‘Verifier 성공’, ‘attach 성공’을 분리해 기록하세요. compiler가 만든 object가 있어도 target kernel의 type·helper가 없으면 load가 실패하고, load돼도 interface 이름이나 권한이 맞지 않으면 attach할 수 없습니다. 각 단계의 error log와 kernel version, object hash를 수집하면 node 간 차이를 찾기 쉽습니다.
+
+Verifier는 program의 업무 의도를 알지 못합니다. 모든 packet을 drop하는 유한한 program도 메모리 규칙을 지키면 적재될 수 있습니다. 따라서 unit·VM test, test namespace와 synthetic packet으로 정책 정확성을 검증하고 attach scope·canary node를 제한해야 합니다.
+
+## 원문의 XDP·BCC 예제에서 특히 위험한 부분은?
+
+다음 XDP 조각은 들어오는 모든 packet을 `XDP_DROP`으로 반환합니다. `bpf_printk` 문자열에 ‘악성’이라고 적혀 있어도 IP 판별 로직은 없습니다. 운영 interface에 attach하면 정상 traffic도 차단할 수 있으므로 격리된 veth·test namespace에서만 원리를 확인해야 합니다.
 
 ```c
 #include <linux/bpf.h>
@@ -73,17 +59,15 @@ image:
 
 SEC("xdp")
 int drop_malicious_ip(struct xdp_md *ctx) {
-    // 실제로는 BPF Map에서 IP를 조회해야 하지만, 원리 이해를 위해 단순화했습니다.
-    // 들어오는 모든 패킷을 빛의 속도로 버립니다. (CPU 부하 0에 수렴)
-    bpf_printk("Drop packet before kernel even knows it!
-");
+    // 학습용 조각: 현재 코드는 모든 패킷을 드롭합니다.
+    bpf_printk("Drop packet at XDP hook\n");
     return XDP_DROP;
 }
 
 char _license[] SEC("license") = "GPL";
 ```
 
-유저 스페이스에서 이 코드를 커널로 밀어 넣는 Python(BCC 라이브러리 활용) 로더(Loader) 코드는 이렇습니다.
+원문의 BCC loader 역시 `ebpf_c_code` 정의와 실제 함수 이름·오류 처리가 생략됐습니다. attach할 device를 하드코딩했고 종료 시 detach, 신호 처리와 기존 XDP program 충돌 검사도 없습니다.
 
 ```python
 from bcc import BPF
@@ -91,43 +75,69 @@ from bcc import BPF
 # 1. 컴파일된 eBPF C 코드 바이트코드 로드
 b = BPF(text=ebpf_c_code)
 
-# 2. XDP 훅에 프로그램 부착 (네트워크 인터페이스 eth0)
+# 2. XDP 훅에 프로그램 부착 (테스트 인터페이스 예시)
 b.attach_xdp(dev="eth0", fn=b.get_syscall_fnname("drop_malicious_ip"))
 
-print("🚀 XDP eBPF 프로그램이 커널에 주입되었습니다! 악성 패킷 드랍 모니터링 중...")
+print("XDP eBPF 프로그램 적재 상태를 확인합니다.")
 b.trace_print()
 ```
-이 짧은 코드가 컴파일되어 NIC 드라이버 레벨에 꽂히는 순간, 초당 수백만 번의 SYN Flooding 공격도 서버 CPU를 거의 쓰지 않고 방어해 냅니다. 기존 iptables로는 상상도 할 수 없는 아키텍처적 우위죠.
 
-🎯 **4. 실전! 현업에서는 어떻게 써먹을까? (Pragmatic Use Cases)**
+실제 loader는 기존 program ID와 attach mode를 확인하고, 실패하면 변경을 남기지 않으며, signal·timeout 때 확실히 detach해야 합니다. `eth0`가 관리 traffic interface일 수 있으므로 device 선택을 입력 검증과 승인 대상으로 둡니다. `trace_print`는 부하가 큰 경로의 production telemetry로 무제한 사용하지 않습니다.
 
-**시나리오 A: 대규모 트래픽 스파이크 시의 마이크로서비스 라우팅**
-블랙 프라이데이 이벤트로 트래픽이 100배 폭증했다고 가정해 봅시다. k8s 파드(Pod)가 1,000개에서 5,000개로 스케일 아웃됩니다. iptables 환경에서는 노드마다 수만 개의 룰이 업데이트되며 전체 네트워크가 락(Lock)에 걸리고 멈칫거립니다. 반면 eBPF를 적용한 클러스터는 노드의 BPF Map(단순한 Key-Value 해시 테이블)에 Pod IP 하나만 O(1)으로 '띡' 추가하고 끝납니다. 트래픽 폭주 중에도 네트워크 지연 시간(Latency) 그래프가 평온하게 일자(Flat)를 유지합니다.
+## BTF와 CO-RE는 어떤 문제를 줄이고 무엇을 남기는가?
 
-**시나리오 B: 레거시 코드 건드리지 않고 분산 트레이싱(Tracing) 달기**
-"옆 팀이 10년 전에 만든 C++ 레거시 서버에서 HTTP 500 에러가 간헐적으로 나는데, 프로메테우스 메트릭을 달아줄 수 있나요? (소스코드 수정 없이요)"
-보통은 불가능하다고 하겠죠. 하지만 eBPF의 `uprobes`를 사용하면 가능합니다. 유저 스페이스 애플리케이션의 특정 함수(예: HTTP 핸들러) 메모리 주소에 eBPF 훅을 걸어버립니다. **앱 개발자는 코드를 단 한 줄도 수정하지 않았는데**, 인프라 엔지니어가 밖에서 HTTP 응답 시간, 상태 코드, gRPC 페이로드 등을 훔쳐와(?) 대시보드에 띄울 수 있습니다.
+BTF는 kernel type 정보를 제공하고 CO-RE는 compile된 program이 target kernel 구조 차이에 맞게 relocation되는 데 도움을 줍니다. 여러 node image마다 source를 다시 빌드하는 부담을 줄일 수 있지만, target kernel에 필요한 type·field와 helper가 아예 없거나 의미가 바뀐 경우까지 해결하지는 않습니다.
 
-더 소름 돋는 건, 암호화된 HTTPS 트래픽조차 OpenSSL 라이브러리의 `SSL_read`와 `SSL_write` 함수에 훅을 걸면, 커널이 암호화하기 직전/직후의 평문 데이터를 가로채 로깅할 수 있다는 점입니다. 이것이 'Zero-instrumentation'의 진정한 무서움이자 가치입니다.
+build artifact에는 source commit, compiler·libbpf 버전, 요구 feature와 BTF 기준을 기록합니다. 지원하는 모든 node image의 VM 또는 실제 canary에서 load·attach·event test를 실행하고, kernel upgrade 때 회귀 suite를 다시 돌립니다. ‘한 번 compile해 어디서나’라는 문구를 기능 probe 대체로 사용하지 마세요.
 
-⚖️ **5. 시니어의 깐깐한 시선: 이면에 숨겨진 Trade-offs**
+BCC 방식은 runtime compile과 kernel header 의존성이 생길 수 있습니다. 학습·탐색에는 편리하지만 production agent에서는 build toolchain과 header 배포, startup 지연과 supply chain 범위를 고려해야 합니다. CO-RE object와 BCC 중 어느 방식을 쓰든 재현 가능한 artifact와 version pinning이 필요합니다.
 
-현업에서 구르다 보면 늘 그렇듯 '은통알(Silver Bullet)'은 없습니다. 아키텍처가 우수하다고 무작정 도입하기엔 꽤 무거운 트레이드오프들이 존재합니다.
+## eBPF 권한은 어떻게 최소화할까?
 
-- **BPF Verifier라는 통곡의 벽**: 커널 보호를 명목으로 Verifier가 코드를 튕겨낼 때 뱉어내는 에러 메시지(예: `R1 type=ctx expected=fp`)는 최악의 개발자 경험(DX)을 자랑합니다. 메모리 바운드 체크 로직을 조금만 잘못 짜도 컴파일은 되는데 커널이 적재를 거부하는 환장할 상황을 마주하게 됩니다. 포인터 연산의 자유도가 극도로 제한되기 때문에 숙련된 C 개발자라도 꽤나 애를 먹습니다.
-- **파편화된 커널 버전과 CO-RE의 한계**: eBPF 생태계는 'Compile Once, Run Everywhere(한 번 컴파일해서 어디서든 실행)'를 외치며 BTF(BPF Type Format)를 도입했습니다. 하지만 RHEL 7(커널 4.x)과 Ubuntu 24.04(커널 6.x) 사이의 구조체 오프셋 차이를 완벽히 극복하는 것은 여전히 험난합니다. 최신 eBPF 기능을 쓰려면 결국 서버 운영체제의 커널 버전을 최신으로 끌어올려야 하는 강력한 선결 조건이 붙습니다.
-- **무서운 벤더 락인(Vendor Lock-in)**: eBPF 기반의 관측/보안 생태계를 특정 툴(예: Isovalent의 상용 Cilium 기능이나 Datadog의 네트워크 모니터링)에 깊게 의존하게 되면, 추후 커스텀 로직을 넣거나 다른 오픈소스 솔루션으로 마이그레이션할 때 사실상 네트워크 인프라 전체를 뜯어고치는 '재건축' 수준의 비용을 치러야 합니다.
+program load·attach와 Map 접근에는 높은 권한이 필요할 수 있습니다. 모든 애플리케이션 pod에 넓은 capability나 host filesystem을 주지 말고 전용 node agent가 검증된 artifact만 관리하게 합니다. control plane API는 누가 어느 hook에 어떤 program을 배포할 수 있는지 RBAC와 승인으로 제한합니다.
 
-🏁 **6. Closing Thoughts: 변화는 이미 시작되었습니다**
+Map에는 packet metadata, process 정보나 평문에 가까운 민감 데이터가 들어갈 수 있습니다. 수집 field와 보존 기간을 최소화하고 사용자 공간 exporter의 접근을 제한합니다. uprobe로 암호화 library 경계를 관찰할 수 있다는 가능성은 관측 장점인 동시에 기밀 노출 위험이므로 별도 보안·법적 검토가 필요합니다.
 
-솔직히 말해서, 대부분의 백엔드나 프론트엔드 개발자가 생태계의 밑바닥인 eBPF C 코드를 직접 짤 일은 앞으로도 거의 없을 겁니다. 이미 앞서 언급한 Cilium, Pixie, Tetragon 같은 훌륭한 추상화 도구들이 생태계를 든든하게 받치고 있으니까요.
+artifact 서명과 hash를 검증하고, 임의 source를 node에서 바로 compile·attach하지 않습니다. 허용 program·Map type과 interface를 정책으로 제한하며 load·attach·detach 사건을 감사 로그에 남깁니다. agent가 침해되면 kernel-level traffic과 관측이 영향을 받을 수 있으므로 node 보안 경계로 다룹니다.
 
-**하지만 기술의 '원리'를 아는 것과 블랙박스로 두는 것은 천지 차이입니다.**
-인프라가 어떻게 트래픽을 O(1)로 라우팅하는지, 어떻게 내 애플리케이션 코드를 수정하지 않고도 성능 메트릭을 뽑아갈 수 있는지 그 밑바닥의 아키텍처를 이해하는 엔지니어는 위기 상황에서 빛을 발합니다. 원인 모를 트러블슈팅 상황에서 남들이 죄다 iptables 로그나 애플리케이션 로그만 뒤지고 있을 때, 정확히 eBPF 훅 지점이나 커널 사이드의 병목을 의심하고 입체적인 해결책을 찾아낼 수 있기 때문이죠.
+## 노드 preflight와 canary 합격 기준은?
 
-Kube-proxy는 이미 은퇴 수순을 밟고 있습니다. 클라우드 네이티브 네트워크와 옵저버빌리티의 패러다임은 Netfilter에서 eBPF로 완전히 넘어왔습니다. 이 거대한 아키텍처적 파도 위에서 여러분의 멘탈 모델도 한 단계 깊이 업데이트해 보시길 강력히 권합니다. 🚀
+node pool별 대표 node에서 kernel config, BTF, helper·Map probe, JIT, attach mode와 권한을 자동 수집합니다. 이어서 read-only trace 또는 test interface의 pass program을 load·attach·detach해 각 단계 로그를 확인합니다. production interface의 drop·redirect program은 이 preflight에 사용하지 않습니다.
+
+canary에서는 program load 실패, Verifier reject, Map allocation, agent restart, node reboot와 upgrade를 재현합니다. attach 뒤 network와 application health가 유지되고, agent를 제거했을 때 hook과 pinned Map이 의도한 상태로 정리되는지 봅니다. cleanup이 안 되면 이전 program이 남아 rollback 뒤에도 packet을 바꿀 수 있습니다.
+
+노드 일부가 기능 probe에 실패하면 조용히 다른 datapath로 섞지 말고 scheduling label과 지원 matrix로 격리합니다. feature downgrade가 허용되는지, 성능과 정책이 달라지는지 명시하세요. 모든 지원 image가 load·attach·detach와 운영 관측을 통과했을 때만 전체 배포 후보가 됩니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/EveryInc/compound-engineering-plugin)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [eBPF 프로그램을 운영에 올리려면: 훅 선택·CO-RE·런타임 보안]({% post_url 2026-05-28-The-End-of-the-Sidecar-Pattern-A-10-Year-Engineers-Deep-Dive-into-eBPF-and-Kernel-Level-Revolution %}) — XDP·시스템 콜 추적·런타임 보안처럼 목적이 다른 eBPF 훅을 구분하고, Verifier·JIT·CO-RE·커널 호환성과 운영 롤백을 하나의 수명주기로 정리합니다.
+- [eBPF XDP 훅은 패킷을 어디서 막을까: 커널 경로와 Verifier 읽기]({% post_url 2026-05-25-Is-the-Sidecar-Pattern-Dead-Unveiling-the-True-Face-of-eBPF-Hooking-Networks-at-the-Kernel-Level %}) — XDP가 NIC 드라이버 가까이에서 패킷을 처리하는 위치와 PASS·DROP 반환값을 코드로 읽고, Verifier·Map·커널 호환성과 L7 기능의 한계를 구분합니다.
+- [eBPF를 처음 도입할 때 무엇을 확인할까: 훅·Verifier·Map 입문]({% post_url 2026-05-27-Hacking-the-Kernel-without-Reboot-A-10-Year-Backend-Engineers-Deep-Dive-into-the-Insane-Potential-of-eBPF %}) — eBPF 프로그램이 커널 훅에서 실행되고 Verifier를 거쳐 BPF Map으로 유저 공간과 통신하는 원리를 살펴본 뒤 직접 개발과 도구 도입의 경계를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Linux 커널 버전만 알면 eBPF 지원 여부를 판단할 수 있나요?
+
+아닙니다. 배포판 backport와 build config, 필요한 hook·helper·BTF·JIT, NIC driver와 보안 정책이 달라 실제 노드에서 기능 probe와 적재 시험을 해야 합니다.
+
+### Verifier를 통과하면 eBPF 프로그램이 안전한가요?
+
+메모리·제어 흐름 등 커널이 검사하는 조건을 통과했다는 뜻이지 정책 로직이 옳다는 보장은 아닙니다. test packet, 범위 제한과 canary·detach 절차가 필요합니다.
+
+### BCC 예제는 모든 서버에서 그대로 실행되나요?
+
+아닙니다. 커널 header·compiler·BCC와 권한, 함수·interface 이름이 필요합니다. 배포판과 노드 image에 맞춰 의존성과 attach mode를 확인해야 합니다.
 
 ## References
-- https://ebpf.io/
-- https://cilium.io/
-- https://github.com/iovisor/bcc
+
+- [ebpf.io 원문](https://ebpf.io/)
+- [cilium.io 원문](https://cilium.io/)
+- [GitHub 저장소](https://github.com/iovisor/bcc)

@@ -4,16 +4,16 @@ title: 'Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 
 date: '2026-02-17'
 categories: Tech
 tags:
-  - Rowboat
-  - LocalFirst
-  - 지식그래프
+  - Google
+  - LLM
   - MCP
-  - RAG
+  - 벡터DB
+  - AI메모리
 summary: Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail·OAuth·LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
-author: AI Trend Bot
+description: 'Rowboat가 이메일·회의의 인물·결정·약속을 Markdown 기억으로 연결하는 원리와 외부 LLM·OAuth 권한, 동기화·삭제 검증 기준을 설명합니다.'
 image:
   path: https://opengraph.githubassets.com/1/rowboatlabs/rowboat
-  alt: Rowboat-The-Local-First-AI-Coworker
+  alt: "rowboatlabs/rowboat GitHub 저장소 대표 이미지"
 ---
 
 Rowboat는 기억을 로컬 Markdown으로 보관해 사용자가 직접 읽고 고칠 수 있지만, Gmail·Calendar와 외부 LLM API를 연결하면 업무 데이터의 모든 처리가 자동으로 오프라인이 되는 것은 아닙니다. “local-first”의 장점은 저장 위치와 기억의 투명성에 있고, 실제 프라이버시는 연결한 모델·도구·권한까지 확인해야 합니다.
@@ -90,4 +90,32 @@ Rowboat가 잘 맞는 팀은 회의·이메일의 결정이 여러 곳에 흩어
 
 Rowboat의 매력은 챗봇이 “진짜 동료”가 된다는 표현보다, AI가 무엇을 기억했는지 사람이 파일로 검토할 수 있다는 데 있습니다. 그 투명성을 실제 운영의 권한·동기화·삭제 정책으로 이어갈 때 local-first가 의미를 가집니다.
 
+## 기억 파일과 검색 인덱스가 어긋나면 어떻게 확인할까?
+
+사용자가 Markdown에서 잘못된 인물 이름을 고쳤는데 Qdrant의 임베딩과 MongoDB 메타데이터가 이전 값을 유지하면, 화면의 파일과 에이전트 답이 서로 다를 수 있습니다. 수정 직후 같은 질문을 다시 하고 어떤 저장소가 언제 갱신됐는지 확인해야 합니다. 백그라운드 작업이 실패했을 때 재시도와 오류 표시가 있는지도 봅니다.
+
+동일한 이메일을 다시 동기화할 때 중복 기억이 생기지 않는지도 중요합니다. 메시지 ID나 source provenance를 기준으로 기존 entity를 갱신해야 하는데, 제목과 본문 유사도만으로 병합하면 서로 다른 약속이 하나로 합쳐질 수 있습니다. 중복 제거와 잘못된 병합을 서로 다른 오류로 기록해야 합니다.
+
+삭제 시험은 원문 연결 해제, Markdown 파일, 벡터, 메타데이터, 백업을 순서대로 확인합니다. Gmail 권한을 철회했는데 이미 만든 기억이 남는다면 그것이 제품 정책인지 삭제 누락인지 사용자가 알아야 합니다. 특정 인물이나 프로젝트의 파생 기억만 찾아 지울 수 있는지도 개인정보 운영에서 중요한 조건입니다.
+
+## 도구 권한은 기억 읽기와 행동 쓰기를 어떻게 나눌까?
+
+회의와 이메일을 요약하는 데 필요한 읽기 권한과 GitHub 이슈·캘린더를 수정하는 쓰기 권한은 같은 범위가 아닙니다. 처음에는 source별 읽기 전용 계정과 작은 폴더만 연결하고, 답변 근거가 안정된 뒤에도 action은 별도의 확인을 거치게 할 수 있습니다. 한 MCP 연결이 여러 도구를 제공한다면 실제로 필요한 메서드만 허용하는 편이 좋습니다.
+
+기억 속 문장은 신뢰할 수 없는 외부 입력일 수도 있습니다. 이메일 본문에 도구 실행을 유도하는 문구가 있어도 agent가 이를 사용자 명령으로 취급하지 않는지 시험해야 합니다. source content와 system instruction, 사용자의 현재 요청을 분리하지 못하면 자동 기억이 행동 권한을 악용하는 통로가 될 수 있습니다.
+
+운영 전에는 테스트 계정으로 잘못된 일정 생성, 파일 쓰기 실패, API 시간 초과를 의도적으로 발생시킵니다. 부분 실행 뒤 다시 시도했을 때 중복 일정이나 중복 이슈가 생기지 않는지, 사람이 어느 단계까지 되돌릴 수 있는지 확인합니다. 투명한 Markdown 기억도 도구 실행의 원자성과 복구를 자동으로 해결해 주지는 않습니다.
+
+권한 변경의 전파 시간도 시험해야 합니다. MCP나 Google 계정에서 쓰기 권한을 제거한 직후 Rowboat의 기존 세션과 캐시가 같은 동작을 계속할 수 있는지 확인하고, 연결을 해제한 계정의 도구가 화면과 에이전트 후보에서 사라지는지 봅니다. 새 권한 정책이 다음 재시작 때만 적용된다면 그 사이의 운영 절차도 명시해야 합니다.
+
+감사 기록에는 사용자의 자연어 요청, 선택된 기억, 실제 호출한 도구와 최종 결과를 구분해 남기는 편이 좋습니다. 그래야 잘못된 행동이 기억 추출 오류에서 시작됐는지, 도구 선택이나 외부 API 실패에서 시작됐는지 좁힐 수 있습니다. 로그에 이메일 본문과 비밀값을 그대로 복제하지 않으면서도 실행 경로를 재현할 수 있는지도 함께 설계해야 합니다.
+
 참고: [Rowboat GitHub](https://github.com/rowboatlabs/rowboat), [Rowboat 프로젝트 사이트](https://www.rowboatlabs.com/)
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [agentmemory를 붙이면 AI가 어제를 기억할까: 검색·삭제·오염 테스트]({% post_url 2026-05-12-Seniors-Perspective-No-More-Nice-to-Meet-You-from-AI-How-agentmemory-Cures-LLMs-Short-Term-Amnesia %}) — agentmemory의 4단계 기억과 BM25·벡터 검색을 살펴보고, 장기 기억을 도입하기 전 정확도·오염·삭제·장애 복구를 검증하는 방법을 정리합니다.
+- [Mem0를 장기 기억 계층으로 써도 될까: ADD·UPDATE·DELETE와 격리 조건]({% post_url 2026-05-04-The-Most-Elegant-Scalpel-Curing-LLM-Amnesia-A-Deep-Dive-into-Mem0 %}) — Mem0가 대화에서 장기 사실을 추출해 ADD·UPDATE·DELETE·NOOP로 갱신하고 vector·graph에 저장하는 구조와 오판·격리·삭제·평가 조건을 정리합니다.
+- [OpenHuman이 Slack·GitHub를 로컬 기억으로 모아도 될까: OAuth·동기화·가짜 기억]({% post_url 2026-05-13-What-We-Wanted-Wasnt-a-Chatbot-But-a-Clone-of-Our-Brain-Deep-Dive-into-OpenHuman-Architecture %}) — OpenHuman이 Rust·Tauri desktop에서 SaaS 활동을 markdown·SQLite memory로 수집한다는 구조를 살펴보고, OAuth·egress·압축 손실·오래된 기억과 삭제 조건을 정리합니다.
+<!-- internal-links:end -->

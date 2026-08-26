@@ -16,11 +16,10 @@ script_includes:
 
 <article class="px-1" data-toc="{{ enable_toc }}">
   <header>
-    {% include google-ad-script.html %}
-    
     <h1 data-toc-skip>{{ page.title }}</h1>
-    {% if page.description %}
-      <p class="post-desc fw-light mb-4">{{ page.description }}</p>
+    {% assign post_description = page.description | default: page.summary %}
+    {% if post_description %}
+      <p class="post-desc fw-light mb-4">{{ post_description }}</p>
     {% endif %}
 
     <div class="post-meta text-muted">
@@ -48,7 +47,7 @@ script_includes:
         {% endif %}
 
         <div class="mt-3 mb-3">
-          <img {{ src }} {{ class }} {{ alt }} w="1200" h="630" {{ lqip }}>
+          <img {{ src }} {{ class }} {{ alt }} width="1200" height="630" loading="eager" fetchpriority="high" decoding="async" {{ lqip }}>
           {%- if page.image.alt -%}
             <figcaption class="text-center pt-2 pb-2">{{ page.image.alt }}</figcaption>
           {%- endif -%}
@@ -77,7 +76,7 @@ script_includes:
                 {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
               {% endfor %}
             {% else %}
-              <a href="{{ site.social.links[0] }}">{{ site.social.name }}</a>
+              <a href="{{ '/about/' | relative_url }}">OPSOAI 편집팀</a>
             {% endif %}
           </em>
         </span>
@@ -163,7 +162,7 @@ script_includes:
       소제목 직전은 어차피 독자가 한 번 쉬어 가는 자리라 방해가 가장 적다.
 
       개수는 글 길이에 비례시킨다. 섹션이 4개 미만인 짧은 글에는 넣지 않고,
-      그 이상이면 두 섹션마다 하나씩, 최대 4개까지 넣는다.
+      그 이상이면 두 섹션마다 하나씩, 최대 2개까지만 넣는다.
       첫 섹션 앞에는 넣지 않는다. 도입을 읽기도 전에 광고가 나오면 이탈한다.
     {%- endcomment -%}
     {%- assign sections = content | split: '<h2' -%}
@@ -176,21 +175,13 @@ script_includes:
         {%- comment -%} 두 번째 섹션부터, 두 개 걸러 하나씩 {%- endcomment -%}
         {%- assign idx = forloop.index0 -%}
         {%- assign rem = idx | modulo: 2 -%}
-        {%- if sec_count >= 4 and idx >= 2 and rem == 0 and ads_used < 4 -%}
+        {%- if sec_count >= 4 and idx >= 2 and rem == 0 and ads_used < 2 -%}
           {{ inline_ad }}
           {%- assign ads_used = ads_used | plus: 1 -%}
         {%- endif -%}
         <h2{{ sec }}
       {%- endif -%}
     {%- endfor -%}
-    {%- comment -%}
-      소제목이 거의 없는 옛 글은 위 규칙으로 광고가 하나도 안 붙는다.
-      그런 글에는 본문 중반에 하나만 넣는다.
-    {%- endcomment -%}
-    {%- if ads_used == 0 -%}
-      {%- assign paras = content | split: '</p>' | size -%}
-      {%- if paras > 8 -%}{{ inline_ad }}{%- endif -%}
-    {%- endif -%}
   </div>
 
   {% if page.chart %}{% include chartjs.html %}{% endif %}

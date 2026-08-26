@@ -1,112 +1,151 @@
 ---
 layout: post
-title: '[2026-02-03] Lean 증명 자동 수선의 혁명: 컴파일러 피드백을 활용한 APRIL 데이터셋 및 학습 전략 심층 분석'
+title: "Lean Proof Repair는 Compiler Feedback으로 얼마나 나아질까? APRIL 검증법"
 date: '2026-02-07'
 categories: Tech
 tags:
-  - 아키텍처분석
   - 파인튜닝
-  - 컨텍스트윈도우
-  - AI보안
-  - 경량화
+  - AI에이전트
 math: true
-summary: 컴파일러 피드백으로 AI 증명 능력을 극대화하는 APRIL 데이터셋과 수선 기법 심층 가이드
+summary: "APRIL이 틀린 Lean proof, compiler message, 자연어 diagnosis와 수정 proof를 묶어 repair model을 학습하는 구조와 합성 오류·Pass@1·반복 compile 비용을 검토합니다."
+description: "APRIL이 26만 Lean proof repair tuple과 compiler feedback으로 오류 진단·수정을 학습하는 원리, synthetic perturbation의 범위, compile 검증·latency·보안 조건을 설명합니다."
+faq:
+  - question: "Compiler를 통과하면 수정한 proof가 의도한 theorem을 증명한 건가요?"
+    answer: "같은 theorem statement와 trusted environment에서 compile됐다면 형식적 유효성은 확인되지만 statement 자체가 의도와 맞는지, 불필요한 assumption을 썼는지는 별도 review가 필요합니다."
+  - question: "APRIL은 새로운 theorem을 처음부터 증명하는 model인가요?"
+    answer: "중심 task는 오류 proof와 compiler feedback을 받아 수정하는 repair이며 빈 proof의 synthesis, 전략 자체가 잘못된 장기 증명과는 난도가 다릅니다."
+  - question: "자연어 diagnosis가 정확하면 proof도 맞나요?"
+    answer: "아닙니다. 설명은 여러 방식이 가능하고 그럴듯해도 수정 code가 compile되지 않을 수 있으므로 최종 판단은 Lean compiler와 regression check로 해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.02990.png
-  alt: Paper Thumbnail
+  alt: "Lean Proof Repair는 Compiler Feedback으로 얼마나 나아질까? APRIL 검증법 논문 대표 이미지"
 ---
 
-# Lean 증명 자동 수선의 혁명: 컴파일러 피드백을 활용한 APRIL 데이터셋 및 학습 전략 심층 분석
+Lean proof repair에서 compiler feedback은 단순 오류 문구가 아니라 **어느 tactic·type·goal에서 검증이 멈췄는지를 알려 주는 실행 가능한 신호**입니다. APRIL은 틀린 proof와 compiler message, diagnosis, 수정 proof를 한 tuple로 학습하지만, 합성 perturbation에서 배운 수선이 사람의 모든 논리 오류와 새 theorem 증명까지 해결한다는 뜻은 아닙니다.
 
-## 1. Executive Summary (핵심 요약)
+[원문 자료](https://huggingface.co/papers/2602.02990)를 바탕으로 26만 repair tuple의 구성, compiler 검증이 주는 이점과 실제 editor·agent에 넣을 때의 실패 조건을 구분합니다.
 
-최근 인공지능 분야, 특히 자동 정리 증명(Automated Theorem Proving, ATP) 영역에서의 패러다임은 단순히 '증명을 생성하는 것'에서 '오류를 이해하고 수정하는 에이전트'로 진화하고 있습니다. 본 분석은 Lean 4 환경에서 증명 오류를 스스로 진단하고 수정할 수 있는 능력을 부여하기 위해 제안된 **APRIL(Automated Proof Repair in Lean)** 데이터셋과 그 방법론을 다룹니다. 
+## 정답 Proof만 학습하면 왜 수선에 약할까
 
-기존의 데이터셋들이 대부분 '정답(Correct Proofs)'만을 포함하고 있어 AI가 실패 상황에서 어떻게 대처해야 할지 학습하기 어려웠던 한계를 극복하기 위해, 연구진은 26만 개의 수퍼바이즈드 튜플(Supervised Tuples)을 구축했습니다. 이 데이터셋은 의도적으로 생성된 증명 실패 사례, 컴파일러 진단 메시지, 그리고 이에 대응하는 자연어 진단 및 수정된 증명을 포함합니다. 본 보고서에서는 APRIL이 어떻게 4B 파라미터 수준의 소형 언어 모델만으로도 거대 모델(Llama 3 등)을 능가하는 수선 성능을 보여주었는지, 그리고 이것이 향후 소프트웨어 검증 및 수학적 정밀도가 요구되는 산업계에 어떤 파급력을 미칠지 심층적으로 분석합니다.
+Mathlib 같은 완성 proof는 어떤 tactic sequence가 통과하는지는 보여 주지만, 실패한 상태에서 어떤 compiler message를 보고 어느 부분을 바꿔야 하는지는 직접 가르치지 않습니다. 실제 Lean 작업은 첫 시도보다 `unsolved goals`, type mismatch, unknown identifier 같은 feedback을 읽고 수정하는 loop에 가깝습니다.
 
-## 2. Introduction & Problem Statement (연구 배경 및 문제 정의)
+Proof repair는 다음 조건부 문제로 볼 수 있습니다.
 
-### 2.1. Lean 4와 형식 검증의 부상
-형식 검증(Formal Verification)은 소프트웨어나 수학적 정리가 논리적으로 완벽함을 증명하는 과정입니다. 그 중심에 있는 Lean 4는 강력한 종속 유형 이론(Dependent Type Theory)을 기반으로 한 프로그래밍 언어이자 정리 증명기입니다. 최근 OpenAI, Google DeepMind 등 글로벌 빅테크 기업들이 Lean을 활용한 AI 모델 개발에 박차를 가하면서, AI의 논리 추론 능력을 측정하는 척도로 Lean 증명 능력이 주목받고 있습니다.
+```text
+입력: theorem context + 틀린 proof + compiler feedback
+출력: 오류 diagnosis + 수정된 proof
+검증: 같은 Lean environment에서 compile 성공 여부
+```
 
-### 2.2. '성공'의 데이터에 갇힌 AI
-하지만 치명적인 문제가 존재합니다. 현재 AI 모델들이 학습하는 대부분의 데이터(Mathlib4 등)는 숙련된 수학자들이 작성한 '완결된 정답'들입니다. 이는 마치 학생에게 문제집의 해설지만 보여주고 시험을 치르게 하는 것과 같습니다. 실제 증명 과정에서 모델은 수많은 시행착오(Trial-and-Error)를 겪으며 컴파일러로부터 오류 메시지를 받게 되는데, 기존 모델들은 이 '피드백'을 해석할 능력이 부족합니다. 
+Compiler가 최종 proof를 기계적으로 검사하므로 일반 자연어 생성보다 명확한 verifier를 가질 수 있습니다. 그러나 theorem statement 자체가 사용자의 의도와 다른 경우에는 잘못 정의된 명제를 정확히 증명할 수도 있습니다. Compile success와 specification correctness를 분리해야 하는 이유입니다.
 
-### 2.3. 문제 정의: Proof Repair as a Supervised Learning
-본 연구는 '증명 수선(Proof Repair)'을 단순한 텍스트 수정을 넘어, **컴파일러 피드백 기반의 지도 학습 문제**로 재정의합니다. 즉, 오류가 있는 증명 $P_{err}$와 컴파일러 메시지 $C$가 주어졌을 때, 올바른 증명 $P_{corr}$와 왜 틀렸는지에 대한 자연어 진단 $D$를 동시에 예측하도록 하는 것입니다. 이를 위해 대규모의 실패-수정 쌍(Pair) 데이터셋인 APRIL이 탄생하게 되었습니다.
+## APRIL의 26만 Tuple은 어떻게 만들어졌나
 
-## 3. Core Methodology (핵심 기술 및 아키텍처 심층 분석)
+APRIL은 올바른 proof에 systematic perturbation을 적용해 실패를 만들고, compiler message와 수정 target을 묶습니다. 기존 글에서 설명한 perturbation은 네 부류입니다.
 
-### 3.1. APRIL 데이터셋 구축: 체계적 섭동(Systematic Perturbation)
-연구진은 정답 증명으로부터 '의미 있는 실패'를 만들어내기 위해 다음과 같은 섭동 기법을 도입했습니다.
+| Perturbation | 생기는 대표 문제 | Repair가 찾아야 할 것 |
+|---|---|---|
+| Tactic deletion | goal이 남음 | 빠진 논리 단계 또는 대체 tactic |
+| Tactic replacement | type·goal과 tactic 불일치 | 현재 proof state에 맞는 tactic |
+| Argument manipulation | identifier·argument 오류 | scope와 expected type에 맞는 인자 |
+| Premise removal | 필요한 hypothesis 부재 | 사용할 전제 또는 전략의 재구성 |
 
-1.  **Tactic Deletion**: 증명 과정의 핵심 단계를 삭제하여 'Unsolved Goals' 오류 유도.
-2.  **Tactic Replacement**: 유사한 다른 전술로 교체하여 타입 불일치(Type Mismatch) 유도.
-3.  **Argument Manipulation**: 전술에 들어가는 인자(Argument)를 변경하여 식별자 오류(Unknown Identifier) 생성.
-4.  **Premise Removal**: 필요한 전제 조건을 제거하여 증명이 불가능한 상태 생성.
+이 방식은 올바른 proof에서 출발하므로 수정 target을 확보하고 대량으로 pair를 만들기 쉽습니다. 반대로 실제 사용자가 저지르는 오류 분포와 같다고 가정하면 안 됩니다. 잘못된 theorem statement, library API 변화, 여러 lemma에 걸친 설계 오류, 처음부터 전략이 맞지 않는 긴 proof는 한 tactic perturbation보다 복잡합니다.
 
-이러한 과정을 통해 단순한 노이즈가 아닌, 실제 인간 개발자가 저지를 법한 논리적 결함을 재현했습니다.
+따라서 train·test split은 원 proof나 theorem이 겹쳐 수정 pattern을 암기하지 않는지 확인해야 합니다. Perturbation type별 성능과 사람이 작성한 오류 set을 따로 공개해야 synthetic repair 능력과 실제 debugging 능력을 구분할 수 있습니다.
 
-### 3.2. Diagnostic-Conditioned Reasoning (DCR)
-APRIL의 핵심 차별점은 모델이 수정을 수행하기 전, **'무엇이 잘못되었는지'를 먼저 설명하게 만든다는 점**입니다. 
-- **Input**: (Error Proof) + (Lean Compiler Message)
-- **Output**: (Natural Language Diagnosis) + (Fixed Proof)
+## Diagnosis를 먼저 쓰면 무엇이 좋아지고 무엇이 남나
 
-이 방식은 모델에게 일종의 '생각의 사슬(Chain-of-Thought)'을 강제합니다. 컴파일러의 난해한 오류 메시지(예: `failed to synthesize instance...`)를 인간이 이해할 수 있는 언어로 해독하고, 그 이해를 바탕으로 증명을 수정하도록 유도함으로써 추론의 일관성을 확보합니다.
+Diagnostic-Conditioned Reasoning은 model이 수정 code만 바로 내지 않고 compiler message를 해석한 자연어 diagnosis를 함께 생성하게 합니다. `failed to synthesize instance`를 보고 어떤 typeclass context가 부족한지 설명한 뒤 proof를 고치는 식입니다.
 
-### 3.3. 데이터 파이프라인 아키텍처
-APRIL은 Lean의 추상 구문 트리(AST)를 분석하여 증명의 구조를 파악하고, 각 단계에서의 상태(State) 정보를 추출합니다. 이는 모델이 단순히 텍스트 패턴을 매칭하는 것이 아니라, Lean의 논리 구조 내에서 추론할 수 있도록 돕는 풍부한 컨텍스트를 제공합니다.
+장점은 사람이 repair 근거를 읽을 수 있고, 같은 오류가 반복될 때 어느 해석이 잘못됐는지 추적하기 쉽다는 점입니다. 하지만 자연어 diagnosis는 compiler가 직접 증명하는 artifact가 아닙니다. 설명이 그럴듯해도 proof가 실패할 수 있고, 서로 다른 diagnosis가 같은 유효 repair로 이어질 수도 있습니다.
 
-## 4. Implementation Details & Experiment Setup (구현 및 실험 환경)
+평가는 두 축으로 나눕니다.
 
-### 4.1. 모델 베이스라인 및 학습
-- **Base Models**: InternLM2-Step-Prover (4B 및 7B), Llama 3 (8B) 등.
-- **Fine-tuning**: APRIL 데이터셋의 26만 개 튜플을 사용하여 SFT(Supervised Fine-Tuning) 수행.
-- **Hardware**: NVIDIA H100 GPU 클러스터 활용.
-- **Context Length**: 증명 컨텍스트와 컴파일러 메시지를 모두 담기 위해 8k 이상의 컨텍스트 윈도우 확보.
+1. **Proof validity**: 생성 proof가 지정된 Lean version·dependency에서 compile되는가.
+2. **Diagnosis utility**: 오류 위치와 원인을 가리키고 실제 repair와 모순되지 않는가.
 
-### 4.2. 평가 지표
-단순한 문자열 일치(Exact Match)가 아닌, 실제로 Lean 컴파일러를 통과하는지 여부를 판단하는 **Pass@1** 지표를 주력으로 사용했습니다. 또한, 생성된 진단 메시지의 정확도를 평가하기 위해 수학적 논리성 검증을 병행했습니다.
+Diagnosis exact match를 높이는 것이 목적이 되면 표현이 다른 올바른 설명을 틀렸다고 볼 수 있습니다. 최종 proof에는 compiler를 source of truth로 두고 diagnosis는 review와 debugging을 돕는 보조 신호로 취급하는 편이 안전합니다.
 
-## 5. Comparative Analysis (성능 평가 및 비교)
+## 작은 Model이 큰 Model을 이겼다는 주장은 어디까지인가
 
-### 5.1. 소형 모델의 대반격
-실험 결과는 매우 놀랍습니다. APRIL로 파인튜닝된 **4B 파라미터 모델**이 튜닝되지 않은 Llama 3 (70B에 가까운 추론 성능을 내는 베이스 모델 포함)보다 증명 수선 성공률에서 압도적인 우위를 점했습니다. 
-- **APRIL-Finetuned 4B**: Single-shot repair accuracy ~45% 상회.
-- **Generic LLMs**: 동일 조건에서 20% 미만의 성능 노출.
+원문 요약은 InternLM2-Step-Prover 계열 4B·7B와 Llama 계열 baseline, APRIL 26만 tuple을 이용한 supervised fine-tuning을 설명합니다. 기존 글에는 4B repair model의 약 45%와 generic model 20% 미만, compiler feedback 사용 시 2배 이상이라는 수치가 있었지만 이 글에 task별 원표와 평가 조건이 모두 제시돼 있지는 않습니다. 따라서 여기서는 특정 repair benchmark에서 domain-specific feedback data가 유리했다는 범위로만 읽습니다.
 
-### 5.2. 피드백의 중요성
-컴파일러 피드백 없이 수선을 시도했을 때보다, 피드백을 입력으로 주었을 때 성능이 2배 이상 향상되었습니다. 이는 AI가 '눈 감고 증명하기'에서 '오류 메시지를 보며 디버깅하기'로 진화했음을 시사합니다.
+“4B가 큰 model을 이겼다”는 결론에는 최소한 다음 조건이 같아야 합니다.
 
-### 5.3. 기술적 통찰 (Expert Insight)
-여기서 주목할 점은 **'데이터의 양보다 질과 정렬(Alignment)'**입니다. 일반적인 웹 코퍼스로 학습된 대형 모델은 Lean의 특수한 문법과 오류 메시지 사이의 상관관계를 이해하지 못합니다. APRIL은 이 간극을 메우는 '도메인 특화 데이터셋'의 위력을 여실히 보여줍니다. 이것은 마치 범용 언어 모델보다 전문 법률 지식을 학습한 작은 모델이 판례 분석을 더 잘하는 것과 같은 이치입니다.
+- 같은 theorem·error split과 Lean environment
+- 같은 compiler feedback 제공 여부
+- 같은 sampling 수와 repair attempt budget
+- 같은 import·context와 timeout
+- Pass@1인지 여러 후보 중 하나가 성공한 pass@k인지
 
-## 6. Real-World Application & Impact (실제 적용 분야 및 글로벌 파급력)
+한 번의 repair만 허용한 Pass@1과 compiler를 여러 번 호출해 성공 후보를 고른 결과는 운영비가 다릅니다. Parameter 수만 비교하지 말고 model latency, generated token, compile call 수와 최종 success를 함께 봐야 합니다.
 
-### 6.1. 소프트웨어 보안 및 무결성 검증
-AWS나 Microsoft와 같은 클라우드 기업들은 하이퍼바이저나 보안 프로토콜 검증에 Lean과 같은 형식 언어를 사용합니다. APRIL 기술이 적용된 에이전트는 개발자가 작성한 검증 코드의 오류를 실시간으로 수정 제안함으로써, 시스템 취약점을 사전에 차단하는 비용을 획기적으로 낮출 수 있습니다.
+## Compiler Feedback의 기여를 어떤 Ablation으로 확인할까
 
-### 6.2. 수학 교육 및 보조 도구
-수학자들이 Lean을 배울 때 가장 큰 진입 장벽은 난해한 오류 메시지입니다. APRIL 기반의 인터랙티브 튜터는 "이 단계에서 전제가 부족합니다. 'h1'을 활용해 보세요"라는 식의 친절한 가이드를 제공하여 형식 수학의 대중화를 이끌 수 있습니다.
+같은 erroneous proof에서 네 입력 조건을 비교하면 무엇이 성능을 만들었는지 분리할 수 있습니다.
 
-### 6.3. 자가 학습하는 AI (Self-Improving Agents)
-이 연구는 미래의 AI가 스스로 코드를 짜고, 컴파일해보고, 틀리면 고치는 '자기 개선 루프'의 핵심 부품이 될 것입니다. 인간의 개입 없이도 논리적 무결성을 유지하며 발전하는 AI 에이전트의 초석입니다.
+| 조건 | 확인하는 질문 |
+|---|---|
+| Proof만 입력 | code pattern만으로 고칠 수 있는가 |
+| Proof + raw compiler message | 실행 feedback의 추가 이득은 얼마인가 |
+| Proof + message + diagnosis target 학습 | diagnosis supervision이 repair를 돕는가 |
+| Proof + oracle error location | message parsing과 repair 중 병목은 어디인가 |
 
-## 7. Discussion: Limitations & Critical Critique (한계점 및 기술적 비평)
+Compiler message를 섞거나 오래된 message를 붙인 negative test도 필요합니다. Model이 실제 feedback을 읽는다면 모순된 message에 맹목적으로 맞추지 않고 현재 proof state를 다시 compile해야 합니다. Message 문자열 일부만 암기한다면 library version이 바뀌었을 때 성능이 급격히 내려갈 수 있습니다.
 
-### 7.1. 합성 데이터의 한계
-APRIL은 체계적 섭동을 통해 데이터를 생성했습니다. 하지만 현실의 인간 개발자가 저지르는 오류는 훨씬 더 복잡하고 다차원적입니다. 예를 들어, 근본적인 수학적 증명 전략이 틀린 경우를 단순히 Tactic 교체로 재현하기에는 한계가 있습니다. 
+Error category별로 tactic deletion은 잘 고치지만 premise가 실제로 부족한 경우 무리한 lemma를 hallucinate하는지도 봅니다. Unknown identifier에서는 존재하는 import·namespace 안의 이름만 제안하는지, type mismatch에서는 expected·actual type을 올바르게 대조하는지 검사합니다.
 
-### 7.2. 진단의 정답성 문제
-데이터셋에 포함된 '자연어 진단'이 항상 유일한 정답은 아닙니다. 하나의 오류에 대해 여러 가지 해석과 수정 방법이 존재할 수 있는데, 현재의 수퍼바이즈드 학습 방식은 모델을 하나의 정답에만 고착시킬 위험(Overfitting)이 있습니다.
+## Repair Loop는 언제 멈춰야 할까
 
-### 7.3. 연산 비용과 실시간성
-증명을 수선할 때마다 컴파일러를 호출하고 피드백을 모델에 다시 입력하는 루프는 추론 비용을 증가시킵니다. 실시간 코드 에디터에 통합하기 위해서는 더 가벼운 모델과 효율적인 추론 아키텍처가 요구됩니다.
+Editor agent는 `수정 → compile → 새 feedback → 재수정`을 반복할 수 있습니다. 반복하면 success 가능성은 올라가지만 compiler call과 model token, wall-clock이 계속 늘어납니다. 같은 오류를 되풀이하거나 이미 맞던 부분을 바꾸는 regression도 생길 수 있습니다.
 
-## 8. Conclusion (결론 및 인사이트)
+```text
+후보 patch 생성
+→ 격리된 Lean environment에서 compile
+→ 성공하면 theorem statement·diff 검토
+→ 실패하면 새 feedback과 attempt history 저장
+→ budget 또는 반복 오류에 도달하면 중단
+```
 
-APRIL 프로젝트는 자동 정리 증명 분야에서 '피드백 루프'가 얼마나 강력한지를 입증한 중요한 이정표입니다. 단순히 더 큰 모델을 만드는 것이 답이 아니라, **문제 도메인의 특성(Compiler Feedback)을 학습 프로세스에 어떻게 녹여낼 것인가**가 핵심임을 보여주었습니다.
+운영 로그에는 attempt당 compile time, 수정 line 수, error category 변화와 최종 Pass@1·pass@k를 남깁니다. 이전 attempt와 동일한 patch, error message가 반복되면 즉시 중단하고 사람에게 넘깁니다. 큰 proof 전체를 매번 다시 쓰기보다 최소 diff를 만들게 하면 review와 regression 탐지가 쉬워집니다.
 
-이제 AI는 정답만을 읊는 앵무새에서 벗어나, 자신의 실수를 인지하고 논리적으로 교정할 줄 아는 '지능적 동반자'로 거듭나고 있습니다. Lean 증명 수선의 성공은 머지않아 일반적인 프로그래밍 언어의 자동 디버깅과 복잡한 비즈니스 로직의 자동 검증으로 확산될 것입니다. 우리는 지금 AI가 '논리적 완결성'을 스스로 획득해 나가는 역사적인 변곡점에 서 있습니다.
+Compiler 실행도 신뢰 경계 안에 둬야 합니다. Model이 import, option이나 environment를 바꿔 검증을 우회하지 못하도록 허용 file과 command를 제한하고 격리된 workspace에서 실행합니다. Theorem statement, trusted axioms와 dependency lock이 바뀌면 “수선 성공”으로 인정하지 않습니다.
+
+## 실제 도입 전에 어떤 Failure Set이 필요한가
+
+Synthetic perturbation과 함께 실제 repository에서 익명화한 compile failure를 모읍니다. 단일 tactic 오류, 여러 줄의 proof state 변화, dependency upgrade, missing import, timeout, theorem statement 자체의 문제를 나눕니다. Training theorem과 유사한 lemma뿐 아니라 새로운 namespace·API도 포함합니다.
+
+평가 결과는 다음처럼 해석할 수 있습니다.
+
+- Compile success가 높고 diff가 작다: editor suggestion 후보로 유용합니다.
+- Diagnosis는 맞지만 compile이 실패한다: proof generation 또는 context retrieval이 병목입니다.
+- Compile은 되지만 statement·assumption이 바뀐다: verifier boundary를 위반한 실패입니다.
+- 여러 attempt 뒤에만 성공한다: agent loop에는 쓸 수 있지만 latency·비용을 밝혀야 합니다.
+- Synthetic에서는 높고 human error에서 낮다: perturbation coverage를 넓혀야 합니다.
+
+APRIL의 실용적 기여는 model이 논리적 완결성을 스스로 획득했다는 선언이 아닙니다. **틀린 Lean proof와 compiler feedback을 짝지어 repair를 학습하고, 생성 결과를 다시 compiler로 검증할 수 있는 data·evaluation loop를 만든 것**입니다. 자동 적용 범위는 작은 diff와 명확한 feedback부터 시작하고, theorem 의도와 보안 경계는 사람이 계속 소유해야 합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DOM이 바뀌어도 웹 자동화가 살아남을까? MolmoWeb의 화면 기반 접근]({% post_url 2026-03-30-Deep-Dive-into-MolmoWeb-The-End-of-DOM-Parsing-AI2s-8B-Visual-Web-Agent-is-a-Game-Changer %}) — 스크린샷만 보고 클릭하는 8B MolmoWeb이 DOM 자동화의 취약점을 줄이는 방식과 Pass@4 수치, OCR·지연·권한 한계 및 검증 순서를 짚습니다.
+- [OpenClaw는 누구에게 맞을까: 로컬 AI 에이전트 설치와 권한 관리]({% post_url 2026-02-10-OpenClaw-The-Ultimate-Local-AI-Agent-Guide %}) — 최근 깃허브에서 폭발적인 반응을 얻고 있는 오픈소스 AI 에이전트 OpenClaw(구 Moltbot)의 설치부터 기능, 활용법까지 상세하게 다룹니다. 내 로컬 환경에서 돌아가는 나만의 자비스를 만들어보세요.
+- [OpenAI GPT-5.6-Cyber 출시: 해킹과 보안 특화 모델과 Daybreak Red 프로그램 분석]({% post_url 2026-08-12-openai-launches-gpt-5-6-cyber-model-for-cybersecurity-research %}) — OpenAI가 GPT-5.6 Sol을 기반으로 개발한 사이버 보안 특화 모델 'GPT-5.6-Cyber'를 2026년 8월 10일 발표했습니다. 거부율을 줄여 제로데이 연구와 익스플로잇 체인 개발을 지원하며, 엄격히 검증된 보안…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Compiler를 통과하면 수정한 proof가 의도한 theorem을 증명한 건가요?
+
+같은 theorem statement와 trusted environment에서 compile됐다면 형식적 유효성은 확인되지만 statement 자체가 의도와 맞는지, 불필요한 assumption을 썼는지는 별도 review가 필요합니다.
+
+### APRIL은 새로운 theorem을 처음부터 증명하는 model인가요?
+
+중심 task는 오류 proof와 compiler feedback을 받아 수정하는 repair이며 빈 proof의 synthesis, 전략 자체가 잘못된 장기 증명과는 난도가 다릅니다.
+
+### 자연어 diagnosis가 정확하면 proof도 맞나요?
+
+아닙니다. 설명은 여러 방식이 가능하고 그럴듯해도 수정 code가 compile되지 않을 수 있으므로 최종 판단은 Lean compiler와 regression check로 해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.02990)

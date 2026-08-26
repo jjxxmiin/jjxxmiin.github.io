@@ -6,17 +6,17 @@ categories: Tech
 tags:
   - DeepSeek
   - 아키텍처분석
+  - LLM
+  - 오픈소스
   - MCP
-  - 경량화
-  - 온디바이스AI
 summary: DeepSeek Harness는 모델, 도구, 세션, 샌드박스 등 AI 에이전트의 모든 구성 요소를 독립된 플러그인으로 조립하는 오픈소스
   실행 런타임입니다. Cordis 메타 프레임워크 기반의 마이크로커널 구조와 이벤트 궤적 기록을 통해 높은 확장성과 정밀한 디버깅 환경을 제공합니다.
-author: AI Trend Bot
+description: 'DeepSeek Harness의 마이크로커널·플러그인·이벤트 궤적 구조와 모델·도구 교체 방식을 설명하고, 플러그인 신뢰·승인 정책·재현성 한계를 점검합니다.'
 automation: oss_trend
 github_url: https://github.com/deepseek-ai/deepseek-harness
 image:
   path: https://opengraph.githubassets.com/1/deepseek-ai/deepseek-harness
-  alt: 'DeepSeek Harness: Everything is a Plugin Architecture for AI Agents'
+  alt: "deepseek-ai/deepseek-harness GitHub 저장소 대표 이미지"
 project:
   stars: 183137
   forks: 20124
@@ -66,13 +66,15 @@ faq:
 - [DeepSeek Harness 개발자 가이드](https://github.com/deepseek-ai/deepseek-harness/tree/master/docs)
 - [Cordis 메타 프레임워크 아키텍처 논문 및 문서](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cordis-tutorial/index.md)
 
-> **먼저 알아둘 용어**
+DeepSeek Harness는 모델·도구·샌드박스·세션을 서로 교체하며 실험하거나 실행 궤적을 재현해야 하는 에이전트 팀에 적합합니다. 모든 기능이 플러그인이라는 설계는 결합도를 낮추지만, 플러그인 자체의 권한과 공급망 위험까지 제거하지는 않습니다. 실제 배포 전 로드 가능한 플러그인을 제한하고 승인 정책의 우회 여부, 로그의 비밀 노출과 재생 결과의 결정성을 시험해야 합니다.
+
+> **DeepSeek Harness 플러그인 구조의 용어 지도**
 >
-> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
-> - **프롬프트**: AI에게 건네는 지시문입니다. 같은 모델도 지시문에 따라 결과가 크게 달라집니다.
-> - **오픈소스**: 소스 코드를 공개해 누구나 보고 고쳐 쓸 수 있게 한 것입니다. 조건은 라이선스마다 다릅니다.
-> - **LLM**: 엄청난 양의 글을 학습해 문장을 만들어 내는 대형 AI 모델입니다. ChatGPT 가 대표적입니다.
-> - **API**: 다른 프로그램에서 이 기능을 불러다 쓸 수 있게 열어 둔 창구입니다.
+> - **에이전트 하네스**: 모델 호출만 담당하는 것이 아니라 도구·세션·샌드박스·승인과 실행 기록을 한 흐름으로 연결하는 런타임입니다. DeepSeek 모델 자체와는 구분해야 합니다.
+> - **마이크로커널**: 중심부에는 플러그인을 조립하고 이벤트를 전달하는 최소 기능만 두고, 구체적인 모델이나 도구 구현은 바깥 구성 요소로 분리하는 구조입니다.
+> - **플러그인**: 실행 환경에 등록되어 모델 어댑터·도구·샌드박스·UI처럼 한 가지 기능을 제공하거나 다른 서비스와 결합하는 교체 단위입니다. 교체 가능하다는 사실이 해당 코드의 신뢰까지 보장하지는 않습니다.
+> - **이벤트 트래젝터리**: 요청부터 도구 결과까지 실행 중 생긴 사건을 기존 기록을 덮어쓰지 않고 차례로 추가한 이력입니다. 실패 지점을 시간순으로 재구성하고 재생 조건을 확인할 때 사용합니다.
+> - **승인 정책**: 터미널 명령이나 파일 변경 같은 행동을 즉시 실행할지, 사람의 허가를 받을지 결정하는 규칙입니다. 플러그인이 이 경계를 우회하지 못하는지 별도 시험이 필요합니다.
 {: .prompt-info }
 
 ## 도입 및 TL;DR
@@ -404,6 +406,20 @@ DeepSeek Harness는 출시 초기부터 폭발적인 개발자 커뮤니티 반�
 DeepSeek Harness의 공개는 AI 경쟁의 축이 단순한 '모델 추론 성능'에서 '에이전트를 안정적으로 구동하는 인프라 환경'으로 이동하고 있음을 보여줍니다. 모든 Capability를 플러그인화한 이 아키텍처는 개발자가 핵심 비즈니스 도구 작성에만 집중할 수 있는 훌륭한 고속도로를 깔아줍니다.
 
 안전한 샌드박스 위에서 AI 에이전트를 작동시키고 싶다면, 지금 바로 `npx @deepseek-ai/dsh web` 명령어로 새로운 에이전트 하네스 생태계를 직접 체험해 보시길 권합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/deepseek-ai/deepseek-harness)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AstrBot: 단일 코드베이스로 모든 메신저에 똑똑한 AI 에이전트를 배포하는 방법]({% post_url 2026-07-20-AstrBot-How-to-Deploy-Smart-AI-Agents-Across-All-Messengers-with-a-Single-Codebase %}) — 파편화된 메신저 플랫폼과 다수의 대형 언어 모델(LLM)을 하나로 통합하여, 샌드박스 기반의 안전한 코드 실행과 웹 시각화 도구를 제공하는 오픈소스 에이전트 프레임워크 AstrBot의 내부 아키텍처와 활용법을 깊이 있게 분석합니다.
+- [Deer-Flow 2.0은 딥 리서치를 어떻게 나눠 실행할까: 도입 검증 가이드]({% post_url 2026-02-27-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Insane-Research-AI-Deer-Flow-20 %}) — Deer-Flow 2.0이 계획·검색·코드 실행·보고서 생성을 여러 역할과 샌드박스로 연결하는 구조, 설치 스냅샷과 비용·검증 기준을 정리합니다.
+- [DeepSeek-TUI 16K Star·V4 주장은 확인됐나: 저장소 정체와 Shell 권한 감사]({% post_url 2026-05-11-Deep-Dive-into-DeepSeek-TUI-You-Can-Delete-Claude-Code-Now--The-Shocking-Impact-of-the-16K-Star-Open-Source-Terminal-Agent %}) — DeepSeek-TUI 글에 섞인 official repository·16K star·V4·1M context 주장의 출처를 분리하고, dispatcher·TUI·MCP·shell 권한을 검증하는 방법을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

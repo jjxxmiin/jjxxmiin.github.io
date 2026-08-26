@@ -4,21 +4,20 @@ title: 'Openwork: 내 컴퓨터에서 50개 이상의 LLM으로 자유롭게 일
 date: '2026-07-31 10:52:08'
 categories: Tech
 tags:
+  - 오픈소스
   - Anthropic
   - Claude
   - MCP
   - API
-  - OpenAI
 summary: Openwork는 앤트로픽의 독점 데스크톱 에이전트인 Claude Cowork를 대체하는 오픈소스 데스크톱 애플리케이션입니다. Tauri와
   OpenCode 엔진을 기반으로 내 컴퓨터의 파일 시스템과 50개 이상의 다양한 LLM, MCP 도구를 안전하게 연동하여 AI 능동형 동료 환경을
   구축할 수 있습니다.
-author: AI Trend Bot
+description: 'Openwork의 Tauri·OpenCode 기반 데스크톱 구조와 다중 모델·MCP·스킬 공유 방식을 살피고, 파일 권한·코드 전송·팀 배포 위험을 정리합니다.'
 automation: oss_trend
 github_url: https://github.com/different-ai/openwork
 image:
   path: https://opengraph.githubassets.com/1/different-ai/openwork
-  alt: 'Openwork: Open-Source Local-First Alternative to Claude Cowork Powered by
-    OpenCode'
+  alt: "different-ai/openwork GitHub 저장소 대표 이미지"
 project:
   stars: 18771
   forks: 1908
@@ -59,7 +58,9 @@ faq:
     제공해요.
 ---
 
-## 주요 참고 링크
+Openwork는 데스크톱 앱에서 로컬 파일, 선택한 언어 모델, MCP 도구와 공유 스킬을 연결하려는 오픈소스 작업 환경입니다. 로컬 우선이라는 이름만으로 모든 모델 호출과 텔레메트리가 기기 안에 머무는 것은 아니므로 공급자별 전송 경로를 확인해야 합니다. 별도 테스트 폴더에서 읽기·쓰기 권한, 링크로 공유되는 설정 범위, 중단 후 복구를 검증한 뒤 업무 파일을 연결하세요.
+
+## Openwork가 필요한 업무 경계는 어디인가
 
 - [Openwork GitHub 저장소](https://github.com/different-ai/openwork)
 - [Openwork 공식 웹사이트](https://openwork.software)
@@ -363,6 +364,20 @@ Openwork가 독점 서비스에 대한 훌륭한 오픈소스 대안이기는 �
 Openwork는 AI 에이전트가 단순히 대화창에 갇혀 있는 형태를 넘어, 내 데스크톱 환경에서 파일과 도구를 안전하게 제어하는 주체로 진화하는 대표적인 도구예요.
 
 특정 빅테크 기업에 갇히지 않고 내가 원하는 LLM을 마음대로 고르고, 내 데이터의 주권을 지키면서, 팀원들과 손쉽게 AI 작업 스킬을 공유하고 싶다면 Openwork는 매우 매력적인 선택지가 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/different-ai/openwork)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AstrBot: 단일 코드베이스로 모든 메신저에 똑똑한 AI 에이전트를 배포하는 방법]({% post_url 2026-07-20-AstrBot-How-to-Deploy-Smart-AI-Agents-Across-All-Messengers-with-a-Single-Codebase %}) — 파편화된 메신저 플랫폼과 다수의 대형 언어 모델(LLM)을 하나로 통합하여, 샌드박스 기반의 안전한 코드 실행과 웹 시각화 도구를 제공하는 오픈소스 에이전트 프레임워크 AstrBot의 내부 아키텍처와 활용법을 깊이 있게 분석합니다.
+- [LiveKit Agents: 초저지연 실시간 음성 AI 에이전트를 위한 오픈소스 프레임워크]({% post_url 2026-08-04-LiveKit-Agents-Open-Source-Framework-for-Building-Realtime-Voice-AI-Agents %}) — LiveKit Agents는 WebRTC 기반의 초저지연 오디오 스트리밍을 활용해 실시간 대화형 음성 AI를 개발할 수 있는 오픈소스 프레임워크입니다. STT-LLM-TTS 조합 파이프라인부터 OpenAI Realtime API 같은…
+- [Model Context Protocol 2026-07-28 규격 발표, 무상태 HTTP 구조 변경과 영향 정리]({% post_url 2026-07-29-model-context-protocol-2026-07-28-spec-update-transition-to-stateless-http-architecture %}) — Model Context Protocol 프로젝트가 2026년 7월 28일 정식 사양 업데이트를 발표했습니다. 이번 개정으로 지속적인 세션 연결과 프로토콜 수준의 핸드셰이크가 제거되고, 헤더 기반 라우팅이 가능한…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

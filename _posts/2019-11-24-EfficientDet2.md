@@ -2,19 +2,26 @@
 layout: post
 title:  "EfficientDet은 왜 빠른가: BiFPN 가중치 융합과 복합 스케일링 핵심"
 summary: "정확도와 연산량을 함께 잡기 위해 EfficientDet이 BiFPN과 compound scaling을 설계한 방식을 수식과 그림으로 정리합니다."
+description: "EfficientDet이 BiFPN의 양방향 연결과 학습 가능한 융합 가중치, backbone·feature·head·입력을 함께 키우는 scaling으로 효율을 높인 원리를 설명합니다."
 image:
   path: /assets/img/thumb/EfficientDet2.jpg
   alt: EfficientDet 톺아보기 2 대표 이미지
 date:   2019-11-23 13:00 -0400
 categories: Paper
 tags:
-  - EfficientDet
-  - BiFPN
-  - 객체탐지
+  - 컴퓨터비전
+  - 논문리뷰
+faq:
+  - question: "BiFPN은 일반 FPN과 무엇이 다른가요?"
+    answer: "Top-down과 bottom-up 경로를 반복해 여러 scale 정보를 양방향으로 섞고, 입력이 하나뿐인 불필요한 node를 줄이며 같은 레벨 연결을 추가합니다."
+  - question: "BiFPN의 가중치는 각 feature의 중요도를 어떻게 반영하나요?"
+    answer: "서로 다른 해상도에서 들어온 feature마다 학습 가능한 가중치를 두고 정규화해 합칩니다. 따라서 모든 입력을 같은 비율로 더하지 않고 task loss에 따라 상대적 비중을 배웁니다."
+  - question: "EfficientDet의 큰 모델이 항상 더 좋은 선택인가요?"
+    answer: "아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리·후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다."
 math: true
 ---
 
-EfficientDet의 핵심은 **해상도가 다른 특징을 중요도에 따라 섞는 BiFPN**과 **백본·특징망·예측망·입력 크기를 함께 키우는 복합 스케일링**이다. 정확도를 올리겠다고 한 부분만 무작정 크게 만드는 대신, 탐지기의 여러 병목을 균형 있게 확장한다.
+EfficientDet의 핵심은 **해상도가 다른 특징을 중요도에 따라 섞는 BiFPN**과 **백본·특징망·예측망·입력 크기를 함께 키우는 복합 스케일링**이다. 정확도를 올리겠다고 한 부분만 무작정 크게 만드는 대신, 탐지기의 여러 병목을 균형 있게 확장한다. 실제 선택에서는 논문 표의 모델 번호보다 내 입력에서 feature 융합이 필요한 이유와 장치별 지연·메모리 한계를 먼저 봐야 한다.
 
 [앞선 글](https://jjxxmiin.github.io/paper/2019/11/23/EfficientDet/)에서 백본인 EfficientNet을 살펴봤다면, 이번에는 그 백본 위에서 EfficientDet이 어떻게 비용을 통제하는지에 집중한다.
 
@@ -92,3 +99,43 @@ EfficientDet은 EfficientNet 백본, 반복되는 BiFPN, 공유되는 class/box 
 ![det_figure7](/assets/img/post_img/EfficientDet/det_figure7.PNG){: .center}
 
 다만 논문의 COCO 결과와 지연 시간이 내 장비·입력 크기·구현에서도 그대로 재현된다고 가정하면 안 된다. 실제 도입 전에는 원하는 입력 해상도에서 전처리와 후처리까지 포함한 지연 시간, 메모리, 작은 물체 성능을 함께 측정해야 한다. 이 관점으로 보면 BiFPN은 단순한 FPN 변형이 아니라, **어떤 특징을 얼마나 연결하고 모델 전체를 어떻게 키울지 동시에 다룬 설계**로 읽힌다.
+
+## BiFPN 연결을 코드에서 어떻게 확인하나
+
+Backbone이 내는 feature level의 shape와 stride를 먼저 적는다. 각 BiFPN node에서 입력으로 받는 level, resize 방식, channel을 맞추는 연산을 따라가면 top-down과 bottom-up 경로가 실제로 어디에서 만나는지 볼 수 있다. 그림의 화살표 수만 세기보다 tensor가 같은 공간 크기로 변환된 뒤 합쳐지는지 확인한다.
+
+학습 가능한 융합 가중치는 feature마다 하나의 절대 점수를 매기는 설명이 아니다. 같은 node에 들어오는 입력들 사이에서 상대적으로 얼마나 반영할지 학습한다. 정규화와 작은 안정화 항이 코드에 있는지, 가중치가 음수나 0 부근일 때 계산이 어떻게 되는지 수식과 구현을 대조한다.
+
+같은 level의 shortcut을 추가하면 원래 feature를 보존하면서 다른 scale 정보와 섞을 수 있다. 그러나 연결을 늘릴수록 메모리와 연산도 생긴다. 논문이 입력 하나뿐인 node를 줄인 이유와 반복 BiFPN의 깊이를 함께 봐야 “연결은 많을수록 좋다”는 오해를 피할 수 있다.
+
+## 모델 크기 선택은 어떤 실험으로 결정하나
+
+후보 모델마다 입력 resolution이 다르면 원본 이미지의 resize 결과도 저장한다. 작은 물체가 실제로 몇 pixel로 남는지, 종횡비 처리와 padding이 같은지 확인한다. Resolution 향상과 network scale 향상을 한 숫자로 묶지 않고 각각의 비용을 본다.
+
+Latency는 warm-up 이후 반복 추론과 첫 실행을 나누고, decode와 NMS까지 포함한 전체 시간도 별도로 잰다. Peak memory는 weight뿐 아니라 BiFPN activation과 입력 buffer를 포함한다. Batch 1 실시간 처리와 batch 처리의 요구가 다르면 같은 모델도 선택이 달라진다.
+
+오류는 물체 크기별 누락, class 혼동, 중복 box와 위치 오차로 나눈다. 큰 모델에서 전체 AP가 올라도 핵심 작은 물체가 개선되지 않는다면 추가 비용의 의미가 약할 수 있다. 반대로 작은 모델이 목표 latency를 만족해도 중요한 class의 누락이 허용 범위를 넘으면 사용할 수 없다.
+
+같은 장치에서도 동시 요청 수가 늘면 큰 모델의 tail latency가 급격히 커질 수 있다. Batch 1 결과와 목표 concurrency의 queue 대기를 모두 기록해야 offline benchmark가 실제 service 선택을 잘못 이끌지 않는다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유]({% post_url 2019-11-23-EfficientDet %}) — EfficientNet이 depth·width·input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다.
+- [Saliency Map은 무엇을 설명하나: 입력 gradient 시각화와 해석의 한계]({% post_url 2019-12-28-Saliency_Maps %}) — 분류 점수를 입력 픽셀로 미분해 중요한 영역을 찾는 Saliency Map과 class model visualization의 차이를 수식과 코드로 설명합니다.
+- [RynnBrain 30B-A3B는 로봇에 충분히 가벼울까: 3B 활성 파라미터와 제어 지연]({% post_url 2026-02-19-RynnBrain--Open-Embodied-Foundation-Models %}) — 30B 중 3B만 활성화하는 RynnBrain MoE의 계산 이득과 전체 가중치 메모리·라우팅·실시간 제어의 남은 비용을 구분합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### BiFPN은 일반 FPN과 무엇이 다른가요?
+
+Top-down과 bottom-up 경로를 반복해 여러 scale 정보를 양방향으로 섞고, 입력이 하나뿐인 불필요한 node를 줄이며 같은 레벨 연결을 추가합니다.
+
+### BiFPN의 가중치는 각 feature의 중요도를 어떻게 반영하나요?
+
+서로 다른 해상도에서 들어온 feature마다 학습 가능한 가중치를 두고 정규화해 합칩니다. 따라서 모든 입력을 같은 비율로 더하지 않고 task loss에 따라 상대적 비중을 배웁니다.
+
+### EfficientDet의 큰 모델이 항상 더 좋은 선택인가요?
+
+아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리·후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다.

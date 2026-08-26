@@ -6,16 +6,16 @@ categories: Tech
 tags:
   - AI코딩
   - Claude
+  - 웹개발
   - ClaudeCode
-  - 업무자동화
-  - AI에이전트
+  - 오픈소스
 summary: career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며,
   ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
-author: AI Trend Bot
+description: 'career-ops가 공고 분석·적합도 점수·이력서 초안을 로컬 파이프라인으로 묶는 방식과 점수 편향·경력 사실성·개인정보 보관·오래된 공고·중복 지원을 점검합니다.'
 github_url: https://github.com/santifer/career-ops
 image:
   path: https://opengraph.githubassets.com/1/santifer/career-ops
-  alt: 'career-ops: How AI Coding Agents Automate Your Job Search'
+  alt: "santifer/career-ops GitHub 저장소 대표 이미지"
 project:
   stars: 61595
   forks: 12133
@@ -40,23 +40,6 @@ project:
   files: 791
 mermaid: true
 chart: true
-faq:
-- question: career-ops를 실행하려면 반드시 유료 AI 구독이 필요한가요?
-  answer: 그렇지 않습니다. Claude Pro나 Max 요금제를 활용하는 것이 가장 원활하지만, 토큰 한도에 제약받지 않으려면 Ollama를
-    통한 로컬 모델 구동이 가능합니다. 또한 OpenRouter를 통한 종량제 API를 통해서도 충분히 비용 효율적으로 실행할 수 있습니다.
-- question: 모든 구직 사이트에서 정상적으로 동작하나요?
-  answer: Greenhouse, Ashby, Lever 등 150여 개의 주요 글로벌 채용 포털의 형식을 기본적으로 지원합니다. 또한 Playwright
-    기반의 휴리스틱 스캐너가 웹페이지의 텍스트 구조를 분석하므로, 대부분의 기업 자체 채용 페이지에서도 정상적으로 핵심 데이터를 추출할 수 있습니다.
-- question: 직무별로 이력서를 미리 여러 개 만들어 두어야 하나요?
-  answer: 아닙니다. 단 하나의 뼈대가 되는 기본 이력서(Base CV)만 로컬에 준비하시면 됩니다. 시스템이 개별 채용 공고의 요구사항을
-    분석하여 매번 해당 직무의 키워드와 포지션에 가장 적합한 맞춤형 PDF 이력서를 새롭게 생성해 줍니다.
-- question: 공고 분석 후 지원서 자동 제출 기능도 지원하나요?
-  answer: 시스템은 보안과 신뢰성 문제로 자동 제출을 지원하지 않습니다. 개발자는 채용 공고 스캐닝, 정량적 평가, 맞춤형 이력서 생성까지만
-    철저히 자동화하고, 최종 지원 여부의 결정과 제출 버튼을 누르는 행위는 오직 사람의 판단에 맡기도록 시스템을 설계했습니다.
-- question: 내 이력서와 개인 정보가 클라우드나 외부 서버로 전송되지는 않나요?
-  answer: 이 프로젝트는 철저히 로컬 환경에서 구동됩니다. 사용자의 이력서, 평가 기록, 대시보드 상태 등 모든 데이터는 사용자 기기의 로컬
-    저장소에 마크다운 및 SQLite 형태로 보관됩니다. 단, 텍스트 추론을 위해 연결한 AI 모델 API 서버로는 데이터가 전송되므로 해당 AI
-    제공자의 프라이버시 정책을 참고해야 합니다.
 ---
 
 **TL;DR (한 줄 요약)**
@@ -315,6 +298,20 @@ npx @santifer/career-ops init
 채용 시장은 오랫동안 기울어진 운동장이었습니다. 기업은 자동화된 ATS와 AI 알고리즘을 사용해 수만 명의 지원자를 눈 깜짝할 새에 필터링해 왔지만, 구직자는 여전히 밤을 새워가며 글을 다듬어야 했습니다.
 
 career-ops는 이 기울어진 운동장의 균형을 맞추기 위한 강력한 시도입니다. 산티아고가 이야기했듯, "기업들이 AI를 사용해 후보자를 걸러낸다면, 우리 후보자들도 AI를 사용해 기업을 걸러내야 합니다." 이 오픈소스 프로젝트는 단순한 기술적 도구를 넘어 구직자가 스스로의 권리와 시간을 지키기 위한 중요한 선언과도 같습니다. 지금 바로 터미널을 열고 여러분만의 전담 에이전트를 고용해 보시기 바랍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/santifer/career-ops)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
+- [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
+- [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

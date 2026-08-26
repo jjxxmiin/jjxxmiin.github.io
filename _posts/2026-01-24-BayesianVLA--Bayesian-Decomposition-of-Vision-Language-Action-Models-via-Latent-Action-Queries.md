@@ -4,15 +4,21 @@ title: 'BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나:
 date: '2026-01-24'
 categories: Tech
 tags:
-  - BayesianVLA
-  - Vision-Language-Action
-  - Information Collapse
-  - Robot Learning
+  - 로보틱스
+  - AI트렌드
 math: true
 summary: Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior·posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD 성과를 점검합니다.
+description: "BayesianVLA가 vision-only prior와 vision-language posterior의 PMI로 instruction 무시를 줄이는 구조, 목적 함수 부호, 11.3%p 성과와 반사실 검증법을 설명합니다."
+faq:
+  - question: "Prior와 posterior는 무엇이 다른가요?"
+    answer: "Prior는 vision만으로 가능한 action을 예측하고 posterior는 같은 vision에 language instruction을 더해 action을 예측하므로, 둘의 차이로 language의 추가 기여를 볼 수 있습니다."
+  - question: "34.5%에서 45.8%는 11.3% 향상인가요?"
+    answer: "차이는 11.3 percentage point이며 상대 증가율은 약 32.8%입니다. 실제 신뢰성을 판단할 때는 개선폭과 절대 성공률 45.8%를 함께 봐야 합니다."
+  - question: "BayesianVLA는 vision보다 language를 항상 우선하나요?"
+    answer: "아닙니다. 목표는 둘 중 하나를 무조건 우선하는 것이 아니라, 같은 장면에서 instruction 때문에 달라져야 하는 action을 posterior가 실제로 구분하는지 학습하는 것입니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.15197.png
-  alt: Paper Thumbnail
+  alt: "BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p 논문 대표 이미지"
 ---
 
 BayesianVLA는 로봇이 화면만 보고 익숙한 action을 반복하는 shortcut을 줄이기 위해 vision-only prior와 vision-language posterior를 비교합니다. SimplerEnv OOD 성공률은 34.5%에서 45.8%로 올라 11.3 percentage point 개선됐지만, 여전히 절반이 넘는 episode는 성공하지 못했습니다.
@@ -121,4 +127,44 @@ BayesianVLA가 맞는지 확인하려면 일반 success 외에 instruction sensi
 
 대화형 correction이나 장기 instruction은 기존 글도 미검증 한계로 남깁니다. 한 문장 명령에서 PMI가 유용해도 “아니, 왼쪽 것이 아니라 뒤의 컵” 같은 history를 처리하려면 temporal language context가 필요합니다.
 
+## Vision과 language가 충돌할 때 무엇을 기록할까
+
+Counterfactual test는 instruction 단어만 바꾸는 것에서 끝나지 않습니다. 어느 입력을 따라야 정답인지 분명한 case를 나누어야 “language를 많이 쓴다”와 “language를 올바르게 쓴다”를 구분할 수 있습니다.
+
+| 시험 장면 | 기대되는 판단 | 드러나는 실패 |
+|---|---|---|
+| 같은 위치, target noun만 변경 | posterior action이 target에 맞게 변경 | instruction 무시 |
+| instruction은 같고 target 위치 변경 | 새 visual 위치로 action 변경 | language 문구 암기 |
+| 존재하지 않는 물체를 지시 | 실행 대신 실패·재질문 | 지시 과신과 unsafe motion |
+| vision이 가려져 target이 불명확 | confidence 하락 또는 추가 관측 | prior의 잘못된 확신 |
+| 무관한 문장을 instruction으로 입력 | prior와 큰 차이가 없어야 함 | 모든 text에 과민 반응 |
+
+예를 들어 red cup과 blue cup이 모두 보이는 장면에서 두 instruction을 번갈아 입력했을 때 end-effector 경로가 적절히 갈라져야 합니다. 반대로 “green cup을 집어라”인데 green cup이 없다면 language 의존성을 높인 model이 무조건 다른 cup으로 향하는 것은 개선이 아닙니다. 이 경우에는 target 부재 감지와 안전 정지가 성공 기준에 들어가야 합니다.
+
+PMI 값 자체도 calibration이 필요합니다. 높은 PMI가 언제나 정답을 뜻하지 않으므로 PMI 구간별 task success, collision, timeout을 함께 보고, $\alpha$를 바꾼 sweep에서 language sensitivity와 전체 성공률이 어디서 균형을 이루는지 확인합니다. Prior가 잘못 학습된 scene에서는 posterior와의 차이가 커도 그 원인이 instruction의 유용성인지 prior 오류인지 알 수 없으므로 prior-only 성능을 항상 같이 공개해야 합니다.
+
+Latency도 빠뜨릴 수 없습니다. Dual branch가 순차 실행되는지 특징을 공유하는지에 따라 control cycle 비용이 달라집니다. 같은 hardware에서 OpenVLA baseline과 sensor-to-action latency, memory, missed deadline을 나란히 측정해야 11.3%p의 성공률 이득이 실제 robot 제어 예산 안에 들어오는지 판단할 수 있습니다.
+
 BayesianVLA의 핵심은 language를 무조건 vision보다 우선하는 것이 아닙니다. Vision만으로 설명되는 action과 instruction 때문에 달라져야 하는 action을 분리해, model이 실제로 두 입력을 모두 사용했는지 측정 가능하게 만든 것입니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL·Dream-VLA]({% post_url 2025-12-30-Dream-VL---Dream-VLA--Open-Vision-Language-and-Vision-Language-Action-Models-with-Diffusion-Language-Model-Backbone %}) — Dream-VL과 Dream-VLA가 masked diffusion language backbone으로 양방향 문맥과 action chunk 병렬 복원을 시도한 이유, benchmark 성과와 반복 denoising 비용을 함께…
+- [VLANeXt의 12가지 VLA 설계 레시피는 어떻게 검증해야 할까]({% post_url 2026-02-24-VLANeXt--Recipes-for-Building-Strong-VLA-Models %}) — VLANeXt가 VLA 설계 요소를 같은 틀에서 비교해 2.5B 모델을 구성하는 과정과 LIBERO 결과, 실제 로봇 이전에 확인할 조건을 정리합니다.
+- [스마트폰 피드백만으로 로봇 정책을 고칠 수 있나: RoboPocket]({% post_url 2026-03-06-RoboPocket--Improve-Robot-Policies-Instantly-with-Your-Phone %}) — RoboPocket이 원격 정책 궤적을 AR로 보여주고 사용자의 스마트폰 교정을 비동기 파인튜닝에 반영하는 방식, 2배 효율 보고와 현실 간극을 분석합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Prior와 posterior는 무엇이 다른가요?
+
+Prior는 vision만으로 가능한 action을 예측하고 posterior는 같은 vision에 language instruction을 더해 action을 예측하므로, 둘의 차이로 language의 추가 기여를 볼 수 있습니다.
+
+### 34.5%에서 45.8%는 11.3% 향상인가요?
+
+차이는 11.3 percentage point이며 상대 증가율은 약 32.8%입니다. 실제 신뢰성을 판단할 때는 개선폭과 절대 성공률 45.8%를 함께 봐야 합니다.
+
+### BayesianVLA는 vision보다 language를 항상 우선하나요?
+
+아닙니다. 목표는 둘 중 하나를 무조건 우선하는 것이 아니라, 같은 장면에서 instruction 때문에 달라져야 하는 action을 posterior가 실제로 구분하는지 학습하는 것입니다.

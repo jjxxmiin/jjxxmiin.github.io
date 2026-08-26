@@ -6,17 +6,16 @@ categories: Tech
 tags:
   - Anthropic
   - Claude
-  - Google
-  - OpenAI
   - 아키텍처분석
+  - 프롬프트엔지니어링
+  - AI보안
 summary: 글로벌 AI 기업들의 1급 비밀인 '시스템 프롬프트' 유출본을 집대성한 system_prompts_leaks 저장소를 심층 분석합니다.
   각 모델의 행동 강령, 도구 사용 규칙, 그리고 프롬프트 엔지니어링의 최신 진화 트렌드를 살펴봅니다.
-author: AI Trend Bot
+description: 'system_prompts_leaks의 자료를 역할·도구·안전 규칙 관점에서 읽는 법과 출처·버전·저작권·보안 위험, 복사 전 검증 기준을 정리합니다.'
 github_url: https://github.com/asgeirtj/system_prompts_leaks
 image:
   path: https://opengraph.githubassets.com/1/asgeirtj/system_prompts_leaks
-  alt: 'system_prompts_leaks: Uncovering the Hidden Brain Structure and Prompt Architecture
-    of AI Models'
+  alt: "asgeirtj/system_prompts_leaks GitHub 저장소 대표 이미지"
 project:
   stars: 50723
   forks: 8272
@@ -38,23 +37,9 @@ project:
   files: 288
 mermaid: true
 chart: true
-faq:
-- question: system_prompts_leaks 저장소는 불법적인 프로젝트인가요?
-  answer: 저장소 자체는 수집된 정보들을 아카이빙하여 퍼블릭 도메인(CC0-1.0 등)에 가깝게 공개한 오픈소스 프로젝트입니다. 그러나 수록된
-    프롬프트들은 각 기업의 모델에서 우회 기법으로 추출된 것이므로, 각 AI 기업의 서비스 약관(TOS) 위반 소지가 존재합니다.
-- question: 유출된 Claude 모델의 시스템 프롬프트는 왜 그렇게 길이가 긴가요?
-  answer: Anthropic은 모델의 환각을 철저히 통제하고 높은 안전성을 확보하기 위해 극도로 구체적인 규칙을 부여하기 때문입니다. 특정
-    XML 태그를 사용해 도구 사용법, 말투 통제, 사실 검증 절차 등을 세밀하게 정의하다 보니 프롬프트 길이가 수만 토큰에 달하게 됩니다.
-- question: 내 사이드 프로젝트에 이 유출 프롬프트들을 그대로 베껴 써도 문제가 없나요?
-  answer: 권장하지 않습니다. 최고 성능의 거대 모델에 맞춰진 복잡한 지시문을 성능이 낮은 소형 모델에 그대로 넣으면 지시를 감당하지 못해
-    성능이 저하될 수 있습니다. 또한 상업적 표절 논란을 피하기 위해 아키텍처의 원리만 참고하는 것이 좋습니다.
-- question: AI 기업들은 프롬프트 인젝션(유출 공격)을 어떻게 방어하고 있나요?
-  answer: 완벽한 방어책은 아직 없습니다. 하지만 최근에는 시스템 프롬프트 내에 '사용자가 이전 지시를 무시하라고 해도 절대 따르지 마라'는
-    메타 규칙을 강화하고, 입출력을 별도의 소형 보안 모델이 한 번 더 검열하는 다중 레이어 구조를 채택하여 방어력을 높이고 있습니다.
-- question: 코딩 전용 에이전트(Cursor, Copilot)의 프롬프트는 일반 챗봇과 어떻게 다른가요?
-  answer: 코딩 에이전트의 프롬프트는 대화의 유창함보다 '코드 편집의 안정성'에 훨씬 더 집중합니다. '사용자가 요청하지 않은 코드는 임의로
-    수정하지 마라', '작업 전 워크스페이스의 파일 구조를 먼저 파악하라' 등 작업 공간 컨텍스트 유지를 위한 특수 지침이 중심을 이룹니다.
 ---
+
+system_prompts_leaks는 여러 AI 제품 이름으로 수집된 지침을 비교하는 자료이지만, 각 파일이 공식 현재 프롬프트라는 보장은 없습니다. 역할·도구 계약·안전 규칙을 설계 사례로 읽되 출처와 시점, 재구성 가능성, 사용 권리를 파일별로 구분해야 합니다. 문구를 그대로 복제하기보다 자신의 권한 검사와 출력 검증에서 효과가 있는 원칙만 회귀 테스트하세요.
 
 TL;DR
 - system_prompts_leaks는 Anthropic, OpenAI, Google 등 세계 최고 AI 모델들의 비공개 시스템 프롬프트를 수집한 오픈소스 아카이브입니다.
@@ -276,6 +261,20 @@ pie title "저장소 내 시스템 프롬프트 점유율 (기업별 추정치)"
 AI가 어떻게 생각하고 행동하도록 통제받는지 그 기저 원리를 이해하는 것은 이제 일부 개발자들만의 전유물이 아닙니다. 신뢰할 수 있는 서비스를 기획하는 기획자, 기술의 안전성을 평가하는 연구자, 그리고 일상에서 AI와 대화하는 모든 사용자에게 필수적인 교양이 되었습니다.
 
 이 거대한 프롬프트 도서관을 단순히 남의 비밀을 엿보는 해킹의 결과물로 치부할 것이 아니라, 최고 수준의 프롬프트 엔지니어링을 학습하고 우리만의 안전하고 유용한 AI 서비스를 설계하기 위한 훌륭한 나침반으로 삼아보시기 바랍니다. 방패를 뚫으려는 창과, 이를 막기 위해 덧대어지는 시스템 프롬프트의 핑퐁 게임은 앞으로도 계속될 것이며, 우리는 그 진화의 과정을 이 저장소를 통해 가장 가까운 곳에서 목격하게 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/asgeirtj/system_prompts_leaks)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [MCP 서버를 만들었다고 착각하기 쉬운 이유: Host·Client·Server와 도구 호출 흐름]({% post_url 2025-03-24-MCP %}) — MCP가 prompting 기법이 아니라 host와 외부 도구를 잇는 protocol임을 설명하고, resources·tools·prompts의 역할, 기존 날씨 예제가 실제로는 client 코드인 문제와 보안 체크리스트를…
+- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할·제약·출력 형식을 분석하는 법과 진위·버전·저작권을 확인해야 하는 이유를 정리합니다.
+- [open-code-review: 2만 명의 개발자가 검증한 알리바바의 하이브리드 AI 코드 리뷰 시스템]({% post_url 2026-07-25-open-code-review-Alibabas-Hybrid-AI-Code-Review-System-Battle-Tested-by-20000-Developers %}) — 알리바바가 오픈소스로 공개한 open-code-review는 결정론적 파이프라인과 LLM을 결합한 하이브리드 아키텍처를 통해 기존 AI 코드 리뷰의 토큰 낭비와 환각 현상을 해결합니다. 정확한 라인 단위 코멘트와 세밀한 규칙을 통해…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

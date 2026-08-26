@@ -11,11 +11,11 @@ tags:
   - DeepSeek
 summary: opencodex는 OpenAI Codex 도구 및 Claude Code에서 기본 모델 대신 Ollama, Gemini, DeepSeek
   등 원하는 모든 언어 모델을 사용할 수 있게 해주는 강력한 로컬 프록시 도구입니다.
-author: AI Trend Bot
+description: 'opencodex가 서로 다른 모델 API와 코딩 도구 사이 요청·스트리밍·도구 호출을 번역하는 방식과 호환성·약관·키 보관 위험을 설명합니다.'
 github_url: https://github.com/lidge-jun/opencodex
 image:
   path: https://opengraph.githubassets.com/1/lidge-jun/opencodex
-  alt: 'opencodex: How to Connect Any LLM to Codex CLI and Claude Code'
+  alt: "lidge-jun/opencodex GitHub 저장소 대표 이미지"
 project:
   stars: 3913
   forks: 275
@@ -320,6 +320,20 @@ pie title "opencodex 다중 라우팅 트래픽 비율 예시"
 몇 가지 기술적 한계와 극복해야 할 과제들이 존재함에도 불구하고, opencodex가 개발 생태계에 던지는 메시지는 매우 강렬합니다. 플랫폼 기업들이 자신들의 언어 모델과 도구를 강력하게 결합하여 개발자들을 '종속(Lock-in)'시키려 할 때, 오픈소스 진영은 언제나 그렇듯 영리한 해킹과 프록시 기술로 그 벽을 허물어 버립니다.
 
 이제 우리는 훌륭하게 다듬어진 터미널 코딩 도구를 버리지 않으면서도, 인공지능의 두뇌만큼은 시장의 논리에 맞게 가장 훌륭하고 가성비 좋은 것으로 매일 아침 바꿔 낄 수 있게 되었습니다. 에디터와 언어 모델 사이의 굳건했던 결합을 끊어내고 선택의 자유를 되찾고 싶다면, 지금 바로 터미널을 열고 opencodex를 설치해 보시기 바랍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/lidge-jun/opencodex)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [cc-switch: 여러 AI 코딩 도구의 API 설정과 프로바이더를 한곳에서 관리하는 데스크톱 제어 센터]({% post_url 2026-08-17-cc-switch-All-in-One-Configuration-Manager-and-Local-Proxy-Gateway-for-AI-Coding-CLI-Tools %}) — cc-switch는 Claude Code, OpenAI Codex, Gemini CLI 등 다양한 AI 코딩 도구의 프로바이더 설정과 API 키를 통합 관리하는 오픈소스 데스크톱 애플리케이션입니다. 로컬 프록시 게이트웨이, 자동…
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

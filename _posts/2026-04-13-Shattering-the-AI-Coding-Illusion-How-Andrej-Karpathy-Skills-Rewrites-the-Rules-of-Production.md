@@ -1,39 +1,35 @@
 ---
 layout: post
-title: 'AI 코딩의 환상을 부수다: ''Andrej Karpathy Skills''가 실무 개발의 룰을 바꾸는 방식'
+title: "Andrej Karpathy Skills는 AI 코딩 범위를 줄일까: 지침·검증·질문 한계"
 date: '2026-04-13 07:02:18'
 categories: Tech
 tags:
   - AI코딩
-  - 프롬프트엔지니어링
-  - ClaudeCode
-  - 컨텍스트윈도우
-  - LLM
-summary: 기존 AI 코딩 어시스턴트의 치명적 한계인 오버엔지니어링과 임의 리팩토링 문제를 해결하기 위해 등장한 'Andrej Karpathy
-  Skills'의 4대 핵심 원칙(Think Before Coding, Surgical Changes 등)과 자율 검증 루프 아키텍처를 심층 분석하고,
-  대규모 실무 프로젝트에 이를 적용하여 얻을 수 있는 통제력과 현실적인 트레이드오프를 시니어 엔지니어의 관점에서 다룹니다.
-author: AI Trend Bot
+  - AI트렌드
+summary: "Andrej Karpathy Skills의 Think Before Coding·Surgical Changes·Goal-Driven 지침이 수정 범위와 검증을 돕는 방식, prompt만으로 보장할 수 없는 한계를 분석합니다."
+description: "Andrej Karpathy Skills의 coding guideline을 ambiguity·surgical diff·test gate·budget 관점에서 읽고, prompt 지침과 실제 sandbox·review 통제를 구분합니다."
 github_url: https://github.com/forrestchang/andrej-karpathy-skills
+faq:
+  - question: "CLAUDE.md나 rules file을 추가하면 AI가 관련 없는 코드를 절대 바꾸지 않나요?"
+    answer: "아닙니다. 지침은 행동 경향을 바꿀 뿐 보장이 아니므로 허용 경로, diff 검사, test와 사람 review를 별도 gate로 둬야 합니다."
+  - question: "모호할 때 항상 질문하게 하는 것이 좋은가요?"
+    answer: "되돌리기 쉬운 작은 선택까지 모두 질문하면 지연이 커지므로, 위험·범위·요구사항을 바꾸는 모호성만 사람에게 올리는 기준이 필요합니다."
+  - question: "Goal-Driven loop는 어떤 종료 조건이 필요한가요?"
+    answer: "성공 test뿐 아니라 최대 반복·시간·token·diff, 같은 오류 반복과 test 변경 승인 조건을 code 수준에서 고정해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/forrestchang/andrej-karpathy-skills
-  alt: 'Shattering the AI Coding Illusion: How ''Andrej Karpathy Skills'' Rewrites
-    the Rules of Production'
+  alt: "forrestchang/andrej-karpathy-skills GitHub 저장소 대표 이미지"
 ---
 
-## The Hook (공감과 도발)
-사실 처음 이 기술, 아니 이 '룰셋(Rule-set)'을 마주했을 때 저는 꽤 회의적이었습니다. "또 뻔한 프롬프트 엔지니어링의 연장선이겠지" 싶었거든요. 최근 현업에서 Cursor나 Claude Code 같은 AI 코딩 어시스턴트는 더 이상 신기한 장난감이 아닙니다. 없으면 당장 스프린트 일정을 맞출 수 없을 정도로 필수재가 되었죠. 하지만 정말 우리 삶이 그만큼 편해졌을까요?
+**Andrej Karpathy Skills는 코딩 Agent에게 가정 명시, 작은 diff와 검증 가능한 완료 조건을 반복해서 요구하는 지침 모음입니다.** 관련 없는 refactoring과 조용한 가정을 줄이는 데 도움을 줄 수 있지만 prompt만으로 수정 범위나 안전을 강제하지는 못합니다. 허용 경로·test·budget·review를 외부 gate로 두고 기존 방식과 비교해야 합니다.
 
-가슴에 손을 얹고 생각해 봅시다. "여기 NullPointerException 버그 좀 고쳐줘"라고 했더니, AI가 뜬금없이 멀쩡한 레거시 코드를 최신 팩토리 패턴이랍시고 싹 다 갈아엎어 놓은 적 없으신가요? "안 쓰는 변수가 보이네요, 제가 깔끔하게 치웠습니다"라며 데드코드를 날렸다가 빌드 파이프라인이 터져서 새벽에 땀 흘리며 롤백해 본 경험은요? 우리는 코딩 속도는 엄청나게 빨라졌지만, 정작 AI가 싸질러 놓은 '화려하고 위험한 쓰레기'를 리뷰하고 걷어내는 데 더 많은 야근을 하고 있습니다. 우리는 도구에 대한 통제력을 잃어버렸던 겁니다.
+[프로젝트 저장소](https://github.com/forrestchang/andrej-karpathy-skills)는 `.cursorrules`나 `CLAUDE.md` 같은 지침 파일에 행동 원칙을 넣는 접근을 보여 줍니다. 이름에 포함된 인물과 실제 저자·공식성은 동일한 뜻이 아니므로 attribution과 지원 범위는 저장소의 maintainer·license·문서에서 확인해야 합니다.
 
-바로 이 지점에서, 딥러닝의 대가 안드레아 카파시(Andrej Karpathy)의 인사이트를 코드로 엮어낸 **'Andrej Karpathy Skills'**가 등장합니다.
+## 네 가지 지침은 어떤 실패를 줄이려 할까
 
-## TL;DR (The Core)
-Andrej Karpathy Skills는 AI가 묻지 않고 멋대로 상상의 나래를 펴는 것을 원천 차단하고, 오직 '외과 수술적인(Surgical) 수정'과 '목표 기반의 자율 검증'만을 강제하는 가장 강력한 AI 엔지니어링 행동 강령(Behavioral Guidelines)이자 메타 프레임워크입니다.
+이 프로젝트의 중심은 무거운 runtime보다 모델에 전달하는 Markdown 지침입니다. 효과를 평가할 때는 “말을 잘 듣는다”는 인상보다 관련 없는 변경, 질문 지연, test 통과와 review 수정량의 변화를 봅니다.
 
-## Deep Dive: Under the Hood (핵심 아키텍처 심층 분석)
-이 프로젝트는 복잡한 바이너리나 무거운 런타임 라이브러리가 아닙니다. 본질적으로는 프로젝트 루트의 `.cursorrules`나 `CLAUDE.md` 파일에 주입되는 약 60줄의 마크다운 지침일 뿐입니다. 하지만 이 가벼운 텍스트 쪼가리가 만들어내는 '레버리지(Leverage)'는 기존의 AI 코딩 방식과 완전히 궤를 달리합니다.
-
-카파시가 짚어낸 대형 언어 모델(LLM)의 가장 치명적인 맹점은 바로 **'사일런트 픽(Silent Pick)'**입니다. LLM은 모호한 상황에서 질문하지 않고, 자기가 임의로 가정을 세워버린 뒤 그대로 코드를 생성해 버립니다. 이를 막기 위해 Karpathy Skills는 시스템 프롬프트 레벨에서 AI의 AST(Abstract Syntax Tree) 수정 권한과 컨텍스트 인지 방식을 완전히 재설계합니다.
+중요한 문제 중 하나는 모호한 상황에서 모델이 선택한 가정을 알리지 않고 구현하는 것입니다. 지침은 가정을 명시하고 위험한 선택은 질문하도록 유도합니다. 그러나 system prompt가 AST 수정 권한을 기술적으로 제한하는 것은 아니며 실제 file permission과 diff gate가 필요합니다.
 
 | 비교 항목 | 기존 AI 코딩 어시스턴트 (Default) | Andrej Karpathy Skills 적용 시 |
 | :--- | :--- | :--- |
@@ -42,9 +38,9 @@ Andrej Karpathy Skills는 AI가 묻지 않고 멋대로 상상의 나래를 펴�
 | **설계 철학** | 확장성을 고려해 추상화된 패턴과 오버엔지니어링 적용 | **Simplicity First**: 추측성 기능(Speculative features)을 배제하고 최소한의 코드로 구현 (YAGNI 원칙 강제) |
 | **검증 방식** | "완료했습니다. 코드를 확인해보세요."라며 즉시 결과물 제출 | **Goal-Driven Execution**: 테스트 등 성공 기준을 먼저 정의하고, 이를 통과할 때까지 자율 루프 실행 |
 
-특히 2026년 3월 카파시가 선보여 깃허브 생태계를 뒤집어놓은 42,000 스타의 'Autoresearch' 루프 개념과 결합되면서 이 지침은 한 차원 더 진화했습니다. AI에게 "어떻게 해라(Imperative)"라고 지시하는 대신, "무엇이 성공인지(Declarative)"를 정의해 주면 모델이 알아서 피드백 루프를 도는 방식입니다. 
+연결된 [Autoresearch 저장소](https://github.com/karpathy/autoresearch)는 성공 기준을 두고 반복 실험하는 아이디어를 살펴볼 별도 근거입니다. 이 아이디어를 코딩 작업에 옮길 때는 “어떻게 하라”는 세부 방법보다 어떤 test와 지표가 성공인지 먼저 정할 수 있습니다. 다만 반복 실행 권한과 종료 조건은 지침 문장만으로 맡기지 않습니다.
 
-아래는 프로젝트 루트에 위치하여 AI의 토큰 생성 트리를 지배하는 `.cursorrules` (또는 `CLAUDE.md`)의 핵심 설정 예시입니다.
+아래 JSON은 원칙을 구조화한 예시입니다. 특정 도구가 이 schema를 그대로 읽거나 `enforcement_level`을 기술적 권한으로 강제한다는 보장은 없으므로 선택한 client의 실제 지침 형식을 확인해야 합니다.
 
 ```json
 {
@@ -69,41 +65,73 @@ Andrej Karpathy Skills는 AI가 묻지 않고 멋대로 상상의 나래를 펴�
 }
 ```
 
-이 짧은 JSON 설정 하나가 AI의 행동 패턴을 완벽히 꺾어버립니다. "결제 모듈 리팩토링해 줘"라는 명령을 받으면, AI는 코드를 짜기 전에 테스트 계획을 먼저 출력하고, 테스트 코드가 통과하기 전에는 메인 로직을 수정하지 못하도록 스스로에게 락(Lock)을 걸어버립니다. 즉, '단순한 자동완성'을 넘어 카파시가 제창한 'Software 3.0' 패러다임의 설계자처럼 움직이게 되는 것입니다.
+이 설정은 행동을 유도하지만 test 전 code 수정을 물리적으로 막는 lock은 아닙니다. “계획 먼저”를 출력한 뒤 바로 넓은 diff를 만들 수도 있고, 기존 test를 약화해 녹색 결과를 만들 수도 있습니다. 읽기·쓰기 허용 경로, test command와 test file 변경 정책을 실행기에서 검사해야 지침이 운영 통제가 됩니다.
 
-## Pragmatic Use Cases (실무 적용 시나리오)
-그래서 이걸 실무에 어떻게 써먹냐고요? 몇 달 전, 저희 팀이 수백만 명의 트래픽을 처리하는 레거시 결제 마이크로서비스에 새로운 PG사를 연동해야 했을 때의 일입니다.
+모호성도 모두 같은 위험이 아닙니다. 변수 이름처럼 되돌리기 쉬운 지역 선택은 기존 style을 따라 진행하고 기록할 수 있지만 API contract, data migration이나 외부 side effect를 바꾸는 선택은 멈추고 질문해야 합니다. 질문 기준이 없으면 작은 결정마다 사람을 호출해 생산성이 떨어집니다.
 
-기존 같았으면 Claude Code에게 "A사 PG 연동 모듈을 추가해 줘"라고 지시했을 때, 이 녀석은 의욕이 앞선 나머지 기존 B사, C사의 연동 인터페이스까지 팩토리 패턴으로 멋지게 '리팩토링' 해버렸을 겁니다. 당연히 기존 테스트 코드는 다 깨지고, 리뷰어는 쌍욕을 하며 PR을 반려했겠죠.
+Surgical Change는 단순히 줄 수가 적다는 뜻도 아닙니다. 필요한 test와 migration까지 빠뜨린 작은 diff는 안전하지 않습니다. 요구사항을 충족하는 최소 범위를 먼저 적고 그 범위 밖 파일, format 변화와 dependency 변경을 별도 review 대상으로 표시합니다.
 
-하지만 Karpathy Skills가 엄격하게 적용된 환경에서는 완전히 달랐습니다.
+## 결제 모듈 변경에 적용하면 무엇을 확인할까
 
-첫째, **Surgical Changes(외과적 수정)의 위력**입니다. 녀석은 기존 결제 모듈의 끔찍한 스파게티 코드를 보면서도 꾹 참고, 딱 A사 연동에 필요한 클래스와 함수 하나만 추가했습니다. 주변의 지저분한 주석과 오타? 전혀 건드리지 않았습니다. 본인이 보기엔 비효율적이어도 철저히 'Match existing style'을 지킨 거죠. 심지어 안 쓰이는 데드코드를 발견했지만, 지우지 않고 "Line 402에 미사용 변수가 있습니다. 삭제할까요?"라고 물어보더군요. 이 순간 저는 녀석이 정말 믿음직한 동료처럼 느껴졌습니다.
+가상의 A사 PG 연동을 예로 들면 “새 provider 추가”만으로는 범위가 모호합니다. 기존 B·C provider는 변경하지 않는지, 새 configuration과 callback, test fixture가 필요한지, database migration과 secret 이름이 무엇인지 먼저 적습니다. 인접 code의 대규모 refactoring은 별도 제안으로 남기고 현재 작업 diff에 섞지 않습니다.
 
-둘째, **대규모 트래픽 대비와 목표 주도 실행(Goal-Driven Execution)**입니다. "초당 1만 건의 트랜잭션 스파이크를 견딜 수 있게 Redis 캐시를 붙여줘"라고 지시하자, 녀석은 곧바로 로직을 뜯어고치는 대신 이렇게 답했습니다.
+성공 기준은 숫자를 임의로 만들어 선언하지 않습니다. 기존 provider contract test를 유지하고, A사의 성공·거절·timeout·중복 callback 사례가 통과하며, 실제 업무가 요구한 latency와 idempotency 조건을 만족하는 식으로 정합니다. test를 작성한 Agent가 production code와 같은 잘못된 가정을 공유할 수 있으므로 specification과 사람이 review합니다.
 
-> "성공 기준을 정의합니다. 1. 병목 구간을 재현하는 부하 테스트(Mock) 작성 -> 2. Redis 캐싱 적용 -> 3. 캐시 히트율 90% 이상 및 응답 속도 50ms 이하 달성 검증. 이 계획대로 진행할까요?"
+cache 추가 같은 성능 작업도 hit rate 하나로 끝내지 않습니다. cache miss·stale data·장애 시 fallback, key 충돌과 invalidation을 포함하고 load test 환경과 baseline을 기록합니다. Agent가 목표 숫자만 맞추려고 TTL을 늘려 오래된 결제 상태를 반환하지 않는지 business correctness를 함께 봅니다.
 
-허락이 떨어지자마자 녀석은 혼자서 테스트를 돌리고 실패하면 수정하는 자율 루프(Autoresearch loop)를 돌기 시작했습니다. 약 30분 뒤, 완벽하게 검증된 캐시 로직과 통과된 테스트 코드가 담긴 PR을 올려주더군요. 이것이 바로 카파시가 증명한 '검증 루프'가 실무에서 빛을 발하는 순간이었습니다.
+| 지침 | 실행기에서 보완할 gate | 측정할 결과 |
+|---|---|---|
+| Think Before Coding | 위험한 모호성 분류·승인 | 불필요한 질문과 잘못된 가정 수 |
+| Surgical Changes | 허용 path·diff 크기·dependency 검사 | 무관 변경·review 수정량 |
+| Simplicity First | 새 abstraction·dependency 사유 | code 복잡도와 누락된 요구 |
+| Goal-Driven | 고정 test·budget·중단 상태 | 통과율·재시도·사람 재작업 |
 
-## Honest Review & Trade-offs (진짜 장단점과 한계)
-물론 세상에 완벽한 은탄환은 없습니다. 시니어 개발자로서 솔직히 말씀드리자면, 이 방식을 현업에 도입할 때 감수해야 할 뼈아픈 트레이드오프들이 분명 존재합니다.
+## 지침이 실패하는 조건은 무엇일까
 
-첫째, **초기 개발 속도의 급감과 '질문 지옥(Question Hell)'**입니다. 'Think Before Coding'을 강제해 놓으니, 조금만 컨텍스트가 부족해도 코딩은 안 하고 계속 역질문만 던집니다. "이 파라미터는 Null이 될 수 있나요?", "이 방식의 트레이드오프는 이건데 어느 쪽을 택하시겠습니까?" 바쁘게 치고 나가야 할 MVP 개발 단계에서는 이 깐깐하고 방어적인 태도가 숨 막힐 정도로 답답하게 느껴질 때가 있습니다.
+첫째는 질문 과다입니다. `null` 가능성처럼 기존 type·test에서 확인할 수 있는 사실까지 매번 사용자에게 묻는다면 속도가 느려집니다. Agent가 먼저 저장소 근거를 찾고, 되돌릴 수 없거나 요구 의미를 바꾸는 선택만 질문하도록 기준을 둡니다.
 
-둘째, **비용(Token) 폭발 리스크**입니다. 목표 주도 검증을 위해 AI가 혼자서 계획을 세우고, 테스트를 돌리고, 에러를 분석하고 다시 짜는 루프를 돌게 되는데, 이 과정에서 소비되는 API 토큰량이 기하급수적으로 늘어납니다. 자칫 모델이 잘못된 로직으로 무한 루프에 빠지면, 하룻밤 새 수만 원 이상의 API 요금 폭탄을 맞을 수 있습니다.
+둘째는 반복 비용입니다. 계획·test·수정 cycle이 길어지면 model call뿐 아니라 sandbox와 사람 검토 시간도 늘어납니다. 최대 turn·시간·token, 같은 오류 횟수와 diff 크기를 code로 제한하고 상한에 닿으면 실패 원인과 마지막 상태를 사람에게 넘깁니다.
 
-셋째, **컨텍스트 윈도우의 주의력 결핍(Attention Decay)**입니다. `.cursorrules`에 이 모든 행동 룰을 쑤셔 넣으면, 시스템 프롬프트가 매우 무거워집니다. 때로는 모델이 가이드라인 자체를 강박적으로 신경 쓰느라, 정작 해결해야 할 복잡한 비즈니스 로직의 디테일을 놓치는 주객전도 현상이 발생하기도 합니다. 지침은 강력하지만, 그만큼 모델의 '주의력 자원'을 갉아먹는다는 점을 명심해야 합니다.
+셋째는 지침 충돌과 context 부담입니다. 긴 rule file이 업무별 지침, repository 문서와 겹치면 우선순위가 불명확해질 수 있습니다. 핵심 원칙은 짧게 두고 언어·module별 규칙은 필요한 때만 읽게 하며, model·rule version마다 고정 과제로 회귀 평가합니다.
 
-## Closing Thoughts
-> "LLM에게 무엇을 할지 지시하지 마라. 성공 기준을 주고 달리게 하라." (Don't tell it what to do, give it success criteria and watch it go)
+## 도입은 rule file 유무가 아니라 diff 결과로 판단한다
 
-안드레아 카파시가 남긴 이 말은, 우리가 AI를 대하는 패러다임이 완전히 바뀌었음을 선언합니다. AI는 이제 우리 대신 타자를 쳐주는 빠릿빠릿한 주니어 인턴이 아닙니다. Andrej Karpathy Skills는 이 똑똑하지만 통제 불능인 인턴에게 '산전수전 다 겪은 시니어 엔지니어의 규율'을 이식하는 뇌수술과 같습니다.
+실제 저장소의 작은 이슈 20개 정도를 기존 설정과 지침 설정으로 나눠 실행합니다. 정답 test, 관련 없는 파일·줄 변경, dependency 추가, 질문 수, token·시간, 사람이 고친 diff와 되돌림을 같은 기준으로 측정합니다. 지침을 추가한 뒤 질문만 늘고 무관 변경이 줄지 않는다면 문구를 더 길게 만드는 대신 gate와 작업 정의를 고쳐야 합니다.
 
-현업 실무자로서 우리는 이제 코드를 '어떻게 짜느냐'의 시대에서 벗어나, AI의 폭주를 어떻게 제어하고 '올바른 성공 기준'을 어떻게 설계할 것인가를 치열하게 고민해야 합니다. AI가 뱉어낸 화려한 코드를 리뷰하며 찝찝함에 밤을 새우는 것에 지치셨다면, 당장 프로젝트 루트에 `CLAUDE.md`를 만들고 이 룰을 심어보세요. 쏟아지는 코드의 양은 줄어들겠지만, 그 코드가 주는 평화로움은 배가 될 것입니다.
+첫 적용은 비핵심 branch와 제한된 workspace에서 합니다. Agent는 운영 secret·배포 권한을 갖지 않고 test 변경은 별도 review 대상으로 둡니다. rule file의 원칙을 어겼을 때 실행기가 이를 감지할 수 있어야 prompt가 단순한 희망사항을 넘어 팀의 작업 절차와 연결됩니다.
+
+이 프로젝트에서 가져갈 핵심은 유명인의 이름이나 “완벽한 통제” 주장이 아니라 가정을 드러내고, 필요한 만큼만 고치며, 완료를 검증 가능한 상태로 정의하라는 원칙입니다. 이 원칙도 모든 업무에 동일하게 강제하기보다 위험과 되돌릴 수 있는 정도에 맞춰 조절해야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/forrestchang/andrej-karpathy-skills)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조·격리·도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한·업데이트 검증 기준을 정리합니다.
+- [Agent Safehouse로 macOS AI 에이전트를 가둘 수 있을까: Deny-first와 예외 권한]({% post_url 2026-03-11-Agent-Safehouse-Deep-Dive-Leashing-Your-AI-Agents-at-the-Kernel-Level-on-macOS %}) — macOS Seatbelt·sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크·홈 설정·IPC 예외 및 완전 격리가 아닌 한계를 정리합니다.
+- [CoCo는 이미지 속 글자·배치를 코드로 고칠까: +68.83%와 Sandbox 비용]({% post_url 2026-03-11-CoCo--Code-as-CoT-for-Text-to-Image-Preview-and-Rare-Concept-Generation %}) — 자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안·지연·복잡한 장면 한계를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### CLAUDE.md나 rules file을 추가하면 AI가 관련 없는 코드를 절대 바꾸지 않나요?
+
+아닙니다. 지침은 행동 경향을 바꿀 뿐 보장이 아니므로 허용 경로, diff 검사, test와 사람 review를 별도 gate로 둬야 합니다.
+
+### 모호할 때 항상 질문하게 하는 것이 좋은가요?
+
+되돌리기 쉬운 작은 선택까지 모두 질문하면 지연이 커지므로, 위험·범위·요구사항을 바꾸는 모호성만 사람에게 올리는 기준이 필요합니다.
+
+### Goal-Driven loop는 어떤 종료 조건이 필요한가요?
+
+성공 test뿐 아니라 최대 반복·시간·token·diff, 같은 오류 반복과 test 변경 승인 조건을 code 수준에서 고정해야 합니다.
 
 ## References
-- https://github.com/forrestchang/andrej-karpathy-skills
-- https://github.com/karpathy/autoresearch
-- https://aakashg.com/
-- https://open-vsx.org/extension/MichielWBeijen/andrej-karpathy-skills-cursor-vscode
+- [GitHub 저장소](https://github.com/forrestchang/andrej-karpathy-skills)
+- [GitHub 저장소](https://github.com/karpathy/autoresearch)
+- [aakashg.com 원문](https://aakashg.com/)
+- [open-vsx.org 원문](https://open-vsx.org/extension/MichielWBeijen/andrej-karpathy-skills-cursor-vscode)

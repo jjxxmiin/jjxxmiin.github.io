@@ -6,9 +6,9 @@ categories: Tech
 tags:
   - 멀티에이전트
   - 파이썬
-  - Gemini
-  - 업무자동화
-  - 온디바이스AI
+  - LLM
+  - API
+  - 오픈소스
 summary: 'Agno(구 Phidata)는 복잡한 그래프나 체인 추상화 없이 순수 파이썬 코드만으로 멀티 에이전트를 구축할 수 있는 고성능 오픈소스
   프레임워크입니다.
 
@@ -17,12 +17,12 @@ summary: 'Agno(구 Phidata)는 복잡한 그래프나 체인 추상화 없이 �
 
   기억(Memory), 지식(Knowledge/RAG), 도구(Tools), 가드레일(Guardrails)을 통합 제공하여 개발자가 복잡한 인프라
   오버헤드 없이 시스템 논리 구현에 집중하도록 돕습니다.'
-author: AI Trend Bot
+description: 'Agno의 Agent·Team·Workflow와 AgentOS 런타임 구조, 순수 Python 제어의 장점과 벤치마크 조건·세션 보안·운영 실패 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/agno-agi/agno
 image:
   path: https://opengraph.githubassets.com/1/agno-agi/agno
-  alt: 'Agno: Pure Python Multi-Agent Framework and Production AgentOS Runtime'
+  alt: "agno-agi/agno GitHub 저장소 대표 이미지"
 project:
   stars: 41816
   forks: 5802
@@ -52,13 +52,15 @@ chart: true
 - [Agno 공식 문서](https://docs.agno.com)
 - [Agno 공식 웹사이트](https://www.agno.com)
 
-> **먼저 알아둘 용어**
+Agno는 Python 제어 흐름으로 에이전트와 팀을 구성하고 같은 코드에서 API 런타임까지 연결하려는 개발팀에 적합합니다. 프레임워크 인스턴스 생성이 빠르다는 벤치마크만으로 실제 LLM 응답이나 도구 실행이 빨라지는 것은 아닙니다. 도입 전 자신의 모델·세션 저장소·동시 요청 조건에서 전체 지연, 메모리와 실패 복구를 비교해야 합니다.
+
+> **Agno에서 실행 단위를 고르는 기준**
 >
-> - **LLM**: 엄청난 양의 글을 학습해 문장을 만들어 내는 대형 AI 모델입니다. ChatGPT 가 대표적입니다.
-> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
-> - **API**: 다른 프로그램에서 이 기능을 불러다 쓸 수 있게 열어 둔 창구입니다.
-> - **오픈소스**: 소스 코드를 공개해 누구나 보고 고쳐 쓸 수 있게 한 것입니다. 조건은 라이선스마다 다릅니다.
-> - **할루시네이션**: AI가 사실이 아닌 내용을 사실인 것처럼 지어내 말하는 현상입니다.
+> - **Agent**: 모델·도구·지시를 한 실행 주체로 묶은 가장 작은 단위입니다. 도구 몇 개로 결과 하나를 만들 수 있다면 이 구조부터 검증하는 편이 추적하기 쉽습니다.
+> - **Team**: 서로 다른 역할의 Agent가 작업을 나누고 결과를 합치는 협력 단위입니다. 역할을 늘릴수록 전달되는 문맥과 실패 지점도 함께 늘어납니다.
+> - **Workflow**: 실행 순서·분기·재시도를 Python 제어 흐름으로 명시한 자동화 과정입니다. 어떤 단계가 다음에 실행돼야 하는지 업무 규칙이 분명할 때 적합합니다.
+> - **AgentOS**: 작성한 Agent·Team·Workflow를 API로 실행하고 세션·메모리·추적 정보를 연결하는 런타임 계층입니다. AgentOS를 띄웠다는 사실만으로 인증과 운영 복구가 완성되는 것은 아닙니다.
+> - **세션 지속성**: 요청이 끝난 뒤에도 대화 상태와 실행 기록을 저장소에 남겨 다음 요청에서 이어 쓰는 성질입니다. 사용자별 격리와 보존 기간을 함께 정해야 합니다.
 {: .prompt-info }
 
 ## 도입 및 한 줄 요약
@@ -158,4 +160,37 @@ AgentOS는 스테이트리스 환경에서도 지속성을 유지하기 위해 �
 
 ```mermaid
 erDiagram
-    AGENT_ENTITY ||--o{ AGENT_SESSION : 
+    AGENT_ENTITY ||--o{ AGENT_SESSION :
+```
+
+위 ER 다이어그램은 파일 끝에서 관계 설명이 잘린 상태이므로 완성된 데이터베이스 스키마로 해석하면 안 됩니다. 실제 테이블과 마이그레이션은 현재 저장소 문서를 기준으로 확인해야 합니다.
+
+## 단일 Agent와 Team·Workflow 중 무엇을 선택할까?
+
+도구 몇 개로 한 가지 결과를 만드는 작업은 단일 Agent로 시작하는 편이 추적하기 쉽습니다. 서로 다른 전문 판단이 실제로 필요할 때만 Team을 추가하고, 승인·재시도·분기 순서가 명확한 업무는 일반 Python 함수와 Workflow로 고정합니다. 역할 이름만 다른 에이전트를 많이 붙이면 같은 문맥을 반복 전송하고 결과를 다시 요약하느라 비용과 지연이 늘 수 있습니다.
+
+멀티 에이전트의 합격 기준은 대화가 자연스러운지가 아니라 완료율과 오류 위치를 재현할 수 있는지입니다. 같은 입력으로 단일 Agent와 Team을 비교해 도구 호출 수, 토큰, 최종 정확도와 사람이 수정한 시간을 기록합니다. Team이 더 비싸면서 품질 차이가 없다면 구조를 단순화하는 것이 낫습니다.
+
+## AgentOS를 올리면 곧 프로덕션 준비가 끝날까?
+
+REST 엔드포인트와 스트리밍이 생겨도 인증·권한·속도 제한·비밀 관리와 데이터 보존 정책은 서비스 요구에 맞게 검증해야 합니다. 세션과 메모리를 영구 저장한다면 사용자 간 데이터가 섞이지 않는지, 삭제 요청과 백업에서도 제거되는지, 도구 호출 로그에 API 키나 개인정보가 남지 않는지 확인합니다. 스테이트리스 API 프로세스와 상태 저장소의 책임도 구분해야 장애 뒤 세션을 복구할 수 있습니다.
+
+도구 실행에는 요청별 허용 목록과 시간·비용 상한을 두고, 외부 작업은 중복 재시도에도 한 번만 처리되도록 설계합니다. 모델 답변이 실패했을 때 HTTP 성공으로 반환하지 말고 검증 실패, 도구 오류와 사용자 취소를 구분해 관측해야 합니다. AgentOS가 제공하는 기능은 운영의 기반이지 조직의 보안 정책을 자동 완성하는 것은 아닙니다.
+
+## 성능 수치는 어떤 조건에서 다시 재야 할까?
+
+인스턴스 생성 수와 초기 메모리는 프레임워크 객체의 오버헤드를 비교하는 지표입니다. 실제 서비스에서는 모델 네트워크 지연, 데이터베이스, 도구 API와 긴 프롬프트가 더 큰 비중을 차지할 수 있습니다. 동일한 Python 버전과 기능 범위, 동시 사용자 수에서 p50·p95 지연과 최대 메모리를 측정하고, 다른 프레임워크 비교표의 조건이 같지 않다면 숫자를 직접 대입하지 않아야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/agno-agi/agno)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [PraisonAI: YAML과 파이썬 코드로 구축하는 자율형 멀티 AI 에이전트 오케스트레이션]({% post_url 2026-08-10-PraisonAI-Low-Code-Multi-Agent-AI-Framework-for-Autonomous-Workflows %}) — PraisonAI는 코드 몇 줄이나 간단한 YAML 설정만으로 자율형 멀티 AI 에이전트 시스템을 구축하고 배포할 수 있게 해주는 오픈소스 프레임워크입니다. 100개 이상의 LLM 지원, 메모리 관리, RAG, MCP 도구 연동을…
+- [DeepTutor: 지식 그래프와 멀티 에이전트 기반의 맞춤형 AI 학습 플랫폼]({% post_url 2026-08-12-DeepTutor-Agent-Native-Lifelong-Personalized-Tutoring-Framework-by-HKU %}) — 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대 멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
+- [CowAgent: 단순한 챗봇을 넘어 스스로 행동하는 오픈소스 AI 비서 구축 가이드]({% post_url 2026-07-12-CowAgent-Building-an-Autonomous-Open-Source-AI-Assistant-Beyond-Simple-Chatbots %}) — 과거 'chatgpt-on-wechat'으로 알려졌던 CowAgent는 메신저에 갇힌 단순한 챗봇을 넘어, 로컬 환경의 파일 읽기부터 명령어 실행까지 스스로 수행하는 능동적 에이전트 프레임워크입니다. 다양한 대형 언어 모델과 다중…
+<!-- internal-links:end -->

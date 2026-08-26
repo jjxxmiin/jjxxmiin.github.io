@@ -1,59 +1,49 @@
 ---
 layout: post
-title: '"코파일럿, 커서(Cursor) 다 끄세요." 터미널에 강림한 DeepSeek-TUI가 증명한 진짜 엔지니어링의 본질'
+title: 'DeepSeek-TUI를 coding agent로 써도 될까: Terminal·Shell 권한·검증 기준'
 date: '2026-05-03 06:37:36'
 categories: Tech
 tags:
   - DeepSeek
-  - AI코딩
-  - Microsoft
-  - OpenAI
   - MCP
-summary: 무거운 GUI 기반 AI 에디터를 벗어나, 딥시크(DeepSeek) V4의 압도적 성능과 터미널의 순수성을 결합한 차세대 코딩 에이전트
-  'DeepSeek-TUI'의 핵심 아키텍처와 실무 적용 시나리오를 심도 있게 파헤칩니다.
-author: AI Trend Bot
+  - AI보안
+  - AI에이전트
+summary: 'DeepSeek-TUI가 terminal에서 model·file·shell·MCP를 연결하는 구조를 살펴보고, native 기능 주장, context 압축, fan-out 비용과 자동 실행 권한의 위험을 검증합니다.'
+description: "DeepSeek-TUI의 terminal streaming·model fan-out·context compaction·MCP와 shell 실행을 repository 근거, token 비용, sandbox·approval·복구 기준으로 점검합니다."
 github_url: https://github.com/Hmbown/DeepSeek-TUI
+faq:
+  - question: "DeepSeek-TUI를 쓰려면 Copilot이나 Cursor를 중단해야 하나요?"
+    answer: "아닙니다. terminal 중심 조사와 IDE review는 다른 장점이 있으므로 같은 대표 작업의 성공률·비용·복구 시간을 비교해 병행 여부를 정하면 됩니다."
+  - question: "긴 context와 여러 sub-agent가 있으면 큰 repository를 정확히 이해하나요?"
+    answer: "보장하지 않습니다. 잘못된 file 선택·오래된 요약과 중복 분석이 생길 수 있어 근거 path·commit, test와 전체 token을 검증해야 합니다."
+  - question: "자동 승인 mode를 일상 개발에 사용해도 되나요?"
+    answer: "권장하지 않습니다. 일회성 sandbox·최소 권한에서도 destructive command와 external write는 차단하고 diff·대상과 예상 side effect를 승인해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/Hmbown/DeepSeek-TUI
-  alt: '"Turn Off Copilot and Cursor." How DeepSeek-TUI in the Terminal Proves the
-    True Essence of Engineering'
+  alt: "Hmbown/DeepSeek-TUI GitHub 저장소 대표 이미지"
 ---
 
-### The Hook (공감과 도발)
+DeepSeek-TUI는 terminal에서 model 응답과 file·shell·MCP 도구를 연결하려는 coding agent 후보입니다. GUI가 없다는 사실만으로 더 빠르거나 안전해지는 것은 아니며, 저장소가 실제 지원하는 model·context·fan-out 기능과 실행 권한을 version별로 확인해야 합니다. 첫 pilot은 credential과 외부 write가 없는 disposable repository에서 읽기·patch 제안만 허용하는 편이 좋습니다.
 
-요즘 다들 AI 코딩 이야기만 하죠. 그런데 진짜 쓸모가 있을까요? 솔직히 털어놓겠습니다. 저는 최근 유행하는 무거운 GUI 기반 AI 에디터들에 점점 지쳐가고 있었습니다. 에디터 띄우고, 거대한 프로젝트의 인덱싱을 하염없이 기다리고, RAM은 16GB를 훌쩍 넘어 터질 듯이 돌아가는 상황. 현업에서 새벽에 장애가 터져 SSH로 서버에 붙어 급하게 로그를 까보고 스크립트를 짜야 할 때, 그 예쁘고 무거운 AI 도우미들은 철저하게 무용지물이었습니다. 
+## native 연동 주장은 무엇을 확인해야 하나
 
-그러다 최근 깃허브(GitHub) 트렌딩을 휩쓸며 하룻밤 새 별을 수백 개씩 빨아들인 괴물 같은 녀석을 발견했습니다. 바로 **DeepSeek-TUI**입니다. 처음엔 "그냥 흔해 빠진 OpenAI API 래퍼(Wrapper) CLI 중 하나겠지"라며 코웃음을 쳤습니다. 그런데 소스 코드를 열어보고, 밤새 제 로컬 환경에서 굴려본 뒤엔 생각이 완전히 바뀌더라고요. 이건 단순한 터미널 클라이언트가 아닙니다. 딥시크(DeepSeek) V4의 경이로운 가성비와 네이티브 프로토콜을 터미널이라는 가장 원초적이고 강력한 환경에 직결시킨 '결전 병기'에 가깝습니다. 마우스 클릭에 길들여진 우리에게, 이 녀석이 왜 멱살을 잡고 터미널로 끌고 가는지 그 밑바닥을 낱낱이 파헤쳐 보겠습니다.
+원문은 범용 OpenAI 호환 layer 대신 DeepSeek 쪽 기능에 가깝게 연동해 streaming, reasoning 관련 표시와 function calling을 활용한다고 설명합니다. 특정 provider 최적화는 기능을 빨리 쓸 수 있는 대신 model·API version이 바뀔 때 호환 부담이 커집니다. 공식 API field와 repository code에서 지원 범위를 확인하고, marketing 명칭이나 미래 model 이름을 현재 기능으로 가정하지 않아야 합니다.
 
----
+범용 API layer는 model 교체와 test double을 쉽게 만들 수 있지만 provider별 option을 늦게 지원할 수 있습니다. native client는 반대 trade-off가 있습니다. 어느 방식이 정확도와 비용에 유리한지는 같은 task, model과 tool schema에서 측정해야 하며 “하위 계층”이라는 표현 자체가 성능 근거는 아닙니다.
 
-### TL;DR (The Core)
-
-DeepSeek-TUI는 무거운 GUI를 걷어내고 터미널에서 직접 작동하며, 딥시크 V4의 100만 토큰 컨텍스트와 네이티브 '생각 모드(Chain-of-Thought)'를 로컬 파일시스템 및 쉘(Shell) 권한과 직접 연결해 압도적인 속도와 극한의 비용 효율을 달성하는 패러다임 시프트입니다.
-
----
-
-### Deep Dive: Under the Hood (핵심 아키텍처 심층 분석)
-
-뻔한 기능 나열은 집어치우고, 진짜 기술적인 이야기를 해보죠. DeepSeek-TUI가 기존의 수많은 AI CLI 도구들과 결정적으로 다른 점은 **'어설픈 범용성을 철저히 버리고 딥시크 네이티브 프로토콜에 극단적으로 최적화했다'**는 사실입니다.
-
-대부분의 오픈소스 에이전트들은 LangChain 같은 추상화 레이어를 얹거나 OpenAI 규격(OpenAI-shaped API)으로 통신합니다. 이 방식은 LLM을 다른 벤더로 교체하기는 쉽지만, 각 모델이 가진 고유의 성능과 기능을 100% 끌어내지 못하죠. 반면 DeepSeek-TUI는 딥시크 API의 하위 계층까지 직접 파고들었습니다. 
-
-특히 소스 코드를 뜯어보며 가장 소름 돋았던 부분은 **Native RLM(Reasoning Logic Model) Fan-out 아키텍처**입니다. 터미널에서 하나의 복잡한 태스크가 주어지면, 내부적으로 값싼 `deepseek-v4-flash` 모델 1~16개를 병렬로 띄워(Fan-out) 각기 다른 접근법으로 코드를 분석하게 한 뒤, 그 결과를 취합해 메인 프롬프트로 밀어 넣습니다. 이 모든 과정이 터미널의 비동기 스트리밍(SSE)으로 실시간 렌더링되는데, 그 속도와 비용 효율이 상상을 초월합니다. Claude 4.6을 썼다면 토큰 비용으로 몇 달러가 날아갔을 작업을 단돈 몇 센트로 끝내버리죠.
-
-> "추상화의 장막을 걷어내면, 결국 남는 것은 프로토콜의 순수성과 성능뿐입니다. DeepSeek-TUI는 정확히 그 지점을 꿰뚫었습니다."
+원문은 하나의 task를 여러 요청으로 fan-out하고 결과를 취합하는 구조와 1~16개 병렬 범위를 제시합니다. `deepseek-v4-flash` 같은 model 명칭과 실제 구현 여부는 현재 저장소에서 확인해야 합니다. 병렬 요청은 wall time을 줄일 수 있지만 input을 반복 전송하고 서로 비슷한 답을 만들어 token·rate limit를 늘립니다. 1·2·4개 요청에서 최종 test 정답, 전체 token·비용과 p95 시간을 비교해야 합니다.
 
 아래 표를 통해 기존 범용 AI CLI와 DeepSeek-TUI의 아키텍처 차이를 명확히 비교해 보겠습니다.
 
 | 아키텍처 구분 | 기존 범용 AI CLI (OpenAI Wrapper) | DeepSeek-TUI (Native Architecture) |
 | :--- | :--- | :--- |
 | **API 통신 규격** | OpenAI 호환 범용 REST API | **딥시크 Native Function-calling & SSE 프로토콜** |
-| **추론(Reasoning) 처리** | 모델의 최종 결과값만 텍스트로 반환 대기 | **Thinking-mode 실시간 스트리밍** (Chain-of-Thought 노출) |
-| **병렬 처리 아키텍처** | 단일 스레드 기반 직렬 요청 | **Native RLM Fan-out** (1~16개 Flash 모델 병렬 추론) |
-| **컨텍스트 메모리 관리**| 단순 슬라이딩 윈도우 (과거 대화 기계적 잘림) | 1M 토큰 지원 및 **자동 지능형 압축(Intelligent Compaction)** |
+| **추론 표시** | 최종 결과 중심 | repository·API가 지원하는 streaming 범위 확인 |
+| **병렬 처리** | 구현에 따라 직렬·병렬 | 원문 fan-out 1~16개 주장 검증 필요 |
+| **context 관리**| sliding·summary 등 구현별 차이 | model 한도·compaction 구현 확인 필요 |
 | **도구(Tool) 연동성** | 제한적인 Shell 실행 및 파일 텍스트 읽기 | **MCP(Model Context Protocol) 네이티브 통합** 및 서브 에이전트 관리 |
 
-개발자라면 당연히 이 녀석이 터미널에서 로컬 자원과 어떻게 바인딩되는지 궁금하시겠죠? 실제 설정 파일의 핵심 로직을 뜯어보겠습니다.
+아래 TOML은 원문이 제시한 구성 예시입니다. 실제 file path, model ID, option과 MCP schema가 현재 release에서 유효한지는 문서와 `--help`에서 확인해야 합니다. 특히 credential이 문자열로 들어간 예제를 그대로 commit해서는 안 됩니다.
 
 ```toml
 # ~/.deepseek/config.toml (DeepSeek-TUI Configuration Example)
@@ -63,7 +53,7 @@ fallback_model = "deepseek-v4-flash"
 max_context_tokens = 1000000
 
 [interaction]
-# Plan (안전한 탐색), Agent (사용자 승인 후 실행), YOLO (묻지마 자동 실행 - 주의!)
+# Plan, Agent, 자동 실행 mode의 실제 지원 여부와 권한은 version별 확인
 mode = "Agent"
 reasoning_effort = "max" # 현업 실무 시 Shift+Tab으로 터미널에서 즉시 전환 가능
 
@@ -77,50 +67,77 @@ args = ["-y", "@modelcontextprotocol/server-postgres", "postgresql://admin:secre
 live_cost_tracking = true
 ```
 
-이 설정에서 볼 수 있듯, `tools.mcp`를 통해 단순히 코드를 생성하는 것을 넘어 로컬 DB, Git 트리, 심지어 사내 레거시 API까지 터미널 안에서 딥시크 모델과 직접 소통하게 만들 수 있습니다. 특히 `live_cost_tracking`이 턴(Turn) 단위로 터미널 하단에 표시되는 건, 클라우드 비용에 민감한 실무자들의 주머니 사정을 기가 막히게 캐치한 신의 한 수죠.
+MCP 연결이 실제 지원된다면 local DB, Git과 사내 API를 tool로 노출할 수 있습니다. 이는 편의 기능인 동시에 권한 확대입니다. 예시 URI의 password 같은 secret을 config에 평문으로 두지 말고 최소 권한의 읽기 전용 계정과 secret store를 사용합니다. 화면의 cost 추정치가 있더라도 provider invoice, retry·sub-agent와 cache token까지 포함되는지 대조해야 합니다.
 
-100만 토큰이라는 어마어마한 컨텍스트를 로컬 터미널에서 어떻게 감당할까요? 비밀은 **자동 지능형 압축(Intelligent Compaction)** 알고리즘에 있습니다. 대화가 길어지고 터미널 스크롤 버퍼가 한계에 다다르면, TUI 내부에서 불필요한 과거 턴의 추론 과정을 스스로 요약하고 핵심 코드 스니펫의 포인터만 남긴 채 메모리를 비워버립니다. 과거의 '밀어내기식' 잘림 현상과는 완전히 차원이 다른 경험입니다.
-
----
-
-### Pragmatic Use Cases (실무 적용 시나리오)
-
-자, "Hello World"나 짜주는 튜토리얼은 의미가 없습니다. 제가 현업에서 직접 부딪히며 체감한 하드코어한 실무 시나리오 두 가지를 공유합니다.
-
-**1. 낡고 거대한 Spring Boot 레거시 프로젝트의 대규모 마이그레이션**
-수백 개의 파일로 얽히고설킨 7년 된 Java 레거시 프로젝트에 투입되었다고 가정해 보죠. 기존 GUI 기반 AI에게 이 컨텍스트를 먹이려면 거대한 인덱싱 작업이 끝날 때까지 멍하니 창을 바라봐야 합니다. 
-하지만 터미널에선 다릅니다. 프로젝트 루트에서 `deepseek` 명령어를 치고 들어간 뒤, 네이티브 쉘 연동 도구를 이용해 `find . -name "*.java" | xargs` 형태로 관련된 비즈니스 로직 파일 80개를 통째로 컨텍스트에 들이붓습니다. 
-*"이 프로젝트에서 사용 중인 구형 DB 커넥션 풀 로직을 모두 찾아서 HikariCP로 마이그레이션하는 계획을 `PLAN.md`로 작성해 줘."*
-지시가 떨어지면, 에이전트는 서브 에이전트를 생성해 파일들을 병렬로 스캔하고 터미널 화면에 실시간으로 자신의 '생각(Thinking)'을 렌더링하며 마크다운을 작성해 냅니다. 속도와 컨텍스트 이해도 측면에서 기존 도구들을 압살합니다.
-
-**2. 새벽 3시, Node.js 프로덕션 서버의 치명적인 메모리 누수(Memory Leak) 트러블슈팅**
-새벽에 서버에서 OOM(Out of Memory) 장애 알람이 울립니다. SSH로 접속한 긴박한 상황, 무거운 IDE를 켤 시간 따윈 없죠. 이럴 때 서버에 포팅된 DeepSeek-TUI의 진가가 발휘됩니다. 
-터미널에서 곧바로 에이전트를 호출해 지시합니다. *"지금 서버의 `top` 프로세스 상태를 분석하고, 최근 1시간 동안의 pm2 에러 로그를 읽어서 메모리가 튀는 정확한 엔드포인트를 찾아."*
-에이전트는 스스로 쉘 명령어를 실행(`lsof`, `tail -f` 등)하여 시스템 상태를 읽어들이고, 추론 능력을 바탕으로 특정 API 라우트에서 캐시 객체가 해제되지 않고 쌓이는 현상을 찾아냅니다. 심지어 임시 패치를 작성한 뒤 `apply-patch` 도구를 이용해 터미널을 벗어나지 않고 그 자리에서 즉시 버그를 픽스해버립니다. 놀랍게도 이 모든 과정에서 마우스는 단 한 번도 건드리지 않았습니다.
+긴 context나 자동 compaction을 지원한다면 model 한도와 client가 실제 보내는 token을 구분해야 합니다. 요약은 오래된 대화를 줄이지만 삭제된 constraint, 잘못된 file pointer와 stale branch 정보를 만들 수 있습니다. compaction 전후 summary와 source reference를 log에 남기고, 핵심 요구·test command·현재 commit은 별도 고정 상태로 유지합니다. 100만 token 같은 수치는 선택한 model과 API 시점에 따라 확인해야 합니다.
 
 ---
 
-### Honest Review & Trade-offs (진짜 장단점과 한계)
+## 어떤 작업에서 pilot을 시작할까
 
-그렇다면 이것이 완벽한 은탄환(Silver Bullet)일까요? 산전수전 다 겪은 시니어로서 냉정하게 평가하자면, 도입 전 반드시 고려해야 할 치명적인 단점과 트레이드오프가 존재합니다.
+아래는 terminal agent의 적합성을 판단하기 위한 예시이며 직접 수행한 체험이나 성공 사례가 아닙니다. 읽기·계획과 운영 write를 분리해야 합니다.
 
-첫째, **극단적인 벤더 락인(Vendor Lock-in) 리스크**입니다. 앞서 칭찬했던 '딥시크 네이티브 아키텍처'가 실무에선 양날의 검으로 작용합니다. 만약 내일 당장 경쟁사가 압도적인 성능의 새 모델을 발표하더라도, 이 TUI 구조상 백엔드 모델만 쏙 갈아끼우는 건 불가능에 가깝습니다. 딥시크 생태계에 철저히 종속될 각오를 해야 합니다.
+### Spring Boot legacy의 migration inventory
 
-둘째, **가파른 러닝 커브와 피로도**입니다. Vim이나 Tmux 환경에 익숙하지 않은 주니어 개발자들에게는 잔인할 정도로 불친절합니다. 단축키 기반의 네비게이션, 세션 롤백, 서브 에이전트 관리를 오직 키보드만으로 다루는 것은 초기 적응에 상당한 피로감을 동반합니다.
+수백 Java file을 한 번에 context로 넣기보다 build file, connection configuration과 reference 검색으로 범위를 줄입니다. Agent에게 구형 pool 사용처, 변경 후보와 근거 path를 `PLAN.md`로 제안하게 하되 code write는 막습니다. 여러 sub-agent를 쓴다면 package별 read scope를 나누고 중복·누락을 하나의 reviewer가 통합합니다. 실제 migration은 test와 작은 patch 단위로 별도 승인합니다.
 
-셋째, **치명적인 'YOLO(자동 승인)' 모드의 위험성**입니다. 에이전트가 쉘 명령어를 실행할 때 확인 과정을 생략하는 이 모드는 속도 면에선 최고지만, AI 특유의 환각(Hallucination) 현상이 발생하면 `rm -rf`나 치명적인 `git reset --hard`를 임의로 실행할 끔찍한 리스크가 도사리고 있습니다. 사이드 깃(Side-git) 롤백 기능이 있다고는 하나, 로컬 DB 데이터나 환경 설정 파일까지 날려먹는 사태를 완벽히 방어해주진 못하더라고요. 또한 초기 버전 특유의 불안정한 MCP 연동 버그도 종종 눈에 띕니다.
+shell의 `find`와 `xargs`는 빠르지만 generated file, secret과 큰 vendor tree까지 model에 보낼 수 있습니다. ignore rule, 최대 file·byte, binary·secret scan을 executor에서 강제합니다. streaming되는 reasoning 문장이 자연스럽다는 사실은 codebase 이해를 증명하지 않으므로 근거 file과 build·test 결과만 평가합니다.
+
+### production 장애에는 복사한 log만 준다
+
+OOM 조사에서 `top`, process metric과 최근 log를 요약하는 보조 도구로 쓸 수 있지만 production host에 agent와 API key를 설치하고 shell write를 주는 것은 위험합니다. 가능한 경우 필요한 log를 redaction한 격리 환경으로 복사해 읽기 전용으로 분석합니다. endpoint 원인은 heap profile, metric와 재현으로 확인해야 하며 LLM의 설명만으로 확정하지 않습니다.
+
+운영 명령은 allowlist와 timeout·output 상한을 두고 `lsof`·log read 같은 관찰과 process kill·deploy·patch를 분리합니다. 긴급 상황에서도 patch는 repository PR, test와 배포 절차를 거칩니다. terminal에 있다는 사실은 change management를 생략할 이유가 아닙니다.
 
 ---
 
-### Closing Thoughts
+## provider·사용성·자동 실행의 실패 조건은 무엇인가
 
-솔직히 처음 이 아키텍처를 봤을 땐 짙은 의구심이 들었습니다. "이렇게 훌륭한 GUI 시대에 웬 터미널 퇴행인가?" 싶었죠. 하지만 며칠간 실무 코드를 뒹굴어본 뒤, 이것이 단순한 힙스터들의 장난감이 아니라 엔지니어링의 '진화'임을 뼈저리게 깨달았습니다.
+첫째, **provider 결합**입니다. native option에 의존할수록 다른 model로 교체하거나 API 변경에 대응할 adapter·test가 필요합니다. model ID, function schema와 streaming event를 contract test로 고정하고 장애 때 read-only 대체 경로가 있는지 확인합니다. 교체가 불가능하다고 미리 단정하기보다 repository의 provider abstraction을 검사해야 합니다.
 
-우리는 그동안 AI를 '보조 도구(Copilot)'로 여기며 에디터의 사이드바라는 좁은 감옥에 가둬두었습니다. 하지만 DeepSeek-TUI는 AI에게 개발자의 터미널이라는 '운전대'를 직접 쥐여주는 과감한 패러다임 시프트를 보여줍니다. 압도적인 가성비를 자랑하는 딥시크 V4 모델이 있었기에 이런 대담한 구조적 시도가 가능했던 거겠죠.
+둘째, **TUI 사용성과 복구**입니다. keyboard workflow가 맞는 사용자도 session rollback, sub-agent 상태와 diff review를 정확히 이해해야 합니다. terminal size·screen reader·tmux·SSH에서 입력이 안정적인지, daemon crash 뒤 작업을 복구할 수 있는지 시험합니다. 신규 사용자의 작업·오류 복구 시간을 GUI 기준선과 비교합니다.
 
-저는 여전히 정교한 페어 프로그래밍이 필요할 땐 커서(Cursor)를 쓸 겁니다. 하지만, 대규모 로그를 뒤지고, 수십 개의 레거시 코드를 파헤치며, 인프라의 트러블슈팅을 해야 하는 차가운 터미널 앞에서는 주저 없이 `deepseek`을 타이핑할 것입니다. 기술의 거품이 걷히고 있는 지금, 무거운 껍데기를 버리고 터미널의 순수한 본질로 돌아갈 준비가 되셨나요? 선택은 여러분의 키보드 끝에 달려있습니다.
+셋째, **자동 승인 mode**입니다. 실제 mode 이름과 동작은 version에서 확인하되, 확인 없는 shell 실행은 file·DB·remote service를 바꿀 수 있습니다. Git snapshot은 untracked·credential·database·message를 모두 복구하지 못합니다. 일회성 container, non-root, workspace-only write, egress 차단과 resource 상한을 기본으로 하고 destructive command와 external write는 runtime이 거부해야 합니다.
+
+MCP server는 각각 별도 trust boundary입니다. package install command, database URI와 노출 tool을 검토하고 범용 shell·raw DB write를 동시에 주지 않습니다. prompt injection이 log·repository 문서에서 tool 호출을 유도하는 경우를 시험하며 모든 call에 task·argument·결과와 승인 ID를 남깁니다.
+
+---
+
+## IDE와 같은 task로 비교한다
+
+대표 task 20~50개에서 code search, plan, small patch와 log triage를 나눕니다. 첫 올바른 결과까지의 시간, test 통과, 잘못된 command, input·output·sub-agent token, 사람 review와 rollback을 기록합니다. GUI index 시간만 빼거나 TUI startup만 재지 말고 최종 완료 비용을 비교합니다. 같은 model·repository snapshot·tool 권한을 사용해야 interface 효과를 분리할 수 있습니다.
+
+TUI가 remote·keyboard 중심 조사에서 유리하고 IDE가 visual debug·large diff review에서 유리할 수 있습니다. 하나를 끄라는 결론보다 task별 도구 경계를 정하는 편이 현실적입니다. 저장소에서 핵심 기능과 현재 유지 상태를 확인할 수 없거나, 비용 trace와 권한 audit가 불완전하고 sandbox failure를 복구하지 못하면 운영 범위를 넓히지 않습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Hmbown/DeepSeek-TUI)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
+- [Gemini CLI에 파일 수정 권한을 줘도 될까: Plan Mode·MCP 안전선]({% post_url 2026-03-20-Why-the-Gemini-CLI-an-AI-Agent-in-the-Terminal-Disrupted-a-10-Year-Developers-Workflow-feat-MCP-Architecture-Deep-Dive %}) — Gemini CLI의 도구 반복, MCP 연결, Plan Mode와 ask_user를 기준으로 로컬 코딩 에이전트의 권한·컨텍스트·검토 범위를 정리합니다.
+- [SST OpenCode를 팀에 도입해도 될까: Model 선택·LSP·권한 검증]({% post_url 2026-03-02-Why-Did-I-Find-This-So-Late-An-Honest-Review-of-SST-OpenCode-the-Perfect-AI-Partner-for-Terminal-Loving-Developers %}) — SST OpenCode가 terminal TUI, provider 선택, session·LSP·AGENTS.md로 coding workflow를 구성하는 방식과 file·shell·MCP 권한, diff·test 검증 기준을…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### DeepSeek-TUI를 쓰려면 Copilot이나 Cursor를 중단해야 하나요?
+
+아닙니다. terminal 중심 조사와 IDE review는 다른 장점이 있으므로 같은 대표 작업의 성공률·비용·복구 시간을 비교해 병행 여부를 정하면 됩니다.
+
+### 긴 context와 여러 sub-agent가 있으면 큰 repository를 정확히 이해하나요?
+
+보장하지 않습니다. 잘못된 file 선택·오래된 요약과 중복 분석이 생길 수 있어 근거 path·commit, test와 전체 token을 검증해야 합니다.
+
+### 자동 승인 mode를 일상 개발에 사용해도 되나요?
+
+권장하지 않습니다. 일회성 sandbox·최소 권한에서도 destructive command와 external write는 차단하고 diff·대상과 예상 side effect를 승인해야 합니다.
 
 ## References
-- https://github.com/Hmbown/DeepSeek-TUI
-- https://lib.rs/crates/deepseek-tui
-- https://agentconn.com/deepseek-tui-review-2026
+- [GitHub 저장소](https://github.com/Hmbown/DeepSeek-TUI)
+- [lib.rs 원문](https://lib.rs/crates/deepseek-tui)
+- [agentconn.com 원문](https://agentconn.com/deepseek-tui-review-2026)

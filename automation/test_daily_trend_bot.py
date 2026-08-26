@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import tempfile
 import unittest
 from unittest import mock
@@ -18,6 +19,87 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 class DailyTrendNewsBotTests(unittest.TestCase):
     def setUp(self):
         self.now = datetime.datetime(2026, 7, 26, 9, 0, tzinfo=KST)
+
+    def _valid_evidence(self):
+        return {
+            "published_at": "2026-07-25",
+            "sources": [
+                {
+                    "url": "https://example.com/news/new-model",
+                    "title": "Official announcement",
+                    "publisher": "Example",
+                    "published_at": "2026-07-25",
+                    "tier": "official",
+                },
+                {
+                    "url": "https://trusted.example.net/ai/new-model",
+                    "title": "Independent report",
+                    "publisher": "Trusted Tech",
+                    "published_at": "2026-07-25",
+                    "tier": "trusted",
+                },
+            ],
+            "facts": [
+                {"text": "검증 가격은 10달러에서 5달러로 바뀌었습니다."},
+                *[{"text": f"Fact {index}"} for index in range(1, 4)],
+            ],
+        }
+
+    def _valid_post(self):
+        diagrams = [
+            (
+                "```mermaid\nflowchart LR\n"
+                f'  A["Example 공식 발표"] --> B["검증 조건 {index}"]\n```'
+            )
+            for index in range(1, 4)
+        ]
+        paragraph = (
+            "Example AI의 공식 원문에서 확인한 내용과 아직 공개되지 않은 조건을 "
+            "나눠 보면 도입 판단이 쉬워집니다. 현재 작업을 바로 바꾸기보다 작은 예제에서 "
+            "결과 품질, 소요 시간, 요금과 데이터 처리 조건을 같은 기준으로 비교해야 합니다. "
+        ) * 7
+        intro = (
+            "Example AI가 새 모델을 공개했지만, 지금 바로 교체할지는 제공 범위와 "
+            "미공개 조건을 나눠 확인한 뒤 결정해야 합니다. 이 글은 확인된 변화와 판단 기준을 먼저 정리합니다."
+        )
+        chart = (
+            '```chartjs\n{"type":"bar","data":{"labels":["이전","현재"],'
+            '"datasets":[{"label":"검증 가격","data":[10,5]}]},'
+            '"options":{"plugins":{"title":{"display":true,'
+            '"text":"가격 비교"}}}}\n```'
+        )
+        sections = []
+        for index, heading in enumerate(bot.NEWS_HEADINGS):
+            extras = []
+            if index == 0:
+                extras.append(chart)
+            if index in (1, 2):
+                extras.append(diagrams[index])
+            sections.append("\n\n".join([heading, paragraph, *extras]))
+        content = "\n\n".join([
+            diagrams[0],
+            intro + "[Example](https://example.com/news/new-model).",
+            *sections,
+        ])
+        return {
+            "title_korean": "Example AI 새 모델, 실제로 달라진 세 가지",
+            "title_english": "Example AI New Model Changes Three Things",
+            "description": (
+                "Example AI가 공개한 새 모델의 기능과 제공 범위를 공식 발표와 "
+                "독립 보도로 확인하고, 도입 전 비교할 기준과 아직 검증되지 않은 한계를 함께 정리합니다."
+            ),
+            "summary": (
+                "Example AI가 새 모델을 공개했습니다. 실제 도입 전에는 제공 범위와 "
+                "제한 조건을 확인해야 합니다."
+            ),
+            "content": content,
+            "tags": ["AI 뉴스", "Example AI", "생성형 AI", "AI 모델", "AI 트렌드"],
+            "entities": ["Example AI", "Example Model"],
+            "faq": [
+                {"question": f"질문 {index}?", "answer": f"검증된 답변 {index}입니다."}
+                for index in range(1, 4)
+            ],
+        }
 
     def test_pipeline_uses_only_gemini_3_6_flash_with_request_timeout(self):
         self.assertEqual(bot.FALLBACK_MODELS, ["gemini-3.6-flash"])
@@ -226,7 +308,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             self.assertTrue(bot.daily_post_exists(now=self.now))
 
     @mock.patch.object(bot, "generate_content_with_fallback", return_value=None)
-    def test_relaxed_writer_creates_deterministic_post_when_models_fail(self, _generate):
+    def test_relaxed_writer_rejects_short_fallback_when_models_fail(self, _generate):
         source = "https://example.com/news/new-model"
         candidate = {
             "topic_name": "Example AI",
@@ -260,23 +342,11 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             evidence,
             strict=False,
         )
-        self.assertTrue(post["title_korean"])
-        self.assertEqual(len(post["faq"]), 3)
-        # 그림은 하나뿐이고, 그 하나는 검증된 사실에서 나온 문구로만 만든다.
-        # 예전에는 어느 글에나 들어맞는 흐름도 3개가 자동으로 붙었다.
-        self.assertTrue(post["content"].startswith("```mermaid"))
-        self.assertEqual(post["content"].count("```mermaid"), 1)
-        self.assertIn("Example 새 모델 공개", post["content"])
-        self.assertNotIn("오늘의 AI 변화", post["content"])
-        self.assertNotIn("도입 검토", post["content"])
-        self.assertTrue(all(
-            item["ok"]
-            for item in bot._validate_mermaid_codes(
-                bot._fenced_blocks(post["content"], "mermaid")
-            )
-        ))
-        for heading in bot.NEWS_HEADINGS:
-            self.assertIn(heading, post["content"])
+        self.assertIsNone(post)
+        fallback = bot._fallback_post_data(candidate, evidence)
+        errors = bot._post_data_errors(fallback, evidence)
+        self.assertIn("실제 설명 본문이 너무 짧음", errors)
+        self.assertIn("Mermaid 다이어그램은 3~5개 필요", errors)
 
     def test_first_valid_mermaid_is_promoted_to_article_start(self):
         content = """
@@ -474,71 +544,12 @@ flowchart LR
         self.assertNotIn("999", sanitized)
 
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
-        mermaid = (
-            '```mermaid\n'
-            'flowchart LR\n'
-            '  A["Example 새 모델 공개"] --> B["가격 10달러에서 5달러"]\n'
-            '```'
-        )
-        chart = (
-            '```chartjs\n'
-            '{"type":"bar","data":{"labels":["이전","현재"],'
-            '"datasets":[{"label":"검증 가격","data":[10,5]}]},'
-            '"options":{"plugins":{"title":{"display":true,'
-            '"text":"가격 비교"}}}}\n'
-            '```'
-        )
-        post = {
-            "title_korean": "Example AI 새 모델, 실제로 달라진 세 가지",
-            "title_english": "Example AI New Model Changes Three Things",
-            "description": "Example AI가 공개한 새 모델의 실제 변화와 제공 범위, 도입 전에 확인할 제한 조건을 직접 원문을 바탕으로 정리합니다.",
-            "summary": "Example AI가 새 모델을 공개했습니다. 실제 도입 전에는 제공 범위와 제한 조건을 확인해야 합니다.",
-            "content": "\n\n".join([
-                (
-                    "첫 문단입니다"
-                    "[Example](https://example.com/news/new-model)."
-                ),
-                f"{bot.NEWS_HEADINGS[0]}\n\n검증된 본문입니다.\n\n{chart}",
-                f"{bot.NEWS_HEADINGS[1]}\n\n검증된 본문입니다.\n\n{mermaid}",
-                *[
-                    f"{heading}\n\n검증된 본문입니다."
-                    for heading in bot.NEWS_HEADINGS[2:]
-                ],
-            ]),
-            "tags": ["AI 뉴스", "Example AI", "생성형 AI", "AI 모델", "AI 트렌드"],
-            "entities": ["Example AI", "Example Model"],
-            "faq": [
-                {"question": f"질문 {index}?", "answer": f"검증된 답변 {index}입니다."}
-                for index in range(1, 4)
-            ],
-        }
+        post = self._valid_post()
         candidate = {
             "headline": "Example releases a new model",
             "published_at": "2026-07-25",
         }
-        evidence = {
-            "published_at": "2026-07-25",
-            "sources": [
-                {
-                    "url": "https://example.com/news/new-model",
-                    "title": "Official announcement",
-                    "publisher": "Example",
-                    "published_at": "2026-07-25",
-                    "tier": "official",
-                },
-                {
-                    "url": "https://trusted.example.net/ai/new-model",
-                    "title": "Independent report",
-                    "publisher": "Trusted Tech",
-                    "published_at": "2026-07-25",
-                    "tier": "trusted",
-                },
-            ],
-            "facts": [
-                {"text": "검증 가격은 10달러에서 5달러로 바뀌었습니다."},
-                *[{"text": f"Fact {index}"} for index in range(1, 4)],
-            ],
-        }
+        evidence = self._valid_evidence()
         images = [
             {
                 "path": "https://cdn.example.com/hero.jpg",
@@ -593,6 +604,85 @@ flowchart LR
         self.assertIn('id="source-1"', raw)
         self.assertNotIn("[Example](", raw)
         self.assertIn("## 직접 확인한 원문", raw)
+
+    def test_save_post_without_source_images_generates_card_before_using_content(self):
+        post = self._valid_post()
+        candidate = {
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+        }
+        evidence = self._valid_evidence()
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "collect_source_images", return_value=[]), \
+                mock.patch.object(
+                    bot,
+                    "generate_card",
+                    return_value="/assets/img/thumb/example-card.jpg",
+                ) as generate_card:
+            path = bot.save_post(post, candidate, evidence, now=self.now)
+            with open(path, encoding="utf-8") as handle:
+                raw = handle.read()
+
+        front_matter = yaml.safe_load(raw.split("---", 2)[1])
+        self.assertEqual(
+            front_matter["image"]["path"],
+            "/assets/img/thumb/example-card.jpg",
+        )
+        self.assertTrue(generate_card.called)
+
+    def test_save_post_rejects_invalid_post_before_collecting_images_or_writing(self):
+        post = self._valid_post()
+        post["content"] = "\n\n".join(
+            ["```mermaid\nflowchart LR\n  A --> B\n```", "짧은 도입"]
+            + [f"{heading}\n\n짧은 본문" for heading in bot.NEWS_HEADINGS]
+        )
+        candidate = {
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+        }
+        evidence = self._valid_evidence()
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "collect_source_images") as collect_images:
+            with self.assertRaisesRegex(ValueError, "저장 전 글 품질 검증 실패"):
+                bot.save_post(post, candidate, evidence, now=self.now)
+            self.assertEqual(os.listdir(directory), [])
+        collect_images.assert_not_called()
+
+    def test_save_post_revalidates_after_empty_lead_diagram_is_removed(self):
+        post = self._valid_post()
+        generic = (
+            "```mermaid\nflowchart LR\n"
+            '  A["오늘의 AI 변화"] --> B["직접 원문 확인"]\n'
+            '  B --> C["사용자와 개발자 영향"]\n```'
+        )
+        post["content"] = re.sub(
+            r"```mermaid\n.*?\n```", generic, post["content"], count=1, flags=re.S
+        )
+        evidence = self._valid_evidence()
+        evidence["summary_flow"] = []
+        candidate = {
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+        }
+        self.assertEqual(bot._post_data_errors(post, evidence), [])
+
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "collect_source_images") as collect_images:
+            with self.assertRaises(ValueError) as raised:
+                bot.save_post(post, candidate, evidence, now=self.now)
+            self.assertEqual(os.listdir(directory), [])
+        collect_images.assert_not_called()
+        message = str(raised.exception)
+        self.assertIn("최종 변환 후 글 품질 검증 실패", message)
+        self.assertIn("글 첫 부분에 전체 흐름 Mermaid가 없음", message)
+        self.assertIn("Mermaid 다이어그램은 3~5개 필요", message)
+
+    def test_visible_prose_keeps_plain_less_than_comparison(self):
+        text = "이 모델의 지연은 < 5 ms라는 조건을 비교합니다.\n\n다음 판단을 이어갑니다."
+        self.assertIn("< 5 ms", bot._visible_prose(text))
 
 
 if __name__ == "__main__":

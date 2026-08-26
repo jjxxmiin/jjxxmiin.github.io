@@ -4,16 +4,22 @@ title: '7B AdaReasoner가 GPT-5를 이겼다는 말은 맞을까: Tool-GRPO +24.
 date: '2026-01-28'
 categories: Tech
 tags:
-  - AdaReasoner
-  - ToolGRPO
-  - 멀티모달추론
-  - 도구사용
+  - GPT
   - 강화학습
+  - 문서AI
 math: true
 summary: AdaReasoner의 적응형 도구 선택 구조와 +24.9% 성능 주장을 재현성·지연 시간·안전성 관점에서 해석합니다.
+description: "AdaReasoner가 Tool-GRPO로 visual·reasoning tool의 호출 순서와 중단을 학습하는 원리, +24.9% 주장의 범위, reward hacking·latency·권한 검증법을 설명합니다."
+faq:
+  - question: "7B AdaReasoner가 GPT-5보다 전반적으로 뛰어난가요?"
+    answer: "아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version·prompt·tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다."
+  - question: "Tool-GRPO는 정답이면 올바른 호출 과정도 보장하나요?"
+    answer: "아닙니다. 최종 sparse reward만 쓰면 우연한 정답, 검증기 허점이나 불필요한 호출도 보상될 수 있어 과정 audit와 도구별 ablation이 필요합니다."
+  - question: "배포 전 최소한 어떤 제한이 필요한가요?"
+    answer: "읽기 전용 tool부터 시작하고 호출·시간·비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.18631.png
-  alt: Paper Thumbnail
+  alt: "7B AdaReasoner가 GPT-5를 이겼다는 말은 맞을까: Tool-GRPO +24.9% 읽는 법 논문 대표 이미지"
 ---
 
 AdaReasoner의 중요한 결과는 7B 모델이 도구를 더 많이 호출해서가 아니라, 필요한 도구와 호출 순서를 보상으로 학습해 기본 모델 대비 평균 24.9% 향상됐다는 주장입니다. “GPT-5를 이겼다”는 문구는 특정 퍼즐 벤치마크 비교를 전체 능력으로 확대한 표현이므로, 모델 버전과 평가표가 없는 이 글만으로는 일반적인 우위를 확인할 수 없습니다.
@@ -76,5 +82,65 @@ Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그�
 이 글은 학습 아이디어를 설명할 뿐, 의료 진단·과학 실험·보안 분석을 안전하게 자동화하는 완성된 운영 절차를 제공하지 않습니다. 그런 도메인에서는 최종 정답 보상만으로 권한 부여를 결정하면 안 됩니다.
 
 초기 배포는 읽기 전용 도구와 자동 검증 가능한 과제부터 시작하는 편이 안전합니다. 호출 횟수와 시간 제한을 두고, 도구가 실패하거나 서로 모순된 결과를 낼 때 중단하는 규칙도 별도로 필요합니다. AdaReasoner가 보여주는 실용적 포인트는 큰 모델을 대체한다는 선언보다, “언제 도구를 쓰지 않을 것인가”까지 학습 목표에 포함해야 한다는 점입니다.
+
+## 성능 향상이 어느 도구에서 왔는지 어떻게 분리할까
+
+전체 tool set을 한 번에 붙인 정확도만 보면 좋은 policy가 생긴 것인지 강한 OCR·검색 모델을 추가한 효과인지 구분하기 어렵습니다. 같은 base model과 prompt에서 단계별 ablation을 두는 편이 낫습니다.
+
+| 비교 조건 | 확인하는 질문 |
+|---|---|
+| 도구 없음 | base model 자체가 풀 수 있는 범위는 어디까지인가 |
+| 도구는 제공하되 고정 순서 | 외부 정보 자체의 이득은 얼마인가 |
+| AdaReasoner policy | 동적 선택·중단이 추가로 주는 이득은 얼마인가 |
+| Random tool 또는 같은 call 수 | 단순 호출 증가 효과인가 |
+| Oracle tool 결과 | tool output이 정확할 때 reasoning 상한은 얼마인가 |
+
+예를 들어 작은 글자가 핵심인 image 문제에서 OCR 결과만 넣어도 대부분 해결된다면 +24.9% 중 상당 부분은 orchestration보다 perception tool의 이득일 수 있습니다. 반대로 tool 결과가 같은 조건에서도 AdaReasoner가 불필요한 crop을 줄이고 계산기를 적절히 이어 붙여 성공한다면 policy 기여가 분명해집니다. 정확도와 평균 call 수를 같은 표에 넣어야 더 많은 호출로 얻은 점수를 효율 개선으로 오해하지 않습니다.
+
+## Tool contract가 깨지면 어디서 멈춰야 하나
+
+훈련 때 본 API 설명과 실제 응답 schema가 달라지거나 OCR이 빈 문자열을 반환하면 다음 reasoning step의 입력 자체가 잘못됩니다. 각 tool에는 허용 인자, 최대 image crop 크기, timeout, 응답 schema와 신뢰도 필드를 명시하고 model output을 실행 전에 validator가 검사해야 합니다.
+
+```text
+model이 tool call 제안
+→ permission·argument·budget 검사
+→ sandbox 또는 read-only 실행
+→ schema·timeout·오류 확인
+→ 검증된 결과만 다음 reasoning에 전달
+```
+
+검색 결과와 calculator 결과가 충돌하면 더 긴 chain을 무조건 생성하지 않습니다. 출처가 필요한 값인지, 계산으로 재검증 가능한 값인지에 따라 우선순위를 정하고 해결되지 않으면 불확실 답을 반환합니다. Tool output을 prompt에 그대로 넣을 때의 명령문도 신뢰할 수 없는 data로 취급해야 합니다. 학습 벤치마크의 정답률은 이런 운영 경계를 대신하지 않습니다.
+
+## Sparse reward의 실패를 무엇으로 찾을까
+
+최종 답만 맞히는 보상은 과정의 안전성과 비용을 표현하지 못합니다. 정답 reward와 별도로 invalid call, timeout, 중복 호출, 금지된 권한, 근거 없는 답에 penalty를 둘 수 있지만 각 항목의 비중이 과하면 model이 필요한 tool까지 피할 수 있습니다. 그래서 reward 설계는 호출이 필요한 문제와 필요 없는 문제를 함께 넣어 검증합니다.
+
+동일 질문을 여러 번 실행해 경로가 크게 달라지는지도 봅니다. 정답률은 같아도 한 run은 2회, 다른 run은 20회 호출한다면 운영 비용이 예측하기 어렵습니다. Tool별 failure를 주입해 OCR 오류를 검색으로 무작정 덮는지, timeout 뒤 동일 요청을 무한 반복하는지, 검증기 표현만 맞추는 reward hacking이 있는지를 검사합니다.
+
+PoC 합격 기준은 특정 benchmark 승리가 아니라 제한된 call budget 안에서 baseline보다 더 정확하고, 도구 failure 때 안전하게 중단하며, 반복 실행 비용의 상위 구간이 서비스 한도 안에 드는 것입니다.
+
+정답을 내지 못했지만 권한을 지키며 중단한 case와, 우연히 맞았지만 금지된 호출을 한 case도 분리해야 안전한 tool policy를 평가할 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도·비용·프라이버시 판단
+- [물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각·논리 학습]({% post_url 2026-02-11-P1-VL--Bridging-Visual-Perception-and-Scientific-Reasoning-in-Physics-Olympiads %}) — P1-VL이 올림피아드 물리의 도식 정보를 추론과 연결하는 커리큘럼 RL, PhysicsMinions 검증 구조와 벤치마크 해석법을 설명합니다.
+- [VideoLLaMA 3는 중복 프레임을 어떻게 줄일까: AVT·DiffFP]({% post_url 2025-02-22-VideoLLama3 %}) — 고해상도 입력을 토큰화하는 AVT, 유사 프레임을 덜어내는 DiffFP, 7B 벤치마크와 추론 코드의 실행 전제
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 7B AdaReasoner가 GPT-5보다 전반적으로 뛰어난가요?
+
+아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version·prompt·tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다.
+
+### Tool-GRPO는 정답이면 올바른 호출 과정도 보장하나요?
+
+아닙니다. 최종 sparse reward만 쓰면 우연한 정답, 검증기 허점이나 불필요한 호출도 보상될 수 있어 과정 audit와 도구별 ablation이 필요합니다.
+
+### 배포 전 최소한 어떤 제한이 필요한가요?
+
+읽기 전용 tool부터 시작하고 호출·시간·비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.18631)

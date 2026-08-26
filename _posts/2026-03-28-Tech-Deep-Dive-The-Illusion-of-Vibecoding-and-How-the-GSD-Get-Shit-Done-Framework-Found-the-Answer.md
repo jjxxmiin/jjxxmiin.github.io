@@ -4,18 +4,15 @@ title: 'GSD가 Context Rot을 해결할까: 4개 Markdown State와 Fresh Context
 date: '2026-03-28 06:23:52'
 categories: Tech
 tags:
-  - GSD
   - AI코딩
-  - SpecDrivenDevelopment
-  - 컨텍스트관리
-  - 개발워크플로우
+  - 컨텍스트윈도우
+  - AI에이전트
 summary: 'GSD가 PROJECT·REQUIREMENTS·ROADMAP·STATE 파일로 대화 밖에 상태를 남기는 방식을 살펴보고, fresh context의 토큰 비용과 검증 책임을 짚습니다.'
-author: AI Trend Bot
+description: 'GSD가 PROJECT·REQUIREMENTS·ROADMAP·STATE로 AI 코딩 상태를 외부화하는 방식과 문서 드리프트, 검증·커밋·토큰 비용 판단 기준을 설명합니다.'
 github_url: https://github.com/gsd-build/get-shit-done
 image:
   path: https://opengraph.githubassets.com/1/gsd-build/get-shit-done
-  alt: '[Tech Deep Dive] The Illusion of Vibecoding and How the GSD (Get Shit Done)
-    Framework Found the Answer'
+  alt: "gsd-build/get-shit-done GitHub 저장소 대표 이미지"
 ---
 
 GSD는 긴 채팅의 Context Rot을 줄일 수 있지만, 잘못 쓴 요구사항까지 고쳐 주는 시스템은 아니며 새 작업마다 문서를 다시 읽는 비용도 생깁니다.
@@ -75,9 +72,71 @@ npm i get-shit-done-cc@latest
 
 파일럿에서는 같은 중간 규모 기능을 기존 단일 세션과 GSD 흐름으로 각각 수행해 테스트 통과율, 총 토큰, 사람이 수정한 줄과 재작업 횟수를 비교하십시오. GSD의 성패는 “모델이 기억을 잘했는가”가 아니라, 요구와 검증 기준이 다음 작업자에게 손실 없이 전달됐는가로 판단해야 합니다.
 
+## 네 문서는 어떤 순서로 갱신해야 할까
+
+PROJECT는 자주 바뀌지 않는 목적과 제약, REQUIREMENTS는 현재 합의한 기능, ROADMAP은 순서와 의존성, STATE는 실행 결과를 담습니다. 같은 내용을 네 곳에 복사하면 어느 파일이 최신인지 다시 혼란스러워집니다. 한 사실의 기준 위치를 정하고 다른 문서에서는 식별자나 링크로 참조하는 편이 좋습니다.
+
+요구가 바뀌면 REQUIREMENTS만 고치고 끝내지 않습니다. 영향받는 ROADMAP 단계, 이미 완료로 표시한 STATE와 코드·테스트를 함께 검토합니다. 폐기된 요구는 삭제 흔적이나 결정 기록을 남겨 다음 실행자가 오래된 코드가 왜 남았는지 이해할 수 있게 합니다. 상태 문서가 실제 코드보다 앞서 “완료”라고 쓰이지 않도록 검증 결과가 나온 뒤 갱신합니다.
+
+STATE에는 상세한 대화 일지보다 현재 브랜치, 완료된 요구 ID, 실패한 검증, 열린 질문과 다음 작업을 둡니다. 오래된 실행 로그는 별도 기록으로 옮기고 현재 작업자가 반드시 알아야 할 내용만 유지합니다. 문서 크기뿐 아니라 모호한 표현이 새 컨텍스트의 판단을 흔드는지 리뷰해야 합니다.
+
+## 계획은 어느 정도로 작아야 할까
+
+좋은 계획 단위는 한 번의 실행에서 검증할 수 있고 실패했을 때 되돌릴 범위가 분명합니다. “인증을 구현한다”보다 “로그인 요청 검증과 실패 테스트를 추가한다”처럼 파일 범위, 입력·출력과 완료 명령을 포함합니다. 너무 큰 계획은 fresh context에서도 여러 요구를 놓치고, 너무 작은 계획은 같은 문서를 반복 읽는 비용과 통합 실패를 늘립니다.
+
+작업 사이의 계약도 적습니다. 앞 단계가 만든 API, 데이터 형식과 마이그레이션을 다음 단계가 어떤 테스트로 확인할지 명시합니다. 각 작업은 자신의 테스트만 통과해도 단계가 합쳐질 때 실패할 수 있으므로 마일스톤 끝에는 통합 검증을 둡니다.
+
+계획이 예상과 달라지면 실행자가 임의로 범위를 넓히지 않고 STATE에 장애와 선택지를 남긴 뒤 다시 계획합니다. 작은 리팩터링처럼 보여도 여러 요구에 영향을 주면 승인 없이 진행하지 않습니다. 계획 준수는 창의성을 막기 위한 것이 아니라 다음 작업자가 변경 이유를 재구성할 수 있게 하는 경계입니다.
+
+## Verify는 무엇을 독립적으로 확인해야 할까
+
+구현자가 만든 요약과 테스트만 보면 자신이 놓친 요구를 그대로 놓칠 수 있습니다. Verify는 REQUIREMENTS의 완료 조건에서 검사를 다시 만들고 실제 diff, 새·기존 테스트, 정적 검사와 빌드 결과를 확인합니다. 테스트 수가 늘었다는 사실보다 실패해야 할 경우가 정말 실패하는지가 중요합니다.
+
+자동화된 검증이 어려운 UI·성능·문서 품질은 사람 확인 절차와 기대 결과를 계획에 포함합니다. “브라우저에서 확인”처럼 모호하게 쓰지 말고 어떤 화면·입력·관찰값을 볼지 남깁니다. 확인할 수 없는 조건은 완료로 표시하지 않고 제한 사항으로 남깁니다.
+
+검증 실패 뒤에는 같은 실행자에게 무한 수정시키지 않습니다. 실패 원인을 상태에 구조화하고 재시도 횟수와 토큰 상한을 둡니다. 같은 오류가 반복되면 새 컨텍스트나 사람 검토로 보내되 이미 시도한 접근을 다음 실행자가 그대로 반복하지 않게 기록합니다.
+
+## Atomic commit이 안전하려면 무엇을 확인할까
+
+작은 커밋은 되돌리기 쉽지만 사용자 작업과 섞이면 자동화가 다른 변경을 가져갈 수 있습니다. 시작 전에 작업 트리 상태와 대상 파일을 확인하고 GSD 작업을 별도 브랜치나 격리된 작업 공간에서 실행합니다. 커밋에는 요구·계획 ID와 실행한 검증을 연결해 무엇을 완료한 변경인지 알 수 있게 합니다.
+
+비밀 파일, 생성 산출물과 잠금 파일의 대규모 변경은 커밋 전 별도 검사합니다. 테스트를 통과시키려고 검사를 삭제하거나 범위를 축소한 diff, 요구와 무관한 포맷 변경도 차단할 수 있습니다. 자동 커밋 뒤에도 원격 푸시·병합·배포는 사람 승인과 기존 CI 정책을 따릅니다.
+
+되돌리기도 실제로 시험해야 합니다. 한 커밋을 취소했을 때 이후 단계가 의존한 스키마나 파일이 깨지는지 보고, 의존성이 강하면 여러 커밋을 하나의 마일스톤으로 롤백하는 절차를 둡니다. “atomic”은 Git 기록 크기만이 아니라 독립적으로 검증·되돌릴 수 있다는 의미여야 합니다.
+
+## Context Rot이 줄었는지는 어떻게 측정할까
+
+단일 긴 세션과 GSD 흐름에 같은 요구·저장소·모델을 주고 비교합니다. 완료된 요구 수, 테스트와 요구 누락, 잘못 건드린 파일, 총 입력·출력 토큰, 벽시계 시간과 사람 수정 시간을 기록합니다. 결과 코드가 다르면 기능별 고정 테스트와 리뷰 기준으로 비교합니다.
+
+작업 초반과 후반의 오류 유형도 봅니다. 긴 세션에서 후반에 오래된 요구를 따르는 오류가 늘고 GSD에서는 줄었다면 상태 외부화의 근거가 됩니다. 반대로 문서가 낡아 모든 fresh context가 같은 오해를 반복한다면 대화 컨텍스트 문제를 문서 드리프트로 옮긴 것입니다.
+
+토큰은 작업당뿐 아니라 프로젝트 전체로 합칩니다. 각 실행자가 문서를 다시 읽는 비용, 계획·검증·재시도와 문서 갱신 호출을 포함합니다. 재작업 감소가 반복 읽기 비용보다 큰지, 사람의 계획 리뷰 시간이 줄었는지 함께 봐야 합니다.
+
+## 언제 문서 흐름을 줄이거나 멈출까
+
+몇 줄짜리 버그 수정에 네 문서와 다단계 호출이 필요하다면 간단한 이슈와 테스트로 충분할 수 있습니다. 요구가 계속 탐색 중인 프로토타입에서도 문서를 매번 확정하면 실험 속도가 떨어집니다. 작업 위험·기간·인수인계 필요에 따라 PROJECT와 STATE만 쓰거나 기존 저장소 문서를 재사용할 수 있습니다.
+
+문서와 코드의 불일치가 반복되고 이를 검출할 리뷰 책임자가 없다면 자동 실행 범위를 넓히지 않습니다. 검증 명령이 없거나 완료 조건을 사람이 설명할 수 없는 작업도 GSD가 대신 해결해 주지 않습니다. 먼저 작은 요구와 강한 테스트가 있는 기능에서 흐름을 연습해야 합니다.
+
+반대로 여러 작업자와 에이전트가 며칠간 이어받고, 규칙·의존성·감사 요구가 중요한 프로젝트에서는 외부 상태의 가치가 커집니다. GSD의 도입 기준은 문서 수가 아니라 다음 작업자가 과거 대화 없이도 같은 목표와 검증을 재현하는지입니다.
+
 참고 자료:
 
-- https://github.com/gsd-build/get-shit-done
-- https://medium.com/@agentnative/get-sh-t-done-meta-prompting-and-spec-driven-development-for-claude-code-and-codex-2026
-- https://www.reddit.com/r/ClaudeCode/comments/1iwsxyz/get_shit_done_the_1_cc_framework_for_people_tired/
-- https://medium.com/@solodev/i-tested-gsd-claude-code-meta-prompting-system-that-ships-faster-no-agile-bs-2026
+- [GitHub 저장소](https://github.com/gsd-build/get-shit-done)
+- [medium.com 원문](https://medium.com/@agentnative/get-sh-t-done-meta-prompting-and-spec-driven-development-for-claude-code-and-codex-2026)
+- [reddit.com 원문](https://www.reddit.com/r/ClaudeCode/comments/1iwsxyz/get_shit_done_the_1_cc_framework_for_people_tired/)
+- [medium.com 원문](https://medium.com/@solodev/i-tested-gsd-claude-code-meta-prompting-system-that-ships-faster-no-agile-bs-2026)
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/gsd-build/get-shit-done)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Graphify는 코드 Context 재탐색을 줄일까? AST Graph·추론 Edge·Drift]({% post_url 2026-04-11-The-End-of-Context-Windows-and-the-Resurrection-of-Knowledge-Graphs-A-Deep-Dive-into-Graphifys-Architecture %}) — 코드베이스를 매번 처음부터 스캐닝하며 컨텍스트를 낭비하던 기존 AI 어시스턴트의 한계를 극복하기 위해, AST 파싱과 다중 모달 AI 추론을 결합하여 영구적인 위상 기반 지식 그래프를 구축하는 Graphify의 내부 원리와 실무적…
+- [pxpipe: AI 에이전트의 컨텍스트를 이미지로 변환해 토큰 비용을 줄이는 완벽 가이드]({% post_url 2026-07-09-pxpipe-Comprehensive-Guide-to-Reducing-Token-Costs-by-Rendering-AI-Agent-Context-as-Images %}) — pxpipe는 방대한 텍스트 컨텍스트를 고밀도 이미지(PNG)로 변환하여 LLM의 비전 채널을 통해 전달함으로써, 입력 토큰 비용을 최대 70%까지 절감하는 오픈소스 로컬 프록시 도구의 원리와 실전 활용법을 심층 분석합니다.
+- [TencentDB-Agent-Memory: AI 코딩 에이전트가 맥락 폭발을 막고 진짜 기억을 갖는 법]({% post_url 2026-07-15-TencentDB-Agent-Memory-How-AI-Coding-Agents-Prevent-Context-Bloat-and-Build-Real-Memory %}) — 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억 시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로…
+<!-- internal-links:end -->

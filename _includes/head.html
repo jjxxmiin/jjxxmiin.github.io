@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta
     name="viewport"
-    content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
   >
 
   {%- capture seo_tags -%}
@@ -56,6 +56,7 @@
   {%- assign _paginated = false -%}
   {%- if paginator and paginator.page > 1 -%}{%- assign _paginated = true -%}{%- endif -%}
   {%- if page.layout == 'archives' -%}{%- assign _paginated = true -%}{%- endif -%}
+  {%- if page.layout == 'tag' and page.posts.size < 3 -%}{%- assign _paginated = true -%}{%- endif -%}
   {%- if _paginated -%}
     <meta name="robots" content="noindex, follow">
   {%- else -%}
@@ -69,7 +70,8 @@
 
   {{ seo_tags }}
 
-  <!-- AEO: FAQPage structured data (answer engines + Google rich results) -->
+  <!-- FAQPage structured data. It mirrors visible FAQ content for semantic parsers;
+       Google no longer offers FAQ rich results for ordinary sites. -->
   {% if page.faq and page.faq.size > 0 %}
     <script type="application/ld+json">
     {
@@ -86,11 +88,53 @@
     </script>
   {% endif %}
 
+  <!-- A post has one stable topical path: Home > Primary topic > Post. -->
+  {% if page.layout == 'post' %}
+    {% assign primary_topic = page.categories | first %}
+    {% if primary_topic %}
+      {% capture primary_topic_url %}/categories/{{ primary_topic | slugify | url_encode }}/{% endcapture %}
+    {% endif %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": {{ site.title | jsonify }},
+          "item": {{ '/' | absolute_url | jsonify }}
+        }{% if primary_topic %},
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": {{ primary_topic | jsonify }},
+          "item": {{ primary_topic_url | absolute_url | jsonify }}
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": {{ page.title | strip_html | jsonify }},
+          "item": {{ page.url | absolute_url | jsonify }}
+        }{% else %},
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": {{ page.title | strip_html | jsonify }},
+          "item": {{ page.url | absolute_url | jsonify }}
+        }{% endif %}
+      ]
+    }
+    </script>
+  {% endif %}
+
   <title>
-    {%- unless page.layout == 'home' -%}
+    {%- if page.layout == 'home' -%}
+      {{ site.title | append: ' | ' | append: site.tagline }}
+    {%- else -%}
       {{ page.title | append: ' | ' }}
-    {%- endunless -%}
-    {{ site.title }}
+      {{- site.title -}}
+    {%- endif -%}
   </title>
 
   {% include_cached favicons.html %}
@@ -111,9 +155,6 @@
 
   <!-- Theme style -->
   <link rel="stylesheet" href="{{ '/assets/css/:THEME.css' | replace: ':THEME', site.theme | relative_url }}">
-
-  <!-- Web Font -->
-  <link rel="stylesheet" href="{{ site.data.origin[type].webfonts | relative_url }}">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="{{ site.data.origin[type].fontawesome.css | relative_url }}">
@@ -159,4 +200,5 @@
   {% endif %}
 
   {% include metadata-hook.html %}
+  {% include google-ad-script.html %}
 </head>

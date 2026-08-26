@@ -10,8 +10,8 @@ tags:
   - Gemini
   - Google
   - API
-  - AI서비스
   - 컨텍스트윈도우
+  - AI서비스
 description: Google AI가 Gemini 3.7 Flash를 2026년 8월 13일 정식 출시했습니다. 100만 토큰 컨텍스트, 코딩 벤치마크 향상, 할인된 API 가격 정보까지 핵심 내용을 전해드립니다.
 summary: Google AI가 2026년 8월 13일 소프트웨어 엔지니어링과 에이전트 추론 성능을 끌어올린 Gemini 3.7 Flash 모델을 정식 출시했습니다. 100만 토큰 문맥 창과 최대 64K 출력 토큰을 지원하며, FrontierCode 1.1 벤치마크 점수는 43.6%로 대폭 올랐습니다. 2026년 말까지 백만 입력 토큰당 $0.75의 할인된 프로모션 요금이 적용됩니다.
 article_type: NewsArticle
@@ -52,6 +52,8 @@ sitemap: true
 mermaid: true
 chart: true
 ---
+
+Gemini 3.7 Flash는 코딩·에이전트 작업에서 낮은 지연과 긴 문맥을 함께 시험하려는 API 사용자에게 적합합니다. 43.6% 벤치마크와 100만 토큰 창은 각각 특정 평가 점수와 입력 상한이며, 실제 코드베이스 정확도나 비용 절감을 보장하지 않습니다. 특히 $0.75/$3.75 단가는 2026년 말까지의 프로모션이므로 정가 전환 뒤 예산과 마이그레이션 경로까지 함께 계산해야 합니다.
 
 ```mermaid
 flowchart TD
@@ -138,9 +140,43 @@ flowchart TD
     C & D --> E[64K 출력 안정성 테스트 후 프로덕션 적용]
 ```
 
+## 프로모션 단가를 실제 월 비용으로 어떻게 계산할까?
+
+기본 비용은 입력 백만 토큰 수에 0.75달러, 출력 백만 토큰 수에 3.75달러를 곱해 더합니다. 예를 들어 한 달 입력 1억 토큰과 출력 1천만 토큰을 쓴다면 프로모션 표시 단가 기준 75달러와 37.5달러, 합계 112.5달러입니다. 이는 실패 재시도, 도구 API와 저장·검색 비용을 제외한 단순 모델 비용이며 2026년 말 이후에도 유지되는 예산은 아닙니다.
+
+출력 토큰은 입력보다 단가가 높으므로 최대 64K를 항상 요청하면 비용과 대기 시간이 커질 수 있습니다. 작업별 최대 출력, 중단 조건과 재시도 횟수를 정하고 요청당 비용을 기록해야 합니다. 할인 종료 후 정가가 공개되면 같은 트래픽으로 다시 계산하고, 다른 모델로 되돌릴 수 있도록 모델 ID와 응답 형식의 결합을 줄여 두는 편이 좋습니다.
+
+## 1M 컨텍스트를 모두 넣는 것이 좋은 선택일까?
+
+컨텍스트 창은 넣을 수 있는 최대량이지 모델이 모든 토큰을 같은 정확도로 활용한다는 뜻은 아닙니다. 코드 저장소 전체를 매 요청마다 보내면 관련 없는 파일 때문에 중요한 오류가 묻히고 입력 비용도 반복됩니다. 파일 검색으로 필요한 부분을 고른 방식과 전체 입력 방식을 같은 과제로 비교해 정확도, 첫 토큰 시간과 비용을 측정해야 합니다.
+
+긴 출력도 컴파일 가능한 완성 코드와 같지 않습니다. 생성 결과에 단위 테스트, 정적 분석과 보안 검사를 적용하고, 기존 동작을 깨뜨린 변경 수를 기록합니다. 에이전트에서는 도구 인자 스키마와 파일 변경 허용 범위를 검증해 긴 응답이 곧바로 실행되는 것을 막아야 합니다.
+
+## FrontierCode 점수는 어떻게 사내 평가로 옮길까?
+
+34.4%에서 43.6%로 오른 값은 FrontierCode 1.1 Main이라는 정해진 평가의 9.2%포인트 차이입니다. 언어, 저장소 규모와 도구 설정이 다른 업무에 그대로 대입할 수 없습니다. 사내에서 자주 발생하는 버그 수정·테스트 작성·리팩터링 과제를 익명화해 정답과 허용 변경 범위를 만들고, 기존 모델과 같은 프롬프트로 비교합니다.
+
+완료율 외에도 잘못 수정한 파일, 테스트 통과, 사람이 검토한 시간, 토큰과 재시도를 봐야 합니다. 한 번의 높은 점수보다 여러 실행의 편차가 운영 안정성을 더 잘 보여 줍니다. 모델 업데이트 주기가 짧다면 버전을 고정하고 변경 전 회귀 평가를 반복할 절차도 필요합니다.
+
 ## 아직은 선을 그어야 할 부분
 
 아무리 매력적인 조건이라도 몇 가지 제한 사항과 고려할 점은 존재합니다 <sup class="source-citation"><a href="#source-1" aria-label="Google Blog 출처">[1]</a></sup>. 우선 백만 입력 토큰당 $0.75, 백만 출력 토큰당 $3.75라는 가격은 2026년 말까지만 유효한 프로모션 할인 요금입니다 <sup class="source-citation"><a href="#source-1" aria-label="Google Blog 출처">[1]</a></sup>. 따라서 2027년 이후 정가로 전환될 때의 장기적인 예산 계획을 함께 수립해둘 필요가 있습니다. 또한 FrontierCode 1.1 점수가 43.6%로 크게 올랐다고 해서 모든 실제 프로그래밍 언어나 복잡한 레거시 시스템에서 오류가 없다는 뜻은 아니므로, 생성된 코드에 대한 자체 검증 절차는 필수입니다 <sup class="source-citation"><a href="#source-3" aria-label="MarkTechPost 출처">[3]</a></sup>.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://blog.google/technology/ai/gemini-3-7-flash)
+- [Google AI for Developers](https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash)
+- [MarkTechPost](https://www.marktechpost.com/2026/08/13/google-ai-just-released-gemini-3-7-flash-a-coding-and-agent-model-at-0-75-1m-input-tokens)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Liquid AI, 스마트폰과 CPU에서 작동하는 로컬 에이전트 모델 LFM2.5-2.6B 공개]({% post_url 2026-08-07-liquid-ai-releases-lfm2-5-2-6b-open-weight-local-agent-model %}) — Liquid AI가 스마트폰 및 소비자용 CPU에서 로컬로 구동되는 26억 매개변수 온디바이스 에이전트 모델 LFM2.5-2.6B를 공개했습니다. 2.5GB 미만의 RAM 메모리로 128K 컨텍스트와 네이티브 툴 콜링을 지원하며…
+- [OpenRouter에 등장한 스텔스 AI 모델 OX Alpha 무료 공개, 100만 토큰과 DeepSWE 80% 성능 분석]({% post_url 2026-08-23-ox-alpha-stealth-model-launches-on-openrouter-with-1m-token-context-window %}) — 2026년 8월 20일 OpenRouter에 100만 토큰 컨텍스트 창과 다중 모달 입력을 지원하는 스텔스 모델 OX Alpha가 등장했습니다. 프리뷰 기간 무료로 제공되는 이 모델은 DeepSWE 코딩 벤치마크 하위 집합에서 80%…
+- [Athena-Public은 모델을 바꿔도 기억할까: 10K 부팅·278개 프로토콜 검증]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-Athena-Public-Curing-LLM-Amnesia %}) — Athena-Public이 로컬 마크다운으로 상태를 보존하는 방식과 10K 부팅·278개 프로토콜 주장을 살펴보고, 검색·충돌·클라우드 전송 한계를 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

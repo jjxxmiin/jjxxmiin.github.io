@@ -4,21 +4,25 @@ title: 'trycua/cua VM이면 AI에 Mac을 맡겨도 안전할까: Lume·CUI·Netw
 date: '2026-04-27 07:19:32'
 categories: Tech
 tags:
-  - trycua
-  - ComputerUseAgent
-  - Lume
-  - 샌드박스
-  - 데스크톱자동화
+  - MCP
+  - 온디바이스AI
+  - AI에이전트
 summary: 'trycua/cua가 Lume VM과 CUI로 데스크톱을 격리하는 구조를 살펴보고, 일회용 환경이어도 네트워크·비밀·호스트 공유와 토큰 비용은 별도로 통제해야 하는 이유를 설명합니다.'
-author: AI Trend Bot
+description: "trycua/cua의 Lume VM·CUI 경계를 golden image, snapshot 폐기, 자격 증명 주입, network·file 반출 제한과 작업당 성공 비용으로 검증합니다."
 github_url: https://github.com/trycua/cua
+faq:
+  - question: "trycua/cua의 VM을 쓰면 host data가 자동으로 안전해지나요?"
+    answer: "아닙니다. 공유 folder·clipboard·network·MCP·주입한 credential이 VM 밖으로 이어질 수 있으므로 각 통로를 최소 권한으로 별도 제한해야 합니다."
+  - question: "웹 업무도 모두 Computer-Use Agent로 바꾸는 편이 좋은가요?"
+    answer: "아닙니다. 안정적인 API나 DOM selector가 있으면 그 방식을 우선하고, CUA는 desktop app이나 접근 가능한 interface가 없는 구간에 제한하는 편이 낫습니다."
+  - question: "CUA pilot에서 무엇을 성공으로 측정해야 하나요?"
+    answer: "화면 한 장의 성공이 아니라 반복 실행 성공률, 행동·token 수, p95 시간, 사람 개입, 복구 시간과 잘못된 외부 side effect를 함께 측정해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/trycua/cua
-  alt: 'I Handed Over My MacBook to AI: Why trycua/cua is the End of Traditional Browser
-    Automation'
+  alt: "trycua/cua GitHub 저장소 대표 이미지"
 ---
 
-trycua/cua의 VM은 AI가 호스트를 직접 조작하는 위험을 줄이지만, 네트워크·비밀·공유 폴더까지 격리하지 않으면 Mac을 맡겨도 안전하다고 말할 수 없습니다.
+trycua/cua의 VM은 AI가 호스트를 직접 조작하는 위험을 줄이지만, 네트워크·비밀·공유 폴더까지 격리하지 않으면 Mac을 맡겨도 안전하다고 말할 수 없습니다. API나 DOM 자동화가 불가능한 작업만 골라 일회용 image에서 반복 성공률과 외부 효과를 측정하는 것이 현실적인 출발점입니다.
 
 ## Playwright 대신 OS 전체가 필요한 경우
 
@@ -65,8 +69,48 @@ CUI(Computer-Use Interface)는 화면과 접근성 트리를 읽고 클릭, 드�
 
 API, Playwright와 CUA 세 방식으로 같은 업무를 수행해 성공률, 평균 행동 수, 토큰, 복구 시간과 유지보수 비용을 비교하십시오. CUA가 빛나는 곳은 셀렉터를 쓸 수 없는 데스크톱 업무와 격리된 E2E 시험입니다. 구조화된 API가 있는 작업까지 화면 조작으로 바꾸는 것은 더 안전하거나 저렴한 선택이 아닙니다.
 
+## VM 생명주기와 자격 증명을 작업 단위로 묶는다
+
+운영용 pilot은 검증된 golden image에서 시작합니다. OS·앱·font·locale·screen size와 CUI version을 image digest에 고정하고, 작업마다 새 VM을 복제합니다. 실행 중 snapshot을 다음 업무에 재사용하면 이전 문서, cookie와 clipboard가 남을 수 있습니다. 성공·실패와 무관하게 종료 단계에서 VM·disk·temporary credential을 폐기하고, 고아 instance 수와 storage quota를 감시해야 합니다.
+
+자격 증명은 image에 bake하지 않고 작업 시작 때 최소 범위·짧은 만료로 주입합니다. 로그인 뒤에는 secret 문자열을 화면이나 model context에 다시 노출하지 않는 방식을 우선합니다. 출력 파일은 정해진 export 경로만 통과시키고 malware·민감 정보 검사를 거친 뒤 host로 옮깁니다. VM이 격리돼도 이메일 전송이나 SaaS 변경은 이미 외부에서 일어난 일이므로 삭제·결제·전송 직전에는 대상과 diff를 사람에게 보여 줍니다.
+
+화면 에이전트에는 관찰과 행동 사이의 stale 상태도 있습니다. 모델이 screenshot을 본 뒤 dialog가 바뀌거나 다른 창이 앞에 뜨면 같은 좌표가 전혀 다른 버튼이 됩니다. 각 관찰에 frame·window·accessibility element ID와 시각을 붙이고 행동 직전 상태가 달라졌으면 다시 관찰합니다. 비가역 동작은 좌표 클릭만으로 승인하지 않고 현재 앱, 문서, control label과 예상 결과를 함께 검증합니다.
+
+평가는 로그인, 문서 열기, 값 입력, 저장·export처럼 단계가 분명한 업무를 20회 이상 반복해 단계별 실패를 기록하는 방식이 유용합니다. task success 외에 p50·p95 시간, model 호출, screenshot byte, 행동 수, 사람 개입과 잘못된 side effect를 측정합니다. 간헐적 실패가 재시도로 가려지면 token·시간과 중복 저장이 늘기 때문에 최초 성공률과 재시도 후 성공률을 분리합니다.
+
+API는 정상이어도 CUA가 실패할 수 있는 조건을 미리 정합니다. 화면 해상도·locale 변경, 느린 animation, popup, network 단절과 app update를 주입해 timeout 안에 안전하게 멈추는지 봅니다. 자동 복구가 동일한 전송이나 결제를 반복하지 않도록 외부 작업에는 idempotency key나 결과 조회를 사용합니다. 이 시험을 통과하지 못한 업무는 VM 성능과 무관하게 자동화 범위에서 제외합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/trycua/cua)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Claude Code에 저장소를 맡겨도 될까? 권한·CLAUDE.md·검증 체크리스트]({% post_url 2026-02-08-Claude-Code-The-Terminal-AI-Agent-Deep-Dive %}) — 터미널 AI agent가 file 수정·test·Git 작업까지 수행할 때 개발자가 먼저 제한할 권한, CLAUDE.md에 적을 project rule, 변경 후 diff·test 검증 순서를 2026년 2월 원문 기준으로…
+- [Agent Zero에 컴퓨터를 통째로 줘도 될까: Docker 권한의 실제 경계]({% post_url 2026-04-21-Deep-Dive-What-Happens-When-You-Give-AI-a-Computer-Instead-of-APIs-Deconstructing-Agent-Zero %}) — Agent Zero의 터미널·코드 실행형 구조를 살펴보고, Docker를 완전한 격리로 오해하지 않기 위한 권한·네트워크·승인 체크리스트를 정리합니다.
+- [Chrome DevTools MCP에 로그인 브라우저를 연결해도 될까: DOM·Network·Cookie 노출]({% post_url 2026-05-21-The-End-of-Frontend-Debugging-What-Happens-When-You-Give-AI-Full-Control-of-Chrome-DevTools-via-MCP %}) — AI가 Chrome의 DOM·Console·Network·성능 데이터를 읽고 조작하는 구조를 설명하고, 로그인 프로필 대신 격리된 테스트 브라우저를 써야 하는 이유와 안전한 진단 순서를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### trycua/cua의 VM을 쓰면 host data가 자동으로 안전해지나요?
+
+아닙니다. 공유 folder·clipboard·network·MCP·주입한 credential이 VM 밖으로 이어질 수 있으므로 각 통로를 최소 권한으로 별도 제한해야 합니다.
+
+### 웹 업무도 모두 Computer-Use Agent로 바꾸는 편이 좋은가요?
+
+아닙니다. 안정적인 API나 DOM selector가 있으면 그 방식을 우선하고, CUA는 desktop app이나 접근 가능한 interface가 없는 구간에 제한하는 편이 낫습니다.
+
+### CUA pilot에서 무엇을 성공으로 측정해야 하나요?
+
+화면 한 장의 성공이 아니라 반복 실행 성공률, 행동·token 수, p95 시간, 사람 개입, 복구 시간과 잘못된 외부 side effect를 함께 측정해야 합니다.
+
 참고 자료:
 
-- https://github.com/trycua/cua
-- https://www.ycombinator.com/launches/cua
-- https://trendshift.io/repositories/12948
+- [GitHub 저장소](https://github.com/trycua/cua)
+- [ycombinator.com 원문](https://www.ycombinator.com/launches/cua)
+- [trendshift.io 원문](https://trendshift.io/repositories/12948)

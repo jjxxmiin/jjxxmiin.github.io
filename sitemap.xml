@@ -24,7 +24,9 @@ sitemap: false
 {%- endfor %}
 {%- for page in site.pages %}
   {%- assign is_paginated = page.url | slice: 0, 5 %}
-  {%- unless page.sitemap == false or is_paginated == '/page' or page.url contains '404' %}
+  {%- assign is_thin_tag = false %}
+  {%- if page.layout == 'tag' and page.posts.size < 3 %}{% assign is_thin_tag = true %}{% endif %}
+  {%- unless page.sitemap == false or is_thin_tag or is_paginated == '/page' or page.url contains '404' %}
   {%- if page.url contains '.html' or page.url contains '.xml' or page.url contains '.txt' %}{% continue %}{% endif %}
   <url>
     <loc>{{ page.url | absolute_url | xml_escape }}</loc>

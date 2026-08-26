@@ -158,6 +158,29 @@ Model Context Protocol의 개정 사양 도입 시 반드시 주의해야 할 �
 
 또한 Multi Round-Trip Requests(MRTR)로 대화형 도구를 처리할 때 클라이언트 측에서 각 라운드트립 상태값을 요청 헤더나 메시지 페이로드에 올바르게 담아 전달해야 하므로, 기존 코드의 비동기 호출 부를 일부 수정해야 할 수 있습니다 <sup class="source-citation"><a href="#source-4" aria-label="Microsoft .NET Blog 출처">[4]</a></sup>. 무작정 전환하기보다는 현재 운영 중인 에이전트 서비스의 네트워크 토폴로지와 보안 정책을 먼저 점검한 후 차근차근 진행하는 전략이 필요합니다.
 
+## 무상태 전환을 배포 전에 어떻게 시험할까?
+
+같은 요청을 네트워크 오류 뒤 다시 보내도 중복 부작용이 생기지 않는지 확인합니다. 읽기 질의와 파일 수정·결제 같은 쓰기 작업은 재시도 정책이 달라야 하며, 요청 식별자와 도구 실행 결과를 서버 로그에서 연결할 수 있어야 합니다. 세션 메모리에 있던 사용자·권한 정보를 어떤 서명된 헤더나 저장소에서 다시 읽는지도 검토합니다.
+
+기존 클라이언트와 새 서버, 새 클라이언트와 기존 서버를 교차 시험하고 지원하지 않는 메서드가 명확한 오류를 반환하는지 봅니다. 사양 발표의 전환 기간보다 자신의 SDK와 배포 플랫폼 지원 상태를 우선해야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://blog.modelcontextprotocol.io/posts/2026-07-28)
+- [VentureBeat](https://venturebeat.com/infrastructure/mcp-just-got-its-biggest-update-ever-heres-what-changes-for-ai-agents)
+- [AWS](https://aws.amazon.com/blogs/machine-learning/how-agentcore-gateway-supports-the-mcp-2026-07-28-spec)
+- [Microsoft .NET Blog](https://devblogs.microsoft.com/dotnet/announcing-v20-of-the-official-mcp-csharp-sdk)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [A2A(Agent2Agent) 프로토콜: 서로 다른 AI 에이전트가 대화하고 협력하는 표준 규격]({% post_url 2026-07-21-A2A-Agent2Agent-Protocol-The-Standard-for-AI-Agent-Interoperability %}) — 구글이 시작하고 리눅스 재단이 주도하는 A2A 프로토콜은 독립된 인공지능 에이전트 간의 통신과 상호운용성을 위한 오픈 표준입니다. 특정 프레임워크나 플랫폼에 얽매이지 않고 에이전트들이 서로의 능력을 탐색하고 안전하게 작업을 위임하는…
+- [Hermes Agent는 무엇을 기억하고 실행하나: 영구 메모리·스킬·권한 검증법]({% post_url 2026-03-14-Hermes-Agent-Deep-Dive-For-those-tired-of-amnesic-AI-The-dawn-of-a-truly-remembering-and-evolving-agent %}) — Hermes Agent의 세션 간 메모리, 스킬 생성, Gateway·서브에이전트 구조를 살펴보고 오염된 기억·권한·비용·복구를 검증하는 기준을 정리합니다.
+- [OpenCut 아키텍처 가이드: AI가 영상을 편집하고 코드가 타임라인을 제어하는 방법]({% post_url 2026-07-23-OpenCut-Architecture-Guide-How-AI-Edits-Video-and-Code-Controls-the-Timeline %}) — 비공개 상용 소프트웨어가 지배하던 영상 편집 시장에 등장한 완전히 새로운 대안, OpenCut 프로젝트를 조명합니다. 프라이버시를 보장하는 로컬 기반 아키텍처부터 시작해, Rust 코어 기반의 크로스플랫폼 통합, 플러그인 생태계…
+<!-- internal-links:end -->
+
 ## 자주 묻는 질문
 
 ### Model Context Protocol 2026-07-28 사양 업데이트의 가장 큰 변화는 무엇인가요?

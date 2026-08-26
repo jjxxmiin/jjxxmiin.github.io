@@ -4,16 +4,21 @@ title: "화질 좋은 AI 영상이 물리 법칙은 틀리는 이유: RISE-Video
 date: '2026-02-07'
 categories: Tech
 tags:
-  - 영상생성
-  - 벤치마크
-  - 멀티모달
-  - 월드모델
   - 로보틱스
+  - 영상생성
 math: true
 summary: "RISE-Video가 467개 human-annotated prompt로 영상 생성기의 상식·공간 변화·물리·시간 인과를 평가하고, visual quality와 reasoning score가 갈리는 지점을 보여줍니다."
+description: "RISE-Video가 467개 prompt·8개 category로 video generator의 암시적 상식·물리·시간 인과를 평가하는 방식, LMM judge 편향과 simulation 적용 전 failure test를 설명합니다."
+faq:
+  - question: "영상 화질 점수가 높으면 물리적으로도 정확한가요?"
+    answer: "아닙니다. Texture·조명과 frame 선명도는 높아도 중력 방향, 충돌, 상태 변화와 사건 순서가 틀릴 수 있어 visual quality와 reasoning·physical score를 분리해야 합니다."
+  - question: "RISE-Video의 LMM judge만으로 model을 평가해도 되나요?"
+    answer: "대량 candidate 선별에는 유용하지만 keyframe이 짧은 오류를 놓치고 judge가 prompt expectation에 끌릴 수 있어 human audit와 가능한 물리 rule 검사를 병행해야 합니다."
+  - question: "467개 test 결과를 simulation 안전성으로 바로 옮길 수 있나요?"
+    answer: "아닙니다. 해당 prompt·11개 model·평가 시점의 결과이며 robot·자율주행에는 업무별 collision·state transition failure set과 여러 seed 검증이 추가로 필요합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.05986.png
-  alt: Paper Thumbnail
+  alt: "화질 좋은 AI 영상이 물리 법칙은 틀리는 이유: RISE-Video 467개 Test 논문 대표 이미지"
 ---
 
 화질 좋은 AI video가 물리적으로 틀릴 수 있는 이유는 **texture와 조명은 통계적으로 그럴듯하게 만들면서도, prompt에 생략된 원인과 결과를 frame 변화로 구현하지 못할 수 있기 때문**입니다. RISE-Video는 visual quality와 implicit world rule 수행을 같은 점수로 뭉개지 않고 분리합니다.
@@ -45,5 +50,62 @@ LMM 자동 평가는 video의 keyframe, 원 prompt, “얼음이 녹았는가”
 Content 제작에서는 artifact 몇 개를 편집할 수 있지만 robot·자율주행 simulation data에서는 잘못된 collision이나 state transition이 학습을 오염시킬 수 있습니다. 도입 전에 중력, 접촉, 액체, 도구 사용, 사건 순서처럼 업무에 중요한 rule을 별도 failure set으로 만듭니다.
 
 같은 prompt를 여러 seed로 생성하고 네 지표를 따로 기록해야 우연한 성공을 줄일 수 있습니다. LMM judge 결과는 사람이 표본 검수하고, 문화권에 따라 달라지는 commonsense와 보편적 물리 rule을 구분합니다. RISE-Video의 핵심은 video model을 “지능적”이라고 선언하는 데 있지 않습니다. **화질 benchmark가 숨기던 암시적 인과 실패를 독립된 평가 축으로 끌어낸 것**입니다.
+
+## 암시적 Rule 하나를 어떤 Check Item으로 바꿀까
+
+Prompt에 기대 결과를 직접 써 버리면 model이 rule을 추론했는지 문장을 복사했는지 구분하기 어렵습니다. 먼저 원인만 주고, annotation에는 관측 가능한 결과와 금지할 변화, 발생 순서를 분리해 적습니다.
+
+예를 들어 “사람이 촛불을 향해 분다”는 prompt에는 다음 check를 둘 수 있습니다.
+
+| 구분 | 확인 항목 |
+|---|---|
+| 기대 결과 | 불꽃이 작아지거나 꺼짐 |
+| 시간 순서 | 부는 동작 뒤에 불꽃 변화 발생 |
+| 유지 조건 | 사람·촛대의 identity와 scene 유지 |
+| 금지 결과 | 바람 전에 불이 꺼짐, 촛불이 이동·증식 |
+
+“얼음에 뜨거운 물”도 단순히 cup이 예쁜지보다 얼음의 크기·상태가 시간에 따라 변하는지 확인합니다. State change가 한 frame에서만 보였다가 되돌아가면 causal transition을 유지하지 못한 것입니다. Check item을 observable event로 쓰면 인간과 LMM judge가 같은 기준을 적용하기 쉽습니다.
+
+## Prompt Pair로 Rule 사용 여부를 어떻게 확인할까
+
+한 prompt의 성공은 training example과 비슷해서 우연히 나온 결과일 수 있습니다. Object·원인을 하나씩 바꾼 minimal pair를 만듭니다. 뜨거운 물과 차가운 물, 놓은 공과 위로 던진 공, 열려 있는 container와 닫힌 container처럼 원인 차이에 맞춰 결과도 달라져야 합니다.
+
+두 prompt의 video가 거의 같으면 model이 causal condition을 무시했을 가능성이 있습니다. 반대로 원인만 조금 바꿨는데 background와 identity까지 모두 달라지면 비교가 어렵습니다. 같은 initial image와 가능한 한 같은 생성 설정을 사용하고 여러 seed에서 rule adherence의 평균·분산을 봅니다.
+
+Category별 점수도 따로 둡니다. Spatial change에는 강하지만 tool use가 약한 model을 하나의 reasoning score로 순위화하면 실제 용도와 맞지 않을 수 있습니다. Production failure set에서 중요한 category에 가중치를 주되, benchmark 원점수와 업무용 가중 점수를 구분해 보고합니다.
+
+## LMM Judge가 놓치는 오류는 무엇인가
+
+Keyframe judge는 충돌 순간의 clipping, 잠깐 뒤집힌 object, 원인보다 먼저 나타난 결과를 sampling 사이에서 놓칠 수 있습니다. Frame rate와 event duration을 고려해 keyframe을 고르고, motion이 중요한 rule에는 짧은 연속 clip 또는 trajectory 기반 검사를 추가합니다.
+
+Judge가 “얼음은 녹아야 한다”는 text expectation에 끌려 실제 pixel evidence가 약한데도 점수를 줄 수 있습니다. Prompt를 가린 visual-only 판정, 원인·결과를 바꾼 negative video와 사람이 만든 calibration set으로 false positive를 측정합니다. 인간 평가와 correlation 하나만 보지 말고 category별 disagreement를 audit합니다.
+
+## 생성 Data를 학습에 쓰기 위한 합격선
+
+Simulation data로 사용할 때는 화질이 아니라 downstream 위험으로 합격선을 정합니다. Collision, object count, contact sequence처럼 rule로 검사 가능한 항목은 자동 validator를 쓰고, 액체·deformable object처럼 복잡한 항목은 사람이 표본을 봅니다. 실패 sample이 섞인 비율과 그 data로 학습한 policy의 오류를 연결해 기록합니다.
+
+Content 제작이라면 일부 오류 clip을 걸러 내는 비용으로 충분할 수 있습니다. Robot training이라면 작은 물리 오류도 반복 학습돼 위험하므로 더 엄격한 threshold와 실제 simulator·sensor data 대조가 필요합니다. RISE-Video 점수는 이 결정의 시작점이며 업무별 validation을 대신하지 않습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [3D 라벨 없이 장면의 앞뒤를 읽을 수 있을까: VEGA-3D의 대가]({% post_url 2026-03-20-Generation-Models-Know-Space--Unleashing-Implicit-3D-Priors-for-Scene-Understanding %}) — VEGA-3D가 동결 비디오 생성 모델의 중간 피처를 MLLM에 게이트 방식으로 결합하는 구조와 정밀 좌표·메모리·지연 한계를 짚습니다.
+- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone·Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능·실시간 주장과 1~2-step 한계를 점검합니다.
+- [알리바바 Wan 3.0 공개 베타 개시, 문서 입력으로 30초 AI 비디오 원컷 생성]({% post_url 2026-08-10-alibaba-launches-wan-3-0-public-beta-supporting-30-second-ai-video-and-document-inputs %}) — 알리바바 클라우드가 차세대 비디오 생성 AI 모델인 Wan 3.0(통의완상 3.0)의 공개 베타 테스트를 시작했습니다. 기존 15초에서 2배 늘어난 최대 30초 단일 샷 비디오 생성을 지원하며, PDF와 PPT 등 오피스 문서와…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 영상 화질 점수가 높으면 물리적으로도 정확한가요?
+
+아닙니다. Texture·조명과 frame 선명도는 높아도 중력 방향, 충돌, 상태 변화와 사건 순서가 틀릴 수 있어 visual quality와 reasoning·physical score를 분리해야 합니다.
+
+### RISE-Video의 LMM judge만으로 model을 평가해도 되나요?
+
+대량 candidate 선별에는 유용하지만 keyframe이 짧은 오류를 놓치고 judge가 prompt expectation에 끌릴 수 있어 human audit와 가능한 물리 rule 검사를 병행해야 합니다.
+
+### 467개 test 결과를 simulation 안전성으로 바로 옮길 수 있나요?
+
+아닙니다. 해당 prompt·11개 model·평가 시점의 결과이며 robot·자율주행에는 업무별 collision·state transition failure set과 여러 seed 검증이 추가로 필요합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.05986)

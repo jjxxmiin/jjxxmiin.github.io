@@ -2,19 +2,31 @@
 layout: post
 title:  "Detectron2 데모가 CUDA ROI 오류로 멈출 때: 설정·가중치·빌드 점검법"
 summary: "Detectron2 객체 탐지 데모의 구성 요소를 분리해 이해하고, CUDA 환경 불일치와 모델 경로를 순서대로 점검합니다."
+description: "Detectron2 데모의 config·weight·input·CUDA build를 분리하고 ROI CUDA 오류, class metadata와 속도 측정을 단계별로 진단하는 방법입니다."
 image:
   path: /assets/img/thumb/Detectron.jpg
   alt: Detectron 끄적이기 대표 이미지
 date:   2020-04-04 13:00 -0400
 categories: OpenSource
 tags:
-  - Detectron2
-  - 객체탐지
-  - PyTorch
+  - 반도체
+  - 파이썬
+  - 컴퓨터비전
+faq:
+  - question: "ROI CUDA 오류가 나면 모델 가중치부터 다시 받아야 하나요?"
+    answer: "먼저 PyTorch가 사용하는 CUDA와 Detectron2 extension이 빌드된 환경이 맞는지 확인해야 합니다. Build mismatch라면 weight를 다시 받아도 같은 오류가 남습니다."
+  - question: "Detectron2 config와 checkpoint는 아무 조합이나 쓸 수 있나요?"
+    answer: "안 됩니다. Backbone·head·class 수 등 config 구조와 checkpoint가 전제로 한 모델이 맞아야 합니다. 비슷한 이름만 보고 섞으면 key와 tensor shape가 어긋날 수 있습니다."
+  - question: "Demo가 box를 그리면 내 데이터에서도 검증된 것인가요?"
+    answer: "아닙니다. 기본 metadata와 class가 내 데이터 의미와 맞는지, 전처리·threshold·평가 annotation을 별도로 확인해야 합니다. 화면 출력은 실행 성공의 일부일 뿐입니다."
 use_math: true
 ---
 
 Detectron2 데모가 실행되지 않을 때는 코드를 계속 바꾸기보다 **설정 파일, 모델 가중치, 입력 경로, PyTorch가 보는 CUDA 환경**을 분리해 확인해야 한다. 원문의 ROI CUDA 오류도 모델 문제가 아니라 빌드 때 참조한 CUDA 경로가 맞지 않아 발생했다.
+
+파일 생성, 모델 load, CPU forward, CUDA operator, 시각화를 각각 다른 성공 단계로 기록하면 오류 범위를 줄일 수 있다. 이 글의 버전 명령을 현재 환경에 그대로 복사하기보다 같은 분해 순서를 적용하는 것이 핵심이다.
+
+## 환경 문제와 프레임워크 문제를 어떻게 구분할까?
 
 Detectron2는 PyTorch 기반의 object detection·segmentation 프레임워크다. 구버전 비공식 구현인 [Detectron.pytorch](https://github.com/roytseng-tw/Detectron.pytorch)와 [공식 Detectron2 저장소](https://github.com/facebookresearch/detectron2)를 혼동하지 않는 것부터 시작한다.
 
@@ -117,3 +129,49 @@ cv2.imwrite('output.jpg', result.get_image()[:, :, ::-1])
 - 속도 측정에는 모델 추론뿐 아니라 이미지 로드와 시각화가 포함됐는지 명시한다.
 
 공식 구조와 API는 [Detectron2 문서](https://detectron2.readthedocs.io/)와 [공식 저장소](https://github.com/facebookresearch/detectron2)에서 확인할 수 있다. 이 기록의 결론은 특정 설치 명령이 아니라, **모델 실패와 빌드 실패를 섞지 않고 한 층씩 확인해야 디버깅 시간이 줄어든다**는 것이다.
+
+## 깨끗한 baseline을 만드는 순서
+
+먼저 설치한 PyTorch가 CPU tensor 연산을 수행하는지 확인하고, CUDA를 사용할 경우 PyTorch가 보고하는 장치와 간단한 tensor 이동을 확인한다. 이 단계에서 실패하면 Detectron2 config를 바꾸지 않는다. Environment의 Python 경로와 package 위치도 함께 기록한다.
+
+다음으로 Detectron2 import와 extension load를 확인한다. 기존 빌드 산출물이 다른 CUDA·PyTorch 환경에서 만들어졌다면 새 environment에서도 잘못 재사용될 수 있다. 오류를 피하려고 여러 경로를 덧붙이기보다 사용 중인 binary와 build 환경을 명확히 한다.
+
+공식 demo의 알려진 config와 대응 checkpoint, 고정 이미지를 사용한다. Image read 결과가 `None`이 아닌지와 shape를 출력하고 CPU 경로가 가능하다면 먼저 한 번 실행한다. 이 baseline이 통과한 뒤 자신의 config·weight·data를 하나씩 바꾼다.
+
+## Config와 weight 오류를 CUDA 문제와 구분하는 법
+
+Checkpoint load 단계의 missing·unexpected key와 tensor shape 오류는 구조 mismatch의 단서다. Config의 backbone, feature level, head와 class 수를 checkpoint 이름과 대조한다. CUDA kernel 실행 전부터 실패한다면 GPU build를 다시 하는 것이 우선 답이 아닐 수 있다.
+
+모델은 load되지만 결과가 비어 있으면 input 색상·크기, score threshold, weight와 class 구성을 본다. Threshold를 낮춰 box가 생긴다는 사실만으로 품질이 맞는 것은 아니며 raw score와 class를 확인한다.
+
+ROI 관련 CUDA 오류가 forward 중 발생하면 해당 operator가 현재 GPU와 환경에서 load됐는지 좁힌다. 전체 모델을 재학습하거나 annotation을 고치기 전에 작은 operator와 build 정보를 확인하는 편이 빠르다.
+
+## 출력이 보인 뒤 검증해야 할 것
+
+Visualizer의 class 이름은 metadata에서 온다. COCO용 weight에 자신의 class 이름을 임의로 붙이면 box의 의미가 바뀌지 않는다. 학습한 dataset registration과 class order, checkpoint head가 같은 mapping을 쓰는지 확인한다.
+
+입력 몇 장의 정답과 예측을 함께 보고 작은 물체 누락, class 혼동, 중복과 위치 오류를 나눈다. Demo 한 장의 그럴듯한 그림을 독립 평가로 취급하지 않는다. Custom dataset이라면 evaluation annotation과 metric 설정을 별도로 검증한다.
+
+속도는 image load, 전처리, model forward, 시각화를 나눠 측정한다. 첫 호출과 반복 호출을 분리하고 synchronization이 필요한 비동기 장치 측정 조건도 맞춘다. GUI 표시 시간이 긴데 모델만 바꾸는 일을 피하기 위한 분해다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward]({% post_url 2022-02-23-DarkNetGRULayer %}) — DarkNet GRU 순전파의 update·reset·candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다.
+- [DarkNet im2col 배열 모양 계산: 픽셀은 data\_col 어디에 놓이나]({% post_url 2022-02-24-DarkNetIm2col %}) — DarkNet im2col이 채널×커널 위치를 행으로, 출력 공간 위치를 열로 펼치는 인덱스를 계산하고 padding 바깥을 0으로 채우는 과정을 설명합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### ROI CUDA 오류가 나면 모델 가중치부터 다시 받아야 하나요?
+
+먼저 PyTorch가 사용하는 CUDA와 Detectron2 extension이 빌드된 환경이 맞는지 확인해야 합니다. Build mismatch라면 weight를 다시 받아도 같은 오류가 남습니다.
+
+### Detectron2 config와 checkpoint는 아무 조합이나 쓸 수 있나요?
+
+안 됩니다. Backbone·head·class 수 등 config 구조와 checkpoint가 전제로 한 모델이 맞아야 합니다. 비슷한 이름만 보고 섞으면 key와 tensor shape가 어긋날 수 있습니다.
+
+### Demo가 box를 그리면 내 데이터에서도 검증된 것인가요?
+
+아닙니다. 기본 metadata와 class가 내 데이터 의미와 맞는지, 전처리·threshold·평가 annotation을 별도로 확인해야 합니다. 화면 출력은 실행 성공의 일부일 뿐입니다.

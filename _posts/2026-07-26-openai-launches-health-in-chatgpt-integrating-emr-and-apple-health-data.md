@@ -7,9 +7,9 @@ date: 2026-07-26 22:16:11 +0900
 last_modified_at: 2026-07-26 22:16:11 +0900
 categories: Tech
 tags:
+  - Apple
   - ChatGPT
   - OpenAI
-  - Apple
   - AI서비스
 description: OpenAI가 ChatGPT에 Apple Health 및 병원 전자건강기록(EHR)을 연동하는 Health in ChatGPT 기능을 출시했습니다. 미국 내 만 18세 이상 사용자를 대상으로 개인 맞춤형 건강 분석을 제공합니다.
 summary: OpenAI가 2026년 7월 23일 개인 건강 데이터를 ChatGPT와 안전하게 연동하는 'Health in ChatGPT'를 공식 출시했습니다. 미국 내 만 18세 이상 사용자는 Apple Health 및 주요 병원 의료 기록을 연결해 수면, 운동, 혈액검사 결과 등의 맞춤형 분석을 받을 수 있습니다. 연동된 모든 건강 정보는 모델 학습과 광고 타게팅에서 철저히 제외됩니다.
@@ -71,6 +71,8 @@ article_images:
   source_url: https://www.engadget.com/2222059/openai-once-again-makes-the-case-for-giving-chatgpt-your-health-records
 ---
 
+인용된 OpenAI 발표에 따르면 Health in ChatGPT는 사용자가 Apple Health와 의료 기록을 연결해 자신의 건강 데이터를 대화에서 참고하도록 하는 기능입니다. 이 기능은 진단이나 치료를 자동 승인하는 의료기기가 아니며 제공 지역·연결 기관·데이터 정책은 사용 시점에 다시 확인해야 합니다. 연동 전에는 어떤 기록을 읽는지, 모델 학습 제외와 보존·삭제가 각각 무엇을 뜻하는지, 연결 해제 뒤 파생 대화가 남는지를 점검하세요.
+
 ```mermaid
 flowchart TD
     A[OpenAI Health in ChatGPT 출시] --> B[Apple Health 및 병원 EMR 연동]
@@ -122,7 +124,7 @@ ChatGPT가 내 수면 패턴, 운동 기록, 약물 처방 내역, 피검사 결
   <figcaption>Fierce Healthcare가 원문과 함께 공개한 이미지입니다. <a href="https://www.fiercehealthcare.com/ai-and-machine-learning/openai-makes-health-chatgpt-widely-available-moving-deeper-consumer-health" target="_blank" rel="noopener noreferrer">출처: Fierce Healthcare</a></figcaption>
 </figure>
 
-## 직접 써보거나 지켜볼 포인트
+## 사용 전에 무엇을 검증할까?
 
 Health in ChatGPT 기능이 어떤 흐름으로 작동하며 어떻게 활용 가능한지 정리해보면 다음과 같습니다.
 
@@ -154,6 +156,45 @@ flowchart TD
 ```
 
 현재 이 서비스는 미국에 거주하는 만 18세 이상의 로그인된 사용자에게만 배포되고 있어, 국내를 비롯한 타 국가 사용자들은 아직 이용할 수 없습니다 <sup class="source-citation"><a href="#source-4" aria-label="ChatGPT&#x27;s Apple Health Integration Now Rolling Out to U.S. Users 출처">[4]</a></sup>. 또한 ChatGPT가 건강 맥락 데이터를 활용할 때는 매번 사용자의 명확한 승인이 필요합니다 <sup class="source-citation"><a href="#source-1" aria-label="Launching Health in ChatGPT - OpenAI 출처">[1]</a></sup>. 마지막으로 AI의 분석과 답변은 의사의 정식 진단을 대체할 수 없으므로 실제 치료나 약물 처방 관련 결정은 반드시 전문 의료진과 상의해야 합니다.
+
+## 의료 기록 연결 권한은 어디까지 허용할까?
+
+처음에는 필요한 기간과 데이터 유형만 선택할 수 있는지 확인합니다. 수면·운동 기록을 설명받는 데 전체 병력과 약물 기록까지 제공할 이유는 없을 수 있습니다. 읽기 권한과 쓰기 권한을 구분하고, 계정 연결 화면에 표시된 공급자와 실제 데이터 흐름이 일치하는지 확인해야 합니다.
+
+연결 뒤에는 원문 기록과 답변을 표본 대조합니다. 검사 단위, 날짜, 정상 범위와 약 이름을 잘못 읽지 않는지 보고, 서로 다른 병원의 중복 항목을 한 사건처럼 합치지 않는지도 살핍니다. 모델이 기록에 없는 원인을 단정하거나 응급 증상을 일반 조언으로 낮추면 실패로 처리합니다.
+
+## 학습 제외와 데이터 삭제는 같은 뜻일까?
+
+모델 학습에 사용하지 않는다는 정책은 서비스 제공을 위해 저장·처리하지 않는다는 뜻과 같지 않습니다. 대화 기록, 연결 토큰, 가져온 원문과 파생 요약이 각각 어디에 얼마나 오래 남는지 정책에서 구분해야 합니다. 계정 연결을 해제하고 대화를 삭제했을 때 어떤 데이터가 즉시 사라지고 법적·보안상 보관되는 항목이 있는지도 확인합니다.
+
+공유 기기와 조직 계정에서는 다른 사람이 건강 대화를 볼 수 있는지도 점검합니다. 알림 미리보기, 브라우저 세션, 대화 내보내기와 지원 로그는 원문 EHR 외의 노출 경로가 될 수 있습니다. 민감한 기록을 연결하기 전에 계정 보안과 기기 잠금을 먼저 정비해야 합니다.
+
+## 어떤 답변까지 의사결정에 써도 될까?
+
+기록의 쉬운 설명, 다음 진료에서 물을 질문, 생활 기록의 경향 요약은 사람 검토를 전제로 시험할 수 있습니다. 반면 약을 중단하거나 용량을 바꾸고, 증상을 진단하며, 응급 여부를 확정하는 결론은 답변만으로 실행해서는 안 됩니다. 답에 출처가 되는 기록 날짜와 항목이 보이지 않으면 사용자도 근거를 확인하기 어렵습니다.
+
+도입 평가는 편의성뿐 아니라 위험 답의 처리로 합니다. 일부러 상충하는 검사값, 오래된 기록, 누락된 단위를 넣고 모델이 불확실성을 표시하는지 확인합니다. 중요한 기록을 잘못 합치거나 확신 있게 치료를 제안한다면 기능 범위를 기록 요약으로 제한하는 것이 안전합니다.
+
+의료진에게 보여 줄 때는 원문 기록과 모델 요약을 함께 제시해 수정 가능한 초안임을 분명히 하고, 모델 답만 환자 기록으로 다시 저장하지 않아야 합니다.
+
+같은 기록에 질문 표현만 바꿔 답이 달라지는지도 확인합니다. 핵심 수치와 날짜가 반복 질문에서 흔들리거나 근거 기록을 찾지 못한다면, 개인 맞춤 조언보다 원문 검색과 쉬운 설명처럼 검증 가능한 범위로 용도를 좁혀야 합니다. 오류 사례와 수정 결과를 남겨 연결 데이터나 모델이 바뀔 때 같은 시험을 다시 수행하는 것이 안전합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://openai.com/index/health-in-chatgpt)
+- [Fierce Healthcare](https://www.fiercehealthcare.com/ai-and-machine-learning/openai-makes-health-chatgpt-widely-available-moving-deeper-consumer-health)
+- [Engadget](https://www.engadget.com/2222059/openai-once-again-makes-the-case-for-giving-chatgpt-your-health-records)
+- [MacRumors](https://www.macrumors.com/2026/07/23/chatgpt-apple-health-integration)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [OpenAI 프론티어 API 제로 데이터 보존 발표, Private Safety Processing으로 기업 보안 강화]({% post_url 2026-08-21-openai-announces-zero-data-retention-and-previews-private-safety-processing-for-frontier-api-models %}) — OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력…
+- [MedXIAOHE는 의료 멀티모달 모델을 어떻게 학습하나: 구조와 검증 한계]({% post_url 2026-02-16-MedXIAOHE--A-Comprehensive-Recipe-for-Building-Medical-MLLMs %}) — MedXIAOHE의 네이티브 해상도 처리, 의료 개체 중심 사전학습과 추론 데이터 구축, 임상 적용 전 검증해야 할 한계를 분석합니다.
+- [UA-VLS의 불확실성 점수는 의료 판단을 안전하게 할까: SEU Loss와 Dice 3~5% 향상]({% post_url 2026-02-20-Uncertainty-Aware-Vision-Language-Segmentation-for-Medical-Imaging %}) — 임상 텍스트와 영상을 SSMix로 결합하는 UA-VLS의 계산 이득, SEU Loss의 보정 의미와 임상 적용 전 한계를 설명합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

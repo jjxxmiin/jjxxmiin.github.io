@@ -1,124 +1,163 @@
 ---
 layout: post
-title: 이걸 왜 이제 알았을까? 터미널 붙박이 개발자를 위한 완벽한 AI 파트너, SST OpenCode 솔직 리뷰
+title: "SST OpenCode를 팀에 도입해도 될까: Model 선택·LSP·권한 검증"
 date: '2026-03-02 18:34:30'
 categories: Tech
 tags:
-  - AI코딩
-  - Claude
-  - ClaudeCode
-  - ChatGPT
-  - DeepSeek
-summary: 75개 이상의 LLM 지원, 다중 세션, LSP 연동은 물론 오픈소스의 자유로움까지 갖춘 터미널 AI 코딩 에이전트 'SST OpenCode'의
-  심층 분석과 실사용 후기를 개발자 관점에서 다룹니다.
-author: AI Trend Bot
+  - MCP
+  - LLM
+  - AI에이전트
+summary: "SST OpenCode가 terminal TUI, provider 선택, session·LSP·AGENTS.md로 coding workflow를 구성하는 방식과 file·shell·MCP 권한, diff·test 검증 기준을 설명합니다."
+description: "SST OpenCode의 terminal TUI·client/server·provider·session·LSP·AGENTS.md 구조를 설명하고 model별 회귀·file·shell·MCP 권한과 diff·test 검증법을 정리합니다."
+faq:
+  - question: "여러 LLM provider를 지원하면 vendor lock-in이 사라지나요?"
+    answer: "선택지는 늘지만 model별 tool call·context·가격·출력 차이와 OpenCode 자체 session·config format 의존이 남으므로 provider 교체 회귀 test가 필요합니다."
+  - question: "LSP를 연결하면 Agent가 code를 정확히 이해하나요?"
+    answer: "Symbol·diagnostic 근거는 좋아지지만 stale index·unsupported language와 잘못된 architecture 판단이 남아 compiler·test·diff review를 대체하지 않습니다."
+  - question: "Build mode를 production repository에 바로 써도 되나요?"
+    answer: "먼저 read-only plan과 제한된 file edit로 시작하고 shell·network·MCP·Git 권한을 task별 승인하며 clean worktree에서 test와 rollback을 확인해야 합니다."
 github_url: https://github.com/sst/opencode
 image:
   path: https://opengraph.githubassets.com/1/sst/opencode
-  alt: Why Did I Find This So Late? An Honest Review of SST OpenCode, the Perfect
-    AI Partner for Terminal-Loving Developers
+  alt: "sst/opencode GitHub 저장소 대표 이미지"
 ---
 
-> **TL;DR (한 마디로?)**
-> "터미널에서 절대 벗어나기 싫은 개발자를 위한 **진정한 100% 오픈소스 AI 코딩 에이전트**. Claude Code의 강력함에 75개 이상의 LLM 선택권, 다중 세션, 그리고 LSP(Language Server Protocol) 연동까지 때려 넣은 진짜 물건입니다."
+SST OpenCode는 terminal 안에서 여러 model provider, session, LSP와 file·shell tool을 묶을 수 있는 coding agent지만, “완벽한 AI partner”나 model-independent한 정확성을 보장하지는 않습니다. 도입 판단은 provider 교체 때의 회귀, LSP 근거의 freshness, AGENTS.md 준수와 제한된 권한 안에서 만든 diff가 실제 test를 통과하는지로 내려야 합니다.
 
-최근 AI 코딩 툴 시장이 진짜 미친 속도로 발전하고 있죠. Cursor, GitHub Copilot, Claude Code... 개발자라면 다들 한 번씩은 써보셨을 겁니다. 저도 이것저것 찍먹해보고 에디터를 옮겨 다니기를 반복하다가, 최근에 터미널 환경에서 완전히 정착하게 만든 녀석이 하나 생겼어요. 바로 **SST OpenCode**입니다.
+이 글은 [SST OpenCode 저장소](https://github.com/sst/opencode)와 [프로젝트 사이트](https://opencode.ai/)를 기준일에 소개한 기존 원문을 검증 중심으로 다시 구성합니다. 지원 provider 수, 명령과 UI는 release에 따라 바뀔 수 있으므로 현재 문서와 사용하려는 commit을 대조해야 합니다.
 
-사실 우연히 깃허브 눈팅을 하다가 별(Star)이 무려 26,000개나 박혀있는 걸 보고 "아니, 이게 대체 뭐길래 사람들이 이렇게 열광하지?" 하고 무심코 클론을 받아서 써봤는데... 와, 진짜 첫 5분 만에 감탄이 절로 나오더라고요. 단순한 CLI 챗봇이 아닙니다. 내 로컬 환경을 완벽하게 이해하고 같이 고민해 주는 사수를 터미널 안에 앉혀놓은 느낌이랄까요?
+## Terminal Coding Agent는 무엇을 한 흐름에 묶나
 
-게다가 이 프로젝트, 탄생하게 된 뒷배경 스토리도 꽤 매콤합니다. 원래 커뮤니티 주도로 개발되던 동명의 오픈소스 프로젝트가 있었는데, 모 기업(Charm)이 레포지토리를 일방적으로 인수하고 자신들의 방향대로 끌고 가려 했죠. 오픈소스 생태계에서 흔히 볼 수 있는 '자본 vs 개발자의 낭만' 구도였습니다. 이에 빡친(?) 오리지널 팀원들이 SST(Serverless Stack) 팀과 손을 잡고 아예 밑바닥부터 구조를 새로 짜버렸거든요. 개발자들의 순수한 열정과 오기, 그리고 약간의 독기가 가득 담긴 결과물인 셈입니다. 😂
+OpenCode는 terminal TUI에서 repository를 읽고 model과 대화하며 file 수정, command 실행과 session 관리를 이어 가는 도구입니다. 기존 글은 client/server 구조, 여러 model provider, LSP와 다중 session을 주요 특징으로 설명했습니다.
 
-평소에 마우스 클릭보다는 키보드 단축키를 사랑하고, VIM이나 터미널 환경에서 벗어나는 걸 극도로 싫어하는 분들이라면 오늘 제 이야기에 완전히 공감하실 겁니다. 커피 한잔 들고 천천히 읽어보세요!
+각 기능은 서로 다른 문제를 다룹니다.
 
----
+| 기능 | 주는 이점 | 남는 검증 |
+|---|---|---|
+| Provider 선택 | task·가격·privacy에 맞는 model 교체 | tool schema·quality·cost regression |
+| TUI·session | terminal workflow와 대화 상태 유지 | secret·stale context·retention |
+| LSP | symbol·type·diagnostic 제공 | index freshness·language support |
+| AGENTS.md | project rule을 반복 전달 | rule 위반을 diff·lint로 확인 |
+| File·shell tool | 분석에서 수정·test까지 연결 | permission·side effect·rollback |
 
-## 🚀 왜 기존 툴을 버리고 SST OpenCode에 열광하는가? (Deep Dive)
+Terminal에 있다는 사실 자체가 local-only를 뜻하지 않습니다. Cloud model을 선택하면 prompt와 읽은 code가 provider 요청 경로를 통과할 수 있고, local model을 쓰더라도 server·plugin·MCP endpoint의 network flow가 남을 수 있습니다.
 
-단순히 "터미널에서 돌아가는 ChatGPT" 정도로 생각하시면 큰 오산입니다. 기존 툴들과 아키텍처부터 접근 방식까지 뭐가 다른지, 현업 개발자 관점에서 하나하나 뜯어볼게요.
+## 여러 Provider는 Lock-in을 어디까지 줄이나
 
-### 1. 벤더 종속 없는 100% 오픈소스와 모델 독립성 (Provider-Agnostic)
-개인적으로 가장 마음에 들었던 부분입니다. Claude Code나 Gemini CLI는 각 회사의 자사 모델만 강제하잖아요? 지금 당장이야 Claude 3.5 Sonnet이 코딩 원탑이라고 하지만, 내일 당장 GPT-5가 나오거나 DeepSeek가 더 미친 가성비로 시장을 씹어먹을지 모르는 일입니다.
+하나의 interface에서 provider를 바꿀 수 있으면 특정 model 장애·가격 변화에 대응하기 쉽습니다. 그러나 model마다 context limit, tool-call 형식, code quality와 safety behavior가 다릅니다. API key만 바꾸고 동일한 결과를 기대하면 안 됩니다.
 
-OpenCode는 특정 AI 벤더에 종속되지 않습니다. **Claude, OpenAI, Google은 물론이고 최근 핫한 DeepSeek, 심지어 Ollama를 통한 로컬 모델까지 75개 이상의 LLM**을 입맛대로 골라 쓸 수 있어요. 설정에서 API 키 하나만 띡 바꿔 끼우면 끝입니다. 
-특히 사내 보안 규정 때문에 퍼블릭 클라우드 LLM을 절대 못 쓰는 금융/의료 도메인 개발자분들 계시죠? Ollama로 로컬에 Llama3나 Qwen 모델을 띄워두고 완벽한 오프라인 환경에서 AI 코딩을 즐길 수 있다는 건 정말 압도적인 메리트입니다.
+Provider regression set에는 다음 task를 넣습니다.
 
-### 2. 눈이 즐거운 TUI와 미친 아키텍처 설계
-Go 언어 생태계에서 유명한 BubbleTea 라이브러리를 사용해서 터미널 UI(TUI)를 구성했는데, 디자인이 정말 예쁩니다. 하지만 껍데기만 예쁜 게 아니에요. 내부는 단순한 단일 스크립트가 아니라 **클라이언트/서버 아키텍처**로 단단하게 설계되어 있습니다.
+1. Repository symbol 검색과 read-only 설명
+2. 한 file의 작은 bug fix
+3. 새 regression test 생성과 실행
+4. Tool error·timeout 뒤 중단
+5. 변경 금지 file과 secret 접근 거부
 
-이게 무슨 의미냐면, AI 코어 엔진을 로컬 워크스테이션이나 서버에 데몬으로 띄워놓고 다양한 프론트엔드를 붙일 수 있다는 뜻입니다. 실제로 공식 제공되는 VS Code 익스텐션을 설치하면, 내 터미널 세션과 VS Code 에디터 창이 실시간으로 동기화됩니다. 나중에는 모바일 앱으로 원격 접속해서 출퇴근길에 서버 장애를 고치게 될지도 모를 일이죠.
+각 model에서 accepted diff, invalid tool call, input·output token, latency와 cost를 기록합니다. 75개 이상 지원이라는 기존 문구가 현재도 맞는지보다 실제 팀이 허용할 두세 provider가 이 test를 통과하는지가 중요합니다.
 
-### 3. 다중 세션(Multi-session)과 LSP의 완벽한 만남
-작업하다가 터미널 창을 실수로 닫아서 AI랑 장황하게 대화하며 쌓아둔 컨텍스트를 통째로 날려먹은 적 있으시죠? (저만 그런 거 아니라고 해주세요 😅) OpenCode는 **다중 세션을 완벽하게 지원**해서, 창을 껐다 켜도 끊긴 시점부터 바로 이어서 대화할 수 있습니다.
+Local model도 무조건 더 안전하거나 싸지 않습니다. GPU·memory, model server 운영과 낮은 tool accuracy로 인한 재시도 비용을 합칩니다. Source code가 외부로 나가지 않는지 network egress와 log retention으로 확인합니다.
 
-거기에 더해 **LSP(Language Server Protocol)**가 기본으로 물려있습니다. AI가 내 코드를 단순한 텍스트 덩어리로 읽는 게 아니라, IDE처럼 AST(추상 구문 트리) 레벨에서 심도 있게 이해합니다. 에러가 나면 "어디서 났지?" 하고 텍스트를 검색하는 게 아니라, LSP가 던져주는 정확한 에러 로그와 타입 정보를 바탕으로 스스로 코드를 픽스(Fix)해버립니다.
+## LSP는 어떤 근거를 주고 무엇을 못하나
 
-| 기능 핵심 비교 | SST OpenCode | Claude Code | GitHub Copilot CLI |
-| :--- | :--- | :--- | :--- |
-| **오픈소스 여부** | 🟢 100% 투명한 오픈소스 | 🔴 클로즈드 소스 | 🔴 클로즈드 소스 |
-| **지원 모델** | 🟢 75+ (Local 로컬 LLM 완벽 지원) | 🔴 Anthropic 모델 전용 | 🔴 OpenAI 커스텀 전용 |
-| **다중 세션 관리**| 🟢 완벽 지원 (세션 영구 저장) | 🔴 불안정하거나 미지원 | 🔴 미지원 |
-| **컨텍스트 이해** | 🟢 LSP 기본 연동 (코드 문맥 파악) | 🟡 파일 읽기 위주 | 🟡 터미널 명령어 위주 |
-| **아키텍처 구조** | 🟢 클라이언트/서버 기반 | 🟡 단일 프로세스 | 🟡 단일 프로세스 |
+LSP는 definition, reference, type과 diagnostic을 제공해 text grep만 할 때보다 정확한 code navigation을 돕습니다. 하지만 AST 전체를 model이 항상 정확히 이해한다는 뜻은 아닙니다. Language server가 준비되지 않았거나 generated code·macro를 제대로 보지 못하고 index가 stale할 수도 있습니다.
 
----
+비교 test에서는 LSP on/off로 같은 symbol rename, cross-file reference와 type error를 해결하게 합니다. Agent가 인용한 definition path와 실제 compiler diagnostic을 대조합니다. LSP result와 repository source가 충돌하면 clean index를 다시 만들고 compiler·test를 source of truth로 둡니다.
 
-## 💡 실제로 프로젝트에 어떻게 써먹을 수 있을까? (Hands-on)
+Architecture decision, concurrency와 business rule은 symbol graph만으로 결정되지 않습니다. 관련 test·documentation과 runtime behavior를 함께 읽어야 합니다. LSP는 evidence channel이지 correctness certificate가 아닙니다.
 
-이론적인 이야기는 접어두고, 실제 제 토이 프로젝트와 업무에 적용해본 쫀득한 경험을 공유해볼게요.
+## AGENTS.md에는 어떤 Rule을 적을까
 
-터미널에서 `opencode`를 치면 화려한 UI가 반겨줍니다. 그냥 채팅하듯 물어봐도 되지만, 진가는 실제 코드를 뜯어고칠 때 발휘되죠.
-
-```bash
-# 단순 질문을 넘어 실제 문제 해결을 지시할 때 (논인터랙티브 모드 활용 가능)
-> opencode "src/user.service.ts 파일에서 발생하는 무한 루프 원인을 찾고, 테스트 코드까지 포함해서 고쳐줘"
-```
-
-제가 가장 유용하게 쓴 킬러 기능은 바로 `/init` 명령어와 `AGENTS.md` 기능입니다. 
-처음 프로젝트를 시작할 때 루트 디렉토리에서 `/init` 명령어를 실행하면, OpenCode가 내 프로젝트의 파일들을 싹 스캔한 뒤 아래와 같은 마크다운 파일을 자동으로 만들어줍니다.
+기존 글의 개념 조각은 project context를 다음처럼 남깁니다.
 
 ```markdown
-# AGENTS.md (OpenCode가 이해하는 내 프로젝트의 컨텍스트)
-- 이 프로젝트는 TypeScript와 SST v3를 사용하는 모노레포 구조입니다.
-- 패키지 관리는 bun workspaces를 사용합니다.
-- 비즈니스 로직 함수는 반드시 `packages/functions/` 하위에 작성하세요.
-- 인프라(Infra) 코드는 `infra/` 디렉토리에 논리적으로 분리해야 합니다.
-- 모든 코드는 strict 모드를 따르며, any 타입 사용을 지양하세요.
+# AGENTS.md
+- 이 프로젝트는 TypeScript와 SST v3를 사용하는 monorepo입니다.
+- package 관리는 bun workspaces를 사용합니다.
+- business logic은 packages/functions/ 아래에 둡니다.
+- infrastructure code는 infra/에 분리합니다.
+- strict mode를 유지하고 any 사용을 피합니다.
 ```
 
-이게 진짜 미친 포인트입니다. Cursor 에디터의 Rules 기능과 똑같은 역할을 하는데, 이걸 Git에 커밋해두기만 하면 팀원 전체가 완전히 동일한 코딩 컨벤션과 컨텍스트로 AI와 협업할 수 있습니다. 새로 합류한 주니어 개발자가 AI에게 엉뚱한 코드를 짜달라고 해서 레포지토리가 엉망이 되는 걸 미연에 방지할 수 있죠.
+좋은 rule은 확인 가능합니다. “깨끗한 code” 대신 변경 가능 directory, public API 보존, 금지 dependency와 test command를 적습니다. Rule마다 적용 scope가 다르면 root와 subdirectory instruction의 우선순위를 명시합니다.
 
-또한, `Tab` 키를 누르면 AI의 권한 모드를 실시간으로 바꿀 수 있습니다.
-- **Build 모드 (기본값):** AI가 내 파일 시스템에 직접 접근해서 코드를 추가, 삭제, 수정하는 풀(Full) 권한 모드입니다.
-- **Plan 모드 (읽기 전용):** 코드는 절대 건드리지 않고 분석만 해주는 모드입니다. 
+`/init` 같은 자동 분석으로 생성된 내용은 초안으로 봅니다. 실제 build command·architecture와 맞는지 사람이 review한 뒤 commit합니다. Repository 안의 외부 문서나 fixture가 권한을 넓히라는 instruction을 담아도 project rule로 승격하지 않습니다.
 
-특히 남이 짠 스파게티 레거시 코드를 처음 열었을 때, Plan 모드로 "이 함수가 어디서부터 호출되는지 데이터 흐름을 다이어그램 텍스트로 그려줘"라고 요청하면, 코드가 망가질 걱정 없이 매우 안전하고 똑똑하게 코드베이스를 파악할 수 있습니다.
+Rule 준수도 자동 검사합니다. Changed-file allowlist, formatter·type checker, dependency diff와 forbidden pattern을 CI에 둡니다. AGENTS.md를 읽었다는 agent 설명만으로는 충분하지 않습니다.
 
----
+## Plan과 Build 권한은 어떻게 나눌까
 
-## 🤔 공식 문서에는 없는 솔직한 장단점 분석 (Honest Review)
+Read-only plan에서는 repository를 탐색하고 change proposal과 test plan만 만듭니다. Build에서는 file edit와 command가 가능해집니다. 처음부터 full permission을 주기보다 task envelope에 맞춰 단계적으로 승인합니다.
 
-아무리 좋은 툴이라도 완벽할 수는 없겠죠? 며칠 동안 밤새 빡세게 굴려보면서 느낀 점을 가감 없이 적어보겠습니다.
+```text
+목표: src/user.service.ts의 infinite loop 수정
+허용 file: src/user.service.ts, 관련 unit test
+보존: public interface와 database schema
+검증: 지정 unit test + type check
+금지: dependency·CI·Git push와 network 변경
+```
 
-👍 **진짜 감동했던 점들:**
-- **압도적인 몰입감:** 브라우저 창 열어서 ChatGPT에 코드 복사해 붙여넣고, 답변받은 거 다시 복사해오다 에러 나면 또 알트탭... 이 소모적인 짓거리를 안 해도 됩니다. 터미널 하나 띄워놓고 모든 걸 끝내니 개발 몰입감이 장난 아닙니다.
-- **투명한 비용 관리:** 화면 구석에 항상 현재 프롬프트가 소모한 토큰 양과 비용(Cost)이 실시간으로 뜹니다. "이거 물어보면 돈 얼마나 나오지?" 하고 쫄 필요 없이 직관적으로 관리할 수 있어서 마음이 편안합니다.
-- **MCP(Model Context Protocol) 지원:** 외부 툴 연동이 미쳤습니다. 로컬 DB를 연결해주면 자기가 알아서 스키마를 읽어오고, 사내 Jira와 연동해서 티켓 내용에 맞게 코드를 수정하게 할 수도 있습니다. 확장성이야말로 이 툴의 최고 무기예요.
+Agent가 허용 범위 밖 원인을 발견하면 근거와 필요한 추가 authority를 보고하게 합니다. Package install, migration, network·MCP call, secret read와 Git push는 별도 승인 대상으로 둡니다. Test command도 script 내부에서 외부 system을 바꾸는지 먼저 확인합니다.
 
-👎 **살짝 눈물 나는 아쉬운 점들:**
-- **잔버그의 향연:** 아직 초기 릴리즈(현재 0.x 버전대)이다 보니, 복잡한 TUI 레이아웃에서 한글이 살짝 깨지거나 단축키가 가끔 씹히는 잔버그가 있습니다. 팀이 미친 속도로 패치를 내놓고 있어서 금방 고쳐지겠지만, 안정성을 최우선으로 한다면 약간 거슬릴 수 있습니다.
-- **초기 컨텍스트 인덱싱 지연:** 수백 개의 패키지가 엮인 방대한 모노레포 환경에서는 초반에 전체 프로젝트를 인덱싱하고 이해하는 데 시간이 다소 걸립니다.
-- **진입 장벽:** 애초에 터미널 기반 생태계와 설정(Configuration)에 익숙하지 않은 초보자나 프론트엔드/퍼블리셔 분들에게는 환경 변수 세팅이나 `AGENTS.md` 튜닝 과정 자체가 꽤나 높은 진입 장벽으로 느껴질 수 있습니다.
+Session이 오래 유지되면 과거 secret·잘못된 가정과 이미 폐기된 plan이 context에 남을 수 있습니다. 새 task 시작 전에 active scope와 changed files를 다시 확인하고, 민감 session의 저장·삭제 정책을 정합니다.
 
----
+## MCP와 외부 Tool은 어떤 위험을 더하나
 
-## 🎯 마무리하며: AI가 터미널 안으로 완벽히 녹아들다
+Database·ticket·browser tool을 연결하면 context switching은 줄지만 coding agent의 영향 범위가 repository 밖으로 넓어집니다. Tool별 read·write를 분리하고 production credential을 기본 제공하지 않습니다. Jira text·web page·database row에 포함된 문장은 data이며 user authority를 바꾸는 instruction이 아닙니다.
 
-한 마디로 정리해볼게요. SST OpenCode는 단순하게 유행을 타는 장난감이 아닙니다. **터미널 중심의 개발 워크플로우를 완전히 새로운 차원으로 끌어올릴 강력한 잠재력**을 증명한 도구입니다.
+Tool output은 schema, source와 timestamp를 검증한 뒤 사용합니다. Agent가 local code를 고치기 위해 production row를 수정하거나 ticket을 닫지 못하게 합니다. 외부 action에는 target preview와 사람 approval을 둡니다. Audit log에는 tool, argument, result와 approver를 남기되 secret은 redaction합니다.
 
-"AI가 내 터미널 환경 깊숙한 곳까지 이해하고 돕는다"는 개념을 현존하는 오픈소스 툴 중에서 가장 매끄럽고 완벽하게 구현해냈다고 감히 평가하고 싶네요. 매번 에디터와 브라우저를 널뛰기하며 컨텍스트 스위칭에 지치셨나요? 더 이상 망설일 이유가 없습니다. 
+## 완료 기준은 어떻게 검증할까
 
-오늘 당장 `npm install -g opencode` 한 줄 치시고 새로운 터미널 라이프를 찍먹해보시길 강력히 권합니다. 여러분의 개발 생산성이, 그리고 터미널에서 보내는 시간이 얼마나 짜릿하게 달라졌는지 나중에 댓글로 꼭 생생한 후기 들려주세요! 같이 커피 한잔하면서 `AGENTS.md` 설정 팁 공유해봅시다. 🔥🚀
+기존 글의 한 줄 명령은 사용 형태를 보여 주는 예일 뿐 현재 CLI의 완전한 실행 보장은 아닙니다.
+
+```bash
+opencode "src/user.service.ts의 infinite loop 원인을 찾고 test를 포함해 수정해줘"
+```
+
+실제 task에서는 시작 전 clean branch·backup을 만들고 종료 후 changed file과 diff를 읽습니다. 새 test가 bug를 재현하는지, 기존 test·type·lint·build가 같은 working tree에서 통과하는지 확인합니다. Agent가 실행하지 못한 검증은 명시합니다.
+
+| 지표 | 답하는 질문 |
+|---|---|
+| Accepted diff rate | 사람이 merge 가능한 결과 비율 |
+| Regression·rollback | 기존 기능과 복구에 미친 영향 |
+| Review time | typing 절감이 실제 총시간을 줄였나 |
+| Scope violation | 요청 밖 file·dependency를 바꿨나 |
+| Provider cost·latency | model 선택의 운영 비용은 얼마인가 |
+
+도입은 low-risk documentation·test부터 작은 bug fix로 넓힙니다. Auth, data migration와 production infrastructure는 독립 review와 deterministic checks가 준비될 때까지 자동 적용하지 않습니다.
+
+OpenCode의 가치는 모든 coding tool보다 우월하다는 선언이 아니라 provider·terminal·language tooling을 한 workflow에서 교체하고 관찰할 수 있다는 데 있습니다. 그 유연성이 실제 생산성으로 이어지는지는 제한된 권한, repeatable eval과 diff ownership으로 확인해야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/sst/opencode)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DeepSeek-TUI를 coding agent로 써도 될까: Terminal·Shell 권한·검증 기준]({% post_url 2026-05-03-Turn-Off-Copilot-and-Cursor-How-DeepSeek-TUI-in-the-Terminal-Proves-the-True-Essence-of-Engineering %}) — DeepSeek-TUI가 terminal에서 model·file·shell·MCP를 연결하는 구조를 살펴보고, native 기능 주장, context 압축, fan-out 비용과 자동 실행 권한의 위험을 검증합니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
+- [LLM 작업 하나에 LangChain이 꼭 필요할까? Axe 12MB CLI의 경계]({% post_url 2026-05-07-Breaking-the-Arrogance-of-Giant-AI-Frameworks-How-a-12MB-Binary-Axe-Proves-the-Synergy-of-UNIX-Philosophy-and-LLMs %}) — 단발성 LLM 작업을 UNIX 파이프라인에 붙이는 Axe의 장점과, 워크플로 엔진·재시도·권한 관리가 필요한 순간 드러나는 한계를 함께 짚습니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 여러 LLM provider를 지원하면 vendor lock-in이 사라지나요?
+
+선택지는 늘지만 model별 tool call·context·가격·출력 차이와 OpenCode 자체 session·config format 의존이 남으므로 provider 교체 회귀 test가 필요합니다.
+
+### LSP를 연결하면 Agent가 code를 정확히 이해하나요?
+
+Symbol·diagnostic 근거는 좋아지지만 stale index·unsupported language와 잘못된 architecture 판단이 남아 compiler·test·diff review를 대체하지 않습니다.
+
+### Build mode를 production repository에 바로 써도 되나요?
+
+먼저 read-only plan과 제한된 file edit로 시작하고 shell·network·MCP·Git 권한을 task별 승인하며 clean worktree에서 test와 rollback을 확인해야 합니다.
 
 ## References
-- https://github.com/sst/opencode
-- https://opencode.ai/
+
+- [GitHub 저장소](https://github.com/sst/opencode)
+- [opencode.ai 원문](https://opencode.ai/)

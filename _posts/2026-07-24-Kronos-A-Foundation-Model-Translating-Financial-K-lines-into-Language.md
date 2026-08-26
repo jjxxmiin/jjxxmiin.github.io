@@ -6,17 +6,17 @@ categories: Tech
 tags:
   - 아키텍처분석
   - 디퓨전모델
+  - 오픈소스
   - 트랜스포머
   - 파인튜닝
-  - 이미지생성
 summary: 칭화대학교 연구진이 개발한 Kronos는 전 세계 45개 거래소의 120억 개 K선(OHLCV) 데이터를 자연어처럼 토큰화하여 학습한
   최초의 오픈소스 시계열 파운데이션 모델입니다. 연속적인 수치 데이터를 이산적인 토큰으로 변환하는 독창적인 접근을 통해, 기존 시계열 모델의 한계를
   극복하고 예측 및 시뮬레이션 성능을 비약적으로 끌어올렸습니다.
-author: AI Trend Bot
+description: 'Kronos가 OHLCV K선을 이산 토큰으로 바꿔 자기회귀 학습하는 원리와 데이터 시점 누출·거래비용·유동성·시장 국면 변화·시간 외 예측 평가 한계를 설명합니다.'
 github_url: https://github.com/shiyu-coder/Kronos
 image:
   path: https://opengraph.githubassets.com/1/shiyu-coder/Kronos
-  alt: 'Kronos: A Foundation Model Translating Financial K-lines into Language'
+  alt: "shiyu-coder/Kronos GitHub 저장소 대표 이미지"
 project:
   stars: 33506
   forks: 5680
@@ -32,25 +32,6 @@ project:
   files: 92
 mermaid: true
 chart: true
-faq:
-- question: 기존 언어 기반 금융 AI(FinGPT나 BloombergGPT)와 Kronos는 무엇이 다른가요?
-  answer: 기존 금융 AI는 주로 뉴스 기사, 재무제표, 애널리스트 리포트 등 '자연어 텍스트'를 읽고 심리를 분석하는 언어 모델입니다. 반면
-    Kronos는 주식의 가격과 거래량이라는 순수 '수치형 캔들스틱 데이터(OHLCV)' 자체를 이산적인 토큰으로 변환해 직접 분석한다는 점에서
-    근본적인 목적과 구조가 다릅니다.
-- question: 초 단위 호가창이나 틱(Tick) 데이터에도 Kronos를 사용할 수 있나요?
-  answer: 현재 공개된 Kronos 모델은 분봉이나 일봉처럼 정해진 시간 주기를 갖는 K선(캔들스틱) 데이터 구조에 맞춰 학습되었습니다. 불규칙하게
-    발생하는 틱 데이터나 뎁스(Depth)가 있는 호가창 데이터를 다루려면 별도의 토크나이저 설계와 바닥부터의 재학습이 필요합니다.
-- question: Kronos를 실전 트레이딩 자동화에 바로 꽂아서 쓸 수 있나요?
-  answer: 모델 자체는 미래의 가격 방향성이나 변동성에 대한 확률적 신호(Signal)만을 제공합니다. 실제 자동 매매에 적용하려면 거래 수수료,
-    슬리피지(체결 오차), 자금 관리 규칙 등을 통제해야 하므로, Qlib 같은 백테스팅 프레임워크와 결합하여 본인만의 전략 규칙을 입히는 파인튜닝
-    과정이 필수적입니다.
-- question: 개인 컴퓨터나 노트북에서도 Kronos 모델을 돌려볼 수 있나요?
-  answer: 네, 가능합니다. Kronos는 약 4.1M(410만) 파라미터의 초소형 모델부터 499.2M 파라미터의 대형 모델까지 다양한 크기를
-    제공합니다. 가장 작은 모델은 일반적인 노트북 CPU나 저사양 GPU 환경에서도 충분히 빠르고 가볍게 추론 테스트를 진행할 수 있습니다.
-- question: 미국 주식이 아닌 한국 주식이나 암호화폐 시장에도 잘 맞을까요?
-  answer: Kronos는 특정 국가에 국한되지 않고 전 세계 45개 이상의 주요 거래소에서 수집된 120억 개의 K선 데이터를 기반으로 사전
-    학습되었습니다. 따라서 주식은 물론 암호화폐, 외환 등 자산군의 경계를 넘어 시장을 관통하는 보편적인 가격 변동 패턴을 인식하므로 훌륭한 제로샷(Zero-shot)
-    성능을 기대할 수 있습니다.
 ---
 
 [관련 리소스 링크]
@@ -373,6 +354,20 @@ stateDiagram-v2
 과거의 퀀트 투자자들은 '어떤 지표(Factor)를 손으로 깎아내야 수익이 날까'를 고민하며 밤을 새웠습니다. 이동평균선, RSI, MACD 등 무수한 수식들이 그 결과물입니다.
 
 하지만 Kronos의 등장은 패러다임이 변하고 있음을 시사합니다. 인간이 수식을 정의하는 시대에서, 거대한 데이터와 자기회귀 모델이 시장의 숨겨진 '문법'을 스스로 찾아내는 시대로 넘어가고 있습니다. 오픈소스로 완전히 공개된 이 강력한 도구가 앞으로 금융 분석 생태계와 퀀트 리서치의 속도를 얼마나 가속화할지 기대해 보아도 좋습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/shiyu-coder/Kronos)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [TimesFM으로 수천 예측 모델을 하나로 합쳐도 될까: 제로샷 기준선]({% post_url 2026-04-14-The-LLM-Momentum-of-Time-Series-Forecasting-Googles-TimesFM-Unifying-Tens-of-Thousands-of-Pipelines-into-One-Model %}) — TimesFM 1.0의 패치 기반 예측 구조와 제로샷 활용 범위를 살펴보고, 기존 시계열 파이프라인을 대체하기 전에 검증할 기준을 정리합니다.
+- [daily\_stock\_analysis를 0원으로 운영할 수 있을까: GitHub Actions·데이터 품질·비용 조건]({% post_url 2026-04-29-Zero-Cost-AI-Quant-Analyst-Deep-Dive-into-ZhuLinsendailystockanalysis-Source-Code %}) — daily_stock_analysis가 GitHub Actions로 금융 데이터 수집·LLM 요약·알림을 예약 실행하는 구조와 무료 한도, 데이터 품질, 비밀 관리와 투자 판단의 한계를 분석합니다.
+- [금융 API를 MCP로 감싸면 규제·권한 문제가 끝날까? 현실적인 경계]({% post_url 2026-05-08-Stop-Baking-API-Spaghetti-A-Deep-Dive-into-Financial-Services-MCP-Saving-Financial-Legacy-Systems %}) — MCP가 금융 시스템의 도구 발견과 호출 형식을 표준화하는 범위, 그리고 권한·감사·상태·고빈도 처리까지 자동 해결하지는 못하는 이유를 구분합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

@@ -62,6 +62,8 @@ article_images:
   source_url: https://siliconangle.com/2026/07/24/meta-makes-muse-spark-1-1-available-consumers-debuts-new-facebook-features
 ---
 
+인용된 Meta 자료는 Muse Spark 1.1 기반 Meta AI가 Gmail·Google Calendar 연결과 여러 단계 작업을 지원한다고 설명합니다. 제공 지역과 계정별 기능은 다를 수 있고, 메일·일정 접근은 편의만큼 큰 개인정보 권한을 요구합니다. 연결 전 읽기 범위, 외부 메시지·일정 생성 승인, 작업 로그와 연결 해제 절차를 확인하세요.
+
 ```mermaid
 graph TD
     A[Meta AI 에이전트 업데이트] --> B[Muse Spark 1.1 모델 탑재]
@@ -128,7 +130,7 @@ graph LR
   <figcaption>SiliconANGLE가 원문과 함께 공개한 이미지입니다. <a href="https://siliconangle.com/2026/07/24/meta-makes-muse-spark-1-1-available-consumers-debuts-new-facebook-features" target="_blank" rel="noopener noreferrer">출처: SiliconANGLE</a></figcaption>
 </figure>
 
-## 직접 써보거나 지켜볼 포인트
+## 연결하기 전에 무엇을 검증할까?
 
 Meta AI의 새로운 자율 작업 에이전트 기능은 웹사이트인 meta.ai와 Meta AI 모바일 앱을 통해 일부 지역에서 먼저 체험할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Meta Newsroom 출처">[1]</a></sup>. 초기 출시 대상 지역에 거주하는 사용자는 해당 플랫폼에서 계정을 연동해 직접 테스트를 진행해볼 수 있습니다.
 
@@ -149,6 +151,42 @@ flowchart TD
     E --> F[자동 일일 브리핑 및 과업 실행]
     D --> G[WhatsApp 연동 공식 발표 주시]
 ```
+
+## Gmail과 Calendar 권한은 어떻게 최소화할까?
+
+메일 요약에 필요한 읽기 권한과 메시지 전송·삭제 권한은 분리해야 합니다. 일정 조회와 일정 생성도 같은 권한이 아닙니다. 초기 시험에서는 별도 테스트 계정과 제한된 캘린더를 연결하고, 첨부파일·연락처·과거 메일까지 넓게 읽는지 확인합니다.
+
+연결된 메일에는 외부 발신자가 넣은 명령형 문장도 포함됩니다. 에이전트가 메일 본문을 사용자 지시로 오인해 파일을 전송하거나 일정을 만들지 않는지 시험해야 합니다. 외부 행동 전에는 대상·내용·시간을 보여 주고 사람이 승인할 수 있어야 합니다.
+
+## 자율 작업이 실제로 끝났는지는 무엇으로 확인할까?
+
+일일 브리핑이 그럴듯한지만 보지 말고 포함돼야 할 일정과 중요 메일의 정답표를 만듭니다. 누락, 중복, 오래된 스레드 혼합과 시간대 오류를 따로 셉니다. 슬라이드나 문서를 만들었다면 사용한 출처와 생성 파일을 열어 확인할 수 있어야 합니다.
+
+재시도와 중단 조건도 필요합니다. 권한이 없거나 서비스가 응답하지 않을 때 같은 호출을 반복하지 않는지, 일부 단계만 성공했을 때 완료로 표시하지 않는지 봅니다. 지역 또는 언어 지원이 불분명하면 발표 문구보다 현재 계정의 기능 표시와 공식 지원 문서를 우선해야 합니다.
+
+## 연결을 해제하면 무엇이 남을까?
+
+Google 권한을 철회한 뒤 Meta 쪽에 저장된 브리핑, 작업 로그, 파생 요약이 함께 삭제되는지는 별도 문제입니다. 각 서비스의 연결 관리 화면과 데이터 삭제 경로를 확인하고, 조직 계정이라면 관리자의 보존 정책도 적용되는지 봅니다. 연결을 다시 설정했을 때 과거 데이터가 복원된다면 실제 삭제 범위를 다시 점검해야 합니다.
+
+처음부터 실제 업무 계정을 연결하지 말고, 가짜 일정과 메일이 있는 시험 계정으로 시작합니다. 정상 요청뿐 아니라 취소된 일정, 중복 초대, 시간대가 다른 회의와 외부 발신자의 명령형 메일을 넣어 결과를 확인합니다. 브리핑이 중요한 항목을 빠뜨리거나 외부 행동을 승인 없이 수행하면 연결 범위를 줄이고 자동 실행을 중단해야 합니다.
+
+운영 여부는 기능이 한 번 동작했다는 사실보다 반복 정확도와 복구 가능성으로 결정합니다. 작업마다 사용한 데이터 출처, 실행한 도구, 변경된 일정이나 파일을 추적할 수 있어야 하며, 사용자가 되돌릴 방법도 제공돼야 합니다. 이 기록이 없다면 편리한 요약 기능과 자율 행동 기능을 분리해 후자만 비활성화하는 편이 안전합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts)
+- [Axios](https://www.axios.com/2026/07/24/meta-muse-spark-agents)
+- [SiliconANGLE](https://siliconangle.com/2026/07/24/meta-makes-muse-spark-1-1-available-consumers-debuts-new-facebook-features)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail·OAuth·LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
+- [Composio는 에이전트 인증을 얼마나 줄여 주나: 권한과 실행 검증]({% post_url 2026-02-21-Composio-The-Integration-Platform-for-AI-Agents %}) — AI 에이전트 개발의 가장 큰 장벽인 '인증(Auth)'과 '도구 연동(Integration)'을 한 번에 해결해주는 Composio를 상세히 분석합니다. LangChain, AutoGen 등 주요 프레임워크와의 연동법과 실전…
+- [Agentic Inbox가 Gmail Polling을 대체할까: Durable Object·SQLite의 상태 경계]({% post_url 2026-05-20-Giving-Gmail-to-Agents-Was-a-Disaster--A-Deep-Dive-into-Agentic-Inbox-the-Stateful-Infrastructure-for-AI %}) — Agentic Inbox의 이벤트 기반 수신과 Durable Object·SQLite·R2 상태 구조를 분석하고, 중복 처리·승인·MIME·벤더 종속성까지 도입 전에 정할 경계를 설명합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

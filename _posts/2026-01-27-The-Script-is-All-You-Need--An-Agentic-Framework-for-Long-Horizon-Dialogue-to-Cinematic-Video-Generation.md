@@ -4,16 +4,22 @@ title: '대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAge
 date: '2026-01-27'
 categories: Tech
 tags:
-  - 비디오생성
+  - 영상생성
+  - LLM
   - AI에이전트
-  - ScriptBench
-  - VSA
-  - 프롬프트엔지니어링
 math: true
 summary: 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성·평가·비용의 한계를 짚습니다.
+description: "ScripterAgent와 DirectorAgent가 대화문을 장면 명세와 모델별 video prompt로 바꾸는 과정, VSA의 범위, 연속성 실패와 재생성 비용을 검증합니다."
+faq:
+  - question: "대화문만 넣으면 장편 영상이 자동으로 완성되나요?"
+    answer: "아닙니다. agent가 장면 명세와 prompt를 만들 수는 있지만 얼굴·의상·공간의 연속성, 편집 리듬과 실패 clip 재생성은 여전히 별도 제작 판단이 필요합니다."
+  - question: "VSA 점수가 높으면 영화적 품질도 높은가요?"
+    answer: "VSA는 대본의 인물·행동·camera 요소가 화면에 반영됐는지를 보는 지표에 가깝고 미적 완성도, 연기와 장면 리듬까지 대신 평가하지는 않습니다."
+  - question: "비용을 줄이려면 무엇부터 고정해야 하나요?"
+    answer: "인물·의상·소품의 continuity ledger, 장면별 필수 요소와 재생성 상한을 먼저 정하고 실패한 장면만 다시 만드는 방식으로 generation budget을 관리해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.17737.png
-  alt: Paper Thumbnail
+  alt: "대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계 논문 대표 이미지"
 ---
 
 대화문을 비디오 모델에 그대로 넣는 것만으로 긴 서사가 유지되지는 않으며, 이 프레임워크의 답은 대화를 먼저 장면별 실행 대본으로 바꾼 뒤 각 클립을 연결하는 것입니다. ScripterAgent와 DirectorAgent는 이 중간 공정을 자동화하지만, 인물 일관성과 영화적 완성도를 생성 모델 자체에서 해결한 것은 아닙니다.
@@ -75,5 +81,51 @@ CriticAgent는 생성 영상과 대본을 비교하고 Visual-Script Alignment(V
 5. 마지막 프레임 참조로 복구되지 않는 각도·가림·외형 변화
 
 이 프레임워크의 실용적 가치는 “대본만 있으면 영화가 완성된다”는 데 있지 않습니다. 실패를 장면 단위로 드러내고 수정 가능한 제작 공정으로 바꾼다는 데 있습니다.
+
+## 장면 명세에는 무엇을 고정하고 무엇을 열어 둘까
+
+모든 문장을 세밀하게 고정하면 생성 모델이 자연스러운 motion을 만들 여지가 줄고, 너무 느슨하면 다음 장면에서 인물과 공간이 바뀝니다. 그래서 명세를 연속성에 필수인 hard constraint와 연출자가 바꿔도 되는 soft preference로 나누는 편이 실용적입니다.
+
+| 항목 | 고정 수준 | 실패 판정 예시 |
+|---|---|---|
+| 인물 얼굴·의상·소지품 | 장면 전체 hard constraint | jacket 색이나 가방이 사라짐 |
+| 출입 방향·소품 위치 | 인접 장면 hard constraint | 왼쪽으로 나간 인물이 오른쪽 공간에서 불연속 등장 |
+| 핵심 행동·대사 타이밍 | 내용상 필수 | cup을 내려놓는 동작이 누락됨 |
+| lens·camera movement | 장면 목적에 따라 soft preference | 대체 구도가 의미를 보존하면 허용 |
+| 배경의 작은 장식 | 보통 soft preference | 변화가 narrative에 영향 없으면 허용 |
+
+이 정보를 continuity ledger로 남기면 DirectorAgent가 매 장면 전체 대본을 다시 해석하지 않고도 바뀌면 안 되는 state를 참조할 수 있습니다. 예를 들어 `coat=red`, `cup=table right`, `door=open`처럼 장면 시작과 끝 상태를 기록하고, 다음 clip을 만들기 전에 이전 끝 state와 새 시작 state가 충돌하는지 검사합니다. 이는 새 사실을 생성하는 단계가 아니라 대본 안의 약속을 추적하는 단계입니다.
+
+## 재생성 비용은 어떻게 예측할까
+
+장면 수가 $S$, 장면당 평균 생성 횟수가 $R$, 한 번의 video generation 비용이 $C_v$라면 핵심 비용은 대략 $S\times R\times C_v$로 늘어납니다. 여기에 Scripter·Director·Critic의 LLM 호출과 사람이 검수하는 시간이 붙습니다. 긴 작품에서 첫 성공률이 낮으면 장면 수보다 재시도 횟수가 예산을 더 크게 좌우할 수 있습니다.
+
+따라서 PoC에서는 전체 영화를 한 번에 만들기보다 대화, 빠른 action, camera 전환처럼 실패 특성이 다른 세 장면을 고릅니다. 각 장면에 최대 재생성 횟수를 두고 VSA 실패, continuity 실패, 미적 실패를 분리해 기록합니다. 같은 clip이 VSA는 통과했지만 사람이 연기 때문에 다시 생성했다면 자동 critic이 절약하지 못한 비용으로 계산해야 합니다.
+
+Failure gate도 명확해야 합니다. 필수 소품이나 인물 identity가 틀리면 자동 재생성하고, camera preference만 달라졌지만 의미가 유지되면 사람이 선택할 수 있습니다. 최대 횟수까지 실패하면 다음 장면으로 오류를 전파하지 않고 그 장면을 수동 제작 대상으로 넘깁니다. 마지막 frame이 잘못된 상태인데도 다음 clip의 reference로 쓰면 한 번의 오류가 이후 모든 장면에 복제될 수 있습니다.
+
+최종 편집본에서는 장면별 ledger와 실제 frame을 다시 대조하고, 자동 score가 통과시킨 continuity 회귀도 사람이 확인해야 합니다. 이 마지막 검수가 있어야 agent workflow의 절감 시간과 사람이 떠안은 수정 시간을 공정하게 비교할 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DramaClaw: 파편화된 AI 영상 제작을 하나로 통합하는 오픈소스 파이프라인]({% post_url 2026-07-10-DramaClaw-The-Open-Source-Pipeline-Unifying-Fragmented-AI-Video-Generation %}) — DramaClaw는 텍스트 대본 입력부터 캐릭터 추출, 스토리보드, 더빙, 최종 영상 합성까지 AI 영상 제작의 전 과정을 자동화하는 오픈소스 비디오 엔진입니다. 노드 기반 무한 캔버스와 DAG 병렬 처리 스케줄링을 통해 단방향…
+- [OpenMontage로 AI 영상을 만들 때: 에이전트 파이프라인·비용·검수 기준]({% post_url 2026-07-04-The-End-of-Prompt-Engineering-The-True-Value-of-OpenMontages-Agent-First-Video-Pipeline %}) — OpenMontage가 YAML 파이프라인·Markdown 스킬·Python 도구·Remotion과 FFmpeg를 연결해 영상 제작 단계를 조율하는 방식을 설명합니다. 설치 비용, 사람 승인, 재현성과 보안까지 포함한 파일럿 기준도…
+- [12시간 AI 영상은 정말 일관적인가? LoL의 Sink-Collapse와 RoPE Jitter]({% post_url 2026-02-01-LoL--Longer-than-Longer--Scaling-Video-Generation-to-Hour %}) — LoL이 attention sink와 RoPE 주기 때문에 여러 head가 초기 frame에 동시에 쏠리는 sink-collapse를 추론 시 jitter로 완화하는 원리와 12시간 결과의 해석 한계를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 대화문만 넣으면 장편 영상이 자동으로 완성되나요?
+
+아닙니다. agent가 장면 명세와 prompt를 만들 수는 있지만 얼굴·의상·공간의 연속성, 편집 리듬과 실패 clip 재생성은 여전히 별도 제작 판단이 필요합니다.
+
+### VSA 점수가 높으면 영화적 품질도 높은가요?
+
+VSA는 대본의 인물·행동·camera 요소가 화면에 반영됐는지를 보는 지표에 가깝고 미적 완성도, 연기와 장면 리듬까지 대신 평가하지는 않습니다.
+
+### 비용을 줄이려면 무엇부터 고정해야 하나요?
+
+인물·의상·소품의 continuity ledger, 장면별 필수 요소와 재생성 상한을 먼저 정하고 실패한 장면만 다시 만드는 방식으로 generation budget을 관리해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.17737)

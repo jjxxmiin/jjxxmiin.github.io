@@ -7,15 +7,15 @@ tags:
   - 파이썬
   - MCP
   - 멀티에이전트
+  - 웹개발
   - AI보안
-  - AI에이전트
 summary: 구글이 시작하고 리눅스 재단이 주도하는 A2A 프로토콜은 독립된 인공지능 에이전트 간의 통신과 상호운용성을 위한 오픈 표준입니다.
   특정 프레임워크나 플랫폼에 얽매이지 않고 에이전트들이 서로의 능력을 탐색하고 안전하게 작업을 위임하는 구체적인 방법을 다룹니다.
-author: AI Trend Bot
+description: 'A2A 프로토콜의 에이전트 카드·작업 위임·상태·산출물 교환 구조와 MCP와의 차이, 상대 신원 인증·권한·취소·시간 초과·상호운용성 검증법을 설명합니다.'
 github_url: https://github.com/a2aproject/A2A
 image:
   path: https://opengraph.githubassets.com/1/a2aproject/A2A
-  alt: 'A2A (Agent2Agent) Protocol: The Standard for AI Agent Interoperability'
+  alt: "a2aproject/A2A GitHub 저장소 대표 이미지"
 project:
   stars: 24924
   forks: 2521
@@ -36,30 +36,11 @@ project:
   files: 129
 mermaid: true
 chart: true
-faq:
-- question: A2A 프로토콜은 MCP(Model Context Protocol)와 무엇이 다른가요?
-  answer: MCP는 거대 언어 모델(LLM)과 정적인 데이터 출처, 외부 도구를 연결하는 데 집중된 표준입니다. 반면 A2A는 이미 독립적으로
-    작동하고 있는 인공지능 에이전트들이 서로의 능력을 파악하고 능동적으로 작업을 위임하며 협력하기 위한 에이전트 간 통신 표준입니다. 즉, 도구
-    연동과 지능을 가진 에이전트 연동이라는 명확한 목적의 차이가 있습니다.
-- question: 어떤 프로그래밍 언어와 통신 방식을 지원하나요?
-  answer: 파이썬, 자바, 자바스크립트, Go, C#/.NET, 러스트 등 실무에서 쓰이는 주요 언어용 SDK를 모두 제공합니다. 통신 방식
-    또한 환경에 맞춰 유연하게 선택할 수 있도록 대중적인 HTTP 기반의 REST는 물론, 성능이 뛰어난 JSON-RPC와 gRPC를 모두 공식적으로
-    지원하여 범용성을 높였습니다.
-- question: 기존에 이미 구축해 둔 사내 내부 에이전트에도 A2A를 적용할 수 있나요?
-  answer: 네, 적용 가능합니다. 기존에 구축된 에이전트 시스템 앞단에 A2A 서버 인터페이스를 래핑(Wrapping)하는 형태로 가볍게 통합할
-    수 있습니다. 이를 통해 외부 에이전트가 표준화된 규격(에이전트 카드)을 바탕으로 기존 사내 에이전트의 기능을 호출하고 협업하도록 만들 수
-    있습니다.
-- question: 외부 에이전트에 작업을 넘길 때 보안이나 권한 남용 문제는 어떻게 방지하나요?
-  answer: A2A 프로토콜은 위임 체인 컨텍스트(Delegation chain context)와 단조적 능력 축소(Monotonic capability
-    narrowing)라는 강력한 보안 개념을 내장하고 있습니다. 이를 통해 작업의 최초 호출 주체를 명확히 추적하고, 하위 에이전트에게 작업을
-    넘길 때 토큰 예산이나 접근 권한을 엄격하게 제한함으로써 보안 사고를 사전에 차단합니다.
-- question: 특정 대기업의 클라우드나 기술 생태계에 종속되는 것은 아닌가요?
-  answer: 초기에는 구글이 기획하고 개발을 주도하였으나, 2025년 중순에 리눅스 재단에 프로젝트가 정식으로 기증되었습니다. 현재는 특정 벤더나
-    클라우드 제공자에 종속되지 않는 완전히 독립적이고 중립적인 오픈 소스 거버넌스 하에 관리되고 있으므로 락인(Lock-in) 걱정 없이 도입할
-    수 있습니다.
 ---
 
-## 상단 참조 링크
+A2A는 서로 다른 에이전트가 능력을 알리고 작업을 위임하며 상태와 산출물을 교환하는 통신 규격입니다. 메시지 형식이 맞는다고 상대 에이전트의 신원·권한·결과가 신뢰되는 것은 아니므로 인증과 승인, 시간 초과, 추적 ID가 별도로 필요합니다. 두 구현의 최소 예제로 발견·위임·취소·실패 복구가 실제로 호환되는지 확인하세요.
+
+## 에이전트 간 표준이 필요한 경계는 어디인가
 
 - 공식 GitHub 저장소: [a2aproject/A2A](https://github.com/a2aproject/A2A)
 - 파이썬 공식 SDK: [a2aproject/a2a-python](https://github.com/a2aproject/a2a-python)
@@ -360,6 +341,20 @@ A2A 프로토콜이 모든 개발 과제를 해결해 주는 마법의 지팡이
 인공지능 에이전트가 점점 더 전문화되고 기능이 고도화되면서, 하나의 거대한 모놀리식 에이전트가 세상의 모든 일을 처리하는 시대는 저물고 있습니다. 과거 소프트웨어 생태계에서 마이크로서비스 아키텍처가 거대한 단일 시스템을 대체했듯, 앞으로의 AI 생태계 역시 작고 특화된 에이전트들이 네트워크를 통해 긴밀하게 협력하는 다중 에이전트 사회로 진화할 것입니다.
 
 A2A 프로젝트는 서로 다른 개발 언어와 프레임워크라는 거대한 장벽을 허물고, 에이전트들이 공통의 언어로 명함을 교환하고 소통할 수 있는 튼튼한 도로망을 닦고 있습니다. 리눅스 재단의 투명한 중립성과 폭넓은 공식 언어 지원 덕분에 특정 플랫폼에 묶이지 않는 진정한 오픈 표준으로 안착할 가능성이 높습니다. 다가올 멀티 에이전트 자동화 시대를 발 빠르게 준비하고 있다면, A2A 프로토콜의 설계 철학과 발전 과정을 주의 깊게 살펴보고 선제적으로 사내 파이프라인에 적용해 볼 시점입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/a2aproject/A2A)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Model Context Protocol 2026-07-28 규격 발표, 무상태 HTTP 구조 변경과 영향 정리]({% post_url 2026-07-29-model-context-protocol-2026-07-28-spec-update-transition-to-stateless-http-architecture %}) — Model Context Protocol 프로젝트가 2026년 7월 28일 정식 사양 업데이트를 발표했습니다. 이번 개정으로 지속적인 세션 연결과 프로토콜 수준의 핸드셰이크가 제거되고, 헤더 기반 라우팅이 가능한…
+- [OpenOSINT: AI와 결합된 차세대 오픈소스 정보 수집 에이전트의 작동 원리와 실전 활용법]({% post_url 2026-07-09-OpenOSINT-Under-the-Hood-of-the-Next-Generation-AI-Powered-OSINT-Agent %}) — 복잡한 명령어와 수동 데이터 연결의 피로도를 덜어주는 오픈소스 프로젝트 OpenOSINT의 내부 구조와 연동 기법을 깊이 있게 다룹니다.
+- [Thunderbolt는 정말 모질라의 주권형 AI인가: 도입 전 출처 검증]({% post_url 2026-04-19-Mozillas-Counterattack-Can-Thunderbolt-Disrupt-the-Enterprise-AI-Landscape %}) — Thunderbolt에 붙은 Mozilla·로컬 우선·MCP 주장을 사실과 가설로 나누고, 저장소에서 확인해야 할 도입 근거와 운영 위험을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

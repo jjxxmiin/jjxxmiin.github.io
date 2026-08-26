@@ -7,19 +7,18 @@ tags:
   - 경량화
   - 트랜스포머
   - 온디바이스AI
-  - AI에이전트
+  - 컴퓨터비전
   - LLM
 summary: Colibri는 7440억 파라미터(744B) 규모의 초거대 혼합 전문가(MoE) 모델인 GLM-5.2를 25GB 램만 장착된 일반
   노트북에서 구동하게 해주는 독창적인 순수 C 기반 추론 엔진입니다. 전체 모델을 램에 올리는 대신, 자주 쓰이는 17B 규모의 공통 파라미터만
   램에 상주시키고 방대한 전문가 네트워크 가중치는 고속 NVMe SSD에서 그때그때 스트리밍으로 읽어오는 메모리 관리 아키텍처를 채택했습니다. 비록
   콜드 스타트 시 초당 0.1토큰이라는 매우 느린 속도를 보이지만, 고가의 GPU 서버 없이도 로컬 환경에서 프론티어급 거대 AI 모델을 온전히
   실행할 수 있다는 구조적 대안을 구체적으로 증명합니다.
-author: AI Trend Bot
+description: 'Colibri가 MoE 공통 가중치는 메모리에 두고 전문가 가중치는 NVMe에서 읽는 방식과 모델 용량·토큰 속도·디스크 수명·하드웨어 재현 조건을 설명합니다.'
 github_url: https://github.com/JustVugg/colibri
 image:
   path: https://opengraph.githubassets.com/1/JustVugg/colibri
-  alt: 'Colibri: The Pure C Inference Engine Running a 744B MoE Model on a 25GB RAM
-    Laptop'
+  alt: "JustVugg/colibri GitHub 저장소 대표 이미지"
 project:
   stars: 1353
   forks: 78
@@ -59,6 +58,8 @@ faq:
     내부의 수학적 연산과 비트 단위로 일치하도록 정밀하게 조정된 독자적인 INT4 양자화 컨테이너를 사용해야만 하며, 반드시 제공되는 변환 스크립트를
     거친 전용 가중치 파일을 사용해야 합니다.
 ---
+
+Colibri는 MoE 모델의 공통 가중치는 메모리에 두고 선택된 전문가 가중치는 NVMe에서 읽어 제한된 RAM으로 큰 모델을 실행하려는 추론 엔진입니다. 실행 가능성과 실용적인 생성 속도는 다른 질문이며, 이 글의 콜드 속도는 대화형 서비스보다 실험·배치 용도에 가까운 제약을 보여 줍니다. 모델 파일 용량, SSD 처리량·수명, 토큰 속도와 출력 품질을 자신의 하드웨어에서 함께 측정해야 합니다.
 
 TL;DR (한 줄 요약)
 - **무엇인가요**: 7440억(744B) 파라미터 규모의 초거대 언어 모델을 단 25GB 시스템 램으로 구동하는 순수 C 언어 기반 추론 엔진입니다.
@@ -284,6 +285,20 @@ M-->>U: 다음 날 아침 결과 보고서 반환
 
 Colibri 프로젝트는 단순히 "느려도 돌아가게 만들었다"는 것을 넘어, 거대 AI 모델의 병목 현상을 연산 장치(GPU)와 메모리 용량(VRAM)에서 디스크 대역폭(I/O)으로 옮겨보는 훌륭한 사고의 전환을 보여주었습니다. 개발자 Vincenzo가 12코어의 평범한 노트북으로 최고급 프론티어 AI의 대답을 얻어냈을 때 느꼈을 성취감은, 기술이 궁극적으로 나아가야 할 '도구의 대중화'라는 방향성을 정확히 가리키고 있습니다.
 미래에 통합 메모리(Unified Memory) 대역폭이 비약적으로 넓어지고 SSD와 RAM 사이의 경계가 허물어지는 새로운 하드웨어 아키텍처가 보편화된다면, Colibri가 증명한 이러한 스트리밍 방식의 추론 엔진들이 로컬 AI 생태계의 표준으로 자리 잡을지도 모릅니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/JustVugg/colibri)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [KTransformers: 24GB 단일 GPU와 시스템 메모리로 600B급 MoE 모델을 구동하는 이기종 추론 기술]({% post_url 2026-07-19-KTransformers-Heterogeneous-Inference-Architecture-for-Running-600B-MoE-Models-on-a-Single-24GB-GPU-and-System-RAM %}) — 단일 24GB GPU와 시스템 메모리를 결합하는 이기종 컴퓨팅 기술을 통해 수백만 원대 데스크톱 환경에서도 671B 규모의 최신 MoE(전문가 혼합) 언어 모델을 실용적인 속도로 추론하고 파인튜닝할 수 있게 해주는 오픈소스…
+- [DarkNet GEMM 인자 읽는 법: TA·TB·lda·BETA]({% post_url 2022-02-22-DarkNetGEMM %}) — DarkNet GEMM 호출을 C=βC+αop(A)op(B)로 해석하고, 네 가지 전치 분기와 leading dimension이 실제 메모리 인덱스에 미치는 영향을 설명합니다.
+- [ds4의 284B 로컬 추론은 누구에게 현실적일까: 128GB·Metal·SSD 조건]({% post_url 2026-05-11-Why-Did-Redis-Creator-Antirez-Cram-a-284B-Model-into-a-MacBook---A-Deep-Dive-into-the-ds4c-Local-Inference-Engine %}) — ds4가 모델 하나와 Apple Silicon에 집중한 이유, MoE 가중치와 Disk KV Cache의 역할, 실제 검증해야 할 메모리·속도 조건을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

@@ -6,14 +6,22 @@ categories: Tech
 tags:
   - 멀티모달
   - 영상생성
-  - 아키텍처분석
   - 트랜스포머
+  - 경량화
   - 디퓨전모델
 math: true
 summary: "Kling-Omni가 text·image·video 조건을 공통 표현에 놓고 reference visual을 prefix로 연결해 생성과 편집을 통합하는 방법, 장기 영상에서 남는 한계를 정리합니다."
+description: "Kling-Omni가 text·image·video 조건과 reference visual을 prefix로 통합하는 구조를 설명하고, 생성·편집·장기 영상의 품질을 나눠 검증하는 기준입니다."
+faq:
+  - question: "Kling-Omni에서 reference video는 어떻게 사용되나요?"
+    answer: "reference image나 video를 prefix token처럼 조건에 넣어 새 생성과 기존 영상 편집을 하나의 조건부 생성 흐름으로 다룹니다."
+  - question: "하나의 모델이면 생성과 편집 품질이 모두 같은가요?"
+    answer: "아닙니다. 통합 학습의 task 비율과 조건에 따라 기능별 품질이 다를 수 있으므로 생성·편집·reference 유지 과제를 따로 평가해야 합니다."
+  - question: "짧은 데모가 자연스러우면 긴 영상도 안정적인가요?"
+    answer: "그렇지 않습니다. 길이가 늘 때 정체성·배경·동작이 흔들리는 시점을 별도로 측정하고, 빠른 motion과 복잡한 물리 장면도 시험해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.16776.png
-  alt: Paper Thumbnail
+  alt: "Kling-Omni가 생성·편집 모델을 하나로 합친 이유: Reference Video를 Prefix로 쓰는 구조 논문 대표 이미지"
 ---
 
 Kling-Omni가 생성과 편집을 한 모델에 넣은 이유는 **text·image·video 조건을 따로 처리할수록 reference와 결과 사이의 정체성·동작·맥락 정렬이 끊기기 쉽기 때문**입니다. 이 모델의 관전 포인트는 기능 목록이 아니라, 입력 시각 정보를 생성 과정의 prefix로 넣어 같은 Transformer 문맥에서 읽는 방식입니다.
@@ -41,5 +49,61 @@ In-context visual input은 reference image나 video를 prefix token처럼 앞에
 통합 모델이 해결하지 못한 문제도 뚜렷합니다. 긴 video는 계산량이 크고, 빠른 motion이나 fluid처럼 변화가 복잡한 장면에서는 artifact가 생길 수 있습니다. 1분을 넘는 길이에서는 정체성과 장면 구성이 흔들리는 drift도 남습니다. 짧은 demo의 자연스러움을 장기 일관성의 증거로 쓰면 안 됩니다.
 
 도입 전에 네 가지를 확인해야 합니다. 같은 인물이 여러 shot에서 유지되는가, reference의 핵심 속성이 편집 뒤에도 남는가, 빠른 동작에서 frame이 무너지지 않는가, 길이가 늘 때 drift가 어느 시점부터 커지는가입니다. Kling-Omni의 의미는 “모든 영상을 해결한 world model”이 아니라 **생성과 편집을 하나의 multimodal 조건부 생성 틀로 묶은 선택**에 있습니다.
+
+
+## 통합 모델은 기능별 통과선을 따로 둔다
+
+같은 checkpoint가 생성과 편집을 모두 수행해도 한 점수로 합치면 약한 기능이 가려집니다. 평가 세트를 새 영상 생성, reference image 기반 생성, reference video 기반 생성, 부분 편집으로 나눕니다. 각 과제에서는 prompt 충실도, reference 보존, frame 일관성, 편집 밖 영역의 변화량을 별도로 기록합니다.
+
+예를 들어 인물의 옷 색만 바꾸는 편집에서는 새 색이 적용됐는지뿐 아니라 얼굴, 배경, 동작 timing이 유지됐는지 봅니다. reference 동작을 다른 배경으로 옮기는 작업에서는 motion은 보존됐지만 배경 객체가 인물과 충돌하지 않는지도 확인합니다. 보기 좋은 결과 하나보다 변경 대상과 보호 대상이 모두 통과한 비율이 중요합니다.
+
+| 과제 | 핵심 질문 | 대표 실패 |
+|---|---|---|
+| text-to-video | 지시한 객체와 동작이 있는가 | prompt 요소 누락 |
+| image reference | 외형 특징이 시간에 따라 남는가 | 얼굴·의상 drift |
+| video reference | 동작과 timing이 이어지는가 | pose 또는 속도 변화 |
+| 부분 편집 | 지정 영역만 달라졌는가 | 배경·정체성까지 변함 |
+
+## Prefix가 길어질 때 조건 경쟁을 관찰한다
+
+text, image, video reference를 많이 넣으면 조건 정보도 늘지만 서로 충돌할 수 있습니다. 문장은 빨간 옷을 요구하고 reference image는 파란 옷을 보여 주는 식의 모순을 일부러 만들어 모델이 어떤 조건을 우선하는지 확인합니다. 결과가 매번 다르다면 사용자 요청에서 조건 우선순위를 명시하거나 reference 수를 줄여야 합니다.
+
+긴 reference video는 입력 비용과 memory를 늘리고, 중요한 순간이 긴 sequence 안에서 희석될 수 있습니다. 전체 reference, 핵심 구간만 자른 reference, 한 장의 대표 image를 각각 넣어 결과와 비용을 비교합니다. reference를 더 많이 넣을수록 항상 보존력이 좋아진다는 가정을 버려야 합니다.
+
+## 장기 영상은 구간별 누적 오류로 평가한다
+
+최종 frame만 비교하면 중간에 잠깐 사라졌다 돌아온 객체나 갑작스러운 motion artifact를 놓칠 수 있습니다. 영상을 일정 구간으로 나눠 인물 특징, 주요 객체 수, 배경 구조, 동작 연결을 기록합니다. 처음 실패가 나타난 시점과 이후 회복 여부를 표시하면 길이에 따른 drift 곡선을 만들 수 있습니다.
+
+빠른 회전, 가림, 여러 인물의 교차, fluid 같은 복잡한 변화는 별도 실패 묶음으로 둡니다. 평균 품질이 좋아도 서비스의 핵심 장면에서 반복적으로 무너지면 도입할 수 없습니다. 생성 시간과 peak memory도 영상 길이별로 함께 기록해야 통합 구조의 운영 이점을 판단할 수 있습니다.
+
+Kling-Omni를 선택할 근거는 기능 수가 아니라, **내가 자주 쓰는 조건 조합에서 reference를 얼마나 보존하고 편집 범위를 얼마나 지키는지**입니다. 통합 모델의 편의성과 task별 전문 모델의 품질을 같은 입력·같은 시간 예산으로 비교해야 실제 선택이 가능합니다.
+
+## 실패한 결과는 재생성 이유별로 묶는다
+
+재생성 횟수만 세면 무엇이 비용을 키우는지 알 수 없습니다. prompt 누락, reference drift, 편집 밖 변화, 시간 불연속, 물리 artifact로 실패 사유를 나눕니다. 같은 prompt에서 반복되는 유형은 우연한 seed 문제가 아니라 조건 표현이나 모델 한계일 가능성이 큽니다.
+
+seed와 영상 길이, reference 종류, guidance 설정을 함께 기록하면 짧은 clip에서는 안정적이지만 특정 길이부터 drift가 커지는 패턴을 찾을 수 있습니다. 모든 실패를 prompt 수정으로 해결하려 하지 말고, 보호해야 할 reference가 많은 편집은 후처리나 task별 모델과 비교합니다. 최종 성공률에는 사람이 고른 최고 결과뿐 아니라 허용 횟수 안에 통과한 비율을 사용해야 실제 제작 비용을 반영할 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Sora 영상은 왜 물리 법칙을 틀리나: 시공간 패치와 DiT 원리]({% post_url 2025-02-19-sora %}) — Sora가 영상을 압축해 시공간 패치로 처리하는 방식과 긴 영상에서도 남는 물리·캐릭터 일관성 문제
+- [영상·오디오·편집을 한 모델로 묶으면 뭐가 달라질까: SkyReels-V4]({% post_url 2026-02-26-SkyReels-V4--Multi-modal-Video-Audio-Generation--Inpainting-and-Editing-model %}) — SkyReels-V4의 Dual-Stream MMDiT, 통합 인페인팅 인터페이스와 1080p 생성 전략을 살피고 단일 모델이라는 표현의 비용·길이 한계를 짚습니다.
+- [비디오를 16 FPS로 바로 이어 만들 수 있을까? ShotStream의 캐시 조건]({% post_url 2026-03-30-ShotStream--Streaming-Multi-Shot-Video-Generation-for-Interactive-Storytelling %}) — 양방향 비디오 모델을 인과적 학생으로 증류해 스트리밍하는 ShotStream의 듀얼 캐시, 16 FPS 조건과 장기 생성의 한계 및 검증법을 설명합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Kling-Omni에서 reference video는 어떻게 사용되나요?
+
+reference image나 video를 prefix token처럼 조건에 넣어 새 생성과 기존 영상 편집을 하나의 조건부 생성 흐름으로 다룹니다.
+
+### 하나의 모델이면 생성과 편집 품질이 모두 같은가요?
+
+아닙니다. 통합 학습의 task 비율과 조건에 따라 기능별 품질이 다를 수 있으므로 생성·편집·reference 유지 과제를 따로 평가해야 합니다.
+
+### 짧은 데모가 자연스러우면 긴 영상도 안정적인가요?
+
+그렇지 않습니다. 길이가 늘 때 정체성·배경·동작이 흔들리는 시점을 별도로 측정하고, 빠른 motion과 복잡한 물리 장면도 시험해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.16776)

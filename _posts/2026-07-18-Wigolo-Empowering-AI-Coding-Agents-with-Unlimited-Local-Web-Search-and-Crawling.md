@@ -8,15 +8,15 @@ tags:
   - MCP
   - Claude
   - ClaudeCode
-  - Gemini
+  - 웹개발
 summary: Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬
   기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해 오래된 데이터에 갇힌 에이전트의 한계를 근본적으로
   해결합니다.
-author: AI Trend Bot
+description: 'Wigolo가 검색·JS 렌더링·PDF 파싱·캐시를 로컬 MCP로 묶는 방식과 사이트별 크롤링 권한·자료 최신성·캐시 오염·CPU 및 저장 공간 비용을 정리합니다.'
 github_url: https://github.com/KnockOutEZ/wigolo
 image:
   path: https://opengraph.githubassets.com/1/KnockOutEZ/wigolo
-  alt: 'Wigolo: Empowering AI Coding Agents with Unlimited Local Web Search and Crawling'
+  alt: "KnockOutEZ/wigolo GitHub 저장소 대표 이미지"
 project:
   stars: 1267
   forks: 85
@@ -40,26 +40,11 @@ project:
   files: 1593
 mermaid: true
 chart: true
-faq:
-- question: 기존 에디터에 있는 내장 웹 검색과는 무엇이 다른가요?
-  answer: 기존 내장 검색은 보통 한 번에 한 페이지의 얕은 스니펫만 가져옵니다. 반면 Wigolo는 전체 문서 사이트를 크롤링하고, 자바스크립트
-    기반 페이지나 PDF까지 파싱하며, 모든 결과를 로컬에 영구적으로 캐시하여 에이전트의 깊은 리서치를 돕습니다.
-- question: API 키 없이 어떻게 검색을 수행하나요?
-  answer: Wigolo는 사용자의 로컬 머신에서 직접 다중 검색 엔진 쿼리와 내장 헤드리스 브라우저를 구동합니다. 클라우드 서비스나 검색 벤더를
-    거치지 않기 때문에 별도의 API 키 발급이나 요금 청구 없이 완전히 무료로 동작합니다.
-- question: Wigolo가 지원하는 주요 AI 코드 에디터는 무엇인가요?
-  answer: Claude Code, Cursor, Codex, Gemini CLI 등 MCP(Model Context Protocol) 규격을
-    지원하는 거의 모든 AI 코딩 환경과 에이전트에서 활용할 수 있도록 설계되었습니다.
-- question: 1.5GB의 디스크 용량은 주로 어디에 쓰이나요?
-  answer: 로컬 환경에서 웹 페이지를 렌더링하기 위한 헤드리스 브라우저 엔진 파일과 오프라인 처리를 돕는 로컬 모델, 그리고 반복적인 쿼리
-    속도를 획기적으로 높여주는 지속형 캐시 데이터를 저장하는 데 주로 사용됩니다.
-- question: 옵션으로 제공되는 LLM 요약(WIGOLO_LLM_PROVIDER) 기능은 왜 필요한가요?
-  answer: 방대한 문서를 그대로 크롤링하면 에이전트의 컨텍스트 창(Context Window)이 금방 가득 찰 수 있습니다. Gemini 무료
-    티어나 로컬 Ollama 등을 연결해 두면, Wigolo가 무거운 문서를 미리 정제하고 핵심만 요약하여 메인 에이전트의 토큰 소모를 크게 절약해
-    줍니다.
 ---
 
-## Wigolo 소개: AI 에이전트의 한계를 부수는 로컬 웹 계층
+Wigolo는 검색, 웹 페이지 렌더링, PDF 추출과 캐시를 로컬 MCP 서버로 묶어 코딩 에이전트에 제공하려는 도구입니다. 로컬 실행은 검색 API 비용을 줄일 수 있지만 인터넷·사이트 자원은 무제한이 아니며 robots 정책, 이용약관, 차단과 컴퓨터 자원을 지켜야 합니다. 공식 문서 질의부터 시작해 출처 URL·조회 시점·캐시 만료와 추출 누락을 확인하세요.
+
+## 로컬 검색 계층이 필요한 작업은 무엇인가
 
 최근 AI 코딩 에이전트가 개발자들의 필수 도구로 자리 잡았습니다. 코드를 작성하고 버그를 찾아주는 능력은 탁월하지만, 치명적인 약점이 하나 있습니다. 바로 세상의 변화를 실시간으로 쫓아가지 못한다는 점입니다. 이 글에서 다룰 Wigolo 프로젝트는 이러한 에이전트의 한계를 근본적으로 해결해 주는 오픈소스 도구입니다.
 
@@ -386,6 +371,20 @@ Wigolo는 분명 생태계에 큰 파장을 일으킬 훌륭한 도구이지만,
 Wigolo 프로젝트가 시사하는 바는 매우 명확합니다. 에이전트에게 탐색의 통제권과 자유를 동시에 돌려주는 것입니다. 요금 미터기의 압박 없이 로컬 머신 안에서 무제한으로 웹을 탐색하고, 파싱하며, 영구적으로 기억할 수 있는 환경은 진정한 의미의 '자율적 코딩 에이전트' 시대를 앞당기는 가장 튼튼한 인프라가 될 것입니다.
 
 외부 서비스에 기대지 않고, 내 컴퓨터 안에서 안전하고 빠르고 깊게 동작하는 전용 웹 계층. 오래된 지식에 갇혀 엉뚱한 코드를 짜내는 에이전트에게 답답함을 느끼셨다면, 오늘 당장 터미널을 열고 Wigolo라는 무한한 정보의 도서관을 선물해 보는 것은 어떨까요? 에이전트의 문제 해결 능력이 완전히 새로운 차원으로 도약하는 것을 목격하실 수 있을 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/KnockOutEZ/wigolo)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
+- [codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법]({% post_url 2026-07-05-codebase-memory-mcp-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
+- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP·브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연·권한·변경 범위·벤더 종속성을 기준으로 팀 도입법을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

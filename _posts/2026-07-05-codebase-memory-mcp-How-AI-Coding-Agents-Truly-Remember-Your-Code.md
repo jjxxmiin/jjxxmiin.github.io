@@ -10,24 +10,13 @@ tags:
   - RAG
   - ClaudeCode
 summary: AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
-author: AI Trend Bot
+description: 'codebase-memory-mcp가 AST와 호출 관계를 로컬 그래프로 만드는 원리, 토큰 절감 수치의 조건과 동적 코드·색인 갱신 한계를 설명합니다.'
 github_url: https://github.com/DeusData/codebase-memory-mcp
 image:
   path: https://opengraph.githubassets.com/1/DeusData/codebase-memory-mcp
-  alt: 'codebase-memory-mcp: How AI Coding Agents Truly Remember Your Code'
+  alt: "DeusData/codebase-memory-mcp GitHub 저장소 대표 이미지"
 mermaid: true
 chart: true
-faq:
-- question: codebase-memory-mcp는 어떤 에디터나 에이전트와 호환되나요?
-  answer: Claude Code, Cursor, Zed, Aider, Codex CLI 등 모델 컨텍스트 프로토콜(MCP)을 지원하는 11개 이상의 주요 AI 코딩 에이전트와 완벽히 호환됩니다. 제공되는 단일 설치 스크립트가 로컬 환경의 에이전트를 자동으로 감지하여 구성 파일에 MCP 서버를 등록해 줍니다.
-- question: 대규모 프로젝트에서 토큰 절감 효과는 정말로 극적인가요?
-  answer: 네, 매우 극적입니다. 벤치마크 테스트에 따르면 에이전트가 5개의 구조적 질의를 수행할 때 기존 파일 탐색 방식은 약 41만 2천 토큰을 소모했지만, 지식 그래프를 활용하면 3천 4백 토큰만으로 동일한 답을 얻어 99퍼센트의 토큰 절감을 기록했습니다. 프로젝트 규모가 커질수록 절감 효과는 더욱 뚜렷해집니다.
-- question: 코드가 외부 서버나 클라우드로 전송되어 유출될 위험은 없나요?
-  answer: 전혀 없습니다. codebase-memory-mcp는 외부 종속성이 없는 단일 정적 C 바이너리로, 모든 파싱과 지식 그래프 생성(SQLite)이 100퍼센트 사용자의 로컬 환경에서만 수행됩니다. 내장된 LLM이나 외부 API 호출이 없으므로 엔터프라이즈 환경에서도 안전하게 사용할 수 있습니다.
-- question: 기존의 임베딩 기반 RAG(검색 증강 생성) 방식과는 무엇이 다른가요?
-  answer: RAG는 코드 문맥의 '의미적 유사도'를 바탕으로 검색하기 때문에 기능의 위치를 찾는 데는 뛰어나지만, 누가 누구를 호출하는지와 같은 구조적 관계를 파악하는 데는 취약합니다. 반면 이 도구는 Tree-sitter 기반으로 실제 코드 문법과 호출 사슬을 관계형 그래프로 그리기 때문에 명확하고 논리적인 아키텍처 의존성 추적이 가능합니다.
-- question: 최초에 프로젝트를 인덱싱할 때 시간이 너무 오래 걸리지 않나요?
-  answer: C 언어 기반의 고도화된 아키텍처 덕분에 처리 속도가 압도적으로 빠릅니다. 평균적인 프로젝트는 밀리초에서 수 초 내에 인덱싱되며, 약 2천8백만 줄에 달하는 Linux 커널 전체를 분석하는 가혹한 테스트 환경에서도 단 3분밖에 소요되지 않았습니다.
 project:
   stars: 26578
   forks: 1973
@@ -51,6 +40,8 @@ project:
   - Python
   files: 1808
 ---
+
+codebase-memory-mcp는 소스의 함수·클래스·호출 관계를 로컬 그래프로 만들어 에이전트가 구조 질문에 필요한 코드부터 찾도록 돕습니다. 파일 원문을 읽는 일을 완전히 없애는 기억 장치가 아니라 탐색 순서를 좁히는 색인으로 보는 편이 정확합니다. 자신의 언어와 빌드 방식에서 동적 호출 누락, 색인 갱신 지연, 실제 토큰 절감을 같은 과제로 확인해야 합니다.
 
 TL;DR
 - codebase-memory-mcp는 코드베이스 전체를 관계형 지식 그래프로 변환해 AI 에이전트에게 제공하는 강력한 로컬 도구입니다.
@@ -282,6 +273,19 @@ codebase-memory-mcp는 AI 소프트웨어 엔지니어링 생태계에 중요한
 
 AI 에이전트가 코드를 산문(Prose)처럼 읽는 시대에서, 데이터베이스처럼 구조적으로 질의(Query)하는 시대로 넘어가고 있습니다. 복잡한 코드의 미로 속에서 토큰 낭비로 고통받고 있다면, 에이전트에게 돋보기 대신 정밀한 지도를 건네줄 때입니다.
 
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/DeusData/codebase-memory-mcp)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [code-review-graph 심층 분석: AI 코딩 에이전트가 코드를 정확히 기억하는 원리]({% post_url 2026-07-17-Deep-Dive-into-code-review-graph-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의 내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
+- [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
+- [code-graph-rag: AI 코딩 에이전트가 대규모 코드베이스의 구조와 맥락을 잃지 않는 방법]({% post_url 2026-07-24-code-graph-rag-How-AI-Coding-Agents-Keep-Structure-and-Context-in-Large-Codebases %}) — vitali87의 Code Graph RAG는 다국어 코드베이스를 Tree-sitter로 파싱하여 Memgraph 지식 그래프로 구축하는 획기적인 도구입니다. 텍스트 의미 기반의 벡터 검색이 가진 한계를 극복하고 상속, 호출, 데이터…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

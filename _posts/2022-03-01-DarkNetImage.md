@@ -1,22 +1,32 @@
 ---
+source_citations:
+  - name: "Darknet image.c 고정 커밋 원본"
+    url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/image.c"
 layout: post
 title:  "Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱·리사이즈·메모리 소유권"
 summary: "Darknet의 image 구조체가 픽셀을 저장하고 복사·리사이즈·letterbox·증강·탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다."
+description: "Darknet image.c의 CHW index, view·copy 소유권, crop·resize·letterbox 좌표, 색 증강과 detection drawing 실패 조건을 설명합니다."
 date:   2022-03-01 16:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetImage.jpg
   alt: DarkNet 시리즈 - Image 대표 이미지
 tags:
-  - Darknet소스분석
-  - 이미지전처리
-  - C메모리
+  - DarkNet
+  - 이미지생성
 math: true
+faq:
+  - question: "Darknet image의 pixel index는 어떻게 계산하나요?"
+    answer: "채널 평면이 연속인 CHW 배열이므로 (x,y,c)는 c×h×w+y×w+x 위치에 있습니다."
+  - question: "float_to_image 반환값을 항상 free_image해도 되나요?"
+    answer: "아닙니다. 새 buffer를 만들지 않고 전달받은 pointer를 빌려 보는 view이므로 실제 소유자와 해제 책임을 확인해야 합니다."
+  - question: "Letterbox 뒤 box가 밀릴 때 무엇을 확인하나요?"
+    answer: "종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우·상하 padding을 원본 좌표로 되돌렸는지 확인합니다."
 ---
 
 Darknet의 `image.c`를 읽을 때 가장 먼저 잡아야 할 것은 **데이터가 CHW 순서의 1차원 `float` 배열이고, 함수마다 새 메모리를 만드는지 기존 포인터를 빌리는지가 다르다**는 점이다. 이 두 가지를 놓치면 색 채널이 뒤섞이거나 같은 버퍼를 두 번 해제하기 쉽다.
 
-이 글은 수십 개 함수를 이름순으로 외우지 않는다. 픽셀 접근에서 시작해 메모리 소유권, 크기 변환, 색 증강, 탐지 결과 그리기까지 실제 호출 흐름으로 묶어 읽는다. 코드는 Darknet 내부 타입과 helper를 전제로 한 핵심 조각이며 단독 프로그램이 아니다.
+이 글은 수십 개 함수를 이름순으로 외우기보다 픽셀 접근에서 시작해 메모리 소유권, 크기 변환, 색 증강, 탐지 결과 그리기까지 실제 호출 흐름으로 묶어 읽으며, 코드는 Darknet 내부 타입과 helper를 전제로 한 핵심 조각이라 단독 프로그램이 아니라는 점도 함께 확인한다.
 
 ## 1. 픽셀 주소는 왜 `c*h*w + y*w + x`인가
 
@@ -232,3 +242,43 @@ draw_box_width(im, left, top, right, bot,
 6. 임시 `image`를 정확히 한 번만 `free_image` 했는가?
 
 `show_image`는 OpenCV로 컴파일됐으면 창을 띄우고, 아니면 같은 이름의 PNG를 저장한다. “창이 안 뜬다”는 현상만으로 이미지 생성 실패라고 판단하면 안 된다. 결국 `image.c`의 핵심은 개별 필터 이름이 아니라 **배열 배치, 좌표계, 값 범위, 버퍼 소유권이 다음 함수로 어떻게 전달되는지 추적하는 것**이다.
+
+## 작은 Pattern으로 전체 경로를 어떻게 검증할까
+
+2×3 RGB 입력의 각 channel과 위치에 서로 다른 값을 넣고 `get_pixel`, copy, crop, resize와 OpenCV 변환을 순서대로 확인한다. 정사각 image나 같은 RGB 값은 x/y와 channel 오류를 숨긴다. 원본과 copy의 pointer가 다른지, view의 pointer는 같은지도 주소로 확인한다.
+
+Letterbox에는 가로로 긴 image와 세로로 긴 image를 각각 넣어 실제 new_w·new_h와 padding을 손으로 계산한다. 정규화 box 하나를 resize canvas에 옮겼다가 원본으로 되돌리는 round-trip을 만들면 scale 중복과 padding 부호 오류가 드러난다. 보간값 비교에는 작은 float 오차를 허용하되 channel swap이나 한 pixel 이동은 허용하지 않는다.
+
+## In-place 함수는 어떤 순서에서 위험할까
+
+색 변환과 constrain, scale 계열은 원본 data를 직접 바꿀 수 있다. 같은 image를 model input과 화면 표시, 증강 전 label 검사에 함께 쓰면 먼저 실행된 함수가 뒤 경로 결과까지 바꾼다. 호출 graph에서 수정 함수 앞에 독립 copy가 필요한지 정하고, 함수 이름만으로 새 buffer 반환을 추정하지 않는다.
+
+Resize helper처럼 크기가 같으면 원본을 그대로 반환하는 함수는 조건부 소유권을 만든다. 반환 `data==input.data`를 검사하거나 API를 항상-copy와 view로 분리해야 cleanup이 단순해진다. Address sanitizer와 빈 image, 1×1 image, resize no-op을 포함한 해제 테스트로 double free와 leak을 찾는다.
+
+## 자주 남는 질문
+
+### Darknet image의 pixel index는 어떻게 계산하나요?
+
+채널 평면이 연속인 CHW 배열이므로 (x,y,c)는 c×h×w+y×w+x 위치에 있습니다.
+
+### float_to_image 반환값을 항상 free_image해도 되나요?
+
+아닙니다. 새 buffer를 만들지 않고 전달받은 pointer를 빌려 보는 view이므로 실제 소유자와 해제 책임을 확인해야 합니다.
+
+### Letterbox 뒤 box가 밀릴 때 무엇을 확인하나요?
+
+종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우·상하 padding을 원본 좌표로 되돌렸는지 확인합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Darknet image.c 고정 커밋 원본](https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/image.c)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DarkNet data.c 읽는 법: 이미지 경로가 X·y 배치가 되기까지]({% post_url 2022-02-17-DarkNetData %}) — DarkNet data.c의 경로 샘플링, 이미지·라벨 동시 증강, 데이터 유형별 로더 분기와 멀티스레드 병합을 메모리 소유권 주의점까지 연결해 설명합니다.
+- [Darknet layer 구조를 해제할 때 왜 터질까: LAYER\_TYPE과 free\_layer 소유권]({% post_url 2022-03-04-DarkNetLayer %}) — Darknet의 LAYER_TYPE enum이 실행 분기를 만드는 방식과 free_layer가 선택적 버퍼를 해제할 때 확인해야 할 메모리 소유권을 짚습니다.
+- [Darknet 연결 리스트가 한 번 pop 뒤 깨지는 이유: front·back과 메모리 소유권]({% post_url 2022-03-05-DarkNetList %}) — Darknet list 구현의 삽입·pop 불변식과 node, val, array를 각각 누가 해제해야 하는지 코드로 추적합니다.
+<!-- internal-links:end -->

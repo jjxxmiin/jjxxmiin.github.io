@@ -1,21 +1,27 @@
 ---
 layout: post
 title:  "CornerNet은 Anchor 없이 박스를 어떻게 묶나: Heatmap·Embedding·Offset"
-summary: "왼쪽 위·오른쪽 아래 corner를 찾고 같은 물체의 쌍으로 연결하는 예측과 후처리 흐름"
+summary: "CornerNet이 왼쪽 위·오른쪽 아래 corner heatmap, embedding, offset을 예측하고 같은 class의 두 점을 하나의 bounding box로 묶는 과정을 설명합니다."
+description: "CornerNet의 corner heatmap·pooling·embedding·offset이 anchor 없이 box를 만드는 원리와 후보 조합, 밀집 장면의 실패 조건을 정리합니다."
 image:
   path: /assets/img/thumb/cornernet.jpg
   alt: CornerNet 톺아보기 대표 이미지
 date:   2019-10-22 13:00 -0400
 categories: Paper
 tags:
-  - CornerNet
-  - AnchorFree
-  - ObjectDetection
+  - 컴퓨터비전
   - 논문리뷰
+faq:
+  - question: "CornerNet은 corner heatmap 두 장만으로 box를 만드나요?"
+    answer: "아닙니다. 두 종류의 corner 위치뿐 아니라 같은 물체인지 판단할 embedding과 출력 해상도의 좌표 오차를 보정할 offset도 함께 예측합니다."
+  - question: "Embedding 거리가 작으면 언제나 같은 물체의 corner인가요?"
+    answer: "거리만으로 결정하지 않습니다. 두 corner의 class가 같고 왼쪽 위와 오른쪽 아래의 기하 관계가 올바른지, score와 후처리 기준을 함께 확인해야 합니다."
+  - question: "Corner Pooling은 왜 일반 pooling과 방향이 다른가요?"
+    answer: "Corner 자체에는 물체 내부 정보가 적을 수 있어 왼쪽 위와 오른쪽 아래 각각에서 물체의 경계를 따라 유용한 방향의 feature를 모으기 위해 사용합니다."
 math: true
 ---
 
-CornerNet은 **왼쪽 위와 오른쪽 아래 corner의 heatmap을 찾고, embedding 거리로 같은 물체의 두 점을 묶은 뒤 offset으로 좌표를 보정해 bounding box를 만듭니다.**
+CornerNet은 **왼쪽 위와 오른쪽 아래 corner의 heatmap을 찾고, embedding 거리로 같은 물체의 두 점을 묶은 뒤 offset으로 좌표를 보정해 bounding box를 만듭니다.** Heatmap만 잘 나와도 잘못된 두 점을 묶으면 엉뚱한 box가 됩니다. 따라서 누락·잘못된 pairing·좌표 보정 오류를 서로 나눠 봐야 합니다.
 
 ## Anchor 대신 세 종류의 출력을 예측한다
 
@@ -96,3 +102,37 @@ Downsampling된 heatmap 좌표를 입력 이미지로 되돌릴 때 생기는 �
 - 후처리에서 category와 embedding distance를 모두 검사하는가
 
 기준 자료는 [CornerNet 논문](https://arxiv.org/abs/1808.01244)과 [공식 코드](https://github.com/princeton-vl/CornerNet)입니다. 이 글은 학습 실행법이 아니라 anchor box 없이 두 점을 box로 만드는 과정을 읽기 위한 해설입니다.
+
+## 잘못된 Box는 어느 출력에서 시작됐는가
+
+먼저 ground truth corner 근처에 heatmap peak가 있는지 봅니다. 한쪽 corner만 나오면 pairing을 조정하기 전에 해당 방향의 heatmap과 corner pooling을 확인합니다. 두 peak가 모두 있는데 box가 없다면 class·embedding distance·score filter 중 어느 조건에서 후보가 버려졌는지 기록합니다.
+
+서로 다른 물체의 corner가 묶인 경우에는 embedding 분포를 봅니다. 같은 instance의 두 점 거리와 다른 instance 조합의 거리가 실제로 분리되는지, 밀집된 같은 class에서 겹치는지 확인합니다. Threshold를 엄격하게 하면 오조합은 줄지만 올바른 box도 끊길 수 있습니다.
+
+Box가 일정한 크기만큼 밀리면 offset과 좌표 복원을 봅니다. Feature map 좌표를 입력 이미지로 되돌릴 때 stride, resize, padding을 반영해야 합니다. Network 출력 좌표와 최종 원본 좌표를 따로 저장하면 학습 오류와 후처리 오류를 구분할 수 있습니다.
+
+후보 수가 많아질 때는 모든 왼쪽 위와 오른쪽 아래를 무조건 조합하는 비용도 고려합니다. Class, score, 기하 조건으로 줄이는 순서가 recall과 속도에 어떤 영향을 주는지 고정 이미지에서 비교합니다.
+
+대각선으로 가까운 두 물체가 겹치는 장면을 failure set에 넣으면 corner pairing 오류가 잘 드러납니다. 각 corner가 맞아도 서로 다른 instance가 연결될 수 있으므로 최종 box만 보지 말고 heatmap peak와 embedding 쌍을 함께 저장합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [CenterNet은 Anchor와 NMS 없이 어떻게 물체를 찾을까: 중심점·크기·Offset 해설]({% post_url 2019-05-24-CenterNet %}) — CenterNet이 object를 bounding box 후보가 아닌 중심점 하나로 표현하는 방식을 설명합니다. Heatmap peak, box 크기, stride offset의 C+4 출력과 focal·L1 loss를 연결하고…
+- [FSAF는 Anchor 없이 어떤 FPN 레벨을 고르나]({% post_url 2019-09-08-FSAF %}) — FSAF가 effective·ignore 영역으로 anchor-free supervision을 만들고 Online Feature Selection으로 instance별 최적 FPN 레벨을 고르는 과정을 설명합니다.
+- [Deformable Convolution은 Offset을 어디에 더하나: DCN 수식 해설]({% post_url 2019-11-13-DCN %}) — Deformable Convolution이 고정 3×3 sampling grid에 학습 가능한 2차원 offset을 더하고 bilinear interpolation으로 비정수 위치의 값을 읽는 과정을 설명합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### CornerNet은 corner heatmap 두 장만으로 box를 만드나요?
+
+아닙니다. 두 종류의 corner 위치뿐 아니라 같은 물체인지 판단할 embedding과 출력 해상도의 좌표 오차를 보정할 offset도 함께 예측합니다.
+
+### Embedding 거리가 작으면 언제나 같은 물체의 corner인가요?
+
+거리만으로 결정하지 않습니다. 두 corner의 class가 같고 왼쪽 위와 오른쪽 아래의 기하 관계가 올바른지, score와 후처리 기준을 함께 확인해야 합니다.
+
+### Corner Pooling은 왜 일반 pooling과 방향이 다른가요?
+
+Corner 자체에는 물체 내부 정보가 적을 수 있어 왼쪽 위와 오른쪽 아래 각각에서 물체의 경계를 따라 유용한 방향의 feature를 모으기 위해 사용합니다.

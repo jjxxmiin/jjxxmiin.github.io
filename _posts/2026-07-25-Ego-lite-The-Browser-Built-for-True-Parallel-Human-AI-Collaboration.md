@@ -6,14 +6,15 @@ categories: Tech
 tags:
   - AI코딩
   - 멀티모달
+  - 웹개발
   - AI에이전트
 summary: Ego-lite는 사람과 AI가 로그인 상태를 공유하며 방해 없이 동시에 일할 수 있게 설계된 크로미움 기반 브라우저입니다. 화면
   탈취나 복잡한 인증 설정 없이 쾌적한 병렬 작업 환경을 제공합니다.
-author: AI Trend Bot
+description: 'Ego-lite가 사람과 에이전트의 브라우저 작업 공간과 로그인 상태를 나누는 방식, 세션 쿠키 이전·백그라운드 탭 권한·외부 행동 승인·실패 복구 위험을 정리합니다.'
 github_url: https://github.com/citrolabs/ego-lite
 image:
   path: https://opengraph.githubassets.com/1/citrolabs/ego-lite
-  alt: 'Ego-lite: The Browser Built for True Parallel Human-AI Collaboration'
+  alt: "citrolabs/ego-lite GitHub 저장소 대표 이미지"
 project:
   stars: 3016
   forks: 144
@@ -320,6 +321,20 @@ Ego-lite는 웹 자동화의 오래된 패러다임을 바꿀 훌륭한 대안�
 Ego-lite는 'AI가 현대의 복잡한 웹 환경에서 인간을 돕는 올바른 방식은 무엇인가?'에 대한 근본적인 질문을 던지고 매우 명쾌하고 훌륭한 해답을 제시했습니다. AI가 우리를 돕기 위해 굳이 우리의 모니터를 인질로 잡고 방해할 이유가 없으며, 보안 문자와 씨름하며 낭비할 시간도 없다는 것을 실용적인 소프트웨어로 완벽하게 증명해 냈습니다.
 
 초기 셋업 과정에서 클릭 단 한 번으로 내가 쌓아온 풍부한 인증 컨텍스트를 에이전트에게 흔쾌히 물려주고, 내 옆의 숨겨진 보이지 않는 공간에서 소리 없이 거대한 양의 문서를 읽고 정리해 내는 이 새로운 컴퓨팅 경험은, 향후 개인용 PC와 브라우저 환경이 진화해야 할 매우 뚜렷한 이정표를 보여주고 있습니다. 만약 당신이 지금 맥북을 사용하고 있고 매일 반복되는 웹 브라우저 작업에 지쳐 있다면, 망설이지 말고 터미널을 열어 에이전트에게 당신의 브라우저를, 당신의 흐름을 잃지 않는 선에서 나누어 주시길 바랍니다. 분명 새로운 차원의 생산성을 경험하게 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/citrolabs/ego-lite)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP·브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연·권한·변경 범위·벤더 종속성을 기준으로 팀 도입법을 정리합니다.
+- [여러 AI 에이전트 로그를 한 화면에서 봐도 될까? Kibitz의 출처·요약 점검]({% post_url 2026-03-19-Kibitz-Deep-Dive-Turning-Terminal-Noise-into-Narrative-The-Control-Room-for-Directing-AI-Agent-Swarms %}) — 여러 터미널 세션을 모으고 로그를 서사형 상태로 요약한다는 Kibitz의 장점과, 이름이 같은 저장소가 섞인 원문에서 먼저 확인할 출처·기능 경계를 짚습니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

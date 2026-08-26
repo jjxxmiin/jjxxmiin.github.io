@@ -53,6 +53,8 @@ mermaid: true
 chart: true
 ---
 
+800 VDC 아키텍처는 건물의 기존 AC 인입을 모두 교체하지 않고 고밀도 AI 랙의 배전 단계를 재설계하려는 데이터센터 운영자가 검토할 사양입니다. 구리 50~80% 절감은 랙 내부의 발표 조건이며 전체 시설 투자비나 전력비가 같은 비율로 줄어든다는 뜻이 아닙니다. 호환 장비, 변환 손실, 보호 설비와 작업자 안전을 실제 부하에서 검증한 뒤 도입해야 합니다.
+
 ```mermaid
 flowchart TD
     A[AI 팩토리의 고밀도 전력 공급 병목] --> B[NVIDIA 800 VDC 전력 아키텍처 발표]
@@ -156,6 +158,18 @@ flowchart LR
 
 둘째, Google, Microsoft 및 80여 개 OCP 파트너사들이 이 표준 사양을 자신들의 글로벌 데이터센터에 얼마나 빠르게 확장 배치하는지 검증하는 것이 좋습니다 <sup class="source-citation"><a href="#source-2" aria-label="Network World 출처">[2]</a></sup>. 글로벌 빅테크의 실제 도입 속도가 전체 하드웨어 생태계의 표준화 속도를 결정짓기 때문입니다.
 
+## 기존 AC 시설을 유지한다는 말은 공사가 없다는 뜻일까?
+
+하이브리드 구조는 건물 전체의 교류 인프라를 전면 교체하지 않는 경로를 제시하지만, AC를 800V DC로 바꾸는 장비와 랙 내부 배전·차단·접지 체계는 필요합니다. 기존 변압기와 UPS, 냉각과 케이블 경로가 목표 랙 전력을 감당하는지도 별도 검토 대상입니다. 따라서 “재건축 불필요”를 “추가 시설비 없음”으로 계산하면 안 됩니다.
+
+도입 비교에서는 GPU 랙만 떼어 보지 말고 전력망에서 칩까지 각 변환 단계의 효율, 열, 유지보수와 장애 격리 범위를 측정해야 합니다. 구리 사용량 감소가 설치 공간과 자재비에 어떤 영향을 주는지, 고장 난 랙을 기존 운영 절차로 안전하게 분리할 수 있는지도 확인합니다. 800V 직류는 전문 설계와 보호 장비가 필요한 영역이므로 제조사 사양과 전기 안전 기준을 따라야 합니다.
+
+## 상용화를 판단할 때 어떤 증거가 더 필요할까?
+
+파트너 수와 표준 발표는 생태계의 방향을 보여 주지만 실제 호환 제품과 현장 운영 실적을 대신하지 않습니다. 예정된 제품이 출시되면 서로 다른 공급업체의 랙·전원 모듈이 같은 인터페이스에서 작동하는지, 정격 부하와 부분 부하에서 효율이 어떤지, 장애 뒤 복구 시간이 기존 방식보다 나아지는지 확인해야 합니다.
+
+투자 수익률은 절감된 구리와 전력 손실뿐 아니라 변환 장비, 설계 변경, 교육·안전 검사와 예비 부품 비용을 포함해 계산합니다. 초기 표준에서 사양이 바뀌거나 한 공급업체에 종속될 가능성도 있으므로 단계적 실증과 교체 경로를 남기는 편이 안전합니다.
+
 ## 아직은 선을 그어야 할 부분
 
 반드시 냉정하게 짚고 넘어갈 한계점들도 존재합니다.
@@ -165,6 +179,22 @@ flowchart LR
 둘째, 건물 수준의 AC 전력 시설 전체를 갈아엎을 필요는 없지만, 랙 내부 단위에서의 800V 직류 전력 공급을 받아들이기 위한 전용 변환 장비 및 OCP 규격 랙 구축 비용은 별도로 수반됩니다 <sup class="source-citation"><a href="#source-1" aria-label="NVIDIA 공식 블로그 출처">[1]</a></sup>.
 
 셋째, 실제 현장 투입 시 얻을 수 있는 구체적인 전력 손실 단가 절감액이나 투자 대비 수익률(ROI) 같은 상세 실측 수치는 2026년 하반기 실증 제품 배치가 이뤄진 이후에야 정밀한 검증이 가능합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://blogs.nvidia.com/blog/800-vdc-power-architecture-ai-factories)
+- [Network World](https://www.networkworld.com/article/3522295/google-microsoft-and-nvidia-back-800v-dc-standard-for-ai-data-centers.html)
+- [Wccftech](https://wccftech.com/nvidia-800-vdc-platforms-break-past-traditional-power-distros-to-scale-up-performance)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Starcloud, Nvidia 투자 유치하며 2억 5천만 달러 규모 우주 AI 데이터센터 구축 추진]({% post_url 2026-08-22-starcloud-secures-250-million-for-orbital-ai-data-center-constellation %}) — 우주 컴퓨팅 스타트업 Starcloud가 23억 달러의 기업가치로 2억 5천만 달러 규모의 시리즈 A 확장 투자를 마무리했습니다. Nvidia와 Cisco Investments 등이 신규 투자자로 참여했으며, 워싱턴주 우딘빌 공장에서…
+- [World Bank WDR 2026 발표: 거대 데이터센터 없이 개도국 일자리 16.2% 생산성 높인다]({% post_url 2026-08-05-world-bank-wdr-2026-highlights-small-ai-models-for-developing-economies %}) — World Bank는 2026년 8월 4일 발표한 WDR 2026 보고서에서 개도국의 AI 일자리 자동화 위험은 4.5%로 고소득국(14.2%)보다 대폭 낮다고 밝혔습니다. 인더밋 길 총괄 이코노미스트는 거대 데이터센터 없이 소형과…
+- [PyTorch 멀티 GPU가 느린 이유: DataLoader·AMP·DDP 병목 체크리스트]({% post_url 2021-03-30-gpus %}) — GPU를 늘려도 학습이 빨라지지 않을 때 데이터 로딩, mixed precision, DataParallel과 DistributedDataParallel의 차이를 순서대로 점검합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

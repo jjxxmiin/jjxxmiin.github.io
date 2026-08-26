@@ -4,16 +4,24 @@ title: "VLM이 카메라 이동과 객체 이동을 헷갈리는 이유: DSR Sui
 date: '2025-12-27'
 categories: Tech
 tags:
-  - 멀티모달
   - 3D생성
   - 로보틱스
+  - 멀티모달
   - Qwen
-  - 벤치마크
+  - 컴퓨터비전
 math: true
 summary: "DSR Suite가 2D video에 camera pose·point cloud·mask·trajectory를 더해 동적 공간 질문을 만드는 과정과, GSM이 질문에 필요한 geometry만 고르는 이유를 설명합니다."
+description: "DSR Suite가 video에 camera·point cloud·object trajectory를 더하고 GSM이 질문 관련 geometry만 고르는 원리를 설명하며, 상류 오류와 비용을 검증합니다."
+faq:
+  - question: "왜 2D video만으로 camera와 객체 이동을 구분하기 어렵나요?"
+    answer: "frame에서 위치가 달라졌다는 사실만으로 관찰자가 움직였는지 물체가 3D 공간에서 움직였는지 분리하기 어렵기 때문입니다."
+  - question: "GSM은 모든 point cloud와 trajectory를 VLM에 넣나요?"
+    answer: "아닙니다. 질문과 geometry feature 사이의 관련성을 이용해 필요한 token만 선택해 context와 memory를 줄이려는 모듈입니다."
+  - question: "DSR 성능 상승이 실시간 로봇 적용을 보장하나요?"
+    answer: "아닙니다. offline reconstruction·tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.20557.png
-  alt: Paper Thumbnail
+  alt: "VLM이 카메라 이동과 객체 이동을 헷갈리는 이유: DSR Suite와 GSM 논문 대표 이미지"
 ---
 
 VLM이 카메라 이동과 객체 이동을 헷갈리는 이유는 **2D frame의 위치 변화만으로는 관찰자가 움직였는지, 물체가 3D 공간에서 움직였는지 분리하기 어렵기 때문**입니다. DSR Suite는 video에 geometry와 trajectory를 덧붙이고, Geometry Selection Module(GSM)은 질문에 필요한 정보만 VLM에 전달합니다.
@@ -43,5 +51,53 @@ point cloud와 trajectory를 전부 language model context에 넣으면 token과
 texture가 적은 벽, 심한 occlusion, 빠른 camera motion에서는 reconstruction과 tracking이 불안정할 수 있습니다. DSR pipeline이 offline 처리에 의존하면 real-time robot이나 streaming video에도 그대로 적용하기 어렵습니다. 학습 domain 밖의 실내외 장면에서도 질문과 geometry 품질을 다시 확인해야 합니다.
 
 실용적인 도입 순서는 먼저 upstream point cloud와 track을 시각화해 실패율을 측정하고, 다음으로 질문 유형별 GSM 선택을 검사한 뒤, 마지막에 end-to-end 정답률과 latency를 잽니다. 이 연구의 중요한 메시지는 4D 정보를 무조건 많이 주라는 것이 아닙니다. **2D video가 숨기는 camera·object motion의 차이를 geometry로 복원하되, 질문에 필요한 부분만 선별해야 한다**는 것입니다.
+
+
+## Geometry를 넣기 전에 상류 출력을 먼저 감사한다
+
+VLM 정답만 보면 point cloud와 track이 틀렸는데 언어 단서로 우연히 맞힌 사례를 구분할 수 없습니다. camera pose, object mask, point trajectory를 원본 frame 위에 시각화하고 각 단계의 실패를 표시합니다. texture가 적은 표면, 긴 가림, 빠른 camera 이동, 비슷한 객체가 교차하는 장면을 별도 묶음으로 둡니다.
+
+| 상류 요소 | 확인할 질문 | downstream 오류 |
+|---|---|---|
+| camera pose | 고정 배경이 일관되게 정렬되는가 | camera 이동을 object motion으로 오인 |
+| point cloud | 깊이와 표면이 시간에 따라 이어지는가 | 가까움·멀어짐 관계가 뒤집힘 |
+| object mask | 같은 객체를 계속 가리키는가 | 다른 물체의 trajectory가 섞임 |
+| point track | 가림 전후 위치가 연결되는가 | 동일성·운동 방향을 잘못 판단 |
+
+자동 학습 질문은 상류 confidence가 낮은 구간을 제거하거나 별도 표시해야 합니다. 오류가 많은 geometry로 질문을 대량 생성하면 모델이 시각적 사실보다 pipeline artifact를 학습할 수 있습니다. 사람이 검토한 DSR-Bench는 최종 답뿐 아니라 상류 annotation도 표본으로 다시 확인해야 합니다.
+
+## GSM 선택은 정답 Token이 남았는지로 평가한다
+
+선택 token 수가 적다는 사실만으로 효율적인 것은 아닙니다. 질문에 필요한 trajectory나 viewpoint 정보가 선택 집합에 들어왔는지 확인해야 합니다. 전체 geometry, 무작위 같은 수의 token, GSM 선택 token을 비교하면 단순한 context 축소와 학습된 선택의 차이를 볼 수 있습니다.
+
+질문 유형별로 필요한 단서도 다릅니다. 색이나 객체 종류 질문은 geometry가 거의 필요 없을 수 있고, camera-relative motion 질문은 pose와 trajectory가 함께 필요합니다. GSM이 모든 질문에서 비슷한 token을 고르면 질문 조건을 충분히 사용하지 않는다는 신호입니다. 선택된 token을 질문과 함께 시각화하면 잘못된 shortcut을 찾기 쉽습니다.
+
+## 정확도와 처리 시간을 단계별로 기록한다
+
+reconstruction, segmentation, tracking, GSM, VLM 추론을 모두 합친 시간이 실제 end-to-end 비용입니다. offline precomputation이 가능한 영상 검색과 실시간 robot 관찰은 허용 지연이 다르므로 같은 “적용 가능”으로 묶으면 안 됩니다. frame 수와 해상도가 늘 때 각 단계의 memory와 시간이 어떻게 변하는지 측정합니다.
+
+실제 적용 순서는 작은 검증 묶음에서 상류 geometry 정확도를 통과시키고, GSM이 질문별 단서를 보존하는지 확인한 뒤, 마지막에 VLM 정답률과 총 latency를 보는 것입니다. 이 순서를 거치면 성능이 낮을 때 더 큰 language model을 쓰기 전에 geometry 오류를 고칠 수 있습니다. DSR의 가치는 geometry의 양이 아니라 **2D로 모호한 운동 정보를 신뢰할 수 있게 복원하고 필요한 질문에만 전달하는 정도**로 평가해야 합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [NeoVerse는 흔들린 단안 영상으로 4D를 어떻게 만드나: Pose-free의 의미]({% post_url 2026-01-05-NeoVerse--Enhancing-4D-World-Model-with-in-the-wild-Monocular-Videos %}) — 카메라 포즈 전처리와 장면별 최적화를 줄이는 피드포워드 4D 표현, 열화 시뮬레이션, 새 궤적 생성의 경계
+- [Think3D는 가려진 물체를 실제로 볼 수 있을까: 3D CoT와 재구성 오류의 한계]({% post_url 2026-01-22-Think3D--Thinking-with-Space-for-Spatial-Reasoning %}) — Think3D가 point cloud를 만들고 camera rotate·zoom·shift 도구로 새 view를 탐색하는 3D CoT, RL view policy의 성과와 미관측 공간을 복원할 때의 오류를 정리합니다.
+- [Holi-Spatial은 3D 라벨링을 없앨까: 1.2만 Scene·400만 자동 데이터의 검증]({% post_url 2026-03-10-Holi-Spatial--Evolving-Video-Streams-into-Holistic-3D-Spatial-Intelligence %}) — 비디오를 3DGS Scene, 2D Mask, 3D Box, 공간 QA로 바꾸는 Holi-Spatial-4M 파이프라인과 자동 라벨 오류·GPU 비용·도메인 검증을 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 왜 2D video만으로 camera와 객체 이동을 구분하기 어렵나요?
+
+frame에서 위치가 달라졌다는 사실만으로 관찰자가 움직였는지 물체가 3D 공간에서 움직였는지 분리하기 어렵기 때문입니다.
+
+### GSM은 모든 point cloud와 trajectory를 VLM에 넣나요?
+
+아닙니다. 질문과 geometry feature 사이의 관련성을 이용해 필요한 token만 선택해 context와 memory를 줄이려는 모듈입니다.
+
+### DSR 성능 상승이 실시간 로봇 적용을 보장하나요?
+
+아닙니다. offline reconstruction·tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.20557)

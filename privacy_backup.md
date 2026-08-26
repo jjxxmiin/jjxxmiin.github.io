@@ -3,6 +3,7 @@ layout: page
 title: Privacy Policy
 icon: fas fa-user-shield
 order: 5
+published: false
 ---
 
 # 개인정보 처리방침 (Privacy Policy)

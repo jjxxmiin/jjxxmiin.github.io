@@ -6,17 +6,16 @@ categories: Tech
 tags:
   - AI코딩
   - AI보안
+  - 오픈소스
   - ClaudeCode
   - 프롬프트엔지니어링
-  - AI에이전트
 summary: 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항
   명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스 워크플로우입니다.
-author: AI Trend Bot
+description: 'addyosmani/agent-skills가 명세·계획·구현·테스트·리뷰 절차를 지침으로 불러오는 방식과 라우팅·과잉 절차·회귀 검증 기준을 설명합니다.'
 github_url: https://github.com/addyosmani/agent-skills
 image:
   path: https://opengraph.githubassets.com/1/addyosmani/agent-skills
-  alt: 'addyosmani/agent-skills: Teaching AI Coding Agents the Workflows of Senior
-    Developers'
+  alt: "addyosmani/agent-skills GitHub 저장소 대표 이미지"
 project:
   stars: 78789
   forks: 8468
@@ -40,28 +39,9 @@ project:
   files: 172
 mermaid: true
 chart: true
-faq:
-- question: Agent Skills는 어떤 에디터나 코딩 환경에서 사용할 수 있나요?
-  answer: Claude Code, Cursor, GitHub Copilot, Gemini CLI 등 마크다운 기반의 시스템 프롬프트 지침을
-    온전히 이해하는 거의 모든 AI 코딩 도구에서 무리 없이 사용할 수 있습니다. 터미널 명령어를 통해 전역으로 설치하거나, 프로젝트 내부의 규칙
-    폴더에 파일을 직접 복사하는 방식으로 아주 쉽게 연동됩니다.
-- question: 모든 스킬을 한 번에 다 적용해서 사용해야만 하나요?
-  answer: 전혀 그렇지 않습니다. 사용자의 필요와 프로젝트 성격에 맞춰 필요한 스킬만 선택적으로 적용할 수 있습니다. 예를 들어 팀 내에 테스트
-    코드 작성 문화 정착이 시급하다면 테스트 주도 개발 스킬만 단독으로 설치하여 사용할 수 있으며, 코드 리뷰가 고민이라면 리뷰 관련 페르소나
-    스킬만 추가하여 시스템을 가볍게 유지할 수 있습니다.
-- question: 이 워크플로우를 적용하면 API 토큰 소모 비용이 크게 증가하나요?
-  answer: 네, 토큰 소모량은 필연적으로 크게 증가합니다. 단순한 기능 구현 외에도 요구사항 분석, 세부 설계 문서 작성, 테스트 검증, 안티
-    합리화 점검 등 에이전트 내부적인 사고 과정과 대화 턴이 대폭 늘어나기 때문에, 작업의 복잡도에 따라 기존 방식 대비 2배 이상의 토큰을 소모할
-    수도 있습니다.
-- question: 매우 간단한 유틸리티 스크립트를 작성할 때도 Agent Skills를 써야 하나요?
-  answer: 개인적으로는 추천하지 않습니다. 일회성 데이터 파싱 스크립트나 매우 빠르게 버려질 프로토타입을 만들 때는 기본 AI가 제공하는 압도적인
-    생성 속도를 그대로 활용하는 것이 훨씬 효율적입니다. Agent Skills는 장기적으로 팀 단위에서 유지보수해야 하는 프로덕션 레벨의 소프트웨어
-    개발에 초점이 맞춰진 강력한 도구입니다.
-- question: 안티 합리화(Anti-rationalization) 테이블이란 정확히 어떤 역할을 하는 장치인가요?
-  answer: 'AI가 귀찮거나 복잡한 작업(예: 실패하는 테스트 코드 작성, 대규모 구조 리팩토링)을 교묘하게 회피하기 위해 내세우는 핑계들을
-    사전에 정의해 둔 장치입니다. AI가 그 핑계를 대려고 할 때마다 강제로 수행해야 할 올바른 행동 지침을 마크다운 표 형태로 짝지어 놓아,
-    에이전트가 프로세스를 건너뛰는 것을 원천적으로 봉쇄합니다.'
 ---
+
+addyosmani/agent-skills는 명세, 계획, 구현, 테스트와 리뷰 절차를 필요할 때 불러와 코딩 에이전트의 작업 순서를 고정하려는 지침 모음입니다. 좋은 절차를 적었다고 모델이 항상 지키는 것은 아니며, 작은 수정에는 단계 비용이 결과 이득보다 클 수 있습니다. 대표 작업에서 요구 누락·불필요한 변경·테스트 근거와 총 토큰을 비교해 필요한 스킬만 선택하세요.
 
 TL;DR
 - agent-skills는 구글 크롬팀 리더 애디 오스마니가 만든 AI 코딩 에이전트용 프로덕션급 워크플로우 오픈소스입니다.
@@ -362,6 +342,20 @@ agent-skills는 훌륭한 행동 규칙을 제시할 뿐, 근본적인 AI의 추
 agent-skills는 AI 코딩 에이전트를 대하는 우리의 안일했던 관점을 근본적으로 바꾸어 놓습니다. 더 이상 AI를 생각 없이 코드를 빨리 짜주는 타자기 정도로 취급하지 않고, 명확한 프로세스를 지키며 일하는 진정한 엔지니어링 파트너로 대우하게 만듭니다. 
 
 여러분이 지금 팀의 프로젝트에 AI를 적극적으로 투입하고 있다면, 그 AI에게 맹목적인 코딩 지시를 내리기 전에 애디 오스마니의 깊은 지혜가 담긴 이 튼튼한 발판을 먼저 깔아주는 것은 어떨까요? 당장의 초기 속도는 조금 느려지고 깐깐한 절차에 답답함을 느낄지 몰라도, 그 AI가 짜놓은 코드는 다가오는 주말에 여러분의 꿀 같은 단잠을 깨우지 않을 만큼 놀랍도록 견고할 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/addyosmani/agent-skills)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [reverse-skill: AI 코딩 에이전트를 안전하고 정교한 보안 분석가로 바꾸는 스킬 라우터]({% post_url 2026-08-03-reverse-skill-AI-powered-Cybersecurity-Skill-Router-for-Reverse-Engineering-and-Penetration-Testing %}) — reverse-skill은 Claude Code, Cursor, Cline 등 AI 코딩 에이전트가 리버스 엔지니어링과 침투 테스트를 안전하게 실행하도록 안내하는 오픈소스 스킬 라우팅 프레임워크입니다. 경로 우선 실행 모델, 로컬…
+- [공장형 AI UI를 거부하다: Hallmark가 코딩 에이전트의 디자인 감각을 뜯어고치는 원리]({% post_url 2026-07-21-Rejecting-AI-Factory-UIs-How-Hallmark-Rewires-the-Design-Sense-of-Coding-Agents %}) — Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록 강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가…
+- [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

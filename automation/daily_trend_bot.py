@@ -1425,8 +1425,8 @@ def _article_errors(post, evidence):
         errors.append("필수 뉴스 섹션 누락")
     elif positions != sorted(positions):
         errors.append("뉴스 섹션 순서 오류")
-    if len(re.sub(r"\s+", "", content)) < 1800:
-        errors.append("본문이 너무 짧음")
+    if _visible_prose_length(content) < 3500:
+        errors.append("실제 설명 본문이 너무 짧음")
     if not content.lstrip().lower().startswith("```mermaid"):
         errors.append("글 첫 부분에 전체 흐름 Mermaid가 없음")
     allowed = {canonical_url(source["url"]) for source in evidence["sources"]}
@@ -1448,7 +1448,104 @@ def _article_errors(post, evidence):
     ]
     if other_fences:
         errors.append("허용되지 않은 코드 블록: " + ", ".join(sorted(set(other_fences))))
+
+    content_without_fences = re.sub(r"```.*?```|~~~.*?~~~", " ", content, flags=re.S)
+    headings = re.findall(r"(?m)^(#{1,6})\s+(.+?)\s*$", content_without_fences)
+    if any(level == "#" for level, _ in headings):
+        errors.append("본문에 H1 제목이 포함됨")
+    h2_text = [heading for level, heading in headings if level == "##"]
+    required_h2 = [heading.removeprefix("## ") for heading in NEWS_HEADINGS]
+    if any(heading not in h2_text for heading in required_h2):
+        errors.append("필수 뉴스 H2 소제목이 실제 제목으로 존재하지 않음")
+    previous_level = 1
+    for level, heading in headings:
+        current_level = len(level)
+        if current_level == 1:
+            continue
+        if previous_level == 1 and current_level != 2:
+            errors.append(f"첫 본문 소제목이 H{current_level}: {heading}")
+            break
+        if current_level > previous_level + 1:
+            errors.append(
+                f"소제목 계층이 H{previous_level}에서 H{current_level}로 건너뜀: {heading}"
+            )
+            break
+        previous_level = current_level
+
+    first_heading = re.search(r"(?m)^#{1,6}\s+", content_without_fences)
+    intro = content_without_fences[: first_heading.start()] if first_heading else content_without_fences
+    if len(_visible_prose(intro)) < 60:
+        errors.append("직접 답변 도입이 너무 짧음")
     return errors
+
+
+_PROSE_FENCE = re.compile(r"```.*?```|~~~.*?~~~", re.S)
+_PROSE_IMAGE = re.compile(r"!\[[^]\n]*\]\([^)\n]+\)")
+_PROSE_LINK = re.compile(r"\[([^]\n]*)\]\([^)\n]+\)")
+_PROSE_COMMENT = re.compile(r"<!--.*?-->", re.S)
+# A comparison such as ``latency < 5 ms`` is prose, not an HTML tag.  Keep the
+# matcher deliberately conservative and never let it consume another line.
+_PROSE_HTML_TAG = re.compile(
+    r"</?[A-Za-z][A-Za-z0-9:-]*(?:\s+[^>\n]*)?\s*/?>"
+)
+
+
+def _visible_prose(content):
+    """Return reader-visible prose without diagrams, images, or Markdown syntax."""
+    text = _PROSE_FENCE.sub(" ", str(content or ""))
+    text = _PROSE_IMAGE.sub(" ", text)
+    text = _PROSE_LINK.sub(lambda match: match.group(1) or " ", text)
+    text = _PROSE_COMMENT.sub(" ", text)
+    text = _PROSE_HTML_TAG.sub(" ", text)
+    text = html.unescape(text)
+    text = re.sub(r"(?m)^#{1,6}\s*", "", text)
+    text = re.sub(r"(?m)^\s*(?:[-*+] |\d+[.)]\s+|>\s*)", "", text)
+    text = re.sub(r"[`*_~|:-]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _visible_prose_length(content):
+    return len(re.sub(r"\s", "", _visible_prose(content)))
+
+
+def _post_data_errors(post, evidence, *, visual_errors=()):
+    """Apply the complete pre-save contract to a generated or relaxed news post."""
+    if not isinstance(post, dict):
+        return ["글 데이터가 객체가 아님"]
+
+    errors = list(visual_errors)
+    errors.extend(_article_errors(post, evidence))
+    if not all(
+        str(post.get(key) or "").strip()
+        for key in ("title_korean", "title_english", "description", "summary")
+    ):
+        errors.append("제목 또는 메타 설명 누락")
+
+    description = str(post.get("description") or "").strip()
+    if not 80 <= len(description) <= 160:
+        errors.append(f"메타 설명 길이 부적합: {len(description)}자")
+
+    faq = post.get("faq") or []
+    if not isinstance(faq, list) or not 3 <= len(faq) <= 5:
+        errors.append("FAQ는 3~5개 필요")
+    else:
+        questions = set()
+        for index, item in enumerate(faq, 1):
+            if not isinstance(item, dict):
+                errors.append(f"FAQ {index}가 객체가 아님")
+                continue
+            question = str(item.get("question") or "").strip()
+            answer = str(item.get("answer") or "").strip()
+            if not question or not answer:
+                errors.append(f"FAQ {index}의 질문 또는 답변이 비어 있음")
+            if question in questions:
+                errors.append(f"FAQ 질문 중복: {question}")
+            questions.add(question)
+
+    tags = post.get("tags") or []
+    if not isinstance(tags, list) or len(tags) < 5:
+        errors.append("태그 5개 미만")
+    return list(dict.fromkeys(errors))
 
 
 def _remove_unverified_links(content, evidence):
@@ -1631,6 +1728,16 @@ def _relax_post_data(post, topic_data, evidence):
     return post
 
 
+def _validated_relaxed_post(post, topic_data, evidence):
+    """Repair a draft, then run the same full contract again before returning it."""
+    relaxed = _relax_post_data(post, topic_data, evidence)
+    errors = _post_data_errors(relaxed, evidence)
+    if errors:
+        print("완화 글 재검증 실패: " + " / ".join(errors))
+        return None
+    return relaxed
+
+
 def generate_blog_post(client, topic_data, evidence, *, strict=True):
     """Write one fact-locked Korean AI news feature in a lively blogger voice."""
     print(f"뉴스 글 작성: {topic_data['headline']}")
@@ -1659,9 +1766,10 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
 - 제목은 검색할 회사/제품명과 실제 변화를 앞쪽에 넣고, 사람이 누르고 싶을 만큼
   구체적으로 쓴다. 낚시성 표현, 이모지, 느낌표 도배는 금지한다.
 - 제목은 핵심 검색어를 한 번만 자연스럽게 사용하고 같은 표현을 반복하지 않는다.
-  description은 검색 결과만 읽어도 사건, 변화, 독자 영향을 이해할 수 있는 70~160자,
+  description은 검색 결과만 읽어도 사건, 변화, 독자 영향을 이해할 수 있는 80~160자,
   summary는 독립적으로 인용해도 의미가 통하는 2~3문장이다.
-- 본문은 H1 없이 2,800~4,500자 정도로 쓴다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
+- 본문은 H1 없이 4,200~6,000자의 실제 설명문으로 쓴다. Mermaid와 Chart.js 코드,
+  표의 문법 문자는 이 분량에 포함하지 않는다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
   1. 무슨 일이 벌어진 걸까?
   2. 왜 지금 다들 이 이야기를 할까?
   3. 그래서 우리에게 뭐가 달라질까?
@@ -1733,14 +1841,14 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
         thinking_level="HIGH",
     )
     if not response_text:
-        return None if strict else _fallback_post_data(topic_data, evidence)
+        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
     try:
         post = json.loads(response_text)
     except (TypeError, ValueError) as exc:
         print(f"글 JSON 파싱 실패: {exc}")
-        return None if strict else _fallback_post_data(topic_data, evidence)
+        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
     if not isinstance(post, dict):
-        return None if strict else _fallback_post_data(topic_data, evidence)
+        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
 
     for key in ("title_korean", "title_english", "description", "summary"):
         post[key] = strip_emojis(str(post.get(key) or "")).strip()
@@ -1772,20 +1880,12 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
         if item.get("question") and item.get("answer")
     ][:4]
 
-    errors = visual_errors + _article_errors(post, evidence)
-    if not all(post.get(key) for key in ("title_korean", "title_english", "description", "summary")):
-        errors.append("제목 또는 메타 설명 누락")
-    if not 60 <= len(post["description"]) <= 180:
-        errors.append(f"메타 설명 길이 부적합: {len(post['description'])}자")
-    if len(post["faq"]) < 3:
-        errors.append("FAQ 3개 미만")
-    if len(post["tags"]) < 5:
-        errors.append("태그 5개 미만")
+    errors = _post_data_errors(post, evidence, visual_errors=visual_errors)
     if errors:
         print("글 출고 기준 미달: " + " / ".join(errors))
         if strict:
             return None
-        return _relax_post_data(post, topic_data, evidence)
+        return _validated_relaxed_post(post, topic_data, evidence)
     return post
 
 def replace_empty_lead_diagram(content, evidence):
@@ -1817,6 +1917,10 @@ def _safe_slug(value):
 
 def save_post(post_data, topic_data, evidence, *, now=None):
     """Save a news post using the existing blog layout and collected source visuals."""
+    validation_errors = _post_data_errors(post_data, evidence)
+    if validation_errors:
+        raise ValueError("저장 전 글 품질 검증 실패: " + " / ".join(validation_errors))
+
     now = now or kst_now()
     # 카드 이미지 파일명도 이 슬러그를 그대로 쓴다. 글 URL(/posts/<slug>/)과 맞춰 둔다.
     post_slug = _safe_slug(post_data.get("title_english"))
@@ -1827,6 +1931,21 @@ def save_post(post_data, topic_data, evidence, *, now=None):
     if os.path.exists(filepath):
         raise RuntimeError(f"같은 파일이 이미 존재합니다: {filename}")
     os.makedirs(POSTS_DIR, exist_ok=True)
+
+    # Rewrites below are part of the publication contract, not cosmetic post-processing.
+    # In particular, replacing an empty lead diagram can remove it when no grounded
+    # summary is available.  Validate the transformed draft before image/card side
+    # effects and once more after every final insertion so an invalid body is never saved.
+    content = compact_source_citations(post_data["content"], evidence["sources"])
+    content = replace_empty_lead_diagram(content, evidence)
+    content = insert_glossary_box(content)
+    transformed_post = dict(post_data)
+    transformed_post["content"] = content
+    transformed_errors = _post_data_errors(transformed_post, evidence)
+    if transformed_errors:
+        raise ValueError(
+            "최종 변환 후 글 품질 검증 실패: " + " / ".join(transformed_errors)
+        )
 
     images = collect_source_images(evidence.get("sources") or [], limit=4)
     if images:
@@ -1864,15 +1983,15 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         }
         article_images = []
 
-    # Keep the prose clean: long publisher links become [1], [2] markers. Collected
-    # source images are also placed in the body; when only one survives validation,
-    # the hero is intentionally reused once so the article is not text-only.
-    content = compact_source_citations(post_data["content"], evidence["sources"])
+    # Collected source images are placed in the body; when only one survives
+    # validation, the hero is intentionally reused once so the article is not text-only.
     content = insert_source_images(content, images)
-    content = replace_empty_lead_diagram(content, evidence)
-    # 프롬프트로 "용어를 풀어 써라"라고 해도 모델은 자주 잊는다. 본문에 실제로 쓰인
-    # 용어를 코드가 찾아 도입부 끝에 한 줄 설명을 붙인다. 모델 호출이 없어 공짜다.
-    content = insert_glossary_box(content)
+    transformed_post["content"] = content
+    final_errors = _post_data_errors(transformed_post, evidence)
+    if final_errors:
+        raise ValueError(
+            "최종 변환 후 글 품질 검증 실패: " + " / ".join(final_errors)
+        )
     primary_source = next(
         (source for source in evidence["sources"] if source.get("tier") == "official"),
         evidence["sources"][0],

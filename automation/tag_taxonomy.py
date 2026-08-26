@@ -1,7 +1,7 @@
 """OPSOAI 태그 통제 어휘(controlled vocabulary).
 
 관련글 추천은 태그 교집합으로 동작하므로, 태그는 코퍼스를 '분할'해야 한다.
-612편 전부에 달리는 태그(예: 'AI')는 모든 글을 모든 글과 엮어 추천을 무의미하게
+전체 글에 달리는 태그(예: 'AI')는 모든 글을 모든 글과 엮어 추천을 무의미하게
 만들기 때문에 어휘에서 제외했다. 각 태그는 변별력을 갖는 주제 단위로만 둔다.
 
 각 항목은 (태그명, [정규식...], 옵션) 형태다. 옵션 키:
@@ -17,17 +17,18 @@
 # 제목에서 매칭됐을 때의 가중치. 제목은 글의 주제를 본문보다 정확히 대변한다.
 TITLE_WEIGHT = 6
 
-# 한 글에 붙일 최대/최소 태그 수. Chirpy 관련글은 4~6개 구간에서 가장 잘 동작한다.
+# 한 글에 붙일 최대/최소 태그 수. 두 개 미만이면 주제 연결이 지나치게 약하고,
+# 여섯 개 이상이면 관련글 후보가 오히려 넓어지므로 핵심 태그만 남긴다.
 MAX_TAGS = 5
-MIN_TAGS = 3
+MIN_TAGS = 2
 
 # 코퍼스의 이 비율을 넘게 매칭되는 태그는 변별력이 없다고 보고 후순위로 강등한다.
 GENERIC_RATIO = 0.35
 
-# 612편 전수 분석에서 실제로 GENERIC_RATIO를 넘긴 태그들. 자동 발행 봇은 코퍼스
+# 현재 코퍼스 전수 분석에서 실제로 GENERIC_RATIO를 넘긴 태그들. 자동 발행 봇은 코퍼스
 # 전체 통계를 낼 수 없으므로 이 목록을 그대로 써서 기존 글과 같은 기준을 적용한다.
 # 어휘를 크게 바꾸면 apply_tags.py를 드라이런해 이 값을 갱신할 것.
-DEMOTED = {"AI에이전트", "LLM", "오픈소스"}
+DEMOTED = {"AI에이전트"}
 
 TAXONOMY = [
     # ---------- 모델과 기업 ----------
@@ -54,15 +55,28 @@ TAXONOMY = [
     ("xAI",           [r"\bxai\b", r"\bgrok\b", r"그록"], {}),
 
     # ---------- 기술 영역 ----------
-    ("LLM",           [r"\bllm\b", r"대규모 ?언어 ?모델", r"거대 ?언어 ?모델"], {}),
+    ("LLM",           [r"\bllm\b", r"대규모 ?언어 ?모델", r"거대 ?언어 ?모델",
+                       r"\barchon\b"], {}),
     ("멀티모달",       [r"멀티모달", r"multimodal", r"\bvlm\b", r"비전 ?언어"], {}),
-    ("컴퓨터비전",     [r"컴퓨터 ?비전", r"computer ?vision", r"객체 ?탐지",
-                       r"object ?detection", r"이미지 ?분류", r"세그멘테이션",
-                       r"segmentation"], {}),
-    ("이미지생성",     [r"이미지 ?생성", r"text[- ]?to[- ]?image", r"stable ?diffusion",
-                       r"미드저니", r"midjourney", r"\bdall[- ]?e\b", r"이미지 ?편집"], {}),
-    ("영상생성",       [r"비디오 ?생성", r"영상 ?생성", r"text[- ]?to[- ]?video",
+    ("컴퓨터비전",     [r"컴퓨터 ?비전", r"computer ?vision", r"객체 ?(?:탐지|인식|추적)",
+                       r"object ?(?:detection|tracking)", r"multi[- ]?object ?tracking",
+                       r"이미지 ?분류", r"세그멘테이션", r"segmentation", r"bounding ?box",
+                       r"feature ?pyramid", r"\bfpn\b", r"\bcornernet\b", r"\bssd\b",
+                       r"deep ?sort", r"efficientdet", r"efficientnet",
+                       r"crowd ?count", r"density ?map", r"face ?recognition", r"\bfacenet\b"], {}),
+    ("이미지생성",     [r"이미지 ?생성", r"text[- ]?to[- ]?image", r"image[- ]?to[- ]?image",
+                       r"stable ?diffusion", r"\bcyclegan\b", r"미드저니", r"midjourney",
+                       r"\bdall[- ]?e\b", r"이미지 ?편집"], {}),
+    ("영상생성",       [r"비디오 ?생성", r"영상 ?생성", r"video[- ]?generation",
+                       r"video[- ]?audio[- ]?generation", r"text[- ]?to[- ]?video",
+                       r"(?<![a-z0-9])lol(?![a-z0-9]).*(?:sink[- ]?collapse|rope ?jitter)", r"\bmova\b",
                        r"\bsora\b", r"동영상 ?생성", r"비디오 ?모델"], {}),
+    ("영상이해",       [r"비디오 ?이해", r"영상 ?이해", r"video ?understanding",
+                       r"video[- ]?(?:auto[- ]?)?reasoning", r"visual[- ]?reasoning",
+                       r"video ?llm", r"videoauto[- ]?r1", r"비디오 ?추론", r"영상 ?추론", r"internvideo",
+                       r"capimagine", r"proact[- ]?vl"], {}),
+    ("문서AI",         [r"\bocr\b", r"문서 ?이해", r"document ?intelligence",
+                       r"document ?understanding", r"문서 ?파싱", r"레이아웃 ?인식"], {}),
     ("음성AI",         [r"음성 ?인식", r"\btts\b", r"\bstt\b", r"음성 ?합성",
                        r"whisper", r"오디오 ?생성", r"보이스 ?클론"], {}),
     ("3D생성",         [r"포인트 ?클라우드", r"point ?cloud", r"\bnerf\b",
@@ -88,9 +102,13 @@ TAXONOMY = [
     ("경량화",         [r"양자화", r"quantiz", r"\bgguf\b", r"지식 ?증류", r"distill",
                        r"프루닝", r"pruning", r"경량화", r"소형 ?모델", r"\bslm\b"], {}),
     ("온디바이스AI",   [r"온[- ]?디바이스", r"on[- ]?device", r"엣지 ?ai", r"edge ?ai",
-                       r"로컬 ?llm", r"로컬 ?구동", r"\bollama\b", r"llama\.cpp"], {}),
+                       r"로컬 ?llm", r"로컬 ?구동", r"\bollama\b", r"llama\.cpp",
+                       r"\bopenvino\b", r"\bncs ?2\b", r"coral ?usb", r"raspberry ?pi"], {}),
     ("컨텍스트윈도우", [r"컨텍스트 ?(창|윈도우|길이)", r"context ?(window|length)",
                        r"롱 ?컨텍스트", r"long ?context", r"토큰 ?한계"], {}),
+    ("AI메모리",       [r"ai ?(?:장기 ?)?기억", r"에이전트 ?메모리", r"장기 ?기억",
+                       r"long[- ]?term ?memory", r"memory ?(?:system|architecture)",
+                       r"\bmemoria\b"], {}),
 
     # ---------- 에이전트 ----------
     ("AI에이전트",     [r"ai ?에이전트", r"에이전트", r"\bagent\b", r"agentic"], {}),
@@ -101,24 +119,34 @@ TAXONOMY = [
                        r"\bcursor\b", r"\bcodex\b", r"\bcline\b", r"바이브 ?코딩",
                        r"vibe ?coding"], {}),
     ("업무자동화",     [r"업무 ?자동화", r"워크플로우 ?자동화", r"workflow ?automation",
-                       r"\bn8n\b", r"자동화 ?파이프라인", r"\brpa\b"], {}),
+                       r"\bn8n\b", r"자동화 ?파이프라인", r"뉴스 ?파이프라인",
+                       r"trend ?pipeline", r"\btrendradar\b", r"\brpa\b"], {}),
 
     # ---------- 개발과 인프라 ----------
     ("오픈소스",       [r"오픈 ?소스", r"open ?source", r"mit ?라이선스",
                        r"apache ?2", r"자체 ?호스팅", r"self[- ]?host"], {}),
-    ("파이썬",         [r"파이썬", r"\bpython\b", r"\bpytorch\b", r"파이토치"], {"min": 4}),
+    ("파이썬",         [r"파이썬", r"\bpython\b", r"\bpytorch\b", r"파이토치",
+                       r"\btensorflow\b", r"\bkeras\b", r"\bpep ?8\b"], {"min": 4}),
     ("MLOps",         [r"\bmlops\b", r"모델 ?배포", r"model ?serving", r"추론 ?서버",
                        r"\bvllm\b", r"triton", r"모델 ?서빙"], {}),
     ("인프라",         [r"쿠버네티스", r"kubernetes", r"도커", r"docker", r"데이터 ?센터",
-                       r"data ?center", r"클라우드 ?인프라", r"\bebpf\b"], {"min": 4}),
+                       r"data ?center", r"클라우드 ?인프라", r"(?<![a-z0-9])ebpf(?![a-z0-9])", r"\bredis\b",
+                       r"\bkafka\b", r"\bredpanda\b", r"\bdragonfly\b"], {"min": 4}),
+    ("데이터분석",     [r"\bxgboost\b", r"\blightgbm\b", r"\bkaggle\b", r"주성분 ?분석",
+                       r"선형 ?판별", r"\bpca\b", r"\blda\b", r"통계 ?분석"], {}),
+    ("웹개발",         [r"\bdjango\b", r"\bredux\b", r"\bzustand\b", r"백엔드",
+                       r"backend", r"headless ?browser", r"헤드리스 ?브라우저",
+                       r"node\.js", r"웹 ?프레임워크"], {}),
     ("API",           [r"api ?(공개|요금|가격|호출|키)", r"rest ?api", r"\bsdk\b"], {"min": 4}),
     ("반도체",         [r"반도체", r"\bhbm\b", r"\btpu\b", r"\bnpu\b", r"칩셋",
                        r"블랙웰", r"blackwell", r"\bcuda\b"], {}),
 
     # ---------- 보안, 정책, 안전 ----------
     ("AI보안",         [r"ai ?보안", r"프롬프트 ?인젝션", r"prompt ?injection",
-                       r"탈옥", r"jailbreak", r"적대적 ?공격", r"adversarial",
-                       r"취약점", r"사이버 ?보안", r"레드 ?팀"], {}),
+                       r"탈옥", r"jailbreak", r"적대적 ?(?:공격|예제|교란)",
+                       r"adversarial ?(?:attack|example|perturbation)",
+                       r"취약점", r"사이버 ?보안", r"레드 ?팀", r"\bmagika\b",
+                       r"\blibmagic\b", r"파일 ?유형 ?검증"], {}),
     ("AI정책",         [r"ai ?규제", r"ai ?정책", r"\bai act\b", r"거버넌스",
                        r"저작권", r"규제 ?당국"], {}),
     # bare 'alignment'는 컴퓨터비전 글의 Face Alignment(얼굴 정렬)에 걸린다.
@@ -142,7 +170,9 @@ TAXONOMY = [
                       {"title_only": True}),
     ("튜토리얼",       [r"사용법", r"설치 ?방법", r"시작하기", r"getting ?started",
                        r"따라 ?하기", r"실습", r"가이드", r"만들기", r"구축하기",
-                       r"하는 ?법", r"세팅"], {"title_only": True}),
+                       r"하는 ?법", r"세팅", r"체크리스트", r"점검 ?순서", r"설정 ?순서",
+                       r"확인 ?순서", r"연결 ?순서", r"튜닝", r"선택 ?기준",
+                       r"무엇부터"], {"title_only": True}),
     ("벤치마크",       [r"벤치마크", r"benchmark", r"리더보드", r"leaderboard",
                        r"성능 ?비교", r"비교 ?분석"], {"title_only": True}),
     ("AI트렌드",       [r"트렌드", r"전망", r"동향", r"패러다임", r"업계 ?분석",
@@ -158,6 +188,7 @@ TAXONOMY = [
 # 본문 매칭으로 최소 태그 수를 못 채웠을 때 카테고리로 보전한다.
 CATEGORY_FALLBACK = {
     "paper":         ["논문리뷰"],
+    "basics":        ["튜토리얼", "AI트렌드"],
     "darknet":       ["DarkNet", "컴퓨터비전", "C언어"],
     "opensource":    ["오픈소스"],
     "edge":          ["온디바이스AI"],
@@ -169,3 +200,7 @@ CATEGORY_FALLBACK = {
     "tech":          ["AI트렌드"],
     "ai":            ["AI트렌드"],
 }
+
+# 새 자동 글이 아직 어휘에 없는 주제를 다뤄도 관련글 그래프에서 고립되지 않게 한다.
+# 구체 태그가 생기면 점수 정렬에서 이 두 범용 태그보다 앞선다.
+DEFAULT_FALLBACK = ["AI트렌드", "AI서비스"]

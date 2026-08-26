@@ -6,17 +6,17 @@ categories: Tech
 tags:
   - 멀티에이전트
   - RAG
+  - 오픈소스
   - AI코딩
   - 벡터DB
-  - ChatGPT
 summary: 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대
   멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
-author: AI Trend Bot
+description: 'DeepTutor의 지식 그래프와 학습자 기억 이중 루프, 6개 에이전트 역할, TutorBench 근거와 교육 현장 도입 전 개인정보·오개념 검수 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/HKUDS/DeepTutor
 image:
   path: https://opengraph.githubassets.com/1/HKUDS/DeepTutor
-  alt: 'DeepTutor: Agent-Native Lifelong Personalized Tutoring Framework by HKU'
+  alt: "HKUDS/DeepTutor GitHub 저장소 대표 이미지"
 project:
   stars: 35077
   forks: 4448
@@ -63,6 +63,8 @@ faq:
 ---
 
 [DeepTutor GitHub 저장소](https://github.com/HKUDS/DeepTutor) | [DeepTutor 공식 웹사이트](https://deeptutor.info/) | [DeepTutor 논문 (arXiv:2604.26962)](https://arxiv.org/abs/2604.26962) | [HKUDS Data Intelligence Lab](https://sites.google.com/view/chaoh)
+
+DeepTutor는 한 번의 답변보다 학생의 오개념과 학습 이력을 여러 세션에 걸쳐 추적해야 할 때 검토할 프레임워크입니다. 지식 그래프는 설명의 근거를, Trace Forest는 학습자의 변화 기록을 담당하지만 이 구조가 교사의 평가와 개인정보 보호를 대신하지는 않습니다. 도입 전에는 과목별 정답률뿐 아니라 잘못 저장된 학습자 추정이 다음 문제 난이도에 어떤 영향을 주는지 시험해야 합니다.
 
 > **TL;DR (한 줄 요약)**
 > - **한 줄 요약**: DeepTutor는 홍콩대학교(HKU) Data Intelligence Lab에서 개발한 오픈소스 에이전트 네이티브 맞춤형 AI 튜터링 플랫폼입니다.
@@ -463,6 +465,20 @@ DeepTutor는 학습자의 모든 개인화 데이터, 오답 노트, 교재 문�
 홍콩대학교 Data Intelligence Lab의 DeepTutor는 단발성 질의응답 수준에 머물러 있던 교육용 AI 시스템을 **지속적인 개인 맞춤형 오케스트레이터** 단계로 끌어올린 뛰어난 프로젝트예요. 정적 지식 검색과 동적 학습자 기억을 잇는 이중 루프 아키텍처는 향후 교육공학 분야의 표준적인 하이브리드 AI 패턴이 될 가능성이 매우 높아 보입니다.
 
 자신만의 학습 지식 베이스를 구축하고 체계적인 맞춤형 공부 환경을 만들고 싶은 학생이나 연구자, 혹은 교육용 AI 솔루션을 고민 중인 개발자라면 [DeepTutor GitHub 저장소](https://github.com/HKUDS/DeepTutor)를 직접 방문해 체험해 보시길 추천해요.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/HKUDS/DeepTutor)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [PraisonAI: YAML과 파이썬 코드로 구축하는 자율형 멀티 AI 에이전트 오케스트레이션]({% post_url 2026-08-10-PraisonAI-Low-Code-Multi-Agent-AI-Framework-for-Autonomous-Workflows %}) — PraisonAI는 코드 몇 줄이나 간단한 YAML 설정만으로 자율형 멀티 AI 에이전트 시스템을 구축하고 배포할 수 있게 해주는 오픈소스 프레임워크입니다. 100개 이상의 LLM 지원, 메모리 관리, RAG, MCP 도구 연동을…
+- [AI 사용자 기억에 벡터 DB가 꼭 필요할까? Memori와 SQL의 경계]({% post_url 2026-03-05-Review-AI-Finally-Starts-Remembering-Me--A-Deep-Dive-into-the-SQL-Native-AI-Memory-Engine-Memori %}) — Memori가 LLM 호출 전후에 개입해 사실·선호·규칙을 SQL에 저장하는 구조와 대규모 문서 검색은 여전히 벡터 DB가 필요한 이유를 설명합니다.
+- [langchain-ai/openwiki: AI 코딩 에이전트 전용 저장소 위키가 필요한 이유와 작동 원리]({% post_url 2026-07-06-langchain-aiopenwiki-Why-We-Need-a-Dedicated-Repo-Wiki-for-AI-Coding-Agents-and-How-It-Works %}) — LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다. 이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

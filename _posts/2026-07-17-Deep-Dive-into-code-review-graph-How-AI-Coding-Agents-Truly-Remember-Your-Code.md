@@ -7,16 +7,15 @@ tags:
   - AI코딩
   - MCP
   - 아키텍처분석
-  - 파이썬
   - RAG
+  - 컨텍스트윈도우
 summary: AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의
   내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
-author: AI Trend Bot
+description: 'code-review-graph가 Tree-sitter와 SQLite로 코드 관계를 색인하는 방식, MCP 질의·색인 갱신·동적 호출 누락·토큰 절감을 설명합니다.'
 github_url: https://github.com/tirth8205/code-review-graph
 image:
   path: https://opengraph.githubassets.com/1/tirth8205/code-review-graph
-  alt: 'Deep Dive into code-review-graph: How AI Coding Agents Truly Remember Your
-    Code'
+  alt: "tirth8205/code-review-graph GitHub 저장소 대표 이미지"
 project:
   stars: 19769
   forks: 2108
@@ -40,29 +39,11 @@ project:
   files: 332
 mermaid: true
 chart: true
-faq:
-- question: AI 분석 시 토큰을 구체적으로 얼마나 절감할 수 있나요?
-  answer: 프로젝트 규모에 따라 다르지만, 벤치마크 결과에 따르면 평균적으로 기존 방식 대비 토큰 사용량을 크게 줄입니다. 예를 들어 2,900여
-    개의 파일이 있는 FastAPI 프로젝트에서는 8.1배, 약 2만 7천 개의 파일이 있는 Next.js 프로젝트에서는 리뷰 작업 시 6배,
-    라이브 코딩 태스크에서는 최대 49배까지 토큰을 절감했습니다.
-- question: 로컬에서 동작한다고 했는데, 내 코드가 외부 서버로 전송되지 않나요?
-  answer: 네, 절대 전송되지 않습니다. code-review-graph는 클라우드 연결이나 텔레메트리(사용자 데이터 수집) 로직이 전혀 없습니다.
-    모든 파싱과 그래프 구축은 사용자 PC 내부의 로컬 SQLite 데이터베이스에만 저장되므로 기업의 보안 가이드라인을 완벽하게 준수합니다.
-- question: MCP를 지원하지 않는 구형 에디터나 IDE에서도 사용할 수 있나요?
-  answer: MCP(Model Context Protocol)를 기본으로 활용하도록 설계되었으나, CLI(명령줄 인터페이스) 도구를 독립적으로
-    제공합니다. 따라서 에디터 연동 없이도 터미널에서 명령어를 실행해 코드의 구조를 분석하거나 영향 범위(Blast Radius)를 파악할 수
-    있으며, HTML 시각화 기능도 사용할 수 있습니다.
-- question: 파일을 하나만 수정해도 수만 개의 코드를 전부 다시 분석해야 하나요?
-  answer: 아닙니다. 모든 파일의 SHA-256 해시값을 기록해 두고 있어, 변경이 일어난 파일과 그에 의존하는 일부 관련 노드만 선별적으로
-    다시 파싱합니다. 이 증분 업데이트(Incremental Update) 기술 덕분에 파일 수정 시 전체 그래프 갱신에 걸리는 시간은 보통 200ms
-    이하로 매우 빠릅니다.
-- question: 이 도구가 지원하는 프로그래밍 언어는 어떤 것들이 있나요?
-  answer: 현재 트리시터(Tree-sitter) 파서를 통해 총 12개의 언어를 공식 지원합니다. Python, TypeScript, JavaScript,
-    Go, Rust, Java, C#, Ruby, Kotlin, Swift, PHP, C/C++ 프로젝트에서 AST를 추출하여 지식 그래프를 구성할
-    수 있습니다.
 ---
 
-## 관련 링크 및 참고 자료
+code-review-graph는 소스 구조를 파싱해 로컬 관계 그래프로 색인하고 에이전트가 코드 리뷰에 필요한 호출·의존 관계부터 찾게 합니다. 이는 코드를 “기억”하는 모델이 아니라 현재 색인에서 구조 후보를 반환하는 도구이므로 최종 판단에는 원문 diff와 테스트가 필요합니다. 동적 호출, 생성 코드, 최신 커밋 반영과 실제 토큰 절감을 자신의 저장소에서 확인하세요.
+
+## 구조 그래프가 코드 리뷰에 필요한 순간은 언제인가
 
 - [code-review-graph GitHub 저장소](https://github.com/tirth8205/code-review-graph)
 - [PyPI 프로젝트 페이지](https://pypi.org/project/code-review-graph)
@@ -401,6 +382,20 @@ sequenceDiagram
 AI가 개발자를 대체할 것이라는 자극적인 전망이 난무하지만, 현업에서 느끼는 AI는 여전히 잦은 환각(Hallucination)과 맥락 상실을 겪는 불완전한 조수에 가깝습니다. 그 원인의 대부분은 AI 모델 자체의 지능 부족이 아니라, **우리가 AI에게 정보를 떠먹여 주는 방식이 너무 원시적이었기 때문**입니다.
 
 `code-review-graph`는 이 문제를 근본적인 아키텍처 차원에서 풀어냈습니다. 코드를 텍스트의 나열이 아닌 '논리적인 유기체'로 바라보고, 이를 구조화하여 AI의 뇌에 직접 꽂아주는 이 접근법은 매우 실용적이며 경제적입니다. 더 이상 AI가 수만 줄의 코드를 무의미하게 읽느라 시간을 낭비하게 두지 마십시오. 로컬 환경에 작고 똑똑한 지식 그래프를 구축하는 것만으로도, 여러분의 AI 코딩 에이전트는 한 차원 높은 수준의 통찰력을 발휘하게 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/tirth8205/code-review-graph)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법]({% post_url 2026-07-05-codebase-memory-mcp-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
+- [headroom: AI 코딩 에이전트의 컨텍스트 한계를 넘는 압축 기술]({% post_url 2026-07-07-Headroom-Context-Compression-Layer-for-AI-Agents %}) — Headroom은 대형 언어 모델(LLM)에 전달되는 방대한 도구 출력과 로그, RAG 결과물을 최대 95%까지 압축하여 토큰 비용을 줄이고 답변 정확도를 유지하는 오픈소스 기반의 컨텍스트 압축 레이어입니다.
+- [code-graph-rag: AI 코딩 에이전트가 대규모 코드베이스의 구조와 맥락을 잃지 않는 방법]({% post_url 2026-07-24-code-graph-rag-How-AI-Coding-Agents-Keep-Structure-and-Context-in-Large-Codebases %}) — vitali87의 Code Graph RAG는 다국어 코드베이스를 Tree-sitter로 파싱하여 Memgraph 지식 그래프로 구축하는 획기적인 도구입니다. 텍스트 의미 기반의 벡터 검색이 가진 한계를 극복하고 상속, 호출, 데이터…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

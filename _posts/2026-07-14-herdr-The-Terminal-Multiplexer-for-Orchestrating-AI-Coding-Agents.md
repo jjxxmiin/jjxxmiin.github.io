@@ -6,15 +6,16 @@ categories: Tech
 tags:
   - AI코딩
   - ClaudeCode
+  - 웹개발
   - 멀티에이전트
   - AI에이전트
 summary: 기존 터미널 멀티플렉서의 한계를 넘어, AI 에이전트의 작업 상태(대기, 작업 중, 완료)를 실시간으로 자동 추적하고 제어하는 herdr의
   구조와 활용법을 알아봅니다.
-author: AI Trend Bot
+description: 'herdr가 여러 AI 코딩 세션의 대기·작업·완료 상태를 추적하는 방식과 Socket API, 오분류·세션 복구·권한 분리 기준을 설명합니다.'
 github_url: https://github.com/ogulcancelik/herdr
 image:
   path: https://opengraph.githubassets.com/1/ogulcancelik/herdr
-  alt: 'herdr: The Terminal Multiplexer for Orchestrating AI Coding Agents'
+  alt: "ogulcancelik/herdr GitHub 저장소 대표 이미지"
 project:
   stars: 16500
   forks: 1113
@@ -38,25 +39,9 @@ project:
   files: 1827
 mermaid: true
 chart: true
-faq:
-- question: 기존 멀티플렉서(tmux)와 함께 사용할 수 있나요?
-  answer: 동시에 설치해두고 각각 독립적으로 사용하는 것은 가능합니다. 하지만 herdr 내부의 패널에서 tmux 세션을 열 경우, 터미널
-    출력 스트림이 이중으로 캡슐화되어 herdr의 에이전트 상태 감지 기능이 정상적으로 작동하지 않습니다. 두 도구를 중첩해서 사용하는 것은 권장하지
-    않습니다.
-- question: 윈도우(Windows) 환경에서도 사용할 수 있나요?
-  answer: 현재 윈도우용 베타 버전을 제공하고 있으며 로컬 환경에서는 대부분의 기능을 사용할 수 있습니다. 단, 윈도우의 ConPTY 백엔드
-    특성상 SSH를 통한 원격 접속(--remote) 기능은 아직 지원하지 않으므로, 원격 서버 작업이 주된 목적이라면 제약이 있습니다.
-- question: 에이전트가 대기 중인지 작업 중인지 어떻게 자동으로 감지하나요?
-  answer: herdr는 에이전트가 터미널 버퍼에 출력하는 텍스트 스트림을 실시간으로 감시하는 휴리스틱 방식을 사용합니다. 예를 들어 사용자
-    입력을 기다리는 특정 프롬프트 문자열 패턴을 발견하거나 일정 시간 동안 추가 출력이 멈추면 'BLOCKED(대기 중)' 상태로 판단합니다.
-- question: herdr를 사용하려면 Warp나 Ghostty 같은 최신 터미널 에뮬레이터가 필요한가요?
-  answer: 아닙니다. herdr는 백그라운드 데몬과 TUI 렌더러로 구성된 단일 바이너리 프로그램이므로 iTerm2, macOS 기본 터미널,
-    GNOME 터미널 등 여러분이 이미 사용하고 있는 기존 터미널 내부에서 그대로 실행됩니다.
-- question: 상용 SaaS 서비스나 제품에 herdr를 내장해서 판매해도 되나요?
-  answer: herdr는 AGPL-3.0 라이선스를 따릅니다. 따라서 내부 조직에서 개인 용도나 팀 워크플로우용으로 사용하는 것은 무료이지만,
-    이를 수정하거나 포함하여 외부 사용자에게 상용 서비스(SaaS 등)로 제공하려면 여러분의 코드도 오픈소스로 공개하거나 별도의 상업용 라이선스
-    계약을 맺어야 합니다.
 ---
+
+herdr는 여러 터미널의 AI 코딩 세션을 한 화면에서 묶고 대기·작업·완료 상태를 추적하려는 멀티플렉서입니다. 상태 표시는 에이전트가 실제로 요구를 충족했다는 검증이 아니라 다음에 사람이 볼 세션을 고르는 운영 신호입니다. 세션이 끊기거나 권한 질문에서 멈췄을 때 감지·재개되는지, Socket API가 허용된 작업만 제어하는지 확인하세요.
 
 상단 링크 블록
 - [herdr 공식 GitHub 저장소](https://github.com/ogulcancelik/herdr)
@@ -291,6 +276,20 @@ pie title "실제 에이전트 세션의 시간 분포 예시"
 herdr는 그 변곡점을 정확히 짚어낸 도구입니다. 에이전트를 단순한 셸 스크립트 프로세스가 아니라 '상태를 가진 작업자'로 대우하기 시작했다는 점이 가장 큰 실질적 변화입니다. 무거운 GUI 애플리케이션으로 이주할 필요 없이, 우리가 매일 사용하는 가볍고 친숙한 터미널 환경 위에 이러한 자동화 계층을 성공적으로 구현해냈다는 점에서 충분히 주목할 가치가 있습니다.
 
 에이전트가 에이전트를 고용하고 통제하는 진정한 의미의 멀티 에이전트 워크플로우를 구축하고 싶다면, herdr는 여러분의 터미널 환경을 한 단계 끌어올릴 견고한 인프라가 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/ogulcancelik/herdr)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [opencodex: Codex CLI와 Claude Code에 원하는 언어 모델을 연결하는 방법]({% post_url 2026-07-23-opencodex-How-to-Connect-Any-LLM-to-Codex-CLI-and-Claude-Code %}) — opencodex는 OpenAI Codex 도구 및 Claude Code에서 기본 모델 대신 Ollama, Gemini, DeepSeek 등 원하는 모든 언어 모델을 사용할 수 있게 해주는 강력한 로컬 프록시 도구입니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

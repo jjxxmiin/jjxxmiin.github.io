@@ -4,18 +4,23 @@ title: "Agent Safehouse로 macOS AI 에이전트를 가둘 수 있을까: Deny-f
 date: '2026-03-11 18:20:16'
 categories: Tech
 tags:
-  - AgentSafehouse
-  - macOS보안
+  - AI보안
+  - AI코딩
+  - ClaudeCode
   - AI에이전트
-  - 샌드박스
-  - 최소권한
 summary: "macOS Seatbelt·sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크·홈 설정·IPC 예외 및 완전 격리가 아닌 한계를 정리합니다."
-author: AI Trend Bot
+description: 'Agent Safehouse가 macOS Seatbelt 정책으로 AI 에이전트 권한을 줄이는 방식과 예외 경로, 네트워크·IPC·차단 실패를 검증하는 기준을 설명합니다.'
 github_url: https://github.com/eugene1g/agent-safehouse
 image:
   path: https://opengraph.githubassets.com/1/eugene1g/agent-safehouse
-  alt: '[Agent Safehouse Deep Dive] Leashing Your AI Agents at the Kernel Level on
-    macOS'
+  alt: "eugene1g/agent-safehouse GitHub 저장소 대표 이미지"
+faq:
+  - question: 'Agent Safehouse만 쓰면 AI 에이전트를 완전히 격리할 수 있나요?'
+    answer: '아닙니다. 허용한 프로젝트와 네트워크 안의 오작동, 샌드박스 탈출과 허용 프로그램의 취약점까지 막는 완전한 VM 경계는 아니므로 다른 통제와 함께 써야 합니다.'
+  - question: '정상 빌드가 막히면 홈 디렉터리를 통째로 열어도 되나요?'
+    answer: '권장하기 어렵습니다. 실패 로그로 필요한 설정·캐시·도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.'
+  - question: 'Safehouse 정책이 실제로 작동하는지 어떻게 확인하나요?'
+    answer: '테스트 저장소에서 프로젝트 밖 쓰기, SSH 키 읽기, 허용되지 않은 네트워크, 다른 프로세스 종료를 시도해 OS 수준에서 차단되는지 로그와 반환 오류로 확인해야 합니다.'
 ---
 
 Agent Safehouse는 macOS 에이전트의 파일·네트워크 접근 범위를 줄일 수 있지만, 완전한 보안 경계나 악성 코드 분석용 VM을 대신하지는 않습니다.
@@ -71,3 +76,55 @@ Network를 Model API에 허용하면 Project 내용이 정상 요청으로 전�
 먼저 작은 Repository에서 Project File 수정과 Test 실행만 허용합니다. 이어서 `~/.ssh` 읽기, Project 밖 쓰기, 허용하지 않은 Network 연결, 다른 Process 종료를 시도해 실제 차단을 확인합니다. 정상 Build가 실패할 때마다 필요한 단일 Permission만 추가하고 이유를 기록합니다.
 
 Safehouse가 잘 맞는 환경은 macOS에서 Local Toolchain을 그대로 쓰면서 Agent의 Directory 접근을 좁히려는 경우입니다. 출처가 불명확한 Code를 강하게 격리하거나 여러 OS에서 같은 경계를 요구한다면 Container나 VM 같은 별도 계층도 비교해야 합니다. 목표는 “목줄 하나면 안전하다”가 아니라 Agent가 실수해도 피해가 Project와 승인된 Resource 안에 머물게 하는 것입니다.
+
+## 위협 모델은 어떤 행동부터 적어야 할까
+
+보호할 대상을 먼저 나눕니다. 프로젝트 밖의 개인 파일, SSH와 클라우드 자격 증명, 다른 저장소, 로컬 서비스, 외부 네트워크가 대표적입니다. 다음으로 에이전트의 단순 실수, 페이지나 저장소의 프롬프트 인젝션, 의존성 설치 스크립트, 의도적으로 악성인 코드를 구분합니다. Safehouse가 어느 위협을 줄이고 어느 위협은 범위 밖인지 표로 남겨야 과도한 기대를 막을 수 있습니다.
+
+예를 들어 프로젝트 폴더 쓰기를 허용하면 그 안의 소스와 `.env`는 보호 대상에서 빠질 수 있습니다. 네트워크를 모델 API에 허용하면 읽을 수 있는 프로젝트 내용이 정상 요청을 통해 나갈 가능성이 남습니다. 민감 파일은 프로젝트 밖에 두고 필요한 비밀만 제한된 방법으로 주입하는 설계가 함께 필요합니다.
+
+## 예외 권한은 어떻게 최소화할까
+
+정상 작업을 한 번 실행하고 차단 로그에서 필요한 접근을 모읍니다. 각 접근이 빌드에 필수인지, 읽기만 필요한지, 일시적인 캐시인지 검토합니다. 경로 전체보다 특정 파일이나 하위 디렉터리를 허용하고, 쓰기가 필요하지 않으면 읽기 전용으로 둡니다. 네트워크도 모든 호스트 대신 실제 Registry와 API 호스트만 지정합니다.
+
+예외에는 추가 이유, 담당자, 만료 또는 재검토 시점을 붙입니다. 도구 버전이 바뀌어 새 경로를 요구하더라도 편의를 위해 넓은 패턴을 즉시 열지 말고 테스트 저장소에서 확인합니다. 사용하지 않는 예외를 제거하지 않으면 정책이 시간이 지날수록 Allow-all에 가까워질 수 있습니다.
+
+## 부정 테스트에는 무엇을 넣어야 할까
+
+파일 테스트는 프로젝트 안 쓰기 성공과 프로젝트 밖 쓰기 실패를 함께 확인합니다. 심볼릭 링크나 상대 경로로 허용 경계를 우회할 수 있는지, 설정과 키 파일 읽기가 막히는지도 봅니다. 네트워크 테스트는 허용 호스트와 차단 호스트, 다른 포트와 이름 해석을 구분합니다. IPC와 프로세스 테스트에서는 무관한 프로세스의 신호 전송이 차단되는지 확인합니다.
+
+차단되었는데 에이전트가 다른 우회 명령을 반복하는 경우도 기록해야 합니다. 재시도 상한과 중단 조건이 없으면 안전하게 실패하더라도 시간과 비용을 낭비할 수 있습니다. 운영체제 업데이트와 Safehouse 스크립트 변경 뒤에는 같은 부정 테스트를 회귀 실행해야 합니다.
+
+## 컨테이너나 VM이 더 나은 경우는 언제인가
+
+출처가 불명확한 실행 파일을 분석하거나 커널 경계를 강하게 분리해야 한다면 별도 VM이 더 적합할 수 있습니다. Linux 기반 팀에서 동일한 정책을 반복해야 하거나 빌드 환경을 완전히 재현하려면 컨테이너가 운영상 단순할 수 있습니다. 반면 macOS 로컬 도구와 키체인에 제한적으로 접근하면서 프로젝트 경계만 좁히려는 경우 Safehouse가 가벼운 층이 될 수 있습니다.
+
+선택할 때는 시작 시간뿐 아니라 호스트 파일 노출, 네트워크 기본값, 비밀 주입, 스냅샷 복구와 팀 간 재현성을 비교합니다. 여러 층을 함께 쓸 수도 있지만 각 경계가 무엇을 강제하는지 구분해야 합니다. 샌드박스 이름이 있다는 사실보다 실제 공격 시나리오가 차단되는지가 판단 기준입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/eugene1g/agent-safehouse)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조·격리·도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한·업데이트 검증 기준을 정리합니다.
+- [ml-intern에 H100 300회 루프를 맡겨도 될까: 170K Compaction과 비용 상한]({% post_url 2026-04-25-Stop-Debugging-CUDA-How-Hugging-Faces-ml-intern-is-Disrupting-the-ML-Engineering-Workflow %}) — ml-intern의 논문 탐색·학습 Job·Trackio 평가 루프와 170K 자동 압축을 살펴보고, 최대 300회 자율 실행 전에 걸어야 할 GPU·API·평가 상한을 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Agent Safehouse만 쓰면 AI 에이전트를 완전히 격리할 수 있나요?
+
+아닙니다. 허용한 프로젝트와 네트워크 안의 오작동, 샌드박스 탈출과 허용 프로그램의 취약점까지 막는 완전한 VM 경계는 아니므로 다른 통제와 함께 써야 합니다.
+
+### 정상 빌드가 막히면 홈 디렉터리를 통째로 열어도 되나요?
+
+권장하기 어렵습니다. 실패 로그로 필요한 설정·캐시·도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.
+
+### Safehouse 정책이 실제로 작동하는지 어떻게 확인하나요?
+
+테스트 저장소에서 프로젝트 밖 쓰기, SSH 키 읽기, 허용되지 않은 네트워크, 다른 프로세스 종료를 시도해 OS 수준에서 차단되는지 로그와 반환 오류로 확인해야 합니다.

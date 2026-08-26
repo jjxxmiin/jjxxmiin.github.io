@@ -7,16 +7,16 @@ tags:
   - Claude
   - ClaudeCode
   - AI코딩
-  - API
   - MCP
+  - API
 summary: holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를
   상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
-author: AI Trend Bot
+description: 'holaOS가 Claude Code·Codex와 MCP 도구를 공유 메모리로 연결하는 방식, 로컬 저장과 외부 API 경계, 권한 충돌·비용·복구 판단 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/holaboss-ai/holaOS
 image:
   path: https://opengraph.githubassets.com/1/holaboss-ai/holaOS
-  alt: 'holaOS: Open-Source All-in-One AI Agent Workspace with Shared Memory and MCP'
+  alt: "holaboss-ai/holaOS GitHub 저장소 대표 이미지"
 project:
   stars: 7498
   forks: 645
@@ -62,6 +62,7 @@ faq:
     가능합니다.
 ---
 
+holaOS는 여러 코딩 에이전트 사이에서 같은 맥락을 반복 입력하지 않고 작업 큐와 메모리를 공유하려는 팀에 적합합니다. 그러나 공유 범위가 넓을수록 한 에이전트의 잘못된 기록이나 과도한 도구 권한이 다른 에이전트로 전파될 수 있습니다. 실제 코드베이스를 연결하기 전 에이전트별 읽기·쓰기 권한, 메모리 삭제와 충돌 복구, 외부 모델 API로 나가는 데이터 경계를 확인해야 합니다.
 
 > **먼저 알아둘 용어**
 >
@@ -392,6 +393,20 @@ Electron 환경과 여러 에이전트 런타임, 로컬 SQLite 프로세스가 
 holaOS는 단순히 에이전트를 모아둔 툴킷을 넘어, AI 에이전트들이 협업할 수 있는 인프라 레이어를 제시한다는 점에서 커다란 의미를 가져요. 개별 AI 도구의 성능 경쟁을 넘어 '어떻게 에이전트들이 공존하고 협력할 것인가'에 대한 명쾌한 답을 로컬 아키텍처로 구현해 냈죠.
 
 Claude Code나 Codex 같은 강력한 에이전트를 유기적으로 결합하고, MCP 생태계를 한곳에서 통합 통제하고 싶은 개발자라면 [holaOS GitHub 저장소](https://github.com/holaboss-ai/holaOS)를 방문해 직접 설치하고 테스트해 보시는 것을 적극 추천해요.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/holaboss-ai/holaOS)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법]({% post_url 2026-07-05-codebase-memory-mcp-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
+- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
+- [code-review-graph 심층 분석: AI 코딩 에이전트가 코드를 정확히 기억하는 원리]({% post_url 2026-07-17-Deep-Dive-into-code-review-graph-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의 내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

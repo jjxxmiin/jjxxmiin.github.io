@@ -13,13 +13,12 @@ summary: prime-agent는 영속적인 IPython 커널을 단일 도구 인터페�
   유지할 수 있게 만든 오픈소스 코딩 하네스입니다. 재귀적 언어 모델(RLM) 구조를 통해 서브에이전트를 함수 호출 방식으로 실행하고, 자가 개선
   명령인 /refine을 통해 에이전트 스캐폴딩 상태를 보완 업데이트합니다. 터미널이 종료되어도 백그라운드 대몬을 통해 세션과 장기 작업을 지속할
   수 있어 복잡한 소프트웨어 엔지니어링 과제에 최적화되어 있습니다.
-author: AI Trend Bot
+description: 'prime-agent가 영속 IPython 커널과 재귀 서브에이전트로 상태를 유지하는 방식, 자가 수정·코드 실행·재개·비용 위험을 정리합니다.'
 automation: oss_trend
 github_url: https://github.com/PrimeIntellect-ai/prime-agent
 image:
   path: https://opengraph.githubassets.com/1/PrimeIntellect-ai/prime-agent
-  alt: 'prime-agent: Self-Improving RLM Harness for Autonomous Coding and Research
-    Workflows'
+  alt: "PrimeIntellect-ai/prime-agent GitHub 저장소 대표 이미지"
 project:
   stars: 9750
   forks: 937
@@ -56,7 +55,9 @@ faq:
     커널 내의 스킬 모듈로 감싸서 실행합니다. 따라서 모델의 프롬프트 오염 없이 외부 MCP 서버 도구를 자유롭게 활용할 수 있습니다.
 ---
 
-## 주요 참조 링크
+prime-agent는 영속 IPython 커널을 중심 도구로 사용해 변수와 중간 결과를 유지하고, 서브에이전트를 함수처럼 호출하는 하네스입니다. 상태가 오래 남는 만큼 잘못된 변수·비밀값·부분 결과도 다음 단계로 전파될 수 있고, `/refine` 같은 자기 수정은 검증되지 않은 지침을 고착시킬 수 있습니다. 제한된 프로젝트에서 체크포인트·초기화·재현과 코드 실행 권한을 확인하세요.
+
+## 영속 커널이 유리한 작업은 무엇인가
 
 - [Prime Agent GitHub 저장소](https://github.com/PrimeIntellect-ai/prime-agent)
 - [Prime Intellect 공식 블로그 발표](https://www.primeintellect.ai/blog/prime-agent)
@@ -386,6 +387,20 @@ IPython 커널을 제어 도구로 사용하고 파이썬 코드를 즉석에서
 Prime Intellect의 prime-agent는 지금까지 '대화창 래퍼(Wrapper)' 수준에 머물러 있던 AI 코딩 도구를 '지속 실행 가능한 소프트웨어 엔지니어링 런타임' 수준으로 끌어올렸습니다. 단일 영속 파이썬 커널이라는 직관적인 접근과 재귀적 에이전트 오케스트레이션, 그리고 안전한 스캐폴딩 자가 개선 메커니즘인 Continual Harness는 향후 에이전트 개발 표준에 큰 영향을 미칠 것입니다.
 
 긴 시간에 걸쳐 복잡한 코드를 정밀하게 분석하고 백그라운드에서 끊김 없이 업무를 완수하는 AI 협업 도구를 찾고 있다면, 오픈소스로 제공되는 prime-agent를 직접 경험해 보는 것을 권장합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/PrimeIntellect-ai/prime-agent)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
+- [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

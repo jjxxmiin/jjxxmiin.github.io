@@ -4,16 +4,15 @@ title: 'Open Mercato로 ERP 개발 80%를 건너뛸 수 있을까: 멀티테넌�
 date: '2026-02-20'
 categories: Tech
 tags:
-  - OpenMercato
-  - ERP
-  - 멀티테넌시
-  - RBAC
+  - 웹개발
+  - 인프라
+  - AI보안
   - MCP
 summary: 공통 엔터프라이즈 기능을 모듈로 제공하는 Open Mercato가 줄이는 일과, 80% 주장 밖에 남는 격리·권한·업그레이드 비용을 짚습니다.
-author: AI Trend Bot
+description: 'Open Mercato가 인증·RBAC·멀티테넌시·ERP 모듈을 제공하는 방식과 Eject 이후 유지보수, AI 도구 권한·데이터 격리 검증 기준을 설명합니다.'
 image:
   path: https://opengraph.githubassets.com/1/open-mercato/open-mercato
-  alt: Open-Mercato-The-AI-Native-ERP-Framework
+  alt: "open-mercato/open-mercato GitHub 저장소 대표 이미지"
 ---
 
 Open Mercato는 인증·RBAC·멀티테넌시·CRM 같은 반복 기반을 제공해 ERP 개발의 시작점을 앞당길 수 있지만, “80% 완성”은 모든 업종에 적용되는 측정값이 아니라 공통 기능과 고유 업무를 나눈 설명입니다. 실제 절감률은 tenant 격리, 회계·재고 규칙, 기존 시스템 연동과 upgrade 비용까지 prototype에서 확인해야 합니다.
@@ -101,3 +100,27 @@ PoC에서는 happy path보다 아래 실패를 먼저 만듭니다.
 - schema 변경 뒤 audit history와 rollback
 
 “기반 기능이 있다”와 “production ERP가 완성됐다” 사이에는 운영, 보안, 데이터 migration이 남습니다. Open Mercato의 장점은 그 일을 없애는 데 있지 않고, 공통 구조를 source로 소유한 상태에서 고유 업무에 맞게 확장할 출발점을 제공하는 데 있습니다.
+
+## 기존 ERP 데이터를 옮길 때 무엇을 먼저 검증할까?
+
+전체 이관 전에 고객·상품·주문처럼 관계가 분명한 작은 데이터 묶음을 선택합니다. 원본 ID, tenant, 통화와 시간대, 상태 코드가 새 schema에서 같은 의미를 갖는지 확인하고, 합계와 record 수를 양쪽에서 대조합니다. 화면에 보이는 몇 건이 맞는 것만으로 외래키와 audit history까지 보존됐다고 볼 수 없습니다.
+
+이관 중 잘못된 record를 발견했을 때 어느 단계까지 되돌릴지도 정합니다. migration script를 다시 실행해 중복이 생기지 않는지, 실패한 batch만 재시도할 수 있는지, 새 시스템에서 작성된 데이터와 옮겨온 데이터를 구분할 수 있는지 시험합니다. 회계·재고처럼 순서가 중요한 데이터는 서비스 중단과 동시 쓰기 처리도 계획해야 합니다.
+
+검색 인덱스와 cache는 원본 database 이관 뒤 별도로 재구성될 수 있습니다. tenant A의 record가 tenant B의 검색에 잠깐 노출되거나 오래된 권한이 cache에 남지 않는지 확인합니다. 데이터베이스 행 격리 시험만으로 Meilisearch, export, background job의 경계를 대신할 수 없습니다.
+
+## Eject한 모듈의 업그레이드 비용은 어떻게 계산할까?
+
+PoC에서 실제 핵심 모듈 하나를 eject하고 작은 업무 규칙을 추가한 뒤 upstream release를 적용해 봅니다. schema migration, API 변경, 보안 수정이 local copy에 자동으로 들어오는지와 충돌 해결 시간을 기록합니다. 자유롭게 수정할 수 있다는 장점은 이후 차이를 팀이 계속 관리한다는 책임과 함께 평가해야 합니다.
+
+overlay로 해결할 수 있는 변경과 source 수정이 필요한 변경을 구분하면 장기 비용을 줄일 수 있습니다. 단순 화면 배치 때문에 eject한다면 다음 release마다 불필요한 병합 부담을 만들 수 있습니다. 반대로 핵심 transaction 의미가 다르면 억지 overlay가 더 복잡해질 수 있으므로 변경 지점을 코드와 데이터 관점에서 결정해야 합니다.
+
+업그레이드 시험에는 기존 사용자 권한, Custom Entity, audit history, API client를 포함합니다. 새 버전에서 CRUD 화면이 열려도 과거 역할과 외부 연동이 조용히 달라질 수 있습니다. 유지보수 가능한 ERP인지 판단하려면 첫 개발 속도뿐 아니라 한 번의 실제 upgrade와 rollback을 끝까지 수행해 봐야 합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AI 에이전트가 DB·Auth를 직접 만들게 해도 될까? InsForge 권한 경계]({% post_url 2026-05-06-The-End-of-Backends-for-Humans-The-Chilling-Paradigm-Shift-by-InsForge-the-Agent-Native-Backend %}) — PostgreSQL·PostgREST·Deno 백엔드를 MCP로 노출하는 InsForge의 구조, 공식 벤치마크와 RLS·블랙박스·락인 위험을 점검합니다.
+- [DeepSeek-TUI 16K Star·V4 주장은 확인됐나: 저장소 정체와 Shell 권한 감사]({% post_url 2026-05-11-Deep-Dive-into-DeepSeek-TUI-You-Can-Delete-Claude-Code-Now--The-Shocking-Impact-of-the-16K-Star-Open-Source-Terminal-Agent %}) — DeepSeek-TUI 글에 섞인 official repository·16K star·V4·1M context 주장의 출처를 분리하고, dispatcher·TUI·MCP·shell 권한을 검증하는 방법을 정리합니다.
+- [A2A(Agent2Agent) 프로토콜: 서로 다른 AI 에이전트가 대화하고 협력하는 표준 규격]({% post_url 2026-07-21-A2A-Agent2Agent-Protocol-The-Standard-for-AI-Agent-Interoperability %}) — 구글이 시작하고 리눅스 재단이 주도하는 A2A 프로토콜은 독립된 인공지능 에이전트 간의 통신과 상호운용성을 위한 오픈 표준입니다. 특정 프레임워크나 플랫폼에 얽매이지 않고 에이전트들이 서로의 능력을 탐색하고 안전하게 작업을 위임하는…
+<!-- internal-links:end -->

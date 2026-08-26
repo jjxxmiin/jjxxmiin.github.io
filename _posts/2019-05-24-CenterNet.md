@@ -2,19 +2,26 @@
 layout: post
 title:  "CenterNet은 Anchor와 NMS 없이 어떻게 물체를 찾을까: 중심점·크기·Offset 해설"
 summary: "CenterNet이 object를 bounding box 후보가 아닌 중심점 하나로 표현하는 방식을 설명합니다. Heatmap peak, box 크기, stride offset의 C+4 출력과 focal·L1 loss를 연결하고 backbone별 속도·정확도와 중심점 충돌, multi-scale NMS 예외를 짚습니다."
+description: "CenterNet이 anchor 없이 중심 heatmap·크기·offset으로 box를 만드는 과정과 loss 역할, 중심 충돌·multi-scale 후처리·backbone 선택 기준을 설명합니다."
 image:
   path: /assets/img/thumb/CenterNet.jpg
   alt: CenterNet 톺아보기 대표 이미지
 date:   2019-05-19 13:00 -0400
 categories: Paper
 tags:
-  - 논문리뷰
   - 컴퓨터비전
-  - 아키텍처분석
+  - 경량화
+faq:
+  - question: "CenterNet은 정말 NMS가 전혀 필요 없나요?"
+    answer: "단일 scale의 중심 peak를 뽑는 기본 흐름에서는 일반적인 box NMS 의존을 줄입니다. 다만 multi-scale 결과를 합치는 설정처럼 별도 중복 제거가 필요한 예외는 구분해야 합니다."
+  - question: "CenterNet의 C+4 출력은 무엇을 뜻하나요?"
+    answer: "C개 class의 중심 heatmap, 두 값의 폭·높이, 두 값의 stride offset을 뜻합니다. 중심 위치에서 size와 offset을 읽어 원본 좌표의 bounding box로 복원합니다."
+  - question: "CenterNet이 밀집된 작은 물체에서 실패하는 이유는 무엇인가요?"
+    answer: "서로 다른 물체의 중심이 낮은 해상도 feature map의 같은 위치에 겹치면 하나의 peak로 표현하기 어렵습니다. Backbone과 출력 stride, 입력 해상도를 장면과 함께 봐야 합니다."
 math: true
 ---
 
-CenterNet은 수많은 anchor box를 분류하는 대신 물체의 중심 heatmap peak 하나를 찾고 그 위치에서 폭·높이와 offset을 회귀해 bounding box를 만듭니다.
+CenterNet은 수많은 anchor box를 분류하는 대신 물체의 중심 heatmap peak 하나를 찾고 그 위치에서 폭·높이와 offset을 회귀해 bounding box를 만듭니다. Anchor 설계와 일반적인 box NMS 의존은 줄지만, 중심이 같은 출력 위치에 겹치는 밀집 장면과 낮은 해상도에서의 좌표 손실은 남습니다. 오류를 분석할 때는 heatmap, size, offset 세 출력을 따로 봐야 어느 단계가 box를 틀리게 했는지 알 수 있습니다.
 
 ## Box 후보 대신 중심점을 고른 이유
 
@@ -91,3 +98,33 @@ ResNet과 DLA에는 고해상도 출력을 복원하기 위한 up-convolution과
 - 2D box 외에 깊이·방향·pose 출력이 필요한가
 
 논문과 구현은 [CenterNet GitHub](https://github.com/xingyizhou/CenterNet)에서 이어서 볼 수 있습니다. 중심 heatmap, offset, size 세 출력을 각각 시각화하면 최종 box가 틀렸을 때 중심 검출과 크기 회귀 중 어느 단계가 문제인지 분리하기 쉽습니다.
+
+## 최종 Box가 틀렸을 때 무엇부터 봐야 하나
+
+물체가 아예 나오지 않으면 먼저 해당 class heatmap의 peak가 생겼는지 확인합니다. Peak가 약하다면 크기 회귀를 고치기 전에 중심 검출과 class 불균형을 봐야 합니다. 반대로 중심은 정확한데 box가 지나치게 크거나 작다면 size head와 그 L1 학습 대상을 살펴봅니다.
+
+중심이 일정하게 몇 pixel씩 밀린다면 출력 stride로 인한 양자화와 offset을 확인합니다. Feature map 좌표를 원본 이미지로 되돌리는 과정에서 stride를 두 번 곱하거나 resize 비율을 누락해도 같은 증상이 납니다. 입력 전처리와 후처리의 좌표계를 종이에 적어 보면 네트워크 오류와 복원 오류를 분리할 수 있습니다.
+
+모델 선택에서는 backbone 숫자만 비교하지 않습니다. 빠른 backbone이 필요한 지연을 충족하는지, 작은 물체의 중심이 출력 map에서 충분히 분리되는지, 2D box 외의 pose·depth 출력을 실제로 쓰는지를 봅니다. Multi-scale 추론을 쓴다면 추가 계산과 결과 병합 규칙까지 포함해 단일 scale과 비교해야 합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [CornerNet은 Anchor 없이 박스를 어떻게 묶나: Heatmap·Embedding·Offset]({% post_url 2019-10-22-cornernet %}) — CornerNet이 왼쪽 위·오른쪽 아래 corner heatmap, embedding, offset을 예측하고 같은 class의 두 점을 하나의 bounding box로 묶는 과정을 설명합니다.
+- [Darknet NMS는 Class별로 해야 할까? do\_nms\_obj와 do\_nms\_sort 차이]({% post_url 2022-02-09-DarkNetBox %}) — Darknet box.c의 objectness 기준 NMS와 class별 NMS를 비교하고, IoU 계산·stride box 변환·encode/decode·비활성 diou 미분 코드의 주의점을 코드 흐름으로 설명합니다.
+- [사람을 한 명씩 찾지 않고 군중을 세는 법: MCNN과 Density Map]({% post_url 2019-03-07-MCNN %}) — 밀집된 군중에서 사람별 bounding box 검출이 흔들리는 이유와 MCNN이 서로 다른 필터 크기의 세 CNN으로 머리 스케일 변화를 다루는 방식을 설명합니다. Density map 라벨 생성, 학습 전략, 전이학습 시 주의점까지…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### CenterNet은 정말 NMS가 전혀 필요 없나요?
+
+단일 scale의 중심 peak를 뽑는 기본 흐름에서는 일반적인 box NMS 의존을 줄입니다. 다만 multi-scale 결과를 합치는 설정처럼 별도 중복 제거가 필요한 예외는 구분해야 합니다.
+
+### CenterNet의 C+4 출력은 무엇을 뜻하나요?
+
+C개 class의 중심 heatmap, 두 값의 폭·높이, 두 값의 stride offset을 뜻합니다. 중심 위치에서 size와 offset을 읽어 원본 좌표의 bounding box로 복원합니다.
+
+### CenterNet이 밀집된 작은 물체에서 실패하는 이유는 무엇인가요?
+
+서로 다른 물체의 중심이 낮은 해상도 feature map의 같은 위치에 겹치면 하나의 peak로 표현하기 어렵습니다. Backbone과 출력 stride, 입력 해상도를 장면과 함께 봐야 합니다.

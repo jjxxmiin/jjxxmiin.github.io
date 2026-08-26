@@ -4,20 +4,19 @@ title: 'TencentDB-Agent-Memory: AI 코딩 에이전트가 맥락 폭발을 막�
 date: '2026-07-15 04:49:14'
 categories: Tech
 tags:
+  - AI메모리
   - AI코딩
   - RAG
+  - 웹개발
   - 컨텍스트윈도우
-  - 벡터DB
-  - 프롬프트엔지니어링
 summary: 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억
   시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로 빼내고 컨텍스트에는 심볼릭 그래프만 남깁니다.
   OpenClaw 플러그인으로 구동되며 최대 61%의 토큰 절감 효과와 작업 성공률 향상을 동시에 달성했습니다.
-author: AI Trend Bot
+description: 'TencentDB-Agent-Memory의 단기 오프로딩과 L0~L3 장기 기억 구조를 살피고, 토큰 절감·검색 누락·기억 오염·삭제 기준을 설명합니다.'
 github_url: https://github.com/TencentCloud/TencentDB-Agent-Memory
 image:
   path: https://opengraph.githubassets.com/1/TencentCloud/TencentDB-Agent-Memory
-  alt: 'TencentDB-Agent-Memory: How AI Coding Agents Prevent Context Bloat and Build
-    Real Memory'
+  alt: "TencentCloud/TencentDB-Agent-Memory GitHub 저장소 대표 이미지"
 project:
   stars: 8916
   forks: 817
@@ -40,28 +39,11 @@ project:
   files: 171
 mermaid: true
 chart: true
-faq:
-- question: 토큰을 실제로 얼마나 절감할 수 있나요?
-  answer: 공식 벤치마크에 따르면 웹 검색이 빈번한 WideSearch 환경에서 최대 61.38%의 토큰을 절감했습니다. SWE-bench
-    같은 소프트웨어 엔지니어링 작업에서도 약 33%의 절감 효과를 보였습니다. 이는 불필요한 원시 로그를 컨텍스트 창에 넣지 않고 파일로 오프로딩하는
-    아키텍처 덕분입니다.
-- question: 기존 RAG(검색 증강 생성) 방식의 평면적 벡터 저장소와 무엇이 다른가요?
-  answer: 기존 RAG는 모든 대화와 문서를 파편화하여 한 공간에 넣고 유사도 검색만 수행하므로 맥락이 단절됩니다. 반면 이 시스템은 대화(L0),
-    사실(L1), 상황(L2), 페르소나(L3)로 기억을 계층화합니다. 즉, 사용자의 상위 성향(L3)을 우선 적용하고 필요할 때만 하위 계층의
-    세부 증거를 찾아보는 사람의 인지 과정을 모방합니다.
-- question: OpenClaw 외부의 에디터나 프레임워크에서도 쓸 수 있나요?
-  answer: 현재는 기본적으로 OpenClaw 환경에 최적화된 플러그인(@tencentdb-agent-memory/memory-tencentdb)
-    형태로 동작하며, 추가로 Hermes 에이전트를 지원하는 Gateway 어댑터를 제공합니다. 범용 클라우드 API 형태가 아니므로 그 외의
-    독자적인 프레임워크에 적용하려면 소스코드를 참고해 어댑터를 별도로 개발해야 합니다.
-- question: 데이터를 저장하기 위해 클라우드 데이터베이스 서비스가 필수적인가요?
-  answer: 전혀 그렇지 않습니다. 이 시스템은 철저하게 '완전 로컬'을 지향합니다. 외부 API 종속성 없이 내부적으로 로컬 SQLite 데이터베이스와
-    벡터 검색을 위한 sqlite-vec 확장 모듈을 기본 백엔드로 사용하여 보안이 중요한 환경에서도 안전하게 구동됩니다.
-- question: 백그라운드에서 정보를 정제할 때 사용하는 모델을 따로 지정할 수 있나요?
-  answer: 네, 가능합니다. ~/.openclaw/openclaw.json 설정 파일 내에 embedding 속성을 구성하여 API 키, 사용할
-    모델명, 차원 수 등을 자유롭게 정의할 수 있습니다. OpenAI와 호환되는 로컬 및 원격 엔드포인트를 모두 지원합니다.
 ---
 
-## 참고 링크 모음
+TencentDB-Agent-Memory는 긴 도구 로그를 문맥 밖으로 옮기고 대화에서 페르소나까지 정보를 단계별로 압축해 다시 찾는 기억 구조를 제안합니다. 토큰이 줄어도 잘못된 요약이나 폐기된 결정이 장기 기억에 남으면 이후 작업을 반복해서 오염시킬 수 있습니다. 원문 추적, 갱신·삭제, 시간 정보, 검색 누락을 같은 장기 과제에서 확인해야 합니다.
+
+## 어떤 정보를 기억하고 무엇을 버려야 하나
 
 - [TencentDB-Agent-Memory 공식 GitHub 저장소](https://github.com/TencentCloud/TencentDB-Agent-Memory)
 - [Tencent Cloud OpenClaw 커뮤니티 가이드](https://cloud.tencent.com/)
@@ -328,6 +310,19 @@ TencentDB-Agent-Memory 팀의 철학은 AI 에이전트가 나아가야 할 정�
 
 복잡한 장기 태스크를 수행하다가 맥락의 늪에 빠져 허우적대는 에이전트에게 지쳤다면, 컨텍스트 오프로딩과 4단계 기억 피라미드를 제공하는 완전 로컬 솔루션, TencentDB-Agent-Memory를 여러분의 에이전트 파이프라인에 적용해 볼 시점입니다.
 
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/TencentCloud/TencentDB-Agent-Memory)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [headroom: AI 코딩 에이전트의 컨텍스트 한계를 넘는 압축 기술]({% post_url 2026-07-07-Headroom-Context-Compression-Layer-for-AI-Agents %}) — Headroom은 대형 언어 모델(LLM)에 전달되는 방대한 도구 출력과 로그, RAG 결과물을 최대 95%까지 압축하여 토큰 비용을 줄이고 답변 정확도를 유지하는 오픈소스 기반의 컨텍스트 압축 레이어입니다.
+- [code-review-graph 심층 분석: AI 코딩 에이전트가 코드를 정확히 기억하는 원리]({% post_url 2026-07-17-Deep-Dive-into-code-review-graph-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의 내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
+- [code-graph-rag: AI 코딩 에이전트가 대규모 코드베이스의 구조와 맥락을 잃지 않는 방법]({% post_url 2026-07-24-code-graph-rag-How-AI-Coding-Agents-Keep-Structure-and-Context-in-Large-Codebases %}) — vitali87의 Code Graph RAG는 다국어 코드베이스를 Tree-sitter로 파싱하여 Memgraph 지식 그래프로 구축하는 획기적인 도구입니다. 텍스트 의미 기반의 벡터 검색이 가진 한계를 극복하고 상속, 호출, 데이터…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

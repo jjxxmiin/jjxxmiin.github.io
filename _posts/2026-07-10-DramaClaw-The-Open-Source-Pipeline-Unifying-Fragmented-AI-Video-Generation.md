@@ -4,20 +4,20 @@ title: 'DramaClaw: 파편화된 AI 영상 제작을 하나로 통합하는 오�
 date: '2026-07-10 21:16:34'
 categories: Tech
 tags:
+  - 오픈소스
   - 영상생성
   - 이미지생성
-  - 로보틱스
-  - 온디바이스AI
-  - 오픈소스
+  - 인프라
+  - LLM
 summary: DramaClaw는 텍스트 대본 입력부터 캐릭터 추출, 스토리보드, 더빙, 최종 영상 합성까지 AI 영상 제작의 전 과정을 자동화하는
   오픈소스 비디오 엔진입니다. 노드 기반 무한 캔버스와 DAG 병렬 처리 스케줄링을 통해 단방향 생성의 한계를 극복하고 캐릭터 일관성 유지와 압도적인
   제작 속도를 제공합니다. 텍스트, 이미지, 비디오, 음성 생성 등 흩어진 AI 모델들을 하나의 게이트웨이로 통합하여 개인 서버 환경에서도 완벽한
   영상 제작 파이프라인을 구축할 수 있습니다.
-author: AI Trend Bot
+description: 'DramaClaw가 대본·스토리보드·영상·음성·합성을 DAG로 연결하는 구조와 캐릭터 일관성, 노드 재시도 비용·생성 모델의 권리·단계별 검수 지점을 정리합니다.'
 github_url: https://github.com/dramaclaw/dramaclaw
 image:
   path: https://opengraph.githubassets.com/1/dramaclaw/dramaclaw
-  alt: 'DramaClaw: The Open-Source Pipeline Unifying Fragmented AI Video Generation'
+  alt: "dramaclaw/dramaclaw GitHub 저장소 대표 이미지"
 project:
   stars: 1028
   forks: 115
@@ -41,30 +41,11 @@ project:
   files: 1756
 mermaid: true
 chart: true
-faq:
-- question: DramaClaw는 무료로 사용할 수 있나요?
-  answer: 네, DramaClaw는 Elastic 2.0 라이선스 하에 배포되어 개인적인 용도나 기업의 자체 인프라 내 구축용으로는 완전히
-    무료로 사용할 수 있고 코드 수정도 자유롭습니다. 단, DramaClaw 시스템 자체를 그대로 호스팅하여 제3자에게 유료 서비스(SaaS)로
-    재판매하는 행위만 제한됩니다.
-- question: 게이트웨이를 거치지 않고 내 PC의 로컬 GPU로만 완전히 구동할 수 있나요?
-  answer: '가능합니다. 기본 추천 설정은 RelayClaw나 외부 모델 API를 쓰는 것이지만, 자체적으로 오픈소스 모델(예: SDXL,
-    로컬 LLM)을 구동하고 이를 OpenAI 호환 규격(newAPI 등)으로 매핑하여 환경 설정(.env)에 로컬 주소를 입력하면 외부 인터넷
-    연결 없이 100% 로컬 오프라인 환경에서 돌릴 수 있습니다.'
-- question: 기존 ComfyUI와 노드 시스템이 어떻게 다른가요?
-  answer: ComfyUI는 샘플러(Sampler), 모델 체크포인트, 텐서 연산 같은 '수학적이고 기술적인 단위'로 노드를 연결합니다. 반면
-    DramaClaw의 노드 캔버스는 씬(Scene), 비트(Beat), 샷(Shot), 캐릭터(Character) 등 철저하게 '영화 연출과
-    서사 단위'로 구성되어 있어 영상 기획자와 디렉터가 직관적으로 다루기 좋습니다.
-- question: 전체 영상을 다시 뽑지 않고 중간의 어색한 장면만 수정할 수 있나요?
-  answer: 그렇습니다. 파이프라인의 각 과정이 독립된 상태(State)로 저장되기 때문에, 문제가 발생한 특정 샷 노드만 일시정지하거나 캔버스로
-    빼내어 재작업(Branching)할 수 있습니다. 수정을 완료한 후 해당 노드만 전체 파이프라인에 다시 병합(Merge)하면 되므로 렌더링
-    시간과 API 비용을 크게 절약합니다.
-- question: Kling 3.0이나 Sora 같은 최신 비디오 모델이 나오면 바로 적용 가능한가요?
-  answer: 네, 매우 쉽게 적용할 수 있습니다. 특정 벤더에 종속된 코드를 쓰지 않고 중간에 통합 모델 게이트웨이를 두고 통신하기 때문에,
-    게이트웨이 백엔드에 새로운 모델 API 연동만 추가해주면 DramaClaw 코어 코드를 수정할 필요 없이 캔버스 인터페이스 상에서 즉시 최신
-    모델을 선택해 사용할 수 있습니다.
 ---
 
-## 상단 링크 블록
+DramaClaw는 대본, 이미지, 영상, 음성, 합성을 노드와 DAG로 연결해 생성 작업의 순서와 재실행 범위를 관리하려는 파이프라인입니다. 여러 모델을 한 화면에서 호출한다고 캐릭터·입 모양·권리가 자동으로 일관되는 것은 아닙니다. 각 단계의 입력·모델 버전·비용을 남기고 실패한 노드만 재실행할 수 있는지 대표 프로젝트로 확인하세요.
+
+## 파편화된 영상 제작에서 무엇을 먼저 통합할까
 
 - [DramaClaw GitHub 저장소](https://github.com/dramaclaw/dramaclaw)
 - [공식 문서 및 가이드](https://github.com/dramaclaw/dramaclaw/tree/main/docs)
@@ -385,6 +366,20 @@ GitHub의 리드미(README) 문서 첫머리에 적힌 문구가 매우 인상�
 AI 모델의 성능이 아무리 뛰어나도, 이를 연결하는 파이프라인이 거대 플랫폼 기업의 폐쇄적인 생태계에 종속되어 있다면 창작자의 자유는 결국 제한될 수밖에 없습니다. 
 
 DramaClaw는 단순히 영상을 편하게 만들어주는 도구 이상의 의미를 지닙니다. 대본 분석부터 렌더링까지 이어지는 전체 워크플로우에 대한 통제권을 창작자 개인과 작은 스튜디오들의 손에 쥐여주는 인프라입니다. 파편화된 AI 도구들 사이에서 복사 및 붙여넣기에 지쳤다면, 지금 당장 빈 서버를 열고 DramaClaw를 띄워 자신만의 영상 공장을 가동해 보시길 권합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/dramaclaw/dramaclaw)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AI 영상의 소리와 장면이 어긋난다면? JavisDiT++의 시간 정렬]({% post_url 2026-02-26-JavisDiT----Unified-Modeling-and-Optimization-for-Joint-Audio-Video-Generation %}) — JavisDiT++가 공유 attention과 모달리티별 FFN, TA-RoPE, AV-DPO로 영상과 오디오를 함께 생성하는 원리와 100만 데이터 결과의 범위를 짚습니다.
+- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성·평가·비용의 한계를 짚습니다.
+- [MILS 톺아보기]({% post_url 2025-02-13-MILS %}) — 추론만으로 멀티모달 작업을 수행하는 새로운 패러다임
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

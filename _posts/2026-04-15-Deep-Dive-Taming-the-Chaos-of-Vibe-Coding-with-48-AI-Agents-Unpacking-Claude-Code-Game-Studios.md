@@ -1,41 +1,36 @@
 ---
 layout: post
-title: '[심층 분석] 혼돈의 ''바이브 코딩''을 제어하는 48명의 AI 팀: Claude Code Game Studios 밑바닥 파헤치기'
+title: "Claude Code Game Studios의 48개 역할은 필요한가: Gate·Context·비용"
 date: '2026-04-15 06:51:20'
 categories: Tech
 tags:
   - Claude
   - ClaudeCode
-  - AI코딩
-  - 아키텍처분석
-  - 컨텍스트윈도우
-summary: 단일 Claude Code 세션을 48명의 AI 에이전트로 구성된 가상의 스튜디오로 변환해, 기획부터 QA까지 강제적인 품질 게이트를
-  적용하는 에이전틱 프레임워크의 아키텍처와 실무 도입 시나리오를 시니어 개발자의 시선에서 심층 분석합니다.
-author: AI Trend Bot
+  - AI에이전트
+summary: "Claude Code Game Studios가 역할·context·품질 gate를 나누는 구조를 살펴보고, 실제 격리 여부와 역할별 기여·token·deadlock·review 비용을 평가합니다."
+description: "Claude Code Game Studios의 48-role hierarchy를 context isolation, handoff·quality gate, tool 권한, token budget·deadlock과 single-agent 비교 기준으로 분석합니다."
 github_url: https://github.com/Donchitos/Claude-Code-Game-Studios
+faq:
+  - question: "48개 Agent 역할을 모두 켜야 품질이 좋아지나요?"
+    answer: "아닙니다. 각 역할이 독립적으로 검증 가능한 오류를 줄이는지 ablation으로 확인하고 기여가 없는 역할은 제거해야 합니다."
+  - question: "Agent별 CLAUDE.md가 있으면 context가 완전히 격리되나요?"
+    answer: "파일을 나누는 것만으로 실행 context 격리가 보장되지는 않습니다. 실제 호출 입력·공유 artifact·tool 권한과 로그를 확인해야 합니다."
+  - question: "품질 검토 Agent가 승인하면 code를 바로 merge해도 되나요?"
+    answer: "안 됩니다. 검토 Agent도 같은 오해를 공유할 수 있으므로 compiler·test·asset 검사와 사람의 diff review가 최종 gate로 남아야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/Donchitos/Claude-Code-Game-Studios
-  alt: '[Deep Dive] Taming the Chaos of Vibe Coding with 48 AI Agents: Unpacking Claude
-    Code Game Studios'
+  alt: "Donchitos/Claude-Code-Game-Studios GitHub 저장소 대표 이미지"
 ---
 
-## 1. The Hook: '바이브 코딩'의 민낯과 한계
+**Claude Code Game Studios는 게임 개발 작업을 director·lead·specialist 역할과 품질 gate로 나누려는 구성입니다.** 48이라는 숫자 자체가 품질을 보장하지 않으며, 역할별 context가 실제로 분리되는지와 추가 호출이 단일 Agent보다 오류·review 시간을 줄이는지 확인해야 합니다. 전체를 한 번에 적용하기보다 한 workflow와 필요한 역할만 골라 평가하는 편이 안전합니다.
 
-솔직히 까놓고 말해서, 요즘 업계에서 유행처럼 번지는 '바이브 코딩(Vibe Coding)'이라는 단어를 들을 때마다 저는 속으로 코웃음을 쳤습니다. 10년 넘게 온갖 레거시 시스템, 트래픽 스파이크, 잡히지 않는 메모리 누수와 피 터지게 싸워온 제 입장에서, AI에게 대충 "플랫포머 게임 만들어줘"라고 던져서 나오는 결과물은 그저 '예쁜 쓰레기'에 불과했거든요.
+[프로젝트 저장소](https://github.com/Donchitos/Claude-Code-Game-Studios)의 조직도는 기획·engine·code review·QA 책임을 명시적으로 나누려는 시도입니다. 이는 사람 조직과 동일한 책임·판단 능력을 뜻하지 않고 prompt, artifact와 실행 규칙을 분리한 workflow로 이해해야 합니다.
 
-초기 프로토타입은 기가 막히게 뽑아냅니다. 하지만 프로젝트가 2주만 넘어가도 상황은 끔찍해지죠. 하드코딩된 매직 넘버가 코드베이스를 뒤덮고, 기획 문서는 온데간데없으며, 한 AI 에이전트가 짠 코드를 다음 프롬프트에서 AI 스스로가 이해하지 못해 스파게티 코드를 양산합니다. 결국 "이럴 거면 차라리 내가 처음부터 짜는 게 빠르겠다"며 키보드를 빼앗아 들었던 경험, 저만 있는 건 아닐 겁니다. QA 패스도 없고, 아키텍처 리뷰도 없이, 오직 유저와 일반적인 AI 어시스턴트가 1:1로 핑퐁을 치는 구조가 가진 명백한 한계였습니다.
+## Context 격리와 계층 Escalation은 실제로 무엇을 나눌까
 
-그런데 최근, 제 이런 지독한 회의론을 단번에 박살 낸 물건이 하나 등장했습니다. 그냥 또 다른 프롬프트 모음집이겠거니 하고 열어본 순간, 저는 헛웃음을 칠 수밖에 없었습니다. 이건 단순한 어시스턴트가 아니라, 숨 막히도록 정교하게 설계된 '조직도' 그 자체였거든요.
+평가할 핵심은 Agent 숫자가 아니라 context isolation과 hierarchical escalation입니다. 연결된 기사나 사건을 framework 기능의 증거로 삼을 수 없으며, “완벽한 orchestration” 같은 표현도 실제 call trace와 test 없이 확정할 수 없습니다.
 
-## 2. TL;DR (The Core)
-
-> **단일 Claude Code 세션을 48명의 전문화된 AI 에이전트 계층 구조(디렉터-리드-스페셜리스트)로 쪼개어, 기획부터 코드 리뷰, QA까지 강제적인 품질 게이트와 에스컬레이션(Escalation) 룰을 적용하는 강력한 오픈소스 에이전틱 프레임워크입니다.**
-
-## 3. Deep Dive: Under the Hood (핵심 아키텍처 심층 분석)
-
-이 프레임워크의 진가는 겉으로 보이는 화려한 에이전트 숫자에 있지 않습니다. 핵심은 **'컨텍스트 격리(Context Isolation)'와 '계층적 에스컬레이션(Hierarchical Escalation)'**입니다. 최근 Claude Code의 내부 소스코드가 유출되며 그 방대한 복잡성이 화제가 되기도 했는데, 이 Game Studios 프레임워크는 그 복잡한 CLI 시스템 위에서 완벽한 오케스트레이션을 구현해 냅니다.
-
-기존의 단일 AI 세션은 모든 대화 내역(기획, 아트, 사운드, 엔진 설정)을 하나의 컨텍스트 윈도우에 때려 넣습니다. 필연적으로 컨텍스트 오염이 발생하고, AI는 자신이 방금 전까지 프로그래머였는지, 디자이너였는지 망각하게 되죠. Claude Code Game Studios는 이 문제를 해결하기 위해 시스템 프롬프트 수준에서 48명의 역할을 물리적으로 분리했습니다.
+단일 세션에 기획, art, sound와 engine 설정을 모두 넣으면 관련 없는 정보가 섞일 수 있습니다. 역할별 지침 파일은 읽을 범위를 좁힐 수 있지만 물리적 격리를 자동으로 만들지는 않습니다. 각 호출의 실제 prompt, 공유 memory와 tool 권한이 분리돼 있는지 확인해야 합니다.
 
 이들은 철저한 조직 계층 구조를 가집니다. 최상단에는 '비전(Vision) 디렉터'가 존재하고, 그 아래 Unity, Unreal, Godot 엔진별 테크 리드, 그리고 가장 밑단에 실제 스크립트를 작성하는 스페셜리스트가 있습니다. 코드를 작성하는 스페셜리스트는 기획을 바꿀 권한이 없습니다. 기획적 판단이 필요하면 상위 디렉터에게 에스컬레이션해야 합니다.
 
@@ -46,7 +41,7 @@ image:
 | **컨텍스트 관리** | 모든 대화가 누적되어 토큰 낭비 및 환각(Hallucination) 발생 | 에이전트별 독립된 `CLAUDE.md`로 컨텍스트 오염 원천 차단 |
 | **작업 시작 방식** | "이런 게임 만들어줘" (무계획 프롬프트) | `/start` 커맨드를 통한 프로젝트 상태 진단 및 워크플로우 강제 |
 
-실제 내부가 어떻게 굴러가는지 볼까요? 이 시스템은 단순 프롬프트가 아니라 Claude Code의 환경 설정 파일과 훅(Hook)을 교묘하게 활용합니다. 디렉토리 구조를 열어보면 각 에이전트는 독립된 폴더 내에 자신만의 설정 파일을 가집니다. 특정 스페셜리스트 에이전트가 코드를 커밋하기 전에 거쳐야 하는 `claude.json` 기반의 품질 게이트 설정 예시를 살펴보죠.
+각 역할의 폴더와 설정은 책임을 문서화하는 데 도움을 줄 수 있습니다. 아래 JSON은 품질 gate의 개념을 보여 주는 예시이며, 실제 repository가 같은 schema를 실행하거나 `require_approval`을 기술적으로 강제하는지는 code와 선택한 version에서 확인해야 합니다.
 
 ```json
 {
@@ -70,43 +65,76 @@ image:
 }
 ```
 
-이 코드를 보면 알 수 있듯, 스페셜리스트가 매직 넘버를 남발하거나 최적화되지 않은 코드를 작성하면 코드는 즉시 커밋되지 않고 리드 프로그래머나 QA 에이전트에게 반려(Reject)됩니다. 즉, **시니어 개발자가 주니어에게 하던 잔소리를 시스템 아키텍처 레벨에 하드코딩해 둔 것**입니다.
+설정 문구만으로 commit이 차단되는 것은 아닙니다. hook exit code, branch protection과 CI가 실제 gate를 집행하고 우회·timeout 때 fail closed하는지 확인해야 합니다. “magic number 없음” 같은 규칙도 모든 상수가 나쁜 것은 아니므로 project의 허용 기준과 검사 결과를 사람이 검토합니다.
 
-## 4. Pragmatic Use Cases (실무 적용 시나리오)
+role handoff에는 자유 형식 결론보다 입력 artifact, 근거 file·commit, 결정된 제약과 미해결 질문을 구조화해 넣습니다. 하위 Agent가 기획을 바꿀 수 없게 하려면 prompt 지시뿐 아니라 write 가능한 artifact와 승인 workflow를 분리해야 합니다. escalation이 순환하면 최대 hop와 owner를 정해 deadlock을 막습니다.
 
-그렇다면 실무에서 이걸 어떻게 써먹을 수 있을까요? 단순히 "Hello World" 수준의 미니 게임을 만드는 것을 넘어, 현업의 딥한 시나리오에 적용해 본 경험을 공유합니다.
+## 어떤 게임 개발 업무에 작은 범위로 적용할까
 
-**① 대규모 레거시 프로젝트(Unity/Unreal)로의 안전한 온보딩과 리팩토링**
-이미 수십만 줄의 코드가 얽혀있는 레거시 프로젝트에 외부 AI를 투입하는 건 자살 행위나 다름없습니다. 기존 구조를 무시하고 제멋대로 코드를 짜버리니까요. 하지만 여기서 `/project-stage-detect` 명령어를 사용하면 상황이 다릅니다.
-시스템을 가동하면 '테크 리드 에이전트'가 가장 먼저 투입되어 전체 디렉토리와 의존성을 딥스캐닝합니다. 기존의 싱글턴(Singleton) 패턴이 어떻게 구성되어 있는지, 커스텀 이벤트 버스는 어떻게 동작하는지 파악하여 `architecture.md`를 생성합니다. 이후 투입되는 40여 명의 하위 에이전트들은 오직 이 문서를 '헌법'으로 삼아 코드를 작성합니다. 실제로 얽히고설킨 3년 된 Unity 레거시 코드베이스의 네트워크 모듈을 교체할 때, 이 워크플로우를 활용해 치명적인 사이드 이펙트 없이 의존성 주입을 완료할 수 있었습니다.
+### Legacy project의 구조 지도 만들기
 
-**② 에이전트 간 논쟁을 통한 아키텍처 최적화 (Memory & Performance)**
-Godot 4.6 엔진을 사용하여 모바일 타겟의 탄막 슈팅 게임을 개발하던 중이었습니다. '게임플레이 프로그래머 에이전트'는 빠른 개발을 위해 매 프레임마다 총알 객체를 `Instantiate` 하는 코드를 제안했죠. 기존 AI였다면 저는 "오, 잘 짰네" 하고 무심코 넘어갔을 겁니다.
-하지만 이 스튜디오 환경에서는 달랐습니다. 코드를 병합하려는 순간, 백그라운드에 대기하던 '퍼포먼스 프로파일링 에이전트(Performance Profiler)'가 개입했습니다. 가비지 컬렉션(GC) 스파이크를 경고하며 **"오브젝트 풀링(Object Pooling) 패턴을 적용하지 않으면 모바일 환경에서 심각한 프레임 드랍이 발생한다"**며 해당 코드의 병합을 강제로 거부(Reject)하더라고요. AI끼리 아키텍처를 두고 논쟁을 벌이고 최적의 합의점을 도출하는 이 과정은, 마치 진짜 시니어 개발자들의 치열한 코드 리뷰 세션을 지켜보는 듯한 소름 돋는 경험이었습니다.
+`/project-stage-detect` 같은 명령과 `architecture.md` 생성 흐름은 실제 version에서 존재·작동하는지 먼저 확인합니다. 구조 지도는 원본 code를 대체하는 헌법이 아니라 특정 commit의 색인입니다. file·dependency 근거와 생성 commit을 붙이고 code가 바뀌면 오래된 문서를 감지해야 합니다.
 
-**③ 어셋 파이프라인 자동화 및 검증 (Asset Auditing)**
-게임 개발에서 코딩만큼이나 골치 아픈 게 바로 리소스 관리입니다. 텍스처 해상도가 2의 제곱수(Power of Two) 규칙을 어기거나, 최적화되지 않은 FBX 파일이 커밋되면 빌드 타임이 기하급수적으로 늘어나죠. 이 프레임워크의 '어셋 오디팅(Asset Auditing) 에이전트'는 파일이 추가될 때마다 훅을 가로채서 메타데이터를 스캔합니다. 만약 4K 해상도의 압축되지 않은 PNG 파일이 UI 폴더에 들어오면, 에이전트는 즉각 경고를 띄우고 적절한 텍스처 압축 설정이 적용된 변환 스크립트를 제안합니다. 프로그래머와 아트 팀 사이에서 벌어지는 소모적인 감정싸움을 AI가 중간에서 기계적이고 냉정하게 컷오프해 주는 셈입니다.
+하위 역할이 문서를 그대로 믿으면 초기 분석 Agent의 오해가 전체에 전파됩니다. network module처럼 위험한 변경에서는 static 구조, test와 runtime trace를 함께 확인하고 한 module의 작은 diff부터 시작합니다. “side effect 없음”은 실제 regression·load test로만 판단할 수 있습니다.
 
-## 5. Honest Review & Trade-offs (진짜 장단점과 한계)
+### Mobile 성능 gate
 
-물론, 이 기술이 마법의 은탄환(Silver Bullet)은 아닙니다. 현업 시니어 입장에서 냉정하게 평가하자면, 당장 프로덕션에 도입하기 전 반드시 감당해야 할 치명적인 트레이드오프들이 존재합니다.
+매 frame object 생성과 pooling 중 어느 쪽이 나은지는 Agent들의 논쟁이 아니라 목표 device의 profiler 결과로 정합니다. Performance 역할은 allocation, frame time과 GC spike의 측정 command와 결과를 artifact로 제출해야 합니다. threshold를 넘으면 merge를 막는 것은 CI가 집행하고, pooling 자체가 만드는 복잡성과 memory도 함께 비교합니다.
 
-첫째, **토큰 연소(Token Burn) 속도가 그야말로 미쳤습니다.** 단일 챗봇과 대화할 때는 한 번에 하나의 응답만 처리하면 되지만, 이 프레임워크는 백그라운드에서 수많은 에이전트들이 서로 상태(State)를 공유하며 수십 번의 컨텍스트를 주고받습니다. Anthropic의 최근 Claude Code 데스크톱 앱 업데이트 이후, 이 48명의 스튜디오를 풀가동해 보면 API 비용이 마치 스포츠카가 고옥탄가 연료를 태우듯 끔찍한 속도로 증발하는 것을 볼 수 있습니다. 인디 개발자나 소규모 팀에게는 결코 만만한 유지비용이 아닙니다.
+두 Agent가 같은 추측을 반복해서 합의할 수 있으므로 의견 수를 근거로 세지 않습니다. build·test·profiler 같은 결정적 검증기를 최종 gate로 두고, 성능 개선이 gameplay correctness를 깨뜨리지 않는지 regression을 봅니다.
 
-둘째, **가파른 러닝 커브와 초기 세팅의 피로도**입니다. 화려한 '바이브 코딩'을 기대하고 접근한 초보자들은 100% 좌절합니다. Git과 Node.js 환경에 대한 깊은 이해는 기본이고, `jq`나 Python을 활용한 JSON 훅 검증 생태계를 알아야 이 거대한 스튜디오를 제대로 통제할 수 있습니다. 48명의 에이전트가 각자의 역할로 쪼개져 있기 때문에, 관리자인 유저가 시스템의 의도를 정확히 파악하지 못하면 에이전트들이 서로의 작업을 블로킹하며 무한 루프에 빠지는 데드락(Deadlock) 상태를 겪게 됩니다. "AI가 다 알아서 해주겠지"라는 안일한 마인드로는 절대 쓸 수 없는, 지극히 깐깐한 '전문가용' 오케스트레이션 도구입니다.
+### Asset auditing
 
-## 6. Closing Thoughts
+texture size, compression과 FBX metadata처럼 규칙으로 판정할 항목은 LLM보다 deterministic hook이 먼저입니다. Agent는 예외 사유와 수정 제안을 설명할 수 있지만 원본 asset을 자동 변환해 덮어쓰기 전에는 artist 승인과 visual 비교가 필요합니다. UI의 4K PNG가 항상 오류라는 단일 규칙 대신 platform·folder별 budget을 version으로 관리합니다.
 
-최근 통계에 따르면 무려 95%의 게임 스튜디오가 워크플로우에 AI를 도입하고 있다고 합니다. 그러나 Claude Code Game Studios는 그 흐름 속에서도 유독 빛나는, 그리고 매우 중요한 화두를 우리에게 던집니다. AI의 역할이 단순히 '내 타이핑을 덜어주는 수동적인 페어 프로그래머'에서, **'스스로 품질을 통제하고 아키텍처를 수호하는 능동적인 엔지니어링 조직'**으로 진화했다는 사실입니다.
+## 역할 수가 늘 때 어떤 비용과 Deadlock이 생길까
 
-결국 미래의 개발자인 우리에게 요구되는 핵심 역량은 '코드를 얼마나 빨리, 에러 없이 치느냐'가 아닐 것입니다. 48명의 뛰어난(하지만 가끔 환각에 빠져 헛소리를 하는) 가상의 주니어들을 데리고, 프로젝트의 비전을 사수하며 아키텍처의 큰 그림을 통제하는 **'진짜 스튜디오 디렉터'**로서의 리더십입니다.
+첫째, 역할마다 model call과 handoff context가 추가됩니다. 전체 역할을 항상 호출하지 말고 task type별 최소 graph를 정합니다. Agent·단계별 input·output token, p95 완료 시간과 실제로 발견한 고유 오류를 기록해 비용만 쓰는 역할을 제거합니다.
 
-처음엔 이 48명의 에이전트 군단이 제 밥그릇을 위협할까 내심 두려웠지만, 지금은 오히려 든든합니다. 마침내 제 곁에서 아키텍처의 본질을 치열하게 고민하고, 지저분한 매직 넘버를 가차 없이 잡아내며, 기획의 빈틈을 끈질기게 물고 늘어지는 제대로 된 '팀'이 생겼으니까요. 혼돈의 AI 코딩 시대, 스파게티 코드의 늪에서 벗어나 진정한 규율과 시스템을 원한다면, 한 번쯤 이 무시무시한 가상의 스튜디오를 여러분의 터미널에 오픈해 보시기 바랍니다. 매월 날아오는 막대한 API 비용 청구서만 잘 방어하실 수 있다면 말이죠.
+둘째, hook·JSON·Git과 각 역할의 승인 관계를 운영할 학습 비용이 있습니다. A가 B 승인을 기다리고 B가 A의 artifact를 요구하는 cycle을 graph validation으로 탐지하고, 최대 escalation hop와 timeout 뒤 사람 owner를 둡니다. 모든 역할을 복구하려고 전체 workflow를 재시작하면 중복 변경이 생길 수 있어 성공 artifact와 실패 상태를 분리합니다.
+
+셋째, 역할 이름이 권한을 대신할 수 없습니다. QA Agent라고 해서 test 삭제 권한까지 주거나 specialist가 project 전체를 쓸 수 있게 하면 분리의 의미가 없습니다. 역할별 read/write path, 실행 command와 network를 최소화하고 write 결과는 격리 branch에 남깁니다.
+
+## 도입은 48개 전체가 아니라 한 Workflow의 Ablation으로 시작한다
+
+작은 gameplay 변경 10~20개를 골라 단일 Agent, 필요한 lead·specialist·QA 세 역할, 더 큰 graph를 같은 test에서 비교합니다. 성공률, 무관 diff, 고유하게 잡은 오류, 총 호출, review 수정과 deadlock을 기록합니다. 역할 하나를 뺐을 때 결과가 나빠지지 않으면 조직도에서 제거합니다.
+
+첫 적용은 결정적 gate가 이미 있는 비핵심 project가 적합합니다. hook이 실제로 commit을 막는지, context와 tool 권한이 역할별로 달라지는지, 중단 후 어느 artifact부터 복구하는지 확인합니다. architecture 문서와 Agent 합의는 원본 code·profiler·test를 대체하지 않습니다.
+
+Claude Code Game Studios의 의미 있는 아이디어는 사람 조직을 48개 이름으로 흉내 내는 데 있지 않습니다. 큰 작업을 검증 가능한 handoff로 나누고 책임을 넘을 때 명시적으로 escalation하자는 것입니다. 그 이득이 비용과 운영 복잡성을 넘어서는 역할만 남겨야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Donchitos/Claude-Code-Game-Studios)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [oh-my-claudecode의 32개 Agent는 필요한가: Routing·State·검증 비용]({% post_url 2026-04-21-10-Year-Seniors-View-Is-Claude-Code-Dead-The-Shocking-Reality-and-Limits-of-oh-my-claudecode-Orchestrating-32-AIs %}) — oh-my-claudecode가 역할·model routing·hook·state로 코딩 작업을 나누는 구조를 살펴보고, 실제 병렬성·검증 독립성·token·복구·권한 한계를 평가합니다.
+- [ai-job-search: 클로드 코드로 나만의 맞춤형 구직 에이전트 구축하기]({% post_url 2026-07-07-Building-a-Custom-Job-Search-Agent-with-ai-job-search-and-Claude-Code %}) — 클로드 코드(Claude Code)를 기반으로 공고 수집, 적합도 평가, 맞춤형 이력서 작성 등 구직 전 과정을 자동화하는 ai-job-search 프레임워크의 작동 원리와 실전 활용법을 깊이 있게 분석합니다.
+- [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 48개 Agent 역할을 모두 켜야 품질이 좋아지나요?
+
+아닙니다. 각 역할이 독립적으로 검증 가능한 오류를 줄이는지 ablation으로 확인하고 기여가 없는 역할은 제거해야 합니다.
+
+### Agent별 CLAUDE.md가 있으면 context가 완전히 격리되나요?
+
+파일을 나누는 것만으로 실행 context 격리가 보장되지는 않습니다. 실제 호출 입력·공유 artifact·tool 권한과 로그를 확인해야 합니다.
+
+### 품질 검토 Agent가 승인하면 code를 바로 merge해도 되나요?
+
+안 됩니다. 검토 Agent도 같은 오해를 공유할 수 있으므로 compiler·test·asset 검사와 사람의 diff review가 최종 gate로 남아야 합니다.
 
 ## References
-- https://mdskills.ai/claude-code-game-studios
-- https://github.com/Donchitos/Claude-Code-Game-Studios
-- https://thenewstack.io/anthropics-redesigned-claude-code-desktop-app-lets-you-burn-through-tokens-even-faster/
-- https://theguardian.com/technology/2026/apr/01/claude-code-anthropic-source-code-leak
-- https://kevurugames.com/blog/using-claude-ai-in-game-development/
-- https://substack.com/anthropics-claude-code-isnt-ready-for-the-rest-of-us
+- [mdskills.ai 원문](https://mdskills.ai/claude-code-game-studios)
+- [GitHub 저장소](https://github.com/Donchitos/Claude-Code-Game-Studios)
+- [thenewstack.io 원문](https://thenewstack.io/anthropics-redesigned-claude-code-desktop-app-lets-you-burn-through-tokens-even-faster/)
+- [theguardian.com 원문](https://theguardian.com/technology/2026/apr/01/claude-code-anthropic-source-code-leak)
+- [kevurugames.com 원문](https://kevurugames.com/blog/using-claude-ai-in-game-development/)
+- [substack.com 원문](https://substack.com/anthropics-claude-code-isnt-ready-for-the-rest-of-us)

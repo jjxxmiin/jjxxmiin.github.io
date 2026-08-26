@@ -1,52 +1,50 @@
 ---
 layout: post
-title: '🔥 iptables 늪에서 탈출하기: 10년 차 서버 개발자가 eBPF와 Cilium에 두 손 두 발 다 든 이유'
+title: 'iptables에서 Cilium으로 어떻게 옮길까: 단계별 마이그레이션과 복귀 기준'
 date: '2026-05-30 07:03:10'
 categories: Tech
 tags:
   - 인프라
-  - AI트렌드
-summary: 수만 개의 iptables 룰로 인해 발생하는 쿠버네티스 네트워크 병목 현상을 eBPF가 커널 레벨에서 어떻게 우회하고 해결하는지,
-  그 밑바닥 원리와 실무 도입 시의 득실을 10년 차 실무자의 시선으로 낱낱이 파헤칩니다.
-author: AI Trend Bot
-github_url: https://github.com/0xPlaygrounds/rig
+  - 오픈소스
+  - 튜토리얼
+summary: '쿠버네티스 kube-proxy·iptables 환경을 Cilium eBPF 데이터 플레인으로 옮길 때 필요한 현황 조사, 정책 동등성, 노드 풀 canary와 롤백 기준을 정리합니다.'
+description: 'iptables 기반 쿠버네티스를 Cilium으로 옮기기 전 기준선을 만들고, 정책 번역·노드 풀 canary·혼합 경로·장애 복귀를 검증하는 단계별 마이그레이션 안내입니다.'
+github_url: https://github.com/cilium/cilium
+faq:
+  - question: 'Cilium을 설치하면 kube-proxy를 바로 제거해도 되나요?'
+    answer: '권장하지 않습니다. 현재 CNI·서비스 경로와 정책 기능을 조사하고 별도 테스트 또는 canary 노드 풀에서 동등성을 검증한 뒤 명시한 절차로 전환해야 합니다.'
+  - question: '마이그레이션 중 iptables와 eBPF 노드를 함께 운영할 수 있나요?'
+    answer: '구성과 버전이 지원하는 범위에서 단계적 전환을 설계할 수 있지만, 노드 간 경로·정책·서비스 동작을 별도로 시험해야 합니다. 혼합 상태를 무기한 운영하면 디버깅이 어려워집니다.'
+  - question: '어떤 상황에서 기존 데이터 플레인으로 복귀해야 하나요?'
+    answer: '정책 우회·대량 연결 실패·DNS 또는 서비스 도달성 회귀, 관측 불가능한 drop이 합의한 임계값을 넘으면 확장을 멈추고 검증된 이전 이미지와 설정으로 복귀해야 합니다.'
 image:
-  path: https://opengraph.githubassets.com/1/0xPlaygrounds/rig
-  alt: '🔥 Escaping the iptables Swamp: Why a 10-Year Backend Dev Surrendered to eBPF
-    and Cilium'
+  path: https://opengraph.githubassets.com/1/cilium/cilium
+  alt: "cilium/cilium GitHub 저장소 대표 이미지"
 ---
 
-### 🔥 1. 프롤로그: 우리는 왜 여전히 네트워크 병목에 시달리는가?
+iptables에서 Cilium으로의 전환은 CNI 패키지 하나를 교체하는 작업이 아니라 클러스터 데이터 플레인을 바꾸는 마이그레이션입니다. 현재 traffic과 정책의 기준선을 만들고, 대표 노드 풀에서 동등성과 복귀를 검증한 뒤 범위를 넓혀야 합니다. 성능 기대만으로 kube-proxy를 먼저 제거하면 장애 때 비교할 정상 경로도 함께 잃습니다.
 
-솔직히 까놓고 얘기해 봅시다. 쿠버네티스(Kubernetes) 환경에서 대규모 트래픽 좀 받아봤다 하는 분들 중에, `iptables` 때문에 새벽에 등골 서늘해진 경험 없으신 분 있나요? 노드 수가 100개, 500개로 늘어나고, 마이크로서비스가 잘게 쪼개지면서 서비스 엔드포인트가 수만 개 단위로 넘어가는 순간, 우리의 웅장했던 K8s 클러스터는 갑자기 네트워크 병목이라는 거대한 늪에 빠집니다.
+이 글은 [eBPF](https://ebpf.io/), [Cilium의 kube-proxy 대체 설명](https://cilium.io/use-cases/kube-proxy/)과 [Cilium 저장소](https://github.com/cilium/cilium)를 참고해 전환 순서를 설명합니다. 설치 명령과 호환 조건은 배포판·커널·Cilium 버전에 따라 달라지므로 해당 버전의 공식 절차를 기준으로 실행해야 합니다.
 
-기존의 `kube-proxy`는 새로운 서비스가 뜰 때마다 노드의 `iptables` 룰을 업데이트합니다. 이게 몇 백 개 수준일 때는 아무 문제가 없죠. 하지만 블랙프라이데이 이벤트로 HPA(Horizontal Pod Autoscaler)가 작동해 순식간에 수천 개의 파드가 떴다 졌다고 상상해 보세요. `iptables`는 근본적으로 **순차 탐색(O(N))** 구조입니다. 패킷 하나가 목적지를 찾기 위해 수만 줄의 룰을 위에서부터 아래로 훑어야 하고, 룰 하나가 추가될 때마다 전체 테이블을 Lock 걸고 통째로 다시 써야 합니다. 
+## 먼저 iptables가 실제 병목인지 어떻게 확인할까?
 
-결국 CPU는 패킷 라우팅과 룰 업데이트에 자원을 다 뺏기고, 애플리케이션의 레이턴시는 널뛰기를 시작합니다. IPVS로 넘어가서 한숨 돌렸다고요? 구조적 한계는 여전합니다. 그래서 오늘 제가 꺼낼 이야기는 단순한 '새로운 툴' 소개가 아닙니다. 리눅스 네트워크의 패러다임 자체를 엎어버린 **eBPF**와 이를 쿠버네티스에 이식한 **Cilium**에 대한 딥다이브입니다.
+전환 전 일주일 이상 서비스·endpoint 수, 노드별 rule 규모와 동기화 시간, network CPU, conntrack 사용량, DNS·Service 오류, p50·p95·p99 지연을 기록합니다. HPA나 rollout 때 endpoint가 급변하는 구간을 따로 표시하면 애플리케이션 부하와 network rule 갱신을 구분하기 쉽습니다. 단순히 rule 줄이 많다는 사실만으로 사용자 지연의 원인이라고 확정하지 않습니다.
 
-> **💡 한 마디로 요약하자면?**
-> eBPF는 리눅스 커널의 '자바스크립트'입니다. 브라우저가 웹페이지를 다시 로드하지 않고 JS를 실행하듯, eBPF는 리눅스 커널을 재컴파일하거나 재부팅하지 않고도 커널 내부(Kernel Space)에 우리의 커스텀 로직을 안전하게 밀어넣고 실행할 수 있게 해줍니다. 그리고 Cilium은 이 능력을 활용해 무겁디무거운 기존 리눅스 네트워크 스택을 완전히 우회(Bypass)해버립니다.
+현재 kube-proxy mode, CNI, network policy 구현, MTU, IPAM, node-local DNS, ingress·egress, LoadBalancer와 hostNetwork 사용을 inventory로 만듭니다. NetworkPolicy 외에 운영 스크립트가 직접 만든 iptables rule, 보안 agent와 cloud firewall이 있는지도 확인하세요. 데이터 플레인을 바꾸면 이런 숨은 의존성이 먼저 깨질 수 있습니다.
 
----
+성공 기준은 ‘Cilium 설치됨’이 아니라 기존 기능을 유지하면서 합의한 병목이 개선되는 것입니다. 예를 들어 endpoint 갱신 p95, 신규 pod의 첫 Service 연결 성공 시간, network CPU와 tail latency를 기준선으로 정합니다. 개선 목표가 없으면 마이그레이션 복잡성만 남을 수 있습니다.
 
-### 🛠️ 2. Under the Hood: eBPF는 어떻게 커널 네트워크를 해킹(?)하는가
+## 정책과 서비스 동작을 어떻게 번역할까?
 
-도대체 내부에서 무슨 일이 벌어지길래 eBPF가 압도적인 퍼포먼스를 낸다는 걸까요? 기존 네트워크 스택과 eBPF 기반의 차이를 밑바닥부터 뜯어봅시다.
+모든 namespace의 NetworkPolicy, 기본 허용·거부 상태와 selector를 수집하고 실제 허용 traffic으로 테스트 fixture를 만듭니다. 문법이 변환됐다고 의미가 같다고 보지 말고 ingress·egress, DNS, host traffic, node-to-pod와 external service를 각각 확인합니다. 정책이 없는 namespace의 기본 동작도 명시해야 합니다.
 
-#### 기존 네트워크 흐름의 비효율성
-보통 동일 노드 내의 파드(Pod A)에서 다른 파드(Pod B)로 통신할 때, 패킷은 다음과 같은 험난한 여정을 거칩니다.
-1. Pod A의 사용자 공간(User Space)에서 소켓을 통해 커널로 데이터 전달
-2. veth(Virtual Ethernet) 인터페이스 통과
-3. 호스트의 TCP/IP 스택(Netfilter, iptables 포함) 횡단
-4. 브리지(Bridge) 도달 및 라우팅 결정
-5. 다시 호스트 TCP/IP 스택 통과
-6. 목적지 veth 통과
-7. Pod B의 수신 대기 소켓 도달
+Service 유형별로 ClusterIP, headless, NodePort, LoadBalancer와 externalTrafficPolicy를 시험합니다. session affinity, source IP 보존, health check와 IPv4·IPv6 사용 여부도 현재 동작을 기록하세요. 이름이 같은 기능도 packet 경로와 실패 상황에서 동작이 달라질 수 있습니다.
 
-이 복잡한 과정을 거치는 동안 컨텍스트 스위칭(Context Switching)과 메모리 복사, 그리고 악명 높은 iptables 룰 매칭이 발생합니다.
+기존 메시나 ingress가 iptables redirect에 의존한다면 별도 목록으로 둡니다. Cilium의 eBPF 경로를 켰을 때 sidecar interception, transparent proxy와 L7 정책이 어떻게 연결되는지 작은 서비스에서 확인합니다. 데이터 플레인과 서비스 메시를 동시에 바꾸면 어느 변경이 회귀를 만들었는지 찾기 어렵기 때문에 가능하면 단계와 rollback을 분리합니다.
 
-#### eBPF의 Socket-Level Redirection (SockOps)
-반면 eBPF(특히 Cilium이 사용하는 SockOps 기능)를 적용하면 패킷의 여정은 충격적일 만큼 단순해집니다. eBPF는 `bpf_msg_redirect_hash` 같은 헬퍼 함수를 이용해 소켓 레벨에서 패킷을 낚아챕니다.
+## SockOps 의사코드는 무엇을 설명하고 무엇을 생략하는가?
+
+원문의 다음 코드는 socket Map을 조회해 redirect하는 개념을 단순화한 조각입니다. Map 생성·수명주기, key 추출, 연결 상태, 오류와 커널 기능 검사가 빠져 있어 그대로 동작하는 Cilium 구성은 아닙니다.
 
 ```c
 // eBPF SockOps 의사코드 (Cilium 내부 동작 원리 단순화)
@@ -54,70 +52,73 @@ SEC("sk_msg")
 int bpf_tcp_forward(struct sk_msg_md *msg) {
     struct sock_key key = {};
     extract_socket_info(msg, &key);
-    
-    // eBPF Map(O(1) 해시 테이블)에서 목적지 소켓을 즉시 조회
+
+    // eBPF Map에서 목적지 소켓 후보 조회
     if (bpf_map_lookup_elem(&socket_map, &key)) {
-        // TCP/IP 스택, iptables, veth 전부 무시하고 목적지 소켓으로 즉시 꽂아버림!
         return bpf_msg_redirect_hash(msg, &socket_map, &key, BPF_F_INGRESS);
     }
     return SK_PASS;
 }
 ```
 
-위 코드가 보이시나요? eBPF는 커널 내부의 해시 테이블(eBPF Map)을 조회하여, 패킷이 네트워킹 스택 밑바닥으로 내려가기도 전에 **목적지 파드의 소켓으로 데이터를 직접 쏴버립니다(Bypass).** O(N)의 iptables가 O(1)의 커널 해시 테이블 조회로 바뀌는 순간입니다.
+이 예시는 일부 같은 노드 socket 경로를 줄일 수 있는 원리를 보여 줄 뿐 모든 packet이 TCP/IP stack과 veth를 건너뛴다는 보장은 아닙니다. protocol, 위치와 configuration에 따라 실제 hook과 경로가 달라집니다. 마이그레이션은 의사코드의 O(1) 설명이 아니라 사용 중인 kernel과 Cilium datapath의 관측 결과로 판단해야 합니다.
 
-#### 📊 아키텍처 및 성능 비교 표
+BPF Map lookup도 상태가 정확히 갱신돼야 의미가 있습니다. control plane과 node agent가 단절되거나 오래된 endpoint가 남으면 빠른 lookup이 잘못된 대상으로 이어질 수 있습니다. Map pressure, sync error와 stale entry를 관측 항목에 포함합니다.
 
-| 비교 항목 | kube-proxy (iptables) | Cilium (eBPF 기반) |
-|---|---|---|
-| **라우팅 복잡도** | O(N) (룰 개수에 비례하여 성능 저하) | **O(1)** (eBPF Map/Hash table 조회) |
-| **업데이트 비용** | 전체 테이블 Lock 및 병목 발생 | 개별 Map 엔트리만 즉시 업데이트 (Lock-free) |
-| **네트워크 스택** | TCP/IP 스택 및 Netfilter 전부 통과 | **Socket 통신 시 우회(Bypass)**, XDP 활용 |
-| **DDoS 방어 성능** | 커널 메모리(sk_buff) 할당 후 드롭 | **XDP로 NIC 드라이버 레벨에서 즉시 드롭** |
+## canary 노드 풀은 어떤 순서로 넓혀야 하는가?
 
----
+운영과 같은 kernel·NIC·cloud route를 쓰는 별도 테스트 클러스터에서 기능 시험을 먼저 합니다. 다음으로 stateless·저위험 workload가 있는 작은 node pool을 canary로 정하고, 명시한 label과 scheduling 규칙으로 대상 pod만 이동합니다. 한 번에 CNI, kernel, ingress와 mesh를 모두 업그레이드하지 말고 data plane 변경만 관찰할 수 있게 합니다.
 
-### 🎯 3. 현업 트러블슈팅: 이 기술, 진짜 실무에서 먹힐까?
+canary에는 내부·외부 client, DNS, long-lived TCP, short HTTP, UDP, health check와 pod churn 부하를 보냅니다. node reboot, drain, agent restart, control plane 지연과 policy update 중에도 연결이 회복되는지 봅니다. 정상 traffic 평균만 확인하면 마이그레이션 순간의 connection reset과 신규 endpoint 반영 오류를 놓칩니다.
 
-이론이 훌륭한 건 알겠습니다. 그럼 현업 시니어 개발자 관점에서, 이게 실제로 어떤 문제를 해결해 줄까요? 뻔한 예시 말고, 현업에서 뼈 맞아가며 겪는 구체적 시나리오 두 가지를 가져왔습니다.
+확대 단계마다 중단 시간을 둡니다. 예를 들어 5%, 20%, 50%의 node에서 동일한 지표와 오류를 한 운영 주기씩 관찰하고, 다음 단계 전 on-call과 application owner가 결과를 승인합니다. 오래 유지되는 혼합 환경은 packet이 어느 data plane을 거쳤는지 추적하기 어려우므로 canary 종료 조건과 전체 전환 또는 복귀 날짜를 미리 정합니다.
 
-#### 시나리오 A: 블랙프라이데이, 수천 개의 파드가 쏟아지는 트래픽 스파이크
-대규모 프로모션이 시작되면 K8s HPA가 미친 듯이 파드를 스케일아웃합니다. 이때 기존 `kube-proxy`는 새로 생성된 파드들의 IP를 `iptables`에 업데이트하느라 클러스터 전체의 네트워크 엔드포인트 동기화를 지연시킵니다. 트래픽은 쏟아지는데 라우팅 룰은 아직 업데이트되지 않아 `503 Service Unavailable`이나 타임아웃이 대량 발생하죠.
-Cilium을 사용하면? 컨트롤 플레인이 eBPF Map(해시 테이블)에 엔트리를 추가하는 즉시 데이터 플레인에 반영됩니다. 수만 개의 엔드포인트 변경도 밀리초(ms) 단위로 처리되며, CPU 스파이크 따위는 발생하지 않습니다. 마치 인덱스가 잘 걸려 있는 DB에 레코드 하나 `INSERT` 하는 것과 같습니다.
+## 복귀 가능한 상태를 어떻게 보존할까?
 
-#### 시나리오 B: 무거운 서비스 메시(Service Mesh) 사이드카 덜어내기
-최근 mTLS나 L7 트래픽 라우팅을 위해 Istio 같은 서비스 메시를 많이 도입합니다. 하지만 파드마다 붙어있는 Envoy 사이드카 프록시는 네트워크 홉(Hop)을 두 번씩 늘리고, 엄청난 메모리 오버헤드를 유발합니다. 
-Cilium은 eBPF를 활용해 노드 당 하나의 프록시만 띄우거나 커널 레벨에서 L7 정책을 강제할 수 있습니다. 사이드카 패턴 특유의 '애플리케이션 -> 로컬 Envoy -> 네트워크 -> 상대방 Envoy -> 애플리케이션'이라는 지옥 같은 레이턴시 구간을 대폭 단축시킵니다.
+이전 node image, kube-proxy·CNI manifest, routing·MTU와 policy snapshot을 버전으로 보관합니다. 복귀 절차는 ‘Cilium 삭제’ 한 줄이 아니라 신규 scheduling 중지, connection drain, 이전 node pool 확장, workload 이동, Service·DNS 검증과 새 component 제거 순서를 포함해야 합니다. 실행에 필요한 권한과 소요 시간도 rehearsal에서 확인합니다.
 
----
+stateful connection은 단순 rollback 뒤에도 끊길 수 있습니다. connection drain 시간을 둘 수 없는 workload와 고정 source IP, external load balancer health check를 별도로 다룹니다. rollback 중 양쪽 data plane이 같은 IP·route를 주장하지 않게 소유권 전환 지점을 명시합니다.
 
-### ⚖️ 4. 솔직한 리뷰: 장밋빛 환상 이면의 Trade-offs
+정책 우회나 격리 실패는 지연 회귀보다 더 엄격한 중단 조건이어야 합니다. 허용하면 안 되는 traffic이 한 번이라도 통과하면 확장을 중단하고 원인을 확인합니다. 반대로 관측 도구에서 drop이 보이지 않는다는 이유만으로 packet loss가 없다고 판단하지 말고 client·server 양끝의 성공률과 외부 synthetic probe를 사용합니다.
 
-자, 찬양은 여기까지 합시다. 세상에 공짜는 없고, 은탄환(Silver Bullet)은 더더욱 없습니다. 10년 차 엔지니어의 깐깐한 시선으로 볼 때, eBPF와 Cilium 도입을 가로막는 치명적인 허들들이 존재합니다.
+## 마이그레이션 완료는 무엇으로 증명할까?
 
-1. **커널 버전의 압박 (Kernel Dependency)**
-   eBPF의 진가를 제대로 맛보려면(특히 XDP나 고급 SockOps) 리눅스 커널 최소 5.4 이상, 권장 5.10 이상이 필요합니다. 만약 여러분의 회사가 보수적인 인프라 정책 때문에 CentOS 7 (커널 3.10) 같은 레거시를 여전히 붙들고 있다면? eBPF는 그림의 떡입니다. 커널 업그레이드라는 거대한 사내 정치와 싸워야 합니다.
+전체 전환 뒤에도 기준선과 같은 dashboard를 최소 한 운영 주기 유지합니다. endpoint churn, node upgrade와 peak traffic에서 network CPU, tail latency, DNS·Service 오류, Map pressure와 policy verdict를 비교합니다. application owner가 실제 업무 흐름을 통과시키고 on-call이 Hubble·Cilium 상태에서 drop 이유와 경로를 설명할 수 있어야 합니다.
 
-2. **디버깅의 지옥 (The Observability Paradox)**
-   이게 정말 무서운 포인트입니다. 기존에는 네트워크가 꼬이면 습관적으로 노드에 들어가 `tcpdump`를 떴습니다. 그런데 eBPF의 XDP(eXpress Data Path) 레벨에서 패킷을 드롭시키거나 라우팅해버리면? **패킷이 커널의 TCP/IP 스택에 도달하기도 전에 사라지기 때문에 `tcpdump`에 잡히지 않습니다!** 
-   '안 보이는데 어떻게 고치죠?' 네, 그래서 Cilium에서는 `Hubble`이라는 eBPF 전용 관측(Observability) 도구를 강제로 써야 합니다. 생태계 자체를 통째로 갈아타야 한다는 뜻입니다.
+직접 만든 iptables rule과 임시 호환 설정을 목록에서 제거하고, 더 이상 쓰지 않는 kube-proxy 자원·모니터링·runbook을 정리합니다. 다만 rollback 보관 기간 동안 이전 artifact와 절차는 유지합니다. 비용 절감에는 새 agent·관측 storage, 교육과 운영 시간도 포함해 전환 전 목표와 비교하세요.
 
-3. **eBPF Verifier의 깐깐함**
-   만약 직접 eBPF 코드를 짠다면, 리눅스 커널의 'Verifier'라는 무시무시한 검증기를 통과해야 합니다. 커널 패닉을 막기 위해 무한 루프를 엄격히 금지하고, 접근 가능한 메모리 바운더리를 런타임 전에 철저히 검사합니다. C 언어로 코드를 짜지만, 우리가 알던 그 유연한 C 언어가 아닙니다. 러닝 커브가 수직 벽에 가깝습니다.
+마지막으로 버전 upgrade를 작은 node pool에서 다시 시험하는 반복 절차를 만듭니다. 최초 마이그레이션에 성공했어도 kernel·Cilium·cloud network 변경이 datapath를 바꿀 수 있습니다. 완료의 의미는 새 data plane을 한 번 띄운 것이 아니라 안전하게 upgrade·복귀할 수 있는 운영 체계를 갖춘 것입니다.
 
----
+<!-- primary-sources:start -->
+## 원문과 버전 확인
 
-### 💡 5. 결론: 실무자의 스탠스와 미래
+- [공식 GitHub 저장소](https://github.com/cilium/cilium)
+<!-- primary-sources:end -->
 
-결론을 내리겠습니다. eBPF와 Cilium은 단순한 네트워크 플러그인(CNI) 교체를 넘어, 리눅스 OS가 네트워크와 보안을 다루는 방식 자체를 재정의하는 거대한 패러다임 시프트입니다. AWS, Google Cloud(GKE의 Dataplane V2가 바로 Cilium입니다) 등 메이저 클라우드 벤더들이 이미 eBPF를 표준으로 채택하고 있다는 사실이 이를 증명합니다.
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
 
-**그래서 지금 당장 도입해야 할까요?**
-만약 여러분의 클러스터가 50개 노드 미만이고, 트래픽이 예측 가능한 수준이며, `kube-proxy`로도 아무 불편함을 느끼지 못하고 있다면 굳이 유행을 좇아 eBPF의 가파른 학습 곡선을 감내할 필요는 없습니다.
-하지만 마이크로서비스가 기하급수적으로 늘어나고 있고, 트래픽 스파이크 때마다 원인 모를 레이턴시 지연을 겪고 있으며, 인프라의 네트워크 가시성(Visibility)을 커널 레벨에서 확보하고 싶다면? **eBPF는 선택이 아니라 필연적인 생존 도구가 될 것입니다.**
+- [Cilium eBPF로 kube-proxy를 바꿀 때: iptables 병목·Hubble·L7 경계]({% post_url 2026-05-25-The-End-of-the-Sidecar-Era-How-eBPF-is-Rewiring-Kubernetes-Networking-from-the-Kernel-Up %}) — Kubernetes 서비스·정책 경로를 Cilium eBPF 데이터 플레인으로 옮길 때의 Map·소켓 경로와 Hubble 관측성을 살펴보고, L7 프록시와 커널 운영 조건을 점검합니다.
+- [eBPF·Cilium 서비스 메시를 어떻게 운영할까: 관측·업그레이드·롤백]({% post_url 2026-05-31-eBPF-and-Cilium-Is-Sidecar-less-Service-Mesh-a-Salvation-or-Another-Disaster %}) — eBPF·Cilium 데이터 플레인을 운영할 때 필요한 flow·drop·BPF Map 관측, 정책 배포, agent·proxy 장애 격리, 업그레이드 canary와 롤백 절차를 정리합니다.
+- [Istio 사이드카를 없애도 될까: eBPF 서비스 메시와 L7 하이브리드 조건]({% post_url 2026-05-26-Time-to-Ditch-the-Sidecar-How-eBPF-is-Disrupting-Service-Mesh %}) — 파드별 Istio·Envoy 비용을 eBPF와 노드 단위 프록시로 줄일 수 있는 조건을 살펴보고, mTLS·재시도·HTTP 라우팅 때문에 남는 L7 기능과 안전한 전환 기준을 정리합니다.
+<!-- internal-links:end -->
 
-기술의 밑바닥을 이해하는 엔지니어만이 도구가 주는 마법의 이면을 통제할 수 있습니다. iptables의 늪에서 허우적대고 계신다면, 이제 리눅스 커널이 허락한 합법적 해킹 툴, eBPF를 진지하게 검토해 볼 시간입니다.
+## 자주 묻는 질문
+
+### Cilium을 설치하면 kube-proxy를 바로 제거해도 되나요?
+
+권장하지 않습니다. 현재 CNI·서비스 경로와 정책 기능을 조사하고 별도 테스트 또는 canary 노드 풀에서 동등성을 검증한 뒤 명시한 절차로 전환해야 합니다.
+
+### 마이그레이션 중 iptables와 eBPF 노드를 함께 운영할 수 있나요?
+
+구성과 버전이 지원하는 범위에서 단계적 전환을 설계할 수 있지만, 노드 간 경로·정책·서비스 동작을 별도로 시험해야 합니다. 혼합 상태를 무기한 운영하면 디버깅이 어려워집니다.
+
+### 어떤 상황에서 기존 데이터 플레인으로 복귀해야 하나요?
+
+정책 우회·대량 연결 실패·DNS 또는 서비스 도달성 회귀, 관측 불가능한 drop이 합의한 임계값을 넘으면 확장을 멈추고 검증된 이전 이미지와 설정으로 복귀해야 합니다.
 
 ## References
-- https://ebpf.io/
-- https://cilium.io/use-cases/kube-proxy/
-- https://github.com/cilium/cilium
+
+- [ebpf.io 원문](https://ebpf.io/)
+- [cilium.io 원문](https://cilium.io/use-cases/kube-proxy/)
+- [GitHub 저장소](https://github.com/cilium/cilium)

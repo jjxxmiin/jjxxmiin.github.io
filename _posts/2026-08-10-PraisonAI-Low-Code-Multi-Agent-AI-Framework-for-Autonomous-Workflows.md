@@ -6,17 +6,17 @@ categories: Tech
 tags:
   - 멀티에이전트
   - 파이썬
+  - LLM
   - MCP
   - RAG
-  - 업무자동화
 summary: PraisonAI는 코드 몇 줄이나 간단한 YAML 설정만으로 자율형 멀티 AI 에이전트 시스템을 구축하고 배포할 수 있게 해주는
   오픈소스 프레임워크입니다. 100개 이상의 LLM 지원, 메모리 관리, RAG, MCP 도구 연동을 통해 복잡한 오케스트레이션을 단순화합니다.
-author: AI Trend Bot
+description: 'PraisonAI가 YAML·Python으로 에이전트 역할·작업·메모리·MCP를 구성하는 방식과 자동 팀 설계·재시도·관찰성·비용 한계를 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/MervinPraison/PraisonAI
 image:
   path: https://opengraph.githubassets.com/1/MervinPraison/PraisonAI
-  alt: 'PraisonAI: Low-Code Multi-Agent AI Framework for Autonomous Workflows'
+  alt: "MervinPraison/PraisonAI GitHub 저장소 대표 이미지"
 project:
   stars: 8795
   forks: 1377
@@ -59,6 +59,8 @@ faq:
   answer: 사용자가 자연어로 해결하고자 하는 목표나 요구사항을 입력하면, PraisonAI가 필요한 에이전트 역할과 세부 작업 지침, 실행
     순서를 담은 YAML 시스템 구성을 자동으로 생성해 주는 자율 설계 기능입니다.
 ---
+
+PraisonAI는 YAML이나 Python으로 에이전트 역할과 작업 연결을 정의하고 여러 모델·메모리·RAG·MCP를 한 실행 흐름에 묶는 프레임워크입니다. 적은 설정으로 팀을 만든다고 목표 분해와 결과 검증이 자동으로 옳아지는 것은 아니며, 역할 수가 늘면 호출 비용과 실패 경로도 늘어납니다. 단일 에이전트 기준선과 비교해 새 결함 감소, 재시도, 로그와 총비용을 확인하세요.
 
 [PraisonAI GitHub 저장소](https://github.com/MervinPraison/PraisonAI)
 [PraisonAI 공식 문서](https://docs.praison.ai)
@@ -410,6 +412,20 @@ PraisonAI는 순차적(Sequential), 계층적(Hierarchical) 오케스트레이�
 AI 개발 트렌드는 단일 프롬프트 작성에서 에이전틱 오케스트레이션으로 빠르게 이동하고 있습니다. PraisonAI는 이러한 변화의 진입 장벽을 낮추어 기획자, 데이터 분석가, 현업 개발자 누구나 실용적인 AI 에이전트 팀을 운용할 수 있도록 돕습니다.
 
 특히 100개 이상의 다양한 LLM을 자유롭게 조합하고, MCP 도구 프로토콜을 즉시 사용할 수 있다는 점은 복잡한 기업용 자동화 파이프라인 구축 시 큰 이점을 제공합니다. 프로젝트 요구사항의 복잡도와 제어 수준을 잘 측정하여 PraisonAI를 적재적소에 도입한다면 빠른 프로토타이핑과 실용적인 업무 자동화를 달성할 수 있을 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/MervinPraison/PraisonAI)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Supermemory는 RAG를 대체할까: 관계·시간·삭제를 포함한 메모리 계층의 조건]({% post_url 2026-03-25-The-End-of-RAG-or-its-Evolution-A-10-Year-Developers-Deep-Dive-into-Supermemory %}) — Supermemory가 벡터 검색에 관계와 시간 정보를 더하는 구조를 살펴보고, 출처 추적·충돌 처리·삭제·권한·MCP 도입 조건을 정리합니다.
+- [Ruflo로 멀티 에이전트를 조율할까: 토폴로지·기억·드리프트 검증]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-Honest-Review-and-Deep-Dive-into-Ruflo-the-Ultimate-Claude-Multi-Agent-Orchestrator %}) — Ruflo가 특화 에이전트·토폴로지·AgentDB·MCP로 작업을 분담하는 방식과, 병렬 비용·권한·드리프트·검증 책임을 정리합니다.
+- [DeepTutor: 지식 그래프와 멀티 에이전트 기반의 맞춤형 AI 학습 플랫폼]({% post_url 2026-08-12-DeepTutor-Agent-Native-Lifelong-Personalized-Tutoring-Framework-by-HKU %}) — 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대 멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

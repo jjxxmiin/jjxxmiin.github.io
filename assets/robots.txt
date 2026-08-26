@@ -1,0 +1,10 @@
+---
+permalink: /robots.txt
+sitemap: false
+---
+# OPSOAI allows search and answer-engine crawlers to discover public pages.
+
+User-agent: *
+Allow: /
+
+Sitemap: {{ '/sitemap.xml' | absolute_url }}

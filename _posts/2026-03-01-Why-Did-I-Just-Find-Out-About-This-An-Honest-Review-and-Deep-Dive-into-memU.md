@@ -4,17 +4,23 @@ title: "memU는 LLM 기억 비용을 90% 줄일까: Locomo 92%와 거짓 기억 
 date: '2026-03-01 18:17:52'
 categories: Tech
 tags:
-  - memU
-  - LLM메모리
-  - RAG
+  - LLM
+  - AI메모리
+  - 오픈소스
   - AI에이전트
-  - 셀프호스팅
 summary: "memU의 3단계 기억 구조와 Locomo 92%·토큰 비용 최대 90% 절감 주장을 살펴보고, 거짓 기억·동시성·운영 비용까지 도입 기준으로 정리합니다."
-author: AI Trend Bot
+description: "memU의 Resource·Memory Item·Category 구조와 Locomo·비용 주장을 살펴보고, 거짓 기억·동시성·삭제·모델 교체를 검증하는 기준을 설명합니다."
 github_url: https://github.com/NevaMind-AI/memU
 image:
   path: https://opengraph.githubassets.com/1/NevaMind-AI/memU
-  alt: Why Did I Just Find Out About This? An Honest Review and Deep Dive into memU
+  alt: "NevaMind-AI/memU GitHub 저장소 대표 이미지"
+faq:
+  - question: "memU를 쓰면 전체 대화를 보낼 필요가 없어지나요?"
+    answer: "관련 기억만 검색해 입력을 줄일 수 있지만 현재 질문에 필요한 정보가 빠질 수 있습니다. 전체 이력 기준선과 같은 질문을 비교해 정답률·누락·전체 호출 비용을 함께 측정해야 합니다."
+  - question: "사용자가 대화를 삭제하면 추출된 기억도 자동으로 사라지나요?"
+    answer: "Resource와 Memory Item, 검색 인덱스가 별도라면 삭제 전파 시점을 확인해야 합니다. 원본 삭제가 파생 기억과 backup까지 반영되는 절차를 실제 사용자 단위로 시험해야 합니다."
+  - question: "사람이 읽을 수 있는 기억이면 환각을 쉽게 막을 수 있나요?"
+    answer: "검토와 수정은 쉬워지지만 잘못 추출된 기억을 자동으로 사실로 만들지는 않습니다. 중요한 항목은 원본 근거·생성 시각·신뢰 상태를 표시하고 확정 전에 승인하는 편이 안전합니다."
 ---
 
 memU는 매번 전체 대화를 다시 보내는 비용을 줄일 수 있지만, “최대 90% 절감”과 “Locomo 92%”가 모든 에이전트에서 그대로 재현된다는 뜻은 아닙니다.
@@ -79,3 +85,55 @@ Apache 2.0 기반 셀프호스팅과 1.0.0 이후의 사용자·모델 간 격�
 memU는 대화가 길고 반복되는 개인화 에이전트, 사람이 기억을 감사해야 하는 시스템에 잘 맞을 수 있습니다. 짧은 세션이나 소규모 서비스라면 서버·워커·UI를 운영하는 부담이 절감 토큰보다 클 수 있습니다.
 
 작게 시작하려면 대표 질문을 시간 간격을 두고 반복하고, 전체 이력 방식과 memU 방식의 정답률·누락·잘못된 기억·총토큰을 비교합니다. 그다음 사용자 삭제 요청, 동시 쓰기, 모델 교체, 추출 실패를 시험합니다. 이 과정을 통과해야 memU가 “24시간 능동형 기억”이라는 인상보다 실제 시스템 요구에 맞는 선택인지 알 수 있습니다.
+
+## 기억의 생명주기는 어떻게 설계할까
+
+기억은 생성·검색·수정·만료·삭제의 다섯 단계를 가집니다. 대화가 들어왔다고 모든 문장을 Memory Item으로 만들면 중복과 민감 정보가 빠르게 쌓입니다. 장기적으로 유용한 선호와 일회성 요청을 구분하고, 자동 추출하지 않을 정보와 보관 기간을 먼저 정해야 합니다.
+
+검색될 때는 어떤 Memory Item이 어느 Resource에서 왔는지 함께 반환하는 편이 좋습니다. 답변이 틀렸을 때 retrieval이 관련 없는 기억을 골랐는지, 기억 추출이 처음부터 틀렸는지, 생성 모델이 근거를 무시했는지를 구분할 수 있기 때문입니다. 기억을 수정하면 이전 embedding과 cache가 언제 무효화되는지도 확인해야 합니다.
+
+삭제는 UI에서 항목 하나가 사라지는 것으로 끝나지 않습니다. 원본 Resource, 파생 Memory Item, Category 연결, vector index, backup과 observability log의 관계를 문서화해야 합니다. 사용자의 계정 삭제 요청을 test data로 실행해 검색 결과와 background worker에서 다시 나타나지 않는지 일정 시간 뒤 확인합니다.
+
+## 동시성과 모델 변경에서 무엇이 깨질까
+
+한 사용자가 여러 device에서 동시에 대화하면 background memory agent가 같은 Resource를 중복 처리할 수 있습니다. 두 worker가 서로 다른 Category로 분류하거나 오래된 항목으로 새 값을 덮어쓸 수도 있습니다. Event ID와 version을 두고 중복 write, 순서가 뒤바뀐 write, 부분 실패를 재현해야 합니다.
+
+추출 모델을 바꾸면 같은 대화에서 다른 Memory Item이 나올 수 있습니다. 모든 과거 자료를 즉시 다시 처리하면 비용이 크고 사용자 선호가 갑자기 바뀔 수 있으므로, model version을 기록하고 일부 사용자·일부 Category에서 비교하는 migration이 필요합니다. 새 추출과 기존 기억이 충돌할 때 어느 값을 우선할지도 정해야 합니다.
+
+읽기 일관성도 업무마다 다릅니다. 방금 말한 주소를 바로 다시 묻는 assistant는 수 초 안에 반영돼야 하지만, 주간 요약 memory는 지연돼도 괜찮을 수 있습니다. 비동기 처리의 목표 시간을 Category별로 정하고 지연 중임을 application이 알 수 있어야 합니다.
+
+## 전체 이력 방식과 어떻게 공정하게 비교할까
+
+같은 model, 같은 질문, 같은 평가 시점으로 맞추고 입력 구성만 바꿉니다. 전체 이력, 최근 N개 대화, memU 검색의 세 기준을 두면 복잡한 기억 시스템이 단순한 최근 window보다 실제로 나은지 알 수 있습니다. 질문은 최근 사실, 오래된 선호, 수정된 정보, 서로 충돌하는 기억을 포함해야 합니다.
+
+비용에는 최종 답변의 input token뿐 아니라 memory 추출, embedding, background 정리, 저장소와 재시도 호출을 포함합니다. 정답률도 평균만 보지 말고 “모른다”고 해야 하는 질문에서 잘못된 기억을 자신 있게 말하는 비율을 기록합니다. 기억 시스템에서는 누락과 함께 잘못된 회상이 중요한 실패입니다.
+
+운영 지표는 사용자별 memory 수, 검색되지 않은 오래된 항목, 중복률, 수정·삭제 반영 시간입니다. 이 값이 계속 늘면 우아한 망각이 실제로 작동하는지 점검해야 합니다. 비용 절감이 기억 품질 저하와 맞바뀌지 않는 범위에서만 검색 개수와 요약 강도를 조정합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/NevaMind-AI/memU)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [LingBot-World의 16 FPS는 실시간 월드 모델을 뜻할까: 1초 지연과 장기 기억 점검]({% post_url 2026-01-29-Advancing-Open-source-World-Models %}) — 16 FPS·1초 미만 지연·분 단위 기억 주장을 처리량, 입력 반응성, 물리 정확도로 나눠 검토합니다.
+- [MiroFish의 에이전트 사회는 예측 엔진일까: GraphRAG·OASIS와 비용 폭발]({% post_url 2026-03-12-From-a-10-Day-Code-to-a-30M-RMB-Investment-A-Deep-Dive-into-the-MiroFish-Multi-Agent-Prediction-Engine-Architecture %}) — GraphRAG 기억과 OASIS 환경에서 에이전트 사회를 돌리는 MiroFish의 구조를 살펴보고, 확률 보정·상관된 환각·Context·JSON·운영 비용 한계를 정리합니다.
+- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU·WASM·기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AIRI가 WebGPU·WASM·Live2D/VRM과 모듈식 음성·기억 계층을 조합하는 방식, 브라우저 호환성·자원·개인정보·업데이트 한계를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### memU를 쓰면 전체 대화를 보낼 필요가 없어지나요?
+
+관련 기억만 검색해 입력을 줄일 수 있지만 현재 질문에 필요한 정보가 빠질 수 있습니다. 전체 이력 기준선과 같은 질문을 비교해 정답률·누락·전체 호출 비용을 함께 측정해야 합니다.
+
+### 사용자가 대화를 삭제하면 추출된 기억도 자동으로 사라지나요?
+
+Resource와 Memory Item, 검색 인덱스가 별도라면 삭제 전파 시점을 확인해야 합니다. 원본 삭제가 파생 기억과 backup까지 반영되는 절차를 실제 사용자 단위로 시험해야 합니다.
+
+### 사람이 읽을 수 있는 기억이면 환각을 쉽게 막을 수 있나요?
+
+검토와 수정은 쉬워지지만 잘못 추출된 기억을 자동으로 사실로 만들지는 않습니다. 중요한 항목은 원본 근거·생성 시각·신뢰 상태를 표시하고 확정 전에 승인하는 편이 안전합니다.

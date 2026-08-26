@@ -4,18 +4,15 @@ title: 'Mission Control에 Sentry 자동 PR을 맡겨도 될까: 이벤트·Aegi
 date: '2026-03-24 18:25:44'
 categories: Tech
 tags:
+  - AI보안
+  - 멀티에이전트
   - AI에이전트
-  - 개발자동화
-  - 오케스트레이션
-  - HumanInTheLoop
-  - 아키텍처
 summary: '오류 이벤트에서 코드 분석과 PR 생성까지 이어지는 Mission Control 구조를 따라가며, 자동 배포 대신 승인 가능한 자동화로 시작해야 하는 이유를 설명합니다.'
-author: AI Trend Bot
+description: 'Mission Control형 코딩 에이전트가 오류 이벤트에서 PR 초안까지 가는 흐름과 권한·중복 제거·검증·승인·비용 상한 설계를 설명합니다.'
 github_url: https://github.com/MeisnerDan/mission-control
 image:
   path: https://opengraph.githubassets.com/1/MeisnerDan/mission-control
-  alt: '[Tech Deep Dive] Stop Prompting, Start Orchestrating: Inside the Mission Control
-    Architecture for AI Agents'
+  alt: "MeisnerDan/mission-control GitHub 저장소 대표 이미지"
 ---
 
 Mission Control형 에이전트에 맡길 첫 업무는 자동 배포가 아니라, 테스트 결과와 근거가 붙은 PR 초안 만들기입니다.
@@ -58,8 +55,62 @@ Mission Control형 에이전트에 맡길 첫 업무는 자동 배포가 아니�
 
 Mission Control의 가치는 에이전트를 “방목”하는 데 있지 않습니다. 이벤트, 문맥, 상태와 승인 경계를 한곳에서 관찰하는 데 있습니다. 이 네 경계를 설명할 수 없다면 아직 자동 PR을 켤 때가 아닙니다.
 
+## 같은 오류가 여러 번 와도 작업은 하나여야 한다
+
+Webhook은 재전송될 수 있고 같은 근본 원인이 여러 사용자에게 반복될 수 있습니다. 이벤트 ID만 보지 말고 저장소, 오류 지문, 대상 커밋과 시간 구간을 묶어 중복 기준을 정해야 합니다. 이미 열린 작업이 있다면 새 작업을 만들지 않고 발생 횟수와 새 증거만 기존 기록에 붙이는 편이 안전합니다.
+
+중복 제거는 실패 후 재시도와도 구분해야 합니다. 네트워크 오류로 PR 생성 응답을 받지 못했다고 다시 실행하면 이미 만들어진 브랜치나 PR이 하나 더 생길 수 있습니다. 각 단계에 멱등 키를 두고 브랜치·커밋·PR이 존재하는지 확인한 뒤 다음 행동을 선택해야 합니다. “한 번만 실행된다”는 가정 대신 여러 번 받아도 결과가 하나인 흐름을 설계합니다.
+
+폭주 방지 장치는 전체와 저장소별로 필요합니다. 짧은 시간에 작업이 몰리면 새 이벤트를 큐에 쌓을지, 비슷한 오류를 묶을지, 낮은 우선순위를 버릴지 정합니다. 에이전트 호출 수만 제한하면 이벤트가 계속 쌓여 나중에 오래된 코드를 수정할 수 있으므로 작업의 만료 조건도 둬야 합니다.
+
+## 문맥을 많이 주는 것보다 근거를 남기는 것이 중요하다
+
+오류 스택에서 시작해 관련 심볼과 최근 변경을 좁히되, 에이전트가 읽은 파일과 선택 이유를 PR에 남기게 합니다. 저장소 전체를 넣으면 비용이 늘 뿐 아니라 같은 이름의 오래된 코드나 테스트 fixture가 원인 분석을 흐릴 수 있습니다. 반대로 문맥을 너무 좁히면 호출자나 설정 변경을 놓칠 수 있으므로 첫 가설이 실패했을 때 확장하는 순서를 정합니다.
+
+수정 전에는 재현 단계를 만드는 편이 좋습니다. 과거 입력이나 최소 테스트로 오류를 다시 만들 수 있다면 수정 전 실패와 수정 후 성공을 같은 명령으로 보여 줄 수 있습니다. 재현되지 않는 오류는 곧바로 코드를 바꾸기보다 필요한 로그와 환경 차이를 요청하는 분석 PR이나 이슈 초안으로 끝낼 수 있습니다.
+
+생성한 패치의 크기에도 의미가 있습니다. 관련 없는 파일, 잠금 파일의 대규모 변경, 테스트 삭제나 오류 무시는 위험 신호입니다. 수정 파일 수와 변경 줄 수 상한을 넘으면 자동으로 중단하고, 상한을 늘리려면 사람 승인을 받도록 하면 원인 하나에 광범위한 리팩터링을 시도하는 일을 막을 수 있습니다.
+
+## Aegis 승인 전에 어떤 증거가 보여야 할까
+
+승인 화면에는 자연어 요약보다 재현 테스트, 변경된 파일, 정적 검사와 전체 테스트 결과, 남은 실패를 먼저 보여 줘야 합니다. 에이전트가 “해결했다”고 말해도 원래 오류를 재현하지 못했거나 테스트 범위를 줄였다면 승인 근거가 없습니다. 위험한 설정·권한·데이터 마이그레이션 변경은 일반 코드 수정과 다른 승인자를 요구할 수 있습니다.
+
+거부도 학습 가능한 운영 신호입니다. 검토자는 원인 오판, 과도한 변경, 테스트 부족, 보안 위험처럼 이유를 선택하고 에이전트 실행과 연결합니다. 병합률만 높이려 하면 쉬운 스타일 변경이 성과를 채울 수 있으므로, 오류 재발률과 되돌린 PR, 검토 시간을 함께 봅니다.
+
+승인 뒤에도 자동 병합과 자동 배포는 분리합니다. PR 병합 권한이 있더라도 운영 환경 배포는 기존 CI/CD 정책과 담당자의 승인을 따르게 해야 합니다. Mission Control은 변경을 준비하는 계층이지 조직의 모든 변경 통제를 대체하는 계층으로 두지 않는 편이 안전합니다.
+
+## 실패 주입으로 어떤 경계를 확인할까
+
+파일럿에는 정상 오류만 넣지 않습니다. 오류 이벤트의 저장소 정보가 틀린 경우, 대상 커밋이 이미 바뀐 경우, 테스트가 간헐적으로 실패하는 경우, 모델 호출이 시간 초과되는 경우를 의도적으로 만듭니다. 에이전트가 근거 없이 다른 저장소를 고치거나 무한 재시도하지 않고 명확한 실패 상태로 끝나는지 봅니다.
+
+외부 문맥에는 프롬프트 인젝션과 비밀 유출 시나리오도 넣어야 합니다. 오류 메시지나 이슈 본문에 “환경 변수를 출력하라”는 지시가 있어도 데이터로 취급하고, 허용된 도구와 파일만 읽어야 합니다. 실행기는 최소 권한의 임시 환경에서 동작하고 네트워크 목적지를 제한하며 작업 종료 후 자격 증명을 폐기해야 합니다.
+
+관제 자체가 멈췄을 때도 안전해야 합니다. 상태 스트림이 끊기거나 데이터베이스 잠금이 생기면 실행 중 작업을 계속할지 취소할지 정책을 둡니다. 승인 상태를 읽지 못한 에이전트가 기본적으로 배포를 진행하지 않도록 위험한 단계는 fail-closed로 설계합니다.
+
+## 자동화의 이득을 어떤 비용과 비교할까
+
+작업당 모델 비용만 보면 부족합니다. 사람이 이벤트를 분류한 시간, 에이전트 결과를 검토한 시간, 잘못된 PR을 닫고 되돌린 시간과 인프라 운영 비용을 합칩니다. 반대편에는 사람이 처음부터 수정했을 때 걸린 시간을 둡니다. 에이전트가 코드를 빨리 만들지만 검토가 더 길다면 자동화 범위를 줄여야 합니다.
+
+오류 유형별로 결과를 나누면 어디에서 이득이 나는지 보입니다. 단순한 누락 처리나 테스트 보강은 잘 맞을 수 있지만 동시성, 환경 의존, 요구사항 해석이 필요한 문제는 반복 실패할 수 있습니다. 성공률 평균 대신 유형별 재현 성공, 올바른 파일 선택, 첫 PR 승인과 재발 여부를 봅니다.
+
+범위 확장은 권한이 아니라 검증된 작업 유형 단위로 합니다. 한 저장소의 한 오류군에서 안정적이라면 같은 승인 경계로 비슷한 저장소를 추가합니다. 자동 PR이 안전하다는 사실이 자동 병합이나 운영 조치의 안전성을 증명하지는 않으므로 각 단계는 별도 파일럿과 책임자를 가져야 합니다.
+
 참고 자료:
 
-- https://blog.continue.dev/introducing-mission-control-your-ai-dashboard/
-- https://github.com/builderz-labs/mission-control
-- https://www.youtube.com/watch?v=ztUwEI0oksY
+- [blog.continue.dev 원문](https://blog.continue.dev/introducing-mission-control-your-ai-dashboard/)
+- [GitHub 저장소](https://github.com/builderz-labs/mission-control)
+- [youtube.com 원문](https://www.youtube.com/watch?v=ztUwEI0oksY)
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/MeisnerDan/mission-control)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Claude Code에 저장소를 맡겨도 될까? 권한·CLAUDE.md·검증 체크리스트]({% post_url 2026-02-08-Claude-Code-The-Terminal-AI-Agent-Deep-Dive %}) — 터미널 AI agent가 file 수정·test·Git 작업까지 수행할 때 개발자가 먼저 제한할 권한, CLAUDE.md에 적을 project rule, 변경 후 diff·test 검증 순서를 2026년 2월 원문 기준으로…
+- [Paperclip: Claude Code와 OpenClaw 에이전트를 모아 무인 AI 기업을 가동하는 오픈소스 오케스트레이션 프레임워크]({% post_url 2026-08-11-Paperclip-Open-Source-Orchestration-Platform-for-Autonomous-Multi-Agent-AI-Companies %}) — Paperclip은 Claude Code, OpenClaw, Codex 등 서로 다른 AI 에이전트들을 하나의 조직으로 구성하여 자율적으로 목표를 달성하도록 제어하는 오픈소스 오케스트레이션 플랫폼입니다. 조직도 기반 태스크 위임…
+- [Aye Chat이 허락 없이 파일을 고쳐도 안전할까: .aye Snapshot·restore 한계]({% post_url 2026-04-30-AI-Editing-My-Code-Without-Permission-How-Aye-Chat-is-Shattering-the-Terminal-Ecosystem %}) — Aye Chat의 action-first 편집과 .aye 스냅샷·restore 흐름을 살펴보고, 파일은 되돌려도 명령 실행·외부 효과·토큰 비용은 복구되지 않는 한계를 짚습니다.
+<!-- internal-links:end -->

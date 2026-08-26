@@ -1,50 +1,50 @@
 ---
 layout: post
-title: 'eBPF와 Cilium: 사이드카(Sidecar) 없는 서비스 메시는 과연 구원일까, 또 다른 재앙일까?'
+title: 'eBPF·Cilium 서비스 메시를 어떻게 운영할까: 관측·업그레이드·롤백'
 date: '2026-05-31 18:59:12'
 categories: Tech
 tags:
   - 인프라
-  - 오픈소스
-  - AI트렌드
-summary: 무거운 프록시를 파드마다 띄우는 기존의 사이드카 패턴을 벗어나, 커널 레벨에서 네트워크를 제어하는 eBPF와 Cilium의 아키텍처
-  원리, 실무 트러블슈팅 사례, 그리고 도입 전 반드시 고려해야 할 한계점(Trade-offs)을 10년 차 엔지니어의 시선에서 심층 분석합니다.
-author: AI Trend Bot
+  - 웹개발
+  - AI에이전트
+summary: 'eBPF·Cilium 데이터 플레인을 운영할 때 필요한 flow·drop·BPF Map 관측, 정책 배포, agent·proxy 장애 격리, 업그레이드 canary와 롤백 절차를 정리합니다.'
+description: 'Cilium 운영을 flow·drop·Map pressure 관측, 정책 변경 canary, node agent·L7 proxy 장애 runbook, 버전 업그레이드와 데이터 플레인 롤백 기준으로 정리합니다.'
 github_url: https://github.com/FareedKhan-dev/train-llm-from-scratch
+faq:
+  - question: 'Cilium을 쓰면 tcpdump만으로 네트워크 장애를 찾을 수 있나요?'
+    answer: '항상 그렇지는 않습니다. XDP·tc·socket hook에서 처리된 packet은 기존 관찰 지점과 다를 수 있어 flow verdict, drop reason, agent 상태와 BPF Map을 함께 봐야 합니다.'
+  - question: 'CiliumNetworkPolicy는 적용 전에 어떻게 검증하나요?'
+    answer: '허용·거부 traffic fixture와 selector 대상을 확인하고 test namespace와 canary workload에 먼저 적용합니다. 정책 반영 지연과 예상 밖 drop·허용을 관찰한 뒤 확대하세요.'
+  - question: 'Cilium 업그레이드 롤백은 Helm 버전만 되돌리면 끝나나요?'
+    answer: '아닙니다. agent·operator·proxy·CRD와 BPF state 호환성, node image와 connection을 함께 고려해야 합니다. 공식 upgrade path와 사전 rehearsal로 복귀 단계를 검증하세요.'
 image:
   path: https://opengraph.githubassets.com/1/FareedKhan-dev/train-llm-from-scratch
-  alt: 'eBPF and Cilium: Is Sidecar-less Service Mesh a Salvation or Another Disaster?'
+  alt: "FareedKhan-dev/train-llm-from-scratch GitHub 저장소 대표 이미지"
 ---
 
-# eBPF와 Cilium: 사이드카(Sidecar) 없는 서비스 메시는 과연 구원일까, 또 다른 재앙일까?
+eBPF·Cilium 데이터 플레인은 설치보다 운영 모델이 더 중요합니다. packet이 어느 hook에서 허용·drop됐는지, 정책과 BPF Map이 최신인지, agent·L7 proxy 장애가 어디까지 번지는지를 온콜이 설명할 수 있어야 합니다. 업그레이드 전 canary와 검증된 복귀 절차가 없다면 sidecar 비용을 줄이고 더 어려운 장애를 얻을 수 있습니다.
 
-여러분의 쿠버네티스 클러스터, 지금 Istio Envoy 사이드카가 메모리를 얼마나 집어삼키고 있나요? 솔직해집시다. 서비스 메시는 마이크로서비스 아키텍처의 빛과 소금이라고 배웠지만, 막상 현업에 적용해 보면 수십, 수백 개의 파드(Pod)마다 찰싹 달라붙어 있는 Envoy 프록시들을 보며 "이게 진짜 효율적인 아키텍처가 맞나?" 하는 서늘한 현타가 오곤 합니다. 트래픽은 늘어나고, OOM(Out of Memory) 킬러는 엄한 사이드카를 저격하고, 우리는 또다시 Helm 차트의 리소스 Limit을 올리는 무한 굴레에 빠지죠.
+이 글은 [eBPF](https://ebpf.io/), [Cilium](https://cilium.io/), [Cilium 저장소](https://github.com/cilium/cilium)와 [Isovalent 자료](https://isovalent.com/blog/)에 연결된 원문을 바탕으로 운영 질문을 정리합니다. 실제 명령, CRD와 upgrade path는 사용하는 Cilium·Kubernetes·Linux 버전의 공식 문서를 따라야 합니다.
 
-> **💡 한 마디로 요약하면?**
-> eBPF(Extended Berkeley Packet Filter)는 리눅스 커널을 재컴파일하지 않고도 커널 내부 네트워크 계층에 직접 개입할 수 있는 샌드박스 기술입니다. 이를 활용한 Cilium은 무거운 사이드카 프록시 오버헤드를 완전히 걷어내고, 노드 레벨에서 모든 네트워크 패킷과 보안 정책을 O(1)의 속도로 통제해버리는 인프라 생태계의 파괴적 혁신입니다.
+## 운영자는 어떤 control·data plane 상태를 봐야 하는가?
 
----
+control plane은 Service·endpoint·identity와 policy를 계산해 node agent에 전달하고, data plane은 attach된 eBPF program과 Map·proxy에서 packet을 처리합니다. API가 정상이어도 특정 node의 Map이 오래됐거나 program load가 실패하면 일부 pod만 통신하지 못할 수 있습니다. cluster 전체 ‘정상’ 하나가 아니라 node·endpoint별 desired와 realized 상태 차이를 봐야 합니다.
 
-## 🔥 Under the Hood: 커널 레벨에서 패킷을 '합법적으로 납치'하다
+기본 dashboard에는 agent·operator 가용성, endpoint regeneration·policy revision, BPF Map pressure, program load error, conntrack, flow drop reason, DNS와 L7 proxy 오류를 넣습니다. application SLI인 request 성공률·p99와 같은 시간축으로 맞추면 network 변화와 사용자 영향을 연결할 수 있습니다. telemetry backend 자체의 drop과 sampling도 표시해야 ‘관측되지 않음’을 ‘문제 없음’으로 오해하지 않습니다.
 
-제가 처음 eBPF 기반 아키텍처를 접했을 때 든 생각은 "이거 까딱하면 커널 패닉 일으켜서 노드 전체가 죽는 거 아니야?" 였습니다. 보수적인 링 제로(Ring 0) 커널 공간에 유저가 작성한 코드를 주입한다니요. 하지만 eBPF는 **'Verifier(검증기)'**라는 지독하게 깐깐한 문지기를 통해 무한 루프나 허가되지 않은 메모리 접근을 원천 차단합니다. 안전성이 보장된 코드만 커널의 이벤트 훅(Hook)에 적재되는 거죠.
+node image, kernel, Cilium image와 configuration hash를 inventory로 유지하세요. 특정 kernel pool에서만 drop이 늘거나 mixed version upgrade 중 문제가 생길 때 공통점을 빠르게 찾을 수 있습니다. 임시 설정과 debug flag에는 소유자·만료일을 붙여 정상 설정으로 굳지 않게 합니다.
 
-기존의 쿠버네티스 네트워킹(kube-proxy)은 철저히 `iptables`에 의존했습니다. 서비스가 늘어날 때마다 체인 룰이 선형적으로 늘어나고(O(N)), 패킷 하나가 들어오면 이 거대한 룰 셋을 하나하나 통과해야 했죠. 레이턴시 병목이 안 오면 그게 기적입니다. 반면 eBPF는 어떨까요? **XDP(eXpress Data Path)**라는 네트워크 스택의 가장 밑바닥, 즉 NIC(네트워크 인터페이스 카드)에서 커널의 TCP/IP 스택으로 올라가기도 전에 패킷을 가로챕니다.
+## packet이 사라졌을 때 어떤 순서로 좁혀 갈까?
 
-### 📊 아키텍처 벤치마크: iptables vs Istio(Sidecar) vs Cilium(eBPF)
+먼저 client·server 양쪽의 DNS, Service endpoint와 application listen 상태를 확인합니다. 다음으로 source·destination identity, policy verdict와 drop reason을 flow 관측에서 찾고 해당 node의 endpoint·agent 상태를 확인합니다. 그 뒤 BPF Map과 program attachment, route·MTU·cloud firewall로 내려갑니다. 처음부터 모든 Map을 dump하면 신호보다 데이터가 많아집니다.
 
-추상적으로 "성능이 좋습니다" 같은 뜬구름 잡는 소리는 하지 않겠습니다. 1,000개의 서비스를 가진 클러스터에서 10,000 req/s의 부하를 줬을 때의 벤치마크를 비교해보죠.
+XDP, tc 또는 socket hook에서 packet이 처리되면 전통적인 tcpdump 위치에서 기대한 packet이 보이지 않을 수 있습니다. ‘capture에 없음’은 network에 들어오지 않았다는 뜻이 아닙니다. 어느 hook 앞·뒤에서 관찰하는지 기록하고 Hubble 같은 flow 정보, kernel counter와 양끝 synthetic probe를 교차 확인합니다.
 
-| 비교 항목 | kube-proxy (iptables) | Istio (Envoy Sidecar) | Cilium (eBPF XDP) |
-| :--- | :--- | :--- | :--- |
-| **패킷 라우팅 복잡도** | O(N) (규칙에 비례해 느려짐) | 유저 공간 <-> 커널 공간 반복 전환 | **O(1) (eBPF Map 해시 테이블 조회)** |
-| **CPU 오버헤드** | 중간 (규칙 많을 시 급증) | 매우 높음 (파드 당 프록시 존재) | **매우 낮음 (NIC 레벨 직접 처리)** |
-| **지연 시간 (Latency)** | ~5ms (베이스라인) | ~12ms (프록시 홉 추가로 인한 지연) | **~2ms (TCP/IP 스택 우회)** |
-| **메모리 사용량 (100 파드)** | 낮음 | ~5GB (Envoy 50MB * 100) | **~200MB (노드 당 1개 데몬셋)** |
+incident timeline에는 policy·Cilium·kernel·node 변화, endpoint churn과 control plane 단절을 함께 놓습니다. 변경 직후 특정 identity만 거부됐다면 application 재시작보다 policy revision과 Map sync를 먼저 확인할 수 있습니다. 반대로 모든 flow가 허용인데 server가 응답하지 않으면 L7 proxy나 application까지 범위를 옮깁니다.
 
-### 🛠️ 껍데기만 볼 수 없죠, 코드로 까봅시다
+## XDP 예제를 운영 코드로 오해하면 왜 위험한가?
 
-실제 XDP에서 특정 IP 패킷을 분석하고 드롭시키는 eBPF C 코드의 핵심 부분을 볼까요? 현업 개발자라면 이 코드가 얼마나 간결하면서도 폭력적인(?) 퍼포먼스를 낼지 단번에 감이 오실 겁니다.
+원문의 다음 예제는 Ethernet·IPv4 header 경계를 검사한 뒤 특정 주소를 drop하는 개념 조각입니다. IPv6, fragment, Map 기반 목록, byte order와 update·audit를 완성하지 않았고 서비스 메시의 mTLS·L7 기능과도 별개입니다.
 
 ```c
 SEC("xdp")
@@ -52,42 +52,29 @@ int xdp_drop_prog(struct xdp_md *ctx) {
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
 
-    // 1. 이더넷 헤더 파싱
     struct ethhdr *eth = data;
     if (data + sizeof(struct ethhdr) > data_end)
         return XDP_PASS;
 
-    // 2. IP 헤더 파싱 및 특정 로직 적용 (커널 네트워크 스택을 타기도 전에!)
     struct iphdr *ip = data + sizeof(struct ethhdr);
     if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end)
         return XDP_PASS;
 
-    // 3. 예: 특정 악성 IP를 발견했다면 즉시 DROP
-    if (ip->saddr == bpf_htonl(0x0A000001)) { // 10.0.0.1
-        return XDP_DROP; // iptables까지 갈 필요도 없이 랜카드에서 폐기!
+    if (ip->saddr == bpf_htonl(0x0A000001)) {
+        return XDP_DROP;
     }
 
     return XDP_PASS;
 }
 ```
-위 코드가 컴파일되어 커널에 적재되면, TCP 세션을 맺는 과정이나 소켓 버퍼(sk_buff)를 할당하는 오버헤드가 말 그대로 **'0'**입니다. 그냥 하드웨어 드라이버 수준에서 패킷을 찢어버리는 거죠.
 
-덧붙여, eBPF의 진짜 마법은 **'Socket-Based Load Balancing'**에서 나타납니다. 통신하려는 두 파드가 같은 노드 안에 있다면, eBPF는 `sock_ops` 훅을 이용해 네트워크 스택 전체를 바이패스하고 두 파드의 소켓을 메모리 단에서 직접 연결(Short-circuit)해버립니다. "어? 너네 같은 노드에 있네? 랜카드까지 내려갈 필요 없이 여기서 바로 데이터 주고받아." 이게 가능해집니다.
+운영 program은 artifact hash와 source·compiler version을 추적하고 허용 node·interface에서만 attach합니다. 새로운 drop 조건은 test packet, replay와 canary에서 false positive를 검사하고, attach 전 기존 program과 충돌을 확인합니다. emergency detach 명령은 권한 있는 담당자가 rehearsal해야 합니다.
 
----
+고속 경로의 debug print나 모든 packet event 수집은 CPU와 storage를 소모할 수 있습니다. 문제 재현 시간과 endpoint를 제한하고 sampling 뒤 원상 복구합니다. 관측을 켠 행위가 성능 문제를 더 악화시키지 않는지도 runbook에 포함합니다.
 
-## 🎯 현업 밀착형 시나리오: 우리가 eBPF에 열광해야 하는 진짜 이유
+## 네트워크 정책 변경은 어떻게 안전하게 배포할까?
 
-뻔한 튜토리얼 예시가 아닌, 현업에서 피눈물 흘려본 분들이라면 격하게 공감할 시나리오를 준비했습니다.
-
-### Case 1: 블랙프라이데이, 수천 개의 파드가 미친 듯이 스케일 아웃될 때
-트래픽 스파이크로 인해 HPA(Horizontal Pod Autoscaler)가 작동합니다. 기존 Istio 환경에서는 파드가 뜰 때마다 Envoy 컨테이너도 같이 초기화되어야 합니다. "Envoy가 아직 준비 안 됐어요!" 라며 트래픽을 거부하는 503 에러나 Readiness Probe 실패를 본 적 있으시죠? 반면, Cilium과 같은 eBPF 기반 메시에서는 파드 내부에 프록시를 띄울 필요가 없습니다. 노드에 이미 떠 있는 Cilium 데몬이 eBPF Map(커널과 유저 공간이 공유하는 인메모리 데이터 구조)을 업데이트하는 즉시 모든 네트워크 정책이 적용됩니다. 스케일아웃 속도와 안정성 자체가 아예 다른 차원입니다.
-
-### Case 2: "대체 패킷이 어디서 증발한 거야?" - 레거시 연동 시의 딥 트러블슈팅
-클라우드 네이티브 환경에서 온프레미스 레거시 DB와 통신할 때 발생하는 간헐적인 딜레이 타임아웃. 원인을 찾으려고 노드에 접속해 tcpdump를 뜨고 Wireshark 파일로 다운받아 눈알 빠지게 분석하느라 밤샌 적 많으시죠? eBPF는 소켓, TCP 스택, 커널 함수 등 모든 곳에 **'Kprobe(Kernel Probe)'**를 박아 넣을 수 있습니다. Cilium의 관측성 툴인 Hubble을 켜면, "A 파드에서 B 레거시 IP로 나가는 SYN 패킷이 리눅스 커널의 어떤 특정 함수(예: `tcp_v4_connect`)에서 드롭되었는지"를 시각적인 UI로 낱낱이 까발려줍니다. 이거 한 번 맛보면 절대 예전의 눈먼 디버깅 시절로 못 돌아갑니다.
-
-### Case 3: 클라우드 벤더 종속성(Lock-in) 탈피
-EKS, AKS, GKE... 각 클라우드 벤더마다 제공하는 CNI 플러그인과 보안 정책 문법이 미묘하게 다릅니다. 이기종 클러스터나 하이브리드 클라우드를 운영하는 DevOps 팀은 정책 동기화에 죽어나는 거죠. Cilium을 통합 CNI로 사용하면 밑단이 AWS든 온프레미스 베어메탈이든 완벽하게 동일한 선언적 정책을 적용할 수 있습니다. 예를 들어, L7 레벨에서 특정 HTTP 메서드만 허용하는 정책을 아래와 같이 작성할 수 있습니다.
+원문의 CiliumNetworkPolicy 조각은 `backend-api`로 들어오는 8080/TCP 중 GET·특정 path를 허용하려는 예시입니다. 실제 지원·proxy 경로, 다른 method와 기존 connection 동작은 버전과 구성에서 검증해야 합니다.
 
 ```yaml
 apiVersion: "cilium.io/v2"
@@ -108,40 +95,66 @@ spec:
         - method: "GET"
           path: "/public/.*"
 ```
-이 얌전해 보이는 YAML 파일이 백그라운드에서는 eBPF Map과 노드 레벨의 분산 프록시를 통해 즉각적이고 전역적으로 반영됩니다. 앱을 재시작할 필요 없이 커널이 알아서 GET 외의 요청을 튕겨냅니다.
 
----
+배포 전에 selector가 선택하는 실제 endpoint 수와 현재 허용 flow를 미리 봅니다. test namespace에서 GET·POST, 일치·불일치 path, health check와 운영에 필요한 내부 호출을 fixture로 실행합니다. canary workload에 정책을 먼저 적용하고 예상 allow·deny, proxy error와 policy revision 반영 시간을 관찰합니다.
 
-## ⚖️ 시니어의 깐깐한 시선: 과연 만병통치약일까요? (Trade-offs)
+정책 diff에는 새 허용뿐 아니라 제거되는 허용, 대상 endpoint 변화와 rollback manifest를 표시합니다. emergency 때문에 광범위한 allow를 넣었다면 만료와 제거 조건을 설정합니다. 정책 적용 실패를 ‘안전하게 이전 상태 유지’로 볼지 ‘부분 적용’ 가능성이 있는지 제품 동작을 확인하고 node별 realized revision을 검사합니다.
 
-여기까지 들으면 당장 내일 출근해서 "팀장님, 우리도 당장 Istio 걷어내고 eBPF 도입합시다!" 하고 싶으실 겁니다. 하지만 10년 차 엔지니어의 짬바구니에서 우러나온 경험상, 세상에 은탄환(Silver Bullet)은 절대 없습니다. 도입 전 반드시 뼈저리게 짚고 넘어야 할 현실적인 한계점들을 비판해보겠습니다.
+## agent와 L7 proxy 장애는 어떻게 격리할까?
 
-**1. 커널 버전의 저주 (Kernel Dependency)**
-eBPF의 강력한 최신 기능(BPF Ring Buffer, 최신 XDP 훅 등)을 제대로 쓰려면 최소 Linux 커널 5.8 이상, 권장 5.15 이상이 강제됩니다. 만약 여러분의 회사가 보수적인 금융권이고 RHEL 7(커널 3.10) 기반의 폐쇄망 시스템을 쓰고 있다면? eBPF는 그림의 떡입니다. 깔끔하게 포기하셔야 합니다.
+node agent 재시작 중 기존 connection과 신규 connection이 어떻게 동작하는지 시험합니다. control plane이 끊겼을 때 마지막 정책이 유지되는지, 새 endpoint가 준비되지 않는지와 복구 뒤 stale state가 정리되는지를 runbook에 적습니다. agent가 죽었다는 alert만이 아니라 해당 node의 사용자 SLI와 연결해 우선순위를 정합니다.
 
-**2. 블랙박스의 공포와 디버깅 툴 체인의 부재 (Observability Paradox)**
-iptables는 구리지만 직관적입니다. 최소한 `iptables -L`을 치면 룰이 눈에 보이니까요. 그런데 eBPF는 커널 내부에서 컴파일된 바이너리로 은밀하게 동작합니다. 네트워크 라우팅이 꼬였을 때 `bpftool` 명령어로 eBPF Map의 헥사(Hex) 값을 직접 덤프 떠서 분석할 수 있는 인력이 사내에 몇 명이나 될까요? 추상화 수준이 높은 만큼, 그 추상화가 한 번 깨졌을 때 디버깅의 난이도는 상상을 초월합니다.
+sidecarless 구성도 L7 기능을 위해 node-level proxy를 사용할 수 있습니다. proxy 과부하나 crash의 blast radius가 pod 하나가 아니라 node의 여러 workload로 커질 수 있으므로 L7 traffic 양, queue·connection, memory와 restart를 따로 관측합니다. L4-only service와 L7 proxy 경로를 분리하면 장애 때 영향을 받지 않는 traffic을 유지하기 쉽습니다.
 
-**3. 완벽한 사이드카의 대체재인가? (L7 딜레마)**
-커널 레벨에서 L3/L4 네트워크 통제는 예술에 가깝습니다. 하지만 HTTP 헤더 기반 라우팅, gRPC 양방향 스트리밍 트레이싱 같은 복잡한 애플리케이션 계층(L7) 처리는 커널 밖(유저 공간)에서 처리하는 게 아키텍처상 더 효율적입니다. Cilium 역시 복잡한 L7 처리를 위해서는 노드 레벨에 데몬셋 형태로 별도의 Envoy 프록시를 띄워 트래픽을 위임합니다. 즉, 파드마다 붙어있던 프록시를 노드 당 하나로 줄였을 뿐, 아키텍처에서 L7 프록시 자체를 완전히 멸종시킨 것은 아닙니다.
+Map pressure나 identity 할당 지연에는 단순 agent restart보다 원인을 먼저 봅니다. 제한을 무작정 늘리면 memory가 고갈될 수 있고 restart가 상태 재생성을 한꺼번에 유발할 수 있습니다. capacity threshold, endpoint churn rate와 cleanup 상태를 보고 traffic drain·node 교체·확장 중 안전한 대응을 선택합니다.
 
-**4. 새로운 벤더 락인 (Vendor Lock-in)**
-클라우드 서비스 제공자(CSP) 종속성에서는 벗어났지만, 역설적으로 Cilium 생태계를 쥐락펴락하는 특정 기업(Isovalent, 최근 Cisco에 인수됨)에 대한 의존도가 극도로 높아집니다. 오픈소스 버전과 엔터프라이즈 버전 간의 핵심 기능 격차(고급 BGP 연동, 멀티 클러스터 보안 가시성 등)를 고려하면 비용 청구서가 또 다른 형태로 날아올 수 있습니다.
+## 업그레이드와 롤백은 어떤 단위로 연습해야 하는가?
 
----
+upgrade 전 공식 호환 경로, Kubernetes·kernel·CRD와 설정 변경을 확인하고 현재 state·manifest와 node image를 snapshot합니다. 별도 cluster에서 policy·Service·DNS·L7·encryption과 node reboot suite를 통과한 뒤 작은 node pool을 canary로 올립니다. data plane upgrade와 kernel·CNI·ingress 변경을 같은 창에 묶지 않습니다.
 
-## 🚀 마치며: IT 생태계의 패러다임 시프트, 우리의 스탠스는?
+canary 동안 endpoint regeneration, program load, Map migration, connection reset, drop·error와 application p99를 이전 pool과 비교합니다. 버전이 섞인 기간의 지원 범위와 최대 시간을 정하고, 다음 batch는 on-call과 service owner가 승인합니다. 새 기능을 즉시 켜지 말고 version upgrade 안정화 뒤 별도 변경으로 배포하면 rollback을 단순화할 수 있습니다.
 
-결론을 내리겠습니다. eBPF는 단순하게 "iptables보다 빠른 네트워크 플러그인" 정도로 치부할 기술이 아닙니다. 리눅스 시스템과 쿠버네티스가 소통하는 방식 자체를 밑바닥부터 뜯어고치고 있는 **'운영체제 레벨의 혁명'**입니다.
+rollback은 Helm release만 되돌리는 명령이 아닐 수 있습니다. CRD·Map·proxy와 agent state의 하위 호환성, 이미 바뀐 node image와 장기 connection을 고려해야 합니다. 검증된 이전 image의 새 node pool로 workload를 drain해 옮기는 방식도 준비하고, 양쪽 datapath가 동시에 route를 소유하지 않게 전환 순서를 명시합니다.
 
-만약 지금 아무런 기술 부채가 없는 신규 그린필드(Greenfield) 프로젝트를 설계 중이시라면, 주저 없이 eBPF 기반의 Cilium 도입을 검토하시기 바랍니다. 하지만 이미 Istio가 끈끈하게 잘 돌아가고 있는 레거시 클러스터 환경이라면 무리해서 전환할 필요는 없습니다. 섣부른 전환은 'eBPF 디버깅 역량 부족'이라는 더 끔찍한 부채를 낳을 수 있으니까요.
+## incident 후 무엇을 남겨야 다음 장애가 짧아질까?
 
-분명한 사실은, 파드마다 무거운 프록시를 욱여넣는 사이드카 패턴은 점차 과도기적인 레거시 기술로 기억될 것이며, 클라우드 인프라의 미래는 커널 내부로 깊숙이, 그리고 가볍게 스며들고 있다는 점입니다. 당장 내일 eBPF C 코드를 짜지 않더라도, 이 기술이 마이크로서비스의 '물리적 한계'를 어떻게 우아하게 돌파하고 있는지 현업 엔지니어로서 반드시 예의주시해야 합니다.
+사용자 영향, 최초 drop 또는 policy 변화, control·data plane 상태와 어떤 관측이 비어 있었는지 timeline으로 남깁니다. 근본 원인을 ‘eBPF 문제’처럼 넓게 쓰지 말고 특정 policy revision, Map stale, loader 실패, MTU 또는 proxy saturation처럼 재현 가능한 조건으로 좁힙니다.
 
-항상 명심하세요. 기술의 밑바닥(Under the Hood) 작동 원리를 이해하고 치열하게 의심하는 자만이, 다음 세대의 거대한 기술적 파도를 올라탈 수 있습니다.
+재발 방지는 dashboard 하나 추가로 끝내지 않습니다. synthetic probe, policy fixture, preflight, upgrade suite와 rollback rehearsal 중 어느 단계에서 잡혔어야 하는지 연결합니다. 임시 debug 권한·broad allow policy와 pinned Map이 제거됐는지 incident 종료 checklist에서 확인합니다.
+
+운영 합격 기준은 정상 때 낮은 latency뿐 아니라 장애 때 packet 경로를 설명하고 제한 시간 안에 안전한 상태로 복귀하는 능력입니다. 이 기준을 정기 game day에서 재검증하면 eBPF 데이터 플레인이 블랙박스가 아니라 관리 가능한 기반이 됩니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/FareedKhan-dev/train-llm-from-scratch)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Cilium eBPF로 kube-proxy를 바꿀 때: iptables 병목·Hubble·L7 경계]({% post_url 2026-05-25-The-End-of-the-Sidecar-Era-How-eBPF-is-Rewiring-Kubernetes-Networking-from-the-Kernel-Up %}) — Kubernetes 서비스·정책 경로를 Cilium eBPF 데이터 플레인으로 옮길 때의 Map·소켓 경로와 Hubble 관측성을 살펴보고, L7 프록시와 커널 운영 조건을 점검합니다.
+- [iptables에서 Cilium으로 어떻게 옮길까: 단계별 마이그레이션과 복귀 기준]({% post_url 2026-05-30-Escaping-the-iptables-Swamp-Why-a-10-Year-Backend-Dev-Surrendered-to-eBPF-and-Cilium %}) — 쿠버네티스 kube-proxy·iptables 환경을 Cilium eBPF 데이터 플레인으로 옮길 때 필요한 현황 조사, 정책 동등성, 노드 풀 canary와 롤백 기준을 정리합니다.
+- [사이드카를 없애도 될까: eBPF 서비스 메시의 경계와 선택 기준]({% post_url 2026-05-29-The-End-of-Sidecar-Pattern-How-eBPF-is-Disrupting-Service-Mesh-at-the-Kernel-Level %}) — eBPF·Cilium이 파드별 프록시의 L3/L4 역할을 어디까지 줄일 수 있는지 살펴보고, mTLS·L7 라우팅·관측 요구에 따라 사이드카 유지 여부를 판단합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Cilium을 쓰면 tcpdump만으로 네트워크 장애를 찾을 수 있나요?
+
+항상 그렇지는 않습니다. XDP·tc·socket hook에서 처리된 packet은 기존 관찰 지점과 다를 수 있어 flow verdict, drop reason, agent 상태와 BPF Map을 함께 봐야 합니다.
+
+### CiliumNetworkPolicy는 적용 전에 어떻게 검증하나요?
+
+허용·거부 traffic fixture와 selector 대상을 확인하고 test namespace와 canary workload에 먼저 적용합니다. 정책 반영 지연과 예상 밖 drop·허용을 관찰한 뒤 확대하세요.
+
+### Cilium 업그레이드 롤백은 Helm 버전만 되돌리면 끝나나요?
+
+아닙니다. agent·operator·proxy·CRD와 BPF state 호환성, node image와 connection을 함께 고려해야 합니다. 공식 upgrade path와 사전 rehearsal로 복귀 단계를 검증하세요.
 
 ## References
-- https://ebpf.io/
-- https://cilium.io/
-- https://github.com/cilium/cilium
-- https://isovalent.com/blog/
+
+- [ebpf.io 원문](https://ebpf.io/)
+- [cilium.io 원문](https://cilium.io/)
+- [GitHub 저장소](https://github.com/cilium/cilium)
+- [isovalent.com 원문](https://isovalent.com/blog/)

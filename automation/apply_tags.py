@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """_posts의 글에 통제 어휘 기반 태그를 부여한다.
 
-Chirpy의 관련글 추천은 태그 교집합으로 동작하는데 612편 중 3편에만 태그가 있어
+Chirpy의 관련글 추천은 태그 교집합으로 동작하는데 대부분의 글에 통제 태그가 없어
 사실상 꺼져 있는 상태였다. 이 스크립트가 그 구멍을 메운다.
 
     python automation/apply_tags.py            # 드라이런: 분포만 출력, 파일 미변경
@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tag_taxonomy import (  # noqa: E402
     CATEGORY_FALLBACK,
+    DEFAULT_FALLBACK,
     DEMOTED,
     GENERIC_RATIO,
     MAX_TAGS,
@@ -38,7 +39,14 @@ POSTS_GLOB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "_po
 _CODE_FENCE = re.compile(r"```.*?```", re.S)
 _INLINE_CODE = re.compile(r"`[^`\n]+`")
 _URL = re.compile(r"https?://\S+")
-_HTML_TAG = re.compile(r"<[^>]+>")
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+_HTML_TAG = re.compile(r"</?[A-Za-z][^>\n]*>")
+_INTERNAL_LINK_BLOCK = re.compile(
+    r"<!-- internal-links:start -->.*?<!-- internal-links:end -->", re.S
+)
+_PRIMARY_SOURCE_BLOCK = re.compile(
+    r"<!-- primary-sources:start -->.*?<!-- primary-sources:end -->", re.S
+)
 
 # 본문 언급 점수의 상한. 제목 매칭(TITLE_WEIGHT)을 넘지 않게 잡아,
 # 본문에서 100번 언급돼도 제목에 박힌 주제를 이기지 못하게 한다.
@@ -81,9 +89,12 @@ def clean_title(raw: str) -> str:
 
 
 def strip_noise(body: str) -> str:
+    body = _INTERNAL_LINK_BLOCK.sub(" ", body)
+    body = _PRIMARY_SOURCE_BLOCK.sub(" ", body)
     body = _CODE_FENCE.sub(" ", body)
     body = _INLINE_CODE.sub(" ", body)
     body = _URL.sub(" ", body)
+    body = _HTML_COMMENT.sub(" ", body)
     body = _HTML_TAG.sub(" ", body)
     return body
 
@@ -116,7 +127,7 @@ def score_post(title: str, body: str) -> dict[str, int]:
 def tags_for(title: str, body: str, category: str = "") -> list[str]:
     """제목, 본문, 카테고리로 태그를 뽑는 단일 진입점. 자동 발행 봇이 호출한다.
 
-    기존 612편과 같은 통제 어휘와 같은 강등 기준을 쓰므로, 새 글이 옛 글과
+    기존 코퍼스와 같은 통제 어휘와 같은 강등 기준을 쓰므로, 새 글이 옛 글과
     태그로 이어져 관련글 추천이 끊기지 않는다.
     """
     rec = {
@@ -170,6 +181,12 @@ def pick_tags(rec, generic: set[str]) -> list[str]:
                 tags.append(extra)
             if len(tags) >= MIN_TAGS:
                 break
+    if len(tags) < MIN_TAGS:
+        for extra in DEFAULT_FALLBACK:
+            if extra not in tags:
+                tags.append(extra)
+            if len(tags) >= MIN_TAGS:
+                break
     if not tags:
         # 어느 패턴에도 안 걸린 글. 태그가 0개면 관련글에서 완전히 고립된다.
         tags = ["AI트렌드"]
@@ -183,9 +200,9 @@ def render_tags_block(tags: list[str]) -> str:
 def write_tags(text: str, fm: str, tags: list[str]) -> str:
     """프론트매터에 tags 블록을 주입(또는 교체)한다."""
     block = render_tags_block(tags)
-    existing = re.search(r"^tags:\s*(?:\n(?:[ \t]*-[ \t]*.*\n)*|.*\n)", fm + "\n", re.M)
+    existing = re.search(r"^tags:[^\n]*(?:\n[ \t]*-[^\n]*)*", fm, re.M)
     if existing:
-        new_fm = (fm + "\n").replace(existing.group(0), block, 1).rstrip("\n")
+        new_fm = fm[: existing.start()] + block.rstrip("\n") + fm[existing.end() :]
     else:
         # categories 바로 뒤에 붙여 관련 필드끼리 모아둔다.
         cat = re.search(r"^categories:.*$", fm, re.M)

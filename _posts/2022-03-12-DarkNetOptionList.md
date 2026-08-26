@@ -1,4 +1,7 @@
 ---
+source_citations:
+  - name: "Darknet option_list.c 고정 커밋 원본"
+    url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/option_list.c"
 layout: post
 title:  "Darknet data.cfg 옵션이 조용히 잘못 읽히는 이유: '=' 파싱과 문자열 수명"
 date:   2022-03-12 16:00 -0400
@@ -8,10 +11,17 @@ image:
   alt: DarkNet 시리즈 - Option List 대표 이미지
 tags:
   - DarkNet
-  - Config Parser
-  - C언어
+  - 컴퓨터비전
 summary: "Darknet option_list.c가 설정 한 줄을 key와 value로 나누는 과정, used 추적, 기본값 처리, 원본 문자열에 기대는 메모리 소유권을 코드 중심으로 점검합니다."
+description: "Darknet option_list.c의 in-place key=value parsing, used 상태와 atoi·atof 기본값을 따라 빈 key·NULL value·문자열 수명 실패를 설명합니다."
 math: true
+faq:
+  - question: "등호가 없는 설정 줄은 현재 read_option에서 거부되나요?"
+    answer: "아닙니다. Loop가 len에서 끝나 조건을 통과해 val이 NULL인 항목이 삽입될 수 있습니다."
+  - question: "option_insert는 key와 value 문자열을 복사하나요?"
+    answer: "아닙니다. 원본 line buffer 안의 pointer를 저장하므로 그 buffer 수명이 option 사용보다 길어야 합니다."
+  - question: "quiet 조회는 used 상태도 바꾸지 않나요?"
+    answer: "아닙니다. 기본값 메시지만 생략하며 key가 있으면 일반 조회처럼 used를 1로 바꿉니다."
 ---
 
 Darknet의 옵션 파서는 `key=value` 한 줄을 직접 잘라 보관하므로, `=`이 없는 줄과 문자열 수명을 먼저 점검해야 합니다. 특히 현재 `read_option`은 `=`이 전혀 없는 줄을 정상적으로 거부하지 못합니다.
@@ -192,3 +202,67 @@ metadata get_metadata(char *file)
 중요한 순서는 `get_labels(name_list)`가 `free_list(options)`보다 먼저 실행된다는 점입니다. `name_list`가 옵션 줄 내부를 가리키므로, 리스트를 정리한 뒤 이 포인터를 다시 쓰는 구조로 순서를 바꾸면 수명 문제가 생길 수 있습니다.
 
 설정 문제를 추적할 때는 다음 네 가지를 함께 보면 됩니다. 원문 한 줄에 `=`이 실제로 있는지, 변환 전에 문자열 형식이 맞는지, 필요한 키가 `used`로 표시됐는지, 옵션 리스트를 정리한 뒤에도 내부 포인터를 보관하고 있지 않은지입니다.
+
+## Parser 입력 표에는 어떤 줄을 넣나요?
+
+`key=value`, `key=`, `=value`, `key`, 여러 등호, 앞뒤 공백과 inline comment를 각각 넣고 성공 여부와 key·val을 기록합니다. 최소 조건은 등호를 실제로 찾고 key와 value가 비어 있지 않은지 확인하는 것입니다. 허용할 문법을 정하지 않은 채 strip 결과만 믿으면 오타가 default 설정으로 조용히 넘어갑니다.
+
+Duplicate key가 있으면 첫 항목을 반환하는지 마지막 값을 덮는지 현재 순회 순서를 확인하고 경고 정책을 둡니다. Case sensitivity와 공백 normalization도 실제 cfg와 일치시킵니다.
+
+## 숫자 Conversion을 어떻게 안전하게 하나요?
+
+`atoi`와 `atof`는 잘못된 문자열과 정상 0을 구분하기 어렵고 trailing text도 놓칠 수 있습니다. 변환 종료 pointer와 overflow를 확인하는 함수로 전체 문자열이 소비됐는지 검사하고, batch·width·probability처럼 옵션별 범위도 검증합니다. Default 사용과 명시적 0을 로그에서 구분합니다.
+
+Used를 변환 성공 전에 표시하면 잘못된 값도 unused 진단에서 사라집니다. 조회, parse와 validation 상태를 분리하거나 오류를 즉시 반환합니다.
+
+## Memory를 어떤 순서로 해제하나요?
+
+Key는 allocation 시작, val은 같은 block 중간 pointer이므로 둘을 각각 free하지 않습니다. Kvp, 원본 line, node와 list 구조체 중 누가 무엇을 소유하는지 표로 정하고 한 번씩 해제합니다. Metadata처럼 value를 사용해 외부 data를 먼저 load한 뒤 option storage를 정리합니다.
+
+Option pointer를 장기 보관해야 한다면 별도 문자열 copy를 만든다. List만 free했을 때 contents와 line이 남는지 또는 함께 사라지는지는 실제 free helper와 대조해 leak·dangling pointer를 sanitizer로 확인합니다.
+
+## Duplicate와 Unknown Option을 어떻게 다루나요?
+
+같은 key가 두 번 나오면 현재 front 순회에서 어느 값을 반환하는지 확인하고, 조용히 첫 값만 쓰는 대신 line 번호와 함께 중복을 보고합니다. Unknown option은 `option_unused`로 찾되 조회만 하고 실제 적용하지 않은 값도 used가 될 수 있다는 한계를 보완합니다. Parser가 지원하는 key 목록과 type·범위를 section별로 검증하는 편이 명확합니다.
+
+Deprecated key를 alias할 때는 두 이름이 동시에 있으면 우선순위를 정합니다. 오타를 default로 바꾸는 행동은 학습을 실행되게 만들지만 잘못된 설정을 숨기므로 required option과 optional default를 구분합니다.
+
+## 문자열 안의 특수 문자는 어떻게 처리하나요?
+
+현재 첫 등호에서 key와 val을 나누므로 value 안 추가 등호는 남을 수 있습니다. Inline `#`·`;`를 comment로 볼지 literal로 볼지, 따옴표와 escape를 지원하는지 문법을 명시합니다. Path에 공백이나 등호가 들어간 fixture로 실제 strip 결과를 확인합니다.
+
+빈 line 검사 전에 line[0]을 읽는 흐름과 UTF-8 key 비교도 안전한지 봅니다. Config encoding과 newline을 고정해 플랫폼별 차이를 줄입니다.
+
+## Metadata Pointer 수명을 어떻게 테스트하나요?
+
+Option에서 받은 names path를 list free 전과 후에 읽는 최소 test를 만들고, get_labels가 내부에서 즉시 copy 또는 file load를 마치는지 확인합니다. Long-lived reference가 필요하면 value를 독립 copy해 option storage와 수명을 분리합니다.
+
+Read/free를 반복해 원본 line, kvp, node와 list가 정확히 한 번씩 해제되는지 sanitizer로 봅니다. Parse 실패 line은 즉시 free되고 성공 line은 option owner가 정리하는 경로가 달라야 합니다.
+
+## 자주 남는 질문
+
+### 등호가 없는 설정 줄은 현재 read_option에서 거부되나요?
+
+아닙니다. Loop가 len에서 끝나 조건을 통과해 val이 NULL인 항목이 삽입될 수 있습니다.
+
+### option_insert는 key와 value 문자열을 복사하나요?
+
+아닙니다. 원본 line buffer 안의 pointer를 저장하므로 그 buffer 수명이 option 사용보다 길어야 합니다.
+
+### quiet 조회는 used 상태도 바꾸지 않나요?
+
+아닙니다. 기본값 메시지만 생략하며 key가 있으면 일반 조회처럼 used를 1로 바꿉니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Darknet option_list.c 고정 커밋 원본](https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/option_list.c)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Darknet layer 구조를 해제할 때 왜 터질까: LAYER\_TYPE과 free\_layer 소유권]({% post_url 2022-03-04-DarkNetLayer %}) — Darknet의 LAYER_TYPE enum이 실행 분기를 만드는 방식과 free_layer가 선택적 버퍼를 해제할 때 확인해야 할 메모리 소유권을 짚습니다.
+- [Darknet network.c 학습·예측 흐름: subdivisions 업데이트와 포인터 수명 함정]({% post_url 2022-03-10-DarkNetNetwork %}) — Darknet network가 layer forward·backward·update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다.
+- [Darknet RNN의 State 포인터가 깨질 때: batch·steps 메모리 계약 읽기]({% post_url 2022-03-16-DarkNetRNNLayer %}) — Darknet rnn_layer가 세 connected layer를 시간축으로 이동시키는 구조와 batch를 steps로 나누는 이유, state 포인터·shortcut·역방향 순회의 위험 조건을 코드로 점검합니다.
+<!-- internal-links:end -->

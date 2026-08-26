@@ -1,4 +1,7 @@
 ---
+source_citations:
+  - name: "Darknet parser.c 고정 커밋 원본"
+    url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/parser.c"
 layout: post
 title:  "Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스·STEPS·가중치 순서"
 date:   2022-03-13 16:00 -0400
@@ -8,10 +11,17 @@ image:
   alt: DarkNet 시리즈 - Parser 대표 이미지
 tags:
   - DarkNet
-  - CFG Parser
-  - Weight Format
+  - 컴퓨터비전
 summary: "Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록·route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다."
+description: "Darknet parser.c의 cfg section·shape propagation·route·comma list와 binary weight 순서를 따라 NULL·index·metadata 호환 실패를 설명합니다."
 math: true
+faq:
+  - question: "인식하지 못한 layer section을 경고만 하고 계속해도 되나요?"
+    answer: "안 됩니다. 0으로 초기화된 layer가 저장되어 이후 shape propagation과 output 탐색까지 연쇄적으로 깨질 수 있습니다."
+  - question: "Route의 layers option은 왜 NULL 검사 순서가 중요한가요?"
+    answer: "제시된 코드는 NULL 검사 전에 strlen을 호출해 option이 없으면 의도한 오류 처리 전에 crash할 수 있습니다."
+  - question: "Weight 파일을 읽을 때 layer shape만 맞으면 충분한가요?"
+    answer: "아닙니다. Header version·seen 크기와 layer별 저장 순서, BatchNorm·binary·dontload 옵션이 writer와 같아야 합니다."
 ---
 
 Darknet의 `cfg` 문제를 찾으려면 개별 옵션보다 먼저 “섹션 읽기 → 레이어 생성 → 출력 크기 전파 → 가중치 로드” 순서를 따라가야 합니다. 이 구현에는 잘못된 `route` 설정이나 쉼표 목록 하나가 NULL 접근 또는 어긋난 가중치 읽기로 이어질 수 있는 지점이 있습니다.
@@ -418,3 +428,31 @@ void save_weights_upto(network *net, char *filename, int cutoff)
 ```
 
 이 소스의 `fread`와 `fwrite`는 실제로 처리한 항목 수를 검사하지 않습니다. 잘린 파일이나 다른 구조의 파일도 중간까지는 조용히 읽힐 수 있으므로, 이식하거나 고칠 때는 각 호출의 반환값과 예상 파일 크기를 검증해야 합니다. Parser 디버깅은 cfg 문법에서 끝나지 않습니다. 최종 레이어 배열의 모양과 가중치 스트림 위치까지 일치해야 네트워크가 같은 의미로 재구성됩니다.
+
+## 자주 남는 질문
+
+### 인식하지 못한 layer section을 경고만 하고 계속해도 되나요?
+
+안 됩니다. 0으로 초기화된 layer가 저장되어 이후 shape propagation과 output 탐색까지 연쇄적으로 깨질 수 있습니다.
+
+### Route의 layers option은 왜 NULL 검사 순서가 중요한가요?
+
+제시된 코드는 NULL 검사 전에 strlen을 호출해 option이 없으면 의도한 오류 처리 전에 crash할 수 있습니다.
+
+### Weight 파일을 읽을 때 layer shape만 맞으면 충분한가요?
+
+아닙니다. Header version·seen 크기와 layer별 저장 순서, BatchNorm·binary·dontload 옵션이 writer와 같아야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Darknet parser.c 고정 커밋 원본](https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/parser.c)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적]({% post_url 2022-03-09-DarkNetMaxpool %}) — Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다.
+- [Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법]({% post_url 2022-03-17-DarkNetRouteLayer %}) — Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w·out_h·out_c가 0이 되는 조건, delta 누적 방식을 설명합니다.
+<!-- internal-links:end -->

@@ -9,7 +9,7 @@ categories: Tech
 tags:
   - OpenAI
   - AI서비스
-  - AI트렌드
+  - MLOps
 description: OpenAI가 프론티어 API 모델을 위한 제로 데이터 보존(ZDR)과 Private Safety Processing을 발표했습니다. 금융과 의료 기업의 데이터 유출 걱정 없는 AI 도입 길을 상세히 정리합니다.
 summary: OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력 데이터가 저장되지 않으며 고객 동의 없이는 모델 학습에 활용되지 않습니다. OpenAI는 2026년 9월 기술 백서 공개와 함께 순차적 적용을 시작할 예정입니다.
 article_type: NewsArticle
@@ -82,7 +82,7 @@ flowchart TD
     N3 --> N4
 ```
 
-OpenAI Zero Data Retention and Private Safety Processing 관련 새 소식을 오늘 확인 가능한 직접 원문 범위에서 정리했습니다. 자동 검증 기준을 모두 충족하지 못한 날에도 발행을 건너뛰지 않기 위한 간결한 브리핑이며, 확인되지 않은 내용은 단정하지 않습니다.
+이번 발표의 직접적인 의미는 **조건을 충족하는 프론티어 API 배포에서** 처리 후 프롬프트와 출력을 보관하지 않는 ZDR 옵션을 제공한다는 것입니다. 모든 OpenAI 제품과 계정에 자동 적용된다는 뜻은 아니며, Private Safety Processing도 아직 일반 제공이 아니라 미리보기 단계입니다. 기업은 “저장하지 않음”, “학습에 쓰지 않음”, “직원이 내용을 보지 않고 안전 신호를 처리함”을 서로 다른 통제로 나눠 확인해야 합니다.
 
 > **먼저 알아둘 용어**
 >
@@ -113,33 +113,54 @@ OpenAI Zero Data Retention and Private Safety Processing 관련 새 소식을 �
   <figcaption>OpenAI가 원문과 함께 공개한 이미지입니다. <a href="https://openai.com/index/offering-zero-data-retention-for-frontier-models" target="_blank" rel="noopener noreferrer">출처: OpenAI</a></figcaption>
 </figure>
 
-## 왜 지금 다들 이 이야기를 할까?
+## ZDR을 켜면 어떤 데이터 경로가 달라질까?
 
-이 소식의 핵심은 새 기능이나 발표의 이름보다 실제 사용자와 개발자의 선택이 달라지는지에 있습니다. 지금 단계에서는 원문이 밝힌 내용과 아직 공개하지 않은 내용을 분리해서 보는 것이 안전합니다.
+ZDR의 범위는 OpenAI가 API 요청을 처리한 뒤 고객 프롬프트와 모델 출력을 보관하는 단계입니다. 고객이 별도로 동의하지 않으면 기업 데이터를 모델 학습에 쓰지 않는다는 조건도 함께 발표됐지만, 두 문장은 같은 통제가 아닙니다. 학습 미사용 정책이 있어도 운영 로그가 남을 수 있고, 반대로 처리 후 본문을 보관하지 않아도 고객이 명시적으로 학습 사용에 동의하는 별도 흐름이 있을 수 있기 때문입니다.
+
+도입 전에는 해당 계정과 모델 배포가 “eligible” 범위인지부터 계약과 설정 화면에서 확인해야 합니다. 애플리케이션 자체 로그, 고객이 운영하는 데이터베이스, 중간 프록시나 관측 도구에 복사된 내용은 OpenAI의 ZDR만으로 사라지지 않습니다. 예를 들어 고객상담 앱이 요청 전문을 오류 로그에 남긴다면 API 제공자의 보존 정책과 무관하게 사내 저장소에 민감정보가 남습니다. 따라서 데이터 흐름도를 그려 각 저장 지점의 보존 기간과 삭제 책임자를 따로 지정해야 ZDR의 효과가 실제 운영까지 이어집니다.
 
 <figure class="news-source-image">
   <img src="https://images.ctfassets.net/kftzwdyauwt9/3tUOfo4E1xZComoOiRjHJm/51c532f25dd4062f92bff0e41ea00c3c/index-pacing-model-development-cyber-capabilities-dark-cover.png?w=3840&amp;q=90&amp;fm=webp" alt="Pacing model development in an era of cyber-critical capabilities — Card image" loading="lazy" decoding="async">
   <figcaption>OpenAI가 원문과 함께 공개한 이미지입니다. <a href="https://openai.com/index/offering-zero-data-retention-for-frontier-models" target="_blank" rel="noopener noreferrer">출처: OpenAI</a></figcaption>
 </figure>
 
-## 그래서 우리에게 뭐가 달라질까?
+## Private Safety Processing은 ZDR과 무엇이 다를까?
 
-도입을 검토한다면 현재 쓰는 도구와 바로 교체하기보다 작은 작업에서 먼저 비교해 보는 편이 좋습니다. 제공 지역, 요금, 데이터 처리 방식처럼 의사결정에 영향을 주는 조건은 실제 사용 전에 원문에서 다시 확인해야 합니다.
+Private Safety Processing은 콘텐츠를 장기간 보관하는 옵션이 아니라, 프롬프트나 응답 본문을 직원에게 보여주지 않으면서 관련 상호작용의 오남용 패턴을 식별하려는 안전 처리 방식입니다. 발표된 설계에서는 데이터를 고객 통제 인프라에 두거나 고객 관리 암호화 키로 보호할 수 있습니다. 즉 ZDR이 **처리 후 보존** 문제를 다룬다면 이 기능은 **안전 감시 과정에서 누가 내용을 볼 수 있고 키를 통제하는가**에 초점이 있습니다.
+
+다만 미리보기와 정식 제공은 구분해야 합니다. 2026년 9월부터 순차 적용할 계획과 기술 백서 공개 계획은 밝혀졌지만, 모든 고객이 쓸 수 있는 날짜와 지원 모델·지역·계약 조건은 공개되지 않았습니다. 보안 검토 문서에는 “향후 제공 예정”으로 표기하고, 실제 일반 제공 여부와 기술 백서의 위협 모델을 확인한 뒤 통제로 인정하는 편이 안전합니다.
 
 <figure class="news-source-image">
   <img src="https://img.helpnetsecurity.com/wp-content/uploads/2026/06/08084601/openai_person-1500.webp" alt="Help Net Security 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
   <figcaption>Help Net Security가 원문과 함께 공개한 이미지입니다. <a href="https://www.helpnetsecurity.com/2026/08/20/openai-private-safety-processing-zdr" target="_blank" rel="noopener noreferrer">출처: Help Net Security</a></figcaption>
 </figure>
 
-## 직접 써보거나 지켜볼 포인트
+## 기업 도입 전에 무엇을 문서로 남겨야 할까?
 
-첫째, 공식 제공 범위와 사용 조건을 확인합니다. 둘째, 기존 작업 흐름에서 시간을 줄여주는지 작은 예제로 비교합니다. 셋째, 발표 내용과 실제 일반 제공 상태가 같은지 구분합니다.
+먼저 대상 API 배포가 ZDR 적용 대상이라는 증거와 실제 활성화 상태를 남깁니다. 다음으로 프롬프트·출력·오류 로그·메타데이터를 각각 누가 얼마나 보관하는지 표로 정리합니다. 마지막으로 고객 관리 키를 쓸 경우 키 회전과 폐기 권한, 안전 경보가 발생했을 때 본문을 공개하지 않고 조사하는 절차를 확인합니다. 이 세 단계 중 하나라도 불명확하면 “데이터가 전혀 남지 않는다”는 문구보다 실제 계약과 시스템 로그를 기준으로 판단해야 합니다.
 
 ## 아직은 선을 그어야 할 부분
 
 - 초기 프리뷰 이후 Private Safety Processing 이 언제 정식 제공되는지는 아직 공개되지 않았습니다.<br><span class="source-original">원문: The exact general availability schedule for Private Safety Processing following the initial preview period.</span>
 
 추가 원문이 공개되거나 제공 조건이 바뀌면 판단도 달라질 수 있습니다. 따라서 이 글은 오늘 시점의 출발점으로 활용하고, 실제 도입 전에는 연결된 원문을 다시 확인하는 것이 좋습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://openai.com/index/offering-zero-data-retention-for-frontier-models)
+- [Axios](https://www.axios.com/2026/08/19/openai-previews-zero-retention-safety-system-as-anthropic-requires-data-logs)
+- [Help Net Security](https://www.helpnetsecurity.com/2026/08/20/openai-private-safety-processing-zdr)
+- [BetaNews](https://betanews.com/article/openai-private-safety-processing)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [로컬 LLM은 클라우드보다 쌀까: VRAM·전력·운영비 계산]({% post_url 2026-05-14-LLMs-in-My-Room-The-Reality-and-Limits-of-Building-Personal-AI-Infrastructure %}) — 로컬 LLM의 양자화·메모리 대역폭·KV 캐시를 이해하고, 하드웨어 구매 전에 품질·동시성·전력·운영비를 비교하는 방법을 정리합니다.
+- [OpenAI, GPT-5.6 API 가격 최대 80% 인하… 개발자 및 기업 비용 부담 대폭 감소]({% post_url 2026-08-02-openai-slashes-gpt-5-6-luna-api-price-by-80-percent-and-terra-by-20-percent %}) — 2026년 7월 30일 OpenAI가 GPT-5.6 API 가격 인하를 공식 발표했습니다. 경량 모델인 GPT-5.6 Luna 가격은 80% 하락해 100만 입력 토큰당 0.20달러로 내려갔고, 중급 모델인 GPT-5.6 Terra는…
+- [GPT-5.6 Sol Ultrafast 프리뷰: 초당 750토큰과 실제 지연 시간 판단법]({% post_url 2026-08-17-openai-previews-gpt-5-6-sol-ultrafast-mode-powered-by-cerebras %}) — OpenAI와 Cerebras가 Cerebras 웨이퍼 스케일 엔진 기반으로 표준 대비 최대 14배 빠른 GPT-5.6 Sol Ultrafast mode API를 공개했습니다. 초당 최대 750토큰을 생성하여 실시간 음성 에이전트…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

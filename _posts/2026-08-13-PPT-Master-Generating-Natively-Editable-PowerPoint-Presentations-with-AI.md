@@ -8,16 +8,16 @@ tags:
   - 파이썬
   - Claude
   - ClaudeCode
-  - 온디바이스AI
+  - 오픈소스
 summary: PPT Master는 PDF, 마이그레이션 문서, 텍스트 등을 수정 가능한 고품질 파워포인트(.pptx) 파일로 변환해 주는 오픈소스
   AI 프레젠테이션 자동화 도구입니다. 기존 AI 도구들이 슬라이드를 수정 불가능한 통이미지로 만들던 문제를 SVG 2D 좌표 계산 및 DrawingML
   벡터 직렬화 기술로 완전하게 해결했습니다.
-author: AI Trend Bot
+description: 'PPT Master가 SVG 좌표와 DrawingML로 편집 가능한 PPTX를 만드는 원리, 템플릿 적용 범위와 폰트·표·차트 변환 실패를 검수하는 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/hugohe3/ppt-master
 image:
   path: https://opengraph.githubassets.com/1/hugohe3/ppt-master
-  alt: 'PPT Master: Generating Natively Editable PowerPoint Presentations with AI'
+  alt: "hugohe3/ppt-master GitHub 저장소 대표 이미지"
 project:
   stars: 46294
   forks: 3754
@@ -62,6 +62,8 @@ faq:
 ---
 
 [PPT Master GitHub 저장소](https://github.com/hugohe3/ppt-master) | [PPT Master 공식 데모 갤러리](https://hugohe3.github.io/ppt-master/)
+
+PPT Master는 결과를 통이미지가 아니라 개별 텍스트와 도형으로 다시 편집해야 하는 팀에 적합합니다. SVG를 중간 표현으로 쓰고 PowerPoint 개체로 직렬화하기 때문에 수정 가능성은 높지만, 입력 문서의 모든 표·폰트·애니메이션이 원본과 동일하게 변환된다고 보장되지는 않습니다. 먼저 실제 회사 템플릿 한 개로 글꼴 대체, 줄바꿈, 도형 겹침과 다른 Office 앱에서의 호환성을 확인해야 합니다.
 
 ## 발표 자료 제작의 새로운 접근법과 한 줄 요약
 
@@ -325,6 +327,20 @@ PPT Master는 혁신적인 도구이지만 기술적 트레이드오프와 한�
 PPT Master는 'AI 생성 결과물은 실제 업무에서 수정할 수 없다'는 기존의 고정관념을 파괴한 대표적인 오픈소스 혁신 사례입니다. 이미지 생성에만 치중하던 기존 프레젠테이션 AI 분야에서 SVG 좌표계와 파워포인트 내부 DrawingML 표준을 잇는 매개 레이어를 도입해 실용성을 극대화했습니다.
 
 사내 보고서나 발표 자료 제작으로 매주 수십 시간을 허비하던 기획자와 개발자에게 PPT Master는 진정한 생산성 도구가 되어 줄 것입니다. 무엇보다 로컬 환경에서 구동되어 데이터 유출 우려가 없고, 파워포인트에서 최종 마무리를 직접 손으로 다듬을 수 있다는 점에서 현업 실무진에게 가장 정직하고 현실적인 솔루션이라 평할 수 있습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/hugohe3/ppt-master)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
+- [pxpipe: AI 에이전트의 컨텍스트를 이미지로 변환해 토큰 비용을 줄이는 완벽 가이드]({% post_url 2026-07-09-pxpipe-Comprehensive-Guide-to-Reducing-Token-Costs-by-Rendering-AI-Agent-Context-as-Images %}) — pxpipe는 방대한 텍스트 컨텍스트를 고밀도 이미지(PNG)로 변환하여 LLM의 비전 채널을 통해 전달함으로써, 입력 토큰 비용을 최대 70%까지 절감하는 오픈소스 로컬 프록시 도구의 원리와 실전 활용법을 심층 분석합니다.
+- [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

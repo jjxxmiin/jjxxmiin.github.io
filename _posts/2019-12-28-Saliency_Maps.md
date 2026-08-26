@@ -2,19 +2,30 @@
 layout: post
 title:  "Saliency Map은 무엇을 설명하나: 입력 gradient 시각화와 해석의 한계"
 summary: "분류 점수를 입력 픽셀로 미분해 중요한 영역을 찾는 Saliency Map과 class model visualization의 차이를 수식과 코드로 설명합니다."
+description: "Saliency Map이 class score를 입력 픽셀로 미분해 민감도를 표시하는 원리와 class visualization의 차이, 전처리·안정성·해석 한계를 설명합니다."
 image:
   path: /assets/img/thumb/Saliency_Maps.jpg
   alt: Visualising Image Classification Models and Saliency Maps 톺아 대표 이미지
 date:   2019-12-27 13:00 -0400
 categories: Paper
 tags:
-  - SaliencyMap
-  - 모델해석
   - 컴퓨터비전
+  - 이미지생성
+faq:
+  - question: "Saliency Map의 밝은 픽셀은 물체 영역을 뜻하나요?"
+    answer: "반드시 그렇지는 않습니다. 해당 픽셀의 작은 변화에 class score가 민감하다는 뜻이며, 정확한 경계나 인과적 근거로 해석하면 안 됩니다."
+  - question: "Class model visualization과 Saliency Map은 같은 방법인가요?"
+    answer: "아닙니다. Class visualization은 target score가 커지도록 입력을 최적화해 새 이미지를 만들고, Saliency Map은 주어진 이미지에서 입력 gradient를 계산합니다."
+  - question: "Saliency Map을 비교할 때 무엇을 고정해야 하나요?"
+    answer: "Target class와 model mode, 학습 때의 전처리, gradient를 줄이는 채널 규칙과 normalization을 고정해야 합니다. 같은 입력의 정답·오답 class를 함께 비교하는 편이 좋습니다."
 math: true
 ---
 
 Saliency Map은 **선택한 클래스 점수를 입력 이미지로 미분해, 점수를 가장 민감하게 바꿀 픽셀을 표시한 지도**다. 밝은 픽셀이 곧 물체의 정확한 영역이나 인과적 근거라는 뜻은 아니지만, 분류기가 어디에 민감한지 빠르게 점검할 수 있다.
+
+## Saliency Map은 어떤 조건에서 믿을 수 있을까?
+
+Class score와 입력 tensor의 연결이 유지되고 target index가 정확해야 올바른 gradient를 얻을 수 있다. 선명한 한 장보다 class·샘플·작은 입력 변화를 바꿔도 같은 결론이 남는지를 확인하는 것이 중요하다.
 
 - 논문: [Deep Inside Convolutional Networks: Visualising Image Classification Models and Saliency Maps](https://arxiv.org/abs/1312.6034)
 
@@ -101,3 +112,49 @@ for step in range(1, 150):
 3. 무작위 초기값 하나의 결과를 클래스의 유일한 모습으로 해석하지 않는다.
 
 Saliency Map 자체를 구할 때는 입력 tensor의 gradient를 얻어 채널별 절댓값을 2차원으로 줄이면 된다. 그러나 선명한 그림보다 더 중요한 검증은 **정답·오답 클래스의 지도 비교, 여러 샘플에서 반복되는 배경 확인, 작은 입력 변화에 대한 안정성 확인**이다. 시각화는 결론이 아니라 다음 디버깅 실험을 고르는 출발점이다.
+
+## Saliency Map 구현을 어떤 순서로 검증하나
+
+먼저 학습 때와 같은 resize·crop·normalization을 적용한 입력을 만든다. 입력 tensor가 gradient를 받을 수 있는 상태인지, batch와 channel 순서가 모델과 맞는지 확인한다. Model parameter gradient가 아니라 입력 gradient가 목적이라는 점을 코드에서 분명히 한다.
+
+Forward 결과에서 설명할 class score 하나를 고른다. Softmax 뒤 확률과 그 전 score를 섞지 않고, batch의 어느 이미지와 class index인지 기록한다. 정답 class와 예측 class가 다르면 두 지도를 모두 만들어 질문을 구분한다.
+
+Backward 뒤 입력과 같은 shape의 gradient가 생겼는지 본다. RGB channel을 절댓값·최대값 등 어떤 규칙으로 2차원에 줄였는지 명시한다. 서로 다른 축을 줄이거나 batch 축까지 합치면 다른 이미지의 정보가 섞일 수 있다.
+
+Heatmap normalization은 이미지마다 별도로 했는지 확인한다. 매우 작은 gradient도 0~1로 늘리면 강한 신호처럼 보일 수 있으므로 raw 범위와 score도 함께 기록한다. 모두 0인 결과를 나눗셈으로 억지로 그림으로 만들지 않는다.
+
+## Class image 생성과 혼동하지 않는 실험 설계
+
+Class visualization은 무작위 또는 기준 입력을 target score가 커지는 방향으로 반복 갱신한다. 이때 학습 데이터의 실제 한 장을 설명하는 것이 아니라 model이 class score를 높이는 패턴을 찾는 것이다. 한 초기값 결과를 class의 대표 모습으로 해석하지 않는다.
+
+반대로 Saliency Map은 주어진 입력을 고정하고 그 주변의 민감도를 본다. 입력 최적화 step이나 regularization을 Saliency 계산에 그대로 가져오지 않는다. 두 결과가 비슷하게 보여도 질문과 계산 과정이 다르다.
+
+## 지도를 신뢰하기 전에 할 세 가지 반례 실험
+
+첫째, 같은 이미지에서 정답·예측·관련 없는 class를 비교한다. 모든 class가 같은 모서리를 밝힌다면 target index나 공통 배경 의존을 의심한다. 둘째, 객체 주변 배경을 가리거나 색을 조금 바꿔 prediction과 지도의 변화를 함께 본다.
+
+셋째, 같은 class의 여러 이미지에서 반복되는 영역을 본다. 특정 촬영 배경·테두리·워터마크가 계속 강조되면 데이터 지름길 가능성을 조사한다. 지도만 보고 결론 내리지 않고 해당 영역을 제거한 입력에서 class score가 실제로 달라지는지 확인한다.
+
+지도 해상도와 선명도를 정확도와 혼동하지 않는다. Saliency는 pixel 수준 gradient라 노이즈가 많을 수 있고, 매끄러운 시각화가 원래 계산보다 더 많은 확신을 주기도 한다. 원본과 raw map, 처리한 map을 함께 보관한다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Latent Bridge Matching의 1 NFE는 정말 한 번의 계산일까: 수식·속도·한계 해설]({% post_url 2025-03-20-LBM %}) — LBM이 source와 target latent 사이 stochastic bridge를 학습해 1회 drift network 평가로 변환하는 과정을 설명하고, VAE 비용·paired data·sigma와 NFE trade-off를…
+- [AI 논문 그림, 한 번에 생성하면 왜 틀릴까? PaperBanana의 4단계 검수]({% post_url 2026-02-02-PaperBanana--Automating-Academic-Illustration-for-AI-Scientists %}) — PaperBanana가 관련 그림 검색, 내용·style 설계, neural·code rendering, VLM self-critique를 나눠 학술 도식의 글자·화살표·수치 오류를 줄이는 방법과 검수 한계를 설명합니다.
+- [PPT Master: AI가 슬라이드 통이미지 대신 진짜 수정 가능한 파워포인트를 만드는 방법]({% post_url 2026-08-13-PPT-Master-Generating-Natively-Editable-PowerPoint-Presentations-with-AI %}) — PPT Master는 PDF, 마이그레이션 문서, 텍스트 등을 수정 가능한 고품질 파워포인트(.pptx) 파일로 변환해 주는 오픈소스 AI 프레젠테이션 자동화 도구입니다. 기존 AI 도구들이 슬라이드를 수정 불가능한 통이미지로 만들던…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Saliency Map의 밝은 픽셀은 물체 영역을 뜻하나요?
+
+반드시 그렇지는 않습니다. 해당 픽셀의 작은 변화에 class score가 민감하다는 뜻이며, 정확한 경계나 인과적 근거로 해석하면 안 됩니다.
+
+### Class model visualization과 Saliency Map은 같은 방법인가요?
+
+아닙니다. Class visualization은 target score가 커지도록 입력을 최적화해 새 이미지를 만들고, Saliency Map은 주어진 이미지에서 입력 gradient를 계산합니다.
+
+### Saliency Map을 비교할 때 무엇을 고정해야 하나요?
+
+Target class와 model mode, 학습 때의 전처리, gradient를 줄이는 채널 규칙과 normalization을 고정해야 합니다. 같은 입력의 정답·오답 class를 함께 비교하는 편이 좋습니다.

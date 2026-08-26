@@ -2,6 +2,7 @@
 layout: post
 title:  "Diffusion 학습 코드는 왜 원본 이미지 대신 Noise를 맞출까?"
 summary: "DDPM 코드의 perturb_x·get_losses·sample 흐름을 따라 정답 noise를 예측하는 학습과 역순 denoising 추론을 연결하고, Stable Diffusion·conditioning의 위치를 설명합니다."
+description: "DDPM의 random timestep noise target, closed-form perturb와 reverse sampling을 따라 shape·schedule·EMA·conditioning 실패 조건과 latent diffusion 차이를 설명합니다."
 image:
   path: /assets/img/thumb/StableDiffusion.jpg
   alt: Diffusion 톺아보기 대표 이미지
@@ -9,11 +10,15 @@ date:   2023-03-06 16:00 -0400
 categories: Paper
 tags:
   - 디퓨전모델
-  - 논문리뷰
   - 이미지생성
-  - 파이썬
-  - 아키텍처분석
 math: true
+faq:
+  - question: "Diffusion 학습 target은 깨끗한 이미지인가요?"
+    answer: "이 코드에서는 임의 timestep에 원본에 직접 섞은 Gaussian noise가 target이고 model이 그 noise를 예측합니다."
+  - question: "학습 때 0부터 t까지 noise를 순서대로 더해야 하나요?"
+    answer: "아닙니다. 누적 alpha 계수를 사용하면 x0와 noise를 한 번 섞어 원하는 xt를 직접 sampling할 수 있습니다."
+  - question: "이 pixel-space DDPM 코드가 곧 Stable Diffusion 전체인가요?"
+    answer: "아닙니다. Stable Diffusion에는 latent encoder·decoder와 text conditioning 등 추가 구성요소가 있습니다."
 ---
 
 Diffusion 모델이 학습에서 맞히는 핵심 정답은 깨끗한 이미지 자체가 아니라, 임의 시점 `t`에서 원본에 섞은 noise이며 추론은 이 예측을 마지막 시점부터 거꾸로 반복합니다.
@@ -84,3 +89,51 @@ DDPM의 “noise를 더하고 예측해 지운다”는 뼈대는 Stable Diffusi
 Text-to-image에서는 text와 image의 연결 표현이 필요하고, 원문은 CLIP을 그 역할과 함께 소개합니다. DreamBooth는 사용자가 제공한 image concept을 여러 장면에서 유지하려는 맞춤화 방향으로 정리돼 있습니다. [Stable Diffusion Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)는 관련 기능을 한 interface에서 실험하는 프로젝트로 소개됩니다.
 
 다만 이 글의 Python 조각은 pixel-space DDPM 예시이며 Stable Diffusion 전체 학습 코드가 아닙니다. 두 구현을 같은 것으로 포장하지 말고, 먼저 `noise → perturb_x → estimated_noise → loss`와 `random noise → reverse loop`를 손으로 추적한 뒤 latent encoder와 text conditioning을 추가해서 보는 편이 안전합니다.
+
+## Shape와 Timestep을 어떻게 검증하나요?
+
+Batch마다 t shape가 `[B]`이고 extract 결과가 image channel·height·width로 broadcast되는지 확인합니다. Image batch와 class y, t의 batch가 같아야 합니다. 직사각 image에서는 height와 width를 각각 img_size 두 항목과 비교해 원문 중복 index를 고칩니다.
+
+T=0과 마지막 step, batch 안 서로 다른 t를 넣어 coefficient가 올바른 sample에 적용되는지 봅니다. Noise를 고정하면 perturb 결과와 loss를 재현할 수 있습니다.
+
+## Schedule과 Sampling 실패를 어떻게 찾나요?
+
+Beta, alpha와 cumulative alpha가 유효 범위이고 sqrt·division에서 NaN이 없는지 시작 시 검사합니다. Reverse loop는 t=0에서 추가 noise를 넣지 않아야 하며 sigma와 mean coefficient shape를 출력합니다. Sampling 결과가 나쁘다고 step 수만 늘리기 전에 train과 sample schedule이 같은지 확인합니다.
+
+EMA 사용 시 model과 EMA weight, evaluation mode와 checkpoint restore를 분리해 같은 noise seed 결과를 비교합니다. Sequence 시각화는 저장 간격을 두어 memory를 제한합니다.
+
+## Conditioning이 실제로 쓰이는지 어떻게 보나요?
+
+같은 noisy x와 t에서 y만 바꿨을 때 output이 달라지는지 확인합니다. Embedding shape가 feature와 broadcast되는 위치, unconditional mode의 y 처리와 label 범위를 검증합니다. Conditioning 그림이 있다는 이유만으로 생략된 U-Net code에 연결됐다고 가정하지 않습니다.
+
+## 학습 Loss와 Sample 품질을 어떻게 연결하나요?
+
+Noise MSE가 낮아져도 특정 timestep·class에서 sample artifact가 남을 수 있으므로 t 구간별 loss와 고정 seed sample을 함께 봅니다. Train image 범위와 sample 후 clipping·denormalization이 같은지 확인하고, 단 한 장의 좋은 sample로 schedule을 선택하지 않습니다.
+
+L1과 L2를 비교할 때 reduction, noise seed와 train budget을 고정합니다. Sampling은 EMA on/off, step 수와 guidance 같은 실제 사용 조건을 기록합니다.
+
+## Latent Diffusion에서 추가되는 검증은 무엇인가요?
+
+Encoder가 만든 latent scale과 shape, decoder reconstruction error를 먼저 확인한 뒤 latent에 noise를 더합니다. Pixel-space code의 image size assertion을 latent size에 그대로 적용하지 않습니다. Text conditioning token·attention mask와 latent batch도 같은 sample 순서를 가져야 합니다.
+
+## 자주 남는 질문
+
+### Diffusion 학습 target은 깨끗한 이미지인가요?
+
+이 코드에서는 임의 timestep에 원본에 직접 섞은 Gaussian noise가 target이고 model이 그 noise를 예측합니다.
+
+### 학습 때 0부터 t까지 noise를 순서대로 더해야 하나요?
+
+아닙니다. 누적 alpha 계수를 사용하면 x0와 noise를 한 번 섞어 원하는 xt를 직접 sampling할 수 있습니다.
+
+### 이 pixel-space DDPM 코드가 곧 Stable Diffusion 전체인가요?
+
+아닙니다. Stable Diffusion에는 latent encoder·decoder와 text conditioning 등 추가 구성요소가 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime·realistic preset, input image와 advanced 기능을 정리합니다.
+- [2^256 바이너리 토큰이 코드북을 없앨까: BitDance FID 1.24와 30.2배 속도의 조건]({% post_url 2026-02-18-BitDance--Scaling-Autoregressive-Generative-Models-with-Binary-Tokens %}) — 256비트 토큰과 Binary Diffusion Head가 거대한 Softmax를 피하는 방법, FID 1.24와 30.2배 수치의 적용 범위를 설명합니다.
+- [이미지 생성 모델이 너무 많다면? Diffusion-GPT 라우터의 선택 기준]({% post_url 2026-03-02-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-and-Honest-Review-of-Diffusion-GPT %}) — Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연·오선택·모델 로딩 비용을 짚습니다.
+<!-- internal-links:end -->

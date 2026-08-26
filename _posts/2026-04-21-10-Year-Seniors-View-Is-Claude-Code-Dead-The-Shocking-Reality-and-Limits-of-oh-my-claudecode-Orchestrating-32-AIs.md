@@ -1,53 +1,50 @@
 ---
 layout: post
-title: '[10년 차 시니어의 시선] 클로드 코드는 끝났다? 32개의 AI 에이전트를 지휘하는 ''oh-my-claudecode''의 충격적
-  실체와 한계'
+title: "oh-my-claudecode의 32개 Agent는 필요한가: Routing·State·검증 비용"
 date: '2026-04-21 06:56:56'
 categories: Tech
 tags:
   - Claude
   - ClaudeCode
   - 멀티에이전트
-  - AI코딩
-  - AI보안
-summary: 단순한 CLI 툴을 넘어 32개의 전문 AI 에이전트를 병렬로 지휘하는 oh-my-claudecode(OMC)의 아키텍처, 실무 적용
-  시나리오, 그리고 시니어 개발자 관점에서의 치명적인 트레이드오프를 심층 분석합니다.
-author: AI Trend Bot
+  - AI에이전트
+summary: "oh-my-claudecode가 역할·model routing·hook·state로 코딩 작업을 나누는 구조를 살펴보고, 실제 병렬성·검증 독립성·token·복구·권한 한계를 평가합니다."
+description: "oh-my-claudecode의 32-agent orchestration을 role routing, state persistence, hook·blind review, token budget·cascade·sandbox·ablation 기준으로 분석합니다."
 github_url: https://github.com/Yeachan-Heo/oh-my-claudecode
+faq:
+  - question: "OMC의 32개 Agent를 모두 실행하면 속도가 3~5배 빨라지나요?"
+    answer: "보장되지 않습니다. 의존 작업은 병렬화할 수 없고 handoff·review 비용이 생기므로 같은 task에서 wall time·호출·정답을 직접 비교해야 합니다."
+  - question: "다른 model이 review하면 작성 Agent의 오류를 항상 찾나요?"
+    answer: "아닙니다. 같은 요구·근거를 공유하면 같은 오류를 반복할 수 있어 compiler·test·원문 specification 같은 독립 검증기가 필요합니다."
+  - question: "OMC를 처음 적용할 때 어떤 범위가 안전한가요?"
+    answer: "운영 권한이 없는 격리 branch에서 완료 조건이 분명한 작은 변경을 단일 Agent baseline과 비교하는 범위가 적합합니다."
 image:
   path: https://opengraph.githubassets.com/1/Yeachan-Heo/oh-my-claudecode
-  alt: '[10-Year Senior''s View] Is Claude Code Dead? The Shocking Reality and Limits
-    of ''oh-my-claudecode'' Orchestrating 32 AIs'
+  alt: "Yeachan-Heo/oh-my-claudecode GitHub 저장소 대표 이미지"
 ---
 
-요즘 개발자 커뮤니티나 사내 슬랙 채널을 보면 온통 AI 코딩 에이전트 이야기뿐입니다. 특히 터미널에서 바로 돌아가는 Claude Code가 등장했을 때, 다들 '이제 IDE 밖으로 나갈 일이 없겠다'며 환호했죠. 저 역시 처음엔 그 편리함에 매료되었습니다.
+**oh-my-claudecode(OMC)는 Claude Code 위에서 기획·구현·검토 역할과 hook·state를 조합하는 multi-agent 구성입니다.** 32개 역할을 둔다는 사실만으로 비용이 줄거나 속도가 3~5배 빨라지지는 않으며, 독립 작업의 병렬성·검증 기여·복구 가능성을 같은 task에서 측정해야 합니다. 작은 격리 branch에서 단일 Agent보다 실제 review 시간을 줄이는 역할만 남기는 편이 좋습니다.
 
-하지만 현업에서 수만 줄짜리 레거시 프로젝트를 다뤄보신 분들이라면 뼈저리게 공감하실 겁니다. **아무리 뛰어난 AI라도 '단일 에이전트(Single Agent)'가 갖는 치명적인 한계가 존재한다는 것을요.** 복잡한 리팩토링을 맡기면 컨텍스트 윈도우가 엉키면서 방금 수정한 코드를 다시 원복해버리거나, 혼자서 북치고 장구치다 결국 '할루시네이션(환각) 무한 루프'에 빠져버리는 끔찍한 경험, 다들 한 번쯤 겪어보셨을 겁니다.
+[OMC 저장소](https://github.com/Yeachan-Heo/oh-my-claudecode)는 single session의 context와 자기검증 한계를 역할 분리로 다루려 합니다. 사람 조직과 같은 “개발팀”이 생겼다고 보기보다 task graph, prompt와 tool 권한을 나눈 workflow로 이해해야 과장을 피할 수 있습니다.
 
-솔직히 저도 '아직 AI가 인간 팀을 대체하려면 멀었구나'라고 생각하며 터미널 창을 닫으려던 참이었습니다. 그런데 최근 깃허브(GitHub)를 휩쓸고 있는 요상한 프로젝트 하나가 제 시선을 멈추게 만들었습니다. 이름부터 도발적인 **oh-my-claudecode(OMC)**. 처음엔 그저 `oh-my-zsh` 흉내를 낸 예쁜 CLI 래퍼(Wrapper)인 줄 알았습니다. 하지만 이 녀석의 밑바닥 아키텍처를 뜯어본 순간, 저는 등골이 서늘해짐을 느꼈습니다. 이것은 단순한 유틸리티가 아닙니다. 코딩의 패러다임을 '작성'에서 '오케스트레이션(Orchestration)'으로 바꿔버리는 괴물입니다.
+## Hook·Skill·Agent·State 네 Layer는 무엇을 나눌까
 
-### TL;DR (The Core)
+원문은 OMC를 Hooks, Skills, Agents, State 네 layer로 설명합니다. 실제 지원 interface와 구성은 선택한 repository commit에서 확인해야 하며, 역할 수와 “완벽한 조율”은 구현 증거가 아닙니다. 각 layer가 없을 때 어떤 오류가 늘어나는지 분리해 보는 것이 중요합니다.
 
-> oh-my-claudecode는 단일 AI 모델의 한계를 극복하기 위해, Claude Code 위에 32개의 전문화된 AI 에이전트(아키텍트, 코더, 리뷰어 등)를 병렬로 지휘하는 **'팀 기반 다중 에이전트 오케스트레이션(Multi-Agent Orchestration) 프레임워크'**입니다. 비용은 줄이고 속도는 3~5배 끌어올리며, AI를 단순한 '도구'가 아닌 실체적인 '개발팀'으로 격상시킵니다.
+### 업무를 병렬화하기 전에 Dependency를 그린다
 
-### Deep Dive: Under the Hood (핵심 아키텍처 심층 분석)
-
-기존의 Claude Code를 그냥 쓰는 것과 OMC를 도입하는 것은, 마치 '천재 개발자 1명'에게 기획부터 QA까지 모든 일을 몰아주는 것과 '완벽하게 조율된 32명의 개발팀'을 꾸리는 것의 차이와 같습니다. OMC는 Claude Code가 자체적으로 제공하는 확장 인터페이스(플러그인, 훅, 하위 에이전트)를 극한까지 쥐어짜 내어 4개의 핵심 레이어(Hooks, Skills, Agents, State)로 시스템을 재구성합니다.
-
-**단일 실행에서 병렬 파이프라인으로의 진화**
-
-가장 충격적인 부분은 '모델 라우팅(Model Routing)'과 '역할 분담' 메커니즘입니다. OMC는 작업을 받으면 즉시 단일 모델로 코딩을 시작하지 않습니다. 내부적으로 `Team Mode`가 발동되며 업무를 기획(Plan) → PRD 작성 → 실행(Execute) → 검증(Verify) 단계로 무자비하게 쪼갭니다.
+원문은 model routing과 Team Mode에서 Plan→PRD→Execute→Verify 단계를 나누는 흐름을 설명합니다. 조사처럼 독립적인 하위 작업은 병렬로 실행할 수 있지만 PRD가 필요한 구현이나 같은 file을 바꾸는 작업은 순서를 지켜야 합니다. dependency를 무시한 worker 수 증가는 merge 충돌과 재작업을 만듭니다.
 
 | 비교 항목 | Native Claude Code | oh-my-claudecode (OMC) |
 | :--- | :--- | :--- |
 | **작업 방식** | 단일 모델이 처음부터 끝까지 순차적으로 처리 | 32개 전문 에이전트(아키텍트, 코더, QA 등)가 병렬 처리 |
-| **모델 활용** | 사용자가 지정한 단일 고비용 모델에 의존 | **지능형 라우팅:** 단순 포매팅은 Haiku, 코딩은 Sonnet, 설계는 Opus |
-| **검증 방식** | 자가 검증 (동일 컨텍스트 내에서 수행하여 맹점 발생) | **교차 검증 (Blind TDD):** Claude가 짜고, Codex나 Gemini가 리뷰함 |
+| **model 활용** | 한 model·설정으로 처리 | 역할별 routing을 구성할 수 있으며 실제 mapping은 version별 확인 |
+| **검증 방식** | 같은 context의 자기검토 위험 | 다른 역할·model review와 결정적 test를 함께 구성 |
 | **상태 관리** | 세션이 길어지면 토큰 오염 및 할루시네이션 급증 | 영속성(Persistence) 레이어로 각 에이전트 컨텍스트 독립적 초기화 |
 
-**내부 동작 메커니즘: JSON으로 보는 파이프라인**
+### JSON 예시는 상태 추적에 필요한 항목을 보여 준다
 
-OMC가 터미널 뒤에서 실제로 어떻게 동작하는지, 내부 상태(State) 추적 객체의 구조를 보면 그 철학이 명확해집니다.
+아래 JSON은 pipeline state의 개념을 설명하는 예시입니다. 실제 OMC schema, 지원 model 이름이나 `tokens_saved` 계산으로 단정하지 말고 선택한 version의 source와 생성 state file을 확인해야 합니다.
 
 ```json
 {
@@ -79,46 +76,78 @@ OMC가 터미널 뒤에서 실제로 어떻게 동작하는지, 내부 상태(St
 }
 ```
 
-위 코드를 보시죠. 아키텍트(Opus)가 뼈대를 잡으면, 3명의 코더(Sonnet)가 병렬로 코드를 쏟아냅니다. 여기서 소름 돋는 점은 검증 단계입니다. OMC는 `Blind TDD`라는 개념을 도입해, 코드를 작성한 모델(Claude)이 아닌 완전히 다른 모델(Codex 또는 타 에이전트)에게 리뷰를 맡깁니다. 인간 팀에서 '내가 짠 코드는 내 눈에 완벽해 보이는' 확증 편향을 아키텍처 레벨에서 원천 차단한 것입니다.
+다른 역할이나 model이 review하면 표현 편향을 줄일 가능성은 있지만 오류를 원천 차단하지 않습니다. reviewer가 같은 잘못된 PRD와 source를 읽으면 같은 결론을 낼 수 있습니다. compiler, 기존·새 test와 specification처럼 model과 독립된 기준을 최종 gate로 둡니다.
 
-OMC의 상태 관리(State Management) 역시 탁월합니다. 터미널이 닫혀도 작업이 날아가지 않습니다. 자체적인 영속성(Persistence) 레이어를 구축하여 이전 에이전트가 어디까지 작업했는지 컨텍스트를 완벽히 복원합니다. 또한 `pre-commit-lint` 같은 훅(Hooks)은 코더가 작업을 마칠 때마다 자동으로 발동되어 문법적 오류를 1차 필터링하며, 실패 시 리뷰어에게 가기도 전에 스스로 재작업을 수행합니다.
+병렬 coder가 같은 file이나 API contract를 바꾸지 않게 작업별 write path와 branch를 분리합니다. 결과 merge에는 ownership, conflict와 dependency test가 필요합니다. worker가 많아도 최종 통합이 직렬 병목이면 wall time은 줄지 않을 수 있습니다.
 
-### Pragmatic Use Cases (실무 적용 시나리오)
+상태 persistence가 있다면 terminal 종료 뒤 stage·artifact를 복구할 수 있는지 실제로 강제 종료해 시험합니다. model의 긴 context를 완벽히 복원한다는 표현보다 task ID, 기준 commit, 완료 artifact, 실패와 budget을 구조화해 저장하는지가 중요합니다. state file과 Git이 충돌하면 Git diff와 test를 진실의 원천으로 삼습니다.
 
-'그래서 이걸로 현업에서 뭘 할 수 있는데?' 실무자라면 당연히 던질 질문입니다. 단순한 Hello World나 알고리즘 문제 풀이를 넘어, 실제 프로덕션 환경의 복잡한 문제를 해결하는 시나리오를 살펴보겠습니다.
+`pre-commit-lint` 같은 hook도 이름이 아니라 집행을 확인합니다. 실패 exit code가 commit을 차단하는지, Agent가 hook을 끄거나 lint 설정을 약화할 수 있는지, timeout 때 fail closed하는지 봅니다. lint 통과는 의미·보안 검증을 대신하지 않습니다.
 
-**시나리오 1: 거대한 스프링 부트(Spring Boot) 레거시의 MSA 전환**
+## 어떤 업무부터 역할을 나눌까
 
-기존 방식이라면 수백 개의 파일이 얽힌 모놀리식 아키텍처를 AI에게 맡기는 건 자살 행위입니다. 컨텍스트가 꼬여서 `@Autowired` 지옥을 만들거나 트랜잭션 경계를 깨버리기 일쑤죠. 하지만 OMC의 `Ralph Mode(엄격한 검증 모드)`와 팀 오케스트레이션을 결합하면 양상이 달라집니다.
+### Spring Boot legacy 분석과 작은 분리
 
-1. **Librarian 에이전트 투입:** 코드를 바로 건드리지 않습니다. CLI를 활용해 사내 위키와 문서를 탐색하고, 레거시 시스템의 엔드포인트와 의존성을 매핑합니다.
-2. **Architect의 설계:** Opus 모델 기반의 아키텍트가 컨텍스트를 넘겨받아 '어떤 클래스를 어떤 마이크로서비스로 분리할지' 상세한 PRD를 작성합니다.
-3. **Chore & Coder의 분업:** 패키지명 변경 등 단순 노가다(Chore)는 가장 저렴한 Haiku가 순식간에 처리하고, 핵심 비즈니스 로직 분리는 Sonnet이 담당합니다.
-4. **Adversarial Testing (적대적 테스트):** 코더가 로직을 짜는 동안, 리뷰어 에이전트는 '코더가 실패할 만한' 극단적인 엣지 케이스 테스트를 작성하며 서로를 공격하고 방어합니다.
+수백 file의 monolith를 한 번에 MSA로 바꾸는 것은 OMC 여부와 무관하게 위험합니다. 먼저 read-only dependency map과 한 module의 contract test를 만들고, 작은 경계 하나만 격리 branch에서 분리합니다. `Ralph Mode` 같은 이름과 실제 동작·종료 조건은 repository version에서 확인합니다.
 
-이 모든 과정은 백그라운드 Tmux 세션에서 병렬로 돌아가며, 사용자는 HUD(Heads Up Display) 상태 표시줄을 통해 실시간으로 지휘관처럼 모니터링만 하면 됩니다.
+1. **Librarian 역할:** endpoint·dependency를 source 위치와 함께 mapping하고 문서와 code 충돌을 표시합니다.
+2. **Architect 역할:** 분리 후보와 transaction·data ownership, 반대 근거를 PRD artifact로 냅니다.
+3. **Chore·Coder 역할:** 독립 파일만 병렬화하고 model routing은 현재 지원·가격과 평가 결과로 정합니다.
+4. **Review 역할:** edge case test를 제안하되 기존 specification과 사람이 test의 타당성을 확인합니다.
 
-**시나리오 2: 대규모 트래픽 스파이크로 인한 새벽 장애 대응(Incident Response)**
+Tmux와 HUD가 있더라도 사람이 상태 표시만 보면 되는 것은 아닙니다. 각 stage의 기준 commit, artifact·test, budget과 blocker를 열 수 있어야 하고 transaction 경계 변경은 승인 전에 merge하지 않습니다.
 
-새벽 3시에 서버가 터졌을 때 비몽사몽간에 로그를 뒤지는 대신 OMC를 투입해 보십시오. 명령어 하나만 내리면 `Librarian` 에이전트가 Datadog이나 AWS CloudWatch 로그를 긁어오고, `Architect` 에이전트는 이를 분석해 장애 원인 리포트(RCA) 초안을 뽑아냅니다. 동시에 `Coder` 에이전트는 DB 커넥션 풀을 늘리거나 캐싱 로직을 덧붙이는 핫픽스 PR을 생성합니다. 출근 후 당신은 AI 팀이 분석한 원인과 조치 내역을 리뷰하고 승인(Approve)하기만 하면 됩니다.
+### Incident response는 조사와 변경을 분리한다
 
-### Honest Review & Trade-offs (진짜 장단점과 한계)
+OMC에 Datadog·CloudWatch 접근이 실제로 제공되는지는 별도 connector와 권한을 확인해야 합니다. 장애 조사 역할에는 incident 시간 범위의 read-only log만 주고 근거 source가 붙은 RCA 초안을 만들게 할 수 있습니다. DB pool 변경이나 cache hotfix는 동시에 자동 실행하지 않고 별도 branch와 사람 승인으로 분리합니다.
 
-이쯤 되면 '당장 도입해야겠다!' 싶으시겠지만, 10년 차 시니어의 깐깐한 시선으로 볼 때 OMC가 만능 은탄환(Silver Bullet)은 절대 아닙니다. 오히려 실무 도입 전 반드시 각오해야 할 치명적인 트레이드오프들이 존재합니다.
+Agent가 많은 환경에서는 한 잘못된 alert 해석이 조사·code·review로 빠르게 전파될 수 있습니다. 과거 incident fixture에서 red herring, PII masking, tool budget과 근거 적중률을 평가하기 전에는 live incident에 연결하지 않습니다.
 
-*   **토큰 먹는 하마 (Token-Eating Monster):** 커뮤니티에서 가장 논란이 되는 부분입니다. 아무리 지능형 라우팅으로 비용을 최적화한다고 해도, 32개의 에이전트가 끊임없이 대화하고 검증하며 컨텍스트를 주고받는 과정에서 API 호출량은 기하급수적으로 폭발합니다. 가드레일 없이 'Autopilot' 모드를 켜둔 채 퇴근했다가 다음 날 아침 수백 달러가 찍힌 청구서를 받을 위험이 농후합니다.
-*   **할루시네이션 폭포 효과 (Hallucination Cascade):** 팀 기반 아키텍처의 치명적인 양날의 검입니다. 만약 초기 기획 단계에서 아키텍트 에이전트가 엉뚱한 방향으로 요구사항을 뱉어버리면? 밑에 있는 30명의 에이전트들은 '그 잘못된 목표'를 향해 너무나도 완벽하고 맹렬하게 코드를 짜냅니다. 초기에 방향을 잡아주는 인간의 개입이 절대적으로 필수적인 이유입니다.
-*   **디버깅의 복잡성과 벤더 락인 리스크:** 다중 에이전트가 병렬로 쏟아내는 로그를 터미널 창 여러 개(Tmux)에서 보고 있으면 도대체 '어느 시점에 코드가 망가졌는지' 역추적하기가 극도로 까다롭습니다. 또한 Anthropic의 Claude 모델 생태계에 깊이 종속되어 있어, API 정책 변경이나 토큰 한도 제한이 걸리면 잘 구축해 둔 에이전트 팀 전체가 한순간에 마비될 수 있는 벤더 락인(Vendor Lock-in) 리스크를 항상 염두에 두어야 합니다.
+## Token·오류 전파·복구 비용은 어떻게 통제할까
 
-### Closing Thoughts
+* **호출 예산:** 역할별 최대 call·token·시간과 workflow 전체 상한을 둡니다. 평균뿐 아니라 timeout·retry가 몰린 p95 비용을 보고 budget 초과는 정상 완료와 구분합니다. 역할마다 고가 model을 쓰는 것보다 평가에서 기여한 최소 구성을 고릅니다.
+* **오류 Cascade:** PRD의 claim에 source·승인 상태를 붙이고 구현 전에 사람이 목표와 위험을 확인합니다. 하위 역할은 상위 artifact를 사실로만 믿지 않고 충돌하는 code·test를 표시합니다. 초기 방향이 틀렸으면 전체를 계속 실행하지 않습니다.
+* **Debug와 복구:** task·Agent·commit·tool call을 parent trace로 연결하고 병렬 branch의 merge 순서를 기록합니다. process를 stage마다 강제 종료해 state와 Git에서 중복 없이 복구하는지 시험합니다. Tmux log만으로 상태를 복원하지 않습니다.
+* **Vendor 경계:** OMC가 의존하는 Claude Code hook·plugin·model 이름을 adapter 뒤에 두고 supported version을 고정합니다. 다른 model review가 실제 지원되는지 확인하며 특정 provider 변경 때 전체 workflow가 어떻게 degrade되는지 test합니다.
+* **권한:** 모든 Agent가 repository·shell·network 전체를 공유하지 않습니다. 역할별 write path, 허용 command와 egress를 제한하고 운영 secret·배포 권한은 제외합니다. 외부 issue·문서는 신뢰하지 않는 입력으로 다룹니다.
 
-> "AI가 내 직업을 대체할까 걱정하기 전에, 내가 이 AI 팀을 이끄는 훌륭한 매니저가 될 수 있을지 먼저 고민하라."
+## 도입은 역할별 Ablation과 실패 복구로 결정한다
 
-oh-my-claudecode를 며칠간 씹고 뜯고 맛보며 내린 제 결론입니다. OMC는 단순히 코드를 대신 쳐주는 도구가 아닙니다. 이것은 개발자라는 직업의 본질이 '코드를 타이핑하는 사람'에서 '시스템을 설계하고, 여러 에이전트의 작업 흐름을 통제하며, 최종 품질을 책임지는 오케스트레이터(Orchestrator)'로 거대하게 이동하고 있음을 보여주는 가장 강력한 증거입니다.
+대표적인 작은 task 20개를 단일 Claude Code, OMC의 최소 세 역할, 더 큰 Team Mode로 실행합니다. 정답 test, 무관 diff, wall time, 총 호출, 사람 review 수정과 복구 실패를 같은 표에 놓습니다. 각 역할을 하나씩 빼도 결과가 같다면 그 역할은 운영 graph에서 제거합니다.
 
-처음 도입할 때 마주하는 가파른 러닝 커브와 예상치 못한 토큰 비용 지출은 뼈아플 수 있습니다. 하지만 언제까지 무한 루프에 빠진 단일 에이전트만 바라보며 답답해하실 건가요? 복잡한 문제를 쪼개고 분배하여 기계들의 오케스트라를 지휘하는 이 강렬한 경험. 현업 실무자라면 지금 당장 OMC의 멱살을 잡고 이 압도적인 생산성의 파도를 직접 타보시기를 강력히 권합니다.
+첫 파일럿은 운영 자격 증명이 없는 worktree와 보호 branch에서 수행합니다. state persistence, hook fail-closed, worker 충돌과 budget 중단을 의도적으로 재현합니다. 성능 수치와 model routing은 기사나 JSON 예시가 아니라 실제 usage·trace에서 확인합니다.
+
+OMC의 유용한 질문은 “Agent가 32명인가”가 아니라 어떤 작업을 독립시키고 어떤 근거로 다시 합칠 것인가입니다. multi-agent가 single-agent보다 오류와 review를 줄이는 작업만 남기고, 최종 품질과 merge 책임은 사람과 결정적 gate가 소유해야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Yeachan-Heo/oh-my-claudecode)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Claude Code Game Studios의 48개 역할은 필요한가: Gate·Context·비용]({% post_url 2026-04-15-Deep-Dive-Taming-the-Chaos-of-Vibe-Coding-with-48-AI-Agents-Unpacking-Claude-Code-Game-Studios %}) — Claude Code Game Studios가 역할·context·품질 gate를 나누는 구조를 살펴보고, 실제 격리 여부와 역할별 기여·token·deadlock·review 비용을 평가합니다.
+- [ai-job-search: 클로드 코드로 나만의 맞춤형 구직 에이전트 구축하기]({% post_url 2026-07-07-Building-a-Custom-Job-Search-Agent-with-ai-job-search-and-Claude-Code %}) — 클로드 코드(Claude Code)를 기반으로 공고 수집, 적합도 평가, 맞춤형 이력서 작성 등 구직 전 과정을 자동화하는 ai-job-search 프레임워크의 작동 원리와 실전 활용법을 깊이 있게 분석합니다.
+- [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### OMC의 32개 Agent를 모두 실행하면 속도가 3~5배 빨라지나요?
+
+보장되지 않습니다. 의존 작업은 병렬화할 수 없고 handoff·review 비용이 생기므로 같은 task에서 wall time·호출·정답을 직접 비교해야 합니다.
+
+### 다른 model이 review하면 작성 Agent의 오류를 항상 찾나요?
+
+아닙니다. 같은 요구·근거를 공유하면 같은 오류를 반복할 수 있어 compiler·test·원문 specification 같은 독립 검증기가 필요합니다.
+
+### OMC를 처음 적용할 때 어떤 범위가 안전한가요?
+
+운영 권한이 없는 격리 branch에서 완료 조건이 분명한 작은 변경을 단일 Agent baseline과 비교하는 범위가 적합합니다.
 
 ## References
-- https://github.com/Yeachan-Heo/oh-my-claudecode
-- https://docs.anthropic.com/claude/docs/claude-code
-- https://emelia.io/oh-my-claudecode-turn-claude-code-into-a-full-32-agent-development-team
+- [GitHub 저장소](https://github.com/Yeachan-Heo/oh-my-claudecode)
+- [공식 문서](https://docs.anthropic.com/claude/docs/claude-code)
+- [emelia.io 원문](https://emelia.io/oh-my-claudecode-turn-claude-code-into-a-full-32-agent-development-team)

@@ -11,11 +11,11 @@ tags:
   - 업무자동화
 summary: AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는
   C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
-author: AI Trend Bot
+description: 'OfficeCLI가 Word·Excel·PowerPoint 문서를 단일 도구로 다루는 구조와 서식 보존, 렌더링 검수, 매크로·외부 링크·권한 위험을 설명합니다.'
 github_url: https://github.com/iOfficeAI/OfficeCLI
 image:
   path: https://opengraph.githubassets.com/1/iOfficeAI/OfficeCLI
-  alt: 'OfficeCLI: How AI Agents Read and Write Microsoft Office Documents Natively'
+  alt: "iOfficeAI/OfficeCLI GitHub 저장소 대표 이미지"
 project:
   stars: 12036
   forks: 816
@@ -40,29 +40,9 @@ project:
   files: 1179
 mermaid: true
 chart: true
-faq:
-- question: OfficeCLI를 사용하려면 마이크로소프트 오피스가 로컬에 설치되어 있어야 하나요?
-  answer: 아니요, 전혀 필요하지 않습니다. OfficeCLI는 내부에 .NET 런타임과 고유의 렌더링 엔진을 포함하여 단일 바이너리로 컴파일되어
-    있습니다. 따라서 MS 오피스나 LibreOffice 같은 외부 프로그램의 설치 없이도 문서를 완벽하게 읽고 수정할 수 있습니다.
-- question: 무료로 사용할 수 있나요? 상업적 이용도 가능한가요?
-  answer: 네, OfficeCLI는 완전한 오픈소스 프로젝트이며 Apache 2.0 라이선스를 따릅니다. 개인 프로젝트는 물론, 상업용 애플리케이션이나
-    사내 내부 도구로 통합하여 사용할 때도 별도의 라이선스 비용이나 제약 없이 자유롭게 이용할 수 있습니다.
-- question: Claude Code나 Cursor 외의 환경에서도 쓸 수 있나요?
-  answer: 터미널에서 쉘 명령어(CLI)를 실행할 수 있는 환경이라면 어디서든 사용할 수 있습니다. AI 코딩 에이전트뿐만 아니라 일반적인
-    CI/CD 파이프라인(GitHub Actions 등)이나 백엔드 스크립트 내에서도 표준 입출력을 통해 문서를 자동화하는 데 유용하게 활용 가능합니다.
-- question: 기존 python-docx나 openpyxl과 비교했을 때 가장 큰 장점은 무엇인가요?
-  answer: 가장 큰 장점은 시각적 렌더링 기능과 3계층(3-Tier) API입니다. 기존 라이브러리들은 복잡한 표나 차트를 다룰 때 서식이
-    깨지는 일이 잦았지만, OfficeCLI는 내장된 HTML 렌더링 엔진과 PNG 캡처 기능을 통해 AI가 결과물을 눈으로 직접 확인하며 교정할
-    수 있게 해줍니다.
-- question: AI 에이전트가 문서를 처리할 때 토큰을 얼마나 절감할 수 있나요?
-  answer: 원시 XML 전체를 읽어 들이는 방식과 비교했을 때, 통상적으로 약 65%에서 최대 90%까지 프롬프트 토큰을 절약할 수 있습니다.
-    OfficeCLI의 L1 API는 불필요한 마크업을 모두 제거하고 에이전트가 이해하기 쉬운 의미론적 텍스트나 깔끔한 JSON 형태로 데이터만
-    구조화하여 전달하기 때문입니다.
-- question: 수천 개의 문서를 한 번에 처리할 때 성능은 어떤가요?
-  answer: OfficeCLI는 메모리에 문서를 올려두고 60초간 대기하는 '상주 모드(Resident Mode)'를 지원하여 파일 입출력 병목을
-    크게 줄였습니다. 하지만 4만 개 이상의 문서를 다루는 대규모 스케일에서는 병렬 처리 시 메모리 스파이크가 발생할 수 있으므로, 단일 프로세스에
-    과부하가 걸리지 않도록 적절한 배치(Batch) 설계가 필요합니다.
 ---
+
+OfficeCLI는 에이전트가 Word·Excel·PowerPoint 파일을 읽고 수정할 수 있도록 문서 작업을 명령 인터페이스로 노출합니다. 파일이 열리고 저장됐다는 사실은 수식·서식·차트가 보존됐다는 뜻이 아니므로 구조 diff와 렌더링 결과를 함께 확인해야 합니다. 원본 복사본과 허용 출력 경로를 두고 매크로, 외부 링크, 숨김 시트가 있는 대표 문서부터 시험하세요.
 
 [참고 링크]
 - [OfficeCLI GitHub 저장소](https://github.com/iOfficeAI/OfficeCLI)
@@ -361,6 +341,20 @@ classDiagram
 단순히 코드를 자동 완성해 주는 단계를 넘어, 최신 AI 에이전트들은 이제 소프트웨어 개발의 전체 생명주기를 돕는 방향으로 진화하고 있습니다. 구현 계획을 정리한 기획서, 비용을 산출한 스프레드시트, 경영진을 설득할 프레젠테이션 자료를 에이전트가 사람과 동일한 눈높이에서 이해하고 만들어낼 수 있어야 진정한 자동화가 완성됩니다.
 
 OfficeCLI는 AI가 인간의 비즈니스 문서를 시각적으로 인지하고 안전하게 제어할 수 있는 견고한 다리를 놓았습니다. 마이크로소프트 오피스라는 거대한 장벽을 단일 바이너리로 허물어낸 이 프로젝트는, 앞으로 이어질 '문서 에이전트(Document Agents)' 생태계에 중요한 인프라로 자리 잡을 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/iOfficeAI/OfficeCLI)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
+- [마크다운 직무 기술서만으로 서브 에이전트가 될까? agency-agents의 실제 역할]({% post_url 2026-03-14-Old-Prompt-Crafters-Can-Rest-Now-The-Dawn-of-the-Sub-Agent-Era-Proven-by-agency-agents %}) — 120여 개 역할 문서를 에이전트로 활용하는 agency-agents의 구조를 살피고, 실행 엔진과 기억 장치가 따로 필요한 이유와 도입 판단 기준을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

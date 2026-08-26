@@ -4,21 +4,24 @@ title: 'Obscura는 정말 RAM 30MB로 V8을 돌릴까: CDP 호환성과 렌더�
 date: '2026-04-28 07:23:28'
 categories: Tech
 tags:
-  - Obscura
-  - Rust
-  - HeadlessBrowser
-  - V8
-  - CDP
+  - 웹개발
+  - 경량화
 summary: 'Obscura의 30~40MB RAM·70MB 바이너리·85ms 시작 주장을 구분해 읽고, Blink를 덜어낸 대가인 CSS 렌더링·Web API·CDP 호환 공백을 점검합니다.'
-author: AI Trend Bot
+description: "Obscura의 30~40MB RAM·CDP 지원 주장을 cold·warm, concurrency·soak test로 재고, Chrome 결과 동일성·security·fallback 기준까지 점검합니다."
 github_url: https://github.com/h4ckf0r0day/obscura
+faq:
+  - question: "Obscura가 CDP를 지원하면 Playwright script가 모두 그대로 동작하나요?"
+    answer: "아닙니다. CDP 연결 성공은 protocol 전체와 Chrome 결과의 동일성을 뜻하지 않으므로 실제 사용하는 command와 대상 page별 contract test가 필요합니다."
+  - question: "30MB RAM 수치를 그대로 container 용량에 적용해도 되나요?"
+    answer: "안 됩니다. 측정 대상·cold와 warm·RSS와 PSS·동시 page 수가 다를 수 있어 자체 workload의 peak와 장시간 누수를 다시 측정해야 합니다."
+  - question: "Obscura가 잘 맞지 않으면 어떤 fallback이 필요한가요?"
+    answer: "CSS layout, screenshot, 지원되지 않는 Web API나 결과 불일치가 감지되면 같은 작업을 고정 version Chromium으로 넘기고 두 결과를 추적해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/h4ckf0r0day/obscura
-  alt: Running V8 on 30MB RAM? A Deep Dive into 'Obscura', the Monster Rust-built
-    Headless Browser
+  alt: "h4ckf0r0day/obscura GitHub 저장소 대표 이미지"
 ---
 
-Obscura의 RAM 30MB는 흥미로운 프로젝트 주장이나, 대상 페이지와 동시성에서 다시 잰 수치 없이 Headless Chrome의 1/7 비용이라고 단정할 수는 없습니다.
+Obscura의 RAM 30MB는 흥미로운 프로젝트 주장이나, 대상 페이지와 동시성에서 다시 잰 수치 없이 Headless Chrome의 1/7 비용이라고 단정할 수는 없습니다. 필요한 CDP command와 추출 결과가 Chromium 기준선과 같고 장시간 부하에서도 자원이 안정적일 때에만 엔진 교체 후보가 됩니다.
 
 ## 가벼워진 이유는 브라우저 기능을 덜었기 때문이다
 
@@ -64,7 +67,43 @@ DOM 텍스트와 JavaScript 결과만 필요한 대량 수집, 제한된 패키�
 
 바이너리 크기와 첫 페이지 속도만 좋고 실패 재시도가 많다면 총비용은 줄지 않습니다. Obscura의 도입 판단은 30MB라는 한 숫자가 아니라, 필요한 CDP 기능을 정확히 수행하는 성공한 작업 한 건당 메모리와 시간으로 내려야 합니다.
 
+측정 절차도 고정해야 숫자를 비교할 수 있습니다. 같은 host와 network에서 process cold start, 첫 navigation, V8 warm 상태를 분리하고 OS cache 조건을 기록합니다. 메모리는 단일 순간의 RSS뿐 아니라 process tree의 PSS·peak, page 종료 뒤 회수량을 봅니다. 1·10·50개 page를 열고 닫는 부하와 수 시간 soak test에서 heap이 계단식으로 남는지도 확인합니다.
+
+성공 판정은 HTTP 200이나 selector 존재가 아닙니다. 대상 업무가 필요로 하는 text, attribute, cookie, redirect, iframe과 download 결과를 schema로 만들고 Chromium 결과와 비교합니다. SPA hydration이 덜 끝난 값을 빨리 반환하면 속도는 좋아 보이지만 데이터는 틀립니다. command별 지원·부분 지원·미지원을 version과 함께 남기면 client update가 호환성을 깨뜨린 지점을 찾기 쉽습니다.
+
+경량화가 보안 동등성을 뜻하지도 않습니다. navigation 격리, TLS와 certificate 오류, same-origin·cookie partition, download path와 script timeout이 기대대로 동작하는지 악성·비정상 page로 시험합니다. Blink를 덜어냈다는 사실만으로 attack surface가 작다고 단정할 수 없고, V8·Rust FFI와 CDP endpoint의 접근 제어도 운영자가 책임집니다.
+
+두 engine을 한동안 함께 운영하면 전환 위험을 줄일 수 있습니다. Obscura에서 unsupported command, timeout, 결과 schema 불일치가 발생하면 고정 version Chromium으로 한 번만 fallback하고 이유를 metric으로 남깁니다. fallback 비율이 높으면 작은 정상 작업의 비용 이점이 이중 실행으로 사라집니다. 어느 페이지를 처음부터 Chromium에 보낼지 rule을 개선하되, 사이트 변화가 생기면 다시 표본 검증합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/h4ckf0r0day/obscura)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Browser-use는 셀렉터 자동화를 대체할까: 비용·권한·실패 복구 기준]({% post_url 2026-03-01-Stop-Clicking-Start-Prompting-Building-Real-AI-Agents-with-Browser-use %}) — Browser-use가 LLM과 Playwright로 웹 작업을 수행하는 방식, 고정 셀렉터 자동화와의 차이, 토큰 비용·권한·재현성·복구 기준을 정리합니다.
+- [pinchtab은 Playwright를 대체할까: 12MB HTTP 브리지와 800토큰 접근성 트리]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-pinchtab-the-Ultimate-Browser-Control-for-AI-Agents %}) — 12MB Go 바이너리로 Chrome을 HTTP 제어하는 pinchtab의 토큰 절감 구조와, 접근성 품질·세션 보안·시각 작업 한계를 비교합니다.
+- [셀렉터가 자꾸 깨질 때 Page Agent를 써도 될까: 속도·안전 판단법]({% post_url 2026-03-09-Does-a-Silver-Bullet-for-Web-Automation-Exist-The-Future-of-Declarative-Browsing-with-Page-Agents %}) — Page Agent의 시맨틱 DOM·시각 입력·계획·Playwright 실행 구조와 셀렉터 자동화 대비 장점, 지연·비용·오작동 한계를 살펴봅니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Obscura가 CDP를 지원하면 Playwright script가 모두 그대로 동작하나요?
+
+아닙니다. CDP 연결 성공은 protocol 전체와 Chrome 결과의 동일성을 뜻하지 않으므로 실제 사용하는 command와 대상 page별 contract test가 필요합니다.
+
+### 30MB RAM 수치를 그대로 container 용량에 적용해도 되나요?
+
+안 됩니다. 측정 대상·cold와 warm·RSS와 PSS·동시 page 수가 다를 수 있어 자체 workload의 peak와 장시간 누수를 다시 측정해야 합니다.
+
+### Obscura가 잘 맞지 않으면 어떤 fallback이 필요한가요?
+
+CSS layout, screenshot, 지원되지 않는 Web API나 결과 불일치가 감지되면 같은 작업을 고정 version Chromium으로 넘기고 두 결과를 추적해야 합니다.
+
 참고 자료:
 
-- https://github.com/h4ckf0r0day/obscura
-- https://phemex.com/news/rust-developer-unveils-obscura
+- [GitHub 저장소](https://github.com/h4ckf0r0day/obscura)
+- [phemex.com 원문](https://phemex.com/news/rust-developer-unveils-obscura)

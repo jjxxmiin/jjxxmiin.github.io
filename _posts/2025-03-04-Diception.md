@@ -2,16 +2,25 @@
 layout: post
 title: "DICEPTION 하나로 깊이·법선·분할을 다 잘할까: 벤치마크가 보여준 성능 차이"
 summary: "DICEPTION이 여러 vision perception 출력을 RGB 이미지로 통합하는 방식과 50-shot 적응 구조를 설명하고, 깊이·표면 법선·entity segmentation 표에서 드러난 태스크별 강약을 비교합니다."
+description: "DICEPTION이 깊이·표면 법선·분할 출력을 RGB로 통합하는 원리와 태스크별 성능 차이, 50-shot 적응과 운영 단순화의 trade-off를 설명합니다."
+faq:
+  - question: "DICEPTION은 모든 perception 태스크에서 전용 모델보다 좋은가요?"
+    answer: "아닙니다. 데이터셋과 태스크에 따라 우열이 다르므로 깊이·법선·분할의 핵심 지표를 각각 비교해야 합니다."
+  - question: "왜 서로 다른 출력을 RGB로 만드나요?"
+    answer: "하나의 diffusion backbone과 생성 interface를 공유하기 위해서입니다. 다만 RGB를 실제 depth·normal·label로 해석하는 오차를 따로 검증해야 합니다."
+  - question: "50-shot이면 새 태스크에 충분한가요?"
+    answer: "보장되지 않습니다. 표본 대표성, domain 차이와 seed 분산을 확인하고 전용 baseline과 같은 split에서 비교해야 합니다."
 image:
   path: /assets/img/thumb/Diception.jpg
   alt: "DICEPTION: 하나의 Diffusion 모델로 모든 시각 지각 태스크 해결 대표 이미지"
 date: 2025-03-04
 categories: Paper
 tags:
-  - DICEPTION
-  - Vision Perception
-  - Diffusion Model
-  - Multi-task Learning
+  - 벤치마크
+  - 컴퓨터비전
+  - 디퓨전모델
+  - 파인튜닝
+  - 로보틱스
 math: true
 ---
 
@@ -20,6 +29,9 @@ DICEPTION은 깊이·표면 법선·분할을 한 diffusion backbone과 RGB 출�
 자료는 [논문](https://arxiv.org/abs/2502.17157), [프로젝트 페이지](https://aim-uofa.github.io/Diception/), [Hugging Face 데모](https://huggingface.co/spaces/Canyu/Diception-Demo)에 공개돼 있습니다.
 
 ![DICEPTION 전체 구조](/assets/img/post_img/diception/1.png)
+
+
+하나의 backbone과 출력 형식을 쓴다는 사실은 모든 태스크에서 같은 정확도를 낸다는 뜻이 아닙니다. 범용화로 줄어드는 운영 비용과 전용 모델 대비 떨어질 수 있는 과제별 성능을 함께 비교해야 합니다.
 
 ## 하나의 모델이라는 말의 정확한 의미
 
@@ -124,3 +136,33 @@ DICEPTION이 매력적인 경우는 한 시스템에서 깊이·법선·분할�
 기존 글에 적힌 실시간 로봇 상호작용이나 의료 영상 zero-shot 성능은 이 표에서 직접 검증되지 않았습니다. 일반 RGB perception 결과가 곧 안전한 제어 또는 의료 판단이 되는 것도 아닙니다.
 
 DICEPTION의 의미는 모든 전용 모델이 필요 없어졌다는 선언보다, 서로 다른 vision perception 문제를 하나의 생성 인터페이스로 얼마나 묶을 수 있는지 보여준 데 있습니다. 최종 선택은 “범용인가”가 아니라 “내 태스크에서 어느 정도의 성능 차이를 감수하고 운영 단순화를 얻는가”로 내려야 합니다.
+
+## RGB 출력은 공통 형식이면서 새 검증 지점이다
+
+깊이, 법선, segmentation을 RGB image처럼 생성하면 같은 diffusion interface를 재사용할 수 있지만 색을 다시 물리 값이나 label로 해석하는 과정이 필요합니다. 작은 색 오차가 depth 값이나 class 경계에서 어떤 오차로 바뀌는지 태스크별 decoder와 metric으로 확인해야 합니다.
+
+50-shot 적응도 모든 domain에서 같은 효과를 보장하지 않습니다. 학습 표본이 장면 다양성을 대표하는지, class별로 충분한지, seed에 따라 결과가 흔들리는지를 봅니다. 전용 모델과 비교할 때는 accuracy뿐 아니라 모델 수, 배포 memory, latency, 새 태스크 추가 시간을 함께 기록해야 통합의 실제 가치를 계산할 수 있습니다.
+
+실패 세트에는 반사·투명 표면의 depth, 가는 구조의 normal, 작은 객체 segmentation을 넣습니다. DICEPTION이 적합한지는 평균 benchmark보다 업무에서 가장 중요한 태스크의 최저 품질이 허용 범위 안에 있고, 하나의 pipeline으로 줄어드는 유지 비용이 그 차이를 보상하는지로 판단합니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [CenterNet은 Anchor와 NMS 없이 어떻게 물체를 찾을까: 중심점·크기·Offset 해설]({% post_url 2019-05-24-CenterNet %}) — CenterNet이 object를 bounding box 후보가 아닌 중심점 하나로 표현하는 방식을 설명합니다. Heatmap peak, box 크기, stride offset의 C+4 출력과 focal·L1 loss를 연결하고…
+- [Darknet NMS는 Class별로 해야 할까? do\_nms\_obj와 do\_nms\_sort 차이]({% post_url 2022-02-09-DarkNetBox %}) — Darknet box.c의 objectness 기준 NMS와 class별 NMS를 비교하고, IoU 계산·stride box 변환·encode/decode·비활성 diou 미분 코드의 주의점을 코드 흐름으로 설명합니다.
+- [BiRefNet: 고해상도 이미지 세분화를 위한 최첨단 AI 모델]({% post_url 2025-02-25-birefnet %}) — BiRefNet, 어떻게 미세한 이미지 분할을 정밀하게 수행할까? 최신 연구와 실용적 응용 사례를 소개합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### DICEPTION은 모든 perception 태스크에서 전용 모델보다 좋은가요?
+
+아닙니다. 데이터셋과 태스크에 따라 우열이 다르므로 깊이·법선·분할의 핵심 지표를 각각 비교해야 합니다.
+
+### 왜 서로 다른 출력을 RGB로 만드나요?
+
+하나의 diffusion backbone과 생성 interface를 공유하기 위해서입니다. 다만 RGB를 실제 depth·normal·label로 해석하는 오차를 따로 검증해야 합니다.
+
+### 50-shot이면 새 태스크에 충분한가요?
+
+보장되지 않습니다. 표본 대표성, domain 차이와 seed 분산을 확인하고 전용 baseline과 같은 split에서 비교해야 합니다.

@@ -11,12 +11,11 @@ tags:
   - 파인튜닝
 summary: 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을
   출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
-author: AI Trend Bot
+description: 'i-have-adhd 스킬이 코딩 에이전트의 답을 행동 중심으로 줄이는 방식과 설명 부족·위험 명령·접근성 명칭·작업별 적용 기준을 설명합니다.'
 github_url: https://github.com/ayghri/i-have-adhd
 image:
   path: https://opengraph.githubassets.com/1/ayghri/i-have-adhd
-  alt: 'ayghri/i-have-adhd: How to Stop AI Coding Agents from Burying the Answer and
-    Focus on Actions'
+  alt: "ayghri/i-have-adhd GitHub 저장소 대표 이미지"
 project:
   stars: 8378
   forks: 383
@@ -57,7 +56,9 @@ faq:
     에이전트(Claude Code 등) 본체에 있으며, 이 스킬은 에이전트가 어떤 형식으로 말을 할지 어투와 구조만 교정할 뿐입니다.
 ---
 
-## 상단 링크 블록
+i-have-adhd는 에이전트 답변에서 긴 서론을 줄이고 실행할 명령과 순서를 앞에 두도록 유도하는 프롬프트 스킬입니다. 빠른 작업에는 읽는 시간을 줄일 수 있지만 위험한 명령의 이유·전제·되돌림까지 지우면 오히려 실행 판단이 어려워집니다. 단순 조회와 고위험 변경을 나눠 설명 길이와 필수 안전 정보를 다르게 적용하세요.
+
+## 행동 중심 답변이 도움이 되는 작업은 무엇인가
 
 - [ayghri/i-have-adhd GitHub 공식 저장소](https://github.com/ayghri/i-have-adhd)
 - [Claude Code Plugins 정보 모음](https://github.com/ccplugins/awesome-claude-code-plugins)
@@ -302,6 +303,20 @@ sequenceDiagram
 ayghri/i-have-adhd 프로젝트가 GitHub에서 단기간에 수천 개의 별을 받으며 인기를 끈 이유는 단순히 코드를 잘 짜는 인공지능을 넘어서, 인공지능이 인간과 어떻게 소통해야 하는가에 대한 본질적인 고민을 건드렸기 때문입니다. 
 
 모델의 파라미터 수가 커지고 지능이 높아지는 것만큼이나, 그 지능을 개발자의 작업 기억 범위 내에 얼마나 매끄럽고 압축적으로 전달할 수 있느냐가 생산성의 핵심입니다. 여러분이 평소 화면을 가득 채우는 AI의 설명을 보며 조금이라도 답답함을 느끼셨다면, 당장 터미널에 이 작은 스킬을 설치해 보시길 권합니다. 불필요한 친절함이 사라진 자리에, 진정한 의미의 초고속 코딩 파트너가 나타날 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/ayghri/i-have-adhd)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
+- [reverse-skill: AI 코딩 에이전트를 안전하고 정교한 보안 분석가로 바꾸는 스킬 라우터]({% post_url 2026-08-03-reverse-skill-AI-powered-Cybersecurity-Skill-Router-for-Reverse-Engineering-and-Penetration-Testing %}) — reverse-skill은 Claude Code, Cursor, Cline 등 AI 코딩 에이전트가 리버스 엔지니어링과 침투 테스트를 안전하게 실행하도록 안내하는 오픈소스 스킬 라우팅 프레임워크입니다. 경로 우선 실행 모델, 로컬…
+- [addyosmani/agent-skills: AI 코딩 에이전트에게 시니어 개발자의 업무 방식을 가르치다]({% post_url 2026-07-16-addyosmaniagent-skills-Teaching-AI-Coding-Agents-the-Workflows-of-Senior-Developers %}) — 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항 명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

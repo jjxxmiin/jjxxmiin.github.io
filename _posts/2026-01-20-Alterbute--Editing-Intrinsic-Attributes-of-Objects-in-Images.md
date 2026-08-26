@@ -4,15 +4,21 @@ title: 'Alterbute는 색·재질을 바꿔도 같은 객체를 유지할까: VNE
 date: '2026-01-20'
 categories: Tech
 tags:
-  - Alterbute
-  - Intrinsic Attribute Editing
-  - Identity Preservation
-  - Image Editing
+  - 디퓨전모델
+  - 이미지생성
 math: true
 summary: Alterbute가 Visual Named Entity, 참조 이미지, text attribute, 배경·mask를 분리해 identity와 편집 자유도의 충돌을 다루는 방식과 VNE·mask 오류의 한계를 정리합니다.
+description: "Alterbute가 VNE identity·intrinsic text·extrinsic mask를 분리해 속성을 편집하는 원리와 shape 변화·mask 경계·identity trade-off를 검증합니다."
+faq:
+  - question: "VNE는 일반 object category와 무엇이 다른가요?"
+    answer: "car보다 특정 차종처럼 reference를 알아보는 데 필요한 더 구체적인 visual identity 단위를 뜻합니다."
+  - question: "Shape를 크게 바꿔도 같은 객체라고 볼 수 있나요?"
+    answer: "shape가 identity 단서이기도 해 변화가 커질수록 경계가 모호합니다. 제품별 필수 특징과 허용 변형을 사람이 정해야 합니다."
+  - question: "CLIP score 하나로 편집 성공을 판단할 수 있나요?"
+    answer: "아닙니다. text attribute 준수, DINO류 identity 보존, mask 밖 background 변화와 사람 식별을 함께 봐야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.10714.png
-  alt: Paper Thumbnail
+  alt: "Alterbute는 색·재질을 바꿔도 같은 객체를 유지할까: VNE와 마스크 의존성 논문 대표 이미지"
 ---
 
 Alterbute는 참조 객체의 identity를 Visual Named Entity(VNE)로 묶고 text로 색·재질·형태를 바꾸지만, shape를 크게 바꿀수록 “같은 객체”의 기준 자체가 모호해집니다. 결과를 볼 때 prompt 준수와 identity 보존을 하나의 점수로 합치지 말아야 합니다.
@@ -104,3 +110,35 @@ Alterbute가 맞는 작업은 같은 제품군의 색상·재질 variation을 �
 모델이 text를 잘 따랐지만 제품 model이 달라졌다면 edit 성공이 아닙니다. 반대로 identity는 정확하지만 색·재질이 거의 변하지 않아도 실패입니다.
 
 Alterbute의 핵심은 객체의 “영혼”을 보존한다는 비유가 아니라, VNE identity·intrinsic text·extrinsic mask를 별도 조건으로 만들어 충돌을 측정할 수 있게 한 데 있습니다. 실용성은 그 분리가 자신의 제품군과 shape edit 범위에서도 유지되는지에 달려 있습니다.
+
+## 편집 강도별 Pareto Curve를 만든다
+
+색 변경, material 변경, part 추가, 큰 shape 변경 순서로 난도를 높이며 attribute score와 identity score를 함께 기록합니다. 한 점의 평균보다 어느 강도에서 identity가 급격히 무너지는지 보는 편이 제품별 허용 범위를 정하기 쉽습니다.
+
+mask도 tight·expanded·soft boundary 조건을 비교합니다. tight mask는 새 shape를 자를 수 있고 expanded mask는 background를 바꿀 수 있습니다. shadow·reflection이 mask 밖에 있을 때 이를 보존할지 함께 수정할지도 edit 목적에 따라 미리 정합니다.
+
+VNE label은 사람이 표본 검수하고 일반 category로 잘못 축약된 사례와 지나치게 구체적인 잘못된 model명을 나눕니다. label이 틀린 상태에서 prompt를 반복 수정해도 identity 기준 자체가 잘못됐을 수 있습니다.
+
+실제 도입에서는 동일 제품의 여러 각도와 가림, 작은 logo·pattern을 포함한 test set을 사용합니다. Alterbute의 성공은 자유로운 변형이 아니라 **필수 identity 특징을 남기고 요청 attribute를 바꾸며, mask 밖 문맥 변화를 허용 범위 안에 유지하는 Pareto 지점을 찾는 것**입니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [PhotoDoodle은 30~50쌍으로 스타일을 배울까: 배경 보존 구조와 실행 코드 함정]({% post_url 2025-03-03-PhotoDoodle %}) — PhotoDoodle의 OmniEditor 사전학습과 EditLoRA 미세조정, positional encoding cloning이 배경을 보존하는 방식, 비교·ablation 결과와 예제 코드의 해상도 주의점을 정리합니다.
+- [이미지 생성 Step을 1에서 50까지 바꿔도 될까? Self-E의 Any-Step 학습]({% post_url 2026-01-01-Self-Evaluation-Unlocks-Any-Step-Text-to-Image-Generation %}) — Self-E가 별도 teacher distillation 없이 flow matching의 local supervision과 자체 sample 평가를 결합해 하나의 weight로 1~50 step 생성을 지원하는 원리와 비용을…
+- [InternVL-U 4B가 14B를 이길까: 이해·생성 분리와 실제 VRAM 조건]({% post_url 2026-03-12-InternVL-U--Democratizing-Unified-Multimodal-Models-for-Understanding--Reasoning--Generation-and-Editing %}) — 4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM·지식·서빙 한계를 점검합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### VNE는 일반 object category와 무엇이 다른가요?
+
+car보다 특정 차종처럼 reference를 알아보는 데 필요한 더 구체적인 visual identity 단위를 뜻합니다.
+
+### Shape를 크게 바꿔도 같은 객체라고 볼 수 있나요?
+
+shape가 identity 단서이기도 해 변화가 커질수록 경계가 모호합니다. 제품별 필수 특징과 허용 변형을 사람이 정해야 합니다.
+
+### CLIP score 하나로 편집 성공을 판단할 수 있나요?
+
+아닙니다. text attribute 준수, DINO류 identity 보존, mask 밖 background 변화와 사람 식별을 함께 봐야 합니다.

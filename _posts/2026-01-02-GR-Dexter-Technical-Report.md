@@ -4,18 +4,24 @@ title: 'GR-Dexter는 양손 42-DoF를 어떻게 다루나: 데이터·가림·�
 date: '2026-01-02'
 categories: Tech
 tags:
-  - GR-Dexter
-  - VLA
-  - 양손로봇
-  - 로봇조작
+  - 로보틱스
+  - AI트렌드
 math: true
 summary: 양손 21-DoF 로봇을 VLA로 제어할 때 생기는 액션 차원, 손-물체 가림, 데이터 부족 문제와 평가 기준
+description: "GR-Dexter가 양손 42-DoF 하드웨어·텔레오퍼레이션·VLA를 묶어 학습하는 구조를 설명하고, 가림·접촉·교차 임보디먼트·안전 실패를 검증합니다."
+faq:
+  - question: "GR-Dexter의 42-DoF는 무엇을 뜻하나요?"
+    answer: "각 손의 21개 자유도를 합친 양손 action 차원을 뜻하며, 두 손가락 관절과 협응을 동시에 예측해야 합니다."
+  - question: "다른 로봇 데이터가 손가락 제어도 직접 가르치나요?"
+    answer: "주로 물체·명령 같은 고수준 개념을 넓히며, GR-Dexter의 저수준 접촉과 21-DoF action은 전용 데이터로 보강해야 합니다."
+  - question: "시각만으로 미끄러짐을 안정적으로 알 수 있나요?"
+    answer: "손가락 가림과 힘 정보 부재 때문에 놓칠 수 있습니다. 촉각이 없다면 접촉 실패·미끄러짐을 별도 시험하고 안전 정지 조건을 둬야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.24210.png
-  alt: Paper Thumbnail
+  alt: "GR-Dexter는 양손 42-DoF를 어떻게 다루나: 데이터·가림·제어 논문 대표 이미지"
 ---
 
-GR-Dexter의 핵심은 손마다 21개 자유도를 가진 로봇을 크게 만든 데 있지 않고, 양손 제어 데이터와 VLA 모델을 한 시스템으로 묶어 42차원의 손 동작을 학습하게 한 데 있습니다.
+GR-Dexter의 핵심은 손마다 21개 자유도를 가진 로봇을 크게 만든 데 있지 않고, 양손 제어 데이터와 VLA 모델을 한 시스템으로 묶어 42차원의 손 동작을 학습하게 한 데 있습니다. 성공 여부는 자유도 수가 아니라 접촉 안정성, 두 손의 협응, 가림 뒤 회복, control 지연을 task 단계별로 측정해 판단해야 합니다.
 
 - [GR-Dexter 기술 보고서](https://huggingface.co/papers/2512.24210)
 
@@ -58,3 +64,60 @@ GR-Dexter는 하드웨어, 데이터 수집, 모델을 분리된 성과로 보�
 시각 중심 제어는 손가락이 물체를 가리거나 미끄러짐이 시작될 때 상태를 놓칠 수 있습니다. 촉각 정보가 없다면 화면상으로 비슷해 보이는 접촉과 실제 힘의 차이를 구분하기 어렵습니다. 자유도가 많은 손은 제어 범위를 넓히는 동시에 관절 고장과 유지보수 지점도 늘립니다.
 
 텔레오퍼레이션 역시 자동으로 무한히 확장되는 데이터 공급 방식은 아닙니다. 사람의 조작 시간과 품질 관리가 계속 필요합니다. GR-Dexter를 범용 서비스 로봇의 완성으로 읽기보다, 고차원 양손 VLA를 만들 때 하드웨어와 데이터 설계를 함께 해야 한다는 사례로 보는 편이 정확합니다.
+
+## 42차원 Action은 관절 오차와 작업 오차를 나눠 본다
+
+모든 관절 값의 평균 오차가 작아도 엄지와 검지의 접촉 시점이 어긋나면 grasp가 실패할 수 있습니다. 반대로 일부 관절이 demonstration과 달라도 물체를 안정적으로 잡고 목표를 완료할 수 있습니다. joint trajectory 유사도, 접촉 성공, object slip, 최종 task completion을 별도 지표로 두는 이유입니다.
+
+| 작업 단계 | 관찰 신호 | 대표 실패 |
+|---|---|---|
+| 접근 | 두 손의 pose와 속도 | 한 손이 먼저 충돌함 |
+| 접촉 | 손가락별 닫힘과 object 이동 | 가림 뒤 허공을 집음 |
+| 협응 | 양손 사이 힘·위치 관계 | 한 손이 다른 손을 방해함 |
+| 운반·조작 | slip과 목표 상태 | 초반 grasp 뒤 장기 task 실패 |
+
+두 손의 역할이 다른 task도 포함해야 합니다. 한 손이 고정하고 다른 손이 돌리는 작업과 두 손이 같은 물체를 함께 드는 작업은 협응 방식이 다릅니다. 평균 성공률은 어떤 coordination pattern이 약한지 가릴 수 있으므로 task family별로 결과를 냅니다.
+
+## Teleoperation Data는 동기화와 품질을 감사한다
+
+vision frame, language instruction, 양손 joint trajectory의 시간이 맞지 않으면 모델은 늦은 observation에 잘못된 action을 연결해 배웁니다. camera timestamp와 controller timestamp를 정렬하고, packet 누락과 지연이 있는 episode를 표시합니다. 작업자가 중간에 멈추거나 실패를 복구한 구간도 성공 demonstration과 구분해야 합니다.
+
+여러 작업자의 손동작 차이는 data 다양성이 될 수 있지만 calibration 차이로도 나타납니다. 같은 task에서 속도·접촉 위치·관절 범위를 비교하고, robot limit를 넘는 mapping이나 과도한 떨림을 제거합니다. 전체 시간만 늘리기보다 희귀한 가림, 미끄러짐, 양손 역할 교대가 충분히 포함됐는지 확인하는 편이 중요합니다.
+
+## Cross-Embodiment 이득은 혼합 Data Ablation으로 확인한다
+
+GR-Dexter 전용 data만 쓴 조건, 다른 robot data를 섞은 조건, vision-language data까지 섞은 조건을 같은 task로 비교합니다. unseen object 인식이 좋아졌지만 손가락 제어가 약해질 수 있으므로 고수준 성공과 저수준 contact metric을 함께 봅니다. action space가 다른 data를 어떻게 정렬했는지도 재현 조건에 포함합니다.
+
+안전 시험에는 joint limit, 양손 충돌, 예상보다 큰 object 이동, 손가락이 보이지 않는 상태를 넣습니다. confidence가 낮거나 접촉이 확인되지 않을 때 계속 힘을 주지 않고 멈추는지가 중요합니다. GR-Dexter의 실용성은 복잡한 demo 한 번보다 **여러 실패 조건에서 hardware를 보호하면서 양손 task를 반복 완료하는 비율**로 판단해야 합니다.
+
+## Episode는 시작 성공과 최종 완료를 분리한다
+
+양손 task는 첫 grasp가 성공해도 뚜껑 회전, 손 사이 object 전달, 최종 배치에서 실패할 수 있습니다. episode를 접근·첫 접촉·협응·완료로 나누고 각 단계 도달률을 기록합니다. 최종 성공률만 낮으면 어디서 data가 부족한지 알 수 없지만 단계별 funnel을 보면 가림 문제인지 장기 coordination 문제인지 구분할 수 있습니다.
+
+실패 뒤 recovery도 별도 항목입니다. 한 손의 grasp가 풀렸을 때 다른 손이 object를 유지하는지, 다시 관찰해 접촉을 복구하는지, 위험한 자세에서 멈추는지 봅니다. 성공 episode만 학습하면 이런 복구 장면이 부족할 수 있으므로 teleoperation 과정에서 안전하게 회복한 구간을 표시해 활용합니다.
+
+반복 시험에서는 관절 온도와 calibration drift, 손가락 마모도 함께 기록합니다. 고차원 hand는 software 성능이 같아도 hardware 상태 변화로 성공률이 흔들릴 수 있습니다. 모델 update와 hardware maintenance 시점을 구분하지 않으면 성능 변화를 잘못 해석할 수 있으므로 episode log에 장치 상태를 함께 남깁니다.
+
+이 기록이 있어야 같은 모델의 반복 가능성을 판단할 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [DynamicVLA는 0.4B로 움직이는 물체를 80% 잡을까: 20Hz Action Streaming 검증]({% post_url 2026-01-30-DynamicVLA--A-Vision-Language-Action-Model-for-Dynamic-Object-Manipulation %}) — 0.4B 모델의 20Hz·80% 성공률이 경량 백본, 비동기 추론, 최신 action chunk 선택 중 어디서 나오는지 분석합니다.
+- [Magma는 UI 클릭과 로봇 행동을 어떻게 한 모델로 배우나: SoM·ToM 구조와 한계]({% post_url 2025-03-02-Magma %}) — Magma의 시각·언어·행동 토큰 통합 구조, Set-of-Mark와 Trace-of-Mark 학습 방식, UI·로봇 벤치마크 수치를 읽는 법과 실제 에이전트 적용 전 조건을 정리합니다.
+- [Being-H0.5는 다른 로봇 사이에서 무엇을 공유하나? Human Data와 Mixture-of-Flow]({% post_url 2026-01-21-Being-H0-5--Scaling-Human-Centric-Robot-Learning-for-Cross-Embodiment-Generalization %}) — Being-H0.5가 human interaction data를 공통 표현으로 삼고 Mixture-of-Flow로 공유 primitive와 robot별 expert를 나누는 구조·평가 한계를 정리합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### GR-Dexter의 42-DoF는 무엇을 뜻하나요?
+
+각 손의 21개 자유도를 합친 양손 action 차원을 뜻하며, 두 손가락 관절과 협응을 동시에 예측해야 합니다.
+
+### 다른 로봇 데이터가 손가락 제어도 직접 가르치나요?
+
+주로 물체·명령 같은 고수준 개념을 넓히며, GR-Dexter의 저수준 접촉과 21-DoF action은 전용 데이터로 보강해야 합니다.
+
+### 시각만으로 미끄러짐을 안정적으로 알 수 있나요?
+
+손가락 가림과 힘 정보 부재 때문에 놓칠 수 있습니다. 촉각이 없다면 접촉 실패·미끄러짐을 별도 시험하고 안전 정지 조건을 둬야 합니다.

@@ -1,7 +1,11 @@
 ---
+source_citations:
+  - name: "Darknet utils.c 고정 커밋 원본"
+    url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/utils.c"
 layout: post
 title:  "Darknet utils.c 이름만 믿으면 틀리는 7곳: mse_array는 MSE가 아니다"
 summary: "Darknet utils.c의 CLI 파서·문자열·파일·CSV·난수·배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위·0 나눗셈·입력 변경 위험을 짚습니다."
+description: "Darknet utils.c의 mutating CLI·string·CSV·array·random helper를 따라 RMS 오명, bounds·zero division·ownership·thread 실패를 설명합니다."
 date:   2022-03-22 16:00 -0400
 categories: DarkNet
 image:
@@ -9,10 +13,15 @@ image:
   alt: DarkNet 시리즈 - Utils 대표 이미지
 tags:
   - DarkNet
-  - C언어
-  - 아키텍처분석
   - 컴퓨터비전
 math: true
+faq:
+  - question: "mse_array는 실제 mean squared error를 반환하나요?"
+    answer: "아닙니다. 한 배열의 제곱 평균에 제곱근을 취한 RMS를 반환합니다."
+  - question: "find_int_arg 같은 CLI helper는 argv를 보존하나요?"
+    answer: "아닙니다. 찾은 option과 값을 del_arg로 제거해 이후 parser가 보는 argv 배열을 바꿉니다."
+  - question: "sample_array는 입력 배열을 그대로 두나요?"
+    answer: "아닙니다. 합으로 각 원소를 나눠 probability로 만들며 합 0과 음수도 호출자가 검증해야 합니다."
 ---
 
 Darknet `utils.c`를 포팅할 때는 함수 이름보다 배열을 직접 바꾸는지, 범위와 0을 검사하는지부터 봐야 하며, 특히 `mse_array`는 MSE가 아니라 root mean square를 반환합니다.
@@ -75,3 +84,51 @@ float mse_array(float *a, int n)
 `rand_int`와 `rand_uniform`은 min·max 순서가 반대면 교환하지만 암호학적 난수 함수가 아닙니다. `rand_normal`은 Box–Muller 변환의 두 번째 값을 static 변수에 보관합니다. 재현성과 동시 접근 요구가 있다면 외부 seed와 호출 모델까지 함께 관리해야 합니다.
 
 실용적인 검증 순서는 mutation, bounds, empty input, allocation ownership입니다. 각 helper에 정상값 하나만 넣는 대신 `min!=0`, `n=0`, 합이 0인 배열, 너무 긴 문자열, field 수 초과를 넣어야 이름 뒤에 숨은 전제가 드러납니다.
+
+## Helper 계약표에 무엇을 적나요?
+
+입력 변경 여부, 새 allocation 반환 여부, 허용 범위, empty input, 오류 시 종료 코드와 thread safety를 함수마다 기록합니다. 짧은 helper일수록 이름만 보고 호출되기 쉬우므로 unit test를 원 source behavior에 고정합니다. Mutable parser에는 원본 copy가 필요한 호출부도 표시합니다.
+
+CLI는 dangling option, 중복 option과 숫자 변환 실패를, CSV는 quote·field 초과와 빈 line을 시험합니다. Array는 n=0, constant, NaN·Inf, 합 0과 class index 범위를 넣습니다.
+
+## 난수 재현성은 어떻게 관리하나요?
+
+Global rand와 static cached normal 값은 seed만 같아도 thread scheduling과 호출 순서에 따라 결과가 달라질 수 있습니다. Data augmentation과 model layer가 같은 generator를 공유하는지 보고 thread별 state 또는 외부 RNG를 사용합니다. `random_index_order`는 min이 0이 아닌 fixture로 index write 범위를 검증합니다.
+
+## 오류 처리를 어떻게 통일하나요?
+
+File open 실패가 exit 0이면 orchestration이 성공으로 오해할 수 있어 nonzero status와 구체 메시지를 사용합니다. Fixed buffer sprintf와 shell 호출을 피하고 length-aware API를 씁니다. Allocation과 fread/fwrite 반환값을 검사해 partial 결과를 정상 data로 넘기지 않습니다.
+
+## Porting 우선순위는 어떻게 정하나요?
+
+전체 utils를 한 번에 옮기기보다 실제 call graph에서 쓰이는 helper부터 mutation·ownership test와 함께 포팅합니다. 이름이 표준 함수와 비슷해도 return·error·side effect 계약을 wrapper에 명시합니다. 사용되지 않는 실험 helper를 production API로 노출하지 않으면 검증 범위를 줄일 수 있습니다.
+
+CPU 32·64-bit와 Windows·Linux에서 `int`, `size_t`, newline과 exit code 차이가 있는 경계를 선택해 테스트합니다. Compiler warning과 sanitizer를 오류로 취급하면 format string·signed overflow·범위 문제를 일찍 찾을 수 있습니다.
+
+## 자주 남는 질문
+
+### mse_array는 실제 mean squared error를 반환하나요?
+
+아닙니다. 한 배열의 제곱 평균에 제곱근을 취한 RMS를 반환합니다.
+
+### find_int_arg 같은 CLI helper는 argv를 보존하나요?
+
+아닙니다. 찾은 option과 값을 del_arg로 제거해 이후 parser가 보는 argv 배열을 바꿉니다.
+
+### sample_array는 입력 배열을 그대로 두나요?
+
+아닙니다. 합으로 각 원소를 나눠 probability로 만들며 합 0과 음수도 호출자가 검증해야 합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Darknet utils.c 고정 커밋 원본](https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/utils.c)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유]({% post_url 2022-02-10-DarkNetCol2im %}) — Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다.
+- [DarkNet image와 OpenCV Mat 변환: 채널 순서·스트림 설정 주의점]({% post_url 2022-02-25-DarkNetImageOpencv %}) — DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB·BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다.
+- [Darknet avgpool은 일반 Average Pooling이 아니다: Global Average 코드 읽기]({% post_url 2022-02-06-DarkNetAvgpool %}) — Darknet avgpool_layer가 window와 stride 없이 채널마다 h×w 전체를 평균내는 Global Average Pooling인 이유와 backward에서 gradient를 균등 분배하는 방식을 설명합니다.
+<!-- internal-links:end -->

@@ -4,15 +4,23 @@ title: 'HERMES는 TTFT를 왜 10배 줄였나: Streaming Video KV Cache의 계�
 date: '2026-01-23'
 categories: Tech
 tags:
-  - HERMES
-  - Streaming Video
-  - KV Cache
-  - Hierarchical Memory
+  - 파인튜닝
+  - 로보틱스
+  - 온디바이스AI
+  - 컨텍스트윈도우
 math: true
 summary: HERMES가 최근 frame은 local cache에, 과거 핵심 token은 global summary에 남겨 query TTFT와 token 수를 줄이는 방식, 10배·68%·11.4% 수치의 조건과 망각 위험을 정리합니다.
+description: "HERMES가 streaming video KV cache를 local detail과 global summary로 계층화해 TTFT를 줄이는 원리, delayed relevance와 eviction 손실, 총비용 검증법을 설명합니다."
+faq:
+  - question: "Training-free이면 stream 처리 비용도 없나요?"
+    answer: "아닙니다. 별도 fine-tuning은 하지 않지만 frame이 들어올 때 attention importance 계산, cache 갱신과 token eviction을 계속 수행합니다."
+  - question: "한 번 evict한 token은 나중 질문에서 복구할 수 있나요?"
+    answer: "원본 frame을 별도로 보관해 다시 encode하지 않는 한 KV cache만으로는 복구할 수 없으므로, 미래에 중요한 짧은 사건을 버리는 delayed relevance가 핵심 위험입니다."
+  - question: "HERMES를 비교할 때 어떤 지표가 필요한가요?"
+    answer: "TTFT와 정확도뿐 아니라 frame ingest latency, peak KV memory, token budget, 오래된 사건 recall과 최악 조건의 응답 지연을 함께 측정해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.14724.png
-  alt: Paper Thumbnail
+  alt: "HERMES는 TTFT를 왜 10배 줄였나: Streaming Video KV Cache의 계층화와 손실 논문 대표 이미지"
 ---
 
 HERMES는 질문이 들어온 뒤 과거 video를 다시 encode하지 않도록 streaming 중 KV cache를 계속 정리해 TTFT를 줄입니다. 즉, query가 빨라진 대신 attention scoring과 eviction 비용을 stream-time에 미리 지불하며, 버린 token은 나중 질문에서 복구할 수 없다는 trade-off가 있습니다.
@@ -110,4 +118,44 @@ Baseline은 full history, sliding window, uniform sampling, HERMES를 같은 tok
 
 Always-on assistant나 CCTV에 바로 안전하게 적용할 수 있다는 기존 전망은 10배 TTFT만으로 입증되지 않습니다. Privacy, multi-stream capacity, missed event rate가 필요하고 자율주행·robot에는 최악 조건의 latency도 봐야 합니다.
 
+## 미래 질문을 모르는 eviction을 어떻게 시험할까
+
+평가 query를 cache 선택 전에 공개하면 attention importance가 특정 질문에 유리하게 작동할 수 있습니다. 실제 stream처럼 eviction이 끝난 뒤 질문을 제시하고, 같은 video에 현재 사건·오래된 사건·짧은 예외 사건을 묻는 세 묶음을 준비해야 미래-query blind 성능을 볼 수 있습니다.
+
+예를 들어 사람이 방에 들어와 잠깐 key를 table에 두었다가 가방으로 옮긴 stream을 생각할 수 있습니다. 마지막 frame만 묻는 질문은 local cache로 답할 수 있지만 “key를 처음 둔 곳”은 짧은 과거 event가 global memory에 남아야 합니다. 두 질문의 평균 정확도만 내면 첫 질문이 두 번째 실패를 가릴 수 있으므로 event age별 recall을 따로 표시해야 합니다.
+
+Memory budget도 고정합니다. Full history, sliding window, uniform sampling, HERMES가 서로 다른 token 수를 쓴다면 policy가 좋아서인지 budget이 커서인지 구분할 수 없습니다. 같은 token 수에서 local/global 배분 비율을 바꾸고, scene cut·정적 장면·빠른 motion별로 어느 계층이 포화되는지 기록하면 cache 설계의 실제 민감도를 알 수 있습니다.
+
+총비용은 다음처럼 나눠 보는 편이 명확합니다.
+
+```text
+stream 총비용 = frame ingest + importance scoring + cache update
+query 총비용  = 압축 KV attention + answer decoding
+운영 총비용   = stream 총비용 + 모든 query 총비용
+```
+
+질문이 거의 없는 camera라면 query TTFT 절감보다 지속적인 ingest 비용이 클 수 있습니다. 반대로 하나의 stream에 질문이 자주 들어오면 미리 만든 KV를 여러 번 재사용해 이득이 커질 수 있습니다. 따라서 video 길이만이 아니라 stream당 query 수까지 같게 맞춘 비교가 필요합니다.
+
 HERMES의 핵심은 모든 frame을 기억하는 것이 아니라 미래에 유용할 것 같은 token을 계층별로 선택하는 것입니다. 빠른 첫 응답이 가치 있는지는 무엇을 버렸는지, stream-time 계산을 포함한 총 비용이 얼마인지, 오래된 중요 event를 얼마나 자주 놓치는지까지 측정해야 판단할 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [화면 밖 자동차를 비디오 모델이 잊는다면? HyDRA의 Top-K 기억]({% post_url 2026-03-30-Out-of-Sight-but-Not-Out-of-Mind--Hybrid-Memory-for-Dynamic-Video-World-Models %}) — 과거 프레임을 모두 쌓지 않고 압축 메모리에서 관련 토큰만 찾는 HyDRA의 객체 영속성 설계, HM-World 범위와 검색 병목을 살펴봅니다.
+- [Context Mode가 토큰을 98% 줄인다는 수치를 믿어도 될까? 측정법과 누락]({% post_url 2026-05-09-Why-Your-AI-Agent-Gets-Dumb-in-30-Minutes-A-Deep-Dive-into-Claude-Codes-Context-Mode-Architecture %}) — Context Mode의 SQLite FTS5 기반 출력 압축 구조를 이해하고, 98% 절감 수치를 일반화하기 전에 확인할 저장소 불일치·검색 누락·우회 경로를 점검합니다.
+- [Qwen3.8-Max 2.4조 파라미터 MoE: 95B 활성 구조와 오픈 웨이트 계획]({% post_url 2026-08-06-alibaba-launches-2-4-trillion-parameter-qwen3-8-max-moe-model-with-open-weight-plans %}) — 알리바바가 2026년 8월 3일 2.4조 파라미터 규모의 Mixture-of-Experts(MoE) 기반 Qwen3.8-Max를 출시했습니다. 이 모델은 추론 시 950억 개의 활성 파라미터를 사용하며, 알리바바는 장기 소프트웨어…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Training-free이면 stream 처리 비용도 없나요?
+
+아닙니다. 별도 fine-tuning은 하지 않지만 frame이 들어올 때 attention importance 계산, cache 갱신과 token eviction을 계속 수행합니다.
+
+### 한 번 evict한 token은 나중 질문에서 복구할 수 있나요?
+
+원본 frame을 별도로 보관해 다시 encode하지 않는 한 KV cache만으로는 복구할 수 없으므로, 미래에 중요한 짧은 사건을 버리는 delayed relevance가 핵심 위험입니다.
+
+### HERMES를 비교할 때 어떤 지표가 필요한가요?
+
+TTFT와 정확도뿐 아니라 frame ingest latency, peak KV memory, token budget, 오래된 사건 recall과 최악 조건의 응답 지연을 함께 측정해야 합니다.

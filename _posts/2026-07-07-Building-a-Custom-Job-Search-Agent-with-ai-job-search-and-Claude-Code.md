@@ -7,15 +7,15 @@ tags:
   - Claude
   - ClaudeCode
   - 튜토리얼
-  - AI에이전트
   - 오픈소스
+  - AI에이전트
 summary: 클로드 코드(Claude Code)를 기반으로 공고 수집, 적합도 평가, 맞춤형 이력서 작성 등 구직 전 과정을 자동화하는 ai-job-search
   프레임워크의 작동 원리와 실전 활용법을 깊이 있게 분석합니다.
-author: AI Trend Bot
+description: 'ai-job-search가 공고 수집·적합도 평가·지원 문서 작성을 나누는 방식과 허위 경력 방지, 개인정보·중복 지원·사람 승인 기준을 설명합니다.'
 github_url: https://github.com/MadsLorentzen/ai-job-search
 image:
   path: https://opengraph.githubassets.com/1/MadsLorentzen/ai-job-search
-  alt: Building a Custom Job Search Agent with ai-job-search and Claude Code
+  alt: "MadsLorentzen/ai-job-search GitHub 저장소 대표 이미지"
 project:
   stars: 11215
   forks: 3725
@@ -31,25 +31,11 @@ project:
   files: 119
 mermaid: true
 chart: true
-faq:
-- question: 클로드 코드(Claude Code)가 꼭 필요한가요?
-  answer: 네, 이 프로젝트는 앤스로픽(Anthropic)의 클로드 코드를 기반으로 작동하는 프레임워크입니다. 클로드의 CLI 환경 위에서
-    명령어를 통해 스크래핑, 평가, 문서 작성 파이프라인이 순차적으로 실행됩니다.
-- question: 한국의 채용 포털(사람인, 원티드 등)에서도 작동하나요?
-  answer: 기본적으로는 덴마크 시장에 맞춰진 스크래퍼가 내장되어 있습니다. 하지만 구조가 모듈화되어 있어, 사용자가 '/add-portal'
-    명령어를 활용해 한국 포털의 DOM 구조에 맞는 스크래핑 로직을 추가하면 충분히 활용할 수 있습니다.
-- question: LaTeX를 전혀 모르면 사용하기 어렵나요?
-  answer: 기본 제공되는 템플릿을 그대로 사용한다면 시스템이 텍스트를 채우고 PDF로 자동 컴파일해주므로 깊은 지식이 필요 없습니다. 다만
-    템플릿의 서식을 세밀하게 수정하려면 기본적인 LaTeX 문법 지식이 요구됩니다.
-- question: AI가 없는 경력을 지어내면 어떻게 하나요?
-  answer: 이 시스템은 사용자가 사전에 직접 작성한 프로필 데이터에만 의존하도록 설계되었습니다. AI가 임의로 경력을 창조하지 않도록 프롬프트
-    수준에서 엄격하게 통제되어 있어 환각(Hallucination) 현상을 효과적으로 방지합니다.
-- question: 이 도구를 쓰면 입사 지원 버튼도 알아서 눌러주나요?
-  answer: 아니요, 최종 지원서 PDF를 렌더링하는 단계까지만 자동화되어 있습니다. 생성된 모든 지원서는 사용자가 직접 눈으로 읽고 검토한
-    뒤 채용 사이트에서 제출해야 하며, 이는 품질 관리를 위한 의도적인 설계입니다.
 ---
 
-## 참고 링크 및 프로젝트 정보
+ai-job-search는 공고 수집, 적합도 평가, 지원 문서 초안을 단계로 나눠 반복 작업을 줄이는 프레임워크입니다. 자동 제출 장치로 보기보다 후보 공고를 정리하고 사실에 맞는 초안을 만드는 보조 도구로 제한하는 편이 안전합니다. 중복 지원과 오래된 공고, 개인정보 전송, 경력 과장을 사람이 승인 전에 차단할 수 있는지 확인해야 합니다.
+
+## 어떤 구직 단계부터 자동화할 가치가 있나
 
 - [GitHub 저장소: MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)
 - [Reddit 관련 논의: I built an open-source job search framework](https://www.reddit.com/r/ClaudeAI/)
@@ -265,6 +251,20 @@ pie title "전통적 지원서 작성 과정의 에너지 소모 비율 추정"
 ai-job-search는 생성형 AI를 실생활의 고통스러운 문제에 적용한 매우 현실적이고 훌륭한 사례입니다. 양산형 봇들이 인터넷 트래픽을 장악하고 인사담당자들을 괴롭히는 시대에, 오히려 AI를 활용해 '가장 나다운' 맞춤형 지원서를 만들어낸다는 접근이 신선합니다. 
 
 단순히 글을 잘 써주는 도구를 넘어, 나를 객관적으로 평가하고 부족한 점을 채울 학습 경로까지 제시하는 이 시스템은, 앞으로 개인화된 AI 에이전트가 어떤 방향으로 발전해야 하는지를 잘 보여주는 이정표라고 생각합니다. 터미널 환경에 익숙하고 이직을 준비 중이시라면, 당장 이번 주말에 이 프레임워크를 포크(Fork)하여 자신만의 구직 에이전트를 구축해 보시길 권합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/MadsLorentzen/ai-job-search)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
+- [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
+- [Claude Code Game Studios의 48개 역할은 필요한가: Gate·Context·비용]({% post_url 2026-04-15-Deep-Dive-Taming-the-Chaos-of-Vibe-Coding-with-48-AI-Agents-Unpacking-Claude-Code-Game-Studios %}) — Claude Code Game Studios가 역할·context·품질 gate를 나누는 구조를 살펴보고, 실제 격리 여부와 역할별 기여·token·deadlock·review 비용을 평가합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

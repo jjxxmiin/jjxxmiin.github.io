@@ -4,18 +4,24 @@ title: "MarkItDown만으로 RAG 전처리가 끝날까: PDF 읽기 순서·표·
 date: '2026-03-01'
 categories: Tech
 tags:
-  - MarkItDown
-  - RAG
-  - 문서전처리
-  - PDF파싱
   - 멀티모달
+  - RAG
+  - LLM
+  - 문서AI
+  - 온디바이스AI
 summary: "PDF·엑셀·PPT를 마크다운으로 통일하는 MarkItDown의 역할과 다단 PDF, 병합 셀, 메타데이터, VLM 비용에서 남는 검증 과제를 정리합니다."
-author: AI Trend Bot
+description: "MarkItDown으로 PDF·Excel·PPT를 Markdown으로 통일할 때 읽기 순서·표·이미지·출처 메타데이터를 검증하고 RAG에 연결하는 기준을 설명합니다."
 github_url: https://github.com/microsoft/markitdown
 image:
   path: https://opengraph.githubassets.com/1/microsoft/markitdown
-  alt: 'Why Did I Just Find Out About This? A Savior for RAG Pipelines: An Honest
-    Review of MS MarkItDown'
+  alt: "microsoft/markitdown GitHub 저장소 대표 이미지"
+faq:
+  - question: "MarkItDown이 만든 Markdown을 바로 청크로 나눠도 되나요?"
+    answer: "먼저 제목 계층, 표의 행·열, 페이지·시트·슬라이드 경계와 반복 머리글을 확인해야 합니다. 원본 위치 메타데이터를 붙인 뒤 문서 유형에 맞는 청킹 규칙을 적용하는 편이 안전합니다."
+  - question: "VLM을 켜면 문서 이미지도 정확히 설명되나요?"
+    answer: "이미지 설명을 추가할 수 있지만 다이어그램의 관계나 작은 글자를 잘못 읽을 수 있습니다. 중요한 그림은 사람이 만든 정답 설명과 비교하고 외부 API 전송 범위·비용도 함께 확인해야 합니다."
+  - question: "모든 문서 형식을 하나의 변환기로 처리하는 것이 좋은가요?"
+    answer: "공통 인터페이스는 운영을 단순하게 하지만 특정 형식의 레이아웃과 표 정확도가 부족할 수 있습니다. 어려운 문서에서 전용 parser와 품질·속도를 비교해 format별 fallback을 두는 방법도 있습니다."
 ---
 
 MarkItDown은 여러 문서를 마크다운으로 통일하는 변환기이지, RAG 전처리 전체를 대신하는 파서나 청커는 아닙니다.
@@ -82,3 +88,62 @@ MarkItDown의 가치가 가장 잘 드러나는 문서보다 실패 비용이 �
 파일 형식을 하나의 마크다운 인터페이스로 통일하려는 팀에는 MarkItDown이 유용한 시작점입니다. 반면 정교한 레이아웃 복원, 청크별 메타데이터, 인용 위치 보존이 핵심이라면 별도 파싱과 후처리를 예상해야 합니다.
 
 실행 순서는 간단합니다. 대표 문서보다 어려운 문서 묶음으로 변환 품질을 측정하고, 형식별 실패 규칙을 만든 뒤, 헤더 기반 청킹과 출처 메타데이터를 붙입니다. 마지막으로 VLM을 켠 경우와 끈 경우의 정확도·지연·비용을 비교해야 합니다. 이 검증을 통과할 때 MarkItDown은 RAG의 “구원자”가 아니라 관리 가능한 변환 계층이 됩니다.
+
+## 문서 형식별 합격 기준은 어떻게 다를까
+
+PDF는 눈에 보이는 좌표와 읽기 순서가 다를 수 있으므로 다단 문서와 각주가 섞인 샘플을 우선 봅니다. Excel은 셀 값만 남는지보다 sheet 이름, 병합 header, 빈 셀의 의미와 수식 결과가 어느 열에 연결되는지가 중요합니다. PowerPoint는 slide 순서와 speaker note, 도형 안의 text가 섞이지 않는지 확인해야 합니다.
+
+| 문서 유형 | 먼저 볼 실패 | RAG에 미치는 영향 |
+| :--- | :--- | :--- |
+| 다단 PDF | 열 사이 문장 혼합 | 존재하지 않는 문장과 논리 생성 |
+| 병합 셀 Excel | header와 숫자 열 불일치 | 올바른 숫자를 잘못된 항목에 인용 |
+| 도형 중심 PPT | text box 순서 붕괴 | 설명 단계와 결론의 순서 역전 |
+| 이미지 문서 | OCR·VLM 누락 | 핵심 근거가 검색 대상에서 사라짐 |
+
+한 변환 기준으로 모든 형식을 합격시키기보다 문서 유형별 필수 요소를 정의합니다. 숫자 보고서는 표 정확도에 높은 비중을 두고, 규정 문서는 section 번호와 각주, 발표 자료는 slide 경계와 제목을 우선할 수 있습니다. 변환이 어려운 형식은 전용 parser로 보내는 fallback도 파이프라인의 일부입니다.
+
+## 출처를 되짚을 수 있게 무엇을 저장할까
+
+최소 메타데이터는 원본 파일 ID, checksum, 변환 시각, 변환기 버전, 페이지·sheet·slide 위치입니다. 같은 파일명이 다시 업로드될 수 있으므로 이름만으로 문서를 식별하면 이전 청크와 새 청크가 섞일 수 있습니다. 원본 checksum과 변환 결과 version을 연결하면 답변이 어느 시점의 문서를 근거로 했는지 추적할 수 있습니다.
+
+청크에는 상위 제목 경로와 표의 header를 함께 넣습니다. 숫자 한 행만 잘라 저장하면 검색 결과에서 열 의미를 잃을 수 있고, 페이지 번호만 남기면 Excel·PPT의 위치를 표현하기 어렵습니다. 사용자에게 보여 줄 citation label과 내부 재처리에 쓸 source key를 나누면 파일명이 바뀌어도 인덱스를 안정적으로 관리할 수 있습니다.
+
+VLM이 만든 이미지 설명은 원문에서 직접 추출한 text와 다른 종류의 근거입니다. `generated_description`처럼 출처 유형을 표시하고 model·prompt version을 남겨야 나중에 설명 오류를 찾을 수 있습니다. 생성 설명을 원문 문장처럼 섞어 저장하면 답변이 추론을 사실 인용으로 보일 위험이 있습니다.
+
+## 회귀 테스트는 어떻게 만들까
+
+각 형식에서 실패하기 쉬운 문서 5~10개를 골라 사람이 핵심 문장, 표 셀, 제목 경계를 표시합니다. 변환 뒤 이 요소가 존재하는지와 순서가 맞는지 자동 검사하고, 읽기 순서처럼 단순 문자열 비교로 부족한 항목은 사람이 표본 검토합니다. 라이브러리나 선택 dependency를 업데이트할 때 같은 세트를 다시 실행합니다.
+
+변환 성공률은 예외 없이 파일이 끝났다는 지표일 뿐입니다. 필수 요소 보존률, 잘못 추가된 text, 처리 시간과 peak memory를 함께 기록해야 합니다. 대용량 파일 하나가 worker를 점유하거나 VLM 재시도가 과도하게 발생하는 경우를 찾기 위해 크기 구간별 분포도 봅니다.
+
+실패 문서는 빈 Markdown으로 저장하지 않고 상태와 원인을 별도 queue에 둡니다. 암호화 파일, 손상 파일, 지원하지 않는 형식, 일시적 VLM 오류는 서로 다른 재처리 정책이 필요합니다. 수동 보정한 결과가 있다면 다음 자동 변환에서 덮어쓰지 않도록 원본·자동 결과·검수 결과를 분리해야 합니다.
+
+품질 검사가 통과한 문서만 다음 청킹 단계로 보내면 변환 실패가 검색 품질 문제로 숨어드는 것을 막을 수 있습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/microsoft/markitdown)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [RAG 답이 틀릴 때 LLM보다 PDF를 먼저 의심해야 하는 이유: RAGFlow]({% post_url 2026-04-16-RAGFlow-Deep-Dive-Garbage-In-Garbage-Out--Shattering-the-Illusion-of-Naive-Text-Chunking-with-Next-Gen-RAG-Architecture %}) — RAGFlow의 문서 이해형 수집 구조를 표·레이아웃·읽기 순서 중심으로 살펴보고, 검색 품질을 평가하는 실무 절차와 운영 비용을 정리합니다.
+- [WeKnora가 표·수식 PDF RAG에 맞을까: 파싱·Hybrid Retrieval 검증]({% post_url 2026-05-15-For-Those-Tired-of-Simple-ChatUI-Shells-A-Deep-Dive-Under-the-Hood-of-WeKnora-Tencents-Hardcore-RAG-Engine %}) — WeKnora의 layout·표·수식 parsing과 BM25·dense·graph 검색, agent·MCP 구조를 살펴보고 한국어 문서 정확도·인용·자원·운영 조건을 검증합니다.
+- [Open WebUI만 설치하면 사내 AI가 완성될까: 로컬 추론·RAG·RBAC의 경계]({% post_url 2026-03-25-Breaking-Free-from-the-Comfort-of-ChatGPT-to-Build-a-Local-AI-Assistant-Open-WebUI-Architecture-and-Survival-Guide %}) — Open WebUI의 SvelteKit·FastAPI·내장 RAG 구조를 살펴보고, 로컬 설치가 곧 데이터 보호나 운영 준비를 뜻하지 않는 이유를 점검합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### MarkItDown이 만든 Markdown을 바로 청크로 나눠도 되나요?
+
+먼저 제목 계층, 표의 행·열, 페이지·시트·슬라이드 경계와 반복 머리글을 확인해야 합니다. 원본 위치 메타데이터를 붙인 뒤 문서 유형에 맞는 청킹 규칙을 적용하는 편이 안전합니다.
+
+### VLM을 켜면 문서 이미지도 정확히 설명되나요?
+
+이미지 설명을 추가할 수 있지만 다이어그램의 관계나 작은 글자를 잘못 읽을 수 있습니다. 중요한 그림은 사람이 만든 정답 설명과 비교하고 외부 API 전송 범위·비용도 함께 확인해야 합니다.
+
+### 모든 문서 형식을 하나의 변환기로 처리하는 것이 좋은가요?
+
+공통 인터페이스는 운영을 단순하게 하지만 특정 형식의 레이아웃과 표 정확도가 부족할 수 있습니다. 어려운 문서에서 전용 parser와 품질·속도를 비교해 format별 fallback을 두는 방법도 있습니다.

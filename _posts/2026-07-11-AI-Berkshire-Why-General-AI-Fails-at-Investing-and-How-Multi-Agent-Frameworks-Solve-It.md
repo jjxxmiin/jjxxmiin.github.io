@@ -6,17 +6,16 @@ categories: Tech
 tags:
   - 멀티에이전트
   - AI코딩
+  - LLM
   - 강화학습
-  - AI보안
   - AI투자
 summary: 일반적인 언어 모델이 투자 분석에서 보여주는 양비론적 한계와 데이터 환각을 극복하기 위해, 4대 가치투자 대가의 방법론을 다중 에이전트로
   구현한 AI Berkshire 프레임워크의 구조와 작동 원리를 깊이 있게 분석합니다.
-author: AI Trend Bot
+description: 'AI Berkshire가 가치투자 관점을 역할별로 나누는 구조와 교차 검증의 한계, 재무 데이터 기준일·백테스트 편향·거래비용·투자 판단 위험을 설명합니다.'
 github_url: https://github.com/xbtlin/ai-berkshire
 image:
   path: https://opengraph.githubassets.com/1/xbtlin/ai-berkshire
-  alt: 'AI Berkshire: Why General AI Fails at Investing and How Multi-Agent Frameworks
-    Solve It'
+  alt: "xbtlin/ai-berkshire GitHub 저장소 대표 이미지"
 project:
   stars: 12774
   forks: 1818
@@ -57,7 +56,9 @@ faq:
     문화를 파고드는 단융핑, 그리고 거시적 맥락을 분석하는 리루의 방법론이 에이전트로 분리되어 있습니다.
 ---
 
-## 관련 링크 모음
+AI Berkshire는 가치투자 관점을 여러 역할로 나누고 결과를 종합해 기업 분석 절차를 구조화하려는 프레임워크입니다. 역할 수가 늘어도 시점이 맞지 않는 재무 데이터나 같은 모델의 편향이 사라지지는 않으며, 출력은 투자 수익을 보장하지 않습니다. 데이터 기준일, 계산식, 반대 의견, 거래비용을 포함한 시간 외 표본으로 검증한 뒤 연구 보조로만 사용해야 합니다.
+
+## 투자 분석을 역할로 나누면 무엇이 달라지나
 
 - [AI Berkshire 공식 GitHub 저장소](https://github.com/xbtlin/ai-berkshire)
 
@@ -330,6 +331,20 @@ cd ai-berkshire
 과거 인공지능이 텍스트를 그럴싸하게 요약해 주는 '문장 생성기'에 불과했다면, AI Berkshire 프레임워크는 언어 모델이 어떻게 복잡한 비즈니스 환경에서 '의사결정 엔진'으로 진화할 수 있는지를 보여주는 훌륭한 청사진입니다. 
 
 단순히 유명한 투자자의 어록을 학습시킨 것이 아니라, 그들의 사고 과정을 단계별로 분해하고 코드로 강제했다는 점에서 큰 의미가 있습니다. 비록 시장의 모든 변수를 통제할 수는 없겠지만, 적어도 우리가 감정에 휩쓸려 치명적인 실수를 저지르는 것은 확실하게 막아줄 것입니다. 자신의 투자 프로세스를 한 단계 더 객관화하고 싶은 분들이라면, 지금 당장 에디터에 이 작은 투자 위원회를 고용해 보시기 바랍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/xbtlin/ai-berkshire)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Starcloud, Nvidia 투자 유치하며 2억 5천만 달러 규모 우주 AI 데이터센터 구축 추진]({% post_url 2026-08-22-starcloud-secures-250-million-for-orbital-ai-data-center-constellation %}) — 우주 컴퓨팅 스타트업 Starcloud가 23억 달러의 기업가치로 2억 5천만 달러 규모의 시리즈 A 확장 투자를 마무리했습니다. Nvidia와 Cisco Investments 등이 신규 투자자로 참여했으며, 워싱턴주 우딘빌 공장에서…
+- [Nvidia, Poolside와 70억 달러 계약 체결하여 Nemotron AI 경쟁력 강화]({% post_url 2026-08-24-nvidia-poolside-7-billion-deal-nemotron-ai %}) — Nvidia가 AI 스타트업 Poolside의 Model Factory 소프트웨어 라이선스 대금으로 60억 달러를 지급하고 10억 달러의 지분 투자를 단행했습니다. 이번 거래를 통해 Poolside의 핵심 엔지니어 109명이…
+- [Model Context Protocol: AI 에이전트가 외부 데이터와 소통하는 범용 인터페이스 작동 원리]({% post_url 2026-07-18-Model-Context-Protocol-The-Universal-Interface-for-AI-Agents-to-Communicate-with-External-Data %}) — Anthropic과 GitHub이 주도하는 오픈소스 프로젝트인 Model Context Protocol(MCP)의 탄생 배경, 클라이언트-서버 간 핵심 통신 아키텍처, 그리고 공식 저장소에서 제공되는 서버 구현체들의 작동 원리를 깊이…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

@@ -5,18 +5,17 @@ date: '2026-07-20 21:18:10'
 categories: Tech
 tags:
   - xAI
+  - 오픈소스
   - MCP
-  - AI코딩
   - Claude
   - ClaudeCode
 summary: 과도한 원격 데이터 수집 논란 이후 전면 오픈소스화된 SpaceXAI의 터미널 기반 AI 코딩 에이전트, Grok Build의 내부
   아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
-author: AI Trend Bot
+description: 'grok-build의 Rust 터미널 UI와 파일·셸·MCP·플러그인 구조를 살피고, 저장소 규모 주장·코드 전송·권한·오픈소스 검증 기준을 정리합니다.'
 github_url: https://github.com/xai-org/grok-build
 image:
   path: https://opengraph.githubassets.com/1/xai-org/grok-build
-  alt: 'xai-org/grok-build: Everything About the Terminal AI Agent Built with 1 Million
-    Lines of Rust'
+  alt: "xai-org/grok-build GitHub 저장소 대표 이미지"
 project:
   stars: 20849
   forks: 3845
@@ -34,28 +33,11 @@ project:
   files: 2787
 mermaid: true
 chart: true
-faq:
-- question: 논란이 되었던 데이터 무단 업로드 문제는 현재 어떻게 해결되었나요?
-  answer: 2026년 7월 논란이 발생한 직후, xAI 측은 백그라운드 텔레메트리 전송을 완전히 비활성화하고 수집된 모든 사용자 데이터를 영구
-    삭제했습니다. 현재는 전체 코드가 Apache 2.0으로 공개되어 누구나 네트워크 전송 로직이 투명하게 제거되었음을 직접 검증할 수 있습니다.
-- question: Cursor나 GitHub Copilot 같은 기존 GUI 기반 에디터 대신 Grok Build(TUI)를 쓸 때의 구체적인
-    장점은 무엇인가요?
-  answer: 가장 큰 장점은 실행 속도와 맥락의 연속성입니다. 무거운 크로미움 기반 앱을 띄울 필요 없이 터미널에서 즉각적으로 실행되며, 사용자가
-    셸에서 발생한 에러 로그나 테스트 결과를 복사할 필요 없이 에이전트가 해당 터미널 세션의 맥락을 바로 읽고 대처할 수 있습니다.
-- question: 클라우드 통신 없이 완전히 로컬(오프라인) 모델로만 작동시킬 수 있나요?
-  answer: 네, 가능합니다. Grok Build는 처음부터 로컬 퍼스트(Local-First)를 염두에 두고 설계되었습니다. 구성 파일(config.toml)에서
-    모델 추론 API 엔드포인트를 로컬에 띄워둔 Ollama나 Llama-cpp 인스턴스로 변경하면 외부 인터넷 연결 없이 안전하게 프라이빗 코딩
-    에이전트로 활용할 수 있습니다.
-- question: Mermaid 다이어그램을 텍스트 기반 터미널에서 어떻게 렌더링하나요?
-  answer: Grok Build 내부에는 Rust로 바닥부터 작성된 독자적인 텍스트 렌더링 엔진이 포함되어 있습니다. 이 엔진이 Mermaid
-    문법을 파싱한 뒤, 유니코드의 특수 선 긋기(Box-drawing) 문자들을 정교하게 조합하여 터미널 창 안에 차트와 다이어그램을 시각적으로
-    구현해냅니다.
-- question: 방대한 100만 줄의 Rust 코드베이스 중, 기여하거나 구조를 파악하기 좋은 시작점은 어디인가요?
-  answer: 가장 핵심이 되는 로직은 소스 트리의 'crates/codegen' 디렉토리 아래에 모여 있습니다. 에이전트의 상태 전이를 관리하는
-    루프 로직과 사용자 권한 제어(plan 모드 승인 등)를 담당하는 모듈부터 살펴보는 것이 전체 아키텍처를 이해하는 데 큰 도움이 됩니다.
 ---
 
-## 공식 링크 및 참고 자료
+grok-build는 터미널 UI에서 파일, 셸, MCP와 플러그인을 연결하는 코딩 에이전트 저장소로 소개됩니다. 코드 줄 수나 소유 조직, 과거 데이터 수집 논란 같은 주장은 저장소·공식 문서의 시점과 근거를 나눠 확인해야 하며 오픈소스라는 사실만으로 전송이 사라지지는 않습니다. 실행 전 네트워크 목적지, 원격 모델 입력, 플러그인 권한과 기본 승인 정책을 검사하세요.
+
+## 저장소 공개만으로 신뢰할 수 있을까
 
 - 공식 GitHub 저장소: [xai-org/grok-build](https://github.com/xai-org/grok-build)
 - 플러그인 생태계: [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace)
@@ -335,6 +317,20 @@ Grok Build 환경에서는 오류가 난 터미널 상태 그대로 에이전트
 xai-org/grok-build는 그 궤적의 최전선에 있는 프로젝트입니다. 비록 프라이버시라는 거대한 암초에 부딪혀 강제적으로 오픈소스화되는 홍역을 치렀지만, 역설적으로 그 덕분에 우리는 세계 최고 수준의 AI 기업이 개발한 정교한 에이전트 아키텍처를 무료로 뜯어보고 분석할 수 있게 되었습니다.
 
 단순히 코드를 자동 완성해 주는 수준을 넘어, 프로젝트의 맥락을 이해하고 스스로 계획을 세우며 터미널을 제어하는 이 도구가 향후 개발 생태계에 어떤 새로운 흐름을 만들어낼지 지켜보는 것은 무척 흥미로운 일이 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/xai-org/grok-build)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
+- [Claude Code에 저장소를 맡겨도 될까? 권한·CLAUDE.md·검증 체크리스트]({% post_url 2026-02-08-Claude-Code-The-Terminal-AI-Agent-Deep-Dive %}) — 터미널 AI agent가 file 수정·test·Git 작업까지 수행할 때 개발자가 먼저 제한할 권한, CLAUDE.md에 적을 project rule, 변경 후 diff·test 검증 순서를 2026년 2월 원문 기준으로…
+- [Claude Code는 어떻게 코딩 작업을 수행할까: 설치·권한·검증 가이드]({% post_url 2026-02-22-Claude-Code-The-Terminal-Agent %}) — Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서 직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

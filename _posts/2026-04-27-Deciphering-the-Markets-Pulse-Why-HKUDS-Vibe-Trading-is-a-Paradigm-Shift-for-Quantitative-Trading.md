@@ -4,21 +4,24 @@ title: 'Vibe-Trading 감성 점수로 매매해도 될까: News·가격 결합�
 date: '2026-04-27 18:44:20'
 categories: Tech
 tags:
-  - VibeTrading
-  - 금융AI
-  - 멀티모달
-  - 감성분석
-  - 리스크관리
+  - 환각문제
+  - LLM
 summary: 'Vibe-Trading이 가격·뉴스·소셜 맥락을 LLM으로 결합하는 방식을 살펴보고, 가짜 정보·편향·지연·운영비 때문에 점수를 주문 신호로 바로 쓰면 안 되는 이유를 설명합니다.'
-author: AI Trend Bot
+description: "Vibe-Trading의 뉴스·가격 결합을 point-in-time 데이터, 출처 중복, walk-forward·비용 포함 기준선, calibration과 deterministic risk gate로 검증합니다."
 github_url: https://github.com/HKUDS/Vibe-Trading
+faq:
+  - question: "Vibe Score를 매수·매도 주문에 바로 연결해도 되나요?"
+    answer: "안 됩니다. 점수는 사실 검증이나 예상 수익률이 아니므로 관찰·paper trading을 거쳐야 하며, 주문은 별도의 결정적 risk gate가 제한해야 합니다."
+  - question: "LLM의 시장 설명이 그럴듯하면 예측력도 높다는 뜻인가요?"
+    answer: "아닙니다. 설명의 자연스러움과 미래 가격 예측력은 별개이므로 가격 전용 기준선, calibration과 비용 포함 walk-forward 결과로 평가해야 합니다."
+  - question: "뉴스를 이용한 backtest에서 가장 먼저 막아야 할 오류는 무엇인가요?"
+    answer: "기사의 수정 시각이나 미래에 정리된 데이터가 과거 신호에 섞이는 look-ahead leakage입니다. 발행·수집 시각과 당시 이용 가능한 원문을 함께 보존해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/HKUDS/Vibe-Trading
-  alt: 'Deciphering the Market''s Pulse: Why HKUDS Vibe-Trading is a Paradigm Shift
-    for Quantitative Trading'
+  alt: "HKUDS/Vibe-Trading GitHub 저장소 대표 이미지"
 ---
 
-Vibe-Trading의 감성 점수를 실제 주문에 바로 연결해서는 안 되며, 가격 지표가 놓친 맥락을 검증하는 연구 신호로 먼저 다뤄야 합니다.
+Vibe-Trading의 감성 점수를 실제 주문에 바로 연결해서는 안 되며, 가격 지표가 놓친 맥락을 검증하는 연구 신호로 먼저 다뤄야 합니다. 뉴스가 들어온 시각과 거래 비용까지 재현한 평가에서 단순 가격 기준선을 꾸준히 넘을 때에만 제한된 paper trading 후보가 됩니다.
 
 ## Vibe는 긍정·부정 단어 수보다 넓은 입력이다
 
@@ -64,8 +67,60 @@ LLM은 반어법이나 가짜 뉴스를 잘못 해석할 수 있고, 상승기 �
 
 그 뒤에도 주문 시스템과 분석 시스템을 분리하고, 사람이 정한 최대 노출과 손실 한도는 LLM이 수정하지 못하게 해야 합니다. 이 글은 투자 조언이 아니며 Vibe-Trading의 성과를 보장하지 않습니다. 프로젝트의 실질적 가치는 “시장 감정을 읽는다”는 문구가 아니라, 텍스트 맥락이 가격 기준선에 추가 정보를 주는지 반복 가능한 평가로 확인하는 데 있습니다.
 
+## 과거 데이터는 당시 알 수 있었던 상태로 고정한다
+
+뉴스 기반 전략의 backtest는 가격 배열만 맞춘다고 재현되지 않습니다. 기사의 최초 발행 시각, 실제 수집 시각, 이후 수정 여부와 원문 ID를 함께 저장해야 합니다. 장 마감 뒤 정리된 기사나 나중에 붙은 분류 태그를 장중 신호에 쓰면 미래 정보가 과거로 새어 들어갑니다. 소셜 글의 삭제·수정과 계정 상태도 가능한 범위에서 당시 snapshot으로 남겨야 합니다.
+
+같은 보도자료를 여러 매체와 계정이 복제하면 단순 게시물 수가 시장 확신처럼 보일 수 있습니다. URL만이 아니라 제목·본문·인용 출처를 기준으로 사건을 묶고, 원 출처 하나와 재전파 횟수를 별도 feature로 취급하십시오. 시각도 `event time`, `published time`, `ingested time`, `scored time`으로 나눠야 지연된 수집을 예측력으로 착각하지 않습니다.
+
+평가는 고정된 과거 전체를 반복 최적화하는 방식보다 시간 순서의 walk-forward가 적합합니다. 앞 구간에서 prompt·가중치·임계값을 정하고 다음 구간에서는 바꾸지 않은 채 측정합니다. 가격 신호만, 텍스트만, 둘을 결합한 모델을 각각 돌리는 ablation으로 어느 입력이 기여했는지도 확인합니다. 수수료, spread, slippage와 신호가 나온 뒤 실제 체결 가능한 지연까지 빼야 합니다.
+
+점수 품질은 방향 적중률 하나로 판단하지 않습니다. 점수 구간별 실제 상승 빈도, coverage, turnover, 최대 낙폭과 비용 후 수익을 함께 봅니다. 높은 `confidence` 구간이 실제로 더 자주 맞지 않으면 calibration되지 않은 숫자입니다. 시장 국면·종목·출처별로 성능이 무너지는 곳을 공개해야 운영 범위를 제한할 수 있습니다.
+
+예를 들어 오전 9시 1분에 수집된 긍정 기사로 0.7이 나왔다면, 같은 점수대 100건이 비용 후 실제로 얼마나 일관된 방향을 보였는지 확인합니다. 기사 없이 가격만 넣은 결과, 기사 순서를 섞은 결과와도 비교해 모델이 내용이 아니라 문장 톤이나 종목 이름에 반응한 것은 아닌지 점검합니다. 특정 출처를 제거했을 때 신호가 뒤집히거나 한 시장 국면에서만 성과가 나면 일반화된 매매 근거가 아닙니다.
+
+운영 경보도 수익률만 기다리지 않습니다. 입력 기사 수 급감, 중복 비율 급증, 점수 분포 이동, 처리 지연과 model 오류율을 감시합니다. 학습·평가 때 보지 못한 언어 또는 사건이 많아지면 자동 주문 후보 생성을 멈추고 원본 표본을 검토해야 합니다. 신호가 없다는 상태와 pipeline 장애를 구분해야 조용한 오작동을 피할 수 있습니다.
+
+paper trading에서도 LLM은 제안만 만들고 주문 후보는 별도 서비스가 검증합니다. 가격 freshness, 허용 종목, 포지션·일일 손실 상한, 중복 신호와 market hours가 하나라도 맞지 않으면 fail closed로 거부합니다. 모델·prompt·입력 source·생성 시각과 거부 이유를 같은 trace로 남겨야 손실 전후의 설명을 바꾸는 일을 막을 수 있습니다.
+
+## 반복 실험이 만든 통계 착시를 어떻게 막나
+
+모델, prompt, 점수 임계값과 결합 가중치를 바꿀 때마다 하나의 실험으로 등록하고 결과가 나쁜 설정도 함께 남깁니다. 수십 가지 조합을 시도한 뒤 가장 수익이 높은 하나만 보여 주면 우연한 과거 적합을 전략의 성능으로 오해하기 쉽습니다. 조정에 쓴 기간과 최종 확인 기간을 분리하고, 확인 기간의 결과를 본 뒤에는 같은 구간에서 설정을 다시 고치지 않습니다.
+
+비교표에는 시도 횟수와 가격 전용 기준선, 비용 전후 결과를 함께 적습니다. 여러 후보를 동시에 평가했다면 단일 후보를 한 번 시험한 것과 같은 확신으로 해석하지 않고, 아직 사용하지 않은 기간이나 시장에서 재검증합니다. 상승·하락·횡보 국면, 거래량이 큰 종목과 작은 종목, 뉴스 출처와 언어별로 결과를 나누면 전체 평균이 감춘 실패 범위를 찾을 수 있습니다.
+
+운영에 들어간 뒤에는 backtest 수익률보다 입력과 점수 분포의 변화를 먼저 감시합니다. 특정 출처 비중, 중복률, 처리 지연이나 높은 점수의 실제 적중 빈도가 검증 범위를 벗어나면 자동 주문 후보 생성을 멈춥니다. 중단 기준을 모델의 자연어 판단에 맡기지 않고 고정된 risk gate에 두어야 새 사건이나 시장 국면에서 그럴듯한 설명이 검증되지 않은 위험 허용으로 바뀌는 일을 막을 수 있습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/HKUDS/Vibe-Trading)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AutoHedge의 4개 Agent면 투자 위험이 줄까: Director→Quant→Risk→Execution]({% post_url 2026-04-28-Unmanned-Hedge-Fund-with-LLMs-AutoHedge-Dissecting-the-Real-Architecture-Between-Illusion-and-Practice %}) — AutoHedge가 전략·분석·위험·실행을 네 역할로 나누는 구조를 살펴보고, Pydantic JSON과 Risk Agent만으로 환각·확증 편향·실거래 위험이 사라지지 않는 이유를 짚습니다.
+- [Langfuse로 LLM 환각 원인을 찾을 수 있을까: Trace·Span·Generation·PII]({% post_url 2026-04-23-Stop-Debugging-LLMs-with-consolelog-A-Deep-Dive-into-Langfuse-Architecture %}) — Langfuse의 계층형 Trace와 비동기 전송이 RAG 실패를 어떻게 재구성하는지 살펴보고, 프롬프트 저장에 따른 PII·스토리지·샘플링 문제를 점검합니다.
+- [AI-Trader로 실거래를 맡겨도 될까? 저장소 불일치와 백테스트 함정]({% post_url 2026-05-08-Seniors-View-Just-a-Bot-or-Wall-Streets-Replacement-Deep-Dive-into-the-Architecture-of-AI-Trader %}) — AI-Trader 글에 섞인 저장소·논문·예시 코드의 불일치를 먼저 확인하고, 실거래 전 반드시 검증해야 할 미래 정보 누수와 체결·위험 관리 조건을 짚습니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Vibe Score를 매수·매도 주문에 바로 연결해도 되나요?
+
+안 됩니다. 점수는 사실 검증이나 예상 수익률이 아니므로 관찰·paper trading을 거쳐야 하며, 주문은 별도의 결정적 risk gate가 제한해야 합니다.
+
+### LLM의 시장 설명이 그럴듯하면 예측력도 높다는 뜻인가요?
+
+아닙니다. 설명의 자연스러움과 미래 가격 예측력은 별개이므로 가격 전용 기준선, calibration과 비용 포함 walk-forward 결과로 평가해야 합니다.
+
+### 뉴스를 이용한 backtest에서 가장 먼저 막아야 할 오류는 무엇인가요?
+
+기사의 수정 시각이나 미래에 정리된 데이터가 과거 신호에 섞이는 look-ahead leakage입니다. 발행·수집 시각과 당시 이용 가능한 원문을 함께 보존해야 합니다.
+
 참고 자료:
 
-- https://github.com/HKUDS/Vibe-Trading
-- https://arxiv.org/abs/2410.15555
-- https://hkuds.github.io/
+- [GitHub 저장소](https://github.com/HKUDS/Vibe-Trading)
+- [논문 원문 (arXiv)](https://arxiv.org/abs/2410.15555)
+- [hkuds.github.io 원문](https://hkuds.github.io/)

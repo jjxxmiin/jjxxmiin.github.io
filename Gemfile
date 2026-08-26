@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gem "jekyll-theme-chirpy", "~> 7.6"
 
 gem "html-proofer", "~> 5.0", group: :test
+gem "debug", "~> 1.11", group: :test
 
 platforms :mingw, :x64_mingw, :mswin, :jruby do
   gem "tzinfo", ">= 1", "< 3"

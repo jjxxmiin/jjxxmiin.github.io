@@ -4,19 +4,18 @@ title: 'Void 에디터: 코드가 유출되지 않는 프라이버시 중심 오
 date: '2026-07-17 04:46:13'
 categories: Tech
 tags:
+  - 오픈소스
   - AI코딩
-  - Llama
+  - 웹개발
   - 경량화
   - 온디바이스AI
-  - 오픈소스
 summary: 오픈소스 AI 코드 에디터인 Void의 내부 아키텍처, 기존 상용 도구와의 차별점, 로컬 언어 모델 통합 방식 및 실제 현업 활용
   시나리오를 구체적인 다이어그램과 함께 심층적으로 분석합니다.
-author: AI Trend Bot
+description: 'Void 에디터의 VS Code 포크 구조와 로컬·사용자 지정 모델 연결을 살피고, 코드 전송 경로·확장 권한·업데이트·프로젝트 성숙도를 점검합니다.'
 github_url: https://github.com/voideditor/void
 image:
   path: https://opengraph.githubassets.com/1/voideditor/void
-  alt: 'Void Editor: The Privacy-First Open Source AI Code Editor - Architecture and
-    Usage'
+  alt: "voideditor/void GitHub 저장소 대표 이미지"
 project:
   stars: 28839
   forks: 2591
@@ -301,6 +300,20 @@ pie title "개발자들이 오픈소스 에디터를 도입하는 주요 원인 
 Void는 단순히 구독료를 아끼기 위해 쓰는 가벼운 대안 도구가 아닙니다. AI가 코드를 직접 읽고 쓰는 거대한 변화의 흐름 속에서, 개발자가 자신의 코드베이스에 대한 통제권과 주권을 잃지 않도록 도와주는 강력하고 주체적인 플랫폼입니다.
 
 단일 클라우드 벤더가 주도하는 폐쇄적인 에디터 시장에서, 아키텍처를 밑바닥부터 다시 설계해 현대적인 React 컴포넌트를 이식하고, 철저히 프라이버시를 지켜내는 Void의 접근 방식은 전체 오픈소스 생태계에 매우 긍정적인 자극을 줍니다. 당장 팀 전체의 메인 에디터를 바꾸는 것이 부담스럽더라도, 보안이 중요한 주말 개인 프로젝트나 사내 스터디에 Void를 우선적으로 적용해보며 그 무한한 가능성을 직접 체감해 보시기를 강력히 권장합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/voideditor/void)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [cc-switch: 여러 AI 코딩 도구의 API 설정과 프로바이더를 한곳에서 관리하는 데스크톱 제어 센터]({% post_url 2026-08-17-cc-switch-All-in-One-Configuration-Manager-and-Local-Proxy-Gateway-for-AI-Coding-CLI-Tools %}) — cc-switch는 Claude Code, OpenAI Codex, Gemini CLI 등 다양한 AI 코딩 도구의 프로바이더 설정과 API 키를 통합 관리하는 오픈소스 데스크톱 애플리케이션입니다. 로컬 프록시 게이트웨이, 자동…
+- [re4/LibreCode: 일렉트론을 걷어내고 로컬 AI와 리버싱을 통합한 네이티브 에디터]({% post_url 2026-07-13-re4LibreCode-The-Native-Editor-Integrating-Local-AI-and-Reversing-Toolkit-without-Electron %}) — re4/LibreCode는 .NET 10과 Avalonia UI를 기반으로 설계되어 일렉트론의 무거움을 극복하고, Ollama 기반의 완전 오프라인 로컬 AI(RAG)와 강력한 역공학(리버싱) 도구들을 단일 환경에 통합한 차세대 코드…
+- [Block의 Buzz: 인간과 AI 에이전트가 Cryptographic Identity로 협업하는 하이브마인드 워크스페이스]({% post_url 2026-08-07-Buzz-by-Block-A-Hive-Mind-Communication-Platform-Built-on-Nostr-Protocol %}) — Block이 공개한 Buzz는 인간 개발자와 AI 에이전트가 동일한 공간에서 암호화된 정체성(secp256k1)을 바탕으로 협업하는 오픈소스 하이브마인드 플랫폼입니다. Nostr 프로토콜 기반의 단일 서명 로그를 활용하여 대화…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

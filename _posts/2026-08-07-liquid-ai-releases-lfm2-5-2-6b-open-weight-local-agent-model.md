@@ -9,9 +9,9 @@ categories: Tech
 tags:
   - HuggingFace
   - 온디바이스AI
-  - 트랜스포머
   - 컨텍스트윈도우
-  - AI서비스
+  - 트랜스포머
+  - 경량화
 description: Liquid AI가 2.5GB 미만 RAM 환경에서 작동하는 오픈웨이트 에이전트 모델 LFM2.5-2.6B를 출시했습니다. 클라우드 연결 없이 스마트폰과 CPU에서 128K 컨텍스트와 툴 콜링을 오프라인으로 실행할 수 있습니다.
 summary: Liquid AI가 스마트폰 및 소비자용 CPU에서 로컬로 구동되는 26억 매개변수 온디바이스 에이전트 모델 LFM2.5-2.6B를 공개했습니다. 2.5GB 미만의 RAM 메모리로 128K 컨텍스트와 네이티브 툴 콜링을 지원하며, Hugging Face를 통해 오픈웨이트로 배포되었습니다.
 article_type: NewsArticle
@@ -41,13 +41,13 @@ entities:
 - Hugging Face
 faq:
 - question: Liquid AI의 LFM2.5-2.6B는 인터넷 연결 없이 오프라인으로 실행할 수 있나요?
-  answer: 네, LFM2.5-2.6B는 클라우드 GPU 인프라 없이 스마트폰이나 PC CPU에서 직접 동작하는 로컬 오프라인 에이전트 모델입니다. 작동을 위해 필요한 메모리는 2.5GB RAM 미만입니다.
+  answer: 네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱·운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
 - question: LFM2.5-2.6B 모델이 지원하는 주요 기술 스펙은 무엇인가요?
   answer: 26억 매개변수를 가진 비 트랜스포머 파운데이션 모델로, 128,000(128K) 토큰 컨텍스트 윈도우와 네이티브 툴 콜링 기능을 갖추고 있습니다.
 - question: 스마트폰과 PC CPU에서 디코드 속도는 어느 정도 나오나요?
   answer: Apple M5 Max CPU 환경에서는 초당 220토큰, 일반 스마트폰 하드웨어 환경에서는 초당 약 30토큰의 디코드 속도를 나타냅니다.
 - question: LFM2.5-2.6B 모델 파일은 어디서 다운로드할 수 있나요?
-  answer: Hugging Face 플랫폼에서 오픈웨이트 포스트 트레이닝 모델과 LFM2.5-2.6B-Base 체크포인트를 직접 누구나 무료로 다운로드할 수 있습니다.
+  answer: Hugging Face에서 오픈웨이트 포스트 트레이닝 모델과 LFM2.5-2.6B-Base 체크포인트를 확인할 수 있습니다. 실제 제품 사용 전에는 모델 카드의 파일 형식과 라이선스 조건을 함께 검토해야 합니다.
 sitemap: true
 mermaid: true
 chart: true
@@ -69,12 +69,14 @@ article_images:
   source_url: https://huggingface.co/LiquidAI/LFM2.5-2.6B
 ---
 
+LFM2.5-2.6B는 네트워크가 불안하거나 입력 데이터를 외부 API로 보내기 어려운 환경에서 먼저 검토할 만한 소형 오픈웨이트 모델입니다. 다만 “2.5GB 미만”과 “128K 문맥”은 모든 스마트폰에서 동시에 같은 속도와 메모리로 작동한다는 보장이 아닙니다. 모델 파일, 긴 문맥의 실행 메모리, 도구 권한과 앱 자체 자원을 실제 대상 기기에서 함께 측정해야 도입 가능성을 판단할 수 있습니다.
+
 ```mermaid
 flowchart TD
     A[Liquid AI, LFM2.5-2.6B 공개] --> B[2.5GB 미만 RAM 메모리 사용]
     B --> C[128K 컨텍스트 & 네이티브 툴 콜링 지원]
     C --> D[스마트폰 및 소비자용 CPU에서 오프라인 실행]
-    D --> E[클라우드 GPU 및 API 비용 제로화]
+    D --> E[클라우드 API 호출 종량제 없음]
     E --> F[기기별 디코드 속도 차이 확인 필요]
 ```
 
@@ -93,11 +95,13 @@ Liquid AI는 사용자가 용도에 맞게 도입할 수 있도록 포스트 트
   <figcaption>Liquid AI가 원문과 함께 공개한 이미지입니다. <a href="https://www.liquid.ai/blog/lfm2-5-2-6b" target="_blank" rel="noopener noreferrer">출처: Liquid AI</a></figcaption>
 </figure>
 
-## 왜 지금 다들 이 이야기를 할까?
+## 2.5GB 미만 메모리와 128K 문맥을 동시에 기대해도 될까?
 
-Liquid AI의 LFM2.5-2.6B가 눈길을 모으는 이유는 디바이스 시스템 메모리를 2.5GB 미만으로 점유하면서도 대형 AI 모델급 기능을 모두 갖췄기 때문입니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+Liquid AI는 LFM2.5-2.6B가 2.5GB 미만의 메모리 사용 조건에서 동작한다고 소개했습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. 이 수치는 모델 실행의 한 조건으로 읽어야 하며 운영체제, 애플리케이션, 입력 버퍼와 다른 백그라운드 작업까지 포함한 기기 전체 사용량이라고 단정할 수는 없습니다.
 
 기존의 온디바이스 소형 모델들은 메모리 제약으로 인해 긴 문맥을 다루지 못하거나 외부 도구를 불러오는 연산 능력이 부족한 경우가 많았습니다. 그러나 LFM2.5-2.6B는 128,000(128K) 토큰에 달하는 대용량 컨텍스트 윈도우를 지원하며, 네이티브 툴 콜링(native tool calling) 능력을 내장하고 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+
+컨텍스트 윈도우는 받아들일 수 있는 최대 입력 길이이고, 최대 길이를 사용할 때의 메모리와 응답 속도는 짧은 대화와 다를 수 있습니다. 모델 가중치가 차지하는 공간 외에도 이전 토큰의 상태를 유지하는 실행 메모리가 필요하기 때문입니다. 2.5GB라는 발표 수치를 제품 요구사항으로 옮기려면 실제 문서 길이별 최대 메모리, 첫 토큰까지의 시간, 배터리와 발열을 같은 기기에서 측정해야 합니다.
 
 ```mermaid
 flowchart LR
@@ -111,16 +115,16 @@ flowchart LR
 
 위 다이어그램은 LFM2.5-2.6B가 로컬 디바이스 자원 내부에서 작동하여 오프라인 에이전트 출력을 내놓는 내부 실행 순서를 보여줍니다.
 
-이러한 구조 덕분에 네트워크 연결이 불안정하거나 끊긴 상황에서도 로컬 시스템 내부의 데이터를 바탕으로 스스로 판단하고 도구를 호출하는 AI 에이전트를 안정적으로 구동할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+이러한 구조는 네트워크 연결이 불안정하거나 끊긴 상황에서 로컬 데이터를 처리하는 선택지를 제공합니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. 다만 툴 콜링은 모델이 구조화된 호출을 제안하는 능력이지, 실행 권한을 안전하게 통제해 주는 기능은 아닙니다. 파일 삭제나 메시지 전송 같은 도구는 애플리케이션이 인자를 검증하고 사용자 승인과 허용 범위를 적용해야 합니다.
 
 <figure class="news-source-image">
   <img src="https://www.liquid.ai/_next/image?url=https%3A%2F%2Faypchzzf9pftwuto.public.blob.vercel-storage.com%2FLFM2.5-2.6B-Training-Recipe-KCm9pyjDeBK4rWpNNH5MOrQBeP17Pj.png&amp;w=3840&amp;q=75" alt="LFM2.5-2.6B Training recipe" loading="lazy" decoding="async">
   <figcaption>Liquid AI가 원문과 함께 공개한 이미지입니다. <a href="https://www.liquid.ai/blog/lfm2-5-2-6b" target="_blank" rel="noopener noreferrer">출처: Liquid AI</a></figcaption>
 </figure>
 
-## 그래서 우리에게 뭐가 달라질까?
+## 로컬 실행이 곧 프라이버시와 무료 운영을 뜻할까?
 
-개발자와 사용자 입장에서 가장 직접적인 변화는 데이터 프라이버시 확보와 한계 비용 제로(Zero Marginal Cost)입니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. 데이터 거주성 요건이나 엄격한 보안 규정 때문에 외부 클라우드 API를 쓰지 못했던 기업 및 개인 사용자도 오프라인 환경에서 로컬 에이전트 워크플로우를 완성할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+로컬 실행은 입력을 외부 모델 API에 보내지 않는 구조를 만들 수 있다는 점이 직접적인 이점입니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. 그러나 에이전트가 웹 검색이나 외부 데이터베이스 도구를 호출하거나 앱이 진단 정보를 전송한다면 전체 워크플로가 오프라인인 것은 아닙니다. 데이터 거주성 요건이 있다면 모델 위치뿐 아니라 각 도구의 네트워크 목적지와 로그 저장 위치까지 확인해야 합니다.
 
 연산 디바이스 하드웨어에 따른 디코드 속도 성능도 구체적으로 제시되었습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. Apple M5 Max CPU 환경에서는 초당 220토큰(220 tokens/s)의 디코드 속도를 발휘하며, 모바일 스마트폰 하드웨어 환경에서는 초당 약 30토큰(roughly 30 tokens/s)의 속도로 작동합니다 <sup class="source-citation"><a href="#source-2" aria-label="Hugging Face 출처">[2]</a></sup>.
 
@@ -147,16 +151,16 @@ flowchart LR
 }
 ```
 
-위 차트는 Liquid AI가 제시한 검증 데이터에 따라 Apple M5 Max CPU와 스마트폰 하드웨어 간의 디코드 속도 차이를 나타낸 결과입니다.
+위 차트는 Liquid AI가 제시한 Apple M5 Max CPU와 스마트폰 하드웨어의 디코드 속도 수치를 비교합니다. 서로 다른 기기 범주에서 측정된 값이므로 다른 스마트폰이나 입력 길이에 그대로 적용할 수는 없습니다.
 
-매번 클라우드 서비스에 토큰 단위 비용을 지급할 필요가 없기 때문에 지속적인 연산을 수행하는 온디바이스 자동화 프로그램을 구축할 때 비용 부담을 없앨 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+로컬 실행은 클라우드 서비스의 토큰 종량제 비용을 피할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>. 그렇다고 운영 비용이 0이 되는 것은 아닙니다. 기기 구입, 전력과 배터리 소모, 모델 업데이트, 앱 최적화와 장애 지원을 포함해 API 방식의 월 청구액과 비교해야 합니다.
 
 <figure class="news-source-image">
   <img src="https://cdn-thumbnails.huggingface.co/social-thumbnails/models/LiquidAI/LFM2.5-2.6B.png" alt="Hugging Face 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
   <figcaption>Hugging Face가 원문과 함께 공개한 이미지입니다. <a href="https://huggingface.co/LiquidAI/LFM2.5-2.6B" target="_blank" rel="noopener noreferrer">출처: Hugging Face</a></figcaption>
 </figure>
 
-## 직접 써보거나 지켜볼 포인트
+## 실제 기기에서 어떤 순서로 시험해야 할까?
 
 LFM2.5-2.6B는 오픈웨이트(open-weight) 형태로 공개되었으므로 관심 있는 개발자라면 누구든 Hugging Face에서 모델 파일과 베이스 체크포인트를 내려받아 적용해볼 수 있습니다 <sup class="source-citation"><a href="#source-2" aria-label="Hugging Face 출처">[2]</a></sup>.
 
@@ -173,7 +177,9 @@ flowchart TD
 
 위 가이드 다이어그램은 사용자가 자신의 하드웨어 및 데이터 환경에 맞춰 LFM2.5-2.6B 도입 여부를 결정할 수 있도록 돕는 판단 흐름입니다.
 
-직접 배포 시에는 로컬 디바이스의 RAM 사용량이 2.5GB 미만으로 유지되는지 확인하고, 본인이 구현하고자 하는 도구 호출(tool calling) 로직이 네이티브 환경에서 제대로 작동하는지 점검해야 합니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+직접 배포할 때는 짧은 입력과 목표 최대 입력에서 각각 RAM, 응답 지연, 발열과 배터리 변화를 기록합니다. 그다음 정답이 알려진 도구 호출 예제로 함수 이름과 인자 형식이 맞는지, 잘못된 호출이 실행 전에 차단되는지 확인합니다. 마지막으로 네트워크를 끈 상태에서도 필요한 기능이 실제로 유지되는지 시험해야 “오프라인” 요구를 충족했는지 알 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
+
+같은 모델이라도 런타임과 양자화 형식이 다르면 속도와 출력 품질이 달라질 수 있습니다. 따라서 발표 수치와 단말 결과가 다를 때 곧바로 모델 문제로 결론 내리지 말고 사용한 파일, 엔진, 스레드 수와 입력 길이를 함께 남겨야 재현 가능한 비교가 됩니다.
 
 ## 아직은 선을 그어야 할 부분
 
@@ -181,11 +187,27 @@ flowchart TD
 
 또한 2.5GB 미만의 RAM을 점유한다고 발표되었으나, 모바일 OS나 다른 백그라운드 앱이 함께 실행되는 환경에서 배터리 소모량 및 발열에 관한 수치는 기기별로 상이할 수 있으므로 구체적인 디바이스 최적화 결과는 실제 적용 과정을 지켜보아야 합니다 <sup class="source-citation"><a href="#source-1" aria-label="Liquid AI 공식 블로그 출처">[1]</a></sup>.
 
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://www.liquid.ai/blog/lfm2-5-2-6b)
+- [Hugging Face](https://huggingface.co/LiquidAI/LFM2.5-2.6B)
+- [VentureBeat](https://venturebeat.com/ai/no-cloud-no-gpus-no-problem-liquid-ais-new-model-lfm2-5-2-6b-brings-powerful-ai-agents-to-devices-as-small-as-a-raspberry-pi)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Nvidia Nemotron 3.5 Lightning과 NeMo Switchyard: 에이전트 모델 라우팅 판단법]({% post_url 2026-08-13-nvidia-releases-nemotron-3-5-lightning-and-nemo-switchyard-router %}) — Nvidia가 자율 에이전트 시스템을 위해 개발된 30B 규모의 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 라우터 라이브러리 NeMo Switchyard를 2026년 8월 11일 공개했습니다. NeMo…
+- [Meta Muse Glimmer 30B 로컬 에이전트: 4비트 메모리 조건과 도입 판단]({% post_url 2026-08-11-meta-releases-open-source-muse-glimmer-30b-model-for-consumer-gpus %}) — Meta가 2026년 8월 10일 소비자용 GPU 환경에 최적화된 300억 파라미터 오픈소스 모델 Muse Glimmer를 Apache 2.0 라이선스로 출시했습니다. 4비트 양자화를 적용해 메모리 점유율을 20GB RAM 이하로…
+- [jcode의 14ms 부팅은 무엇을 바꿀까: Rust Harness·Semantic Memory·Swarm 검증 기준]({% post_url 2026-05-01-I-Deleted-Claude-Code-Deep-Dive-into-jcode-the-14ms-Rust-based-Agent-Harness-that-Changes-Everything %}) — jcode가 제시하는 14ms 부팅·27.8MB idle RAM, vector semantic memory와 daemon 기반 swarm 구조를 살펴보고, 수치 재현·검색 오류·동시 편집·API 비용의 도입 조건을 정리합니다.
+<!-- internal-links:end -->
+
 ## 자주 묻는 질문
 
 ### Liquid AI의 LFM2.5-2.6B는 인터넷 연결 없이 오프라인으로 실행할 수 있나요?
 
-네, LFM2.5-2.6B는 클라우드 GPU 인프라 없이 스마트폰이나 PC CPU에서 직접 동작하는 로컬 오프라인 에이전트 모델입니다. 작동을 위해 필요한 메모리는 2.5GB RAM 미만입니다.
+네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱·운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
 
 ### LFM2.5-2.6B 모델이 지원하는 주요 기술 스펙은 무엇인가요?
 
@@ -197,7 +219,7 @@ Apple M5 Max CPU 환경에서는 초당 220토큰, 일반 스마트폰 하드웨
 
 ### LFM2.5-2.6B 모델 파일은 어디서 다운로드할 수 있나요?
 
-Hugging Face 플랫폼에서 오픈웨이트 포스트 트레이닝 모델과 LFM2.5-2.6B-Base 체크포인트를 직접 누구나 무료로 다운로드할 수 있습니다.
+Hugging Face에서 오픈웨이트 포스트 트레이닝 모델과 LFM2.5-2.6B-Base 체크포인트를 확인할 수 있습니다. 실제 제품 사용 전에는 모델 카드의 파일 형식과 라이선스 조건을 함께 검토해야 합니다.
 
 ## 직접 확인한 원문
 

@@ -4,21 +4,24 @@ title: 'AutoHedge의 4개 Agent면 투자 위험이 줄까: Director→Quant→R
 date: '2026-04-28 18:46:54'
 categories: Tech
 tags:
-  - AutoHedge
-  - 멀티에이전트
-  - 금융AI
-  - 리스크관리
-  - 구조화출력
+  - LLM
+  - AI에이전트
 summary: 'AutoHedge가 전략·분석·위험·실행을 네 역할로 나누는 구조를 살펴보고, Pydantic JSON과 Risk Agent만으로 환각·확증 편향·실거래 위험이 사라지지 않는 이유를 짚습니다.'
-author: AI Trend Bot
+description: "AutoHedge의 Director→Quant→Risk→Execution 구조를 point-in-time data, deterministic limit, 주문 idempotency와 비용 포함 paper trading 기준으로 검증합니다."
 github_url: https://github.com/The-Swarm-Corporation/AutoHedge
+faq:
+  - question: "Risk Agent가 있으면 LLM의 실거래 주문을 허용해도 되나요?"
+    answer: "안 됩니다. Risk Agent도 틀릴 수 있으므로 종목·금액·손실·빈도 한도와 kill switch는 모델 밖의 결정적 주문 service가 집행해야 합니다."
+  - question: "Pydantic 구조화 출력은 투자 판단의 정확성도 검증하나요?"
+    answer: "아닙니다. 필드 존재와 type은 검증하지만 가격 freshness, 사실 여부, 예상 수익이나 confidence calibration은 별도 data와 rule로 확인해야 합니다."
+  - question: "AutoHedge를 평가하는 첫 단계는 무엇인가요?"
+    answer: "주문 권한 없이 point-in-time 입력으로 제안만 기록하고 단일 model·가격 기준선과 비용 포함 walk-forward 결과, 지연과 반려 이유를 비교하는 것입니다."
 image:
   path: https://opengraph.githubassets.com/1/The-Swarm-Corporation/AutoHedge
-  alt: 'Unmanned Hedge Fund with LLMs? AutoHedge: Dissecting the Real Architecture
-    Between Illusion and Practice'
+  alt: "The-Swarm-Corporation/AutoHedge GitHub 저장소 대표 이미지"
 ---
 
-AutoHedge가 네 역할로 판단을 나눠도 투자 위험은 자동으로 줄지 않으며, LLM 에이전트와 분리된 결정적 한도·승인 없이 실거래 주문에 연결해서는 안 됩니다.
+AutoHedge가 네 역할로 판단을 나눠도 투자 위험은 자동으로 줄지 않으며, LLM 에이전트와 분리된 결정적 한도·승인 없이 실거래 주문에 연결해서는 안 됩니다. 역할 분리는 관찰과 실험을 쉽게 할 뿐이므로 주문 없는 기록과 비용 포함 평가에서 단일 모델보다 나은지를 먼저 확인해야 합니다.
 
 ## 네 Agent는 책임 구간을 보이게 한다
 
@@ -56,8 +59,50 @@ AutoHedge가 네 역할로 판단을 나눠도 투자 위험은 자동으로 줄
 
 실거래를 검토하더라도 작은 금액이라는 이유로 LLM에 권한을 직접 주지 말고, 별도의 주문 서비스가 사람이 정한 한도와 승인을 집행해야 합니다. 이 글은 투자 조언이 아니며 AutoHedge의 수익을 보장하지 않습니다. 프로젝트의 유용성은 무인 헤지펀드가 아니라, 복잡한 판단을 관찰 가능한 역할과 구조화된 계약으로 나누는 참조 설계에서 먼저 평가해야 합니다.
 
+## 데이터 시각과 주문 상태를 계약에 포함한다
+
+각 Agent가 읽은 가격·뉴스에는 `as_of`와 source를 붙여야 합니다. Director는 장중 가격을 봤는데 Quant는 전일 종가를 사용하거나, 과거 backtest에 나중에 수정된 기사가 섞이면 역할 간 합의가 오히려 잘못된 확신을 만듭니다. point-in-time snapshot ID를 단계 사이에 전달하고, 요구 데이터가 없거나 허용 freshness를 넘으면 결과를 생성하지 않는 편이 낫습니다.
+
+Execution 출력도 주문의 끝이 아닙니다. 별도 서비스가 거래 시간, 잔고, 최소 수량, 현재 spread와 가격 변동을 다시 확인하고 client order ID로 중복을 막아야 합니다. timeout 뒤 재시도하기 전에 거래소에서 주문 상태를 조회해야 하며 부분 체결·거부·취소와 position reconciliation을 상태 machine으로 처리합니다. LLM의 자연어 결론은 이 상태를 덮어쓰지 못합니다.
+
+위험 한도는 최대 주문 금액 하나보다 계층적으로 둡니다. 종목·섹터·전체 portfolio 노출, 일일 손실, 주문 빈도와 오래된 데이터 차단을 결정적 rule로 검사합니다. 시장 데이터 단절, 연속 오류나 reconciliation 불일치가 생기면 새 주문을 막는 kill switch가 필요합니다. 안전한 기본값은 정보가 불완전할 때 거래하지 않는 것입니다.
+
+평가에서는 역할을 하나씩 제거하는 ablation이 유용합니다. 단일 model, Director+Quant, 여기에 Risk를 더한 구성의 비용 후 결과와 반려율을 비교하면 네 번 호출한 값이 있는지 알 수 있습니다. walk-forward 구간마다 prompt와 model version을 고정하고 수수료·spread·slippage를 반영합니다. 수익률 외에 turnover, 최대 낙폭, 잘못된 종목·수량 제안, data 누락 탐지율과 p95 지연을 함께 봅니다.
+
+paper trading trace에는 각 단계 입력, model·prompt version, 구조화 출력, deterministic gate 결과와 예상·실제 가능한 체결가를 연결합니다. 설명이 사후에 바뀌지 않도록 원본을 보존하고 같은 snapshot을 재생할 수 있어야 합니다. 충분한 기간 동안 위험 한도 밖 제안과 운영 실패를 먼저 찾아낸 뒤에도, 사람 승인을 포함한 작은 범위에서만 다음 단계를 판단합니다.
+
+시장 국면별 평가도 분리해야 합니다. 상승 구간 하나에서 나온 수익은 역할 분해의 효과가 아니라 단순한 방향 노출일 수 있으므로 변동성 확대, 급락, 거래 중단과 유동성 감소 구간을 따로 봅니다. 미래 정보를 사용하지 않는 point-in-time 데이터와 고정된 의사결정 시각을 적용하고, 현금 보유·단순 지수 같은 기준선과 비용 후 성과를 비교해야 합니다. 모델의 설명이 그럴듯한지보다 한도 밖 주문을 얼마나 차단했고 오래된 입력에서 얼마나 자주 거래를 보류했는지가 운영 안전성을 더 직접적으로 보여 줍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/The-Swarm-Corporation/AutoHedge)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Vibe-Trading 감성 점수로 매매해도 될까: News·가격 결합과 환각 위험]({% post_url 2026-04-27-Deciphering-the-Markets-Pulse-Why-HKUDS-Vibe-Trading-is-a-Paradigm-Shift-for-Quantitative-Trading %}) — Vibe-Trading이 가격·뉴스·소셜 맥락을 LLM으로 결합하는 방식을 살펴보고, 가짜 정보·편향·지연·운영비 때문에 점수를 주문 신호로 바로 쓰면 안 되는 이유를 설명합니다.
+- [AI-Trader로 실거래를 맡겨도 될까? 저장소 불일치와 백테스트 함정]({% post_url 2026-05-08-Seniors-View-Just-a-Bot-or-Wall-Streets-Replacement-Deep-Dive-into-the-Architecture-of-AI-Trader %}) — AI-Trader 글에 섞인 저장소·논문·예시 코드의 불일치를 먼저 확인하고, 실거래 전 반드시 검증해야 할 미래 정보 누수와 체결·위험 관리 조건을 짚습니다.
+- [daily\_stock\_analysis를 0원으로 운영할 수 있을까: GitHub Actions·데이터 품질·비용 조건]({% post_url 2026-04-29-Zero-Cost-AI-Quant-Analyst-Deep-Dive-into-ZhuLinsendailystockanalysis-Source-Code %}) — daily_stock_analysis가 GitHub Actions로 금융 데이터 수집·LLM 요약·알림을 예약 실행하는 구조와 무료 한도, 데이터 품질, 비밀 관리와 투자 판단의 한계를 분석합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### Risk Agent가 있으면 LLM의 실거래 주문을 허용해도 되나요?
+
+안 됩니다. Risk Agent도 틀릴 수 있으므로 종목·금액·손실·빈도 한도와 kill switch는 모델 밖의 결정적 주문 service가 집행해야 합니다.
+
+### Pydantic 구조화 출력은 투자 판단의 정확성도 검증하나요?
+
+아닙니다. 필드 존재와 type은 검증하지만 가격 freshness, 사실 여부, 예상 수익이나 confidence calibration은 별도 data와 rule로 확인해야 합니다.
+
+### AutoHedge를 평가하는 첫 단계는 무엇인가요?
+
+주문 권한 없이 point-in-time 입력으로 제안만 기록하고 단일 model·가격 기준선과 비용 포함 walk-forward 결과, 지연과 반려 이유를 비교하는 것입니다.
+
 참고 자료:
 
-- https://github.com/The-Swarm-Corporation/AutoHedge
-- https://medium.com/@tattvatarang/autohedge-build-an-autonomous-ai-hedge-fund
-- https://brightcoding.dev/autohedge-build-your-autonomous-ai-hedge-fund-in-minutes
+- [GitHub 저장소](https://github.com/The-Swarm-Corporation/AutoHedge)
+- [medium.com 원문](https://medium.com/@tattvatarang/autohedge-build-an-autonomous-ai-hedge-fund)
+- [brightcoding.dev 원문](https://brightcoding.dev/autohedge-build-your-autonomous-ai-hedge-fund-in-minutes)

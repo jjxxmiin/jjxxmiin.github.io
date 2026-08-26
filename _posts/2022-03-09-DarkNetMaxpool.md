@@ -1,17 +1,27 @@
 ---
+source_citations:
+  - name: "Darknet maxpool_layer.c 고정 커밋 원본"
+    url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/maxpool_layer.c"
 layout: post
 title:  "Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적"
 summary: "Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다."
+description: "Darknet Maxpool의 output shape·padding window와 argmax index를 따라 -1 index, strict tie, backward scatter·resize view 실패를 설명합니다."
 date:   2022-03-09 16:00 -0400
 categories: DarkNet
 image:
   path: /assets/img/thumb/DarkNetMaxpool.jpg
   alt: DarkNet 시리즈 - Maxpool 대표 이미지
 tags:
-  - Darknet소스분석
-  - MaxPooling
-  - 역전파디버깅
+  - DarkNet
+  - 컴퓨터비전
 math: true
+faq:
+  - question: "Maxpool indexes가 -1로 남는 경우는 언제인가요?"
+    answer: "Pooling window 전체가 input 범위 밖이거나 유효 값이 초기 max -FLT_MAX보다 크지 않아 선택이 한 번도 일어나지 않을 때입니다."
+  - question: "같은 최댓값이 여러 개면 gradient는 어디로 가나요?"
+    answer: "Forward 비교가 strict greater-than이므로 loop에서 먼저 만난 위치의 index가 저장되고 그곳으로 갑니다."
+  - question: "get_maxpool_image 반환값을 free_image해도 되나요?"
+    answer: "아닙니다. Layer output을 가리키는 view라서 수정과 해제가 원래 layer buffer에 영향을 줍니다."
 ---
 
 Darknet Maxpool의 backward가 잘못된 주소를 쓸 수 있는 직접적인 조건은 **forward의 어떤 pooling window에서도 유효한 입력을 찾지 못해 `indexes[out_index]`가 -1로 남는 경우**다. 출력 shape와 padding을 정할 때 window가 입력과 실제로 겹치는지까지 확인해야 한다.
@@ -138,3 +148,63 @@ return float_to_image(w, h, c, l.output);
 `get_maxpool_image`와 `get_maxpool_delta`가 반환한 image는 layer의 output 또는 delta를 그대로 가리키는 view다. view를 수정하면 layer buffer가 바뀌며, 독립 image라고 생각하고 `free_image`하면 layer가 소유한 포인터를 해제할 수 있다.
 
 Maxpool 결과가 이상할 때는 “최댓값을 뽑는 단순한 layer”라는 설명보다 **출력식, 실제 window 시작 offset, 저장된 argmax 주소, backward의 무조건 scatter**를 한 줄씩 맞춰야 한다. 그 네 값이 일치해야 parameter가 없는 layer도 안전하다.
+
+## Window Coverage를 어떻게 전수 검사할까
+
+모든 output `(i,j)`에 대해 kernel 좌표 중 적어도 하나가 input 안인지 계산한다. Padding이 큰 설정, 1×1 input, kernel이 input보다 큰 경우와 홀수 pad를 포함한다. Forward 직후 index 최소·최대, -1 수와 -FLT_MAX output 수를 assertion으로 남긴다.
+
+Index -1을 backward에서 단순 건너뛰면 crash는 막지만 잘못된 output shape를 숨길 수 있다. Parser 단계에서 유효 window가 없는 설정을 거부하고 runtime guard는 방어선으로 둔다.
+
+## Argmax Gradient를 어떻게 수치 검증할까
+
+2×2 input의 값이 모두 다르게 하고 output delta 1을 넣으면 최대 위치 하나만 input delta 1이 되어야 한다. 겹치는 두 window가 같은 pixel을 최대값으로 고르면 그 위치 delta는 두 기여의 합이다. 기존 net.delta에 상수를 넣어 `+=` 계약도 확인한다.
+
+Tie에서는 함수가 선택한 첫 위치와 수치 미분의 비매끄러운 경계를 구분한다. Exact -FLT_MAX 입력처럼 sentinel과 실제 값이 같은 사례는 index가 갱신되지 않는 코드 경계로 별도 처리한다.
+
+## Resize와 CPU·GPU 결과를 어떻게 맞출까
+
+새 shape에 맞춰 output·delta·indexes 길이를 함께 갱신하고 realloc 실패를 처리한다. 늘어난 delta는 상위 backward 전에 0으로 초기화되어야 한다. CPU와 GPU가 padding offset과 tie rule을 같게 구현했는지 고정 tensor로 비교한다.
+
+## Padding 대칭을 어떻게 확인하나요?
+
+홀수 pad에서는 `-pad/2` 정수 나눗셈 때문에 왼쪽·오른쪽 또는 위·아래가 직관적으로 같은 여백이 아닐 수 있습니다. 각 output window의 시작과 끝 좌표를 표로 만들고 다른 framework의 padding 정의와 비교합니다. 같은 output shape만으로 같은 연산이라고 판단하지 않습니다.
+
+1×1, 직사각 입력과 size가 입력보다 큰 사례를 넣어 valid input 수를 window별로 셉니다. 최소 한 개 유효 위치라는 불변식이 깨지면 생성 설정을 거부합니다.
+
+## Argmax Buffer의 수명은 어떻게 지키나요?
+
+Backward는 바로 앞 forward의 indexes와 동일한 input shape를 기대합니다. Forward 뒤 resize하거나 여러 micro-batch forward를 겹쳐 같은 layer buffer를 덮으면 mask가 loss에 대응하지 않습니다. Checkpointing 또는 async graph에서는 호출별 argmax를 보존해야 합니다.
+
+Output view로 layer buffer를 수정해도 indexes는 자동으로 바뀌지 않으므로 backward 의미가 깨집니다. 시각화에는 copy를 사용합니다.
+
+## 다른 Pooling 구현과 무엇을 맞춰야 하나요?
+
+Kernel·stride·padding뿐 아니라 floor·ceil output 식, padding 값을 최대 후보에서 제외하는 방식과 tie rule을 비교합니다. Average pooling이나 ceil-mode MaxPool로 교체해 shape만 맞추면 경계 output과 gradient가 달라집니다. Export 전 고정 tensor의 output과 argmax-derived gradient를 target runtime과 대조합니다.
+
+## 자주 남는 질문
+
+### Maxpool indexes가 -1로 남는 경우는 언제인가요?
+
+Pooling window 전체가 input 범위 밖이거나 유효 값이 초기 max -FLT_MAX보다 크지 않아 선택이 한 번도 일어나지 않을 때입니다.
+
+### 같은 최댓값이 여러 개면 gradient는 어디로 가나요?
+
+Forward 비교가 strict greater-than이므로 loop에서 먼저 만난 위치의 index가 저장되고 그곳으로 갑니다.
+
+### get_maxpool_image 반환값을 free_image해도 되나요?
+
+아닙니다. Layer output을 가리키는 view라서 수정과 해제가 원래 layer buffer에 영향을 줍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Darknet maxpool_layer.c 고정 커밋 원본](https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/maxpool_layer.c)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Darknet 활성화 함수 역전파가 틀릴 때: gradient()에 출력값을 넣는 이유]({% post_url 2022-02-05-DarkNetActivations %}) — Darknet activation_layer의 forward·backward 흐름과 함수 dispatch를 따라가며, logistic·tanh gradient가 pre-activation이 아니라 활성화된 출력값을 받는 구현 계약을…
+- [Darknet Region Layer 학습이 멈추는 이유: 빈 backward와 objectness delta 추적]({% post_url 2022-03-14-DarkNetRegionLayer %}) — Darknet region_layer의 출력 인덱스와 박스 좌표, 학습 delta 할당 순서를 따라가며 비어 있는 backward, truth 경계, 마스크 scale 형 변환, 추론 출력 변경을 점검합니다.
+- [Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스·STEPS·가중치 순서]({% post_url 2022-03-13-DarkNetParser %}) — Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록·route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다.
+<!-- internal-links:end -->

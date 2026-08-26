@@ -12,11 +12,11 @@ tags:
 summary: vitali87의 Code Graph RAG는 다국어 코드베이스를 Tree-sitter로 파싱하여 Memgraph 지식 그래프로 구축하는
   획기적인 도구입니다. 텍스트 의미 기반의 벡터 검색이 가진 한계를 극복하고 상속, 호출, 데이터 흐름 같은 구조적 관계를 AI에게 직접 제공함으로써,
   대규모 모노레포 환경에서도 환각 없이 정밀하게 코드를 분석하고 리팩토링할 수 있도록 돕습니다.
-author: AI Trend Bot
+description: 'Code Graph RAG가 Tree-sitter와 Memgraph로 호출·상속·데이터 흐름을 보존하는 방식과 색인 최신성·동적 코드·질의 검증을 설명합니다.'
 github_url: https://github.com/vitali87/code-graph-rag
 image:
   path: https://opengraph.githubassets.com/1/vitali87/code-graph-rag
-  alt: 'code-graph-rag: How AI Coding Agents Keep Structure and Context in Large Codebases'
+  alt: "vitali87/code-graph-rag GitHub 저장소 대표 이미지"
 project:
   stars: 2350
   forks: 391
@@ -41,26 +41,6 @@ project:
   files: 1103
 mermaid: true
 chart: true
-faq:
-- question: 대규모 모노레포에서 지식 그래프를 처음 생성하는 데 시간이 얼마나 걸리나요?
-  answer: 저장소의 전체 크기와 언어 복잡도에 따라 다르지만, Tree-sitter의 병렬 파싱 처리 속도 덕분에 일반적인 수만 줄의 코드도
-    수십 초에서 수 분 내에 처리됩니다. 한 번 그래프가 Memgraph에 적재된 이후에는 인메모리 특성상 AI의 구조적 질의에 밀리초 단위로
-    즉각 응답합니다.
-- question: 벡터 데이터베이스를 사용하는 일반 RAG 방식과 무엇이 가장 다른가요?
-  answer: 벡터 검색은 텍스트의 '의미적 유사성'을 확률적으로 찾기 때문에 상속이나 정확한 호출 경로를 놓치기 쉽습니다. 반면 이 시스템은
-    클래스, 함수, 모듈 등의 '관계(Edge)'를 수학적으로 명확하게 연결하여 추적하므로 구조적인 질문에 100% 완벽한 정확도를 보장합니다.
-- question: MCP(Model Context Protocol)를 지원하지 않는 다른 구형 에디터에서도 사용할 수 있나요?
-  answer: 네, 가능합니다. MCP를 통한 연동이 가장 편리하긴 하지만, 프로젝트 내부에 독립적으로 실행할 수 있는 대화형 CLI(Command
-    Line Interface)가 내장되어 있습니다. 터미널 창에서 자연어로 질문하면 내부적으로 Cypher 쿼리를 생성해 결과를 친절하게 반환해
-    줍니다.
-- question: 외부 API로 코드가 유출되는 것을 막기 위해 완전한 로컬 환경에서 무료로 구동할 수 있나요?
-  answer: 그렇습니다. 핵심인 파싱 엔진과 Memgraph 데이터베이스는 모두 로컬 장비에서 구동됩니다. 사용자의 자연어 질문을 Cypher
-    쿼리로 변환하는 AI 계층 역시 Ollama 같은 로컬 LLM을 연결하도록 설정할 수 있어, 인터넷 연결 없이 철저히 보안이 유지되는 오프라인
-    환경을 구축할 수 있습니다.
-- question: 현재 어떤 프로그래밍 언어들을 지원하며, 지원하지 않는 언어는 어떻게 추가하나요?
-  answer: Python, Java, C, C#, Go 등 11개 이상의 주요 언어를 즉시 지원합니다. 최근 업데이트를 통해 ast-grep
-    기반의 플러그인 방식이 도입되었기 때문에, 사용자가 별도의 파서 코드를 깊게 작성할 필요 없이 간단한 YAML 패턴 파일 설정만으로 Ruby와
-    같은 새로운 언어의 문법을 쉽게 그래프에 추가할 수 있습니다.
 ---
 
 이 글의 핵심을 세 줄로 요약하면 다음과 같습니다.
@@ -393,6 +373,20 @@ pie title "추출되는 주요 그래프 요소의 논리적 비중 예시"
 지금까지 살펴본 vitali87의 Code Graph RAG는 우리가 코드를 다루고 AI와 소통하는 방식을 한 단계 끌어올린 뛰어난 프로젝트입니다. 코드를 단순한 글자들의 나열이 아니라 상호작용하는 거대한 유기체이자 '관계의 집합'으로 바라보는 철학이 돋보입니다.
 
 AI가 개발자를 대체할 것이라는 섣부른 두려움 대신, 개발자가 AI에게 가장 정확한 도구를 쥐여줌으로써 어떻게 한계를 돌파할 수 있는지 보여주는 훌륭한 사례입니다. 모노레포의 복잡성에 짓눌려 환각을 내뱉는 AI 도구에 실망한 적이 있다면, 코드를 진짜로 기억하고 구조적으로 이해하는 이 새로운 패러다임을 당장 경험해 보시기를 권합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/vitali87/code-graph-rag)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [headroom: AI 코딩 에이전트의 컨텍스트 한계를 넘는 압축 기술]({% post_url 2026-07-07-Headroom-Context-Compression-Layer-for-AI-Agents %}) — Headroom은 대형 언어 모델(LLM)에 전달되는 방대한 도구 출력과 로그, RAG 결과물을 최대 95%까지 압축하여 토큰 비용을 줄이고 답변 정확도를 유지하는 오픈소스 기반의 컨텍스트 압축 레이어입니다.
+- [codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법]({% post_url 2026-07-05-codebase-memory-mcp-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
+- [code-review-graph 심층 분석: AI 코딩 에이전트가 코드를 정확히 기억하는 원리]({% post_url 2026-07-17-Deep-Dive-into-code-review-graph-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의 내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

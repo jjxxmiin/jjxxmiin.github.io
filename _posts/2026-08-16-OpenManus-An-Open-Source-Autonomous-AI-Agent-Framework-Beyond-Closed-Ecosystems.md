@@ -4,19 +4,19 @@ title: 'OpenManus: 초대장 없이 사용하는 오픈소스 자율형 AI 에�
 date: '2026-08-16 19:21:39'
 categories: Tech
 tags:
+  - 오픈소스
+  - LLM
   - 튜토리얼
   - 파이썬
-  - 강화학습
-  - AI서비스
-  - DeepSeek
+  - 웹개발
 summary: OpenManus는 폐쇄형 AI 에이전트 서비스의 한계를 극복하기 위해 MetaGPT 커뮤니티 중심으로 개발된 오픈소스 자율형 에이전트
   프레임워크예요. 웹 브라우징, 코드 실행, 파일 조작 등의 도구를 자율적으로 호출하며 추론과 반추 과정을 거쳐 복잡한 업무를 스스로 완수해요.
-author: AI Trend Bot
+description: 'OpenManus의 계획·행동·관찰 루프와 브라우저·터미널 도구 구조, 모델 선택과 샌드박스 권한·무한 반복·토큰 비용을 판단하는 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/mannaandpoem/OpenManus
 image:
   path: https://opengraph.githubassets.com/1/mannaandpoem/OpenManus
-  alt: 'OpenManus: An Open-Source Autonomous AI Agent Framework Beyond Closed Ecosystems'
+  alt: "mannaandpoem/OpenManus GitHub 저장소 대표 이미지"
 project:
   stars: 628
   forks: 149
@@ -49,13 +49,14 @@ faq:
 
 [OpenManus GitHub 저장소](https://github.com/mannaandpoem/OpenManus) | [OpenManus 공식 문서](https://openmanus.github.io/)
 
-> **먼저 알아둘 용어**
+OpenManus는 상용 서비스에 의존하지 않고 웹·터미널·파일 도구를 조합하는 에이전트를 직접 통제하려는 개발자에게 적합합니다. 오픈소스라는 사실은 실행 과정을 살필 수 있게 해 주지만 모델의 판단이나 명령을 자동으로 안전하게 만들지는 않습니다. 격리된 샘플 작업에서 단계 수와 비용 상한, 파일 쓰기 승인, 실패 뒤 되돌림이 작동하는지 확인한 후 권한을 넓혀야 합니다.
+
+> **OpenManus 실행 흐름을 읽는 네 단어**
 >
-> - **에이전트**: 사람이 단계마다 지시하지 않아도 스스로 여러 작업을 이어서 처리하는 AI입니다.
-> - **오픈소스**: 소스 코드를 공개해 누구나 보고 고쳐 쓸 수 있게 한 것입니다. 조건은 라이선스마다 다릅니다.
-> - **LLM**: 엄청난 양의 글을 학습해 문장을 만들어 내는 대형 AI 모델입니다. ChatGPT 가 대표적입니다.
-> - **프롬프트**: AI에게 건네는 지시문입니다. 같은 모델도 지시문에 따라 결과가 크게 달라집니다.
-> - **추론**: 학습이 끝난 모델이 실제로 답을 만들어 내는 과정입니다. 이때 드는 계산 비용이 곧 사용료입니다.
+> - **계획·행동·관찰 루프**: 요청을 한 번에 완성하려 하지 않고 다음 행동을 정한 뒤, 도구 결과를 관찰해 후속 단계를 선택하는 반복 구조입니다.
+> - **도구 호출**: 모델이 브라우저·터미널·파일 기능 가운데 필요한 작업과 인자를 정해 실행 계층에 전달하는 요청입니다. 모델의 문장 생성과 실제 시스템 동작을 구분하는 경계이기도 합니다.
+> - **상태 전이**: 에이전트가 실행 중인지, 작업을 마쳤는지, 오류로 멈췄는지를 명시적으로 바꾸고 기록하는 과정입니다. 반복 횟수 제한과 실패 복구를 이해할 때 먼저 봐야 합니다.
+> - **샌드박스**: 터미널 명령이나 브라우저 자동화가 호스트 전체에 닿지 않도록 파일·네트워크·프로세스 권한을 격리한 실행 환경입니다. OpenManus를 시험할 때는 모델 선택보다 이 권한 범위를 먼저 정해야 합니다.
 {: .prompt-info }
 
 ## 자율형 AI 에이전트의 새로운 선택지
@@ -437,6 +438,20 @@ flowchart LR
 OpenManus는 특정 기업의 독점적인 상용 플랫폼에 의존하지 않고도, 개발자 누구나 고성능 자율 AI 에이전트를 소유하고 개선할 수 있음을 증명해 준 오픈소스 프로젝트예요.
 
 단 몇 줄의 프롬프트를 넘어서 웹, 터미널, 파일 시스템을 직접 자유롭게 오가며 복잡한 현업 문제를 스스로 풀어내는 에이전트 기술은 앞으로 소프트웨어 개발의 형태를 변화시킬 것으로 기대돼요. 초대 코드를 기다리는 대신, OpenManus 저장소를 복제하여 나만의 맞춤형 AI 에이전트를 직접 구축해 보는 것을 추천해요.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/mannaandpoem/OpenManus)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [Multica로 코딩 Agent를 비동기 운영해도 될까: daemon·작업 큐·권한]({% post_url 2026-04-11-multica-aimultica-From-Tools-to-Teammates-Deep-Dive-into-the-Open-Source-Managed-Agent-Architecture %}) — Multica가 로컬 AI CLI를 daemon과 작업 보드에 연결하는 구조를 살펴보고, 비동기 실행의 격리·중단·로그·Skill 검증 비용을 기준으로 도입 범위를 정합니다.
+- [CC-Connect로 터미널을 Slack에 열어도 될까: 원격 셸 보안 체크]({% post_url 2026-04-20-Provocation-Your-Local-AI-Agent-is-Rotting-in-the-Terminal-CC-Connect-and-the-Evolution-of-ChatOps %}) — CC-Connect의 PTY·tmux와 메신저 연결 구조를 살펴보고, 외부 공개 포트가 없어도 남는 원격 명령 위험과 안전한 실험 조건을 정리합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

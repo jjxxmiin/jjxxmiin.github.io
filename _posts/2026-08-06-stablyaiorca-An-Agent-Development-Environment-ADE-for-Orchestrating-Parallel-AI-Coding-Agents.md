@@ -6,20 +6,19 @@ categories: Tech
 tags:
   - AI코딩
   - 멀티에이전트
+  - 웹개발
   - ClaudeCode
   - Gemini
-  - xAI
 summary: stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일
   프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development Environment)입니다. Git Worktree
   기반 작업 영역 격리, WebSocket RPC 통신, 임베디드 브라우저 연동, 휴면 기능 및 원격 SSH 실행을 통해 소프트웨어 개발 생산성을
   상향시킵니다.
-author: AI Trend Bot
+description: 'stablyai/orca가 Git worktree와 RPC로 여러 코딩 에이전트를 분리하는 방식과 병합 충돌·권한·원격 실행·중단 후 복구 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/stablyai/orca
 image:
   path: https://opengraph.githubassets.com/1/stablyai/orca
-  alt: 'stablyai/orca: An Agent Development Environment (ADE) for Orchestrating Parallel
-    AI Coding Agents'
+  alt: "stablyai/orca GitHub 저장소 대표 이미지"
 project:
   stars: 38583
   forks: 2719
@@ -64,6 +63,8 @@ faq:
   answer: Orca UI 내부의 코드 Diff 뷰에서 수정이 필요한 라인에 마크다운 주석을 작성할 수 있습니다. 작성된 인라인 피드백 주석들은
     Orca에 의해 하나의 프롬프트 맥락으로 패키징되어 해당 에이전트의 터미널 콘솔로 직접 피드백 스트리밍 전송됩니다.
 ---
+
+stablyai/orca는 여러 터미널 코딩 에이전트를 Git worktree로 분리하고 한 화면과 RPC 경로에서 제어하려는 개발 환경입니다. 작업 트리 분리는 파일 충돌을 줄이지만 같은 설계 오류, 포트·데이터베이스 자원 충돌, 최종 병합 충돌까지 없애지는 않습니다. 두 개의 작은 독립 이슈로 시작해 브랜치 소유권, 테스트 결과, 취소·재개와 병합 절차를 확인하세요.
 
 - [stablyai/orca GitHub 저장소](https://github.com/stablyai/orca)
 - [Orca 공식 프로젝트 페이지](https://onorca.dev)
@@ -380,6 +381,20 @@ GitHub Actions 빌드가 실패했을 때, Orca CLI 명령(`orca worktree create
 stablyai/orca는 AI 코딩 에이전트를 사용하는 방식의 본질을 '1:1 대화'에서 '1:N 지휘 통제'로 완전히 바꾼 프로젝트입니다. 단일 에이전트가 코드를 다 쓸 때까지 멍하니 대기하던 기존의 비효율성을 Git Worktree 격리와 병렬 오케스트레이션을 통해 말끔히 해소해 줍니다.
 
 개발자는 이제 직접 타이핑하는 사람을 넘어, 여러 특화 AI 에이전트에게 적절한 역할을 분배하고 최종 산출물의 코드 리뷰와 구조를 검증하는 고차원 아키텍터로 진화하고 있습니다. 멀티 에이전트 병렬 개발 체계를 구축하여 생산성 격차를 벌리고 싶은 팀이라면 stablyai/orca는 훌륭한 선택지가 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/stablyai/orca)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
+- [cc-switch: 여러 AI 코딩 도구의 API 설정과 프로바이더를 한곳에서 관리하는 데스크톱 제어 센터]({% post_url 2026-08-17-cc-switch-All-in-One-Configuration-Manager-and-Local-Proxy-Gateway-for-AI-Coding-CLI-Tools %}) — cc-switch는 Claude Code, OpenAI Codex, Gemini CLI 등 다양한 AI 코딩 도구의 프로바이더 설정과 API 키를 통합 관리하는 오픈소스 데스크톱 애플리케이션입니다. 로컬 프록시 게이트웨이, 자동…
+- [herdr: 쏟아지는 AI 코딩 에이전트를 통제하는 터미널 멀티플렉서]({% post_url 2026-07-14-herdr-The-Terminal-Multiplexer-for-Orchestrating-AI-Coding-Agents %}) — 기존 터미널 멀티플렉서의 한계를 넘어, AI 에이전트의 작업 상태(대기, 작업 중, 완료)를 실시간으로 자동 추적하고 제어하는 herdr의 구조와 활용법을 알아봅니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

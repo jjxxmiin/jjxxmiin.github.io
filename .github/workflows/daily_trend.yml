@@ -112,6 +112,20 @@ jobs:
           done
           exit 1
 
+      - name: Enrich and validate the new post
+        if: steps.today.outputs.exists != 'true'
+        shell: bash
+        run: |
+          mapfile -t changed_posts < <(git status --porcelain -- _posts | cut -c4-)
+          if [ "${#changed_posts[@]}" -eq 0 ]; then
+            echo "생성된 글이 없습니다."
+            exit 1
+          fi
+          for post in "${changed_posts[@]}"; do
+            python tools/enrich_post_graph.py --write --only "$post"
+          done
+          python tools/audit_content_quality.py --warnings-as-errors
+
       - name: Commit and Push
         if: steps.today.outputs.exists != 'true'
         run: |

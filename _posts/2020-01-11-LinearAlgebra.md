@@ -2,19 +2,30 @@
 layout: post
 title:  "PCA와 LDA가 헷갈릴 때 보는 선형대수: 고유벡터부터 차원축소까지"
 summary: "벡터·기저·고유값·공분산을 하나의 흐름으로 연결하고 PCA와 LDA가 각각 무엇을 보존하려는지 비교합니다."
+description: "벡터·기저·고유값·공분산을 연결해 PCA의 분산 보존과 LDA의 클래스 분리 목적, 차원 선택 기준, 전처리와 대표 실패 조건의 차이를 설명합니다."
 image:
   path: /assets/img/thumb/LinearAlgebra.jpg
   alt: 선형대수학 끄적이기 대표 이미지
 date:   2020-01-11 16:00 -0400
 categories: Basics
 tags:
-  - 선형대수
-  - PCA
-  - LDA
+  - 데이터분석
+  - 튜토리얼
+faq:
+  - question: "PCA는 class label을 사용하나요?"
+    answer: "사용하지 않습니다. 데이터 전체의 공분산에서 분산이 큰 방향을 찾아 투영합니다. Label을 이용해 클래스 사이를 벌리는 목적은 LDA와 다릅니다."
+  - question: "고유값이 큰 PCA 축은 무엇을 뜻하나요?"
+    answer: "그 고유벡터 방향으로 데이터가 더 크게 퍼져 있음을 뜻합니다. 큰 고유값의 축부터 선택하면 전체 변동을 더 많이 보존할 수 있습니다."
+  - question: "PCA나 LDA를 적용하면 분류 성능이 항상 좋아지나요?"
+    answer: "보장되지 않습니다. 차원을 줄이며 정보가 사라질 수 있으므로 설명된 분산, validation 성능과 class별 오류를 원본 feature 기준과 비교해야 합니다."
 math: true
 ---
 
 PCA와 LDA의 차이는 한 문장으로 정리된다. **PCA는 데이터 전체의 분산을 최대한 보존하는 축을 찾고, LDA는 같은 클래스는 모으면서 다른 클래스는 멀어지는 축을 찾는다.** 이 차이를 이해하려면 벡터, 기저, 고유벡터, 공분산이 어떻게 연결되는지만 잡으면 된다.
+
+## PCA와 LDA는 어떤 기준으로 고를까?
+
+두 방법 모두 데이터를 새로운 축에 투영하지만 최적화하는 기준과 label 사용 여부가 다르다. 차원축소 뒤 결과를 시각화하는 데서 끝내지 말고 정보 손실과 downstream 성능을 원본 feature와 비교해야 한다.
 
 더 긴 강의가 필요하면 [AI를 위한 선형대수](https://www.edwith.org/linearalgebra4ai/joinLectures/14072), 기하학적 직관은 [영상 자료](https://www.youtube.com/watch?v=jNwf-JUGWgg)를 함께 볼 수 있다.
 
@@ -128,3 +139,49 @@ $$S_w^{-1}S_bw=\lambda w$$
 계산 흐름은 평균 계산 → $$S_w$$와 $$S_b$$ 계산 → 고유값 분해 → 필요한 축 선택 → 데이터 투영 순서다. 수식 전개는 [PCA/LDA 개념 자료](https://www.kwangsiklee.com/2017/12/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D%EC%97%90-%ED%95%84%EC%9A%94%ED%95%9C-pcalda-%EA%B0%9C%EB%85%90-%EC%9D%B5%ED%9E%88%EA%B8%B0/)에서 이어서 볼 수 있다.
 
 선택 기준은 목적에서 출발하면 된다. 라벨 없이 압축하거나 시각화하려면 PCA, 라벨을 이용해 클래스 분리를 강조하려면 LDA를 검토한다. 둘 다 원래 정보를 일부 버리는 투영이므로, 축을 줄인 뒤에는 설명된 분산이나 분류 성능을 실제 데이터로 다시 확인해야 한다.
+
+## PCA를 적용하기 전에 무엇을 확인하나
+
+Feature마다 단위와 범위가 크게 다르면 분산이 큰 단위가 주성분을 지배할 수 있다. 어떤 중심화·스케일링을 적용했는지 training 데이터 기준으로 기록하고 validation·test에는 같은 변환을 사용한다. 전체 데이터를 미리 이용해 전처리하면 평가 정보가 섞일 수 있다.
+
+공분산 행렬의 shape와 feature 수를 확인하고 고유값을 큰 순서로 정렬한다. 선택한 축이 서로 다른 방향을 이루는지, 투영 결과의 차원이 의도와 맞는지 작은 배열로 검증한다. 고유벡터의 부호가 바뀌어도 같은 축을 나타낼 수 있으므로 그림 방향만으로 구현 실패를 단정하지 않는다.
+
+축 수는 시각화를 위해 2개로 고정하는 선택과 압축 품질을 위한 선택이 다르다. 누적 설명 분산과 downstream 모델 성능, 저장·계산 비용을 함께 본다. 가장 큰 두 축에 class가 겹쳐 보인다고 원래 공간에서도 분리 불가능하다고 결론 내리지 않는다.
+
+## LDA에서 label과 클래스 분포를 어떻게 다루나
+
+LDA는 각 class 평균과 class 내부 산포, class 사이 산포를 사용하므로 label 오류와 작은 class의 영향이 직접 들어간다. Class별 샘플 수와 산포를 먼저 보고, training split에서만 투영 축을 학습한다. Validation label로 축을 정하면 평가가 낙관적으로 바뀐다.
+
+같은 class를 모으고 다른 class를 벌리는 기준이 실제 분류 목적과 맞는지 본다. Class가 심하게 겹치거나 내부에 여러 subgroup이 있으면 단순 선형 투영으로 충분하지 않을 수 있다. 예쁜 2차원 그림보다 독립 데이터의 분류 결과가 중요하다.
+
+축 수에도 class 수와 데이터 rank에서 오는 한계가 있다. 무조건 원하는 차원만큼 유효한 판별축이 생긴다고 가정하지 않고 계산 결과의 고유값과 수치 안정성을 확인한다.
+
+## PCA와 LDA를 공정하게 비교하는 실험
+
+같은 training·validation split, 같은 원본 feature와 downstream classifier를 사용한다. PCA와 LDA가 각각 어느 데이터를 보고 축을 배웠는지 기록하고, 투영 차원도 비교 목적에 맞게 정한다. LDA가 label을 쓴다는 차이를 숨긴 채 단순 그림만 비교하지 않는다.
+
+평가에는 원본 feature baseline을 포함한다. 차원축소로 속도나 메모리가 줄었는지, 전체와 class별 성능이 어떻게 변했는지 본다. 실패 샘플이 특정 class나 작은 분산 방향에 몰리는지도 확인한다.
+
+새 샘플에는 training에서 구한 평균·scale·투영 행렬을 그대로 적용한다. 매 batch마다 PCA를 다시 계산하면 좌표계가 달라져 저장된 모델과 비교할 수 없다. 이 변환 순서를 하나의 pipeline으로 관리해야 재현 가능하다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [LightGBM vs XGBoost, 무엇부터 튜닝할까: 과적합을 줄이는 파라미터 순서]({% post_url 2021-06-29-LightgbmXgboost %}) — Decision Tree와 bagging·boosting의 차이를 짚고 LightGBM·XGBoost의 depth, leaves, sampling, learning rate를 같은 역할끼리 비교합니다.
+- [DarkNet GEMM 인자 읽는 법: TA·TB·lda·BETA]({% post_url 2022-02-22-DarkNetGEMM %}) — DarkNet GEMM 호출을 C=βC+αop(A)op(B)로 해석하고, 네 가지 전치 분기와 leading dimension이 실제 메모리 인덱스에 미치는 영향을 설명합니다.
+- [백혈구 4종 분류, 정확도만 보면 위험한 이유: Keras 모델과 CAM 점검]({% post_url 2019-12-06-kaggle1 %}) — Kaggle 백혈구 이미지로 4종 분류기를 구성하고, 데이터 분리와 클래스 순서부터 CAM 해석까지 실수하기 쉬운 지점을 짚습니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### PCA는 class label을 사용하나요?
+
+사용하지 않습니다. 데이터 전체의 공분산에서 분산이 큰 방향을 찾아 투영합니다. Label을 이용해 클래스 사이를 벌리는 목적은 LDA와 다릅니다.
+
+### 고유값이 큰 PCA 축은 무엇을 뜻하나요?
+
+그 고유벡터 방향으로 데이터가 더 크게 퍼져 있음을 뜻합니다. 큰 고유값의 축부터 선택하면 전체 변동을 더 많이 보존할 수 있습니다.
+
+### PCA나 LDA를 적용하면 분류 성능이 항상 좋아지나요?
+
+보장되지 않습니다. 차원을 줄이며 정보가 사라질 수 있으므로 설명된 분산, validation 성능과 class별 오류를 원본 feature 기준과 비교해야 합니다.

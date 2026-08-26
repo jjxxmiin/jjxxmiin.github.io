@@ -4,17 +4,17 @@ title: 'Meetily: 오디오 유출 없이 내 PC에서 완성되는 프라이버�
 date: '2026-07-05 05:54:28'
 categories: Tech
 tags:
-  - Llama
   - 음성AI
-  - 온디바이스AI
-  - Mistral
   - LLM
+  - 온디바이스AI
+  - 오픈소스
+  - 웹개발
 summary: 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고 기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
-author: AI Trend Bot
+description: 'Meetily가 회의 음성 전사와 요약을 로컬에서 처리하는 구조를 살피고, 모델 다운로드·시스템 자원·화자 분리·데이터 보존 및 네트워크 경계를 점검합니다.'
 github_url: https://github.com/Zackriya-Solutions/meetily
 image:
   path: https://opengraph.githubassets.com/1/Zackriya-Solutions/meetily
-  alt: 'Meetily: The Privacy-First AI Meeting Assistant Running 100% Locally Without Cloud'
+  alt: "Zackriya-Solutions/meetily GitHub 저장소 대표 이미지"
 mermaid: true
 chart: true
 faq:
@@ -51,6 +51,8 @@ project:
   - Shell
   files: 524
 ---
+
+Meetily는 음성 전사와 요약 모델을 사용자 기기에서 실행해 회의 원문을 외부 서비스로 보내지 않는 구성을 지향합니다. 다만 로컬 실행만으로 데이터 주권이 자동 보장되지는 않으므로 모델 다운로드, 업데이트 확인, 로그·백업 경로의 네트워크와 저장 동작을 점검해야 합니다. 대표 회의에서 전사 정확도, 화자 분리, 처리 지연과 배터리 사용량을 비교한 뒤 도입하세요.
 
 [GitHub 저장소](https://github.com/Zackriya-Solutions/meetily) | [공식 웹사이트](https://meetily.ai) | [Zackriya Solutions](https://www.zackriya.com)
 
@@ -378,6 +380,20 @@ pie title "Meetily 로컬 실행 시 자원 점유 비율 (추정치)"
 AI가 업무의 모든 영역에 스며들면서 우리는 편리함을 얻은 대신 은연중에 데이터 통제권을 거대 기술 기업들에게 넘겨주었습니다. Meetily는 이러한 흐름에 대한 실용적인 반기입니다.
 
 "AI의 능력은 활용하되, 내 데이터는 내 기기에 남긴다." 이 원칙은 보안이 생명인 기업뿐만 아니라, 개인의 프라이버시를 중요하게 생각하는 모든 사용자에게 울림을 줍니다. Rust의 성능과 오픈소스 생태계(Whisper, Ollama)의 결합을 통해, 우리는 이제 클라우드 없이도 놀랍도록 똑똑한 회의 비서를 데스크톱 안에서 만날 수 있게 되었습니다. 앞으로 로컬 AI 모델들이 더욱 경량화되고 똑똑해짐에 따라, Meetily와 같은 데이터 주권 중심의 도구들은 선택이 아닌 필수가 될 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Zackriya-Solutions/meetily)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [FluidVoice: 구독료 없이 Mac에서 작동하는 온디바이스 AI 음성 받아쓰기 구축기]({% post_url 2026-08-14-FluidVoice-On-Device-AI-Dictation-for-macOS-with-Zero-Latency-and-Total-Privacy %}) — FluidVoice는 Apple Silicon 환경에서 완전 오프라인으로 동작하는 무료 오픈소스 음성 인식 및 AI 문맥 교정 애플리케이션입니다. 외부 서버 전송 없이 로컬에서 음성-텍스트 변환(STT)과 Fluid-1 모델 후처리를…
+- [AI가 화면의 버튼을 직접 짚어주면 안전할까? Clicky의 좌표·프라이버시]({% post_url 2026-04-10-No-More-YouTube-Tutorials-A-Deep-Dive-into-farzaaclicky-the-AI-That-Moves-the-Real-Cursor %}) — macOS 화면과 음성 질문을 Vision 모델에 보내 가상 커서로 위치를 알려 주는 Clicky의 구조, 다중 모니터 좌표 오차와 화면 유출 위험을 점검합니다.
+- [pocket-tts: 무거운 GPU 없이 CPU만으로 작동하는 실시간 AI 음성 합성의 원리]({% post_url 2026-07-22-pocket-tts-How-Real-Time-AI-Speech-Synthesis-Works-on-CPU-Without-Heavy-GPUs %}) — Kyutai Labs가 공개한 Pocket TTS는 단 1억 개의 매개변수와 신경망 오디오 코덱을 활용해 최신 CPU 환경에서 실시간 음성 합성과 목소리 복제를 수행하는 초경량 모델입니다. 이 글에서는 기술적 배경부터 세부 아키텍처…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

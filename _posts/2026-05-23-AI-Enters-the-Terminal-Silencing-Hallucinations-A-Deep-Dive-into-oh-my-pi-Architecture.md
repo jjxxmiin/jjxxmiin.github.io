@@ -1,103 +1,151 @@
 ---
 layout: post
-title: '터미널로 들어간 AI, 환각을 잠재우다: oh-my-pi 아키텍처 심층 해부'
+title: 'oh-my-pi(omp) 코딩 에이전트 분석: Hashline·LSP·DAP와 권한 검증법'
 date: '2026-05-23 18:51:06'
 categories: Tech
 tags:
-  - 환각문제
-  - 아키텍처분석
   - AI코딩
-  - MCP
-  - 컨텍스트윈도우
-summary: 단순한 챗봇을 넘어 LSP, DAP 네이티브 통합과 해시 앵커 기반 편집(Hash-anchored edits)으로 AI의 맹목적인
-  코드 수정을 원천 차단하는 터미널 기반 AI 코딩 에이전트 oh-my-pi의 아키텍처와 실무 적용 시나리오를 심도 있게 해부합니다.
-author: AI Trend Bot
+  - 웹개발
+  - AI메모리
+  - AI보안
+  - LLM
+summary: oh-my-pi(omp)가 content hash anchor, LSP·DAP, 하위 에이전트와 메모리를 코딩 작업에 연결하는 방식을 공식 저장소 기준으로 설명합니다. 설치·권한·벤치마크·팀 파일럿의 검증 항목도 정리합니다.
+description: oh-my-pi(omp)의 Hashline 편집, LSP·DAP, 하위 에이전트와 메모리 구조를 살펴보고 설치·권한·벤치마크·팀 도입을 안전하게 검증하는 방법을 설명합니다.
+faq:
+  - question: oh-my-pi의 Hashline 편집이 코드 변경을 항상 안전하게 만드나요?
+    answer: 아닙니다. 오래된 anchor를 거부해 잘못된 위치의 편집을 줄일 수 있지만 변경 의도·동시 수정·업무 로직과 테스트 결과는 별도로 검토해야 합니다.
+  - question: LSP와 DAP를 연결하면 에이전트가 버그 원인을 자동으로 증명하나요?
+    answer: 아닙니다. 정의·진단·런타임 상태라는 좋은 증거를 제공하지만 잘못 연 환경이나 불충분한 테스트에서는 여전히 틀린 결론을 낼 수 있습니다.
+  - question: oh-my-pi를 팀에 도입할 때 가장 먼저 제한할 권한은 무엇인가요?
+    answer: 파일 쓰기·shell·브라우저·desktop·GitHub·협업 공유와 외부 provider 자격 증명을 분리하고, 읽기 전용 저장소에서 필요한 도구만 허용해 시작해야 합니다.
 github_url: https://github.com/can1357/oh-my-pi
 image:
   path: https://opengraph.githubassets.com/1/can1357/oh-my-pi
-  alt: 'AI Enters the Terminal, Silencing Hallucinations: A Deep Dive into oh-my-pi
-    Architecture'
+  alt: "can1357/oh-my-pi GitHub 저장소 대표 이미지"
 ---
 
-> 🔗 **Repository:** [can1357/oh-my-pi](https://github.com/can1357/oh-my-pi)
-> 📦 **NPM:** @oh-my-pi/pi-coding-agent
-> 🛠 **Core Stack:** TypeScript, Bun, NAPI(Rust), LSP/DAP, MCP(Model Context Protocol)
+**oh-my-pi(명령어 `omp`)는 모델 자체가 아니라 파일 편집, 검색, LSP, debugger와 하위 에이전트를 한 terminal workflow에 연결하는 코딩 에이전트 harness입니다.** content hash anchor는 오래된 코드 위치에 patch가 적용되는 일을 줄일 수 있지만, 기능 정확성과 권한 안전성까지 자동으로 보장하지는 않습니다.
 
-솔직히 한 번 까놓고 말해봅시다. 요즘 현업에서 AI 코딩 어시스턴트 안 쓰는 분들이 어디 있습니까? Copilot, Cursor, Claude Code... 이름만 들어도 마음이 든든해지죠. '이거 구현해 줘'라고 치면 눈앞에서 마법처럼 코드가 뚝딱 쏟아지는 시대입니다. **하지만, 진짜 프로덕션 레벨의 거대한 레거시 코드베이스에서 AI에게 '연쇄적인 리팩토링'을 맡겨본 적 있으신가요?**
+[oh-my-pi 공식 저장소](https://github.com/can1357/oh-my-pi)는 이 프로젝트를 Pi의 fork이자 “IDE가 연결된 coding agent”로 소개합니다. 기능과 지원 provider가 빠르게 바뀌므로 이 글의 역할은 숫자를 외우는 것이 아니라 각 기능이 어떤 실패를 줄이고 어떤 새 위험을 만드는지 판단하는 데 있습니다.
 
-현업에서 이 문제를 마주해 본 시니어 분들이라면 제가 무슨 말을 하려는지 단번에 아실 겁니다. 수백 개의 파일이 거미줄처럼 얽힌 수만 줄짜리 코드에서 AI가 파일을 직접 수정하겠다고 나설 때, 우리는 식은땀을 흘리며 `git diff`를 째려봐야 합니다. '50번 줄부터 70번 줄까지 이렇게 바꿀게'라고 호언장담해놓고는, 중간에 누군가 추가한 공백 하나 때문에 엉뚱한 로직을 통째로 날려버리거나 들여쓰기를 망가뜨려 빌드 파이프라인을 시원하게 터뜨려버리는 이른바 **'맹목적인 문자열 치환(Blind String Replacement)'**의 덫에 걸리기 일쑤입니다. 모델의 뇌(지능)는 날이 갈수록 비약적으로 똑똑해지는데, 정작 그 똑똑한 지능을 현실의 소스코드 파일에 물리적으로 적용하는 '손발(Tool Harness)'은 여전히 구석기 시대의 스크립트 수준에 머물러 있었던 겁니다.
+## oh-my-pi는 모델보다 도구 표면을 확장한다
 
-처음 `oh-my-pi` (이하 omp) 프로젝트를 깃허브에서 발견했을 때, 솔직히 저는 꽤나 회의적이었습니다. '또 그저 그런 터미널용 API 래퍼(Wrapper) 하나 나왔겠거니' 싶었거든요. 하지만 소스코드를 바닥부터 뜯어보고 제 로컬 환경의 비대한 Node.js 마이크로서비스 저장소에 직접 물려본 순간, 저는 이 녀석이 단순한 장난감이 아님을 뼈저리게 깨달았습니다.
+코딩 에이전트의 결과는 LLM 성능만으로 결정되지 않습니다. 어느 파일을 어떻게 읽고, 수정 대상이 여전히 같은 상태인지 확인하며, build·test·debug 결과를 다시 모델에 전달하는 harness가 필요합니다. oh-my-pi는 read·grep·edit·shell뿐 아니라 LSP, DAP, browser, desktop, subagent와 memory 같은 도구를 같은 agent surface에서 다루는 방향을 택합니다.
 
-> **TL;DR:** oh-my-pi는 단순한 터미널용 챗봇이 아닙니다. LSP(Language Server Protocol)와 DAP(Debugger Adapter Protocol)를 네이티브로 이식하고, **해시 앵커 기반의 편집(Hash-anchored edits)**을 통해 AI의 '눈먼 수정'을 원천적으로 차단하는 **극한의 실무 지향적 코딩 에이전트 하네스**입니다.
+공식 README는 여러 model provider와 local OpenAI-compatible endpoint를 지원한다고 설명합니다. 이 선택 폭은 작업별 모델을 바꾸기 쉽다는 장점이 있지만 provider별 인증·tool calling 형식·context와 가격 차이를 팀이 관리해야 한다는 뜻이기도 합니다. 모델을 바꿔도 같은 도구 입력과 acceptance test가 유지되는지 확인해야 합니다.
 
-### Deep Dive: Under the Hood - AI의 손발을 외과 수술하다
+기능이 많다는 사실 자체는 생산성 근거가 아닙니다. 작은 수정에는 read·edit·test만으로 충분할 수 있고, 사용하지 않는 browser·desktop·collaboration tool까지 열면 prompt injection과 권한 표면이 커집니다. 작업에 필요한 최소 도구 집합을 고정하고 파일럿 결과를 비교하는 편이 좋습니다.
 
-대부분의 기존 AI 코딩 툴들이 현업의 복잡한 요구사항 앞에서 무너지는 이유는 '모델의 추론 능력이 부족해서'가 아닙니다. 진짜 문제는 **'컨텍스트 주입 방식과 편집 로직의 치명적 결함'**에 있습니다. 기존 도구들은 무식하게 파일 전체를 LLM의 컨텍스트 윈도우에 때려 박고, AI가 반환한 정규식이나 라인 넘버를 기반으로 파일을 수정합니다. 이게 왜 재앙일까요? AI가 코드를 읽어들인 시점과, 실제로 디스크에 패치를 적용하는 시점 사이에 미세한 어긋남이나 외부 수정이 발생하면 코드가 말 그대로 박살 나기 때문입니다. omp는 이 아키텍처의 근본적인 결함을 완전히 뜯어고쳤습니다. 그 내부 원리를 철저히 해부해 보겠습니다.
+oh-my-pi가 다른 IDE를 없애는지도 핵심 질문이 아닙니다. terminal에서 같은 language server와 debugger의 증거를 얻을 수 있다는 것이 의미이며, 사람이 코드 탐색과 review에 익숙한 editor를 계속 써도 됩니다. 도입 목표는 인터페이스 교체보다 에이전트가 추측 대신 검증 가능한 도구를 사용하게 만드는 데 둡니다.
 
-**1. 해시 앵커 기반 편집 (Hash-Anchored Edits)**
-이 기능 하나만으로도 현업 파이프라인에 omp를 도입할 명분은 충분합니다. omp 환경에서 AI가 코드를 수정하려 할 때, 더 이상 'n번째 줄을 이렇게 바꿔'라고 멍청하게 명령하지 않습니다. AI는 자신이 수정하려는 원본 코드 블록의 **콘텐츠 해시(Content Hash)**를 함께 생성하여 Tool Call을 날립니다.
+## Hashline은 오래된 편집 위치를 거부하는 장치다
 
-```json
-{
-  "tool": "edit_file",
-  "parameters": {
-    "file_path": "src/services/auth.service.ts",
-    "anchor_hash": "a1b2c3d4e5f68a9b...", // 원본 타겟 코드 블록의 SHA 무결성 검증 해시
-    "target_content": "async function verifyToken(token: string) { ... }",
-    "replacement_content": "async function verifyToken(token: string, options?: VerifyOptions) { ... }"
-  }
-}
-```
-터미널에 상주하는 omp 하네스가 이 요청을 받으면 어떻게 될까요? 바로 수정하는 대신, 실제 디스크에 존재하는 파일의 해당 영역을 즉석에서 해싱하여 AI가 들고 있는 컨텍스트의 해시값과 일치하는지 먼저 검증합니다. 만약 단 1비트라도 다르다면? 하네스는 가차 없이 수정을 거부하고 AI에게 '네가 읽은 코드가 그사이에 변경되었으니, 다시 컨텍스트를 동기화하고 와라'라고 피드백을 던집니다. 현업에서 동시다발적으로 파일이 변경되는 핫픽스(Hotfix) 상황이나 브랜치 병합 중에도 **안전한 패치(Safe Patch)**가 보장되는, 실로 경이로운 메커니즘입니다.
+공식 README의 Hashline 설명에 따르면 모델은 바꿀 line을 모두 다시 출력하는 대신 content hash가 포함된 anchor로 편집 위치를 가리킵니다. 파일을 읽은 뒤 다른 변경으로 anchor가 달라지면 stale patch를 적용하지 않고 거부할 수 있습니다. 문자열이 우연히 여러 번 나타나 잘못된 위치를 바꾸거나 공백 차이 때문에 반복 실패하는 문제를 줄이려는 방식입니다.
 
-**2. LSP/DAP 네이티브 통합 (Beyond Regex, Into AST)**
-단순 텍스트 기반 AI에게 '이 변수명을 전체 프로젝트에서 바꿔줘'라고 명령하면, 녀석들은 마치 텍스트 에디터에서 `Ctrl+F` 후 `Replace All`을 갈기듯 무자비하게 코드를 망쳐놓습니다. 반면 omp는 로컬에 띄워진 LSP(Language Server Protocol) 서버와 NAPI(Rust)를 통해 직접 통신합니다. AI가 심볼 리네이밍(Rename Symbol), 참조 찾기(Find References) 같은 IDE 네이티브 액션을 단순 API 호출하듯 정밀하게 구사합니다. 추상 구문 트리(AST)를 완벽하게 이해하고 움직인다는 뜻입니다.
+이 장치는 ‘patch가 읽었던 내용과 같은가’를 확인하는 데 강하지만 ‘바꾸려는 내용이 옳은가’를 판단하지 않습니다. 정확한 위치에 잘못된 알고리즘을 넣을 수도 있고, 서로 다른 파일의 연쇄 변경 중 일부만 성공하면 build가 깨질 수 있습니다. Hashline 통과 뒤에도 diff, type check, unit·integration test와 업무 조건 검토가 필요합니다.
 
-더욱 충격적인 지점은 DAP(Debugger Adapter Protocol)의 탑재입니다. `lldb`, `dlv`, `debugpy` 같은 언어별 디버거를 AI가 터미널 안에서 직접 컨트롤합니다. 사용자가 복사해서 붙여넣어 주는 죽은 에러 로그만 보고 헛소리를 지어내는 게 아니라, AI 스스로 의심되는 지점에 브레이크포인트를 걸고(Step-over/Step-into), 런타임 변수 상태를 덤프 떠서 확인하며 원인을 역추적합니다.
+동시 작업에서는 파일 단위와 변경 집합 단위의 원자성을 구분해야 합니다. 한 patch가 atomic하게 적용돼도 여러 파일을 순서대로 바꾸는 중 세 번째 파일에서 stale anchor가 발견될 수 있습니다. 에이전트는 이미 적용한 두 파일을 되돌릴지, 최신 내용을 다시 읽고 나머지를 재계획할지 보여 줘야 합니다. 작업 전 branch 또는 별도 worktree를 사용하면 실패 범위를 격리하기 쉽습니다.
 
-| 아키텍처 요소 | 기존 AI CLI 툴 (ex. Vanilla Copilot, 초창기 래퍼들) | oh-my-pi (omp) 기반 하네스 |
-| :--- | :--- | :--- |
-| **코드 수정 패러다임** | 라인 번호 / 정규식 기반의 취약한 단순 텍스트 치환 | **Hash-Anchored Edits** (해시 무결성 검증 후 안전 패치 적용) |
-| **코드베이스 이해도** | 무식한 파일 전체 텍스트 덤프 (컨텍스트 윈도우/비용 낭비 극심) | **LSP 기반 AST 분석**, 구조화된 요약본 및 심볼 추적 활용 |
-| **트러블슈팅 및 디버깅** | 개발자가 수동으로 떠먹여 주는 로그 기반의 수동적 추론 | **DAP 연동**, AI가 직접 디버거에 붙어 런타임 메모리/변수 능동 추적 |
-| **확장성 (Tools)** | 제조사가 미리 하드코딩해둔 제한된 도구만 사용 가능 | **MCP (Model Context Protocol)** 지원, 브라우저/서브에이전트 무한 확장 |
+파일럿에서는 같은 문자열이 여러 곳에 있는 파일, formatter가 중간에 실행된 경우, 사람이 동시에 수정한 경우와 large generated file을 넣습니다. 잘못된 위치를 수정하지 않는지뿐 아니라 거부 뒤 전체 파일을 무리하게 덮어쓰지 않고 최신 context를 다시 읽는지도 확인해야 합니다.
 
-### Pragmatic Use Cases - 실무 시나리오: 뻔한 예시는 가라
+## LSP는 정의와 진단을 제공하지만 업무 의미는 모른다
 
-'Hello World 웹서버 하나 띄워줘' 수준의 장난감 같은 예시는 거부하겠습니다. 시니어 개발자의 깐깐한 시선에서, 이 도구가 진짜 압도적인 빛을 발하는 실무 시나리오를 소개합니다.
+oh-my-pi의 LSP 도구는 diagnostics, navigation, symbol, rename와 code action 같은 언어 서버 기능을 agent에 연결합니다. 공식 README는 file rename에서 `workspace/willRenameFiles`를 통해 re-export와 alias import까지 갱신하는 예를 듭니다. text search보다 구조화된 참조를 사용할 수 있다는 점이 장점입니다.
 
-**시나리오 1: 대규모 레거시 모놀리스의 안전한 연쇄 리팩토링**
-5년 넘게 묵은 Spring Boot 애플리케이션이나 수십 개의 모듈이 스파게티처럼 얽힌 Node.js 레거시를 상상해 보십시오. 코어 인터페이스 하나를 수정해야 하는데, 이를 의존하는 파일이 40개가 넘습니다. 기존 AI에게 이걸 통째로 맡기면 중간에 컨텍스트를 잃어버리거나 코드를 걸레짝으로 만듭니다. 하지만 omp를 터미널에 띄우고 이렇게 명령해 보십시오.
-> *"AuthService의 `validate` 메서드 시그니처에 JWT 옵션을 추가하고, LSP를 이용해 해당 인터페이스를 참조하는 프로젝트 내의 모든 파일을 찾아 안전하게 마이그레이션 해."*
+그러나 LSP 결과는 workspace 설정과 index 상태에 의존합니다. 올바른 project root를 열지 않았거나 generated type, build flag와 dependency가 빠지면 진단이 불완전할 수 있습니다. 여러 언어가 섞인 monorepo에서는 각 server가 맡는 범위와 initialization 시간을 확인해야 합니다. LSP에 참조가 없다는 이유만으로 runtime reflection과 문자열 기반 route가 없다고 결론 내려서는 안 됩니다.
 
-omp는 무식하게 40개 파일을 다 열어보지 않습니다. LSP에 질의하여 의존성 참조 목록을 정확히 뽑아내고, 각 파일로 찾아가 해시 앵커 기반으로 타겟 메서드 시그니처만 정밀하게 썰어냅니다. 개발자는 그저 tmux 화면 한쪽에 터미널을 띄워두고, AI가 여러 개의 서브에이전트를 동원해 동시다발적으로 AST 레벨의 수술을 집도하는 과정을 팝콘 먹으며 지켜보기만 하면 됩니다.
+rename과 code action도 preview가 필요합니다. 많은 파일을 바꾸는 action은 generated code와 vendor directory까지 포함할 수 있고 formatter가 큰 diff를 만들 수 있습니다. 대상 symbol, 예상 파일 수와 수정 범위를 먼저 기록하고 상한을 넘으면 승인을 받도록 합니다. 변경 뒤 동일 LSP diagnostics뿐 아니라 repository의 실제 test command를 실행합니다.
 
-**시나리오 2: Hindsight 메모리 백엔드를 통한 '야근의 연속성' 확보**
-금요일 밤늦게까지 핏대 세우며 파고들던 악랄한 메모리 누수 버그를 월요일 아침에 이어서 잡아야 할 때의 그 막막함, 다들 겪어보셨죠? omp는 `memory.backend = "hindsight"` 구성을 통해 개발자의 이전 디버깅 세션, 실패했던 무수한 코드 수정 시도들, 심지어 당시 모델이 추론했던 논리적 흐름까지 Vector DB에 저장하고 요약(Rollout-summarization)해 둡니다.
-월요일 아침 퀭한 눈으로 터미널에 `omp`를 켜자마자 AI가 먼저 이렇게 말을 건네는 소름 돋는 경험을 할 수 있습니다. *"지난주 금요일에 `dlv` 디버거로 추적하다가 멈췄던 고루틴(Goroutine) 데드락 문제 이어서 볼까요? 주말 동안 히스토리를 다시 분석해 보니, 원인이 X 모듈의 뮤텍스(Mutex) 해제 누락에 있을 확률이 90% 이상입니다. 브레이크포인트 다시 걸어볼까요?"*
+에이전트가 LSP의 진단 문구를 그대로 정답으로 취급하지 않게 근거를 보존합니다. diagnostic code·file·line, server와 config version을 결과에 붙이고, 수정 전후를 비교합니다. 언어 서버가 crash하거나 index를 재생성하는 동안에는 오래된 결과를 사용하지 않고 상태를 명시해야 합니다.
 
-### Honest Review & Trade-offs - 깐깐하게 바라본 진짜 한계점
+## DAP는 런타임 증거를 주지만 재현 환경이 먼저다
 
-제가 아무리 이 기술의 혁신적인 아키텍처에 찬사를 보냈다고 한들, 10년 차 엔지니어의 비판적인 잣대를 들이대지 않을 수는 없습니다. 도입을 고려 중이라면 반드시 감수해야 할 치명적인 트레이드오프들이 존재합니다.
+공식 README는 DAP 기반 `debug` 도구로 lldb, dlv와 debugpy session에서 breakpoint, stepping, thread, stack과 variable을 다룰 수 있다고 소개합니다. stack trace만 보고 원인을 추측하는 것보다 실제 process 상태를 확인할 경로를 제공한다는 점이 유용합니다.
 
-1. **지독하게 가파른 러닝 커브와 파편화된 설정:**
-   이건 절대 '설치하면 끝'인 친절한 GUI 툴이 아닙니다. 극도의 성능을 뽑아내려면 `~/.omp/agent/models.yml`을 직접 깎아서 튜닝해야 하고, DeepSeek V4나 최신 Claude 모델의 엔드포인트를 매만져야 하며, 시스템 환경에 맞게 MCP와 로컬 LSP 서버 경로까지 수동으로 매핑해줘야 합니다. CLI 환경이나 인프라 설정에 익숙하지 않은 개발자에게는 초반 진입 장벽이 재앙 수준입니다.
+디버거 연결 전에 재현 명령, 입력 fixture, build symbol과 환경 변수를 고정해야 합니다. production process에 agent가 임의로 attach하면 pause와 정보 노출 위험이 있으므로 local 또는 격리된 staging에서 시작합니다. core dump나 variable에는 개인정보·secret이 포함될 수 있어 model provider로 보낼 범위를 제한해야 합니다.
 
-2. **NAPI/Rust 의존성으로 인한 빌드 피로도와 파편화:**
-   omp는 터미널 네이티브의 퍼포먼스를 극대화하기 위해 코어 모듈(`pi-native`)을 Rust로 작성하고 NAPI를 통해 바인딩합니다. 평소에는 날아다니지만, 깃허브 업스트림에서 변경 사항을 `git pull` 받고 `bun run build:native`를 돌리다가 OS 버전이나 Node 환경의 차이로 C++ 빌드 에러가 터져버리면 분노가 치밀어 오릅니다. 현업에서 1분 1초가 급한데 툴체인 빌드나 고치고 있는 자신을 발견하면 강한 현타가 올 수 있습니다.
+breakpoint에서 본 한 번의 값은 원인의 증명이 아닐 수 있습니다. 여러 request와 thread에서 같은 현상이 재현되는지, 관찰 자체가 timing을 바꾸는지 확인합니다. race와 deadlock은 debugger가 붙으면 빈도가 달라질 수 있으므로 log·trace·sanitizer와 테스트를 함께 사용합니다.
 
-3. **'과기억 증후군'에 빠지는 환각 루프(Hallucination Loop):**
-   에이전트가 방대한 히스토리를 기억한다는 건 양날의 검입니다. 만약 모델이 작업 초반에 엉뚱한 로직이나 잘못된 도구 사용법에 꽂히면, 자신이 과거에 했던 삽질을 정답으로 맹신하며 끊임없이 같은 파일을 박살 내려 드는 '환각의 무한 루프'에 빠지기도 합니다. 11번 연속으로 엉뚱한 라인을 수정하려다 결국 전체 파일을 메모리에서 다시 쓰겠다며 난동을 피우는 모습도 목격했습니다. 주기적으로 세션을 날려버리거나 에이전트의 기억을 리셋해 줘야 하는 번거로움은 여전히 우리가 짊어져야 할 숙제입니다.
+에이전트가 session에서 실행한 attach, breakpoint, evaluate와 process control 명령을 남겨 사람이 따라 할 수 있어야 합니다. 수정 뒤 같은 입력에서 장애가 사라지고 regression test가 추가됐는지까지 확인해야 디버깅이 완료된 것입니다.
 
-### Closing Thoughts: 바야흐로 '손발'의 시대가 도래했다
+## 하위 에이전트는 격리와 병합 기준이 중요하다
 
-개발자 동지 여러분, LLM의 파라미터가 수조 개를 돌파하고 토큰 생성 속도가 수십 배 빨라졌다고 열광하는 시기는 이미 지났습니다. 모델 자체의 지능은 이미 일상적인 코딩을 대체하기에 충분한 궤도에 올랐습니다. 이제 앞으로의 승부는 그 거대한 지능을 우리의 복잡다단한 현실 시스템, 즉 터미널과 로컬 파일시스템에 얼마나 기민하고 파괴적이지 않게 연결해 내느냐, 바로 **'하네스(Harness) 아키텍처의 싸움'**입니다.
+oh-my-pi는 task를 여러 worker에 나누고 isolated worktree에서 실행하며 typed result를 돌려주는 구성을 README에 설명합니다. 독립적인 조사·test·review를 병렬화할 때 유용하지만 같은 파일과 같은 결정에 여러 agent가 달려들면 충돌과 중복 비용이 늘 수 있습니다.
 
-oh-my-pi는 단순한 유틸리티 스크립트가 아닙니다. AI가 인간의 도구(터미널, 디버거, LSP)를 인간처럼 자연스럽게 쥐고 다룰 수 있도록 뼈와 근육을 붙여준 거대한 신경망의 연장선입니다. 완벽하진 않고, 때로는 손이 많이 가며 고집불통일 때도 있습니다. 하지만 이 도구가 제시하는 '해시 검증 기반의 정밀 편집'과 'DAP를 통한 주도적 런타임 디버깅' 철학은 머지않아 모든 AI 코딩 툴 생태계가 쫓아가야 할 확고한 표준(De facto)이 될 것이라 굳게 확신합니다.
+작업을 나눌 때는 각 worker의 입력, 허용 파일과 완료 산출물을 명시합니다. 한 worker는 원인 조사, 다른 worker는 test 설계처럼 write 범위를 겹치지 않게 할 수 있습니다. code 변경을 병렬로 한다면 merge 순서와 공통 interface를 먼저 고정합니다. typed result도 schema가 맞는다는 뜻일 뿐 내용이 정확하다는 보장은 아니므로 parent가 source와 test를 검증해야 합니다.
 
-이번 주말, 늘 우리를 편안하게 품어주던 무거운 IDE의 품에서 잠시 벗어나 터미널 창을 열고 `omp`를 컴파일해 보는 건 어떨까요? 매끈한 GUI 뒤에 숨겨져 있던 시스템의 민낯을 마주하며, 어쩌면 잃어버렸던 날것 그대로의 해커 감성을 AI 페어 프로그래머와 함께 다시 꽃피우게 될지도 모릅니다.
+하위 agent에도 원래 session의 권한 상한이 이어져야 합니다. parent가 read-only인데 worker가 shell과 network write를 얻으면 격리가 깨집니다. 사용 model, token·시간 상한, worktree와 취소 정책을 기록하고, 종료된 worker의 process와 temporary credential이 남지 않는지 확인합니다.
 
-## References
-- https://github.com/can1357/oh-my-pi
-- https://www.npmjs.com/package/@oh-my-pi/pi-coding-agent
+파일럿에서는 단일 agent 기준선과 비교해 전체 완료 시간, token·API 비용, 중복 조사와 merge conflict를 측정합니다. 병렬로 더 빨리 시작했다는 느낌보다 검토 가능한 결과를 더 적은 wall-clock과 비용으로 만들었는지가 기준입니다.
+
+## 메모리는 사실·교훈·오래된 가정을 구분해야 한다
+
+README는 project-scoped memory와 local, Hindsight, Mnemopi backend 선택, retain·recall·reflect·learn 계열 도구를 설명합니다. session이 끝나도 코드베이스의 규칙과 이전 결정을 불러올 수 있다는 장점이 있습니다. 동시에 오래된 API와 잘못된 추론이 반복해서 context에 들어갈 위험도 생깁니다.
+
+저장 항목에는 source file·commit·작성 시점과 만료 또는 재검증 조건을 붙입니다. ‘이 repository는 pnpm을 쓴다’처럼 파일로 검증 가능한 사실과 ‘이 module이 장애 원인일 것’ 같은 가설을 같은 등급으로 기억하면 안 됩니다. code가 바뀌면 관련 memory를 invalidation하고, 민감정보와 개인 데이터는 저장 대상에서 제외합니다.
+
+기억을 불러왔을 때 agent가 현재 파일보다 memory를 우선하지 않게 합니다. 중요한 결정은 최신 code·docs·test로 다시 확인하고, 충돌하면 현재 source를 기준으로 memory를 갱신합니다. 누가 저장·수정·삭제했는지 audit하고 project를 삭제할 때 외부 backend의 memory도 실제로 제거되는지 확인해야 합니다.
+
+평가에서는 memory가 있는 session과 없는 session으로 반복 작업을 비교합니다. 탐색 시간이 줄었는지, 오래된 지시 때문에 오답이 늘지 않았는지와 context 비용을 함께 봅니다. 장기 기억은 많이 쌓는 기능보다 필요한 사실을 정확히 폐기하는 운영 규칙이 더 중요합니다.
+
+## browser·desktop·협업 기능은 별도 보안 경계다
+
+현재 README에는 browser가 headless Chromium, Electron app 또는 기존 Chrome relay와 연결되고, computer 도구가 host window·screenshot·native input·clipboard와 accessibility tree를 다룬다고 적혀 있습니다. 이런 기능은 UI 재현에 강력하지만 code repository 쓰기보다 더 넓은 사용자 데이터와 외부 행동에 접근할 수 있습니다.
+
+기본 파일럿에서는 이 도구를 끄고 필요한 작업에서만 별도 profile과 test account로 엽니다. 개인 browser cookie, password manager, Slack DM과 clipboard를 agent가 읽지 못하도록 운영 계정과 분리합니다. 클릭·입력·외부 발송은 allowlist와 사람 승인 뒤 수행하며 페이지 안의 문장을 agent system 지시로 취급하지 않게 prompt injection 방어가 필요합니다.
+
+`/collab` 같은 session 공유는 편리하지만 transcript, file 내용과 tool 결과가 누구에게 보이는지 확인해야 합니다. README는 relay가 key를 보지 않는 client-side sealing을 주장하더라도 조직의 접근 통제·링크 만료·참여자 인증과 로그 정책을 별도로 검토합니다. read-only link와 steering 권한을 분리하고 업무 종료 뒤 session을 폐기합니다.
+
+설정에서 기본 off인 도구도 upgrade 후 기본값이 유지되는지 확인합니다. 허용 도구 목록을 명시적으로 고정하고 configuration drift를 CI 또는 startup check로 검사하면 새 기능이 자동으로 권한을 넓히는 일을 줄일 수 있습니다.
+
+## 설치와 업데이트는 실행 스크립트보다 버전 고정이 먼저다
+
+공식 README는 install script, Homebrew, Bun, Nix와 Windows PowerShell 경로를 안내합니다. 편리한 `curl | sh` 형태는 내용을 확인하지 않은 remote script를 바로 실행할 수 있으므로 팀 배포에서는 release·checksum과 script 내용을 검토하고 검증한 version을 pin하는 편이 안전합니다. 요구 Bun version과 OS별 binary dependency도 현재 문서에서 확인합니다.
+
+새 버전은 tool schema, prompt, model catalog와 native core를 함께 바꿀 수 있습니다. canary 개발 환경에서 기존 task suite를 재실행하고 edit, LSP, DAP, permission prompt와 provider login을 확인합니다. update 뒤 configuration migration과 rollback 경로가 없으면 전체 팀에 자동 배포하지 않습니다.
+
+여러 provider의 OAuth·API key는 역할별 최소 계정으로 분리하고 log·subagent·collaboration session에 노출되지 않는지 시험합니다. local endpoint를 쓰더라도 network 주소와 model identity를 검증하고, 업무 데이터가 의도하지 않은 gateway로 fallback되지 않도록 provider routing을 고정합니다.
+
+## 저장소 벤치마크는 같은 조건으로 재현한다
+
+oh-my-pi README는 여러 모델에서 edit format을 바꾼 뒤 pass rate와 token 개선 수치를 제시합니다. 이 값은 harness design을 조사할 출발점이지만 팀의 codebase와 모델에서 같은 결과를 보장하지 않습니다. benchmark task, 정답, model snapshot, prompt와 sampling, 반복 횟수를 확인해야 합니다.
+
+실제 완료된 작은 issue 20~50개를 익명화해 기준 세트를 만들 수 있습니다. plain patch 또는 기존 agent와 Hashline 구성에서 첫 edit 성공률, retry, output token, 잘못 건드린 파일, test 통과와 사람 review 시간을 비교합니다. 실패 task를 제외하지 말고 timeout과 거부도 결과에 포함합니다.
+
+LSP·DAP·memory와 subagent를 한 번에 켜지 않습니다. edit 방식의 효과, code intelligence, debugging과 parallelism을 단계별로 추가해 어느 기능이 개선과 비용을 만들었는지 분리합니다. 모델 변경과 harness 변경도 동시에 하지 않아야 원인을 해석할 수 있습니다.
+
+팀 도입 성공 기준은 README의 가장 큰 배수가 아니라 현재 workflow보다 정확한 변경을 더 짧은 review 시간과 허용된 비용 안에서 만드는지입니다. 권한 위반, 원인 불명의 대규모 diff와 stale memory 회귀가 발생하면 속도가 빨라도 확대하지 않습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/can1357/oh-my-pi)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [TencentDB-Agent-Memory: AI 코딩 에이전트가 맥락 폭발을 막고 진짜 기억을 갖는 법]({% post_url 2026-07-15-TencentDB-Agent-Memory-How-AI-Coding-Agents-Prevent-Context-Bloat-and-Build-Real-Memory %}) — 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억 시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로…
+- [oMLX: 애플 실리콘에서 AI 코딩 에이전트 속도를 극대화하는 MLX 추론 서버]({% post_url 2026-08-18-oMLX-High-Performance-Apple-Silicon-LLM-Inference-Server-with-Paged-SSD-Caching %}) — oMLX는 애플 실리콘 Mac 환경에서 MLX 프레임워크를 기반으로 작동하는 고성능 LLM 추론 서버입니다. 페이징 처리된 SSD KV 캐싱과 연속 배칭을 통해 AI 코딩 에이전트의 첫 토큰 생성 시간(TTFT)을 획기적으로…
+- [langchain-ai/openwiki: AI 코딩 에이전트 전용 저장소 위키가 필요한 이유와 작동 원리]({% post_url 2026-07-06-langchain-aiopenwiki-Why-We-Need-a-Dedicated-Repo-Wiki-for-AI-Coding-Agents-and-How-It-Works %}) — LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다. 이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### oh-my-pi의 Hashline 편집이 코드 변경을 항상 안전하게 만드나요?
+
+아닙니다. 오래된 anchor를 거부해 잘못된 위치의 편집을 줄일 수 있지만 변경 의도·동시 수정·업무 로직과 테스트 결과는 별도로 검토해야 합니다.
+
+### LSP와 DAP를 연결하면 에이전트가 버그 원인을 자동으로 증명하나요?
+
+아닙니다. 정의·진단·런타임 상태라는 좋은 증거를 제공하지만 잘못 연 환경이나 불충분한 테스트에서는 여전히 틀린 결론을 낼 수 있습니다.
+
+### oh-my-pi를 팀에 도입할 때 가장 먼저 제한할 권한은 무엇인가요?
+
+파일 쓰기·shell·브라우저·desktop·GitHub·협업 공유와 외부 provider 자격 증명을 분리하고, 읽기 전용 저장소에서 필요한 도구만 허용해 시작해야 합니다.
+
+## 원문과 확인 자료
+
+- [oh-my-pi 공식 저장소와 README](https://github.com/can1357/oh-my-pi)
+- [oh-my-pi 공식 사이트](https://omp.sh/)
+- [oh-my-pi LSP 설정 문서](https://github.com/can1357/oh-my-pi/blob/main/docs/lsp-config.md)

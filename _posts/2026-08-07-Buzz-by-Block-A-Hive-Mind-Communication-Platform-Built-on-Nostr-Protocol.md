@@ -4,19 +4,19 @@ title: 'Block의 Buzz: 인간과 AI 에이전트가 Cryptographic Identity로 �
 date: '2026-08-07 19:51:17'
 categories: Tech
 tags:
+  - 웹개발
   - ClaudeCode
   - MCP
+  - 오픈소스
   - AI코딩
-  - AI보안
-  - AI정책
 summary: Block이 공개한 Buzz는 인간 개발자와 AI 에이전트가 동일한 공간에서 암호화된 정체성(secp256k1)을 바탕으로 협업하는
   오픈소스 하이브마인드 플랫폼입니다. Nostr 프로토콜 기반의 단일 서명 로그를 활용하여 대화, Git 패치, CI 워크플로우를 하나로 통합합니다.
-author: AI Trend Bot
+description: 'Buzz가 Nostr 서명 이벤트로 사람·에이전트 대화와 코드 패치를 연결하는 방식과 키 관리·권한 위임·삭제·릴레이 신뢰의 실무 한계를 정리합니다.'
 automation: oss_trend
 github_url: https://github.com/block/buzz
 image:
   path: https://opengraph.githubassets.com/1/block/buzz
-  alt: 'Buzz by Block: A Hive Mind Communication Platform Built on Nostr Protocol'
+  alt: "block/buzz GitHub 저장소 대표 이미지"
 project:
   stars: 24597
   forks: 2830
@@ -55,7 +55,9 @@ faq:
     수 없습니다.
 ---
 
-## 주요 링크
+Buzz는 사람과 에이전트의 메시지, 코드 패치와 작업 이벤트를 Nostr 서명 기록으로 연결하려는 협업 플랫폼입니다. 서명은 누가 이벤트를 만들었는지 확인하는 단서이지 그 행위가 승인됐거나 내용이 정확하다는 보증은 아닙니다. 테스트 키로 릴레이 보관, 권한 위임·철회, 키 분실과 민감 이벤트 삭제 범위를 검증한 뒤 실제 저장소에 연결하세요.
+
+## 서명된 협업 기록이 필요한 이유는 무엇인가
 - [GitHub 저장소 - block/buzz](https://github.com/block/buzz)
 - [공식 웹사이트 - buzz.xyz](https://buzz.xyz)
 - [Block 엔지니어링 블로그](https://engineering.block.xyz/blog/buzz)
@@ -318,6 +320,20 @@ Buzz는 혁신적인 구조를 제시하지만 현재 솔직히 고려해야 할
 
 ## 마무리 및 전망
 Block의 Buzz는 단순한 채팅 도구나 Git 호스팅의 대체재가 아닙니다. AI 에이전트가 소프트웨어 개발 프로세스에서 실질적인 신원과 책임을 지닌 주체로 참여하도록 만든 시스템적 기반입니다. 대화, 코드, 실행, 승인이 단일 암호화 로그에 결합되는 형태는 향후 개발 환경의 새로운 표준을 보여줍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/block/buzz)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [MemPalace는 원문을 보존하면서 오래 기억할까? 계층 검색·충돌·로컬 운영]({% post_url 2026-04-10-The-Architecture-of-Persistent-AI-Memory-Deep-Dive-into-MemPalace-Beyond-the-Summarization-Trap %}) — MemPalace가 대화 원문을 로컬에 보존하고 계층·벡터·시간 정보를 이용해 다시 찾는 구조를 살펴보고, 검색 정확도와 삭제·동기화·운영 부담을 구분해 평가합니다.
+- [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+- [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

@@ -66,6 +66,8 @@ article_images:
   source_url: https://www.cnet.com/tech/services-and-software/chatgpt-mac-activity-computer-history
 ---
 
+Computer History는 macOS 작업 맥락을 다시 설명하는 수고를 줄일 수 있지만, 접근성 이벤트에는 클릭뿐 아니라 입력한 텍스트와 앱 전환 정보가 포함될 수 있습니다. 스크린샷을 찍지 않는다는 사실만으로 민감 정보 위험이 사라지는 것은 아닙니다. 기능을 켜기 전 제외 앱·사이트, 관리자 승인, 일시 정지와 삭제가 실제 업무 환경에서 작동하는지 작은 기간으로 시험해야 합니다.
+
 ```mermaid
 graph TD
     A[OpenAI ChatGPT macOS 앱] -->|기능 출시| B[Computer History 기능 도입]
@@ -174,6 +176,18 @@ flowchart TD
 
 기업용 요금제인 Business 및 Enterprise 워크스페이스의 경우 개별 팀원이 마음대로 켜서 쓸 수 없으며, 조직 관리자가 먼저 권한을 명시적으로 부여해야 팀원이 옵트인할 수 있도록 설계되었습니다 <sup class="source-citation"><a href="#source-2" aria-label="9to5Mac 출처">[2]</a></sup>.
 
+## 스크린샷이 아니면 개인정보 위험이 낮아질까?
+
+이미지 전체를 주기적으로 저장하지 않는 방식은 화면 픽셀 수집을 줄이지만, 키보드 입력과 앱 이름·전환 시각만으로도 업무 내용이 드러날 수 있습니다. 비밀번호 관리자, 금융·의료 시스템, 비공개 메시지와 고객 데이터가 있는 앱은 제외 목록에 넣고 기록 중 표시가 항상 보이는지 확인해야 합니다. 제외 설정이 앱 업데이트나 브라우저 프로필 변경 뒤에도 유지되는지도 시험합니다.
+
+“로컬 타임라인”이라는 설명과 ChatGPT·Codex가 답변에 해당 기억을 쓰는 데이터 흐름도 구분해야 합니다. 기기에 저장되는 원본, 모델에 전달되는 요약, 진단 로그의 위치와 보존 기간을 공식 설정과 조직 계약에서 확인합니다. 개인 기기의 삭제 버튼뿐 아니라 회사의 보존·법적 보류·백업 정책과 충돌하지 않는지도 관리자 검토가 필요합니다.
+
+## 옵트인 뒤 어떤 사용 사례부터 시험할까?
+
+민감도가 낮고 결과를 확인하기 쉬운 작업부터 시작합니다. 예를 들어 공개 문서를 오가며 작성한 메모를 요약하게 한 뒤, 기록이 빠진 구간과 잘못 연결한 앱을 확인합니다. “방금 작업”처럼 모호한 질문에서 엉뚱한 이전 활동을 불러오는지, 기능을 잠시 멈춘 구간이 정말 답변에 나타나지 않는지도 검증해야 합니다.
+
+팀 배포에서는 관리자 승인만으로 끝내지 말고 사용자 교육과 사고 대응을 준비합니다. 기록하면 안 되는 업무, 일시 정지 시점, 이력 검토와 삭제 절차를 문서화하고 계정 탈취 시 기능을 원격으로 끌 수 있는지 확인합니다. 편의가 명확하지 않거나 제외 목록 관리 비용이 더 크다면 기능을 끈 채 필요한 맥락만 수동으로 제공하는 선택도 합리적입니다.
+
 ## 아직은 선을 그어야 할 부분
 
 Computer History 기능이 매력적이지만 몇 가지 명확한 한계점과 지역적 제한이 존재하므로 도입 전 확인이 필요합니다 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI Help Center 출처">[1]</a></sup>.
@@ -183,6 +197,22 @@ Computer History 기능이 매력적이지만 몇 가지 명확한 한계점과 
 둘째, 이용 대상 요금제 조건입니다. 일반 무료(Free) 사용자는 물론 기본 Plus 개인 사용자 플랜 역시 이번 지원 범위에서 제외되며, Pro, Business, Enterprise 요금제 사용자에 한해서만 제공됩니다 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI Help Center 출처">[1]</a></sup>.
 
 셋째, 접근성 API 기반 방식의 기술적 특성입니다. 화면 시각 정보 전체를 캡처하는 것이 아니기 때문에, 이미지나 그래픽 위주의 시각적 디자인 작업 내용까지 정확히 파악하는 데는 구조적 한계가 존재할 수 있습니다. 따라서 본인이 사용하는 작업 환경과 보안 정책을 꼼꼼히 점검한 후 활성화 여부를 결정하는 것이 좋습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [발표 원문](https://help.openai.com/en/articles/6825453-chatgpt-release-notes)
+- [9to5Mac](https://9to5mac.com/2026/08/13/chatgpt-for-mac-adds-opt-in-computer-history-feature-replacing-chronicle)
+- [CNET](https://www.cnet.com/tech/services-and-software/chatgpt-mac-activity-computer-history)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Google Gemini 3.7 Flash 출시: 코딩 성능 향상과 50% 수준의 API 가격 할인]({% post_url 2026-08-14-google-gemini-3-7-flash-released-with-enhanced-coding-and-api-discount %}) — Google AI가 2026년 8월 13일 소프트웨어 엔지니어링과 에이전트 추론 성능을 끌어올린 Gemini 3.7 Flash 모델을 정식 출시했습니다. 100만 토큰 문맥 창과 최대 64K 출력 토큰을 지원하며…
+- [OpenHuman이 Slack·GitHub를 로컬 기억으로 모아도 될까: OAuth·동기화·가짜 기억]({% post_url 2026-05-13-What-We-Wanted-Wasnt-a-Chatbot-But-a-Clone-of-Our-Brain-Deep-Dive-into-OpenHuman-Architecture %}) — OpenHuman이 Rust·Tauri desktop에서 SaaS 활동을 markdown·SQLite memory로 수집한다는 구조를 살펴보고, OAuth·egress·압축 손실·오래된 기억과 삭제 조건을 정리합니다.
+- [Redpanda로 Kafka를 바로 바꿔도 될까: 호환성·p99·메모리 비용 체크]({% post_url 2026-05-26-Forget-Kafka-Unveiling-Redpandas-Architecture-and-How-It-Disrupts-Data-Streaming %}) — Redpanda의 C++·Seastar·thread-per-core·Raft 구조가 지연에 미치는 영향을 살펴보고, Kafka API 호환성과 기능·라이선스·메모리·운영 차이를 검증하는 이전 절차를 제시합니다.
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문
 

@@ -6,19 +6,18 @@ categories: Tech
 tags:
   - Claude
   - ClaudeCode
+  - 오픈소스
   - AI코딩
   - API
-  - 멀티에이전트
 summary: Paperclip은 Claude Code, OpenClaw, Codex 등 서로 다른 AI 에이전트들을 하나의 조직으로 구성하여 자율적으로
   목표를 달성하도록 제어하는 오픈소스 오케스트레이션 플랫폼입니다. 조직도 기반 태스크 위임, 하트비트 주기 스케줄링, 예산 한도 제어, 인간 승인
   게이트를 통해 AI 에이전트 팀을 안전하고 효율적으로 운영할 수 있도록 돕습니다.
-author: AI Trend Bot
+description: 'Paperclip이 조직도·하트비트·예산·승인 게이트로 여러 에이전트를 운영하는 방식과 목표 정렬·권한·실패 복구·비용 통제 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/paperclipai/paperclip
 image:
   path: https://opengraph.githubassets.com/1/paperclipai/paperclip
-  alt: 'Paperclip: Open-Source Orchestration Platform for Autonomous Multi-Agent AI
-    Companies'
+  alt: "paperclipai/paperclip GitHub 저장소 대표 이미지"
 project:
   stars: 76879
   forks: 14221
@@ -58,7 +57,9 @@ faq:
     수 있어요.
 ---
 
-## Paperclip 관련 주요 링크
+Paperclip은 서로 다른 코딩·업무 에이전트를 조직도와 작업 큐에 배치하고 하트비트, 예산, 사람 승인으로 운영하려는 오케스트레이션 플랫폼입니다. “무인 회사”는 제품 비유일 뿐 책임·권한·품질 검토가 사라진다는 뜻이 아닙니다. 작고 검증 가능한 목표로 역할별 산출물, 중복 작업, 예산 중단과 사람 승인 우회를 시험한 뒤 범위를 넓히세요.
+
+## 여러 에이전트를 조직도로 묶을 이유는 무엇인가
 
 - [Paperclip GitHub 공식 저장소](https://github.com/paperclipai/paperclip)
 - [Paperclip 공식 문서 사이트](https://paperclip.ing/)
@@ -396,6 +397,20 @@ Paperclip이 매력적인 도구인 것은 분명하지만, 모든 상황에 다
 Paperclip은 'AI 에이전트 활용이 개인의 도구를 넘어 멀티 에이전트 조직화로 이동하는 흐름'을 명확하게 보여주는 프로젝트예요. 개발자가 일일이 코드를 작성하거나 에이전트 챗봇 창을 주시하는 시대에서, 에이전트들의 회사 구조와 가이드라인을 설계하고 고차원 비즈니스 목표를 관리하는 시대로 진화하고 있는 거죠.
 
 멀티 에이전트 자율 가동 시스템을 도입하려는 팀이나, 클로드 코드/오픈클로 등을 한데 묶어 복잡한 프로젝트를 자동으로 돌려보고 싶은 개발자라면 Paperclip을 직접 구축해서 테스트해 보시는 것을 추천해요.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/paperclipai/paperclip)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
+- [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
+- [공장형 AI UI를 거부하다: Hallmark가 코딩 에이전트의 디자인 감각을 뜯어고치는 원리]({% post_url 2026-07-21-Rejecting-AI-Factory-UIs-How-Hallmark-Rewires-the-Design-Sense-of-Coding-Agents %}) — Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록 강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

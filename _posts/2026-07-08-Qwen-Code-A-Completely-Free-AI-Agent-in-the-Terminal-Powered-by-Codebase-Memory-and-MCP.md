@@ -5,19 +5,18 @@ date: '2026-07-08 05:06:26'
 categories: Tech
 tags:
   - Qwen
-  - MCP
   - AI코딩
-  - 컨텍스트윈도우
-  - 경량화
+  - MCP
+  - 오픈소스
+  - 웹개발
 summary: Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을
   갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다. 이 글에서는 로컬 모델과 결합하여 API
   비용 없이 자율적인 개발 워크플로우를 구축하는 아키텍처와 활용법을 심층적으로 분석합니다.
-author: AI Trend Bot
+description: 'Qwen Code의 터미널 도구·QWEN.md 문맥·MCP 연결 구조와 로컬 모델 사용 조건, 파일 권한·비용·성능을 점검하는 방법을 설명합니다.'
 github_url: https://github.com/QwenLM/qwen-code
 image:
   path: https://opengraph.githubassets.com/1/QwenLM/qwen-code
-  alt: 'Qwen Code: A Completely Free AI Agent in the Terminal Powered by Codebase
-    Memory and MCP'
+  alt: "QwenLM/qwen-code GitHub 저장소 대표 이미지"
 project:
   stars: 25866
   forks: 2621
@@ -35,27 +34,9 @@ project:
   files: 6457
 mermaid: true
 chart: true
-faq:
-- question: Qwen Code는 어떤 모델을 사용하나요?
-  answer: 기본적으로 Qwen3-Coder 시리즈(특히 480B-A35B-Instruct 등)에 최적화되어 설계되었습니다. 하지만 OpenAI
-    SDK 인터페이스 호환성을 제공하므로, 로컬 환경의 LM Studio나 Ollama를 통해 Llama 등 다른 오픈소스 모델을 연결하여 사용할
-    수도 있습니다.
-- question: 기존의 GUI 기반 AI 에디터(Cursor 등)와 무엇이 다른가요?
-  answer: Qwen Code는 VS Code 같은 GUI 창이 아닌 터미널(CLI) 환경에서 작동하는 자율 에이전트입니다. 단순히 코드만 제안하는
-    것이 아니라, 파일 시스템을 직접 읽고 쓰고, 깃(Git) 명령어를 실행하며, MCP를 통해 데이터베이스 쿼리나 스크립트 실행까지 터미널에서
-    한 번에 자동화할 수 있다는 점이 가장 큰 차이입니다.
-- question: API 토큰 비용을 어떻게 절감할 수 있나요?
-  answer: 두 가지 방식으로 비용을 극적으로 낮춥니다. 첫째, LM Studio 등을 활용해 로컬 오픈소스 모델을 연결하면 외부 API 호출
-    비용이 완전히 0원이 됩니다. 둘째, 자동 메모리(save_memory)와 프로젝트 레벨의 QWEN.md를 통해 매번 반복되는 긴 컨텍스트를
-    압축하여 전달하므로 불필요한 프롬프트 토큰 낭비를 막아줍니다.
-- question: 회사 내부의 비공개 도구나 데이터베이스도 연결할 수 있나요?
-  answer: 네, 모델 컨텍스트 프로토콜(MCP)을 완벽하게 지원하므로 가능합니다. 회사 내부의 데이터베이스나 커스텀 API를 MCP 서버 형태로
-    래핑(Wrapping)하기만 하면, Qwen Code가 해당 서버를 자동으로 발견하고 대화 과정에서 도구로 활용할 수 있습니다.
-- question: 메모리 누수나 실행 시 성능 문제는 없나요?
-  answer: '대규모 파일이나 256K 이상의 극단적인 컨텍스트를 한 번에 처리할 때 런타임 메모리를 과도하게 점유하여 크래시가 발생하는 문제(깃허브
-    이슈 #4254 등)가 일부 보고된 바 있습니다. 아주 방대한 레포지토리 환경에서는 @filename 문법으로 필요한 파일만 명시적으로 참조하여
-    모델의 컨텍스트 부담을 줄이는 것이 권장됩니다.'
 ---
+
+Qwen Code는 터미널에서 파일·명령·MCP 도구를 사용하는 오픈소스 코딩 에이전트이며, 로컬 모델을 연결하면 모델 API 요금을 줄일 수 있습니다. 그러나 “완전 무료”는 하드웨어·전력·모델 다운로드와 선택한 외부 서비스 비용까지 사라진다는 뜻이 아닙니다. 작은 저장소에서 수정 범위, 테스트 근거, 지연과 권한을 확인한 뒤 더 넓은 작업으로 확장하세요.
 
 [관련 링크]
 - [Qwen Code GitHub 저장소](https://github.com/QwenLM/qwen-code)
@@ -402,6 +383,20 @@ Qwen Code의 등장은 AI 코딩 도구의 패러다임이 '인라인 자동완�
 무엇보다 가장 큰 가치는 **개방성**입니다. 클라우드 종속성 없이 내 로컬 장비에서 무료로 실행할 수 있고, MCP를 통해 내가 원하는 어떤 도구든 제한 없이 연결할 수 있다는 점은 강력한 자유를 선사합니다. 
 
 완벽한 도구는 아니지만, 터미널과 커맨드라인 환경을 사랑하고 보안과 비용 문제로 상용 AI 코딩 도구 도입을 망설였던 팀이라면 Qwen Code는 지금 당장 시도해 볼 만한 최고의 선택지입니다. 터미널 창을 열고, 여러분만의 든든한 AI 시니어 개발자를 출근시켜 보시기 바랍니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/QwenLM/qwen-code)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
+- [prime-agent: 지속형 파이썬 커널과 재귀적 서브에이전트로 구축하는 자가개선 AI 코딩 하네스]({% post_url 2026-08-09-prime-agent-Self-Improving-RLM-Harness-for-Autonomous-Coding-and-Research-Workflows %}) — prime-agent는 영속적인 IPython 커널을 단일 도구 인터페이스로 활용하여 AI 에이전트가 코드와 상태를 파이썬 변수로 유지할 수 있게 만든 오픈소스 코딩 하네스입니다. 재귀적 언어 모델(RLM) 구조를 통해 서브에이전트를…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

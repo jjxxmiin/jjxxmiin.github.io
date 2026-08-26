@@ -4,33 +4,33 @@ title: 'ERL은 추론 때 성찰하지 않고도 Sokoban 81%를 얻을까: 자�
 date: '2026-02-18'
 categories: Tech
 tags:
-  - ExperientialRL
-  - 자기성찰
-  - 자기증류
   - 강화학습
-  - 언어모델
+  - 경량화
+  - Qwen
+  - AI에이전트
 math: true
 summary: 실패를 성찰해 만든 두 번째 시도를 기본 정책에 내재화하는 ERL의 81% 향상과 학습 비용·잘못된 인과의 위험을 분석합니다.
+description: 'ERL이 첫 실패의 성찰과 수정 시도를 기본 정책에 자기증류하는 원리, Sokoban의 보고 결과와 학습 비용·잘못된 인과 위험을 함께 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.13949.png
-  alt: Paper Thumbnail
+  alt: "ERL은 추론 때 성찰하지 않고도 Sokoban 81%를 얻을까: 자기증류의 비용과 함정 논문 대표 이미지"
 ---
 
 ERL은 학습 중에는 첫 시도·성찰·수정 시도를 모두 생성하지만, 성공한 수정 경로를 기본 정책에 증류해 테스트 때 매번 성찰하지 않고도 더 나은 첫 답을 내도록 합니다. 다만 Sokoban의 81% 향상은 특정 비교 결과이며, 성찰 생성 때문에 늘어난 학습 비용과 우연한 성공을 잘못 내재화할 위험을 함께 봐야 합니다.
 
-![Figure 1:InExperiential Reinforcement Learning(ERL), instead of learning from feedback or outcome directly, an agent learns to (1) verbally reflect on its experience and observed outcome, and (2) internalize the reflections to induce behavioral changes in future iterations.](/assets/img/papers/2602.13949/x1.png)
+![결과 점수만 받지 않고 경험을 언어로 성찰한 뒤 행동 변화로 내재화하는 ERL.](/assets/img/papers/2602.13949/x1.png)
 *결과 점수만 받지 않고 경험을 언어로 성찰한 뒤 행동 변화로 내재화하는 ERL.*
 
-## 0점 하나로는 어느 행동이 틀렸는지 알 수 없다
+## 왜 0점 하나로는 어느 행동이 틀렸는지 알 수 없을까?
 
 FrozenLake, Sokoban, HotpotQA처럼 여러 단계를 거치는 과제에서는 마지막 실패 보상이 앞선 어느 선택 때문인지 불분명합니다. RLVR의 0 또는 1 보상만으로는 모델이 같은 실수를 표현만 바꿔 반복할 수 있습니다.
 
 ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 오류 메시지와 결과를 모델에게 다시 보여주고, 무엇을 고쳐야 하는지 언어로 설명하게 합니다. 이 reflection은 사람이 정답 과정을 새로 labeling한 것이 아니라 같은 모델이 자신의 경험에서 만든 중간 학습 신호입니다.
 
-![Figure 2:Conceptual comparison of learning dynamics in RLVR and Experiential Reinforcement Learning (ERL). RLVR relies on repeated trial-and-error driven by scalar rewards, leading to back-and-forth exploration without durable correction. ERL augments this process with an experience–reflection–consolidation loop that generates a revised attempt and internalizes successful corrections, enabling persistent behavioral improvement.](/assets/img/papers/2602.13949/x2.png)
+![독립적인 시행착오와 경험·성찰·내재화가 연결된 학습의 차이.](/assets/img/papers/2602.13949/x2.png)
 *독립적인 시행착오와 경험·성찰·내재화가 연결된 학습의 차이.*
 
-## $a_1$, $r$, $a_2$가 한 학습 사례를 만든다
+## $a_1$, $r$, $a_2$는 어떻게 한 학습 사례가 될까?
 
 한 과제 $x$에서의 흐름은 네 단계입니다.
 
@@ -41,16 +41,16 @@ ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 �
 
 첫 시도, reflection, 수정 시도는 강화학습의 대상이 되고, 성공한 $a_2$에는 Negative Log-Likelihood 기반 self-distillation loss를 더해 원래 입력 $x$만 보고도 그 행동을 재현하도록 합니다.
 
-![Figure 3:Overview of Experiential Reinforcement Learning (ERL). Given an input taskxx, the language model first produces an initial attempt and receives environment feedback. The same model then generates a self-reflection conditioned on this attempt, which is used to guide a second attempt. Both attempts and reflections are optimized with reinforcement learning, while successful second attempts are internalized via self-distillation, so the model learns to reproduce improved behavior directly from the original input without self-reflection.](/assets/img/papers/2602.13949/x3.png)
+![성공한 두 번째 시도를 원래 정책에 self-distillation하는 전체 루프.](/assets/img/papers/2602.13949/x3.png)
 *성공한 두 번째 시도를 원래 정책에 self-distillation하는 전체 루프.*
 
 이 방식은 추론 비용을 학습으로 옮기지만 공짜로 없애지는 않습니다. 한 task당 최소 세 종류의 sequence를 생성하므로 원문도 기존 RLVR보다 학습 계산량이 크게 늘 수 있다고 지적합니다.
 
-## 81%는 절대 성공률인지 향상률인지 구분한다
+## 81%는 성공률과 향상률 중 무엇일까?
 
 실험 모델은 Qwen3-4B-Instruct-2507과 Olmo-3-7B-Instruct이고, 환경은 FrozenLake, Sokoban, HotpotQA입니다. 최종 답의 정오를 0 또는 1로 검증할 수 있는 과제를 사용합니다.
 
-![Figure 4:Validation reward trajectories versus training wall-clock time on FrozenLake, HotpotQA, and Sokoban for Qwen3-4B-Instruct-2507 and Olmo-3-7B-Instruct. ERL consistently achieves higher reward and faster improvement than RLVR across tasks and models.](/assets/img/papers/2602.13949/x4.png)
+![Wall-clock 시간에 따른 ERL과 RLVR의 검증 reward.](/assets/img/papers/2602.13949/x4.png)
 *Wall-clock 시간에 따른 ERL과 RLVR의 검증 reward.*
 
 원문은 Sokoban에서 81% 성능 향상을 가장 큰 결과로 소개합니다. 그러나 이 글에는 “81% 성공률”, “81% 상대 향상”, “81%p 증가” 중 어느 의미인지 판단할 세부 표가 없습니다. 수치를 절대 성공 확률로 인용하면 안 되는 이유입니다.
@@ -60,7 +60,7 @@ ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 �
 
 학습 초기에 reward가 빨리 오른다는 그림도 흥미롭지만, wall-clock당 생성 token과 GPU 비용을 포함해 비교해야 “더 빠른 학습”인지 알 수 있습니다.
 
-## 잘못된 성찰도 성공 뒤에 강화될 수 있다
+## 왜 잘못된 성찰도 성공 뒤에 강화될 수 있을까?
 
 두 번째 시도가 성공했다고 reflection의 인과 설명까지 옳은 것은 아닙니다. 모델이 우연히 정답을 맞히고 엉뚱한 원인을 설명하면, self-distillation은 결과와 함께 잘못된 규칙을 학습할 수 있습니다. 초기 모델이 약할수록 reflection 자체가 환각일 가능성도 큽니다.
 
@@ -74,10 +74,40 @@ ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 �
 - 학습 token·wall-clock·reward당 비용
 - 새로운 규칙이나 더 긴 horizon으로 옮겼을 때의 성능
 
-## 검증 가능한 환경에서 먼저 쓴다
+## 어떤 검증 가능한 환경에서 먼저 써야 할까?
 
 ERL은 compiler error, unit test, 게임 성공 여부처럼 결과를 자동 확인할 수 있는 과제에 잘 맞습니다. 의료 진단이나 법률 자문처럼 정답 verifier가 불완전한 영역에서 “전문가 사고를 내재화한다”는 원문의 응용 전망은 별도 안전 검증 없이는 성립하지 않습니다.
 
 실무 적용의 첫 단계는 실패 원인이 관찰 가능하고, 수정 시도를 sandbox에서 재실행하며, 성공 조건을 외부에서 판정할 수 있는 작업입니다. ERL의 가치는 모델이 반성문을 잘 쓰는 데 있지 않습니다. 반성 뒤 실제로 검증된 행동만 기본 정책의 첫 시도로 옮길 수 있다는 데 있으며, 그 검증기가 틀리면 전체 루프도 같이 틀립니다.
 
+## 성찰이 실제 원인인지 어떻게 분리해 볼까?
+
+$a_2$가 좋아졌다는 사실만으로 reflection $r$이 도움을 줬다고 결론 내릴 수 없습니다. 두 번째 시도는 단순히 한 번 더 표본을 뽑았기 때문에 우연히 성공했을 수도 있습니다. 같은 실패 사례에 원래 성찰, 다른 사례에서 섞어 온 성찰, 성찰 없는 재시도를 각각 적용하면 개선이 구체적 오류 설명에서 왔는지 추가 샘플링에서 왔는지 비교할 수 있습니다.
+
+성찰 문장 자체도 실행 가능한 주장으로 나눠야 합니다. Sokoban이라면 “상자를 모서리에 밀어 넣어 복구할 수 없었다”처럼 보드 상태로 확인할 수 있는 원인과 “더 신중해야 한다” 같은 일반 문구를 구분합니다. 첫 종류를 제거했을 때 수정 성공률이 떨어지는지 확인하면 학습할 가치가 있는 경험 신호를 찾을 수 있습니다. 설명과 실제 행동 변화가 연결되지 않는다면 긴 reflection은 토큰 비용만 늘립니다.
+
+## 자기증류는 언제 잘못된 습관을 굳힐까?
+
+성공 검증기가 목표의 일부만 본다면 정책은 그 빈틈을 학습할 수 있습니다. 코드 과제에서 공개 테스트만 통과하면 성공으로 보상할 경우 숨은 요구를 깨뜨리는 수정도 증류될 수 있습니다. 검색 과제에서 정답 문자열만 맞추면 근거 없는 추측이 우연히 맞은 사례까지 좋은 경로로 남습니다. 따라서 증류 대상으로 쓰기 전에 수정 행동이 규칙을 지켰는지, 근거와 답이 일치하는지, 다른 초기 상태에서도 같은 원리가 재현되는지를 검사해야 합니다.
+
+한 번 성공한 경로보다 반복 성공한 경로에 더 높은 신뢰를 두는 방법도 있습니다. 초기 상태나 문제 표현을 조금 바꿔도 $a_2$가 성공하고, reflection이 지목한 원인을 바꾸면 실패한다면 인과 설명에 더 강한 근거가 생깁니다. 반대로 사소한 변형에서 무너지면 특정 문구나 상태를 외운 것이므로 기본 정책에 강하게 내재화하지 않는 편이 낫습니다.
+
+## 학습 비용과 추론 절감을 어떻게 비교할까?
+
+ERL은 배포 시 성찰 단계를 줄이는 대신 학습 때 $a_1$, $r$, $a_2$를 생성합니다. 비교표에는 최종 reward뿐 아니라 성공 사례 하나를 얻는 데 생성한 토큰, GPU 시간, 환경 실행 횟수와 증류 후 첫 시도의 지연을 넣어야 합니다. 트래픽이 작거나 과제가 자주 바뀌면 비싼 학습 비용을 회수하기 전에 정책이 낡을 수 있습니다.
+
+반대로 같은 유형의 검증 가능한 과제를 매우 많이 반복한다면 학습 비용을 한 번 지불하고 첫 시도 품질을 높이는 이점이 커집니다. 손익분기점은 “성찰을 없앴다”는 문구가 아니라, 배포 요청 수에 따른 절약 토큰과 추가 학습 비용이 만나는 지점입니다. 새 규칙이 들어올 때 성능이 급락하거나 verifier가 자주 바뀌는 환경에서는 test-time reflection을 완전히 없애기보다 어려운 사례에만 남기는 혼합 정책이 더 안전합니다.
+
+최종 파일럿은 쉬운 문제와 긴 horizon 문제를 분리해야 합니다. 쉬운 문제의 평균 향상이 커도 장기 계획에서 첫 오류가 계속 누적된다면 ERL이 성찰 능력을 내재화했다기보다 자주 본 패턴을 외운 것일 수 있습니다. 실패 원인 분류, 내재화 전후 첫 시도, 성찰 재도입 시 회복 여부를 함께 보면 어디까지 기본 정책에 맡길지 정할 수 있습니다.
+
+Verifier가 업데이트되면 기존에 증류한 성공 경로도 다시 표본 검사해야 합니다. 이전에는 성공이던 행동이 새 규칙에서는 실패일 수 있는데 정책 가중치에는 오래된 기준이 남아 있기 때문입니다. 규칙 버전과 학습 데이터를 연결해 두고, 바뀐 조건의 회귀 세트에서 첫 시도와 성찰 후 시도를 모두 비교합니다. 기준 변화가 잦다면 영구적인 자기증류보다 외부 메모리나 테스트 시 검증을 유지하는 편이 수정 가능성이 높습니다.
+
 [Original Paper Link](https://huggingface.co/papers/2602.13949)
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [사용자 피드백을 계속 학습하면 AI가 정말 나아질까? OpenClaw-RL의 위험]({% post_url 2026-03-03-Why-Did-I-Just-Find-Out-About-This-OpenClaw-RL-Honest-Review-An-AI-That-Evolves-From-Your-Feedback %}) — OpenClaw-RL의 비동기 서빙·평가·학습 루프와 binary RL·on-policy distillation을 살펴보고 잘못된 피드백이 가중치에 굳는 위험을 짚습니다.
+- [DeepSeek-R1은 정말 600만 달러로 o1급 추론을 만들었을까? 비용과 구조 분리]({% post_url 2026-03-04-The-6M-Miracle-That-Panicked-Silicon-Valley-A-Developers-Deep-Dive-into-DeepSeek-R1 %}) — DeepSeek-R1의 671B MoE·37B 활성 파라미터와 critic 없는 GRPO를 설명하고 600만 달러 추정치, API 가격, 증류 성능을 구분해 읽습니다.
+- [Open-R1: 허깅페이스가 공개한 추론형 AI 모델 재현 프로젝트와 GRPO 학습 원리]({% post_url 2026-08-05-Open-R1-Hugging-Face-Open-Source-Reproduction-of-DeepSeek-R1-and-GRPO-Training %}) — 허깅페이스의 Open-R1 프로젝트는 DeepSeek-R1의 추론 능력 복원 과정을 완벽히 오픈소스로 재현하는 이니셔티브입니다. GRPO 기반 강화학습과 지식 증류 기술을 활용해 누구나 고성능 추론 모델을 직접 학습시킬 수 있는…
+<!-- internal-links:end -->

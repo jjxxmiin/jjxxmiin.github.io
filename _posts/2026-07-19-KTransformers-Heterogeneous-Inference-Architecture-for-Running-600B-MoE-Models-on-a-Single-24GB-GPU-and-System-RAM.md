@@ -8,16 +8,15 @@ tags:
   - 경량화
   - DeepSeek
   - 파인튜닝
-  - RAG
+  - 오픈소스
 summary: 단일 24GB GPU와 시스템 메모리를 결합하는 이기종 컴퓨팅 기술을 통해 수백만 원대 데스크톱 환경에서도 671B 규모의 최신 MoE(전문가
   혼합) 언어 모델을 실용적인 속도로 추론하고 파인튜닝할 수 있게 해주는 오픈소스 프레임워크인 KTransformers의 내부 동작 원리와 실제
   활용법을 심층 분석합니다.
-author: AI Trend Bot
+description: 'KTransformers가 MoE의 Attention은 GPU, 전문가 연산은 CPU·RAM에 나누는 원리와 하드웨어 조건·토큰 속도·메모리 한계를 설명합니다.'
 github_url: https://github.com/kvcache-ai/ktransformers
 image:
   path: https://opengraph.githubassets.com/1/kvcache-ai/ktransformers
-  alt: 'KTransformers: Heterogeneous Inference Architecture for Running 600B MoE Models
-    on a Single 24GB GPU and System RAM'
+  alt: "kvcache-ai/ktransformers GitHub 저장소 대표 이미지"
 project:
   stars: 18413
   forks: 1455
@@ -35,26 +34,6 @@ project:
   files: 1397
 mermaid: true
 chart: true
-faq:
-- question: KTransformers는 어떤 하드웨어 환경에서 가장 잘 작동하나요?
-  answer: '성능을 극대화하기 위해서는 Intel AMX 명령어셋을 지원하는 4세대 제온 이상의 CPU나 AVX-512를 지원하는 최신 AMD
-    EPYC 프로세서가 필요합니다. 또한 Attention 연산을 처리할 24GB 이상의 VRAM을 가진 단일 GPU(예: RTX 3090/4090)와
-    모델의 가중치를 담을 광활한 시스템 RAM(일반적으로 400GB~1TB 이상)이 요구됩니다.'
-- question: 기존에 많이 쓰이던 llama.cpp와 가장 큰 차이점은 무엇인가요?
-  answer: llama.cpp는 모델의 레이어를 앞뒤로 잘라 순차적으로 GPU와 CPU에 할당하므로 필연적으로 통신 병목이 발생합니다. 반면
-    KTransformers는 모델의 Attention 구조(GPU 적재)와 MoE 전문가 구조(CPU 적재)를 논리적으로 분할하고 비동기적으로
-    동시에 연산하도록 설계되어 압도적인 속도 향상을 이루어냈습니다.
-- question: KTransformers는 모든 종류의 오픈소스 LLM을 다 지원하나요?
-  answer: 다양한 모델을 지원하도록 설계되었으나, 가장 큰 강점을 발휘하는 것은 모델 파라미터가 성소성(Sparsity)을 가지는 MoE(Mixture-of-Experts)
-    아키텍처 모델들입니다. 대표적으로 DeepSeek-V3/R1, Qwen 모델 계열 등에서 극한의 최적화된 성능을 발휘합니다.
-- question: 수많은 사용자가 동시에 접속하는 클라우드 웹 서비스용으로 적합한가요?
-  answer: 적합하지 않습니다. KTransformers는 극도로 제한된 자원에서 단일 사용자(또는 매우 적은 수의 배치)의 추론 지연 시간을
-    줄이는 데 최적화되어 있습니다. 대규모 동시 트래픽을 처리해야 하는 프로덕션 환경이라면 Multi-GPU 클러스터를 구성하여 vLLM이나 SGLang을
-    사용하는 것이 훨씬 효율적입니다.
-- question: 설치 과정에서 C++ 컴파일이 필요한데, 설정이 많이 복잡한가요?
-  answer: 파이썬 패키지를 단순 설치하는 것보다는 진입 장벽이 조금 있습니다. 하드웨어에 맞춰 최적화된 커널을 빌드해야 하므로 Linux 환경에서
-    제공되는 `install.sh` 스크립트를 통해 소스 코드를 직접 컴파일해야 하며, 이 과정에서 C++ 빌드 환경(GCC, CMake 등)과
-    CUDA 툴킷이 사전에 올바르게 세팅되어 있어야 합니다.
 ---
 
 [관련 리소스]
@@ -361,6 +340,20 @@ pie title "초대형 모델 구동 시 일반적인 병목 체감 비율"
 KTransformers는 단순히 '코드를 조금 빠르게 최적화한 도구'가 아닙니다. 하드웨어의 구조와 모델의 아키텍처(MoE) 양쪽의 본질을 정확히 꿰뚫어 보고, 장점들만 결합하여 완전히 새로운 패러다임을 제시한 엔지니어링의 정수입니다.
 
 과거에는 자본력이 풍부한 빅테크 기업이나 대형 연구소만이 거대 모델의 내부를 뜯어보고 실험할 수 있었습니다. 하지만 KTransformers 덕분에 약간의 노력과 상대적으로 저렴한 장비만으로도 누구나 600B 급 모델을 온프레미스에서 쾌적하게 다룰 수 있는 길이 열렸습니다. 모델 경량화(양자화) 기술과 이러한 하드웨어 이기종 분산 프레임워크가 계속 발전한다면, 멀지 않은 미래에 일반적인 고사양 게이밍 PC에서도 초거대 AI가 온전히 당신만의 비서로 작동하는 날이 올 것입니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/kvcache-ai/ktransformers)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Colibri: 25GB 램 노트북으로 744B 초거대 AI 모델을 구동하는 순수 C 추론 엔진의 원리]({% post_url 2026-07-10-Colibri-The-Pure-C-Inference-Engine-Running-a-744B-MoE-Model-on-a-25GB-RAM-Laptop %}) — Colibri는 7440억 파라미터(744B) 규모의 초거대 혼합 전문가(MoE) 모델인 GLM-5.2를 25GB 램만 장착된 일반 노트북에서 구동하게 해주는 독창적인 순수 C 기반 추론 엔진입니다. 전체 모델을 램에 올리는 대신…
+- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA·MoE·MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8·MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
+- [MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석]({% post_url 2025-03-14-MotionFollower %}) — MotionFollower의 pose·reference controller, reconstruction·editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과…
+<!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
 

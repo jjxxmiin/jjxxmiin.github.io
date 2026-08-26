@@ -1,114 +1,146 @@
 ---
 layout: post
-title: '프롬프트 엔지니어링의 종말: OpenMontage가 증명한 ''에이전트 주도(Agent-First)'' 비디오 파이프라인의 진짜 가치'
+title: 'OpenMontage로 AI 영상을 만들 때: 에이전트 파이프라인·비용·검수 기준'
 date: '2026-07-04 01:10:06'
 categories: Tech
 tags:
-  - 프롬프트엔지니어링
   - 파이썬
   - AI코딩
   - 영상생성
-  - Claude
-summary: 기존의 불안정한 텍스트-투-비디오 프롬프트 방식을 넘어, AI 코딩 어시스턴트가 기획부터 렌더링까지 전체 7단계 유한 상태 기계(FSM)
-  파이프라인을 자율적으로 지휘하는 오픈소스 에이전틱 프레임워크 'OpenMontage'의 아키텍처와 실무 적용 인사이트를 심층 분석합니다.
-author: AI Trend Bot
+  - 음성AI
+  - AI정책
+summary: OpenMontage가 YAML 파이프라인·Markdown 스킬·Python 도구·Remotion과 FFmpeg를 연결해 영상 제작 단계를 조율하는 방식을 설명합니다. 설치 비용, 사람 승인, 재현성과 보안까지 포함한 파일럿 기준도 정리합니다.
+description: OpenMontage의 에이전트 중심 영상 제작 구조와 research부터 compose까지의 단계, 무료·유료 도구 선택, 비용·품질·보안을 검증하는 파일럿 방법을 설명합니다.
+faq:
+  - question: OpenMontage는 영상 생성 모델인가요?
+    answer: 아닙니다. 여러 영상·이미지·음성·검색·편집 도구를 파이프라인으로 연결하고 AI 코딩 에이전트가 제작 단계를 수행하도록 돕는 오케스트레이션 프로젝트입니다.
+  - question: API 키 없이도 OpenMontage를 사용할 수 있나요?
+    answer: 공식 저장소는 Piper TTS·공개 아카이브·Remotion·FFmpeg 등을 이용한 경로를 안내하지만 원하는 스타일·해상도와 장비에 따라 품질·시간·추가 도구가 달라집니다.
+  - question: OpenMontage를 자동 발행 파이프라인에 바로 연결해도 되나요?
+    answer: 먼저 제한된 주제로 사람 승인·저작권 확인·비용 상한·렌더 검수와 실패 복구를 시험하고, 결과가 기준을 통과한 경우에만 발행 단계와 연결하는 편이 안전합니다.
 github_url: https://github.com/calesthio/OpenMontage
 image:
   path: https://opengraph.githubassets.com/1/calesthio/OpenMontage
-  alt: 'The End of Prompt Engineering: The True Value of OpenMontage''s Agent-First
-    Video Pipeline'
+  alt: "calesthio/OpenMontage GitHub 저장소 대표 이미지"
 ---
 
-> **[OpenMontage: The Open-Source Agentic Video Production System]**
-> - **GitHub Repository:** calesthio/OpenMontage
-> - **Core Architecture:** 12 Pipelines, 52 Production Tools, 500+ Agent Skills
-> - **Key Papers & Concepts:** CMU + Harvard (arXiv:2604.21718) 기반 5-Aspect 비디오 분류법(Taxonomy) 도입
-> - **Tech Stack:** Python (Core Execution), NodeJS / Remotion & HyperFrames (Rendering), SQLite (Session Anchor Memory), Markdown (Agent Skills)
+**OpenMontage는 한 문장으로 영상을 만들어 주는 단일 생성 모델이 아니라, 조사·대본·장면 계획·에셋 제작·편집·렌더링을 여러 도구와 연결하는 오픈소스 제작 파이프라인입니다.** AI 코딩 에이전트가 YAML manifest와 Markdown skill을 읽고 Python 도구를 호출한다는 점이 특징이지만, 결과의 정확성·저작권·비용과 최종 품질 책임까지 자동으로 사라지는 것은 아닙니다.
 
-**The Hook (공감과 도발)**
-"프롬프트 좀 기깔나게 깎으면, 이번 프로젝트 영상 하나는 뚝딱 나오겠지." 솔직히 이런 환상을 품고 최신 AI 비디오 제너레이터(Sora, LTX, VEO 등)를 실무에 도입해 보려 했던 분들이라면 다들 비슷한 벽에 부딪혔을 겁니다. "카메라를 부드럽게 패닝하며 걸어가는 주인공, 시네마틱 라이팅"을 아무리 프롬프트로 열심히 묘사해도, 결과물은 제멋대로 흔들리기 일쑤죠. 컷이 넘어갈 때마다 캐릭터의 외모는 무너지고, 결국 짜깁기 수준의 조잡한 3~4초짜리 클립들만 하드디스크에 쌓여갑니다. 실무자로서 진짜 뼈저리게 느끼는 고충은 'AI 모델 자체의 성능'이 아닙니다. 이 모든 다단계 생성 과정을 통제하고, 일관성을 유지하며, 각기 다른 도구들을 조율할 '오케스트레이터'가 없었다는 점, 그리고 그걸 사람이 일일이 수동으로 붙잡고 있었다는 점이죠.
+[OpenMontage 공식 저장소](https://github.com/calesthio/OpenMontage)는 빠르게 바뀌는 프로젝트입니다. 이 글은 특정 스타 수나 과장된 비용 절감을 근거로 추천하지 않고, 저장소가 공개한 구조를 어떤 작업에 시험할 수 있는지와 실제 도입 전에 무엇을 검증해야 하는지를 중심으로 읽습니다.
 
-기존의 자동화 프레임워크들을 까보면 실상은 초라했습니다. 단순히 외부 API를 감싼 래퍼(Wrapper) 수준의 파이썬 스크립트 뭉치에 불과했으니까요. 그런데 최근 깃허브에서 단 하루 만에 3,434개 이상의 스타를 쓸어 담으며 화려하게 등장한 **OpenMontage**는 이 판의 룰을 완전히 뒤엎어버렸습니다. 파이썬이나 노드로 짠 하드코딩된 오케스트레이터를 과감히 버리고, 우리가 매일 IDE에서 마주하는 Cursor나 Claude Code, Copilot 같은 'AI 코딩 어시스턴트'에게 전체 제작 파이프라인의 메가폰을 쥐여준 겁니다.
+## OpenMontage는 무엇을 만들고 무엇을 대신하지 않는가
 
-**TL;DR (The Core)**
-> OpenMontage는 단순한 텍스트-투-비디오 생성기가 아닙니다. 기존의 단일 프롬프트 의존 방식을 폐기하고, **AI 에이전트가 리서치, 스크립팅, 에셋 생성, 편집, 렌더링(Remotion)까지의 전체 7단계 유한 상태 기계(FSM)를 자율적으로 통제하는 '에이전틱 프로덕션 시스템(Agentic Production System)'**으로의 완벽한 패러다임 전환입니다.
+일반적인 영상 생성 서비스는 prompt를 받아 짧은 clip 또는 image를 만듭니다. OpenMontage는 그 앞뒤의 제작 과정을 더 넓게 다룹니다. 주제를 조사하고 proposal과 script를 만들며 scene별 asset을 준비한 뒤, timeline과 자막·음성을 합쳐 최종 파일을 렌더링하는 workflow를 제공합니다. 기존 영상에서 짧은 clip을 고르거나 공개 stock footage를 조합하는 pipeline도 저장소에 설명돼 있습니다.
 
-**Deep Dive: Under the Hood (핵심 아키텍처 심층 분석)**
-이 프로젝트의 소스코드를 처음 열어보고 솔직히 뒷통수를 한 대 맞은 기분이었습니다. "왜 여태 이 생각을 못했을까?" 싶을 정도로 아키텍처 설계가 철저하게 실무 지향적입니다. 가장 핵심적인 철학은 바로 **"오케스트레이션의 역전(Orchestration Inversion)"**입니다. 기존 LangChain 류의 프레임워크가 파이썬 코드로 에이전트의 행동을 엄격하게 통제하려 했다면, OpenMontage는 파이썬을 그저 말단 '도구(Tool)'로 격하시켜버립니다. 대신 에이전트가 직접 마크다운(Markdown) 지시서를 읽고, 스스로의 판단하에 자율적으로 시스템을 지휘하게 만들었죠.
+따라서 OpenMontage 자체의 품질을 영상 생성 model 하나의 화질로 평가하면 안 됩니다. 선택한 image·video·TTS provider, 입력 자료, scene plan, renderer, 승인 기준의 합이 결과를 만듭니다. 같은 pipeline이라도 유료 cloud model을 쓰는 구성과 local·archive asset을 쓰는 구성은 비용·속도·시각적 일관성이 다릅니다.
 
-이들은 시스템을 완벽하게 분리된 3계층(3-Layer) 지식 아키텍처로 구성했습니다.
-1. **Tools (`tools/`)**: FFmpeg, 구글 Veo, Lyria, Piper TTS 등 영상 생성, 오디오 합성, 자막 처리 등 실제 무거운 연산을 수행하는 52개의 파이썬 바이너리와 스크립트.
-2. **Pipeline Manifests (`pipeline_defs/`)**: 영상의 종류(다큐멘터리, 설명 영상, 숏폼 등)별로 어떤 단계를 거쳐야 하는지 7단계의 유한 상태 기계(FSM) 프로세스로 정의해 둔 YAML 플레이북,.
-3. **Agent Skills (`skills/`)**: 에이전트가 각 도구를 어떻게, 언제 사용해야 하는지 알려주는 500개 이상의 정교한 마크다운 파일. 에이전트는 이를 RAG(검색 증강 생성)처럼 끌어다 씁니다.
+프로젝트가 대신하지 않는 역할도 분명합니다. 사용 허가가 불명확한 영상과 음악의 라이선스를 판단하거나, script의 사실 오류를 법적·편집적 기준으로 승인하거나, 브랜드 위험을 책임지는 주체는 여전히 사람입니다. 자동 검수 단계가 있더라도 업무별 최종 acceptance criteria와 발행 승인은 별도로 설계해야 합니다.
 
-특히 이들이 해결한 가장 큰 기술적 난제는 '메모리 관리'와 '시각적 일관성'이었습니다.
+## 에이전트 중심 구조는 지시와 실행을 분리한다
 
-**[표: 기존 AI 비디오 생성 방식 vs OpenMontage 아키텍처 비교]**
+공식 README는 OpenMontage에 전통적인 code orchestrator가 없고 AI coding assistant가 orchestrator 역할을 한다고 설명합니다. 에이전트는 `pipeline_defs/`의 YAML manifest에서 단계·도구·성공 기준을 읽고, `skills/`의 Markdown 파일에서 각 단계를 수행하는 방법을 가져옵니다. 실제 media 처리와 provider 호출은 `tools/` 아래 Python 도구가 맡습니다.
 
-| 아키텍처 비교 항목 | 기존 AI 비디오 파이프라인 (LangChain/API Wrapper) | OpenMontage (Agent-First Architecture) |
-| :--- | :--- | :--- |
-| **제어 주체 (Orchestrator)** | 하드코딩된 Python 미들웨어 및 분기 로직 | **AI 코딩 어시스턴트 (Cursor, Claude Code 등)** |
-| **상태 관리 (State Mgt)** | 인메모리(In-Memory) 유지, 불안정한 휘발성 JSON 전송 | **Session Anchor SQLite 기반 영속적 데이터 압축** |
-| **영상 합성 (Composition)** | FFmpeg 명령어를 통한 단순 병합 (비결정적/에러 잦음) | **Remotion / NodeJS 기반의 결정적(Deterministic) 렌더링** |
-| **비용 통제 (Governance)** | 토큰 리밋 도달 시 런타임 크래시 발생 | **CHI Protocol 적용 (사전 예산 산정/예약/Cap 강제)** |
-| **프롬프팅 패러다임** | 단일 텍스트 프롬프트 ("멋진 시네마틱 샷, 4k") | **CMU+Harvard 논문 기반 5-Aspect Taxonomy 구조화** |
+이 분리는 제작 규칙을 읽고 수정하기 쉽게 만듭니다. 새로운 documentary workflow를 추가할 때 모든 분기를 하나의 거대한 Python state machine에 넣기보다 manifest와 stage skill을 조정하고 기존 tool을 재사용할 수 있습니다. 반대로 자연어 지시가 모호하거나 agent가 잘못된 skill을 고르면 같은 입력도 다른 실행 경로를 택할 수 있습니다.
 
-에이전트가 1시간 분량의 다큐멘터리 영상을 기획하고 에셋을 생성하다 보면, 컨텍스트 윈도우가 꽉 차서 환각(Hallucination)을 일으키는 건 시간문제입니다. OpenMontage는 이 문제를 해결하기 위해 `Session Anchor`라는 SQLite 기반의 메모리 압축 기법을 도입했습니다. 무거운 영상이나 이미지의 바이너리 데이터를 LLM 메모리에 절대 올리지 않습니다. 대신 아래와 같이 엄격하게 검증된 JSON 스키마를 로컬 DB에 영속화(Persistence)하여, 7단계의 FSM(기획 -> 자료조사 -> 스크립트 -> 프롬프트 설계 -> 에셋 생성 -> 가편집 -> 최종 렌더링)을 안전하게 통과시킵니다.
+공식 흐름은 대체로 `research → proposal → script → scene_plan → assets → edit → compose`로 제시됩니다. 각 단계의 산출물을 다음 단계의 입력 계약으로 취급해야 합니다. research citation이 빠졌다면 script로 넘어가지 않고, scene에 필요한 duration·asset·voice가 없으면 비싼 생성 호출 전에 중단하는 식의 gate가 필요합니다.
 
-```json
-{
-  "project_id": "om_docu_pipeline_001",
-  "fsm_stage": "ASSET_GENERATION",
-  "budget_governance": {
-    "allocated_usd": 5.00,
-    "consumed_usd": 1.33,
-    "chi_protocol_status": "NORMAL"
-  },
-  "scene_manifest": [
-    {
-      "scene_id": "sc_01",
-      "cinematography": {
-        "subject_motion": "dynamic_pan_character",
-        "spatial_framing": "medium_close_up",
-        "camera": {
-          "angle": "dutch",
-          "motion": "dolly_zoom_in"
-        }
-      },
-      "tool_invoked": "tool_veo_gen_v2",
-      "status": "APPROVED_BY_HUMAN"
-    }
-  ]
-}
-```
+에이전트가 checkpoint state를 JSON으로 남기고 선택한 provider, 비용 snapshot과 decision log를 기록하는 구조도 README에 설명돼 있습니다. 여기서 중요한 것은 ‘기억한다’는 표현이 아니라 process 재시작 뒤 어느 단계부터 안전하게 재개할 수 있는지입니다. tool 호출이 이미 외부 비용을 발생시켰다면 같은 stage를 재시도할 때 중복 생성하지 않도록 asset ID와 결과 상태를 확인해야 합니다.
 
-이 JSON 스니펫에서 가장 소름 돋는 부분은 바로 `cinematography` 블록입니다. OpenMontage는 단순히 "멋지게 그려줘"라고 요청하지 않습니다. CMU와 Harvard 연구진이 100명 이상의 전문 영화 제작자와 협업해 발표한 논문(arXiv:2604.21718)을 시스템 코어에 그대로 이식했습니다. 그 결과, 모호한 프롬프트 대신 'Subject(피사체), Subject Motion(동선), Scene(배경), Spatial Framing(프레이밍), Camera(카메라 앵글 및 모션)'이라는 5-Aspect Taxonomy(200여 개의 시각적 원시 데이터)로 영상 생성을 정밀하게 통제합니다. 이 룰에 맞춰 Wan 2.2 모델 같은 비디오 제너레이터의 파라미터를 조절하죠.
+## 사람 승인 지점은 창의성과 비용이 커지기 전에 둔다
 
-이 스키마에 맞춰 완벽한 JSON이 생성되면, 백엔드의 파이썬 도구들이 에셋을 찍어내고, 최종적으로는 **React 기반의 비디오 프레임워크인 Remotion과 HyperFrames가 이를 넘겨받아 밀리초 단위로 정확하게 픽셀을 결정적(Deterministic)으로 렌더링**합니다.
+OpenMontage의 Backlot storyboard 설명에는 scene별 take, prompt, asset 비용과 품질 score를 보고 render 전에 승인하는 gate가 나옵니다. 이런 승인 화면은 결과를 다 만든 뒤 폐기하는 낭비를 줄일 수 있습니다. 다만 품질 score 하나가 사람의 판단을 대신하지는 않습니다. 브랜드, 인물 표현, 자막 사실과 권리 문제는 별도 항목으로 확인해야 합니다.
 
-**Pragmatic Use Cases (실무 적용 시나리오)**
-이 대목에서 "재밌네, 근데 이거 장난감 아니야?"라고 생각하실 현업 개발자분들을 위해, 제가 직접 고민해 본 실무 적용 시나리오와 트러블슈팅 관점의 활용법을 꺼내보겠습니다.
+승인은 단계마다 무조건 받는 방식보다 위험에 맞춰 배치합니다. 공개 자료 조사와 outline은 자동으로 진행하되 외부 유료 생성 시작 전 예상 provider·횟수·상한을 확인할 수 있습니다. 사람 얼굴·상표·민감 주제가 포함된 scene은 asset 생성과 발행 전에 추가 승인을 둡니다. 최종 render 전에는 script와 scene order를, 발행 전에는 실제 영상과 audio·caption을 확인합니다.
 
-*   **대규모 트래픽 스파이크 시의 레거시 CMS 연동 아키텍처:**
-    만약 여러분이 사내에 Spring Boot나 Node.js로 구축된 기존 뉴스/콘텐츠 관리 시스템(CMS)을 운영하고 있다면, 매일 쏟아지는 수백 개의 아티클을 숏폼 영상으로 자동 변환하는 파이프라인을 구축할 수 있습니다. 
-    Spring 서버가 `{"topic":"finance", "keyword":"compound interest", "text_body":"..."}` 같은 이벤트를 Kafka나 RabbitMQ 큐에 던지면, 백그라운드에 데몬으로 떠 있는 OpenMontage 워커(Claude Code 기반)가 이를 소비합니다. 워커는 스스로 Archive.org의 무료 아카이브나 Pexels의 스톡 푸티지를 검색(Tool 호출)하고, 로컬의 Piper TTS를 통해 내레이션을 입힙니다. 이 과정에서 에이전트가 에러를 뱉으면? 하드코딩된 try-catch에 의존하는 게 아니라, 에이전트가 스스로 마크다운 에러 대응 스킬 파일을 읽고 "아, FFmpeg 코덱이 안 맞네. 명령어 인자를 수정해서 다시 돌려볼게"라며 자가 복구(Self-healing)를 시도합니다.
-*   **CHI 프로토콜을 활용한 극단적인 비용 최적화(Cost Governance):**
-    회사 돈으로 외부 API(OpenAI, Google Veo 등)를 마구 호출하다가 클라우드 청구서에 뒷목 잡아본 경험, 다들 있으시죠? OpenMontage는 API 예산 거버넌스를 위해 'CHI Protocol'을 내장했습니다. 영상 제작을 시작하기 전, 에이전트가 미리 예상 비용을 산정(Estimate)하고 예산을 예약(Reserve)합니다. 한 리포트에 따르면 60초짜리 애니메이션 숏폼 생성의 미디어 생성 비용을 단 $1.33 수준으로 억제할 수 있었습니다. 예산을 초과할 징후가 보이면, 에이전트는 즉시 값비싼 클라우드 모델 호출을 중단하고 로컬 VRAM에 올라가 있는 모델로 우회(Fallback)하는 현명한 결정을 내립니다.
+승인 뒤 입력이 바뀌면 이전 승인을 그대로 재사용하지 않습니다. script 한 문장이 수정돼 voice와 subtitle만 바뀌는지, 해당 scene asset과 전체 timing까지 다시 만들어야 하는지 dependency를 추적해야 합니다. 누가 어떤 version을 승인했는지 project log에 남기면 여러 사람이 작업할 때 최신본 혼선을 줄일 수 있습니다.
 
-**Honest Review & Trade-offs (진짜 장단점과 한계)**
-하지만, 10년 차 시니어 엔지니어로서 냉정하게 평가해보자면 이 프레임워크가 무결점의 '은불환(Silver Bullet)'은 절대 아닙니다. 실무 도입을 검토 중이라면 반드시 다음의 치명적인 트레이드오프를 감수해야 합니다.
+## Remotion·HyperFrames·FFmpeg는 서로 다른 렌더 역할을 맡는다
 
-첫째, **프론트엔드와 백엔드 스택의 혼재가 주는 극악의 러닝 커브**입니다. 파이썬 스크립트로 툴 생태계를 돌리고, 최종 렌더링은 NodeJS 환경에서 Remotion으로 처리하다 보니 시스템의 의존성(Dependency)이 끔찍하게 얽혀 있습니다. 공식 문서에는 `make setup` 한 번으로 모든 게 끝난다고 자랑하지만, 현업에서 써보면 OS별 C++ 빌드 툴체인이나 FFmpeg 버전 충돌, `pip install`과 `npm install` 패키지 꼬임 문제로 반나절 이상을 터미널과 씨름해야 할 확률이 높습니다.
-둘째, **비결정적(Non-deterministic) 레이턴시와 환각(Hallucination) 리스크**입니다. 에이전트가 500여 개의 마크다운 스킬 파일을 뒤져가며 동적으로 판단을 내리다 보니, 토큰 소비량과 추론(Inference) 시간이 기하급수적으로 늘어납니다. 유저의 요청에 1~2초 이내로 반응해야 하는 '실시간(Real-time)' 서비스에는 절대 쓸 수 없습니다. 이 프레임워크는 철저히 '비동기적(Asynchronous)인 백그라운드 배치 작업'에 적합합니다.
-셋째, **은밀한 벤더 락인(Vendor Lock-in) 리스크**입니다. 겉보기엔 완전한 오픈소스지만, 시스템의 두뇌 역할을 하는 Claude Code나 Cursor 같은 특정 AI 코딩 어시스턴트 서비스에 고도로 종속되어 있습니다. 이들의 API 정책이나 과금 모델이 바뀌면, 잘 돌아가던 파이프라인 전체가 하루아침에 마비될 수 있다는 불안감을 늘 안고 가야 합니다.
+현재 공식 README는 React 기반 Remotion, HTML·CSS·GSAP 기반 HyperFrames와 FFmpeg를 production 도구로 설명합니다. Remotion은 data-driven explainer와 React scene stack에, HyperFrames는 motion graphics 중심의 HTML 표현에 맞는 기본 선택으로 안내됩니다. FFmpeg는 encoding, subtitle burn-in, audio mixing과 post-production에 쓰입니다.
 
-**Closing Thoughts**
-솔직히 처음 이 깃허브 레포지토리의 아키텍처를 뜯어봤을 땐 강한 의구심이 들었습니다. "제어권(Control Flow)을 파이썬 코드에서 빼앗아서 에이전트한테 통째로 넘긴다고? 그게 상용 프로덕션 레벨에서 제어가 될 리가 없잖아."
+renderer가 결정적이라고 해도 외부 생성 asset까지 항상 같다는 뜻은 아닙니다. 같은 image·audio·timeline과 코드가 고정됐다면 composition을 재현하기 쉬워지지만, cloud video model을 다시 호출하면 원본 asset이 달라질 수 있습니다. 최종 결과를 재현하려면 입력 파일의 hash, font·renderer·Node·FFmpeg version과 실행 parameter를 함께 보관해야 합니다.
 
-하지만 OpenMontage의 소스코드를 분석하고 로컬에서 파이프라인을 직접 태워보며, 제 낡은 선입견은 산산조각 났습니다. 이것은 단순한 '비디오 생성 툴'의 발전이 아닙니다. **소프트웨어 아키텍처의 패러다임이 '명령어(Code) 중심'에서 '의도와 컨텍스트(Agent-Skill) 중심'으로 이동하고 있다는 가장 명백하고 역사적인 증명**입니다.
+frame rate, 해상도, color profile, audio sample rate와 subtitle safe area를 project 시작 전에 고정합니다. source asset이 서로 다른 frame rate와 aspect ratio를 가지면 자동 crop이나 interpolation이 의도한 구도를 망칠 수 있습니다. render 성공 여부만 보지 말고 representative frame, black frame, clipping, sync와 loudness를 검사합니다.
 
-이제 더 이상 완벽한 프롬프트 한 줄을 찾기 위해 밤을 새우며 모델과 기싸움을 하지 마세요. 견고하게 구조화된 마크다운 지시서와 SQLite 기반의 영속적인 상태 관리, 그리고 비용을 통제할 거버넌스 프로토콜만 잘 설계해 둔다면, 우리가 늘 쓰던 코딩 어시스턴트는 이제 훌륭한 영상 감독이자 깐깐한 편집자로 거듭날 수 있습니다. OpenMontage는 아직 초기 버전이라 셋업이 거칠고 완벽하지 않을지언정, 앞으로 다가올 '에이전틱 미디어 프로덕션(Agentic Media Production)' 시대가 어떤 모습일지 보여주는 가장 훌륭하고 도발적인 청사진임이 틀림없습니다. 당장 이번 주말, 로컬 환경에 이 녀석을 띄워놓고 마크다운 파일들이 어떻게 하나의 거대한 스튜디오를 지휘하는지 직접 확인해 보시길 강력히 권합니다. 아마 여러분의 기존 시스템 아키텍처 설계 관점 자체가 통째로 바뀔지도 모릅니다.
+공식 README가 언급하는 post-render 검수에는 ffprobe, frame 추출과 audio 분석이 포함됩니다. 이는 파일 손상과 기본 기술 오류를 잡는 데 유용하지만 서사가 자연스럽고 사실이 맞는지까지 보장하지 않습니다. 자동 검사와 사람의 editorial review를 서로 다른 gate로 유지해야 합니다.
 
-## References
-- https://github.com/calesthio/OpenMontage
-- https://github.com/calesthio/OpenMontage
+## API 키가 없는 경로도 시간과 권리 비용이 든다
+
+저장소는 Piper TTS, Archive.org·NASA·Wikimedia Commons 등의 공개 자료, Remotion·HyperFrames와 FFmpeg를 조합한 zero-key 경로를 안내합니다. ‘API 키가 없다’는 것은 외부 생성 API 청구가 없다는 뜻에 가깝습니다. local CPU·GPU 시간, download와 storage, 사람이 자료의 사용 조건을 확인하는 비용은 남습니다.
+
+공개 archive의 파일이 모두 동일 라이선스인 것도 아닙니다. 각 asset의 원문 page, creator, license, 변경·상업 이용 조건과 attribution을 scene manifest에 보관해야 합니다. stock service는 무료 개발자 key를 제공하더라도 API 약관과 배포 조건을 확인합니다. 출처를 찾지 못한 asset은 최종 render에서 제외할 수 있어야 합니다.
+
+유료 image·video·voice provider를 연결할 때는 README의 예시 가격을 예산 보장으로 사용하지 않습니다. duration, resolution, retry, 실패한 take와 region·plan에 따라 비용이 달라질 수 있습니다. tool별 최대 호출 횟수와 project budget을 두고 provider가 예상 정보를 반환하지 않으면 승인 없이 실행하지 않는 정책이 필요합니다.
+
+local model도 무료라는 말보다 capacity로 평가합니다. 한 scene 생성 시간, VRAM peak, queue와 전력, 실패율을 측정하고 cloud fallback이 언제 허용되는지 정합니다. local 결과가 품질 기준을 통과하지 못해 계속 재시도하면 싼 경로가 전체 제작 시간을 늘릴 수 있습니다.
+
+## 설치는 Python·Node·FFmpeg 경계를 함께 시험한다
+
+현재 Quick Start는 Python 3.10 이상, FFmpeg, Node.js 18 이상과 지원되는 AI coding assistant를 전제로 `make setup` 경로를 안내합니다. 이 숫자와 명령은 업데이트될 수 있으므로 설치 시점의 README와 lockfile을 우선합니다. 운영 image에는 성공한 exact version과 system package를 고정하는 편이 좋습니다.
+
+Python 환경과 `remotion-composer`의 npm 의존성, font·codec은 서로 다른 실패 지점을 만듭니다. 빈 container 또는 새 VM에서 설치를 재현하고 sample project를 끝까지 render합니다. 개발자 laptop에서 이미 설치된 package에 기대 성공한 결과는 CI나 worker에서 재현되지 않을 수 있습니다.
+
+API key는 `.env`에 모아 두더라도 agent와 모든 child process가 읽을 필요는 없습니다. provider별 최소 권한 key, project별 spending limit과 짧은 수명을 사용합니다. command log와 prompt, screenshot에 secret이 남지 않도록 redaction을 확인하고, 외부 URL download에는 allowlist·파일 크기·content type 검사와 timeout을 둡니다.
+
+OpenMontage는 AGPL-3.0 license로 공개돼 있으므로 수정·서비스 방식이 조직의 배포 모델과 맞는지도 검토해야 합니다. 이 글은 법률 판단을 대신하지 않습니다. 사내 사용, 수정본 제공과 network service 조건이 중요하다면 정확한 license text를 담당자와 확인합니다.
+
+## 파일럿은 짧고 검증 가능한 영상 하나로 시작한다
+
+첫 과제로 회사의 핵심 캠페인이나 1시간 documentary를 고르면 실패 원인이 너무 많습니다. 출처가 명확한 30~60초 explainer처럼 script 정답과 asset 조건을 사람이 빠르게 검토할 수 있는 주제가 적합합니다. 동일 brief를 현재 수동 workflow와 OpenMontage pipeline으로 각각 만들어 품질과 운영비를 비교합니다.
+
+평가 항목은 다음처럼 나눌 수 있습니다.
+
+| 평가 축 | 기록할 내용 | 중단 신호 |
+|---|---|---|
+| 사실성 | 문장별 source, 잘못된 수치·인용 | source 없는 핵심 주장 |
+| 시각 품질 | scene 일관성, crop, artifact, subtitle | 승인 뒤 반복되는 큰 재작업 |
+| 비용 | provider별 호출·실패 take·GPU 시간 | 사전 상한을 넘긴 자동 호출 |
+| 시간 | 단계별 소요, 사람 승인·재시도 | 수동 workflow보다 긴 병목이 설명되지 않음 |
+| 재현성 | manifest·asset hash·version·decision log | 실패 stage부터 안전하게 재개 불가 |
+| 권리·보안 | license, attribution, secret·외부 전송 | 출처 없는 asset 또는 과도한 key 권한 |
+
+의도적으로 실패도 넣습니다. provider timeout, 잘못된 aspect ratio, 빈 search 결과, FFmpeg 오류와 승인 거절 뒤 pipeline이 어디서 멈추고 재개하는지 봅니다. 자동 fallback이 사람 승인 없이 더 비싼 provider를 부르거나 라이선스가 다른 asset으로 바꾸지 않는지 확인합니다.
+
+두세 번의 성공 영상보다 반복 가능한 acceptance rate가 중요합니다. 주제와 길이를 바꾼 여러 project에서 첫 render 통과율, 수정 횟수, 평균·p95 비용과 완료 시간을 기록합니다. 어느 pipeline과 provider 조합이 어떤 콘텐츠에 맞았는지를 남기면 ‘에이전트가 알아서 한다’는 설명을 운영 가능한 규칙으로 바꿀 수 있습니다.
+
+## 어떤 팀에 맞고 언제 더 단순한 도구가 나은가
+
+여러 provider와 stock source를 조합하고, research부터 render까지 반복 가능한 제작 과정을 명시적으로 관리하려는 팀은 OpenMontage를 시험할 이유가 있습니다. YAML·Markdown으로 제작 규칙을 읽고 고치고 싶고 Python·Node·media tool을 운영할 역량이 있다면 agent-first 구조를 비교해 볼 수 있습니다.
+
+반대로 생성 clip 몇 개를 사람이 편집하는 작은 작업, 한 provider만 쓰는 고정 template 또는 실시간 응답이 필요한 서비스에는 더 단순한 script와 renderer가 이해하기 쉬울 수 있습니다. 단계가 적은데 많은 skill과 tool registry를 유지하면 선택 오류와 업데이트 비용이 이득보다 커집니다.
+
+도입 결론은 GitHub의 별 수나 README의 도구 개수로 내리지 않습니다. 실제 brief에서 정확한 script와 사용 가능한 asset을 만들고, 비용 상한과 승인·권리 조건을 지키며, 실패 뒤 재개 가능한지로 결정합니다. OpenMontage의 핵심 가치는 prompt 한 줄을 없애는 데 있지 않고 제작 단계와 판단 근거를 inspect 가능한 파일로 드러내는 데 있습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/calesthio/OpenMontage)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Claude Code로 영상을 대화하듯 편집하는 Video Use의 원리와 실전 활용법]({% post_url 2026-08-01-Video-Use-How-AI-Coding-Agents-Edit-Raw-Footage-Through-Text-and-FFmpeg %}) — Video Use는 Claude Code, Codex 등 AI 코딩 에이전트와 자연어로 대화하며 타임라인 편집 없이 영상을 완성하는 오픈소스 파이프라인입니다. 영상 프레임을 직접 LLM에 전달하는 대신 단어 단위 음성 스크립트를…
+- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할·제약·출력 형식을 분석하는 법과 진위·버전·저작권을 확인해야 하는 이유를 정리합니다.
+- [OpenCut 아키텍처 가이드: AI가 영상을 편집하고 코드가 타임라인을 제어하는 방법]({% post_url 2026-07-23-OpenCut-Architecture-Guide-How-AI-Edits-Video-and-Code-Controls-the-Timeline %}) — 비공개 상용 소프트웨어가 지배하던 영상 편집 시장에 등장한 완전히 새로운 대안, OpenCut 프로젝트를 조명합니다. 프라이버시를 보장하는 로컬 기반 아키텍처부터 시작해, Rust 코어 기반의 크로스플랫폼 통합, 플러그인 생태계…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### OpenMontage는 영상 생성 모델인가요?
+
+아닙니다. 여러 영상·이미지·음성·검색·편집 도구를 파이프라인으로 연결하고 AI 코딩 에이전트가 제작 단계를 수행하도록 돕는 오케스트레이션 프로젝트입니다.
+
+### API 키 없이도 OpenMontage를 사용할 수 있나요?
+
+공식 저장소는 Piper TTS·공개 아카이브·Remotion·FFmpeg 등을 이용한 경로를 안내하지만 원하는 스타일·해상도와 장비에 따라 품질·시간·추가 도구가 달라집니다.
+
+### OpenMontage를 자동 발행 파이프라인에 바로 연결해도 되나요?
+
+먼저 제한된 주제로 사람 승인·저작권 확인·비용 상한·렌더 검수와 실패 복구를 시험하고, 결과가 기준을 통과한 경우에만 발행 단계와 연결하는 편이 안전합니다.
+
+## 원문과 확인 자료
+
+- [OpenMontage 공식 저장소와 README](https://github.com/calesthio/OpenMontage)
+- [OpenMontage architecture 문서](https://github.com/calesthio/OpenMontage/blob/main/docs/ARCHITECTURE.md)
+- [OpenMontage provider 안내](https://github.com/calesthio/OpenMontage/blob/main/docs/PROVIDERS.md)

@@ -4,18 +4,24 @@ title: 'claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행
 date: '2026-05-22 08:25:45'
 categories: Tech
 tags:
+  - Claude
+  - MCP
+  - AI코딩
   - ClaudeCode
-  - ClaudePlugins
-  - LSP
-  - Playwright
-  - 에이전트권한
+  - AI에이전트
 summary: claude-plugins-official이 필요한 도구를 불러오고 LSP·브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연·권한·변경 범위·벤더 종속성을 기준으로 팀 도입법을 정리합니다.
-author: AI Trend Bot
+description: claude-plugins-official의 동적 도구 선택, LSP·브라우저 검증과 실행 권한 구조를 살펴보고 공급망·감사·파일럿 지표까지 포함한 팀 도입 기준을 설명합니다.
+faq:
+  - question: 공식 플러그인이면 별도 보안 검토 없이 설치해도 되나요?
+    answer: 아닙니다. 공식 배포 여부와 별개로 요청 권한·실행 명령·외부 통신·업데이트 경로를 확인하고 제한된 환경에서 먼저 시험해야 합니다.
+  - question: LSP 플러그인이 있으면 코드 변경이 정확하다고 볼 수 있나요?
+    answer: 아닙니다. 정의와 진단 근거는 좋아지지만 프로젝트 설정·생성 코드·런타임 동작과 업무 요구는 테스트와 리뷰로 별도 확인해야 합니다.
+  - question: 플러그인 파일럿에서 무엇을 비교해야 하나요?
+    answer: 같은 작업의 완료 시간뿐 아니라 테스트 통과율, 잘못 건드린 파일 수, 도구 호출·승인 횟수, 토큰·지연과 실패 후 복구 시간을 함께 비교해야 합니다.
 github_url: https://github.com/anthropics/claude-plugins-official
 image:
   path: https://opengraph.githubassets.com/1/anthropics/claude-plugins-official
-  alt: 'The Toy Era of AI Coding Assistants is Over: What the Under-the-Hood Architecture
-    of claude-plugins-official Reveals About the Future of Real Agentic Development'
+  alt: "anthropics/claude-plugins-official GitHub 저장소 대표 이미지"
 ---
 
 `claude-plugins-official`의 가치는 플러그인 수가 아니라, LSP와 브라우저 같은 외부 증거를 코드 제안 앞에 붙이고 그 실행 권한을 제한할 수 있느냐에 달려 있습니다.
@@ -63,7 +69,67 @@ Claude Code와 플러그인 생태계에 CI·권한·로컬 개발 흐름을 강
 
 결론은 “AI 코딩 비서의 장난감 시대가 끝났다”가 아닙니다. 플러그인이 모델의 추측을 LSP·테스트·브라우저 증거로 바꾸고, 실패했을 때 변경 범위를 통제할 수 있을 때 비로소 팀 도구가 됩니다.
 
+## 설치 전에는 플러그인의 신뢰 경계를 읽는다
+
+플러그인은 프롬프트 모음에 그치지 않고 로컬 명령, 파일, 브라우저와 외부 서비스에 접근할 수 있습니다. 저장소 이름에 `official`이 들어가더라도 현재 설치하는 package와 commit, 배포 주체가 같은지 확인해야 합니다. manifest와 설치 스크립트, 요구 권한, 외부 endpoint, 자동 업데이트 방식을 검토하고 검증한 버전을 고정하는 편이 안전합니다.
+
+의존성도 함께 봅니다. 플러그인이 실행하는 MCP 서버나 npm·Python package가 별도 공급망을 만들 수 있고, 업데이트 뒤 권한이 넓어질 수 있습니다. lockfile과 checksum을 보관하고 새 버전은 기존 권한·동작 회귀 테스트를 통과한 뒤 배포합니다. 플러그인을 제거했을 때 남는 credential, 설정과 background process도 확인합니다.
+
+테스트 저장소에는 실제 고객 데이터와 운영 비밀값을 넣지 않습니다. 읽기 전용 토큰과 만료가 짧은 계정을 사용하고, 브라우저 프로필은 개인 세션과 분리합니다. 플러그인이 접근하지 않아야 할 파일을 canary로 두고 읽기·전송 시도가 정책에서 차단되는지 시험하면 문서상의 권한과 실제 효과를 비교할 수 있습니다.
+
+## 도구 결과에는 출처와 시점을 붙인다
+
+LSP가 반환한 진단에는 파일·줄·진단 코드와 프로젝트 설정이 필요합니다. 에이전트가 요약한 오류만 남기면 어떤 근거로 수정했는지 재현하기 어렵습니다. 브라우저 검증도 URL, viewport, 사용자 상태, 실행한 단계와 최종 assertion을 기록해야 단순한 화면 캡처를 테스트 통과로 오해하지 않습니다.
+
+도구 호출 전에 대상 범위와 기대 결과를 선언하게 하면 검토가 쉬워집니다. 예를 들어 “이 파일의 타입 오류 두 건을 확인하고 수정 뒤 같은 진단과 단위 테스트를 재실행한다”처럼 범위를 고정합니다. 결과가 예상과 다르면 다른 플러그인을 연쇄 호출하기보다 현재 가설과 새 증거를 다시 보여 주도록 합니다.
+
+언어 서버의 인덱스가 오래됐거나 workspace가 잘못 열렸을 수도 있습니다. 실행 중인 프로젝트 root, config와 commit을 도구 결과에 포함하고, 변경 뒤 진단이 사라졌어도 테스트가 실패하면 성공으로 처리하지 않습니다. 서로 다른 증거가 충돌할 때 우선순위를 사람이 확인할 수 있어야 합니다.
+
+## 승인은 위험도와 되돌릴 수 있는지에 따라 나눈다
+
+모든 명령에 승인을 요구하면 사용자는 내용을 읽지 않고 클릭하게 되고, 모든 명령을 자동 허용하면 한 번의 오판이 넓게 퍼집니다. 파일 목록과 검색처럼 읽기 전용 작업, 임시 branch의 코드 수정, 외부 전송·배포·삭제처럼 영향이 큰 작업을 나눠 승인 정책을 설계합니다. command 이름만 아니라 대상 경로와 인자도 범위에 포함합니다.
+
+쓰기 작업에는 허용 디렉터리, 최대 변경 파일 수와 diff 크기 상한을 둘 수 있습니다. 상한을 넘으면 실행을 멈추고 계획을 다시 보여 줍니다. Git commit과 push, issue·메일 전송, cloud resource 변경은 코드 수정과 별도 권한으로 둡니다. 하위 에이전트나 플러그인이 호출한 또 다른 도구에도 원래 제한이 이어져야 합니다.
+
+감사 로그는 누가 승인했는지만 기록해서는 부족합니다. 어떤 입력으로 어느 도구와 버전을 호출했고, 무엇을 읽거나 바꿨으며, 결과와 오류가 무엇이었는지 연결해야 합니다. 비밀값은 저장하지 않되 사건을 재현할 수 있는 요청 ID와 hash를 남깁니다.
+
+## 파일럿 평가는 속도·품질·통제력을 함께 본다
+
+대표 작업을 정의 수정, 타입 오류, UI 회귀, 여러 파일 리팩터링처럼 나누고 난이도별로 반복합니다. 기존 방식과 플러그인 방식에서 첫 정확한 근거까지 시간, 전체 완료 시간, 테스트 통과, 리뷰 수정 횟수와 예상 밖 파일 변경을 기록합니다. 평균만 보면 큰 실패 한 번의 비용이 가려지므로 p95 작업 시간과 실패 후 원상복구도 봅니다.
+
+동적 도구 선택의 효과는 매 요청에 실린 도구 정의 토큰과 검색 호출 지연을 함께 비교합니다. 토큰은 줄었지만 잘못된 도구를 골라 재시도한다면 이득이 사라질 수 있습니다. 사용하지 않은 플러그인이 많아질수록 검색 정확도와 유지보수 비용이 어떻게 변하는지도 정기적으로 확인합니다.
+
+팀 전체 배포 전에는 권한 거부, LSP 중단, 브라우저 로그인 만료, 외부 서비스 timeout과 플러그인 업데이트 실패를 넣습니다. 제한된 기능으로 계속할지 작업을 중단할지 정책이 일관돼야 합니다. 생산성이 조금 좋아져도 권한 우회나 원인 불명의 변경이 남으면 파일럿을 확대하지 않는 것이 맞습니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/anthropics/claude-plugins-official)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
+- [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
+- [Block의 Buzz: 인간과 AI 에이전트가 Cryptographic Identity로 협업하는 하이브마인드 워크스페이스]({% post_url 2026-08-07-Buzz-by-Block-A-Hive-Mind-Communication-Platform-Built-on-Nostr-Protocol %}) — Block이 공개한 Buzz는 인간 개발자와 AI 에이전트가 동일한 공간에서 암호화된 정체성(secp256k1)을 바탕으로 협업하는 오픈소스 하이브마인드 플랫폼입니다. Nostr 프로토콜 기반의 단일 서명 로그를 활용하여 대화…
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### 공식 플러그인이면 별도 보안 검토 없이 설치해도 되나요?
+
+아닙니다. 공식 배포 여부와 별개로 요청 권한·실행 명령·외부 통신·업데이트 경로를 확인하고 제한된 환경에서 먼저 시험해야 합니다.
+
+### LSP 플러그인이 있으면 코드 변경이 정확하다고 볼 수 있나요?
+
+아닙니다. 정의와 진단 근거는 좋아지지만 프로젝트 설정·생성 코드·런타임 동작과 업무 요구는 테스트와 리뷰로 별도 확인해야 합니다.
+
+### 플러그인 파일럿에서 무엇을 비교해야 하나요?
+
+같은 작업의 완료 시간뿐 아니라 테스트 통과율, 잘못 건드린 파일 수, 도구 호출·승인 횟수, 토큰·지연과 실패 후 복구 시간을 함께 비교해야 합니다.
+
 ## 참고 자료
 
-- https://github.com/anthropics/claude-plugins-official
-- https://docs.claude.com/en/docs/claude-code/plugins
+- [GitHub 저장소](https://github.com/anthropics/claude-plugins-official)
+- [공식 문서](https://docs.claude.com/en/docs/claude-code/plugins)

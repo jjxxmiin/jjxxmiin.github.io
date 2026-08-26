@@ -1,51 +1,47 @@
 ---
 layout: post
-title: '우리가 원했던 건 챗봇이 아니라 ''내 뇌의 복제본''이었다: OpenHuman 아키텍처 심층 해부'
+title: 'OpenHuman이 Slack·GitHub를 로컬 기억으로 모아도 될까: OAuth·동기화·가짜 기억'
 date: '2026-05-13 08:11:08'
 categories: Tech
 tags:
-  - 아키텍처분석
-  - Llama
   - 온디바이스AI
-  - ChatGPT
-  - 경량화
-summary: 단순한 챗봇을 넘어, 내 모든 업무 컨텍스트를 로컬 환경에서 영구 기억하는 Rust+Tauri 기반 AI 에이전트 OS 'OpenHuman'의
-  아키텍처와 실무적 가치를 파헤칩니다.
-author: AI Trend Bot
+  - AI코딩
+  - LLM
+  - 벡터DB
+  - 오픈소스
+summary: 'OpenHuman이 Rust·Tauri desktop에서 SaaS 활동을 markdown·SQLite memory로 수집한다는 구조를 살펴보고, OAuth·egress·압축 손실·오래된 기억과 삭제 조건을 정리합니다.'
+description: "OpenHuman의 SaaS auto-fetch·TokenJuice·SQLite/Markdown memory와 model routing을 OAuth scope·incremental sync, provenance·privacy 삭제와 local resource 기준으로 검증합니다."
 github_url: https://github.com/tinyhumansai/openhuman
+faq:
+  - question: "OpenHuman을 설치하면 내 업무를 이해하는 brain clone이 만들어지나요?"
+    answer: "아닙니다. 여러 source를 검색 가능한 memory로 만들 수 있어도 누락·오래된 요약과 권한 오류가 생기며 사람의 판단·원장 source를 대체하지 않습니다."
+  - question: "local-first이면 Slack·GitHub data가 외부로 전혀 나가지 않나요?"
+    answer: "보장하지 않습니다. OAuth API, model·embedding provider, update·telemetry와 plugin의 network flow를 실제 설정에서 확인하고 egress를 제한해야 합니다."
+  - question: "TokenJuice처럼 text를 압축하면 정보가 안전하게 보존되나요?"
+    answer: "아닙니다. HTML·URL·non-ASCII 제거가 식별자·언어·근거를 훼손할 수 있어 source 원문, diff와 retrieval 정확도를 비교해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/tinyhumansai/openhuman
-  alt: 'What We Wanted Wasn''t a Chatbot, But a Clone of Our Brain: Deep Dive into
-    OpenHuman Architecture'
+  alt: "tinyhumansai/openhuman GitHub 저장소 대표 이미지"
 ---
 
-솔직히 한 번 물어보죠. 하루에 몇 번이나 IDE에서 코드를 긁어다 ChatGPT 창에 복사+붙여넣기를 하시나요?
-"이 컨텍스트 좀 기억해 줘"라고 아무리 프롬프트를 깎아봤자, 브라우저 탭을 닫거나 세션이 만료되면 AI는 마치 어제 과음한 사람처럼 모든 걸 하얗게 잊어버립니다. 현업 개발자들이 AI를 쓰면서 느끼는 가장 큰 피로감은 바로 이 'Stateless(상태 없음)'에서 옵니다. 
-최근 유행했던 OpenClaw나 AutoGPT 같은 에이전트 프레임워크를 도입해 본 분들이라면 아실 겁니다. 에이전트 하나 세팅하려고 Mac Mini를 따로 할당하고, 파이썬 가상환경을 잡고, 무거운 설정 파일과 씨름해야 했죠. 그렇게 며칠을 고생해서 세팅해 둬도, 결국 내 업무 히스토리를 파악하는 데 또 수 주일의 시간이 걸립니다.
+OpenHuman은 여러 업무 source의 활동을 local desktop으로 가져와 markdown·SQLite memory로 검색하려는 프로젝트 후보입니다. 그러나 메일·Slack·GitHub·Jira를 연결하는 순간 “brain clone”보다 OAuth 권한, 수집 지연·누락, 압축 손실과 개인정보 삭제가 더 중요한 문제가 됩니다. 비민감 test account와 읽기 전용 connector 하나로 data flow를 확인한 뒤에만 범위를 넓혀야 합니다.
 
-우리가 진정 원했던 건 내가 매번 상황을 설명해야 하는 '똑똑한 인턴'이 아니라, 내 메일함, 슬랙, 깃허브, 지라(Jira)를 실시간으로 같이 읽고 내 뇌의 컨텍스트를 완벽히 동기화하는 '나의 복제본'입니다. 
+[OpenHuman 저장소](https://github.com/tinyhumansai/openhuman)는 Rust core와 Tauri desktop, memory tree·TokenJuice와 local model 연동을 설명하는 것으로 원문에 소개됩니다. 118+ integrations, 20분 주기, resource·token 절감과 특정 기능은 현재 commit·문서에서 확인해야 하는 프로젝트 주장입니다. “local-first”는 저장 위치의 성향이지 외부 SaaS·model과 network가 없다는 보장이 아닙니다.
 
-처음 **OpenHuman** 레포지토리를 발견했을 때만 해도 '또 하나의 뻔한 랭체인(LangChain) 래퍼겠지'라며 회의적이었습니다. 하지만 아키텍처 문서를 열고 내부의 'Subconscious Loop(무의식 루프)'와 'TokenJuice' 압축 로직을 뜯어보는 순간, 등골이 오싹해지더라고요. 이건 단순한 AI 툴이 아닙니다. 개인의 데이터를 로컬에서 영구적으로 구조화하는 **개인용 AI OS(Operating System)**의 등장입니다.
-
-> OpenHuman은 클라우드에 의존하는 일회성 챗봇 패러다임을 박살 내고, 118개의 SaaS 데이터를 20분마다 로컬로 끌어와 마크다운으로 압축한 뒤 영구적인 '지식 트리'를 구축하는 **Rust+Tauri 기반의 로컬 퍼스트 AI 에이전트 생태계**입니다.
-
-이 녀석이 기술적으로 어떻게 이토록 가벼우면서도 집요하게 컨텍스트를 유지하는지 밑바닥부터 파헤쳐 보겠습니다. 
-
-OpenHuman은 무거운 파이썬 백엔드를 과감히 버리고, **Rust Core + Tauri**라는 극한의 퍼포먼스 스택을 선택했습니다. 이를 통해 데스크톱 네이티브 앱으로 동작하면서 시스템 리소스를 최소화하죠. 핵심은 에이전트가 정보를 수집하고 기억하는 방식인 **Memory Tree**와 **TokenJuice**에 있습니다.
+## Rust·Tauri와 memory tree는 무엇을 분리하나
 
 | 비교 항목 | 기존 AI 에이전트 (OpenClaw, AutoGPT 등) | OpenHuman |
 | :--- | :--- | :--- |
 | **기억 장치(Memory)** | Vector DB 기반 단편적 Top-K 검색 | SQLite + Karpathy 스타일 Obsidian 마크다운 트리 |
-| **컨텍스트 주입** | 사용자가 수동으로 파일 업로드 또는 프롬프팅 | 118+ 앱 연동, 20분 주기로 로컬 자동 패치 (Auto-fetch) |
-| **토큰 최적화** | Raw 텍스트 그대로 전송 (API 비용 폭탄) | **TokenJuice**: HTML→MD 변환, 비-ASCII 제거 등 사전 압축 |
-| **인프라 종속성** | 클라우드 인프라 / 별도 호스팅 필수 | 데스크톱 로컬 퍼스트 (Ollama 연동 시 완전 오프라인 가능) |
+| **컨텍스트 주입** | 수동 file·prompt 또는 구현별 connector | 원문 118+·20분 auto-fetch 주장 검증 필요 |
+| **토큰 최적화** | 구현에 따라 raw·chunk·summary | TokenJuice 변환 결과 검증 필요 |
+| **인프라 경계** | cloud·self-hosted 구성별 차이 | local desktop이지만 SaaS·model egress 확인 필요 |
 
-**1. 안드레이 카파시(Andrej Karpathy) 스타일의 Obsidian 메모리 트리**
-AI가 기억을 유지하는 가장 좋은 방법이 뭘까요? 복잡한 그래프 DB? 아닙니다. 카파시가 극찬했던 방식 그대로, 인간과 AI가 모두 읽기 쉬운 **마크다운 파일의 계층 구조**입니다.
-OpenHuman은 연동된 모든 앱에서 20분마다 데이터를 끌어와 최대 3,000 토큰 크기의 마크다운 청크(Chunk)로 쪼갭니다. 이를 내부 SQLite에 인덱싱하는 동시에, 사용자가 직접 열어보고 수정할 수 있는 Obsidian 호환 폴더에 `.md` 파일로 떨궈버립니다. AI의 뇌를 파일 시스템으로 까볼 수 있다는 건, 실무자 입장에서 엄청난 디버깅 편의성을 제공하죠.
+원문은 source activity를 약 3,000 token markdown chunk로 만들고 SQLite index와 사용자가 읽을 수 있는 folder에 보관하는 memory tree를 설명합니다. 실제 interval·chunk는 config와 code에서 확인해야 합니다. Markdown은 사람이 감사·수정하기 쉽지만 source message의 thread, edit·delete, permission과 timestamp가 빠지면 현재 사실을 오해할 수 있습니다. 각 file에 source ID·URL, fetched·event time, revision과 access scope를 붙입니다.
 
-**2. TokenJuice: 극한의 토큰 다이어트**
-수많은 SaaS에서 20분마다 데이터를 긁어오면 API 비용이 감당이 될까요? 여기서 OpenHuman의 핵심 기술인 **TokenJuice**가 등장합니다. LLM에 데이터를 밀어 넣기 전에, 로컬 Rust 코어에서 텍스트를 극한으로 압축해 버립니다.
+## TokenJuice는 byte가 아니라 의미 보존으로 평가한다
+
+원문은 LLM에 넣기 전에 HTML, whitespace, URL과 일부 문자를 정리하는 TokenJuice layer를 설명합니다. 아래 Rust는 내부 구현으로 검증된 code가 아니라 개념을 재구성한 의사 코드입니다. `remove_non_ascii`를 사용하면 한국어·이름·수식이 사라질 수 있고 URL 축약은 issue·commit provenance를 훼손할 수 있습니다.
 
 ```rust
 // [개념적 이해를 위한 OpenHuman Rust Core 내부 로직 재구성]
@@ -54,7 +50,7 @@ async fn run_subconscious_loop(&self, user_integrations: Vec<Integration>) -> Re
         // 1. 20분 주기로 슬랙, 깃허브 등에서 Raw 데이터를 긁어옴
         let raw_data = app.fetch_recent_activity().await?;
         
-        // 2. TokenJuice 압축 레이어 (API 비용 및 지연시간 80% 감소 효과)
+        // 2. TokenJuice 변환 레이어의 개념적 예시
         let compressed_md = TokenJuice::new()
             .strip_html_tags()
             .remove_non_ascii()
@@ -72,40 +68,69 @@ async fn run_subconscious_loop(&self, user_integrations: Vec<Integration>) -> Re
     Ok(())
 }
 ```
-HTML 태그, 쓸데없는 여백, 불필요한 특수문자를 정규식과 파서를 통해 모조리 날려버립니다. 실제로 이 레이어를 거치면 지난 6개월 치 이메일 히스토리를 훑어보는 데 드는 컨텍스트 비용이 불과 몇 달러 수준으로 떨어집니다.
+변환 전후 source를 고정해 key fact·ID·date·thread와 citation recall을 비교합니다. Token byte·model input과 전체 retrieval 비용을 따로 측정하고 삭제된 구간의 diff를 보존합니다. 비용이 몇 달러라는 원문 표현은 corpus·model·질문 수가 없으므로 계획값으로 사용하지 않습니다. 보안상 HTML script·tracking을 제거하더라도 attachment와 hidden text의 처리 정책이 필요합니다.
 
-**3. Automatic Model Routing (지능형 라우팅)**
-이것도 현업에서 눈여겨볼 만합니다. 모든 요청을 비싼 최신 모델로 보내지 않습니다. 단순 요약이나 빠른 검색(`hint:fast`)은 로컬의 Ollama나 저렴한 모델로 태우고, 복잡한 추론(`hint:reasoning`)만 프론티어 모델로 보냅니다. 이 라우터가 투명하게 동작하므로 개발자가 일일이 프롬프트를 분기 칠 필요가 없습니다.
+## model routing은 data 등급을 먼저 봐야 한다
 
-그렇다면 현업에서 이 녀석을 어떻게 굴려먹을 수 있을까요? 뻔한 '코드 리뷰 봇' 같은 예시는 집어치우겠습니다.
+원문은 `hint:fast`와 `hint:reasoning`에 따라 local Ollama·저가 model과 frontier model을 고르는 route를 설명합니다. 실제 hint와 model support를 code에서 확인해야 합니다. 복잡도보다 data classification을 먼저 적용해 민감 source가 cloud fallback으로 나가지 않게 하고 선택 model·이유·비용을 사용자와 trace에 표시합니다. Route 오류로 품질이 낮아졌을 때 manual override와 no-egress mode가 필요합니다.
 
-**시나리오 A: 레거시 모놀리스(Monolith) 시스템 온보딩과 히스토리 추적**
-새로운 회사나 팀에 합류했을 때를 떠올려보세요. 문서화는 안 되어 있고, Spring Boot 코드는 얽혀있으며, 3년 전 퇴사자가 남긴 주석은 암호문 같습니다. 
-이때 OpenHuman을 사내 GitHub Repo, Jira, Slack과 연동합니다. 20분 뒤, 이 에이전트는 지난 수년간의 이슈 티켓과 슬랙 스레드를 TokenJuice로 압축해 자신의 Memory Tree에 구겨 넣습니다.
-이제 이렇게 물어볼 수 있습니다. *"PaymentService.java의 402번 라인에 있는 예외 처리 로직, 이거 왜 들어간 거야?"* 
-일반 챗봇이라면 소스코드만 보고 헛소리를 하겠지만, OpenHuman은 즉시 자신의 로컬 마크다운 트리를 뒤져 **"2024년 3월 #dev-alerts 슬랙 채널에서 결제 PG사 타임아웃 장애가 있었고, 당시 티켓 JIRA-4092의 논의 결과에 따라 임시로 추가된 하드코딩입니다"**라고 답변합니다. 이건 정말 소름 돋는 경험이죠.
+## 첫 connector는 어떤 업무로 검증할까
 
-**시나리오 B: 대규모 트래픽 스파이크 시 실시간 장애 대응**
-새벽 3시, 갑자기 서버에 얼럿이 쏟아집니다. 비몽사몽간에 터미널을 열고 로그를 뒤지는 대신, 데스크톱에 상주하는 OpenHuman에게 마이크로 말합니다. *"지금 터진 에러 로그 최근 100줄만 긁어와서 분석해 줘."* 
-배터리가 포함된(Batteries included) Coder Toolset을 통해 에이전트가 직접 터미널에 `grep`을 때려 로그를 가져옵니다. 그리고 기존에 학습된 시스템 아키텍처 컨텍스트(Notion에 연동해 둔 인프라 문서)를 결합하여 장애의 근본 원인을 파악해냅니다. AWS 콘솔에 들어가기 전에 이미 어디가 터졌는지 파악이 끝나는 겁니다.
+Legacy onboarding에서는 전체 Slack·Jira를 즉시 연결하지 않고 test repository의 issue와 확인 가능한 design decision부터 수집합니다. “이 line이 왜 생겼나” 질문에 source commit·ticket과 thread를 실제로 인용하는지 봅니다. 예시의 JIRA-4092 같은 구체 답은 확인되지 않은 시나리오이므로 성능 사례로 쓰지 않습니다. 답이 없을 때 자연스러운 이유를 만들어내지 않고 미확인으로 끝나야 합니다.
 
-물론, 시니어의 눈으로 봤을 때 무조건 찬양할 수만은 없는 '숨겨진 함정'들도 분명히 존재합니다. 도입을 고려한다면 다음 트레이드오프를 반드시 감내해야 합니다.
+장애 대응에는 production terminal 권한을 주지 않습니다. Redacted log·architecture document를 snapshot으로 넣어 관련 source를 찾는 read-only 보조로 평가합니다. Runtime metric과 현재 상태는 monitoring 원장에서 확인하고 patch·AWS 변경은 기존 incident·approval 절차를 따릅니다. Local desktop agent가 오래된 memory를 최신 장애 사실로 오해하지 않도록 source freshness를 표시합니다.
 
-1. **무자비한 로컬 스토리지 및 CPU 점유율 (The "Auto-Fetch" Trap)**
-"Zero Setup"을 표방하지만, 118개 앱에서 20분마다 데이터를 긁어와 로컬 Ollama로 임베딩을 돌린다고 생각해 보세요. 슬랙 채널이 수십 개인 조직이라면, 이 'Subconscious Loop'가 돌아갈 때마다 노트북의 쿨러가 이륙하는 소리를 듣게 될 겁니다. 특히 SQLite DB가 겉잡을 수 없이 비대해지면 Tauri의 JSON-RPC 브릿지를 통해 프론트엔드로 데이터를 넘길 때 UI 스터터링(버벅임)이 발생할 위험이 농후합니다.
-2. **초기 베타의 불안정성 (GPLv3 라이선스의 양날의 검)**
-현재 오픈소스로 빠르게 발전하고 있지만, 플러그인 생태계가 파편화될 위험이 있습니다. 서드파티 통합 과정에서 OAuth 토큰이 만료되거나 API Rate Limit에 걸렸을 때, 에이전트가 '사일런트 페일(Silent Fail)' 상태에 빠져 사용자가 모르는 사이에 기억이 업데이트되지 않는 버그가 종종 리포트되고 있습니다.
-3. **가짜 기억(Hallucination)의 영구화 리스크**
-LLM이 생성한 잘못된 요약본이 마크다운 파일로 저장되어 버리면 어떻게 될까요? 다음번 추론 때 이 '가짜 기억'을 사실로 받아들여 눈덩이처럼 잘못된 컨텍스트를 형성할 수 있습니다. 카파시 방식의 Obsidian 파일 포맷을 채택한 것도, 결국엔 **인간이 정기적으로 개입해서 거짓 기억을 가지치기(Pruning) 해줘야 한다는 한계**를 방증하는 셈입니다.
+## OAuth와 incremental sync에서 무엇이 실패하나
 
-처음 기술 업계에 발을 들였을 때, 우리는 기계가 인간의 언어를 이해하는 날을 꿈꿨습니다. 그리고 LLM은 그것을 해냈죠. 하지만 언어를 이해하는 것과 '나라는 사람을 이해하는 것'은 완전히 다른 차원의 문제입니다.
+Connector마다 최소 OAuth scope, organization admin 승인, token storage·rotation과 revoke를 확인합니다. Slack private channel·deleted message, GitHub private repository와 Jira project의 기존 권한이 local index에서 더 넓어지지 않아야 합니다. 사용자가 source access를 잃으면 이미 저장한 local memory의 처리 정책도 필요합니다.
 
-OpenHuman은 AI가 단순히 클라우드에 떠 있는 '전지전능한 오라클'이 아니라, 내 컴퓨터에 상주하며 나와 함께 늙어가는 '반려자' 혹은 '뇌의 외장하드'가 되어가는 과정을 보여주는 완벽한 이정표입니다. Rust와 Ollama를 활용한 데이터 무결성 보장, Tauri 기반의 가벼움, 그리고 TokenJuice를 통한 극한의 실용주의까지.
+Incremental sync는 cursor·event ID와 revision을 보존하고 같은 event를 멱등하게 upsert합니다. Rate limit·token expiry·partial page, device sleep과 clock 변화 뒤 gap을 감지해 사용자에게 last successful sync·lag와 누락 source를 보여 줍니다. Full resync와 connector별 purge 경로를 유지하며 silent failure를 정상으로 표시하지 않습니다.
 
-아직은 CPU를 태우며 쿨러를 윙윙 돌게 만드는 투박한 초기 버전일지 모릅니다. 하지만 프롬프트 엔지니어링에 지쳐버린 현업 실무자라면, 이번 주말 당장 GitHub에서 이 레포지토리를 클론해 보시길 권합니다. 이 녀석이 여러분의 지난 1년 치 슬랙 대화를 조용히 읽고 정리하는 모습을 지켜보노라면, 소프트웨어 인터페이스의 다음 10년이 어디로 향하고 있는지 본능적으로 깨닫게 되실 겁니다. 
-진짜 AI 혁명은 클라우드 너머가 아니라, 바로 우리들의 '로컬 디스크' 안에서 시작되고 있으니까요.
+118 integrations와 20분 주기를 그대로 운영 가정으로 삼지 말고 connector 1·5·10개에서 API call, new event, embedding token, CPU·peak memory, battery·disk와 SQLite query p95를 측정합니다. 낮은 activity source를 계속 polling하는 대신 webhook·backoff와 user-defined interval을 검토합니다. UI bridge에는 필요한 page만 전달해 큰 JSON을 매번 복사하지 않습니다.
 
-## References
+## 가짜 기억과 삭제를 어떻게 다룰까
+
+Raw source, deterministic transform과 LLM summary를 다른 층으로 저장합니다. Summary가 틀리면 원문으로 돌아가고 재생성할 수 있어야 하며 model text를 confirmed fact로 자동 승격하지 않습니다. Memory에는 source·revision·generated model, confidence와 user verified status를 표시합니다. Source가 edit·delete되면 파생 markdown·index·summary를 update 또는 tombstone 처리합니다.
+
+사용자는 connector·source·기간별로 memory를 조회·export·정정·삭제할 수 있어야 합니다. 삭제가 SQLite, markdown folder, embedding cache와 backup에서 언제 완료되는지 추적합니다. Local disk encryption, OS user permission과 backup sync를 확인하고 Obsidian vault를 cloud folder에 두면 local-only 주장이 달라진다는 점을 알려야 합니다.
+
+golden 질문에는 현재·과거 결정, 같은 이름의 project, 삭제된 message, 한국어·URL과 상반된 thread를 넣습니다. Retrieval citation, stale·false memory, cross-source permission, token·latency와 삭제 완료를 recent-window·keyword search 기준선과 비교합니다. 압축률이 높아도 citation이 틀리면 실패입니다.
+
+## 결론: brain clone이 아니라 감사 가능한 personal index다
+
+OpenHuman의 가치는 여러 source를 사용자가 읽을 수 있는 local artifact로 모으는 구조에서 검토할 수 있습니다. 그러나 Rust·Tauri·Ollama가 data integrity를 자동 보장하거나 인간의 기억·판단을 복제하지 않습니다. Connector 권한과 freshness, 원문 provenance·정정·삭제를 설명할 수 있을 때 개인 검색 계층으로 쓸 수 있습니다.
+
+비민감 source 하나의 read-only pilot에서 반복 가능한 이득이 확인되기 전에 전체 업무 history를 clone하거나 OAuth token을 넓게 주지 마십시오. 프로젝트 주장과 현재 release를 확인하고 local resource·privacy 비용을 포함해 판단하는 것이 안전합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/tinyhumansai/openhuman)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [agentmemory를 붙이면 AI가 어제를 기억할까: 검색·삭제·오염 테스트]({% post_url 2026-05-12-Seniors-Perspective-No-More-Nice-to-Meet-You-from-AI-How-agentmemory-Cures-LLMs-Short-Term-Amnesia %}) — agentmemory의 4단계 기억과 BM25·벡터 검색을 살펴보고, 장기 기억을 도입하기 전 정확도·오염·삭제·장애 복구를 검증하는 방법을 정리합니다.
+- [DeepTutor: 지식 그래프와 멀티 에이전트 기반의 맞춤형 AI 학습 플랫폼]({% post_url 2026-08-12-DeepTutor-Agent-Native-Lifelong-Personalized-Tutoring-Framework-by-HKU %}) — 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대 멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
+- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail·OAuth·LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### OpenHuman을 설치하면 내 업무를 이해하는 brain clone이 만들어지나요?
+
+아닙니다. 여러 source를 검색 가능한 memory로 만들 수 있어도 누락·오래된 요약과 권한 오류가 생기며 사람의 판단·원장 source를 대체하지 않습니다.
+
+### local-first이면 Slack·GitHub data가 외부로 전혀 나가지 않나요?
+
+보장하지 않습니다. OAuth API, model·embedding provider, update·telemetry와 plugin의 network flow를 실제 설정에서 확인하고 egress를 제한해야 합니다.
+
+### TokenJuice처럼 text를 압축하면 정보가 안전하게 보존되나요?
+
+아닙니다. HTML·URL·non-ASCII 제거가 식별자·언어·근거를 훼손할 수 있어 source 원문, diff와 retrieval 정확도를 비교해야 합니다.
+
+## 참고 자료
 - > **Repository**: [tinyhumansai/openhuman](https://github.com/tinyhumansai/openhuman)
 - > **License**: GNU GPLv3
 - > **Architecture**: Rust Core Sidecar + Tauri + React (JSON-RPC Bridge)

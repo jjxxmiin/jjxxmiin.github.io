@@ -7,17 +7,16 @@ tags:
   - AI코딩
   - AI보안
   - ClaudeCode
-  - AI에이전트
   - LLM
+  - AI에이전트
 summary: AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트
   피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일 'Destructive Command Guard'의 작동
   원리와 실무 도입 방법을 심층 분석합니다.
-author: AI Trend Bot
+description: 'Destructive Command Guard가 셸 명령을 실행 전에 분석하는 방식과 패턴·AST 검사의 범위, 우회·오탐·fail-open 정책 검증법을 설명합니다.'
 github_url: https://github.com/Dicklesworthstone/destructive_command_guard
 image:
   path: https://opengraph.githubassets.com/1/Dicklesworthstone/destructive_command_guard
-  alt: 'Destructive Command Guard: Designing a Safety Layer to Control Terminal Command
-    Execution by AI Agents'
+  alt: "Dicklesworthstone/destructive_command_guard GitHub 저장소 대표 이미지"
 project:
   stars: 3004
   forks: 109
@@ -41,25 +40,9 @@ project:
   files: 541
 mermaid: true
 chart: true
-faq:
-- question: Destructive Command Guard(dcg)는 AI 에이전트의 작동이나 시스템 속도를 크게 늦추지 않나요?
-  answer: 그렇지 않습니다. Rust 언어로 작성되어 0.1밀리초 수준의 Aho-Corasick 알고리즘 1차 필터링을 수행하므로, 사용자가
-    지연을 체감할 수 없는 서브 밀리초(sub-millisecond) 단위로 동작합니다. 일반적인 명령어는 성능 저하 없이 즉시 통과됩니다.
-- question: 어떤 AI 에이전트들을 지원하며, 설정은 복잡한가요?
-  answer: Claude Code, Cursor, Copilot CLI, Aider, Gemini CLI 등을 포함하여 12개 이상의 주요 AI
-    에이전트를 지원합니다. 설치 스크립트 실행 시 `--easy-mode` 플래그를 추가하면 시스템 내의 에이전트를 자동 탐지하여 Hook을 알아서
-    구성해 주므로 설정이 매우 간단합니다.
-- question: 설명 중 'Fail-open 설계'란 구체적으로 무슨 의미인가요?
-  answer: 분석 엔진이 알 수 없는 셸 문법을 만나 파싱에 실패하거나 검사 시간을 초과하여 크래시(Crash)가 날 경우, 명령어를 차단하는
-    대신 실행을 허용(Allow)한다는 뜻입니다. 이는 보안 도구의 오류가 개발자의 정상적인 작업 흐름을 중단시키는 것을 막기 위한 실용적인 타협입니다.
-- question: AI 에이전트가 아닌 제가 직접 입력하는 터미널 스크립트 환경에서도 사용할 수 있나요?
-  answer: 네, 가능합니다. 기본적으로는 AI 에이전트의 Hook으로 동작하도록 설계되었으나, 사용자의 셸 설정 파일(.bashrc, .zshrc)에
-    직접 바이너리를 래핑하도록 구성하면 일반적인 터미널 환경에서도 실수 방지용 가드레일로 훌륭하게 작동합니다.
-- question: 파일 삭제나 Git 명령어 외에 도커나 쿠버네티스 명령어도 막아줄 수 있나요?
-  answer: 네, 기본 팩 외에도 50개 이상의 선택적 팩(Opt-in packs)을 제공합니다. 데이터베이스 스키마 삭제(DROP TABLE),
-    Docker 리소스 강제 정리(prune), Kubernetes 리소스 삭제, AWS/GCP/Azure 인프라 조작 명령어 등을 선택적으로
-    켜서 보호 범위를 확장할 수 있습니다.
 ---
+
+Destructive Command Guard는 에이전트가 만든 셸 명령을 실행 전에 검사해 알려진 파괴 패턴을 차단하는 안전 계층입니다. 빠른 패턴 매칭은 유용하지만 별칭, 스크립트 내부, 간접 호출과 잘못 지정된 대상까지 모두 이해하는 권한 시스템은 아닙니다. 허용·차단 사례와 우회 사례를 함께 시험하고, 분석 실패 시 실행할지 멈출지 정책을 작업 위험도에 맞춰 정해야 합니다.
 
 [TL;DR]
 - 자율형 AI 코딩 에이전트가 임의로 파괴적인 명령어(예: `rm -rf`, `git reset`)를 실행하는 것을 방지하는 사전 실행 보안 계층(Pre-execution Safety Layer)입니다.
@@ -290,6 +273,20 @@ dcg가 제공하는 보안은 훌륭하지만 맹목적으로 의존해서는 �
 
 명확한 피드백을 통해 AI와 협업하는 이 작고 단단한 Rust 도구는, 머지않아 모든 개발자의 로컬 환경에 설치되어야 할 필수 안전장치로 자리 잡을 것입니다.
 
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [공식 GitHub 저장소](https://github.com/Dicklesworthstone/destructive_command_guard)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
+- [herdr: 쏟아지는 AI 코딩 에이전트를 통제하는 터미널 멀티플렉서]({% post_url 2026-07-14-herdr-The-Terminal-Multiplexer-for-Orchestrating-AI-Coding-Agents %}) — 기존 터미널 멀티플렉서의 한계를 넘어, AI 에이전트의 작업 상태(대기, 작업 중, 완료)를 실시간으로 자동 추적하고 제어하는 herdr의 구조와 활용법을 알아봅니다.
+- [opencodex: Codex CLI와 Claude Code에 원하는 언어 모델을 연결하는 방법]({% post_url 2026-07-23-opencodex-How-to-Connect-Any-LLM-to-Codex-CLI-and-Claude-Code %}) — opencodex는 OpenAI Codex 도구 및 Claude Code에서 기본 모델 대신 Ollama, Gemini, DeepSeek 등 원하는 모든 언어 모델을 사용할 수 있게 해주는 강력한 로컬 프록시 도구입니다.
+<!-- internal-links:end -->
+
 ## 자주 묻는 질문 (FAQ)
 
 ### Destructive Command Guard(dcg)는 AI 에이전트의 작동이나 시스템 속도를 크게 늦추지 않나요?
@@ -304,7 +301,7 @@ Claude Code, Cursor, Copilot CLI, Aider, Gemini CLI 등을 포함하여 12개 �
 
 분석 엔진이 알 수 없는 셸 문법을 만나 파싱에 실패하거나 검사 시간을 초과하여 크래시(Crash)가 날 경우, 명령어를 차단하는 대신 실행을 허용(Allow)한다는 뜻입니다. 이는 보안 도구의 오류가 개발자의 정상적인 작업 흐름을 중단시키는 것을 막기 위한 실용적인 타협입니다.
 
-### AI 에이전트가 아닌 제가 직접 입력하는 터미널 스크립트 환경에서도 사용할 수 있나요?
+### AI 에이전트 없이 사람이 입력하는 터미널 환경에서도 사용할 수 있나요?
 
 네, 가능합니다. 기본적으로는 AI 에이전트의 Hook으로 동작하도록 설계되었으나, 사용자의 셸 설정 파일(.bashrc, .zshrc)에 직접 바이너리를 래핑하도록 구성하면 일반적인 터미널 환경에서도 실수 방지용 가드레일로 훌륭하게 작동합니다.
 

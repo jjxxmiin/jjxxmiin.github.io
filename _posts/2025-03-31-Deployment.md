@@ -1,18 +1,28 @@
 ---
+source_citations:
+  - name: "Kubernetes Probe 공식 문서"
+    url: "https://kubernetes.io/docs/concepts/workloads/pods/probes/"
+  - name: "ONNX Runtime Quantization 공식 문서"
+    url: "https://onnxruntime.ai/docs/how-to/quantization.html"
 layout: post
 title: "AI 모델 API가 뜬다고 배포가 끝난 게 아니다: 프로덕션 전 5개 Gate"
 summary: "학습된 모델을 ONNX·FastAPI·Docker·Kubernetes로 옮길 때 정확도, 상태 확인, 롤백, 관측성, 비밀값과 드리프트를 어떤 순서로 검증해야 하는지 기존 예제의 위험까지 짚습니다."
+description: "AI 모델 API를 프로덕션에 배포하기 전 예측 동등성·상태 검사·롤백·관측성·비밀값을 다섯 개 Gate로 나눠 검증하는 실무 체크리스트입니다."
+faq:
+  - question: "ONNX 변환 검사가 통과하면 예측도 같은가요?"
+    answer: "아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본·ONNX·양자화 모델의 출력과 정확도를 비교해야 합니다."
+  - question: "liveness와 readiness는 왜 나눠야 하나요?"
+    answer: "프로세스가 살아 있어도 모델 로딩이나 대표 추론이 실패할 수 있습니다. 재시작 판단과 트래픽 수신 가능 상태를 서로 다른 검사로 다뤄야 합니다."
+  - question: "배포 실패 때 latest 태그로 돌아가면 되나요?"
+    answer: "latest는 내용이 바뀔 수 있어 복구 기준으로 부적합합니다. 코드와 모델이 함께 묶인 이전 정상 commit SHA 같은 불변 버전을 기록해야 합니다."
 image:
   path: /assets/img/thumb/Deployment.jpg
   alt: 프로덕션 환경에서의 인공지능 모델 배포 완벽 가이드 대표 이미지
 date: 2025-03-31
 categories: Tech
 tags:
-  - MLOps
-  - 인프라
-  - 튜토리얼
   - 경량화
-  - AI보안
+  - MLOps
 math: true
 ---
 
@@ -65,3 +75,54 @@ MLflow·PostgreSQL·MinIO 예제에는 `minioadmin`과 `mlflow` 같은 하드코
 드리프트 감지 조각은 통계 검정의 p-value 0.05, 한 시간 간격 반복, webhook placeholder를 보여주지만 `fetch_recent_data`가 정의되지 않았습니다. 별도의 CronJob 예제와도 실행 방식이 겹칩니다. 그러므로 이 코드는 핵심 아이디어를 설명하는 불완전한 조각입니다. 기준 데이터 보관, 최근 데이터 수집, 다중 feature 검정, 경보 중복 억제, 재학습 승인 절차를 채우기 전에는 자동 운영으로 부르면 안 됩니다.
 
 최종 승인표는 다섯 줄이면 충분합니다. **예측 동등성**, **실패를 반영하는 health**, **SHA 기반 rollback**, **행동 가능한 metric·log**, **회전 가능한 secret과 검증된 drift 절차**입니다. Argo CD와 통합 배포 script도 placeholder 저장소와 여러 선행 manifest를 가정하므로, 이 다섯 Gate를 대신하지 못합니다.
+
+## Gate는 문서 항목이 아니라 배포를 멈추는 조건이다
+
+체크리스트가 있어도 실패한 상태로 배포를 계속할 수 있다면 Gate가 아닙니다. 각 항목에는 통과 증거, 책임자, 실패했을 때의 행동이 붙어야 합니다. 예측 동등성 실패는 모델 변환을 중단하고, readiness 실패는 새 pod로 트래픽을 보내지 않으며, 오류율 상승은 이전 SHA로 되돌리는 식입니다.
+
+간단한 배포 기록은 다음처럼 만들 수 있습니다.
+
+| Gate | 남길 증거 | 실패 때 행동 |
+|---|---|---|
+| 예측 | 고정 입력별 원본·변환 출력 차이 | export·quantization 보류 |
+| 상태 | cold start와 대표 추론 결과 | traffic 차단, 원인 로그 확인 |
+| 복구 | 현재·이전 image SHA | 이전 정상 SHA로 rollback |
+| 관측 | latency·error·모델 분포 경보 | 배포 중단 또는 담당자 호출 |
+| 보안 | secret 출처·권한·회전 기록 | 노출 값 폐기와 재발급 |
+
+## 장애 연습은 정상 요청과 다른 정보를 보여 준다
+
+배포 전 staging에서 모델 파일을 읽지 못하는 경우, 첫 추론이 늦는 경우, 큰 입력으로 memory pressure가 생기는 경우, 의존 서비스가 timeout 나는 경우를 따로 재현합니다. 이때 사용자가 받는 상태 코드, readiness 변화, log의 원인, metric의 경보가 같은 사건을 일관되게 설명하는지 봅니다. 로그에는 실패 원인이 없고 dashboard에는 CPU만 보인다면 운영자는 모델 문제와 network 문제를 구분하기 어렵습니다.
+
+성공 기준도 시간축으로 정합니다. 새 버전 직후에만 정상인지, 일정 요청을 처리한 뒤 memory가 계속 늘지 않는지, replica 교체 중 요청이 유실되지 않는지 확인합니다. 평균 latency만 보면 드물게 매우 느린 요청을 놓칠 수 있으므로 지연 분포와 timeout 비율을 함께 봅니다. 이 증거를 다음 배포에도 같은 형식으로 남겨야 변경 전후를 비교할 수 있습니다.
+
+최종적으로 “API가 뜬다”는 다섯 Gate 중 일부에 불과합니다. 배포 완료는 **틀린 결과와 장애를 발견하고, 영향을 제한하며, 검증된 버전으로 돌아가는 흐름까지 실제로 실행해 본 상태**를 뜻합니다.
+
+<!-- primary-sources:start -->
+## 원문과 버전 확인
+
+- [Kubernetes Probe 공식 문서](https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+- [ONNX Runtime Quantization 공식 문서](https://onnxruntime.ai/docs/how-to/quantization.html)
+<!-- primary-sources:end -->
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도·비용·프라이버시 판단
+- [오픈소스 LLM이 GPT API보다 싸질까: vLLM·PagedAttention·TCO 계산]({% post_url 2026-04-22-Tired-of-GPT-API-Bills-The-Real-Face-and-Serving-Optimization-Strategy-of-Open-Generative-AI-in-Production %}) — 오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache·Continuous Batching·양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.
+- [Supertonic 99M TTS가 정말 167배 빠를까: RTF·404MB·음질의 교환]({% post_url 2026-05-21-The-Era-of-API-Hustling-is-Over-Implementing-167x-Faster-On-Device-TTS-with-99M-Ultra-Light-Architecture-Supertonic-Deep-Dive %}) — Supertonic의 99M 파라미터·404MB ONNX 자산과 RTF 0.001~0.006 수치를 해석하고, 오프라인 TTS의 지연·음질·기기 호환성·커스텀 음성 비용을 판단합니다.
+<!-- internal-links:end -->
+
+## 자주 묻는 질문
+
+### ONNX 변환 검사가 통과하면 예측도 같은가요?
+
+아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본·ONNX·양자화 모델의 출력과 정확도를 비교해야 합니다.
+
+### liveness와 readiness는 왜 나눠야 하나요?
+
+프로세스가 살아 있어도 모델 로딩이나 대표 추론이 실패할 수 있습니다. 재시작 판단과 트래픽 수신 가능 상태를 서로 다른 검사로 다뤄야 합니다.
+
+### 배포 실패 때 latest 태그로 돌아가면 되나요?
+
+latest는 내용이 바뀔 수 있어 복구 기준으로 부적합합니다. 코드와 모델이 함께 묶인 이전 정상 commit SHA 같은 불변 버전을 기록해야 합니다.
