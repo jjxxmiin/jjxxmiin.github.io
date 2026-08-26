@@ -7,8 +7,9 @@
     이 봇은 구글과 네이버 자동완성으로 수요를 확인한 주제만 골라 쓴다.
 
 무엇을 쓰나
-    automation/data/topic_queue.json 의 대기 주제 중 우선순위가 가장 높은 하나.
-    '클로드 요금제 비교'처럼 사람들이 돈 쓰기 직전에 치는 질의를 노린다.
+    automation/data/topic_queue.json 에서 검색 수요가 확인된 대기 주제를 고른다.
+    가격 글만 이어지지 않도록 사용법, 오류 해결, 비교, 프롬프트를 순환하고
+    가격과 요금제 포맷은 최근 여섯 편 중 한 편까지만 자동 선택한다.
     변형 키워드는 소제목으로 흡수해 한 편이 클러스터 전체를 커버하게 만든다.
 
     python automation/guide_bot.py                # 다음 주제 발행
@@ -42,6 +43,23 @@ QUEUE = os.path.join(ROOT, "automation", "data", "topic_queue.json")
 LEDGER = os.path.join(ROOT, "automation", "data", "written_topics.json")
 POSTS_DIR = os.path.join(ROOT, "_posts")
 AUTOMATION_TAG = "keyword_guide"
+
+FORMAT_WINDOW = 6
+FORMAT_ORDER = (
+    "실전 사용법",
+    "오류 해결",
+    "프롬프트와 템플릿",
+    "비교와 추천",
+    "가격과 요금제",
+)
+FORMAT_CAPS = {"가격과 요금제": 1, "비교와 추천": 2}
+FORMAT_WEIGHTS = {
+    "실전 사용법": 3,
+    "오류 해결": 1,
+    "프롬프트와 템플릿": 1,
+    "비교와 추천": 2,
+    "가격과 요금제": 1,
+}
 
 # 사실을 모아 오는 단계. 근거 없이 쓰면 가격 같은 건 바로 틀린다.
 RESEARCH_SCHEMA = {
@@ -147,6 +165,7 @@ _TITLE_HYPE = re.compile(
 )
 _DECORATIVE_EMOJI = re.compile(r"[\U0001F300-\U0001FAFF\u2600-\u27BF]")
 _KEYCAP = re.compile(r"[0-9]\ufe0f?\u20e3")
+_MIDDOT = "\u00b7"
 
 
 def _strip_fenced_blocks(markdown: str) -> tuple[str, bool]:
@@ -341,6 +360,8 @@ def _metadata_and_style_errors(front_matter: dict, body: str) -> list[str]:
     false_experience = _FALSE_EXPERIENCE.search(style_text)
     if false_experience:
         errors.append(f"근거 없는 1인칭 경험 문구: {false_experience.group(0)}")
+    if _MIDDOT in style_text:
+        errors.append("가운뎃점 사용 금지: 나열은 쉼표나 과/와로 작성")
 
     outside_fences, _ = _strip_fenced_blocks(body)
     emoji_count = len(_DECORATIVE_EMOJI.findall(outside_fences))
@@ -501,6 +522,25 @@ def load_prompt() -> str:
     return shared
 
 
+def _recent_written_formats(topics: list[dict]) -> list[str]:
+    """Return formats in publication order using the append-only topic ledger."""
+    if not os.path.exists(LEDGER):
+        return []
+    try:
+        written = json.load(open(LEDGER, encoding="utf-8")).get("written", {})
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return []
+    if not isinstance(written, dict):
+        return []
+    by_id = {str(topic.get("id")): topic for topic in topics}
+    formats = [
+        str(by_id[topic_id].get("format") or "")
+        for topic_id in written
+        if topic_id in by_id
+    ]
+    return [value for value in formats if value][-FORMAT_WINDOW:]
+
+
 def pick_topic(topic_id: str | None) -> dict:
     data = json.load(open(QUEUE, encoding="utf-8"))
     topics = data["topics"]
@@ -509,10 +549,36 @@ def pick_topic(topic_id: str | None) -> dict:
             if t["id"] == topic_id:
                 return t
         raise SystemExit(f"주제를 찾지 못했습니다: {topic_id}")
-    for t in topics:
-        if t["status"] == "pending":
-            return t
-    raise SystemExit("대기 중인 주제가 없습니다. build_topic_queue.py 를 다시 돌리세요.")
+    pending = [topic for topic in topics if topic["status"] == "pending"]
+    if not pending:
+        raise SystemExit("대기 중인 주제가 없습니다. build_topic_queue.py 를 다시 돌리세요.")
+
+    recent = _recent_written_formats(topics)
+    counts = {value: recent.count(value) for value in set(recent)}
+    allowed = [
+        topic
+        for topic in pending
+        if counts.get(str(topic.get("format") or ""), 0)
+        < FORMAT_CAPS.get(str(topic.get("format") or ""), FORMAT_WINDOW + 1)
+    ]
+    if not allowed:
+        allowed = pending
+
+    for format_name in FORMAT_ORDER:
+        if counts.get(format_name, 0) == 0:
+            for topic in allowed:
+                if topic.get("format") == format_name:
+                    return topic
+
+    queue_order = {id(topic): index for index, topic in enumerate(pending)}
+    return min(
+        allowed,
+        key=lambda topic: (
+            counts.get(str(topic.get("format") or ""), 0)
+            / FORMAT_WEIGHTS.get(str(topic.get("format") or ""), 1),
+            queue_order[id(topic)],
+        ),
+    )
 
 
 def _research_tier(value: object) -> str:

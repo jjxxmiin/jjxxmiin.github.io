@@ -2,7 +2,7 @@
 layout: post
 title:  "EfficientDet은 왜 빠른가: BiFPN 가중치 융합과 복합 스케일링 핵심"
 summary: "정확도와 연산량을 함께 잡기 위해 EfficientDet이 BiFPN과 compound scaling을 설계한 방식을 수식과 그림으로 정리합니다."
-description: "EfficientDet이 BiFPN의 양방향 연결과 학습 가능한 융합 가중치, backbone·feature·head·입력을 함께 키우는 scaling으로 효율을 높인 원리를 설명합니다."
+description: "EfficientDet이 BiFPN의 양방향 연결과 학습 가능한 융합 가중치, backbone, feature, head, 입력을 함께 키우는 scaling으로 효율을 높인 원리를 설명합니다."
 image:
   path: /assets/img/thumb/EfficientDet2.jpg
   alt: EfficientDet 톺아보기 2 대표 이미지
@@ -17,11 +17,11 @@ faq:
   - question: "BiFPN의 가중치는 각 feature의 중요도를 어떻게 반영하나요?"
     answer: "서로 다른 해상도에서 들어온 feature마다 학습 가능한 가중치를 두고 정규화해 합칩니다. 따라서 모든 입력을 같은 비율로 더하지 않고 task loss에 따라 상대적 비중을 배웁니다."
   - question: "EfficientDet의 큰 모델이 항상 더 좋은 선택인가요?"
-    answer: "아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리·후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다."
+    answer: "아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리, 후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다."
 math: true
 ---
 
-EfficientDet의 핵심은 **해상도가 다른 특징을 중요도에 따라 섞는 BiFPN**과 **백본·특징망·예측망·입력 크기를 함께 키우는 복합 스케일링**이다. 정확도를 올리겠다고 한 부분만 무작정 크게 만드는 대신, 탐지기의 여러 병목을 균형 있게 확장한다. 실제 선택에서는 논문 표의 모델 번호보다 내 입력에서 feature 융합이 필요한 이유와 장치별 지연·메모리 한계를 먼저 봐야 한다.
+EfficientDet의 핵심은 **해상도가 다른 특징을 중요도에 따라 섞는 BiFPN**과 **백본, 특징망, 예측망, 입력 크기를 함께 키우는 복합 스케일링**이다. 정확도를 올리겠다고 한 부분만 무작정 크게 만드는 대신, 탐지기의 여러 병목을 균형 있게 확장한다. 실제 선택에서는 논문 표의 모델 번호보다 내 입력에서 feature 융합이 필요한 이유와 장치별 지연, 메모리 한계를 먼저 봐야 한다.
 
 [앞선 글](https://jjxxmiin.github.io/paper/2019/11/23/EfficientDet/)에서 백본인 EfficientNet을 살펴봤다면, 이번에는 그 백본 위에서 EfficientDet이 어떻게 비용을 통제하는지에 집중한다.
 
@@ -42,7 +42,7 @@ EfficientDet이 던진 질문은 단순하다. **모든 연결과 모든 입력 
 BiFPN은 이 질문에 두 가지로 답한다.
 
 - 입력 연결이 하나뿐인 노드는 제거한다. 융합하지 않는 노드를 굳이 중간에 둘 이유가 적기 때문이다.
-- 같은 레벨의 원래 입력을 출력 노드에 다시 연결하고, 하향식·상향식 경로를 한 층처럼 반복한다.
+- 같은 레벨의 원래 입력을 출력 노드에 다시 연결하고, 하향식, 상향식 경로를 한 층처럼 반복한다.
 
 즉, 양방향 정보 흐름은 유지하되 가치가 낮은 연결을 덜어낸 구조다.
 
@@ -78,7 +78,7 @@ EfficientDet은 EfficientNet 백본, 반복되는 BiFPN, 공유되는 class/box 
 
 ![det_figure4](/assets/img/post_img/EfficientDet/det_figure4.PNG){: .center}
 
-- 백본: EfficientNet의 width·depth·resolution 계수를 따른다.
+- 백본: EfficientNet의 width, depth, resolution 계수를 따른다.
 - BiFPN 폭: $$W_{bifpn}=64\cdot 1.35^{\phi}$$
 - BiFPN 깊이: $$D_{bifpn}=2+\phi$$
 - 예측망 깊이: $$D_{box}=D_{class}=3+\lfloor\phi/3\rfloor$$
@@ -92,13 +92,13 @@ EfficientDet은 EfficientNet 백본, 반복되는 BiFPN, 공유되는 class/box 
 
 ![det_figure5](/assets/img/post_img/EfficientDet/det_figure5.PNG){: .center}
 
-벤치마크 그림에서 먼저 볼 것은 최고 정확도 한 점이 아니라 **정확도 대비 FLOPs·파라미터·지연 시간의 곡선**이다. EfficientDet의 주장은 특정 크기 하나가 언제나 최고라는 것이 아니라, D0부터 더 큰 모델까지 같은 확장 원리로 효율적인 선택지를 만든다는 데 있다.
+벤치마크 그림에서 먼저 볼 것은 최고 정확도 한 점이 아니라 **정확도 대비 FLOPs, 파라미터, 지연 시간의 곡선**이다. EfficientDet의 주장은 특정 크기 하나가 언제나 최고라는 것이 아니라, D0부터 더 큰 모델까지 같은 확장 원리로 효율적인 선택지를 만든다는 데 있다.
 
 ![det_figure6](/assets/img/post_img/EfficientDet/det_figure6.PNG){: .center}
 
 ![det_figure7](/assets/img/post_img/EfficientDet/det_figure7.PNG){: .center}
 
-다만 논문의 COCO 결과와 지연 시간이 내 장비·입력 크기·구현에서도 그대로 재현된다고 가정하면 안 된다. 실제 도입 전에는 원하는 입력 해상도에서 전처리와 후처리까지 포함한 지연 시간, 메모리, 작은 물체 성능을 함께 측정해야 한다. 이 관점으로 보면 BiFPN은 단순한 FPN 변형이 아니라, **어떤 특징을 얼마나 연결하고 모델 전체를 어떻게 키울지 동시에 다룬 설계**로 읽힌다.
+다만 논문의 COCO 결과와 지연 시간이 내 장비, 입력 크기, 구현에서도 그대로 재현된다고 가정하면 안 된다. 실제 도입 전에는 원하는 입력 해상도에서 전처리와 후처리까지 포함한 지연 시간, 메모리, 작은 물체 성능을 함께 측정해야 한다. 이 관점으로 보면 BiFPN은 단순한 FPN 변형이 아니라, **어떤 특징을 얼마나 연결하고 모델 전체를 어떻게 키울지 동시에 다룬 설계**로 읽힌다.
 
 ## BiFPN 연결을 코드에서 어떻게 확인하나
 
@@ -121,9 +121,9 @@ Latency는 warm-up 이후 반복 추론과 첫 실행을 나누고, decode와 NM
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유]({% post_url 2019-11-23-EfficientDet %}) — EfficientNet이 depth·width·input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다.
+- [EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유]({% post_url 2019-11-23-EfficientDet %}) — EfficientNet이 depth, width, input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다.
 - [Saliency Map은 무엇을 설명하나: 입력 gradient 시각화와 해석의 한계]({% post_url 2019-12-28-Saliency_Maps %}) — 분류 점수를 입력 픽셀로 미분해 중요한 영역을 찾는 Saliency Map과 class model visualization의 차이를 수식과 코드로 설명합니다.
-- [RynnBrain 30B-A3B는 로봇에 충분히 가벼울까: 3B 활성 파라미터와 제어 지연]({% post_url 2026-02-19-RynnBrain--Open-Embodied-Foundation-Models %}) — 30B 중 3B만 활성화하는 RynnBrain MoE의 계산 이득과 전체 가중치 메모리·라우팅·실시간 제어의 남은 비용을 구분합니다.
+- [BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p]({% post_url 2026-01-24-BayesianVLA--Bayesian-Decomposition-of-Vision-Language-Action-Models-via-Latent-Action-Queries %}) — Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior, posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -138,4 +138,4 @@ Top-down과 bottom-up 경로를 반복해 여러 scale 정보를 양방향으로
 
 ### EfficientDet의 큰 모델이 항상 더 좋은 선택인가요?
 
-아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리·후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다.
+아닙니다. 정확도뿐 아니라 입력 해상도, 메모리, 전처리, 후처리 포함 지연과 작은 물체 성능을 목표 장치에서 비교해야 합니다.

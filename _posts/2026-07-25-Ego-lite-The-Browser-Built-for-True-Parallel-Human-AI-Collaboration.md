@@ -10,7 +10,7 @@ tags:
   - AI에이전트
 summary: Ego-lite는 사람과 AI가 로그인 상태를 공유하며 방해 없이 동시에 일할 수 있게 설계된 크로미움 기반 브라우저입니다. 화면
   탈취나 복잡한 인증 설정 없이 쾌적한 병렬 작업 환경을 제공합니다.
-description: 'Ego-lite가 사람과 에이전트의 브라우저 작업 공간과 로그인 상태를 나누는 방식, 세션 쿠키 이전·백그라운드 탭 권한·외부 행동 승인·실패 복구 위험을 정리합니다.'
+description: 'Ego-lite가 사람과 에이전트의 브라우저 작업 공간과 로그인 상태를 나누는 방식, 세션 쿠키 이전, 백그라운드 탭 권한, 외부 행동 승인, 실패 복구 위험을 정리합니다.'
 github_url: https://github.com/citrolabs/ego-lite
 image:
   path: https://opengraph.githubassets.com/1/citrolabs/ego-lite
@@ -332,8 +332,8 @@ Ego-lite는 'AI가 현대의 복잡한 웹 환경에서 인간을 돕는 올바�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
-- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP·브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연·권한·변경 범위·벤더 종속성을 기준으로 팀 도입법을 정리합니다.
-- [여러 AI 에이전트 로그를 한 화면에서 봐도 될까? Kibitz의 출처·요약 점검]({% post_url 2026-03-19-Kibitz-Deep-Dive-Turning-Terminal-Noise-into-Narrative-The-Control-Room-for-Directing-AI-Agent-Swarms %}) — 여러 터미널 세션을 모으고 로그를 서사형 상태로 요약한다는 Kibitz의 장점과, 이름이 같은 저장소가 섞인 원문에서 먼저 확인할 출처·기능 경계를 짚습니다.
+- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP, 브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연, 권한, 변경 범위, 벤더 종속성을 기준으로 팀 도입법을 정리합니다.
+- [여러 AI 에이전트 로그를 한 화면에서 봐도 될까? Kibitz의 출처, 요약 점검]({% post_url 2026-03-19-Kibitz-Deep-Dive-Turning-Terminal-Noise-into-Narrative-The-Control-Room-for-Directing-AI-Agent-Swarms %}) — 여러 터미널 세션을 모으고 로그를 서사형 상태로 요약한다는 Kibitz의 장점과, 이름이 같은 저장소가 섞인 원문에서 먼저 확인할 출처, 기능 경계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

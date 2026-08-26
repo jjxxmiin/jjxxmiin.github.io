@@ -12,7 +12,7 @@ tags:
 summary: FluidVoice는 Apple Silicon 환경에서 완전 오프라인으로 동작하는 무료 오픈소스 음성 인식 및 AI 문맥 교정 애플리케이션입니다.
   외부 서버 전송 없이 로컬에서 음성-텍스트 변환(STT)과 Fluid-1 모델 후처리를 연속 실행하여, 민감한 데이터를 안전하게 보호하면서 키보드
   타이핑 대비 3.7배 빠른 받아쓰기 환경을 제공합니다.
-description: 'FluidVoice의 온디바이스 음성 인식과 Fluid-1 문맥 교정 구조, Apple Silicon 메모리 요구와 오프라인 여부·고유명사·오인식 검수 기준을 정리합니다.'
+description: 'FluidVoice의 온디바이스 음성 인식과 Fluid-1 문맥 교정 구조, Apple Silicon 메모리 요구와 오프라인 여부, 고유명사, 오인식 검수 기준을 정리합니다.'
 automation: oss_trend
 github_url: https://github.com/altic-dev/FluidVoice
 image:
@@ -62,7 +62,7 @@ faq:
 - GitHub 저장소: [altic-dev/FluidVoice GitHub](https://github.com/altic-dev/FluidVoice)
 - 공식 웹사이트: [Altic FluidVoice 공식 페이지](https://altic.dev/fluid)
 
-FluidVoice는 음성을 외부 STT API로 보내기 어려운 Mac 사용자에게 적합한 로컬 받아쓰기 도구입니다. 오프라인 설계는 데이터 경로를 줄이지만 “지연 0”이나 모든 환경의 완전한 프라이버시를 자동 보장하지는 않습니다. 대상 Mac에서 네트워크를 끈 채 동작하는지, 메모리·발열과 고유명사 오인식이 허용 범위인지 직접 확인해야 합니다.
+FluidVoice는 음성을 외부 STT API로 보내기 어려운 Mac 사용자에게 적합한 로컬 받아쓰기 도구입니다. 오프라인 설계는 데이터 경로를 줄이지만 “지연 0”이나 모든 환경의 완전한 프라이버시를 자동 보장하지는 않습니다. 대상 Mac에서 네트워크를 끈 채 동작하는지, 메모리, 발열과 고유명사 오인식이 허용 범위인지 직접 확인해야 합니다.
 
 ## 도입 및 3줄 요약
 
@@ -328,8 +328,8 @@ FluidVoice는 AI 보조 도구가 클라우드에서 로컬 디바이스로 이�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Meetily: 오디오 유출 없이 내 PC에서 완성되는 프라이버시 최우선 AI 회의 비서]({% post_url 2026-07-05-Meetily-The-Privacy-First-AI-Meeting-Assistant-Running-100-Locally-Without-Cloud %}) — 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고 기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
-- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU·WASM·기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AIRI가 WebGPU·WASM·Live2D/VRM과 모듈식 음성·기억 계층을 조합하는 방식, 브라우저 호환성·자원·개인정보·업데이트 한계를 정리합니다.
-- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M·25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng·영어 중심·감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
+- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU, WASM, 기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AIRI가 WebGPU, WASM, Live2D/VRM과 모듈식 음성, 기억 계층을 조합하는 방식, 브라우저 호환성, 자원, 개인정보, 업데이트 한계를 정리합니다.
+- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M, 25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng, 영어 중심, 감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

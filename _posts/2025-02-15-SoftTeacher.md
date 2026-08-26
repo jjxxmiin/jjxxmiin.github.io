@@ -2,7 +2,7 @@
 layout: post  
 title: "Soft Teacher는 라벨 1%에서 왜 강했나: Pseudo Label 신뢰도 설계"
 summary: "Soft Teacher의 Teacher-Student 반복, confidence 기반 pseudo label 필터링, soft labeling과 box jittering이 라벨 부족 문제를 다루는 방식을 설명합니다."
-description: "Soft Teacher의 Teacher-Student 갱신, 분류·박스 신뢰도 분리, 라벨 비율별 성과를 따라가며 pseudo label 오류를 진단하는 실험 순서를 설명합니다."
+description: "Soft Teacher의 Teacher-Student 갱신, 분류, 박스 신뢰도 분리, 라벨 비율별 성과를 따라가며 pseudo label 오류를 진단하는 실험 순서를 설명합니다."
 faq:
   - question: "Soft Teacher는 비라벨 예측을 모두 학습에 쓰나요?"
     answer: "아닙니다. 분류 신뢰도와 박스 안정성을 기준으로 pseudo label을 걸러 쓰며, 낮은 품질의 예측이 Student에 전달되지 않도록 설계합니다."
@@ -118,8 +118,8 @@ Teacher가 만든 label을 confidence 구간별로 나누어 사람이 표본 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone·Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능·실시간 주장과 1~2-step 한계를 점검합니다.
-- [Teacher의 CoT를 못 봐도 Agent를 학습할 수 있을까? π-Distill의 PI]({% post_url 2026-02-08-Privileged-Information-Distillation-for-Language-Models %}) — π-Distill이 frontier model의 숨은 CoT 대신 성공 trajectory의 tool call·argument 같은 privileged information을 training에서만 주고, inference에는 없는…
+- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone, Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능, 실시간 주장과 1~2-step 한계를 점검합니다.
+- [Teacher의 CoT를 못 봐도 Agent를 학습할 수 있을까? π-Distill의 PI]({% post_url 2026-02-08-Privileged-Information-Distillation-for-Language-Models %}) — π-Distill이 frontier model의 숨은 CoT 대신 성공 trajectory의 tool call, argument 같은 privileged information을 training에서만 주고, inference에는 없는…
 - [이미지를 다시 자르지 않고 작은 글씨를 읽을까: ZwZ Single-pass와 Zooming Gap]({% post_url 2026-02-16-Zooming-without-Zooming--Region-to-Image-Distillation-for-Fine-Grained-Multimodal-Perception %}) — 크롭을 본 교사의 답을 전체 이미지 학생에게 증류하는 ZwZ가 줄이는 추론 비용과 복구하지 못하는 정보 손실을 구분합니다.
 <!-- internal-links:end -->
 
@@ -139,7 +139,7 @@ Teacher가 만든 label을 confidence 구간별로 나누어 사람이 표본 �
 
 ## 실패를 일찍 발견하는 세 개의 그래프
 
-첫 그래프에는 epoch별 pseudo label 수를 class별로 그립니다. 특정 class만 빠르게 늘면 Teacher가 쉬운 범주에 편향된 것일 수 있습니다. 두 번째에는 confidence 구간별 실제 precision을 표시해 점수가 calibration돼 있는지 봅니다. 세 번째에는 labeled validation의 작은·중간·큰 객체 AP를 그려 비라벨 학습이 어느 크기에 도움 또는 손해를 주는지 확인합니다.
+첫 그래프에는 epoch별 pseudo label 수를 class별로 그립니다. 특정 class만 빠르게 늘면 Teacher가 쉬운 범주에 편향된 것일 수 있습니다. 두 번째에는 confidence 구간별 실제 precision을 표시해 점수가 calibration돼 있는지 봅니다. 세 번째에는 labeled validation의 작은, 중간, 큰 객체 AP를 그려 비라벨 학습이 어느 크기에 도움 또는 손해를 주는지 확인합니다.
 
 Teacher와 Student의 차이도 표본으로 남겨야 합니다. Teacher가 계속 같은 오탐을 내고 Student가 이를 더 강하게 예측한다면 confirmation bias 신호입니다. 반대로 Student의 새로운 정답이 Teacher 갱신 뒤 반영된다면 반복 구조가 유효하게 작동한 것입니다. 평균 mAP가 오르더라도 드문 class의 recall이 급감하면 threshold와 비라벨 loss 비중을 다시 조정해야 합니다.
 

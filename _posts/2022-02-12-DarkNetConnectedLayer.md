@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet connected_layer.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/connected_layer.c"
 layout: post
-title: "DarkNet Connected Layer 순전파·역전파: GEMM 차원 따라가기"
+title: "DarkNet Connected Layer 순전파, 역전파: GEMM 차원 따라가기"
 summary: "DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다."
-description: "DarkNet Connected Layer의 GEMM 차원, bias·BatchNorm·activation 순서, weight/input gradient와 momentum buffer 검증법을 설명합니다."
+description: "DarkNet Connected Layer의 GEMM 차원, bias, BatchNorm, activation 순서, weight/input gradient와 momentum buffer 검증법을 설명합니다."
 date:   2022-02-12 16:00 -0400
 categories: DarkNet
 image:
@@ -88,7 +88,7 @@ scal_cpu(l.inputs*l.outputs, momentum, l.weight_updates, 1);
 
 ## 생성 함수에서 메모리 범위를 확인한다
 
-`make_connected_layer`는 공간 차원을 `1 × 1`로 두고 채널에 입력과 출력 수를 기록합니다. 출력과 delta는 `batch × outputs`, 가중치와 그 업데이트는 `inputs × outputs`만큼 할당합니다. 순전파·역전파·업데이트 함수 포인터도 여기서 연결됩니다.
+`make_connected_layer`는 공간 차원을 `1 × 1`로 두고 채널에 입력과 출력 수를 기록합니다. 출력과 delta는 `batch × outputs`, 가중치와 그 업데이트는 `inputs × outputs`만큼 할당합니다. 순전파, 역전파, 업데이트 함수 포인터도 여기서 연결됩니다.
 
 가중치 초기화에 쓰는 scale은 다음과 같습니다.
 
@@ -97,7 +97,7 @@ float scale = sqrt(2./inputs);
 l.weights[i] = scale*rand_uniform(-1, 1);
 ~~~
 
-배치 정규화를 켜면 scale, 평균, 분산, 이동 통계와 정규화용 버퍼가 추가됩니다. `adam` 인자가 참이면 모멘트 배열도 할당하지만, 이 글에 나온 `update_connected_layer` 본문 자체는 일반 학습률·decay·momentum 경로만 보여 줍니다. Adam의 실제 갱신 동작까지 판단하려면 호출하는 상위 코드도 함께 확인해야 합니다.
+배치 정규화를 켜면 scale, 평균, 분산, 이동 통계와 정규화용 버퍼가 추가됩니다. `adam` 인자가 참이면 모멘트 배열도 할당하지만, 이 글에 나온 `update_connected_layer` 본문 자체는 일반 학습률, decay, momentum 경로만 보여 줍니다. Adam의 실제 갱신 동작까지 판단하려면 호출하는 상위 코드도 함께 확인해야 합니다.
 
 이 코드는 DarkNet 내부 구현을 읽기 위한 핵심 조각입니다. 단독 실행 프로그램이 아니므로 `layer`, `network`, GEMM과 BLAS 보조 함수가 포함된 같은 소스 트리 안에서 해석해야 합니다.
 
@@ -119,7 +119,7 @@ BatchNorm을 켠 경로에서는 정규화 뒤 gamma와 beta가 scale과 이동�
 
 Evaluation에서는 rolling 통계를 사용해야 하고, 학습에서 저장한 `x`와 `x_norm` cache는 backward 전에 덮어쓰면 안 됩니다. Connected layer 값이 맞는데 학습만 실패한다면 activation gradient, BatchNorm backward, bias update의 순서와 delta buffer를 단계별로 봅니다.
 
-## Momentum·Decay 수식은 어떻게 읽나요?
+## Momentum, Decay 수식은 어떻게 읽나요?
 
 Decay 항은 `weight_updates`에 `-decay×batch×weights`로 더해지고, 전체 update buffer가 `learning_rate/batch` 비율로 weight에 반영됩니다. 식을 합치면 batch 계수가 일부 상쇄되지만 다른 gradient가 어떤 reduction으로 들어왔는지까지 봐야 일반 optimizer와 같은 coefficient인지 판단할 수 있습니다. Decay를 별도 optimizer에서도 한 번 더 적용하면 중복 규제가 됩니다.
 
@@ -154,7 +154,7 @@ delta 전치와 입력으로 outputs×inputs weight gradient를 만들고, delta
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
-- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파·초기화 주의점을 코드 차원으로 설명합니다.
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col, GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
+- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파, 초기화 주의점을 코드 차원으로 설명합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
 <!-- internal-links:end -->

@@ -8,14 +8,14 @@ tags:
   - AI서비스
   - ClaudeCode
   - AI에이전트
-summary: 'obra/superpowers가 브레인스토밍·계획·테스트·마무리를 스킬로 묶는 방식과 OpenCode 설치 스냅샷, 도입 전 확인할 한계를 정리합니다.'
-description: 'obra/superpowers가 AI 코딩에 브레인스토밍·계획·TDD·완료 검증을 적용하는 방식과 설치 전 점검, 팀 도입 효과를 판별하는 기준을 정리합니다.'
+summary: 'obra/superpowers가 브레인스토밍, 계획, 테스트, 마무리를 스킬로 묶는 방식과 OpenCode 설치 스냅샷, 도입 전 확인할 한계를 정리합니다.'
+description: 'obra/superpowers가 AI 코딩에 브레인스토밍, 계획, TDD, 완료 검증을 적용하는 방식과 설치 전 점검, 팀 도입 효과를 판별하는 기준을 정리합니다.'
 image:
   path: https://opengraph.githubassets.com/1/obra/superpowers
   alt: "obra/superpowers GitHub 저장소 대표 이미지"
 ---
 
-AI 코딩 에이전트가 요구사항을 확인하기 전에 구현부터 시작한다면, obra/superpowers는 브레인스토밍·계획·테스트·마무리 순서를 명시하는 작업 규율로 검토할 만합니다. 이 저장소는 모델의 지능을 바꾸기보다 에이전트가 따라야 할 절차를 스킬로 제공해 성급한 구현과 근거 없는 완료 보고를 줄이려 합니다. 효과는 스킬 이름이나 절차 수가 아니라 실제 diff와 테스트 품질로 판단해야 합니다.
+AI 코딩 에이전트가 요구사항을 확인하기 전에 구현부터 시작한다면, obra/superpowers는 브레인스토밍, 계획, 테스트, 마무리 순서를 명시하는 작업 규율로 검토할 만합니다. 이 저장소는 모델의 지능을 바꾸기보다 에이전트가 따라야 할 절차를 스킬로 제공해 성급한 구현과 근거 없는 완료 보고를 줄이려 합니다. 효과는 스킬 이름이나 절차 수가 아니라 실제 diff와 테스트 품질로 판단해야 합니다.
 
 ## Superpowers는 모델이 아니라 무엇을 바꾸는가?
 
@@ -73,7 +73,7 @@ Superpowers는 에이전트에게 파일 권한이나 실행 도구를 새로 �
 
 결론적으로 이 저장소가 맞는 팀은 AI 코딩의 속도보다 과정의 재현성과 검토 근거가 필요한 팀입니다. 이미 짧고 엄격한 자체 절차가 잘 작동한다면 중복 여부부터 확인해야 하고, 절차가 없어서 같은 실수가 반복된다면 작은 작업으로 검증할 이유가 있습니다. 채택 여부는 에이전트가 더 자신 있게 말하는지가 아니라 사람이 더 쉽게 오류를 발견하고 되돌릴 수 있는지로 결정해야 합니다.
 
-## 브레인스토밍·계획·완료 단계마다 무엇을 남겨야 할까?
+## 브레인스토밍, 계획, 완료 단계마다 무엇을 남겨야 할까?
 
 브레인스토밍의 산출물은 장황한 아이디어 목록이 아니라 결정해야 할 질문과 채택한 범위입니다. 사용자가 원하는 동작, 바꾸지 말아야 할 동작, 확인한 가정을 남기면 이후 구현이 목표에서 벗어났는지 비교할 수 있습니다. 중요한 질문에 답하지 못한 상태라면 코드를 쓰기보다 중단하는 것도 올바른 결과입니다.
 
@@ -94,7 +94,7 @@ Superpowers는 에이전트에게 파일 권한이나 실행 도구를 새로 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Agent Safehouse로 macOS AI 에이전트를 가둘 수 있을까: Deny-first와 예외 권한]({% post_url 2026-03-11-Agent-Safehouse-Deep-Dive-Leashing-Your-AI-Agents-at-the-Kernel-Level-on-macOS %}) — macOS Seatbelt·sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크·홈 설정·IPC 예외 및 완전 격리가 아닌 한계를 정리합니다.
-- [ml-intern에 H100 300회 루프를 맡겨도 될까: 170K Compaction과 비용 상한]({% post_url 2026-04-25-Stop-Debugging-CUDA-How-Hugging-Faces-ml-intern-is-Disrupting-the-ML-Engineering-Workflow %}) — ml-intern의 논문 탐색·학습 Job·Trackio 평가 루프와 170K 자동 압축을 살펴보고, 최대 300회 자율 실행 전에 걸어야 할 GPU·API·평가 상한을 정리합니다.
-- [Compozy로 AI 개발을 병렬화해도 될까: 스펙·비용·리뷰 루프]({% post_url 2026-05-18-AI-Coding-From-Toy-to-Production-Pipeline-Deep-Dive-into-Compozy-Multi-Agent-Orchestration-with-a-Single-Binary %}) — Compozy의 선언적 워크플로와 마크다운 상태를 살펴보고, 병렬 에이전트가 잘못된 스펙을 증폭하지 않도록 승인·예산·종료 조건을 설계합니다.
+- [Agent Safehouse로 macOS AI 에이전트를 가둘 수 있을까: Deny-first와 예외 권한]({% post_url 2026-03-11-Agent-Safehouse-Deep-Dive-Leashing-Your-AI-Agents-at-the-Kernel-Level-on-macOS %}) — macOS Seatbelt, sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크, 홈 설정, IPC 예외 및 완전 격리가 아닌 한계를 정리합니다.
+- [ml-intern에 H100 300회 루프를 맡겨도 될까: 170K Compaction과 비용 상한]({% post_url 2026-04-25-Stop-Debugging-CUDA-How-Hugging-Faces-ml-intern-is-Disrupting-the-ML-Engineering-Workflow %}) — ml-intern의 논문 탐색, 학습 Job, Trackio 평가 루프와 170K 자동 압축을 살펴보고, 최대 300회 자율 실행 전에 걸어야 할 GPU, API, 평가 상한을 정리합니다.
+- [Compozy로 AI 개발을 병렬화해도 될까: 스펙, 비용, 리뷰 루프]({% post_url 2026-05-18-AI-Coding-From-Toy-to-Production-Pipeline-Deep-Dive-into-Compozy-Multi-Agent-Orchestration-with-a-Single-Binary %}) — Compozy의 선언적 워크플로와 마크다운 상태를 살펴보고, 병렬 에이전트가 잘못된 스펙을 증폭하지 않도록 승인, 예산, 종료 조건을 설계합니다.
 <!-- internal-links:end -->

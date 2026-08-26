@@ -12,7 +12,7 @@ tags:
   - Qwen
   - 오픈소스
   - 컨텍스트윈도우
-description: 'Nemotron 3.5 Lightning의 30B·활성 3B MoE 구조와 NeMo Switchyard 라우팅 원리, 속도 벤치마크 조건과 비용·품질 실패 기준을 정리합니다.'
+description: 'Nemotron 3.5 Lightning의 30B, 활성 3B MoE 구조와 NeMo Switchyard 라우팅 원리, 속도 벤치마크 조건과 비용, 품질 실패 기준을 정리합니다.'
 summary: Nvidia가 자율 에이전트 시스템을 위해 개발된 30B 규모의 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 라우터 라이브러리 NeMo Switchyard를 2026년 8월 11일 공개했습니다. NeMo Switchyard는 프론티어 모델 대신 반복적인 도구 호출 및 검증 작업을 저비용 실행 모델로 전환하여 운영 비용과 지연 시간을 획기적으로 낮춥니다. Nemotron 3.5 Lightning은 하이브리드 Mamba-Transformer MoE 구조를 채택해 1M 토큰 컨텍스트와 높은 처리량을 제공합니다.
 article_type: NewsArticle
 seo:
@@ -59,7 +59,7 @@ article_images:
   source_url: https://developer.nvidia.com/blog/nvidia-nemotron-3-5-lightning-delivers-fast-accurate-specialized-task-execution-for-long-running-agents
 ---
 
-이 조합은 모든 단계를 최고가 모델로 처리하는 장기 에이전트에서 반복 도구 호출과 검증을 더 작은 실행 모델로 분리하려는 팀에 적합합니다. 비용 절감은 라우터가 쉬운 단계와 어려운 단계를 정확히 구분할 때만 생기며, 잘못 분류하면 재시도와 품질 저하로 이득이 사라질 수 있습니다. 실제 작업 로그로 단일 모델 기준선과 완료 작업당 비용·지연·정확도를 비교해야 합니다.
+이 조합은 모든 단계를 최고가 모델로 처리하는 장기 에이전트에서 반복 도구 호출과 검증을 더 작은 실행 모델로 분리하려는 팀에 적합합니다. 비용 절감은 라우터가 쉬운 단계와 어려운 단계를 정확히 구분할 때만 생기며, 잘못 분류하면 재시도와 품질 저하로 이득이 사라질 수 있습니다. 실제 작업 로그로 단일 모델 기준선과 완료 작업당 비용, 지연, 정확도를 비교해야 합니다.
 
 ```mermaid
 flowchart LR
@@ -136,15 +136,15 @@ graph TD
 
 ## 라우터가 실제로 비용을 줄였는지 어떻게 확인할까?
 
-먼저 기존 단일 모델이 처리한 작업을 계획, 도구 호출, 결과 검증, 최종 합성 단계로 나누고 각 단계의 토큰·지연·실패를 기록합니다. 그다음 도구 인자 생성이나 정형 검증처럼 정답을 판정하기 쉬운 단계만 Lightning으로 보내고 결과를 비교합니다. 최종 성공률이 같아도 라우팅 결정과 모델 전환 때문에 호출 수가 늘면 총비용이 줄지 않을 수 있습니다.
+먼저 기존 단일 모델이 처리한 작업을 계획, 도구 호출, 결과 검증, 최종 합성 단계로 나누고 각 단계의 토큰, 지연, 실패를 기록합니다. 그다음 도구 인자 생성이나 정형 검증처럼 정답을 판정하기 쉬운 단계만 Lightning으로 보내고 결과를 비교합니다. 최종 성공률이 같아도 라우팅 결정과 모델 전환 때문에 호출 수가 늘면 총비용이 줄지 않을 수 있습니다.
 
-낮은 비용 모델이 불확실할 때 프론티어 모델로 승격하는 조건도 필요합니다. 스키마 검증 실패, 반복된 도구 오류, 낮은 신뢰 점수처럼 측정 가능한 신호를 쓰고 최대 승격·재시도 횟수를 제한합니다. 성공한 요청의 평균만 보지 말고 p95 지연, 실패 뒤 복구 비용과 사람이 다시 처리한 시간까지 포함해야 운영 효과를 판단할 수 있습니다.
+낮은 비용 모델이 불확실할 때 프론티어 모델로 승격하는 조건도 필요합니다. 스키마 검증 실패, 반복된 도구 오류, 낮은 신뢰 점수처럼 측정 가능한 신호를 쓰고 최대 승격, 재시도 횟수를 제한합니다. 성공한 요청의 평균만 보지 말고 p95 지연, 실패 뒤 복구 비용과 사람이 다시 처리한 시간까지 포함해야 운영 효과를 판단할 수 있습니다.
 
 ## 1M 문맥과 활성 3B를 어떻게 해석할까?
 
-활성 3B는 한 번의 순방향 계산에 참여하는 파라미터 규모를 설명하지만 전체 30B 가중치의 저장과 서빙 요구가 3B 밀집 모델과 같다는 뜻은 아닙니다. 1M 문맥도 입력 상한이며, 최대 길이를 채우면 비용·메모리·첫 토큰 시간이 늘고 중요한 지시가 묻힐 수 있습니다. 긴 이력을 모두 보내는 방식과 필요한 기록만 검색하는 방식을 함께 비교해야 합니다.
+활성 3B는 한 번의 순방향 계산에 참여하는 파라미터 규모를 설명하지만 전체 30B 가중치의 저장과 서빙 요구가 3B 밀집 모델과 같다는 뜻은 아닙니다. 1M 문맥도 입력 상한이며, 최대 길이를 채우면 비용, 메모리, 첫 토큰 시간이 늘고 중요한 지시가 묻힐 수 있습니다. 긴 이력을 모두 보내는 방식과 필요한 기록만 검색하는 방식을 함께 비교해야 합니다.
 
-최대 4배와 30% 빠르다는 수치는 Nvidia가 제시한 비교 조건에 묶여 있습니다. 모델·하드웨어·배치 크기와 정확도 기준이 다른 환경에 그대로 적용하지 말고, 자신의 동시 요청과 에이전트 도구 구성에서 재측정해야 합니다.
+최대 4배와 30% 빠르다는 수치는 Nvidia가 제시한 비교 조건에 묶여 있습니다. 모델, 하드웨어, 배치 크기와 정확도 기준이 다른 환경에 그대로 적용하지 말고, 자신의 동시 요청과 에이전트 도구 구성에서 재측정해야 합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -159,7 +159,7 @@ graph TD
 
 - [Liquid AI, 스마트폰과 CPU에서 작동하는 로컬 에이전트 모델 LFM2.5-2.6B 공개]({% post_url 2026-08-07-liquid-ai-releases-lfm2-5-2-6b-open-weight-local-agent-model %}) — Liquid AI가 스마트폰 및 소비자용 CPU에서 로컬로 구동되는 26억 매개변수 온디바이스 에이전트 모델 LFM2.5-2.6B를 공개했습니다. 2.5GB 미만의 RAM 메모리로 128K 컨텍스트와 네이티브 툴 콜링을 지원하며…
 - [화면 밖 자동차를 비디오 모델이 잊는다면? HyDRA의 Top-K 기억]({% post_url 2026-03-30-Out-of-Sight-but-Not-Out-of-Mind--Hybrid-Memory-for-Dynamic-Video-World-Models %}) — 과거 프레임을 모두 쌓지 않고 압축 메모리에서 관련 토큰만 찾는 HyDRA의 객체 영속성 설계, HM-World 범위와 검색 병목을 살펴봅니다.
-- [jcode의 14ms 부팅은 무엇을 바꿀까: Rust Harness·Semantic Memory·Swarm 검증 기준]({% post_url 2026-05-01-I-Deleted-Claude-Code-Deep-Dive-into-jcode-the-14ms-Rust-based-Agent-Harness-that-Changes-Everything %}) — jcode가 제시하는 14ms 부팅·27.8MB idle RAM, vector semantic memory와 daemon 기반 swarm 구조를 살펴보고, 수치 재현·검색 오류·동시 편집·API 비용의 도입 조건을 정리합니다.
+- [jcode의 14ms 부팅은 무엇을 바꿀까: Rust Harness, Semantic Memory, Swarm 검증 기준]({% post_url 2026-05-01-I-Deleted-Claude-Code-Deep-Dive-into-jcode-the-14ms-Rust-based-Agent-Harness-that-Changes-Everything %}) — jcode가 제시하는 14ms 부팅, 27.8MB idle RAM, vector semantic memory와 daemon 기반 swarm 구조를 살펴보고, 수치 재현, 검색 오류, 동시 편집, API 비용의 도입 조건을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

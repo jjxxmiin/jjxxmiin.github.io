@@ -13,7 +13,7 @@ summary: 과거 'chatgpt-on-wechat'으로 알려졌던 CowAgent는 메신저에 
   명령어 실행까지 스스로 수행하는 능동적 에이전트 프레임워크입니다. 다양한 대형 언어 모델과 다중 채널(위챗, 슬랙, 웹 등)을 원활하게 연결하며,
   SKILL.md 기반의 생태계를 통해 명령어 한 줄로 새로운 능력을 주입할 수 있습니다. 다만, 시스템 제어 권한을 AI에게 위임하는 만큼 엄격한
   네트워크 접근 통제와 보안 업데이트가 동반되어야 안전하게 활용할 수 있습니다.
-description: 'CowAgent가 메신저·모델·로컬 도구·SKILL.md를 연결하는 구조와 채널별 권한, 외부 입력 공격·파일 실행·기억 관리 기준을 정리합니다.'
+description: 'CowAgent가 메신저, 모델, 로컬 도구, SKILL.md를 연결하는 구조와 채널별 권한, 외부 입력 공격, 파일 실행, 기억 관리 기준을 정리합니다.'
 github_url: https://github.com/zhayujie/CowAgent
 image:
   path: https://opengraph.githubassets.com/1/zhayujie/CowAgent

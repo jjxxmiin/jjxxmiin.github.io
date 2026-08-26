@@ -11,7 +11,7 @@ tags:
   - 컨텍스트윈도우
 summary: pxpipe는 방대한 텍스트 컨텍스트를 고밀도 이미지(PNG)로 변환하여 LLM의 비전 채널을 통해 전달함으로써, 입력 토큰 비용을
   최대 70%까지 절감하는 오픈소스 로컬 프록시 도구의 원리와 실전 활용법을 심층 분석합니다.
-description: 'pxpipe가 긴 텍스트를 이미지로 렌더링해 비전 입력으로 보내는 원리와 가격 조건, OCR 오독·정확 문자열 손실·모델별 이미지 비용과 복구 호출을 점검합니다.'
+description: 'pxpipe가 긴 텍스트를 이미지로 렌더링해 비전 입력으로 보내는 원리와 가격 조건, OCR 오독, 정확 문자열 손실, 모델별 이미지 비용과 복구 호출을 점검합니다.'
 github_url: https://github.com/teamchong/pxpipe
 image:
   path: https://opengraph.githubassets.com/1/teamchong/pxpipe
@@ -34,7 +34,7 @@ mermaid: true
 chart: true
 ---
 
-pxpipe는 긴 텍스트를 고밀도 이미지로 렌더링해 비전 입력으로 보내면서 모델별 과금 차이를 활용하려는 프록시입니다. 비용이 줄 수 있어도 코드·숫자·공백을 잘못 읽으면 수정 작업의 정확도가 떨어지므로 일반 문맥과 정확 문자열을 분리해야 합니다. 사용 모델의 현재 이미지 과금과 해상도 규칙을 확인하고, 같은 과제의 총비용·오독률·복구 호출을 비교하세요.
+pxpipe는 긴 텍스트를 고밀도 이미지로 렌더링해 비전 입력으로 보내면서 모델별 과금 차이를 활용하려는 프록시입니다. 비용이 줄 수 있어도 코드, 숫자, 공백을 잘못 읽으면 수정 작업의 정확도가 떨어지므로 일반 문맥과 정확 문자열을 분리해야 합니다. 사용 모델의 현재 이미지 과금과 해상도 규칙을 확인하고, 같은 과제의 총비용, 오독률, 복구 호출을 비교하세요.
 
 ## 텍스트를 이미지로 바꾸면 언제 이득인가
 - [pxpipe GitHub 공식 저장소](https://github.com/teamchong/pxpipe)
@@ -273,9 +273,9 @@ pxpipe는 단순한 꼼수를 넘어, 현재 AI 생태계의 토큰 경제학(To
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Graphify는 코드 Context 재탐색을 줄일까? AST Graph·추론 Edge·Drift]({% post_url 2026-04-11-The-End-of-Context-Windows-and-the-Resurrection-of-Knowledge-Graphs-A-Deep-Dive-into-Graphifys-Architecture %}) — 코드베이스를 매번 처음부터 스캐닝하며 컨텍스트를 낭비하던 기존 AI 어시스턴트의 한계를 극복하기 위해, AST 파싱과 다중 모달 AI 추론을 결합하여 영구적인 위상 기반 지식 그래프를 구축하는 Graphify의 내부 원리와 실무적…
+- [Graphify는 코드 Context 재탐색을 줄일까? AST Graph, 추론 Edge, Drift]({% post_url 2026-04-11-The-End-of-Context-Windows-and-the-Resurrection-of-Knowledge-Graphs-A-Deep-Dive-into-Graphifys-Architecture %}) — 코드베이스를 매번 처음부터 스캐닝하며 컨텍스트를 낭비하던 기존 AI 어시스턴트의 한계를 극복하기 위해, AST 파싱과 다중 모달 AI 추론을 결합하여 영구적인 위상 기반 지식 그래프를 구축하는 Graphify의 내부 원리와 실무적…
 - [마크다운 직무 기술서만으로 서브 에이전트가 될까? agency-agents의 실제 역할]({% post_url 2026-03-14-Old-Prompt-Crafters-Can-Rest-Now-The-Dawn-of-the-Sub-Agent-Era-Proven-by-agency-agents %}) — 120여 개 역할 문서를 에이전트로 활용하는 agency-agents의 구조를 살피고, 실행 엔진과 기억 장치가 따로 필요한 이유와 도입 판단 기준을 정리합니다.
-- [GSD가 Context Rot을 해결할까: 4개 Markdown State와 Fresh Context 비용]({% post_url 2026-03-28-Tech-Deep-Dive-The-Illusion-of-Vibecoding-and-How-the-GSD-Get-Shit-Done-Framework-Found-the-Answer %}) — GSD가 PROJECT·REQUIREMENTS·ROADMAP·STATE 파일로 대화 밖에 상태를 남기는 방식을 살펴보고, fresh context의 토큰 비용과 검증 책임을 짚습니다.
+- [GSD가 Context Rot을 해결할까: 4개 Markdown State와 Fresh Context 비용]({% post_url 2026-03-28-Tech-Deep-Dive-The-Illusion-of-Vibecoding-and-How-the-GSD-Get-Shit-Done-Framework-Found-the-Answer %}) — GSD가 PROJECT, REQUIREMENTS, ROADMAP, STATE 파일로 대화 밖에 상태를 남기는 방식을 살펴보고, fresh context의 토큰 비용과 검증 책임을 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

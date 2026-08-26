@@ -1,28 +1,28 @@
 ---
 layout: post
-title: 'Gemini CLI에 파일 수정 권한을 줘도 될까: Plan Mode·MCP 안전선'
+title: 'Gemini CLI에 파일 수정 권한을 줘도 될까: Plan Mode, MCP 안전선'
 date: '2026-03-20 06:26:23'
 categories: Tech
 tags:
   - Gemini
   - MCP
   - AI에이전트
-summary: 'Gemini CLI의 도구 반복, MCP 연결, Plan Mode와 ask_user를 기준으로 로컬 코딩 에이전트의 권한·컨텍스트·검토 범위를 정리합니다.'
-description: 'Gemini CLI의 도구 반복·Plan Mode·ask_user·MCP 구조를 따라가며 파일 권한, 컨텍스트 범위, 비밀 관리, 위험 명령과 실제 생산성을 검증하는 도입 기준을 설명합니다.'
+summary: 'Gemini CLI의 도구 반복, MCP 연결, Plan Mode와 ask_user를 기준으로 로컬 코딩 에이전트의 권한, 컨텍스트, 검토 범위를 정리합니다.'
+description: 'Gemini CLI의 도구 반복, Plan Mode, ask_user, MCP 구조를 따라가며 파일 권한, 컨텍스트 범위, 비밀 관리, 위험 명령과 실제 생산성을 검증하는 도입 기준을 설명합니다.'
 faq:
   - question: 'Gemini CLI에 처음부터 파일 쓰기와 셸 권한을 모두 줘도 되나요?'
-    answer: '권장하지 않습니다. 읽기 전용 분석과 Plan Mode로 범위를 확인한 뒤 한 파일 수정, 테스트 실행 순으로 권한을 넓히고 삭제·게시·배포는 별도 승인을 두는 편이 안전합니다.'
+    answer: '권장하지 않습니다. 읽기 전용 분석과 Plan Mode로 범위를 확인한 뒤 한 파일 수정, 테스트 실행 순으로 권한을 넓히고 삭제, 게시, 배포는 별도 승인을 두는 편이 안전합니다.'
   - question: 'MCP 서버를 연결하면 외부 도구도 자동으로 안전해지나요?'
     answer: '아닙니다. MCP는 연결 규격이며 서버의 신뢰성이나 데이터 정확도를 보증하지 않으므로 계정 권한, 전송 필드, 쓰기 행동과 감사 로그를 서버별로 검토해야 합니다.'
   - question: 'Gemini CLI의 생산성은 무엇으로 측정하나요?'
-    answer: '완료 시간만 보지 말고 잘못 읽은 파일 수, 재시도, 사람의 diff 수정량, 테스트 누락, 모델·도구 호출 비용과 실패 후 복구 시간까지 같은 작업의 수동 기준선과 비교해야 합니다.'
+    answer: '완료 시간만 보지 말고 잘못 읽은 파일 수, 재시도, 사람의 diff 수정량, 테스트 누락, 모델, 도구 호출 비용과 실패 후 복구 시간까지 같은 작업의 수동 기준선과 비교해야 합니다.'
 github_url: https://github.com/google-gemini/gemini-cli
 image:
   path: https://opengraph.githubassets.com/1/google-gemini/gemini-cli
   alt: "google-gemini/gemini-cli GitHub 저장소 대표 이미지"
 ---
 
-Gemini CLI는 로컬 파일과 명령을 직접 다룰 수 있어 복사·붙여넣기를 줄이지만, 처음부터 쓰기 권한을 모두 주기보다 Plan Mode에서 범위와 변경 계획을 확인한 뒤 단계적으로 허용하는 편이 안전합니다. 이 글은 2026년 3월 원문에 담긴 기능 스냅샷을 기준으로 합니다.
+Gemini CLI는 로컬 파일과 명령을 직접 다룰 수 있어 복사, 붙여넣기를 줄이지만, 처음부터 쓰기 권한을 모두 주기보다 Plan Mode에서 범위와 변경 계획을 확인한 뒤 단계적으로 허용하는 편이 안전합니다. 이 글은 2026년 3월 원문에 담긴 기능 스냅샷을 기준으로 합니다.
 
 ## 답변기가 아니라 도구 반복을 수행한다
 
@@ -42,7 +42,7 @@ Gemini CLI는 로컬 파일과 명령을 직접 다룰 수 있어 복사·붙여
 
 MCP 서버를 붙이면 GitHub, 데이터베이스, 사내 시스템의 자료와 도구를 같은 대화에서 사용할 수 있습니다. CLI는 클라이언트로서 필요한 기능을 요청하고, 서버가 외부 시스템과 통신한 결과를 모델에 돌려줍니다. 새 서비스마다 연결 코드를 제각각 만들지 않아도 되는 것이 장점입니다.
 
-그러나 MCP라는 공통 형식이 서버의 안전성이나 데이터 정확성을 보증하지는 않습니다. 서버별로 읽기·쓰기 권한, 접근 계정, 전송되는 필드와 감사 로그를 확인해야 합니다. 데이터베이스나 저장소에는 별도 최소 권한 계정을 쓰고, 삭제·게시·병합 같은 행동은 자동 호출 목록에서 빼는 편이 좋습니다.
+그러나 MCP라는 공통 형식이 서버의 안전성이나 데이터 정확성을 보증하지는 않습니다. 서버별로 읽기, 쓰기 권한, 접근 계정, 전송되는 필드와 감사 로그를 확인해야 합니다. 데이터베이스나 저장소에는 별도 최소 권한 계정을 쓰고, 삭제, 게시, 병합 같은 행동은 자동 호출 목록에서 빼는 편이 좋습니다.
 
 ## MCP 연결에서는 어떤 경계를 그을까
 
@@ -90,15 +90,15 @@ ask_user가 묻는 선택지는 결과가 어떻게 달라지는지 함께 설�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
-- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
-- [LLM 작업 하나에 LangChain이 꼭 필요할까? Axe 12MB CLI의 경계]({% post_url 2026-05-07-Breaking-the-Arrogance-of-Giant-AI-Frameworks-How-a-12MB-Binary-Axe-Proves-the-Synergy-of-UNIX-Philosophy-and-LLMs %}) — 단발성 LLM 작업을 UNIX 파이프라인에 붙이는 Axe의 장점과, 워크플로 엔진·재시도·권한 관리가 필요한 순간 드러나는 한계를 함께 짚습니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스, 최소 권한, 모델 선택의 실무 기준을 정리합니다.
+- [LLM 작업 하나에 LangChain이 꼭 필요할까? Axe 12MB CLI의 경계]({% post_url 2026-05-07-Breaking-the-Arrogance-of-Giant-AI-Frameworks-How-a-12MB-Binary-Axe-Proves-the-Synergy-of-UNIX-Philosophy-and-LLMs %}) — 단발성 LLM 작업을 UNIX 파이프라인에 붙이는 Axe의 장점과, 워크플로 엔진, 재시도, 권한 관리가 필요한 순간 드러나는 한계를 함께 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Gemini CLI에 처음부터 파일 쓰기와 셸 권한을 모두 줘도 되나요?
 
-권장하지 않습니다. 읽기 전용 분석과 Plan Mode로 범위를 확인한 뒤 한 파일 수정, 테스트 실행 순으로 권한을 넓히고 삭제·게시·배포는 별도 승인을 두는 편이 안전합니다.
+권장하지 않습니다. 읽기 전용 분석과 Plan Mode로 범위를 확인한 뒤 한 파일 수정, 테스트 실행 순으로 권한을 넓히고 삭제, 게시, 배포는 별도 승인을 두는 편이 안전합니다.
 
 ### MCP 서버를 연결하면 외부 도구도 자동으로 안전해지나요?
 
@@ -106,4 +106,4 @@ ask_user가 묻는 선택지는 결과가 어떻게 달라지는지 함께 설�
 
 ### Gemini CLI의 생산성은 무엇으로 측정하나요?
 
-완료 시간만 보지 말고 잘못 읽은 파일 수, 재시도, 사람의 diff 수정량, 테스트 누락, 모델·도구 호출 비용과 실패 후 복구 시간까지 같은 작업의 수동 기준선과 비교해야 합니다.
+완료 시간만 보지 말고 잘못 읽은 파일 수, 재시도, 사람의 diff 수정량, 테스트 누락, 모델, 도구 호출 비용과 실패 후 복구 시간까지 같은 작업의 수동 기준선과 비교해야 합니다.

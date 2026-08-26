@@ -5,7 +5,7 @@ source_citations:
 layout: post
 title:  "Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적"
 summary: "Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다."
-description: "Darknet Maxpool의 output shape·padding window와 argmax index를 따라 -1 index, strict tie, backward scatter·resize view 실패를 설명합니다."
+description: "Darknet Maxpool의 output shape, padding window와 argmax index를 따라 -1 index, strict tie, backward scatter, resize view 실패를 설명합니다."
 date:   2022-03-09 16:00 -0400
 categories: DarkNet
 image:
@@ -151,7 +151,7 @@ Maxpool 결과가 이상할 때는 “최댓값을 뽑는 단순한 layer”라�
 
 ## Window Coverage를 어떻게 전수 검사할까
 
-모든 output `(i,j)`에 대해 kernel 좌표 중 적어도 하나가 input 안인지 계산한다. Padding이 큰 설정, 1×1 input, kernel이 input보다 큰 경우와 홀수 pad를 포함한다. Forward 직후 index 최소·최대, -1 수와 -FLT_MAX output 수를 assertion으로 남긴다.
+모든 output `(i,j)`에 대해 kernel 좌표 중 적어도 하나가 input 안인지 계산한다. Padding이 큰 설정, 1×1 input, kernel이 input보다 큰 경우와 홀수 pad를 포함한다. Forward 직후 index 최소, 최대, -1 수와 -FLT_MAX output 수를 assertion으로 남긴다.
 
 Index -1을 backward에서 단순 건너뛰면 crash는 막지만 잘못된 output shape를 숨길 수 있다. Parser 단계에서 유효 window가 없는 설정을 거부하고 runtime guard는 방어선으로 둔다.
 
@@ -161,13 +161,13 @@ Index -1을 backward에서 단순 건너뛰면 crash는 막지만 잘못된 outp
 
 Tie에서는 함수가 선택한 첫 위치와 수치 미분의 비매끄러운 경계를 구분한다. Exact -FLT_MAX 입력처럼 sentinel과 실제 값이 같은 사례는 index가 갱신되지 않는 코드 경계로 별도 처리한다.
 
-## Resize와 CPU·GPU 결과를 어떻게 맞출까
+## Resize와 CPU, GPU 결과를 어떻게 맞출까
 
-새 shape에 맞춰 output·delta·indexes 길이를 함께 갱신하고 realloc 실패를 처리한다. 늘어난 delta는 상위 backward 전에 0으로 초기화되어야 한다. CPU와 GPU가 padding offset과 tie rule을 같게 구현했는지 고정 tensor로 비교한다.
+새 shape에 맞춰 output, delta, indexes 길이를 함께 갱신하고 realloc 실패를 처리한다. 늘어난 delta는 상위 backward 전에 0으로 초기화되어야 한다. CPU와 GPU가 padding offset과 tie rule을 같게 구현했는지 고정 tensor로 비교한다.
 
 ## Padding 대칭을 어떻게 확인하나요?
 
-홀수 pad에서는 `-pad/2` 정수 나눗셈 때문에 왼쪽·오른쪽 또는 위·아래가 직관적으로 같은 여백이 아닐 수 있습니다. 각 output window의 시작과 끝 좌표를 표로 만들고 다른 framework의 padding 정의와 비교합니다. 같은 output shape만으로 같은 연산이라고 판단하지 않습니다.
+홀수 pad에서는 `-pad/2` 정수 나눗셈 때문에 왼쪽, 오른쪽 또는 위, 아래가 직관적으로 같은 여백이 아닐 수 있습니다. 각 output window의 시작과 끝 좌표를 표로 만들고 다른 framework의 padding 정의와 비교합니다. 같은 output shape만으로 같은 연산이라고 판단하지 않습니다.
 
 1×1, 직사각 입력과 size가 입력보다 큰 사례를 넣어 valid input 수를 window별로 셉니다. 최소 한 개 유효 위치라는 불변식이 깨지면 생성 설정을 거부합니다.
 
@@ -179,7 +179,7 @@ Output view로 layer buffer를 수정해도 indexes는 자동으로 바뀌지 �
 
 ## 다른 Pooling 구현과 무엇을 맞춰야 하나요?
 
-Kernel·stride·padding뿐 아니라 floor·ceil output 식, padding 값을 최대 후보에서 제외하는 방식과 tie rule을 비교합니다. Average pooling이나 ceil-mode MaxPool로 교체해 shape만 맞추면 경계 output과 gradient가 달라집니다. Export 전 고정 tensor의 output과 argmax-derived gradient를 target runtime과 대조합니다.
+Kernel, stride, padding뿐 아니라 floor, ceil output 식, padding 값을 최대 후보에서 제외하는 방식과 tie rule을 비교합니다. Average pooling이나 ceil-mode MaxPool로 교체해 shape만 맞추면 경계 output과 gradient가 달라집니다. Export 전 고정 tensor의 output과 argmax-derived gradient를 target runtime과 대조합니다.
 
 ## 자주 남는 질문
 
@@ -204,7 +204,7 @@ Forward 비교가 strict greater-than이므로 loop에서 먼저 만난 위치�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet 활성화 함수 역전파가 틀릴 때: gradient()에 출력값을 넣는 이유]({% post_url 2022-02-05-DarkNetActivations %}) — Darknet activation_layer의 forward·backward 흐름과 함수 dispatch를 따라가며, logistic·tanh gradient가 pre-activation이 아니라 활성화된 출력값을 받는 구현 계약을…
+- [Darknet 활성화 함수 역전파가 틀릴 때: gradient()에 출력값을 넣는 이유]({% post_url 2022-02-05-DarkNetActivations %}) — Darknet activation_layer의 forward, backward 흐름과 함수 dispatch를 따라가며, logistic, tanh gradient가 pre-activation이 아니라 활성화된 출력값을 받는 구현…
 - [Darknet Region Layer 학습이 멈추는 이유: 빈 backward와 objectness delta 추적]({% post_url 2022-03-14-DarkNetRegionLayer %}) — Darknet region_layer의 출력 인덱스와 박스 좌표, 학습 delta 할당 순서를 따라가며 비어 있는 backward, truth 경계, 마스크 scale 형 변환, 추론 출력 변경을 점검합니다.
-- [Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스·STEPS·가중치 순서]({% post_url 2022-03-13-DarkNetParser %}) — Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록·route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다.
+- [Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스, STEPS, 가중치 순서]({% post_url 2022-03-13-DarkNetParser %}) — Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록, route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다.
 <!-- internal-links:end -->

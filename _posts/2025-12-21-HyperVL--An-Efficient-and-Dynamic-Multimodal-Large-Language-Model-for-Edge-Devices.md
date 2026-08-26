@@ -11,12 +11,12 @@ tags:
   - 컴퓨터비전
 math: true
 summary: "HyperVL이 저해상도 thumbnail로 입력 난도를 먼저 판단하고 필요한 이미지에만 고해상도 branch를 쓰는 이유, token 절감과 routing 실패의 대가를 함께 살펴봅니다."
-description: "HyperVL이 VRC로 입력별 해상도를 고르고 DCL로 두 경로의 표현을 맞추는 원리를 설명하며, edge 배포에서 route 오류·지연·전력을 함께 재는 기준입니다."
+description: "HyperVL이 VRC로 입력별 해상도를 고르고 DCL로 두 경로의 표현을 맞추는 원리를 설명하며, edge 배포에서 route 오류, 지연, 전력을 함께 재는 기준입니다."
 faq:
   - question: "HyperVL은 모든 이미지를 낮은 해상도로 처리하나요?"
     answer: "아닙니다. thumbnail을 먼저 보고 단순 장면은 저해상도, 작은 문자와 세부 정보가 필요한 입력은 고해상도 경로로 보내는 동적 routing을 사용합니다."
   - question: "평균 시각 token이 줄면 배포 성공으로 볼 수 있나요?"
-    answer: "아닙니다. 저해상도로 잘못 보낸 문서·차트의 정답률, 재시도 비용, route별 latency와 전력을 함께 확인해야 합니다."
+    answer: "아닙니다. 저해상도로 잘못 보낸 문서, 차트의 정답률, 재시도 비용, route별 latency와 전력을 함께 확인해야 합니다."
   - question: "VRC 판단이 애매할 때는 어떻게 해야 하나요?"
     answer: "신뢰도가 낮거나 사용자가 세부 판독을 요구하면 고해상도로 재시도하고, 두 결과가 다를 때 보수적으로 처리하는 복구 정책이 필요합니다."
 image:
@@ -24,7 +24,7 @@ image:
   alt: "온디바이스 VLM은 모든 이미지를 고해상도로 봐야 할까? HyperVL의 VRC 판단 논문 대표 이미지"
 ---
 
-온디바이스 VLM은 **모든 이미지를 고해상도로 처리하기보다, 문서·차트처럼 세부 정보가 필요한 입력만 고해상도 branch로 보내는 편이 효율적**입니다. HyperVL의 핵심도 모델 자체를 무조건 작게 만드는 데 있지 않고, 입력마다 필요한 시각 token 양을 다르게 배정하는 데 있습니다.
+온디바이스 VLM은 **모든 이미지를 고해상도로 처리하기보다, 문서, 차트처럼 세부 정보가 필요한 입력만 고해상도 branch로 보내는 편이 효율적**입니다. HyperVL의 핵심도 모델 자체를 무조건 작게 만드는 데 있지 않고, 입력마다 필요한 시각 token 양을 다르게 배정하는 데 있습니다.
 
 ## VRC는 계산량을 입력 난도에 맞춘다
 
@@ -42,7 +42,7 @@ image:
 
 ## Edge 성능은 평균값 대신 route별로 측정한다
 
-원문은 Snapdragon 8 Gen 2와 Gen 3 환경, TVM·ONNX 변환, quantization과 kernel 최적화를 설명합니다. 보고된 결과는 OCR 성능 15~20% 개선, latency 약 40% 개선, 전력 사용 약 30% 감소입니다. 이 값은 논문의 모델·장비·입력 조건에 묶여 있으므로 내 기기의 보장치로 읽으면 안 됩니다.
+원문은 Snapdragon 8 Gen 2와 Gen 3 환경, TVM, ONNX 변환, quantization과 kernel 최적화를 설명합니다. 보고된 결과는 OCR 성능 15~20% 개선, latency 약 40% 개선, 전력 사용 약 30% 감소입니다. 이 값은 논문의 모델, 장비, 입력 조건에 묶여 있으므로 내 기기의 보장치로 읽으면 안 됩니다.
 
 실제 검증에서는 데이터셋을 네 묶음으로 나누는 편이 좋습니다.
 
@@ -70,7 +70,7 @@ VRC가 단순 장면을 고해상도로 보내면 계산을 낭비하지만 답�
 |---|---|---|
 | 큰 객체 식별 | 영향이 작을 수 있음 | 신뢰도 낮을 때만 재시도 |
 | 영수증 숫자 | 근거가 소실될 수 있음 | high route 강제 |
-| chart 비교 | 전체 구조와 세부 값 모두 필요 | global·local 결과 확인 |
+| chart 비교 | 전체 구조와 세부 값 모두 필요 | global, local 결과 확인 |
 | 경계 입력 | 질문에 따라 달라짐 | 두 route 차이를 비교 |
 
 ## 절감률은 재시도까지 포함한 요청 단위로 계산한다
@@ -81,9 +81,9 @@ VRC가 단순 장면을 고해상도로 보내면 계산을 낭비하지만 답�
 
 ## DCL 효과는 Controller 효과와 분리해 확인한다
 
-동적 해상도와 DCL을 동시에 적용한 결과만 보면 개선 원인을 알기 어렵습니다. low 고정, high 고정, VRC만 사용, VRC와 DCL을 함께 사용한 네 조건을 같은 질문으로 비교합니다. low·high 답이 크게 갈리는 사례에서 DCL이 표현 차이를 실제로 줄이는지 확인하고, 그 과정에서 세부 문자 정답이 희석되지 않는지도 봅니다.
+동적 해상도와 DCL을 동시에 적용한 결과만 보면 개선 원인을 알기 어렵습니다. low 고정, high 고정, VRC만 사용, VRC와 DCL을 함께 사용한 네 조건을 같은 질문으로 비교합니다. low, high 답이 크게 갈리는 사례에서 DCL이 표현 차이를 실제로 줄이는지 확인하고, 그 과정에서 세부 문자 정답이 희석되지 않는지도 봅니다.
 
-실패 사례는 route, 질문, 정답, low·high 응답, latency를 함께 남깁니다. 문서에서 반복되는 실패가 보이면 controller threshold만 바꾸기보다 해당 입력을 처음부터 high로 보내는 명시적 규칙이 더 안정적일 수 있습니다. HyperVL의 도입 가치는 **쉬운 입력에서 절약한 계산이 어려운 입력의 품질 손실과 복구 비용보다 큰가**로 판단해야 합니다.
+실패 사례는 route, 질문, 정답, low, high 응답, latency를 함께 남깁니다. 문서에서 반복되는 실패가 보이면 controller threshold만 바꾸기보다 해당 입력을 처음부터 high로 보내는 명시적 규칙이 더 안정적일 수 있습니다. HyperVL의 도입 가치는 **쉬운 입력에서 절약한 계산이 어려운 입력의 품질 손실과 복구 비용보다 큰가**로 판단해야 합니다.
 
 ## Edge 검증은 온도와 지속 부하까지 포함한다
 
@@ -94,9 +94,9 @@ VRC가 단순 장면을 고해상도로 보내면 계산을 낭비하지만 답�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [VLM 추론 데이터 180만 개가 다 필요할까? MMFineReason의 7% 선별]({% post_url 2026-01-31-MMFineReason--Closing-the-Multimodal-Reasoning-Gap-via-Open-Data-Centric-Methods %}) — MMFineReason이 180만 sample과 51억 solution token을 만든 뒤 난이도, 정확성으로 약 7%를 선별해 작은 VLM을 학습한 과정과 teacher 오류, 생성 비용을 함께 봅니다.
 - [OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트]({% post_url 2025-02-23-omniparser %}) — GUI 인터페이스를 자동화하는 강력한 AI 기술, OmniParser의 원리와 응용
-- [이미지에 없는 물체를 말할 때: NoLan의 언어 사전확률 억제]({% post_url 2026-02-28-NoLan--Mitigating-Object-Hallucinations-in-Large-Vision-Language-Models-via-Dynamic-Suppression-of-Language-Priors %}) — NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용·오탐 가능성을 정리합니다.
-- [이미지 이해와 생성이 서로 방해한다면? Cheers의 의미·디테일 토큰 분리]({% post_url 2026-03-16-Cheers--Decoupling-Patch-Details-from-Semantic-Representations-Enables-Unified-Multimodal-Comprehension-and-Generation %}) — 한 모델에서 이미지 이해와 생성을 함께 할 때 생기는 표현 충돌을 Cheers가 의미·디테일 경로로 나누는 방식과 비용 수치의 조건을 살펴봅니다.
+- [이미지에 없는 물체를 말할 때: NoLan의 언어 사전확률 억제]({% post_url 2026-02-28-NoLan--Mitigating-Object-Hallucinations-in-Large-Vision-Language-Models-via-Dynamic-Suppression-of-Language-Priors %}) — NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용, 오탐 가능성을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -107,7 +107,7 @@ VRC가 단순 장면을 고해상도로 보내면 계산을 낭비하지만 답�
 
 ### 평균 시각 token이 줄면 배포 성공으로 볼 수 있나요?
 
-아닙니다. 저해상도로 잘못 보낸 문서·차트의 정답률, 재시도 비용, route별 latency와 전력을 함께 확인해야 합니다.
+아닙니다. 저해상도로 잘못 보낸 문서, 차트의 정답률, 재시도 비용, route별 latency와 전력을 함께 확인해야 합니다.
 
 ### VRC 판단이 애매할 때는 어떻게 해야 하나요?
 

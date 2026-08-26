@@ -8,18 +8,18 @@ tags:
   - 영상생성
   - 트랜스포머
 math: true
-summary: "Sink·Mid·Recent로 KV 캐시를 나눠 중간 과거를 32배 압축하는 PackForcing의 구조, H200·16 FPS 평가와 장기 품질 한계를 짚습니다."
-description: "Sink·Mid·Recent로 KV 캐시를 나눠 중간 과거를 32배 압축하는 PackForcing의 구조, H200·16 FPS 평가와 장기 품질 한계를 짚습니다."
+summary: "Sink, Mid, Recent로 KV 캐시를 나눠 중간 과거를 32배 압축하는 PackForcing의 구조, H200, 16 FPS 평가와 장기 품질 한계를 짚습니다."
+description: "Sink, Mid, Recent로 KV 캐시를 나눠 중간 과거를 32배 압축하는 PackForcing의 구조, H200, 16 FPS 평가와 장기 품질 한계를 짚습니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.25730.png
   alt: "5초 영상으로 120초를 만들 수 있을까? PackForcing의 4GB KV 조건 논문 대표 이미지"
 ---
 
-**PackForcing은 논문 설정에서 약 5초 학습 클립으로 120초 영상을 생성하고 KV 캐시를 약 4GB로 제한했지만, 모든 장면이 2분 동안 정확히 유지된다는 보장은 아닙니다.** 핵심은 긴 과거를 그대로 저장하지 않고 역할에 따라 보존·압축·선택하는 데 있습니다.
+**PackForcing은 논문 설정에서 약 5초 학습 클립으로 120초 영상을 생성하고 KV 캐시를 약 4GB로 제한했지만, 모든 장면이 2분 동안 정확히 유지된다는 보장은 아닙니다.** 핵심은 긴 과거를 그대로 저장하지 않고 역할에 따라 보존, 압축, 선택하는 데 있습니다.
 
 [논문 자료](https://huggingface.co/papers/2603.25730)는 causal video generation에서 프레임이 늘수록 KV 캐시가 선형으로 커지는 문제를 다룹니다. PackForcing은 과거 토큰을 Sink, Mid, Recent 세 구간으로 나누고 각기 다른 해상도와 보존 규칙을 적용합니다.
 
-![Sink·Mid·Recent로 나눈 PackForcing 구조](/assets/img/papers/2603.25730/2603.25730v1/x2.png)
+![Sink, Mid, Recent로 나눈 PackForcing 구조](/assets/img/papers/2603.25730/2603.25730v1/x2.png)
 
 ## 처음과 최근은 선명하게, 중간 과거는 압축한다
 
@@ -31,7 +31,7 @@ Sink 토큰은 영상 초반의 인물과 배경을 앵커로 남깁니다. Rece
 
 ## 120초와 4GB는 H200 평가 조건 안의 숫자다
 
-원문 표는 H200, 16 FPS 조건에서 KV 캐시 약 4GB와 120초 이상 생성을 제시합니다. VBench 일관성 점수도 PackForcing 26.07, Rolling-Forcing 22.45, DeepForcing 24.12로 소개합니다. 비교 결과는 동일한 모델·해상도·평가 절차 안에서 읽어야 합니다.
+원문 표는 H200, 16 FPS 조건에서 KV 캐시 약 4GB와 120초 이상 생성을 제시합니다. VBench 일관성 점수도 PackForcing 26.07, Rolling-Forcing 22.45, DeepForcing 24.12로 소개합니다. 비교 결과는 동일한 모델, 해상도, 평가 절차 안에서 읽어야 합니다.
 
 ![120초 지점의 모델별 생성 결과 비교](/assets/img/papers/2603.25730/2603.25730v1/x4.png)
 
@@ -39,7 +39,7 @@ Sink 토큰은 영상 초반의 인물과 배경을 앵커로 남깁니다. Rece
 
 ## 압축에서 사라지는 디테일을 따로 찾는다
 
-32배 Mid 압축은 비·연기·작은 표정처럼 오래된 미세 움직임을 잃을 수 있습니다. Top-K가 현재 장면과 겉보기에 비슷한 잘못된 과거를 고르면 인물이나 물체가 갑자기 바뀔 수도 있습니다. Sink가 초반 상태를 강하게 붙들면 의도한 장면 변화까지 방해할 가능성도 있습니다.
+32배 Mid 압축은 비, 연기, 작은 표정처럼 오래된 미세 움직임을 잃을 수 있습니다. Top-K가 현재 장면과 겉보기에 비슷한 잘못된 과거를 고르면 인물이나 물체가 갑자기 바뀔 수도 있습니다. Sink가 초반 상태를 강하게 붙들면 의도한 장면 변화까지 방해할 가능성도 있습니다.
 
 ![Sink와 RoPE 구성 요소를 뺀 제거 실험](/assets/img/papers/2603.25730/2603.25730v1/x5.png)
 
@@ -51,7 +51,7 @@ Sink 토큰은 영상 초반의 인물과 배경을 앵커로 남깁니다. Rece
 
 ![최대 120초 생성이 가능한 프레임워크 개요](/assets/img/papers/2603.25730/2603.25730v1/x1.png)
 
-PackForcing은 “모든 과거를 보관해야 장기 일관성이 생긴다”는 가정을 깨는 유용한 메모리 설계입니다. 그러나 광고·자율주행 합성 데이터에 쓰려면 시각적 자연스러움 외에 물체 상태와 물리 사건의 정확성을 별도로 검증해야 합니다.
+PackForcing은 “모든 과거를 보관해야 장기 일관성이 생긴다”는 가정을 깨는 유용한 메모리 설계입니다. 그러나 광고, 자율주행 합성 데이터에 쓰려면 시각적 자연스러움 외에 물체 상태와 물리 사건의 정확성을 별도로 검증해야 합니다.
 
 ## 메모리 상한과 장기 이해는 같은 문제가 아니다
 
@@ -59,7 +59,7 @@ KV 캐시가 4GB 부근에 머문다는 것은 계산 자원의 경계를 닫았
 
 그래서 장기 평가는 정체성뿐 아니라 상태 변수를 추적해야 합니다. 컵의 위치, 문이 열렸는지, 등장인물의 옷이 바뀌었는지처럼 시간에 따라 갱신되는 사실을 시점별로 표기하고 생성 결과와 비교합니다. 단순한 영상 유사도는 자연스러운 질감에 높은 점수를 주면서 사건 오류를 놓칠 수 있습니다.
 
-## Sink·Mid·Recent의 크기는 어떻게 정하나
+## Sink, Mid, Recent의 크기는 어떻게 정하나
 
 Sink가 너무 짧으면 초반 배경과 인물 앵커가 사라지고, 너무 길면 이미 바뀐 설정을 계속 끌고 갈 수 있습니다. Recent가 짧으면 움직임이 끊기고, 길면 가장 비싼 고해상도 토큰이 캐시를 차지합니다. Mid 압축률과 Top-K는 그 사이의 사건 기억과 비용을 결정합니다. 세 값은 독립된 knob처럼 보여도 전체 상한 안에서 서로 자원을 빼앗습니다.
 
@@ -73,31 +73,31 @@ Sink가 너무 짧으면 초반 배경과 인물 앵커가 사라지고, 너무 
 
 ## 보고된 120초를 재현할 때 무엇을 고정하나
 
-모델 checkpoint, 해상도, FPS, frame 수, sampling step, precision과 GPU를 모두 적어야 합니다. “120초 영상”도 16 FPS와 24 FPS에서는 생성해야 할 토큰 수가 다릅니다. peak memory만 보지 말고 시간대별 할당량과 생성 속도를 남겨 캐시가 실제로 고정되는지 확인합니다. 영상 저장·디코딩 메모리까지 포함한 프로세스 RSS도 별도로 봅니다.
+모델 checkpoint, 해상도, FPS, frame 수, sampling step, precision과 GPU를 모두 적어야 합니다. “120초 영상”도 16 FPS와 24 FPS에서는 생성해야 할 토큰 수가 다릅니다. peak memory만 보지 말고 시간대별 할당량과 생성 속도를 남겨 캐시가 실제로 고정되는지 확인합니다. 영상 저장, 디코딩 메모리까지 포함한 프로세스 RSS도 별도로 봅니다.
 
-재현 결과는 동일 seed 한 편으로 비교하지 않습니다. 장면 종류와 prompt 길이를 나누고 여러 seed에서 OOM, 속도와 품질 분산을 측정합니다. 논문의 상대 비교를 재현하지 못했을 때는 버전·커널·평가 코드 차이를 먼저 찾고, 더 작은 GPU에서 나온 결과를 원 논문의 배수와 직접 섞지 않습니다.
+재현 결과는 동일 seed 한 편으로 비교하지 않습니다. 장면 종류와 prompt 길이를 나누고 여러 seed에서 OOM, 속도와 품질 분산을 측정합니다. 논문의 상대 비교를 재현하지 못했을 때는 버전, 커널, 평가 코드 차이를 먼저 찾고, 더 작은 GPU에서 나온 결과를 원 논문의 배수와 직접 섞지 않습니다.
 
 ## 서비스에 넣으면 어떤 운영 문제가 생기나
 
 사용자별 캐시가 유지되는 생성 서비스에서는 동시 세션 수가 총 VRAM을 결정합니다. 세션당 4GB라면 모델 가중치와 작업 공간을 제외하고도 수십 세션을 한 GPU에 넣기 어렵습니다. 최대 길이, idle timeout과 admission control을 정하고, 연결이 끊긴 캐시를 즉시 회수해야 합니다.
 
-Top-K 선택과 압축 단계도 관측 가능해야 합니다. 후반에 객체가 바뀌었을 때 어떤 시간대의 토큰이 남았는지 확인할 수 없으면 튜닝이 추측이 됩니다. 설정·seed·모델 버전과 시간대별 품질 지표를 저장하고, 새 checkpoint 배포 전 같은 장기 세트를 다시 돌리는 회귀 검사가 필요합니다.
+Top-K 선택과 압축 단계도 관측 가능해야 합니다. 후반에 객체가 바뀌었을 때 어떤 시간대의 토큰이 남았는지 확인할 수 없으면 튜닝이 추측이 됩니다. 설정, seed, 모델 버전과 시간대별 품질 지표를 저장하고, 새 checkpoint 배포 전 같은 장기 세트를 다시 돌리는 회귀 검사가 필요합니다.
 
-캐시를 disk로 내리거나 session을 재개하는 기능을 추가하면 전송·직렬화 비용과 호환성 문제가 생깁니다. 모델이나 RoPE 설정이 바뀐 뒤 옛 cache를 불러오지 않도록 format version을 두고, checksum과 소유 session을 확인해야 합니다. 복원 시간이 새로 생성하는 시간보다 길다면 재개 기능의 실익이 없으므로 길이별 break-even도 측정합니다.
+캐시를 disk로 내리거나 session을 재개하는 기능을 추가하면 전송, 직렬화 비용과 호환성 문제가 생깁니다. 모델이나 RoPE 설정이 바뀐 뒤 옛 cache를 불러오지 않도록 format version을 두고, checksum과 소유 session을 확인해야 합니다. 복원 시간이 새로 생성하는 시간보다 길다면 재개 기능의 실익이 없으므로 길이별 break-even도 측정합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [비디오를 16 FPS로 바로 이어 만들 수 있을까? ShotStream의 캐시 조건]({% post_url 2026-03-30-ShotStream--Streaming-Multi-Shot-Video-Generation-for-Interactive-Storytelling %}) — 양방향 비디오 모델을 인과적 학생으로 증류해 스트리밍하는 ShotStream의 듀얼 캐시, 16 FPS 조건과 장기 생성의 한계 및 검증법을 설명합니다.
-- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성·평가·비용의 한계를 짚습니다.
-- [멀티샷 영상의 카메라가 프롬프트를 무시한다면? ShotVerse의 3D 궤적]({% post_url 2026-03-14-ShotVerse--Advancing-Cinematic-Camera-Control-for-Text-Driven-Multi-Shot-Video-Creation %}) — 텍스트를 바로 영상으로 만들지 않고 카메라 궤적을 먼저 계획하는 ShotVerse의 Plan-then-Control 구조, 평가 범위와 실제 제작 한계를 짚습니다.
+- [3D 라벨 없이 장면의 앞뒤를 읽을 수 있을까: VEGA-3D의 대가]({% post_url 2026-03-20-Generation-Models-Know-Space--Unleashing-Implicit-3D-Priors-for-Scene-Understanding %}) — VEGA-3D가 동결 비디오 생성 모델의 중간 피처를 MLLM에 게이트 방식으로 결합하는 구조와 정밀 좌표, 메모리, 지연 한계를 짚습니다.
+- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성, 평가, 비용의 한계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 5초 영상만 학습하면 긴 영상 데이터가 필요 없나요?
 
-아닙니다. 논문의 구조가 짧은 클립으로 긴 sampling을 가능하게 했다는 것과 긴 사건·서사를 학습했다는 것은 다릅니다. 목표 업무에 장기 상태 변화가 있다면 그 능력을 별도로 평가해야 합니다.
+아닙니다. 논문의 구조가 짧은 클립으로 긴 sampling을 가능하게 했다는 것과 긴 사건, 서사를 학습했다는 것은 다릅니다. 목표 업무에 장기 상태 변화가 있다면 그 능력을 별도로 평가해야 합니다.
 
 ### KV 캐시 4GB는 어떤 GPU에서도 같은가요?
 

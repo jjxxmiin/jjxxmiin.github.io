@@ -12,7 +12,7 @@ tags:
 summary: 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억
   시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로 빼내고 컨텍스트에는 심볼릭 그래프만 남깁니다.
   OpenClaw 플러그인으로 구동되며 최대 61%의 토큰 절감 효과와 작업 성공률 향상을 동시에 달성했습니다.
-description: 'TencentDB-Agent-Memory의 단기 오프로딩과 L0~L3 장기 기억 구조를 살피고, 토큰 절감·검색 누락·기억 오염·삭제 기준을 설명합니다.'
+description: 'TencentDB-Agent-Memory의 단기 오프로딩과 L0~L3 장기 기억 구조를 살피고, 토큰 절감, 검색 누락, 기억 오염, 삭제 기준을 설명합니다.'
 github_url: https://github.com/TencentCloud/TencentDB-Agent-Memory
 image:
   path: https://opengraph.githubassets.com/1/TencentCloud/TencentDB-Agent-Memory
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-TencentDB-Agent-Memory는 긴 도구 로그를 문맥 밖으로 옮기고 대화에서 페르소나까지 정보를 단계별로 압축해 다시 찾는 기억 구조를 제안합니다. 토큰이 줄어도 잘못된 요약이나 폐기된 결정이 장기 기억에 남으면 이후 작업을 반복해서 오염시킬 수 있습니다. 원문 추적, 갱신·삭제, 시간 정보, 검색 누락을 같은 장기 과제에서 확인해야 합니다.
+TencentDB-Agent-Memory는 긴 도구 로그를 문맥 밖으로 옮기고 대화에서 페르소나까지 정보를 단계별로 압축해 다시 찾는 기억 구조를 제안합니다. 토큰이 줄어도 잘못된 요약이나 폐기된 결정이 장기 기억에 남으면 이후 작업을 반복해서 오염시킬 수 있습니다. 원문 추적, 갱신, 삭제, 시간 정보, 검색 누락을 같은 장기 과제에서 확인해야 합니다.
 
 ## 어떤 정보를 기억하고 무엇을 버려야 하나
 

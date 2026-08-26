@@ -12,7 +12,7 @@ tags:
 summary: Firecrawl은 복잡한 동적 웹사이트, PDF, 문서를 AI 모델이 바로 소비할 수 있는 깨끗한 마크다운과 구조화된 JSON 데이터로
   변환해주는 오픈소스 웹 데이터 API입니다. JavaScript 렌더링, 프록시 순환, 노이즈 제거를 자동으로 처리하여 RAG 파이프라인과 AI
   에디터 환경에서 토큰 소비를 대폭 줄이고 데이터 수집의 정확도를 향상시킵니다.
-description: 'Firecrawl이 동적 웹페이지를 마크다운·JSON으로 바꾸는 렌더링·정제·크롤링 구조와 RAG 수집 범위, 접근 권한·갱신·추출 오류 검수법을 설명합니다.'
+description: 'Firecrawl이 동적 웹페이지를 마크다운, JSON으로 바꾸는 렌더링, 정제, 크롤링 구조와 RAG 수집 범위, 접근 권한, 갱신, 추출 오류 검수법을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/firecrawl/firecrawl
 image:
@@ -47,7 +47,7 @@ mermaid: true
 - [Firecrawl 공식 웹사이트](https://www.firecrawl.dev/)
 - [Firecrawl 공식 문서](https://docs.firecrawl.dev/)
 
-Firecrawl은 JavaScript 렌더링과 본문 정제를 직접 운영하기 어려운 RAG·에이전트 데이터 수집에 적합합니다. URL이 마크다운으로 바뀐다는 사실만으로 내용의 최신성·완전성·수집 권한이 보장되지는 않습니다. 실제 도입 전 허용된 도메인과 갱신 주기, 로그인·무한 스크롤·표가 있는 표본에서 누락률과 재시도 비용을 확인해야 합니다.
+Firecrawl은 JavaScript 렌더링과 본문 정제를 직접 운영하기 어려운 RAG, 에이전트 데이터 수집에 적합합니다. URL이 마크다운으로 바뀐다는 사실만으로 내용의 최신성, 완전성, 수집 권한이 보장되지는 않습니다. 실제 도입 전 허용된 도메인과 갱신 주기, 로그인, 무한 스크롤, 표가 있는 표본에서 누락률과 재시도 비용을 확인해야 합니다.
 
 ![Firecrawl 로고](https://raw.githubusercontent.com/firecrawl/firecrawl/main/img/firecrawl_logo.png)
 
@@ -284,19 +284,19 @@ app = FirecrawlApp(api_key=os.getenv(
 
 ## 단일 스크랩과 사이트 크롤링 중 무엇을 선택해야 할까?
 
-한 페이지의 본문만 필요하면 `/scrape`부터 시작하는 편이 범위와 비용을 통제하기 쉽습니다. 문서 사이트 전체를 수집하려면 먼저 `/map` 결과에서 필요한 경로와 제외할 로그인·검색·태그 페이지를 정한 뒤 `/crawl`로 넓힙니다. 경계를 정하지 않은 재귀 크롤링은 달력·필터 URL처럼 내용이 비슷한 페이지를 반복 방문해 작업량과 중복 문서를 늘릴 수 있습니다.
+한 페이지의 본문만 필요하면 `/scrape`부터 시작하는 편이 범위와 비용을 통제하기 쉽습니다. 문서 사이트 전체를 수집하려면 먼저 `/map` 결과에서 필요한 경로와 제외할 로그인, 검색, 태그 페이지를 정한 뒤 `/crawl`로 넓힙니다. 경계를 정하지 않은 재귀 크롤링은 달력, 필터 URL처럼 내용이 비슷한 페이지를 반복 방문해 작업량과 중복 문서를 늘릴 수 있습니다.
 
-동적 페이지는 브라우저가 “로드 완료”를 판단한 시점과 사용자가 실제 내용을 본 시점이 다를 수 있습니다. 지연 로딩 표나 버튼 뒤의 내용이 필요한 경우 기다릴 조건과 상호작용 단계를 명시하고, 성공 응답뿐 아니라 빈 본문·로그인 화면·오류 페이지를 구별해야 합니다. 재시도 횟수와 동시성도 대상 서버의 허용 범위와 서비스 안정성을 해치지 않도록 제한합니다.
+동적 페이지는 브라우저가 “로드 완료”를 판단한 시점과 사용자가 실제 내용을 본 시점이 다를 수 있습니다. 지연 로딩 표나 버튼 뒤의 내용이 필요한 경우 기다릴 조건과 상호작용 단계를 명시하고, 성공 응답뿐 아니라 빈 본문, 로그인 화면, 오류 페이지를 구별해야 합니다. 재시도 횟수와 동시성도 대상 서버의 허용 범위와 서비스 안정성을 해치지 않도록 제한합니다.
 
 ## RAG에 넣기 전에 어떤 품질 검사를 해야 할까?
 
-마크다운이 깔끔해도 제목·본문·표·코드 블록이 원문과 일치하는지 표본을 대조해야 합니다. 내비게이션 제거가 과도하면 문서 계층과 중요한 경고가 사라질 수 있고, 반대로 쿠키 문구가 남으면 검색 결과를 오염시킬 수 있습니다. URL, 수집 시각, 문서 해시를 함께 저장하면 변경된 페이지만 다시 임베딩하고 답변의 근거 시점을 설명하기 쉽습니다.
+마크다운이 깔끔해도 제목, 본문, 표, 코드 블록이 원문과 일치하는지 표본을 대조해야 합니다. 내비게이션 제거가 과도하면 문서 계층과 중요한 경고가 사라질 수 있고, 반대로 쿠키 문구가 남으면 검색 결과를 오염시킬 수 있습니다. URL, 수집 시각, 문서 해시를 함께 저장하면 변경된 페이지만 다시 임베딩하고 답변의 근거 시점을 설명하기 쉽습니다.
 
-Extract API의 JSON은 스키마에 맞더라도 값이 원문에 없거나 단위를 잘못 해석할 수 있습니다. 필수 필드, 허용 범위와 원문 인용 위치를 별도로 검증하고, 실패한 추출을 빈 값으로 조용히 저장하지 않아야 합니다. 법적·정책적 판단이 필요한 데이터는 사이트 이용 조건과 robots 지침, 개인정보와 접근 권한을 확인한 뒤 수집 범위를 정해야 합니다.
+Extract API의 JSON은 스키마에 맞더라도 값이 원문에 없거나 단위를 잘못 해석할 수 있습니다. 필수 필드, 허용 범위와 원문 인용 위치를 별도로 검증하고, 실패한 추출을 빈 값으로 조용히 저장하지 않아야 합니다. 법적, 정책적 판단이 필요한 데이터는 사이트 이용 조건과 robots 지침, 개인정보와 접근 권한을 확인한 뒤 수집 범위를 정해야 합니다.
 
 ## 클라우드 API와 셀프 호스팅은 어떻게 고를까?
 
-관리형 API는 브라우저·큐·프록시 운영을 줄이는 대신 제공 조건과 사용량 비용에 의존합니다. 셀프 호스팅은 데이터 경로와 배포를 통제할 수 있지만 브라우저 워커, 큐, 저장소, 장애 복구와 보안 업데이트를 직접 맡아야 합니다. 월 호출 수만 비교하지 말고 실패 재처리, 대상 사이트 변화에 따른 유지보수와 운영 인력까지 포함해 결정해야 합니다.
+관리형 API는 브라우저, 큐, 프록시 운영을 줄이는 대신 제공 조건과 사용량 비용에 의존합니다. 셀프 호스팅은 데이터 경로와 배포를 통제할 수 있지만 브라우저 워커, 큐, 저장소, 장애 복구와 보안 업데이트를 직접 맡아야 합니다. 월 호출 수만 비교하지 말고 실패 재처리, 대상 사이트 변화에 따른 유지보수와 운영 인력까지 포함해 결정해야 합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -307,7 +307,7 @@ Extract API의 JSON은 스키마에 맞더라도 값이 원문에 없거나 단�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [WeKnora가 표·수식 PDF RAG에 맞을까: 파싱·Hybrid Retrieval 검증]({% post_url 2026-05-15-For-Those-Tired-of-Simple-ChatUI-Shells-A-Deep-Dive-Under-the-Hood-of-WeKnora-Tencents-Hardcore-RAG-Engine %}) — WeKnora의 layout·표·수식 parsing과 BM25·dense·graph 검색, agent·MCP 구조를 살펴보고 한국어 문서 정확도·인용·자원·운영 조건을 검증합니다.
-- [클로드(Claude) 사용법: 무료·Pro 요금제, 프로젝트·PDF·Skills 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 2026년 8월 26일 기준 Claude 무료·Pro 플랜, 프로젝트와 RAG, 채팅·프로젝트 파일 제한, PDF·Artifacts·Skills·공유 기능을 공식 문서로 비교합니다.
-- [GitNexus는 코드를 밖으로 보내지 않나: 브라우저 Graph RAG와 MCP 경계]({% post_url 2026-03-01-No-More-Code-Leak-Worries-An-Honest-Review-of-GitNexus-the-Insane-In-Browser-Knowledge-Graph %}) — GitNexus가 브라우저에서 AST·지식 그래프를 만드는 방식과 MCP로 외부 모델을 연결할 때 달라지는 데이터 경계, 규모·정확도 검증법을 정리합니다.
+- [WeKnora가 표, 수식 PDF RAG에 맞을까: 파싱, Hybrid Retrieval 검증]({% post_url 2026-05-15-For-Those-Tired-of-Simple-ChatUI-Shells-A-Deep-Dive-Under-the-Hood-of-WeKnora-Tencents-Hardcore-RAG-Engine %}) — WeKnora의 layout, 표, 수식 parsing과 BM25, dense, graph 검색, agent, MCP 구조를 살펴보고 한국어 문서 정확도, 인용, 자원, 운영 조건을 검증합니다.
+- [GitNexus는 코드를 밖으로 보내지 않나: 브라우저 Graph RAG와 MCP 경계]({% post_url 2026-03-01-No-More-Code-Leak-Worries-An-Honest-Review-of-GitNexus-the-Insane-In-Browser-Knowledge-Graph %}) — GitNexus가 브라우저에서 AST, 지식 그래프를 만드는 방식과 MCP로 외부 모델을 연결할 때 달라지는 데이터 경계, 규모, 정확도 검증법을 정리합니다.
+- [RAG가 엉뚱한 문서를 찾는다면? RAFT의 Distractor 학습법]({% post_url 2025-02-20-raft %}) — 정답 문서와 방해 문서를 함께 넣고 근거를 인용하게 만드는 RAFT의 데이터 구성, 성능표, 적용 조건
 <!-- internal-links:end -->

@@ -3,7 +3,7 @@ source_citations:
   - name: "Darknet parser.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/parser.c"
 layout: post
-title:  "Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스·STEPS·가중치 순서"
+title:  "Darknet cfg 파서가 네트워크를 망가뜨리는 순간: route 인덱스, STEPS, 가중치 순서"
 date:   2022-03-13 16:00 -0400
 categories: DarkNet
 image:
@@ -12,8 +12,8 @@ image:
 tags:
   - DarkNet
   - 컴퓨터비전
-summary: "Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록·route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다."
-description: "Darknet parser.c의 cfg section·shape propagation·route·comma list와 binary weight 순서를 따라 NULL·index·metadata 호환 실패를 설명합니다."
+summary: "Darknet parser.c가 cfg 섹션을 레이어로 연결하는 흐름과 크기 전파, 쉼표 목록, route 인덱스의 경계 오류, 가중치 바이너리 순서를 코드로 점검합니다."
+description: "Darknet parser.c의 cfg section, shape propagation, route, comma list와 binary weight 순서를 따라 NULL, index, metadata 호환 실패를 설명합니다."
 math: true
 faq:
   - question: "인식하지 못한 layer section을 경고만 하고 계속해도 되나요?"
@@ -21,7 +21,7 @@ faq:
   - question: "Route의 layers option은 왜 NULL 검사 순서가 중요한가요?"
     answer: "제시된 코드는 NULL 검사 전에 strlen을 호출해 option이 없으면 의도한 오류 처리 전에 crash할 수 있습니다."
   - question: "Weight 파일을 읽을 때 layer shape만 맞으면 충분한가요?"
-    answer: "아닙니다. Header version·seen 크기와 layer별 저장 순서, BatchNorm·binary·dontload 옵션이 writer와 같아야 합니다."
+    answer: "아닙니다. Header version, seen 크기와 layer별 저장 순서, BatchNorm, binary, dontload 옵션이 writer와 같아야 합니다."
 ---
 
 Darknet의 `cfg` 문제를 찾으려면 개별 옵션보다 먼저 “섹션 읽기 → 레이어 생성 → 출력 크기 전파 → 가중치 로드” 순서를 따라가야 합니다. 이 구현에는 잘못된 `route` 설정이나 쉼표 목록 하나가 NULL 접근 또는 어긋난 가중치 읽기로 이어질 수 있는 지점이 있습니다.
@@ -126,7 +126,7 @@ network *parse_network_cfg(char *filename)
             params.inputs = l.outputs;
         }
     }
-    /* 출력·입력·truth·workspace 할당 */
+    /* 출력, 입력, truth, workspace 할당 */
     return net;
 }
 ```
@@ -264,10 +264,10 @@ if(!net->inputs && !(net->h && net->w && net->c)) {
 
 각 레이어 파서는 같은 패턴을 따릅니다. 옵션을 읽고, 필요한 입력 형태를 확인한 뒤 `make_*_layer`를 호출합니다.
 
-- `convolutional`·`local`·`deconvolutional`·pool·crop·reorg는 `h/w/c`가 모두 있어야 합니다.
-- `connected`·RNN·GRU·LSTM은 `params.inputs`를 중심으로 생성합니다.
-- `activation`·`logistic`·`l2norm`은 원래 공간 모양을 다시 기록합니다.
-- `YOLO`·`region`·`ISEG`은 생성 뒤 `l.outputs == params.inputs`를 `assert`로 확인합니다.
+- `convolutional`, `local`, `deconvolutional`, pool, crop, reorg는 `h/w/c`가 모두 있어야 합니다.
+- `connected`, RNN, GRU, LSTM은 `params.inputs`를 중심으로 생성합니다.
+- `activation`, `logistic`, `l2norm`은 원래 공간 모양을 다시 기록합니다.
+- `YOLO`, `region`, `ISEG`은 생성 뒤 `l.outputs == params.inputs`를 `assert`로 확인합니다.
 - `route`와 `shortcut`은 이미 생성된 `net->layers`를 참조합니다.
 
 이 구조 때문에 한 레이어의 `out_w/out_h/out_c/outputs`가 잘못되면 그 다음 레이어의 파서가 연쇄적으로 잘못된 크기를 받습니다.
@@ -336,7 +336,7 @@ for(i = 0; i < n; ++i){
 
 실행 전에 점검할 최소 조건은 다음과 같습니다.
 
-1. `route`·`shortcut`의 모든 인덱스가 이미 생성된 레이어를 가리키는가?
+1. `route`, `shortcut`의 모든 인덱스가 이미 생성된 레이어를 가리키는가?
 2. 결합하는 레이어의 공간 크기가 같은가?
 3. `steps`와 `scales`의 항목 수가 같은가?
 4. `mask` 값과 anchor 개수가 레이어 생성 시 정한 `num/total` 범위에 맞는가?
@@ -396,9 +396,9 @@ void load_connected_weights(layer l, FILE *fp, int transpose)
 }
 ```
 
-`dontload`는 레이어 전체를 건너뛰고, `numload`는 컨볼루션 필터 수를 제한하며, `dontloadscales`는 배치 정규화 값을 읽지 않습니다. 하지만 건너뛴 바이트를 `fseek`로 넘기는 코드는 없으므로, 단순히 값을 무시하려고 이 플래그를 바꾸면 다음 읽기 위치가 파일 구성과 어긋날 수 있습니다. 파일을 만든 설정과 로드하는 설정의 레이어 타입·필터 수·배치 정규화 여부가 맞아야 합니다.
+`dontload`는 레이어 전체를 건너뛰고, `numload`는 컨볼루션 필터 수를 제한하며, `dontloadscales`는 배치 정규화 값을 읽지 않습니다. 하지만 건너뛴 바이트를 `fseek`로 넘기는 코드는 없으므로, 단순히 값을 무시하려고 이 플래그를 바꾸면 다음 읽기 위치가 파일 구성과 어긋날 수 있습니다. 파일을 만든 설정과 로드하는 설정의 레이어 타입, 필터 수, 배치 정규화 여부가 맞아야 합니다.
 
-저장 쪽은 헤더를 `0, 2, 0`으로 쓰고 `net->seen`을 `size_t`로 기록합니다. `dontsave` 레이어는 건너뛰며, RNN·LSTM·GRU·CRNN은 내부 레이어를 정해진 순서로 저장합니다. LOCAL은 위치별 bias와 weights를 직접 기록합니다.
+저장 쪽은 헤더를 `0, 2, 0`으로 쓰고 `net->seen`을 `size_t`로 기록합니다. `dontsave` 레이어는 건너뛰며, RNN, LSTM, GRU, CRNN은 내부 레이어를 정해진 순서로 저장합니다. LOCAL은 위치별 bias와 weights를 직접 기록합니다.
 
 ```c
 void save_weights_upto(network *net, char *filename, int cutoff)
@@ -441,7 +441,7 @@ void save_weights_upto(network *net, char *filename, int cutoff)
 
 ### Weight 파일을 읽을 때 layer shape만 맞으면 충분한가요?
 
-아닙니다. Header version·seen 크기와 layer별 저장 순서, BatchNorm·binary·dontload 옵션이 writer와 같아야 합니다.
+아닙니다. Header version, seen 크기와 layer별 저장 순서, BatchNorm, binary, dontload 옵션이 writer와 같아야 합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -452,7 +452,7 @@ void save_weights_upto(network *net, char *filename, int cutoff)
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
 - [Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적]({% post_url 2022-03-09-DarkNetMaxpool %}) — Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다.
-- [Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법]({% post_url 2022-03-17-DarkNetRouteLayer %}) — Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w·out_h·out_c가 0이 되는 조건, delta 누적 방식을 설명합니다.
+- [Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법]({% post_url 2022-03-17-DarkNetRouteLayer %}) — Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w, out_h, out_c가 0이 되는 조건, delta 누적 방식을 설명합니다.
 <!-- internal-links:end -->

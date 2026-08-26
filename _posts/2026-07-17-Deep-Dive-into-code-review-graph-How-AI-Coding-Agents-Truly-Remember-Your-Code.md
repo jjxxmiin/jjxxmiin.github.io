@@ -11,7 +11,7 @@ tags:
   - 컨텍스트윈도우
 summary: AI 코딩 도구의 토큰 낭비와 컨텍스트 한계를 해결하기 위해 등장한 로컬 기반 지식 그래프 도구인 code-review-graph의
   내부 원리, 아키텍처, 성능 벤치마크, 그리고 실제 업무 적용 방법을 상세히 분석합니다.
-description: 'code-review-graph가 Tree-sitter와 SQLite로 코드 관계를 색인하는 방식, MCP 질의·색인 갱신·동적 호출 누락·토큰 절감을 설명합니다.'
+description: 'code-review-graph가 Tree-sitter와 SQLite로 코드 관계를 색인하는 방식, MCP 질의, 색인 갱신, 동적 호출 누락, 토큰 절감을 설명합니다.'
 github_url: https://github.com/tirth8205/code-review-graph
 image:
   path: https://opengraph.githubassets.com/1/tirth8205/code-review-graph
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-code-review-graph는 소스 구조를 파싱해 로컬 관계 그래프로 색인하고 에이전트가 코드 리뷰에 필요한 호출·의존 관계부터 찾게 합니다. 이는 코드를 “기억”하는 모델이 아니라 현재 색인에서 구조 후보를 반환하는 도구이므로 최종 판단에는 원문 diff와 테스트가 필요합니다. 동적 호출, 생성 코드, 최신 커밋 반영과 실제 토큰 절감을 자신의 저장소에서 확인하세요.
+code-review-graph는 소스 구조를 파싱해 로컬 관계 그래프로 색인하고 에이전트가 코드 리뷰에 필요한 호출, 의존 관계부터 찾게 합니다. 이는 코드를 “기억”하는 모델이 아니라 현재 색인에서 구조 후보를 반환하는 도구이므로 최종 판단에는 원문 diff와 테스트가 필요합니다. 동적 호출, 생성 코드, 최신 커밋 반영과 실제 토큰 절감을 자신의 저장소에서 확인하세요.
 
 ## 구조 그래프가 코드 리뷰에 필요한 순간은 언제인가
 

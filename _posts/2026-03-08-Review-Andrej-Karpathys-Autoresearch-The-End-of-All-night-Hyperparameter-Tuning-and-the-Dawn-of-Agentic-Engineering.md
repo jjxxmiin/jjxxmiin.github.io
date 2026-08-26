@@ -8,7 +8,7 @@ tags:
   - MLOps
   - 강화학습
   - AI코딩
-summary: 'Autoresearch가 단일 GPU의 고정 시간 안에서 코드를 수정하고 평가하는 방식과, 단기 지표·재현성·하드웨어 편향을 검증하는 기준을 설명합니다.'
+summary: 'Autoresearch가 단일 GPU의 고정 시간 안에서 코드를 수정하고 평가하는 방식과, 단기 지표, 재현성, 하드웨어 편향을 검증하는 기준을 설명합니다.'
 description: '카파시의 Autoresearch가 코드 수정과 단기 학습을 반복하는 구조, 기존 하이퍼파라미터 탐색과의 차이, 실험 결과를 검증하는 방법을 정리합니다.'
 github_url: https://github.com/karpathy/autoresearch
 image:
@@ -100,9 +100,9 @@ Autoresearch의 실제 가치는 연구자의 판단을 제거하는 데 있지 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
-- [DeepSeek Engram이 VRAM을 DRAM으로 옮길까: O(1) N-gram 조회와 PCIe 병목]({% post_url 2026-03-10-Breaking-the-GPU-VRAM-Curse-The-Memory-Paradigm-Shift-Sparked-by-DeepSeeks-Engram-Architecture %}) — 정적 N-gram 지식을 DRAM·CXL에서 조회하고 GPU를 추론에 집중시키는 Engram의 구조와, 초기 레이어 삽입·PCIe·OOV·데모 코드 한계를 정리합니다.
+- [DeepSeek Engram이 VRAM을 DRAM으로 옮길까: O(1) N-gram 조회와 PCIe 병목]({% post_url 2026-03-10-Breaking-the-GPU-VRAM-Curse-The-Memory-Paradigm-Shift-Sparked-by-DeepSeeks-Engram-Architecture %}) — 정적 N-gram 지식을 DRAM, CXL에서 조회하고 GPU를 추론에 집중시키는 Engram의 구조와, 초기 레이어 삽입, PCIe, OOV, 데모 코드 한계를 정리합니다.
 - [oMLX: 애플 실리콘에서 AI 코딩 에이전트 속도를 극대화하는 MLX 추론 서버]({% post_url 2026-08-18-oMLX-High-Performance-Apple-Silicon-LLM-Inference-Server-with-Paged-SSD-Caching %}) — oMLX는 애플 실리콘 Mac 환경에서 MLX 프레임워크를 기반으로 작동하는 고성능 LLM 추론 서버입니다. 페이징 처리된 SSD KV 캐싱과 연속 배칭을 통해 AI 코딩 에이전트의 첫 토큰 생성 시간(TTFT)을 획기적으로…
+- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

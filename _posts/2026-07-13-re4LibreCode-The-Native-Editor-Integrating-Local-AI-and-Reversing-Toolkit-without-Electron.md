@@ -11,7 +11,7 @@ tags:
   - LLM
 summary: re4/LibreCode는 .NET 10과 Avalonia UI를 기반으로 설계되어 일렉트론의 무거움을 극복하고, Ollama 기반의
   완전 오프라인 로컬 AI(RAG)와 강력한 역공학(리버싱) 도구들을 단일 환경에 통합한 차세대 코드 에디터입니다.
-description: 'LibreCode의 .NET·Avalonia 기반 편집기, Ollama 로컬 AI와 역공학 도구 통합 구조를 살피고 성숙도·권한·성능 한계를 설명합니다.'
+description: 'LibreCode의 .NET, Avalonia 기반 편집기, Ollama 로컬 AI와 역공학 도구 통합 구조를 살피고 성숙도, 권한, 성능 한계를 설명합니다.'
 github_url: https://github.com/re4/LibreCode
 image:
   path: https://opengraph.githubassets.com/1/re4/LibreCode
@@ -56,7 +56,7 @@ faq:
     높은 코드 조각을 찾아내어 AI 프롬프트에 주입하는 방식으로 작동합니다.
 ---
 
-LibreCode는 .NET·Avalonia 기반의 네이티브 편집기에 Ollama 로컬 AI와 역공학 도구를 함께 두려는 프로젝트입니다. 로컬 모델을 쓴다는 사실만으로 모든 플러그인·업데이트·패키지의 네트워크 전송이 사라지는 것은 아니며, 디컴파일 결과도 원본 소스와 같지 않습니다. 지원 파일 형식, 프로젝트 성숙도, 메모리 사용과 실행 권한을 샘플 저장소에서 확인한 뒤 주 도구로 채택하세요.
+LibreCode는 .NET, Avalonia 기반의 네이티브 편집기에 Ollama 로컬 AI와 역공학 도구를 함께 두려는 프로젝트입니다. 로컬 모델을 쓴다는 사실만으로 모든 플러그인, 업데이트, 패키지의 네트워크 전송이 사라지는 것은 아니며, 디컴파일 결과도 원본 소스와 같지 않습니다. 지원 파일 형식, 프로젝트 성숙도, 메모리 사용과 실행 권한을 샘플 저장소에서 확인한 뒤 주 도구로 채택하세요.
 
 > **TL;DR**
 > 1. LibreCode는 일렉트론(Electron) 없이 .NET 10과 Avalonia로 만들어진 가볍고 빠른 크로스플랫폼 네이티브 코드 에디터입니다.

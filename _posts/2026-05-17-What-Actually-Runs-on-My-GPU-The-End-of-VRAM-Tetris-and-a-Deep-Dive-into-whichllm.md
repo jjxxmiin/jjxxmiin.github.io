@@ -8,8 +8,8 @@ tags:
   - RAG
   - MLOps
   - 트랜스포머
-summary: 'whichllm이 가중치·KV 캐시·MoE 활성 파라미터와 벤치마크를 조합하는 방식을 살펴보고, 추천을 실제 추론으로 검증하는 절차를 정리합니다.'
-description: 'whichllm 추천을 가중치·KV 캐시·런타임 여유로 다시 계산하고, 목표 문맥·동시성·첫 토큰 시간·업무 정확도로 로컬 LLM 후보를 검증하는 방법입니다.'
+summary: 'whichllm이 가중치, KV 캐시, MoE 활성 파라미터와 벤치마크를 조합하는 방식을 살펴보고, 추천을 실제 추론으로 검증하는 절차를 정리합니다.'
+description: 'whichllm 추천을 가중치, KV 캐시, 런타임 여유로 다시 계산하고, 목표 문맥, 동시성, 첫 토큰 시간, 업무 정확도로 로컬 LLM 후보를 검증하는 방법입니다.'
 github_url: https://github.com/Andyyyy64/whichllm
 faq:
   - question: '모델 파일이 VRAM보다 작으면 GPU에서 반드시 실행되나요?'
@@ -17,7 +17,7 @@ faq:
   - question: 'MoE 모델은 활성 파라미터만 메모리에 올리면 되나요?'
     answer: '일반적으로 속도 추정에는 활성 파라미터가 중요하지만 적재 메모리는 전체 expert 가중치의 영향을 받습니다. 사용 엔진의 offload 방식과 실제 메모리를 확인해야 합니다.'
   - question: 'whichllm 순위 1위 모델을 바로 선택해도 되나요?'
-    answer: '순위는 후보를 좁히는 출발점입니다. 실제 양자화·엔진에서 내부 업무 평가, 첫 토큰 시간, 생성 처리량과 오류율을 함께 통과한 모델을 선택해야 합니다.'
+    answer: '순위는 후보를 좁히는 출발점입니다. 실제 양자화, 엔진에서 내부 업무 평가, 첫 토큰 시간, 생성 처리량과 오류율을 함께 통과한 모델을 선택해야 합니다.'
 image:
   path: https://opengraph.githubassets.com/1/Andyyyy64/whichllm
   alt: "Andyyyy64/whichllm GitHub 저장소 대표 이미지"
@@ -57,7 +57,7 @@ LiveBench나 ELO 같은 공개 점수와 최신성 가중치는 오래된 인기
 
 먼저 운영체제와 화면, 추론 서버가 이미 쓰는 VRAM을 뺀 가용 예산을 정합니다. 그 안에서 양자화 가중치, 목표 문맥의 KV 캐시, 런타임 작업 공간을 각각 추정합니다. 수치가 경계에 걸리면 가장 낙관적인 값 대신 여유를 크게 둔 후보를 선택하세요. 로드 직후만 보고 맞는다고 판단하면 긴 프롬프트나 두 번째 사용자가 들어오는 순간 OOM이 날 수 있습니다.
 
-KV 캐시는 모델 구조, 데이터 형식, 문맥 길이, 배치와 동시 시퀀스 수에 따라 커집니다. 따라서 ‘최대 컨텍스트 32K 지원’과 ‘내 GPU에서 32K로 두 요청을 동시에 처리’는 다른 주장입니다. 실제 업무의 입력 토큰 분포를 먼저 측정하고, 상위 몇 퍼센트의 긴 요청을 잘라낼지 또는 CPU offload·요약 경로로 보낼지 정해야 합니다.
+KV 캐시는 모델 구조, 데이터 형식, 문맥 길이, 배치와 동시 시퀀스 수에 따라 커집니다. 따라서 ‘최대 컨텍스트 32K 지원’과 ‘내 GPU에서 32K로 두 요청을 동시에 처리’는 다른 주장입니다. 실제 업무의 입력 토큰 분포를 먼저 측정하고, 상위 몇 퍼센트의 긴 요청을 잘라낼지 또는 CPU offload, 요약 경로로 보낼지 정해야 합니다.
 
 통합 메모리를 쓰는 장비도 총 RAM 숫자만 비교하면 부족합니다. 운영체제와 다른 애플리케이션이 같은 자원을 경쟁하고, 메모리 압박이 생기면 실행은 되지만 지연이 급격히 늘 수 있습니다. 단일 프롬프트 성공이 아니라 10~20분 동안 반복 요청을 보내 최고 메모리, swap 발생, 오류와 처리량 변화를 관찰하세요.
 
@@ -88,7 +88,7 @@ whichllm에서 상위 후보 세 개를 받은 뒤 모든 모델을 같은 엔�
 
 엔진 차이도 큽니다. 같은 파일이라도 지원 kernel, CPU offload, flash attention과 KV cache 형식에 따라 속도와 메모리가 달라집니다. whichllm 계산에서 합격한 모델이 목표 엔진에서 로드되지 않거나 일부 연산이 CPU로 떨어질 수 있으므로, 추천을 받은 바로 그 장비와 배포 엔진에서 시험해야 합니다.
 
-구매 결정에는 최소 합격 모델 하나만 보지 말고 다음 1년의 문맥·동시성 증가와 대체 후보를 포함합니다. 반대로 언젠가 쓸 최대 모델을 위해 과도한 장비를 사는 것도 피해야 합니다. 현재 p95 요청, 성장 가정과 업그레이드 비용을 문서화하고 실제 후보 장비에서 부하 시험이 재현될 때 발주하세요.
+구매 결정에는 최소 합격 모델 하나만 보지 말고 다음 1년의 문맥, 동시성 증가와 대체 후보를 포함합니다. 반대로 언젠가 쓸 최대 모델을 위해 과도한 장비를 사는 것도 피해야 합니다. 현재 p95 요청, 성장 가정과 업그레이드 비용을 문서화하고 실제 후보 장비에서 부하 시험이 재현될 때 발주하세요.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -99,9 +99,9 @@ whichllm에서 상위 후보 세 개를 받은 뒤 모든 모델을 같은 엔�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [vLLM PagedAttention은 KV 캐시를 어떻게 관리할까: 처리량·지연·OOM 검증법]({% post_url 2026-06-01-Leaking-GPU-Memory-The-Real-Reason-vLLM-and-PagedAttention-Disrupted-LLM-Serving %}) — vLLM의 PagedAttention이 요청마다 늘고 줄어드는 KV 캐시를 블록으로 관리하는 원리를 설명합니다. 논문의 처리량 수치를 운영 환경에 적용하기 전에 TTFT·TPOT·메모리·동시성을 검증하는 방법도 정리합니다.
-- [로컬 LLM은 클라우드보다 쌀까: VRAM·전력·운영비 계산]({% post_url 2026-05-14-LLMs-in-My-Room-The-Reality-and-Limits-of-Building-Personal-AI-Infrastructure %}) — 로컬 LLM의 양자화·메모리 대역폭·KV 캐시를 이해하고, 하드웨어 구매 전에 품질·동시성·전력·운영비를 비교하는 방법을 정리합니다.
-- [오픈소스 LLM이 GPT API보다 싸질까: vLLM·PagedAttention·TCO 계산]({% post_url 2026-04-22-Tired-of-GPT-API-Bills-The-Real-Face-and-Serving-Optimization-Strategy-of-Open-Generative-AI-in-Production %}) — 오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache·Continuous Batching·양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.
+- [vLLM PagedAttention은 KV 캐시를 어떻게 관리할까: 처리량, 지연, OOM 검증법]({% post_url 2026-06-01-Leaking-GPU-Memory-The-Real-Reason-vLLM-and-PagedAttention-Disrupted-LLM-Serving %}) — vLLM의 PagedAttention이 요청마다 늘고 줄어드는 KV 캐시를 블록으로 관리하는 원리를 설명합니다. 논문의 처리량 수치를 운영 환경에 적용하기 전에 TTFT, TPOT, 메모리, 동시성을 검증하는 방법도 정리합니다.
+- [로컬 LLM은 클라우드보다 쌀까: VRAM, 전력, 운영비 계산]({% post_url 2026-05-14-LLMs-in-My-Room-The-Reality-and-Limits-of-Building-Personal-AI-Infrastructure %}) — 로컬 LLM의 양자화, 메모리 대역폭, KV 캐시를 이해하고, 하드웨어 구매 전에 품질, 동시성, 전력, 운영비를 비교하는 방법을 정리합니다.
+- [오픈소스 LLM이 GPT API보다 싸질까: vLLM, PagedAttention, TCO 계산]({% post_url 2026-04-22-Tired-of-GPT-API-Bills-The-Real-Face-and-Serving-Optimization-Strategy-of-Open-Generative-AI-in-Production %}) — 오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache, Continuous Batching, 양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -116,4 +116,4 @@ whichllm에서 상위 후보 세 개를 받은 뒤 모든 모델을 같은 엔�
 
 ### whichllm 순위 1위 모델을 바로 선택해도 되나요?
 
-순위는 후보를 좁히는 출발점입니다. 실제 양자화·엔진에서 내부 업무 평가, 첫 토큰 시간, 생성 처리량과 오류율을 함께 통과한 모델을 선택해야 합니다.
+순위는 후보를 좁히는 출발점입니다. 실제 양자화, 엔진에서 내부 업무 평가, 첫 토큰 시간, 생성 처리량과 오류율을 함께 통과한 모델을 선택해야 합니다.

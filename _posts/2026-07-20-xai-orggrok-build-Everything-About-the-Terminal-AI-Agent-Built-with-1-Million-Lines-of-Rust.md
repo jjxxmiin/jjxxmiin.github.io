@@ -11,7 +11,7 @@ tags:
   - ClaudeCode
 summary: 과도한 원격 데이터 수집 논란 이후 전면 오픈소스화된 SpaceXAI의 터미널 기반 AI 코딩 에이전트, Grok Build의 내부
   아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
-description: 'grok-build의 Rust 터미널 UI와 파일·셸·MCP·플러그인 구조를 살피고, 저장소 규모 주장·코드 전송·권한·오픈소스 검증 기준을 정리합니다.'
+description: 'grok-build의 Rust 터미널 UI와 파일, 셸, MCP, 플러그인 구조를 살피고, 저장소 규모 주장, 코드 전송, 권한, 오픈소스 검증 기준을 정리합니다.'
 github_url: https://github.com/xai-org/grok-build
 image:
   path: https://opengraph.githubassets.com/1/xai-org/grok-build
@@ -35,7 +35,7 @@ mermaid: true
 chart: true
 ---
 
-grok-build는 터미널 UI에서 파일, 셸, MCP와 플러그인을 연결하는 코딩 에이전트 저장소로 소개됩니다. 코드 줄 수나 소유 조직, 과거 데이터 수집 논란 같은 주장은 저장소·공식 문서의 시점과 근거를 나눠 확인해야 하며 오픈소스라는 사실만으로 전송이 사라지지는 않습니다. 실행 전 네트워크 목적지, 원격 모델 입력, 플러그인 권한과 기본 승인 정책을 검사하세요.
+grok-build는 터미널 UI에서 파일, 셸, MCP와 플러그인을 연결하는 코딩 에이전트 저장소로 소개됩니다. 코드 줄 수나 소유 조직, 과거 데이터 수집 논란 같은 주장은 저장소, 공식 문서의 시점과 근거를 나눠 확인해야 하며 오픈소스라는 사실만으로 전송이 사라지지는 않습니다. 실행 전 네트워크 목적지, 원격 모델 입력, 플러그인 권한과 기본 승인 정책을 검사하세요.
 
 ## 저장소 공개만으로 신뢰할 수 있을까
 
@@ -328,8 +328,8 @@ xai-org/grok-build는 그 궤적의 최전선에 있는 프로젝트입니다. �
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
-- [Claude Code에 저장소를 맡겨도 될까? 권한·CLAUDE.md·검증 체크리스트]({% post_url 2026-02-08-Claude-Code-The-Terminal-AI-Agent-Deep-Dive %}) — 터미널 AI agent가 file 수정·test·Git 작업까지 수행할 때 개발자가 먼저 제한할 권한, CLAUDE.md에 적을 project rule, 변경 후 diff·test 검증 순서를 2026년 2월 원문 기준으로…
-- [Claude Code는 어떻게 코딩 작업을 수행할까: 설치·권한·검증 가이드]({% post_url 2026-02-22-Claude-Code-The-Terminal-Agent %}) — Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서 직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히…
+- [Claude Code에 저장소를 맡겨도 될까? 권한, CLAUDE.md, 검증 체크리스트]({% post_url 2026-02-08-Claude-Code-The-Terminal-AI-Agent-Deep-Dive %}) — 터미널 AI agent가 file 수정, test, Git 작업까지 수행할 때 개발자가 먼저 제한할 권한, CLAUDE.md에 적을 project rule, 변경 후 diff, test 검증 순서를 2026년 2월 원문 기준으로…
+- [Claude Code는 어떻게 코딩 작업을 수행할까: 설치, 권한, 검증 가이드]({% post_url 2026-02-22-Claude-Code-The-Terminal-Agent %}) — Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서 직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

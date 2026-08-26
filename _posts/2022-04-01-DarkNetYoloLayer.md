@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/yolo_layer.c"
 layout: post
 title:  "Darknet YOLO Layer에서 ignore_thresh와 truth_thresh가 다른 이유"
-summary: "Darknet yolo_layer가 모든 anchor의 배경 delta를 만든 뒤 IoU에 따라 무시·양성 처리하고, ground truth를 최적 anchor mask에 배정하는 두 단계 학습 흐름을 설명합니다."
-description: "Darknet YOLO Layer의 ignore·truth threshold, best anchor mask와 box·object·class delta를 따라 sentinel·empty-head·letterbox 실패를 설명합니다."
+summary: "Darknet yolo_layer가 모든 anchor의 배경 delta를 만든 뒤 IoU에 따라 무시, 양성 처리하고, ground truth를 최적 anchor mask에 배정하는 두 단계 학습 흐름을 설명합니다."
+description: "Darknet YOLO Layer의 ignore, truth threshold, best anchor mask와 box, object, class delta를 따라 sentinel, empty-head, letterbox 실패를 설명합니다."
 date:   2022-04-01 16:00 -0400
 categories: DarkNet
 image:
@@ -26,11 +26,11 @@ faq:
 
 Darknet YOLO Layer에서 `ignore_thresh`는 정답과 충분히 겹친 미선택 anchor를 배경 오답으로 벌주지 않는 기준이고, `truth_thresh`는 그 anchor 자체를 양성으로 학습시키는 더 직접적인 기준입니다.
 
-`forward_yolo_layer`는 단순히 box를 출력하는 함수가 아닙니다. 추론에서는 입력을 output으로 복사하고 바로 돌아오지만, 학습에서는 objectness·class·box delta와 통계까지 만듭니다. 아래 코드는 anchor decode, IoU, class delta helper가 있는 Darknet 전체를 전제로 합니다.
+`forward_yolo_layer`는 단순히 box를 출력하는 함수가 아닙니다. 추론에서는 입력을 output으로 복사하고 바로 돌아오지만, 학습에서는 objectness, class, box delta와 통계까지 만듭니다. 아래 코드는 anchor decode, IoU, class delta helper가 있는 Darknet 전체를 전제로 합니다.
 
-## 첫 Loop는 모든 Cell·Anchor의 배경 Delta부터 만듭니다
+## 첫 Loop는 모든 Cell, Anchor의 배경 Delta부터 만듭니다
 
-Batch, grid row·column, 이 head의 anchor `n`을 순회하며 예측 box와 모든 truth의 최고 IoU를 찾습니다. Objectness delta는 처음에 `0-output`으로 두어 배경 방향을 만듭니다.
+Batch, grid row, column, 이 head의 anchor `n`을 순회하며 예측 box와 모든 truth의 최고 IoU를 찾습니다. Objectness delta는 처음에 `0-output`으로 두어 배경 방향을 만듭니다.
 
 ```c
 l.delta[obj_index] = 0 - l.output[obj_index];
@@ -59,7 +59,7 @@ if(mask_n >= 0){
 
 Multi-scale YOLO에서 전체 anchor를 head별 mask로 나누는 이유가 여기 드러납니다. 한 truth는 shape가 가장 가까운 anchor가 포함된 head에서 책임집니다. Mask 순서나 bias 배열이 cfg와 다르면 올바른 head가 학습하지 않습니다.
 
-Box delta에는 `2-truth.w*truth.h` scale이 들어갑니다. 정규화 면적이 작은 box에 더 큰 가중치를 주는 형태입니다. Width·height가 입력 이미지 기준으로 올바르게 정규화됐는지도 함께 확인해야 합니다.
+Box delta에는 `2-truth.w*truth.h` scale이 들어갑니다. 정규화 면적이 작은 box에 더 큰 가중치를 주는 형태입니다. Width, height가 입력 이미지 기준으로 올바르게 정규화됐는지도 함께 확인해야 합니다.
 
 ## Cost와 출력 로그는 평균 Loss가 아닙니다
 
@@ -79,7 +79,7 @@ Backward는 이미 만든 `l.delta`를 `net.delta`에 더할 뿐입니다. Loss 
 
 Batch가 2이면 두 번째 output을 수평으로 되돌려 첫 output과 평균하는 `avg_flipped_yolo` 경로도 있습니다. 이 함수는 x 항의 부호를 바꾼 뒤 평균하므로 일반 batch 2 추론과 같은 의미가 아닙니다.
 
-생성부는 output channel을 `n*(classes+4+1)`로 정하고 truth 공간을 최대 90개 box 분량으로 고정합니다. 코드에는 `srand(0)`도 있어 global 난수 상태에 영향을 줍니다. 이 원문 버전을 옮길 때는 head별 mask·anchor, label sentinel, 최대 truth 수, 빈 batch 로그를 작은 fixture로 검증한 뒤 전체 학습을 시작하는 편이 안전합니다.
+생성부는 output channel을 `n*(classes+4+1)`로 정하고 truth 공간을 최대 90개 box 분량으로 고정합니다. 코드에는 `srand(0)`도 있어 global 난수 상태에 영향을 줍니다. 이 원문 버전을 옮길 때는 head별 mask, anchor, label sentinel, 최대 truth 수, 빈 batch 로그를 작은 fixture로 검증한 뒤 전체 학습을 시작하는 편이 안전합니다.
 
 ## 두 Loop를 어떤 Fixture로 분리하나요?
 
@@ -89,7 +89,7 @@ Batch가 2이면 두 번째 output을 수평으로 되돌려 첫 output과 평�
 
 ## Label과 Decode Round-trip은 어떻게 검증하나요?
 
-중심이 cell 경계 안에 있는 정규화 box를 encode target으로 만들고 같은 raw prediction이 decode 후 원래 box와 IoU 1인지 봅니다. Width·height 0, x=0 sentinel과 최대 90개 초과는 loader에서 거부합니다. 작은 box의 `2-area` scale도 면적 단위가 0~1인지 확인합니다.
+중심이 cell 경계 안에 있는 정규화 box를 encode target으로 만들고 같은 raw prediction이 decode 후 원래 box와 IoU 1인지 봅니다. Width, height 0, x=0 sentinel과 최대 90개 초과는 loader에서 거부합니다. 작은 box의 `2-area` scale도 면적 단위가 0~1인지 확인합니다.
 
 Letterbox image에 box를 옮겼다가 원본으로 되돌려 scale과 padding round-trip을 검사합니다. Relative와 pixel 좌표를 한 단계에서 중복 변환하지 않습니다.
 
@@ -99,11 +99,11 @@ Raw output, objectness threshold 뒤 후보, class score 뒤와 NMS 후 개수�
 
 ## Class Delta가 올바른 위치에 생기는지 어떻게 보나요?
 
-Class 두 개와 truth 하나의 fixture에서 담당 anchor의 target class channel만 positive delta가 생기고 다른 anchor·cell의 class delta는 0인지 확인합니다. Class id 범위와 multi-label 지원 여부를 label contract에서 검증합니다. Objectness는 맞는데 class 학습이 안 될 때 upstream channel 수, entry index와 class scale을 순서대로 봅니다.
+Class 두 개와 truth 하나의 fixture에서 담당 anchor의 target class channel만 positive delta가 생기고 다른 anchor, cell의 class delta는 0인지 확인합니다. Class id 범위와 multi-label 지원 여부를 label contract에서 검증합니다. Objectness는 맞는데 class 학습이 안 될 때 upstream channel 수, entry index와 class scale을 순서대로 봅니다.
 
 ## Cost를 Head 간 비교할 때 무엇을 조심하나요?
 
-Grid 크기와 anchor 수가 다른 head는 delta 원소 수와 맡는 object 크기가 다르므로 raw cost를 직접 순위로 보지 않습니다. Coordinate·objectness·class norm과 positive count로 정규화한 진단값을 함께 보고 전체 update에는 원래 scale을 유지합니다.
+Grid 크기와 anchor 수가 다른 head는 delta 원소 수와 맡는 object 크기가 다르므로 raw cost를 직접 순위로 보지 않습니다. Coordinate, objectness, class norm과 positive count로 정규화한 진단값을 함께 보고 전체 update에는 원래 scale을 유지합니다.
 
 ## 자주 남는 질문
 
@@ -128,7 +128,7 @@ Average IoU와 objectness 통계를 count 또는 class_count 0으로 나눌 수 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box·좌표 제약·Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
+- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box, 좌표 제약, Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
 - [YOLOv2에 Anchor Box를 넣었는데 mAP가 떨어진 이유: Recall부터 다시 보기]({% post_url 2022-02-02-DarkNetYOLOv2 %}) — YOLOv2에서 anchor box가 recall은 높였지만 초기 mAP는 소폭 낮춘 이유와 k-means anchor, direct location prediction, passthrough, multi-scale 학습의 역할을…
 - [YOLOv3는 왜 3개 Scale과 BCE를 쓸까? 출력 Tensor 계산법]({% post_url 2022-02-03-DarkNetYOLOv3 %}) — YOLOv3가 세 해상도에서 anchor를 나누고 softmax 대신 독립 BCE를 쓰는 이유를 출력 tensor 식, Darknet-53, 작은 객체 개선과 localization 한계까지 설명합니다.
 <!-- internal-links:end -->

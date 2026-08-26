@@ -9,21 +9,21 @@ tags:
   - 멀티에이전트
   - 파인튜닝
   - AI에이전트
-summary: "Agent Runner·Lightning Store·Trainer로 실행과 학습을 분리하는 Agent Lightning의 구조와 프록시 변경, 보상 해킹·GPU 비용을 짚습니다."
-description: "Agent Runner·Lightning Store·Trainer로 실행과 학습을 분리하는 Agent Lightning의 구조와 프록시 변경, 보상 해킹·GPU 비용을 짚습니다."
+summary: "Agent Runner, Lightning Store, Trainer로 실행과 학습을 분리하는 Agent Lightning의 구조와 프록시 변경, 보상 해킹, GPU 비용을 짚습니다."
+description: "Agent Runner, Lightning Store, Trainer로 실행과 학습을 분리하는 Agent Lightning의 구조와 프록시 변경, 보상 해킹, GPU 비용을 짚습니다."
 github_url: https://github.com/microsoft/agent-lightning
 image:
   path: https://opengraph.githubassets.com/1/microsoft/agent-lightning
   alt: "microsoft/agent-lightning GitHub 저장소 대표 이미지"
 ---
 
-**Agent Lightning은 에이전트 비즈니스 로직을 크게 다시 쓰지 않고 RL 파이프라인을 분리할 수 있지만, 엔드포인트·추적·보상 함수까지 아무 변경 없이 붙는 것은 아닙니다.** “코드 변경 없음”은 실행 프레임워크와 학습 알고리즘의 결합을 줄인다는 의미로 읽어야 합니다.
+**Agent Lightning은 에이전트 비즈니스 로직을 크게 다시 쓰지 않고 RL 파이프라인을 분리할 수 있지만, 엔드포인트, 추적, 보상 함수까지 아무 변경 없이 붙는 것은 아닙니다.** “코드 변경 없음”은 실행 프레임워크와 학습 알고리즘의 결합을 줄인다는 의미로 읽어야 합니다.
 
-Microsoft의 [Agent Lightning 저장소](https://github.com/microsoft/agent-lightning)는 LangChain이나 다중 에이전트 시스템의 실행 이력을 학습 데이터로 바꾸는 미들웨어를 제안합니다. 핵심은 에이전트가 일하는 경로와 PPO·GRPO 같은 알고리즘이 정책을 업데이트하는 경로를 분리하는 것입니다.
+Microsoft의 [Agent Lightning 저장소](https://github.com/microsoft/agent-lightning)는 LangChain이나 다중 에이전트 시스템의 실행 이력을 학습 데이터로 바꾸는 미들웨어를 제안합니다. 핵심은 에이전트가 일하는 경로와 PPO, GRPO 같은 알고리즘이 정책을 업데이트하는 경로를 분리하는 것입니다.
 
-## Runner·Store·Trainer가 실행과 학습을 나눈다
+## Runner, Store, Trainer가 실행과 학습을 나눈다
 
-Agent Runner는 기존 에이전트를 실행합니다. Lightning Store는 LLM 호출과 도구 사용을 span 형태로 받아 비동기 저장하고, 상태·행동·보상의 전이로 정리합니다. Algorithm과 Trainer는 이 데이터를 가져와 정책을 최적화합니다. 운영 요청이 학습 클러스터의 속도에 직접 묶이지 않게 하는 구조입니다.
+Agent Runner는 기존 에이전트를 실행합니다. Lightning Store는 LLM 호출과 도구 사용을 span 형태로 받아 비동기 저장하고, 상태, 행동, 보상의 전이로 정리합니다. Algorithm과 Trainer는 이 데이터를 가져와 정책을 최적화합니다. 운영 요청이 학습 클러스터의 속도에 직접 묶이지 않게 하는 구조입니다.
 
 원문은 OpenAI 호환 프록시로 에이전트의 LLM 호출을 경유시키는 방식을 설명합니다. endpoint나 환경 변수를 프록시로 바꾸면 호출 기록을 모을 수 있지만, 파일 작업과 외부 도구 결과까지 자동으로 완전한 MDP가 되는 것은 아닙니다. 성공 조건과 관찰값을 어떤 span에 담을지 설계해야 합니다.
 
@@ -39,17 +39,17 @@ Text-to-SQL에서 실행 성공만 보상하면 의미가 틀린 쿼리도 점�
 
 운영 로그에는 개인정보와 도구 출력의 비밀값이 섞일 수 있습니다. Store에 보내기 전 마스킹하고, 학습 데이터 보존과 삭제 정책을 정해야 합니다. 실패 사례가 적은 고위험 작업은 온라인 탐색보다 시뮬레이션이나 승인된 오프라인 데이터로 제한하는 편이 안전합니다.
 
-## 코드 비용 대신 GPU·지연·운영 비용이 생긴다
+## 코드 비용 대신 GPU, 지연, 운영 비용이 생긴다
 
-PPO·GRPO를 제대로 돌리려면 추론용 vLLM과 학습용 verl 계열 인프라, 가중치 갱신과 버퍼 관리가 필요하다는 것이 원문의 설명입니다. 에이전트 코드를 덜 바꾸더라도 GPU 비용은 커질 수 있습니다. 모든 호출이 프록시를 거치면 네트워크 지연과 단일 장애점도 추가됩니다.
+PPO, GRPO를 제대로 돌리려면 추론용 vLLM과 학습용 verl 계열 인프라, 가중치 갱신과 버퍼 관리가 필요하다는 것이 원문의 설명입니다. 에이전트 코드를 덜 바꾸더라도 GPU 비용은 커질 수 있습니다. 모든 호출이 프록시를 거치면 네트워크 지연과 단일 장애점도 추가됩니다.
 
-도입 시험은 보상이 명확한 작업 하나에서 시작해야 합니다. 기준 에이전트와 학습 후 에이전트의 성공률, 위험 행동, 토큰·GPU 비용, 프록시 지연을 함께 비교하고 롤백 가능한 정책 버전을 보관합니다. Agent Lightning의 강점은 에이전트와 RL을 분리하는 인터페이스이지, 보상 설계와 학습 운영을 없애는 자동 개선 버튼이 아닙니다.
+도입 시험은 보상이 명확한 작업 하나에서 시작해야 합니다. 기준 에이전트와 학습 후 에이전트의 성공률, 위험 행동, 토큰, GPU 비용, 프록시 지연을 함께 비교하고 롤백 가능한 정책 버전을 보관합니다. Agent Lightning의 강점은 에이전트와 RL을 분리하는 인터페이스이지, 보상 설계와 학습 운영을 없애는 자동 개선 버튼이 아닙니다.
 
 ## 어떤 에이전트가 학습 후보가 되기 쉬운가
 
 정답과 실패를 자동으로 판정할 수 있고 같은 유형의 작업이 반복되는 에이전트가 첫 후보입니다. 테스트가 통과하는 코드 수정, 실행 결과를 비교할 수 있는 SQL, 정답 문서가 있는 검색 작업은 보상 신호를 만들기 비교적 쉽습니다. 반대로 전략 보고서나 사람 간 협상처럼 결과가 늦게 나타나고 평가가 주관적인 업무는 온라인 RL의 원인을 해석하기 어렵습니다.
 
-현재 에이전트가 프롬프트·도구·retrieval 문제로 실패하는지도 먼저 확인해야 합니다. 필요한 문서를 받지 못하는데 정책만 학습하면 모델은 부족한 정보로 보상 함수를 공략할 수 있습니다. 학습 전 baseline의 실패를 데이터, 도구 오류, 판단 오류와 실행 오류로 나누면 RL이 실제 병목에 맞는지 알 수 있습니다.
+현재 에이전트가 프롬프트, 도구, retrieval 문제로 실패하는지도 먼저 확인해야 합니다. 필요한 문서를 받지 못하는데 정책만 학습하면 모델은 부족한 정보로 보상 함수를 공략할 수 있습니다. 학습 전 baseline의 실패를 데이터, 도구 오류, 판단 오류와 실행 오류로 나누면 RL이 실제 병목에 맞는지 알 수 있습니다.
 
 ## span을 학습 가능한 전이로 어떻게 바꾸나
 
@@ -67,7 +67,7 @@ LLM 요청 하나만으로는 상태와 행동의 경계가 충분하지 않을 
 
 처음에는 운영 로그의 승인된 trace로 offline 실험을 하는 편이 안전합니다. 고정 데이터에서 정책 후보를 만들고, holdout 작업과 시뮬레이터에서 위험 행동을 검사합니다. 다음 단계는 실제 변경을 하지 않는 shadow mode입니다. 새 정책의 제안과 기존 정책의 결과를 비교하되 사용자는 기존 결과를 받습니다.
 
-제한된 online 탐색으로 넘어갈 때는 업무 범위, 사용자 수, 하루 rollout 수와 비용을 고정합니다. 삭제·결제·권한 변경은 학습 탐색에서 제외하거나 사람 승인 뒤에만 실행합니다. 정확도 하락, 위험 행동, 비용 초과 중 하나라도 임계값을 넘으면 직전 checkpoint로 되돌리는 자동 중단 조건이 필요합니다.
+제한된 online 탐색으로 넘어갈 때는 업무 범위, 사용자 수, 하루 rollout 수와 비용을 고정합니다. 삭제, 결제, 권한 변경은 학습 탐색에서 제외하거나 사람 승인 뒤에만 실행합니다. 정확도 하락, 위험 행동, 비용 초과 중 하나라도 임계값을 넘으면 직전 checkpoint로 되돌리는 자동 중단 조건이 필요합니다.
 
 ## 학습 뒤 개선을 어떻게 증명하나
 
@@ -77,9 +77,9 @@ LLM 요청 하나만으로는 상태와 행동의 경계가 충분하지 않을 
 
 ## 총비용에는 어떤 항목을 넣어야 하나
 
-GPU 시간 외에 rollout을 위한 도구 사용료, Store 저장·전송, 검증기 실행, 데이터 검수와 실패 복구 시간이 들어갑니다. 프록시와 Trainer의 가용성, 모델 checkpoint 배포와 롤백도 운영 대상입니다. 한 번의 실험 비용보다 월간 업무량당 추가 성공 건수와 비용을 비교해야 합니다.
+GPU 시간 외에 rollout을 위한 도구 사용료, Store 저장, 전송, 검증기 실행, 데이터 검수와 실패 복구 시간이 들어갑니다. 프록시와 Trainer의 가용성, 모델 checkpoint 배포와 롤백도 운영 대상입니다. 한 번의 실험 비용보다 월간 업무량당 추가 성공 건수와 비용을 비교해야 합니다.
 
-팀이 RL 디버깅 경험이 없다면 장애 원인을 찾는 시간도 큽니다. 보상·trace·policy·도구 버전을 한 실행에 묶어 재현할 수 있어야 하고, 학습 데이터 삭제 요청이 checkpoint에 어떻게 반영되는지도 정책으로 정해야 합니다. 인터페이스 분리가 운영 책임까지 외부로 옮겨 주지는 않습니다.
+팀이 RL 디버깅 경험이 없다면 장애 원인을 찾는 시간도 큽니다. 보상, trace, policy, 도구 버전을 한 실행에 묶어 재현할 수 있어야 하고, 학습 데이터 삭제 요청이 checkpoint에 어떻게 반영되는지도 정책으로 정해야 합니다. 인터페이스 분리가 운영 책임까지 외부로 옮겨 주지는 않습니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -90,9 +90,9 @@ GPU 시간 외에 rollout을 위한 도구 사용료, Store 저장·전송, 검�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [PyTorch Lightning, 코드가 짧아져도 헷갈리는 이유: GAN 학습 구조 읽기]({% post_url 2021-06-27-pytorchlighting %}) — DataModule·LightningModule·Trainer가 각각 맡는 역할을 MNIST GAN 예제로 나누고, callback과 multi-GPU 설정을 적용할 때의 경계를 설명합니다.
-- [free-claude-code는 정말 무료일까: 8082 Proxy·Tool Parser·VRAM 비용]({% post_url 2026-04-26-Ending-the-API-Cost-Hostage-Situation-A-Deep-Dive-into-free-claude-code-Architecture-and-Local-Proxy %}) — Claude Code 형식과 로컬·타사 모델 사이를 번역하는 8082 프록시 구조를 살펴보고, 휴리스틱 도구 파싱·프로토콜 변화·GPU 비용 때문에 0원이 아닌 이유를 짚습니다.
-- [100달러로 ChatGPT를 처음부터 학습할 수 있을까? NanoChat의 비용 조건]({% post_url 2026-03-02-Why-Didnt-I-Know-This-Sooner-Building-My-Own-ChatGPT-for-100-Honest-Review-of-NanoChat %}) — NanoChat의 토크나이저·사전학습·SFT·웹 UI 전 과정을 살펴보고 100달러·4시간이라는 문구에 숨은 8×H100 조건과 교육용 코드의 경계를 짚습니다.
+- [PyTorch Lightning, 코드가 짧아져도 헷갈리는 이유: GAN 학습 구조 읽기]({% post_url 2021-06-27-pytorchlighting %}) — DataModule, LightningModule, Trainer가 각각 맡는 역할을 MNIST GAN 예제로 나누고, callback과 multi-GPU 설정을 적용할 때의 경계를 설명합니다.
+- [free-claude-code는 정말 무료일까: 8082 Proxy, Tool Parser, VRAM 비용]({% post_url 2026-04-26-Ending-the-API-Cost-Hostage-Situation-A-Deep-Dive-into-free-claude-code-Architecture-and-Local-Proxy %}) — Claude Code 형식과 로컬, 타사 모델 사이를 번역하는 8082 프록시 구조를 살펴보고, 휴리스틱 도구 파싱, 프로토콜 변화, GPU 비용 때문에 0원이 아닌 이유를 짚습니다.
+- [100달러로 ChatGPT를 처음부터 학습할 수 있을까? NanoChat의 비용 조건]({% post_url 2026-03-02-Why-Didnt-I-Know-This-Sooner-Building-My-Own-ChatGPT-for-100-Honest-Review-of-NanoChat %}) — NanoChat의 토크나이저, 사전학습, SFT, 웹 UI 전 과정을 살펴보고 100달러, 4시간이라는 문구에 숨은 8×H100 조건과 교육용 코드의 경계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -107,4 +107,4 @@ GPU 시간 외에 rollout을 위한 도구 사용료, Store 저장·전송, 검�
 
 ### 운영 로그를 그대로 학습해도 되나요?
 
-아닙니다. 비밀값·개인정보를 제거하고 사용 목적과 보존 기간을 정해야 합니다. 실패나 특정 사용자군이 과대표집됐는지 확인하고 승인된 trace만 학습 세트에 포함해야 합니다.
+아닙니다. 비밀값, 개인정보를 제거하고 사용 목적과 보존 기간을 정해야 합니다. 실패나 특정 사용자군이 과대표집됐는지 확인하고 승인된 trace만 학습 세트에 포함해야 합니다.

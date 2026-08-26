@@ -1,21 +1,21 @@
 ---
 layout: post
-title: 'CoPaw 멀티에이전트 코딩, 바로 도입해도 될까: 역할·검증·출처 점검'
+title: 'CoPaw 멀티에이전트 코딩, 바로 도입해도 될까: 역할, 검증, 출처 점검'
 date: '2026-03-01'
 categories: Tech
 tags:
   - 멀티에이전트
   - AI코딩
   - AI에이전트
-summary: 'CoPaw를 Planner·Coder·Reviewer·Test 역할의 협업 루프로 평가하는 법과 비용·지연, 원문 저장소 링크 불일치를 투명하게 정리합니다.'
-description: 'CoPaw 멀티에이전트 코딩의 역할 분리와 검증 루프를 평가하는 법, 저장소 출처 불일치와 비용·권한·재시도·도입 중단 조건을 구체적으로 정리합니다.'
+summary: 'CoPaw를 Planner, Coder, Reviewer, Test 역할의 협업 루프로 평가하는 법과 비용, 지연, 원문 저장소 링크 불일치를 투명하게 정리합니다.'
+description: 'CoPaw 멀티에이전트 코딩의 역할 분리와 검증 루프를 평가하는 법, 저장소 출처 불일치와 비용, 권한, 재시도, 도입 중단 조건을 구체적으로 정리합니다.'
 github_url: https://github.com/agentscope-ai/CoPaw
 image:
   path: https://opengraph.githubassets.com/1/agentscope-ai/CoPaw
   alt: "agentscope-ai/CoPaw GitHub 저장소 대표 이미지"
 ---
 
-CoPaw를 기획·구현·리뷰·테스트 역할이 반복 협업하는 코딩 워크플로우로 평가할 수는 있지만, 이 원문은 저장소 링크가 서로 달라 현재 설치 가이드로 사용해서는 안 됩니다. 먼저 어느 저장소와 버전을 검토하는지 확정한 뒤 실제 역할·권한·실행 명령을 README와 코드에서 대조해야 합니다. 도입 판단은 에이전트 수가 아니라 같은 작업에서 결함과 불필요한 변경을 줄였는지로 내려야 합니다.
+CoPaw를 기획, 구현, 리뷰, 테스트 역할이 반복 협업하는 코딩 워크플로우로 평가할 수는 있지만, 이 원문은 저장소 링크가 서로 달라 현재 설치 가이드로 사용해서는 안 됩니다. 먼저 어느 저장소와 버전을 검토하는지 확정한 뒤 실제 역할, 권한, 실행 명령을 README와 코드에서 대조해야 합니다. 도입 판단은 에이전트 수가 아니라 같은 작업에서 결함과 불필요한 변경을 줄였는지로 내려야 합니다.
 
 ## 한 에이전트를 넷으로 나누면 무엇이 달라지나
 
@@ -67,7 +67,7 @@ Reviewer와 Tester가 Coder의 설명을 그대로 믿지 않고 diff와 실제 
 
 ## 두 저장소 링크를 먼저 확인해야 한다
 
-frontmatter는 [agentscope-ai/CoPaw](https://github.com/agentscope-ai/CoPaw)를 가리키지만 본문의 References는 [copaw-project/copaw](https://github.com/copaw-project/copaw)를 가리킵니다. 원문에는 어느 저장소가 설명한 Planner·Coder·Reviewer·Test 구조의 근거인지 확정할 정보가 없습니다. 가상의 arXiv 주소도 포함되어 있어 논문 근거로 사용할 수 없습니다.
+frontmatter는 [agentscope-ai/CoPaw](https://github.com/agentscope-ai/CoPaw)를 가리키지만 본문의 References는 [copaw-project/copaw](https://github.com/copaw-project/copaw)를 가리킵니다. 원문에는 어느 저장소가 설명한 Planner, Coder, Reviewer, Test 구조의 근거인지 확정할 정보가 없습니다. 가상의 arXiv 주소도 포함되어 있어 논문 근거로 사용할 수 없습니다.
 
 외부 확인 없이 하나를 정답으로 고르지 말고, 사용 시점에 README, 라이선스, 설치 명령, 실제 에이전트 구성을 대조해야 합니다. 이 글은 멀티에이전트 코딩을 평가할 체크리스트이며 CoPaw의 현재 기능이나 설치 성공을 보증하는 문서가 아닙니다.
 
@@ -90,7 +90,7 @@ CoPaw라는 이름보다 이 검증 절차가 먼저입니다. 링크 불일치�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [컨텍스트 문제는 압축·검색·메모리 중 무엇일까? 스킬 선택 순서]({% post_url 2026-02-24-Agent-Skills-for-Context-Engineering-Guide %}) — 긴 작업의 실패를 지시 손실·검색 과부하·메모리 오염으로 나누고, Agent Skills for Context Engineering에서 맞는 절차를 고르는 순서를 안내합니다.
+- [컨텍스트 문제는 압축, 검색, 메모리 중 무엇일까? 스킬 선택 순서]({% post_url 2026-02-24-Agent-Skills-for-Context-Engineering-Guide %}) — 긴 작업의 실패를 지시 손실, 검색 과부하, 메모리 오염으로 나누고, Agent Skills for Context Engineering에서 맞는 절차를 고르는 순서를 안내합니다.
 - [AI 코딩이 자꾸 망가진다면: mattpocock/skills의 질문→PRD→TDD]({% post_url 2026-05-14-The-Real-Reason-Your-AI-Coding-Always-Fails-How-mattpocockskills-Shattered-the-Vibe-Coding-Illusion %}) — mattpocock/skills가 요구사항 질문, PRD, 작업 분할, 인수인계와 TDD를 작은 스킬로 나누는 이유와 적용 한계를 정리합니다.
 - [prime-agent: 지속형 파이썬 커널과 재귀적 서브에이전트로 구축하는 자가개선 AI 코딩 하네스]({% post_url 2026-08-09-prime-agent-Self-Improving-RLM-Harness-for-Autonomous-Coding-and-Research-Workflows %}) — prime-agent는 영속적인 IPython 커널을 단일 도구 인터페이스로 활용하여 AI 에이전트가 코드와 상태를 파이썬 변수로 유지할 수 있게 만든 오픈소스 코딩 하네스입니다. 재귀적 언어 모델(RLM) 구조를 통해 서브에이전트를…
 <!-- internal-links:end -->

@@ -10,7 +10,7 @@ tags:
   - RAG
   - ClaudeCode
 summary: AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
-description: 'codebase-memory-mcp가 AST와 호출 관계를 로컬 그래프로 만드는 원리, 토큰 절감 수치의 조건과 동적 코드·색인 갱신 한계를 설명합니다.'
+description: 'codebase-memory-mcp가 AST와 호출 관계를 로컬 그래프로 만드는 원리, 토큰 절감 수치의 조건과 동적 코드, 색인 갱신 한계를 설명합니다.'
 github_url: https://github.com/DeusData/codebase-memory-mcp
 image:
   path: https://opengraph.githubassets.com/1/DeusData/codebase-memory-mcp
@@ -41,7 +41,7 @@ project:
   files: 1808
 ---
 
-codebase-memory-mcp는 소스의 함수·클래스·호출 관계를 로컬 그래프로 만들어 에이전트가 구조 질문에 필요한 코드부터 찾도록 돕습니다. 파일 원문을 읽는 일을 완전히 없애는 기억 장치가 아니라 탐색 순서를 좁히는 색인으로 보는 편이 정확합니다. 자신의 언어와 빌드 방식에서 동적 호출 누락, 색인 갱신 지연, 실제 토큰 절감을 같은 과제로 확인해야 합니다.
+codebase-memory-mcp는 소스의 함수, 클래스, 호출 관계를 로컬 그래프로 만들어 에이전트가 구조 질문에 필요한 코드부터 찾도록 돕습니다. 파일 원문을 읽는 일을 완전히 없애는 기억 장치가 아니라 탐색 순서를 좁히는 색인으로 보는 편이 정확합니다. 자신의 언어와 빌드 방식에서 동적 호출 누락, 색인 갱신 지연, 실제 토큰 절감을 같은 과제로 확인해야 합니다.
 
 TL;DR
 - codebase-memory-mcp는 코드베이스 전체를 관계형 지식 그래프로 변환해 AI 에이전트에게 제공하는 강력한 로컬 도구입니다.

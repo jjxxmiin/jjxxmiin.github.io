@@ -11,7 +11,7 @@ tags:
   - 프롬프트엔지니어링
 summary: 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항
   명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스 워크플로우입니다.
-description: 'addyosmani/agent-skills가 명세·계획·구현·테스트·리뷰 절차를 지침으로 불러오는 방식과 라우팅·과잉 절차·회귀 검증 기준을 설명합니다.'
+description: 'addyosmani/agent-skills가 명세, 계획, 구현, 테스트, 리뷰 절차를 지침으로 불러오는 방식과 라우팅, 과잉 절차, 회귀 검증 기준을 설명합니다.'
 github_url: https://github.com/addyosmani/agent-skills
 image:
   path: https://opengraph.githubassets.com/1/addyosmani/agent-skills
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-addyosmani/agent-skills는 명세, 계획, 구현, 테스트와 리뷰 절차를 필요할 때 불러와 코딩 에이전트의 작업 순서를 고정하려는 지침 모음입니다. 좋은 절차를 적었다고 모델이 항상 지키는 것은 아니며, 작은 수정에는 단계 비용이 결과 이득보다 클 수 있습니다. 대표 작업에서 요구 누락·불필요한 변경·테스트 근거와 총 토큰을 비교해 필요한 스킬만 선택하세요.
+addyosmani/agent-skills는 명세, 계획, 구현, 테스트와 리뷰 절차를 필요할 때 불러와 코딩 에이전트의 작업 순서를 고정하려는 지침 모음입니다. 좋은 절차를 적었다고 모델이 항상 지키는 것은 아니며, 작은 수정에는 단계 비용이 결과 이득보다 클 수 있습니다. 대표 작업에서 요구 누락, 불필요한 변경, 테스트 근거와 총 토큰을 비교해 필요한 스킬만 선택하세요.
 
 TL;DR
 - agent-skills는 구글 크롬팀 리더 애디 오스마니가 만든 AI 코딩 에이전트용 프로덕션급 워크플로우 오픈소스입니다.

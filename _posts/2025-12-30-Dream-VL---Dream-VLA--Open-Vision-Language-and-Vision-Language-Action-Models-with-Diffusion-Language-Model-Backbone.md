@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL·Dream-VLA"
+title: "로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL, Dream-VLA"
 date: '2025-12-30'
 categories: Tech
 tags:
@@ -9,7 +9,7 @@ tags:
   - 파인튜닝
 math: true
 summary: "Dream-VL과 Dream-VLA가 masked diffusion language backbone으로 양방향 문맥과 action chunk 병렬 복원을 시도한 이유, benchmark 성과와 반복 denoising 비용을 함께 읽습니다."
-description: "Dream-VL·Dream-VLA가 masked diffusion language model로 vision·language·action chunk를 반복 복원하는 방식과 control 지연·재계획·안전 한계를 설명합니다."
+description: "Dream-VL, Dream-VLA가 masked diffusion language model로 vision, language, action chunk를 반복 복원하는 방식과 control 지연, 재계획, 안전 한계를 설명합니다."
 faq:
   - question: "Dream-VLA는 action을 한 토큰씩 생성하나요?"
     answer: "아닙니다. masked action chunk 전체를 양방향 문맥에서 여러 denoising 단계로 복원하는 diffusion language backbone을 사용합니다."
@@ -19,7 +19,7 @@ faq:
     answer: "호출 수는 줄지만 환경 변화 뒤 오래된 계획을 계속 실행할 수 있습니다. chunk 길이와 재계획 빈도, disturbance 회복을 함께 평가해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.22615.png
-  alt: "로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL·Dream-VLA 논문 대표 이미지"
+  alt: "로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL, Dream-VLA 논문 대표 이미지"
 ---
 
 Dream-VLA는 로봇 action을 앞에서부터 하나씩 확정하지 않고 **action chunk 전체를 masked diffusion으로 반복 복원해 현재 상태와 목표를 함께 보려는 모델**입니다. 병렬로 chunk를 다룬다는 장점은 있지만 denoising을 여러 번 수행하므로, 높은 benchmark 점수가 곧 낮은 control latency를 뜻하지는 않습니다.
@@ -40,13 +40,13 @@ Dream-VLA는 Dream-VL에서 시작해 robotics data로 continuous pretraining과
 
 원문이 제시한 LIBERO 평균 성공률은 97.2%이며, SimplerEnv의 Bridge와 Fractal 설정에서는 각각 71.4%, 60.5%입니다. 동일 parameter와 data를 쓴 AR baseline보다 모든 task에서 높았다는 비교도 포함됩니다. 이 숫자는 해당 simulation, task 정의, 평가 횟수에 묶여 있으며 실제 작업장의 성공률로 옮길 수 없습니다.
 
-판단할 때는 task별 실패를 분리해야 합니다. object를 못 찾았는지, grasp는 했지만 장기 순서를 놓쳤는지, action chunk가 disturbance 뒤에도 그대로 실행됐는지를 봅니다. 평균 성공률 하나로 architecture의 원인을 확정하기보다 같은 compute budget에서 AR과 diffusion의 latency·성공률·회복 능력을 비교하는 편이 정확합니다.
+판단할 때는 task별 실패를 분리해야 합니다. object를 못 찾았는지, grasp는 했지만 장기 순서를 놓쳤는지, action chunk가 disturbance 뒤에도 그대로 실행됐는지를 봅니다. 평균 성공률 하나로 architecture의 원인을 확정하기보다 같은 compute budget에서 AR과 diffusion의 latency, 성공률, 회복 능력을 비교하는 편이 정확합니다.
 
 ## 병렬성은 반복 Denoising 비용을 없애지 않는다
 
 Diffusion backbone은 token을 병렬로 다루지만 iterative denoising이 필요합니다. 한 step의 계산량, 총 step 수, hardware 병렬성이 실제 응답 시간을 결정합니다. 희귀한 corner case data가 부족할 때 action distribution이 어떻게 무너지는지도 별도 검증이 필요합니다.
 
-실제 적용 전에는 첫째 control deadline 안에 chunk가 나오는지, 둘째 disturbance가 생겼을 때 중간에 재계획하는지, 셋째 unseen object와 배치에서 성능이 유지되는지, 넷째 실패 action을 즉시 멈출 안전층이 있는지 확인해야 합니다. Dream-VL·Dream-VLA의 연구적 의미는 AR을 완전히 대체했다고 선언하는 데 있지 않습니다. **vision-language reasoning과 고차원 action을 discrete diffusion이라는 같은 backbone으로 묶어 비교 가능한 대안을 제시한 것**입니다.
+실제 적용 전에는 첫째 control deadline 안에 chunk가 나오는지, 둘째 disturbance가 생겼을 때 중간에 재계획하는지, 셋째 unseen object와 배치에서 성능이 유지되는지, 넷째 실패 action을 즉시 멈출 안전층이 있는지 확인해야 합니다. Dream-VL, Dream-VLA의 연구적 의미는 AR을 완전히 대체했다고 선언하는 데 있지 않습니다. **vision-language reasoning과 고차원 action을 discrete diffusion이라는 같은 backbone으로 묶어 비교 가능한 대안을 제시한 것**입니다.
 
 
 ## Action Chunk는 길이와 Denoising Step을 함께 조정한다
@@ -79,9 +79,9 @@ Dream-VLA의 선택 기준은 masked diffusion이 새롭다는 사실이 아니�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p]({% post_url 2026-01-24-BayesianVLA--Bayesian-Decomposition-of-Vision-Language-Action-Models-via-Latent-Action-Queries %}) — Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior·posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD…
-- [TwinBrainVLA는 지능을 보존하며 20Hz 제어할까: Frozen VLM과 Action Expert의 대가]({% post_url 2026-01-26-TwinBrainVLA--Unleashing-the-Potential-of-Generalist-VLMs-for-Embodied-Tasks-via-Asymmetric-Mixture-of-Transformers %}) — 범용 VLM을 동결하고 제어 전문가만 학습하는 TwinBrainVLA의 성능 이득과 실시간 제어 비용을 구분해 봅니다.
-- [VLM은 텍스트 모델부터 학습해야 할까? Transfusion 공동 사전학습의 대안]({% post_url 2026-03-05-Beyond-Language-Modeling--An-Exploration-of-Multimodal-Pretraining %}) — 텍스트 next-token loss와 이미지 diffusion loss를 처음부터 한 Transformer에서 학습하는 Transfusion 구조, RAE와 MoE의 역할 및 데이터 비용을 설명합니다.
+- [로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model]({% post_url 2026-02-02-Causal-World-Modeling-for-Robot-Control %}) — LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연, 환각, 안전 한계를…
+- [Diffusion LLM이 Qwen보다 5배 빠를까? d3LLM 병렬 디코딩의 조건]({% post_url 2026-05-04-Is-the-Autoregressive-Era-Over-Uncovering-the-True-Potential-and-Limits-of-Diffusion-LLMs-Proven-by-d3LLM %}) — 교사의 복원 순서를 증류하고 엔트로피에 따라 여러 블록을 확정하는 d3LLM의 구조, H100 5배 수치와 KV refresh, 서빙 한계를 짚습니다.
+- [DynamicVLA는 0.4B로 움직이는 물체를 80% 잡을까: 20Hz Action Streaming 검증]({% post_url 2026-01-30-DynamicVLA--A-Vision-Language-Action-Model-for-Dynamic-Object-Manipulation %}) — 0.4B 모델의 20Hz, 80% 성공률이 경량 백본, 비동기 추론, 최신 action chunk 선택 중 어디서 나오는지 분석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

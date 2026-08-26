@@ -5,7 +5,7 @@ source_citations:
 layout: post
 title: "DarkNet Dropout은 추론 때 왜 아무것도 하지 않나"
 summary: "DarkNet의 inverted dropout이 학습 중 살아남은 값과 기울기를 1/(1-p)로 키우고, 추론에서는 입력을 그대로 두는 이유와 resize 구현 주의점을 설명합니다."
-description: "DarkNet inverted dropout의 in-place forward, mask 재사용 backward, 확률 경계와 train flag·resize·난수 재현성 실패 조건을 설명합니다."
+description: "DarkNet inverted dropout의 in-place forward, mask 재사용 backward, 확률 경계와 train flag, resize, 난수 재현성 실패 조건을 설명합니다."
 date:   2022-02-21 16:00 -0400
 categories: DarkNet
 image:
@@ -74,7 +74,7 @@ if(r < l.probability) {
 - 1이면 `1/(1-probability)`에서 0으로 나누게 됩니다.
 - 1보다 크면 scale 부호까지 바뀝니다.
 
-CPU와 GPU 경로 모두 같은 `inputs × batch` 크기의 마스크를 준비하며, GPU가 활성화되면 별도 forward·backward 함수 포인터와 CUDA 배열을 연결합니다.
+CPU와 GPU 경로 모두 같은 `inputs × batch` 크기의 마스크를 준비하며, GPU가 활성화되면 별도 forward, backward 함수 포인터와 CUDA 배열을 연결합니다.
 
 ## resize 함수는 새 inputs를 CPU 상태에 반영하지 않는다
 
@@ -101,7 +101,7 @@ void resize_dropout_layer(dropout_layer *l, int inputs)
 
 같은 상수 입력을 충분히 여러 번 forward하고 각 위치의 평균을 구하면 원래 값에 가까워져야 합니다. `p=0.5`라면 절반가량이 0, 나머지가 두 배가 되지만 적은 시행에서는 정확히 절반이 아닐 수 있습니다. 한 batch 결과만 보고 scale 오류라고 판단하지 말고 drop 비율과 생존 값의 크기를 따로 확인합니다.
 
-`p=0`에서는 모든 값과 gradient가 그대로여야 합니다. `p`가 1에 가까우면 드물게 살아남은 값이 매우 커져 gradient 분산도 커질 수 있습니다. 유효 범위 안이라는 것과 학습에 안정적인 값이라는 것은 다르므로 activation·loss의 NaN과 gradient norm을 함께 봅니다.
+`p=0`에서는 모든 값과 gradient가 그대로여야 합니다. `p`가 1에 가까우면 드물게 살아남은 값이 매우 커져 gradient 분산도 커질 수 있습니다. 유효 범위 안이라는 것과 학습에 안정적인 값이라는 것은 다르므로 activation, loss의 NaN과 gradient norm을 함께 봅니다.
 
 ## In-place 변경은 어떤 Branch에서 위험한가요?
 
@@ -111,13 +111,13 @@ Dropout 이전 tensor를 두 branch가 공유하는데 한 branch가 먼저 in-p
 
 ## Mask 수명과 Train Flag는 어떻게 맞추나요?
 
-Backward는 가장 최근 학습 forward가 만든 mask와 같은 batch·shape를 사용해야 합니다. Forward 두 번 뒤 첫 번째 loss를 backward하거나 resize 사이에 backward하면 rand 위치가 대응하지 않습니다. 일반적인 순차 실행에서는 문제가 없지만 gradient checkpointing, 비동기 실행이나 여러 micro-batch를 겹치면 mask를 호출별로 보존해야 합니다.
+Backward는 가장 최근 학습 forward가 만든 mask와 같은 batch, shape를 사용해야 합니다. Forward 두 번 뒤 첫 번째 loss를 backward하거나 resize 사이에 backward하면 rand 위치가 대응하지 않습니다. 일반적인 순차 실행에서는 문제가 없지만 gradient checkpointing, 비동기 실행이나 여러 micro-batch를 겹치면 mask를 호출별로 보존해야 합니다.
 
 Evaluation 중 실수로 backward를 부르면 이전 mask가 남아 gradient를 임의로 지울 수 있습니다. 상위 loop에서 train mode일 때만 dropout backward를 등록하거나, 함수 안에서도 mode와 mask 유효성을 검사합니다. Mode 전환 테스트는 같은 입력의 evaluation output이 매번 같고 training output만 seed에 따라 달라지는지 봅니다.
 
 ## 난수 재현성과 Thread 안전성은 무엇을 확인하나요?
 
-전역 난수 함수를 여러 layer와 data augmentation이 공유하면 layer 생성·호출 순서가 바뀌어도 dropout mask가 달라집니다. 재현 실험에는 seed뿐 아니라 thread 수와 호출 순서를 기록합니다. 병렬 forward에서 전역 generator가 안전한지, 각 sample이 의도치 않게 같은 mask를 공유하지 않는지도 확인합니다.
+전역 난수 함수를 여러 layer와 data augmentation이 공유하면 layer 생성, 호출 순서가 바뀌어도 dropout mask가 달라집니다. 재현 실험에는 seed뿐 아니라 thread 수와 호출 순서를 기록합니다. 병렬 forward에서 전역 generator가 안전한지, 각 sample이 의도치 않게 같은 mask를 공유하지 않는지도 확인합니다.
 
 완전히 같은 mask만 반복하면 dropout의 정규화 효과가 줄 수 있으므로 재현 가능성과 매 step 새로운 난수라는 요구를 함께 만족해야 합니다. Checkpoint 재개에서 난수 상태를 저장하지 않으면 weight는 같아도 이후 학습 궤적은 달라질 수 있습니다.
 
@@ -152,7 +152,7 @@ Scale 1/(1-p)의 분모가 0이 되므로 유효하지 않으며 probability는 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력·순환·출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
-- [Darknet ISEG Layer는 무엇을 학습하나: 픽셀 클래스와 인스턴스 임베딩 해설]({% post_url 2022-03-02-DarkNetIsegLayer %}) — Darknet의 ISEG layer가 truth mask를 읽어 클래스 delta와 인스턴스 embedding delta를 만드는 과정을 배열 인덱스와 함께 추적합니다.
-- [Darknet matrix를 복사·분할할 때 생기는 버그: 행 포인터 소유권과 CSV 처리]({% post_url 2022-03-08-DarkNetMatrix %}) — Darknet matrix가 행마다 따로 할당되는 구조를 바탕으로 resize, hold-out, pop_column, CSV 입출력과 top-k 정확도의 경계 조건을 설명합니다.
+- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력, 순환, 출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
+- [Darknet Logistic Layer의 cost가 batch마다 달라지는 이유: sigmoid, cross entropy 흐름]({% post_url 2022-03-06-DarkNetLogisticLayer %}) — Darknet LOGXENT layer가 입력을 sigmoid 출력으로 바꾸고 truth가 있을 때만 loss와 delta를 계산하는 과정을 추적합니다.
+- [Darknet matrix를 복사, 분할할 때 생기는 버그: 행 포인터 소유권과 CSV 처리]({% post_url 2022-03-08-DarkNetMatrix %}) — Darknet matrix가 행마다 따로 할당되는 구조를 바탕으로 resize, hold-out, pop_column, CSV 입출력과 top-k 정확도의 경계 조건을 설명합니다.
 <!-- internal-links:end -->

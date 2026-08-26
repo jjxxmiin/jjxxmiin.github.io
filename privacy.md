@@ -3,7 +3,7 @@ layout: page
 title: 개인정보 처리방침
 icon: fas fa-user-shield
 permalink: /privacy/
-description: OPSOAI의 Google Analytics·AdSense·Giscus 사용, 쿠키 처리, 이용자 선택권과 개인정보 관련 문의 방법을 안내합니다.
+description: OPSOAI의 Google Analytics, AdSense, Giscus 사용, 쿠키 처리, 이용자 선택권과 개인정보 관련 문의 방법을 안내합니다.
 ---
 
 **OPSOAI** (이하 "사이트")는 이용자의 개인정보를 소중히 여기며, "정보통신망 이용촉진 및 정보보호 등에 관한 법률" 등 관련 법령을 준수합니다.

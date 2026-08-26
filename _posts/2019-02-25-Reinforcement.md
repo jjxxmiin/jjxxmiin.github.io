@@ -3,9 +3,9 @@ source_citations:
   - name: "Gymnasium FrozenLake Q-Learning 공식 튜토리얼"
     url: "https://gymnasium.farama.org/tutorials/training_agents/frozenlake_q_learning/"
 layout: post
-title:  "FrozenLake Q-Learning이 자꾸 실패하는 이유: 탐험·학습률·DQN까지"
-summary: "FrozenLake 예제로 Q-Table의 갱신 원리를 짚고, 탐험과 활용의 균형·할인율·학습률이 왜 필요한지 설명합니다. 상태 공간이 커질 때 Q-Network와 경험 재생, 타깃 네트워크로 넘어가는 판단 기준도 함께 정리합니다."
-description: "FrozenLake Q-Learning의 실패 원인을 탐험 확률·학습률·할인율로 나눠 진단하고, Q-Table에서 DQN으로 넘어갈 기준과 코드의 버전 한계를 설명합니다."
+title:  "FrozenLake Q-Learning이 자꾸 실패하는 이유: 탐험, 학습률, DQN까지"
+summary: "FrozenLake 예제로 Q-Table의 갱신 원리를 짚고, 탐험과 활용의 균형, 할인율, 학습률이 왜 필요한지 설명합니다. 상태 공간이 커질 때 Q-Network와 경험 재생, 타깃 네트워크로 넘어가는 판단 기준도 함께 정리합니다."
+description: "FrozenLake Q-Learning의 실패 원인을 탐험 확률, 학습률, 할인율로 나눠 진단하고, Q-Table에서 DQN으로 넘어갈 기준과 코드의 버전 한계를 설명합니다."
 image:
   path: /assets/img/thumb/Reinforcement.jpg
   alt: 강화학습 끄적이기 대표 이미지
@@ -23,7 +23,7 @@ faq:
     answer: "경험 재생은 연속된 표본의 상관성을 낮추고, 타깃 네트워크는 학습 목표가 매 단계 함께 움직이는 문제를 줄입니다. 서로 다른 불안정성에 대응하므로 한쪽만으로 같은 효과를 기대하기 어렵습니다."
 ---
 
-FrozenLake에서 Q-Learning이 실패하는 가장 흔한 이유는 현재 가장 좋아 보이는 행동만 반복하거나, 불확실한 환경에서도 Q값을 한 번의 결과로 덮어쓰기 때문입니다. 처음에는 Q-Table로 상태·행동·보상의 연결을 검증하고, 탐험이 실제로 일어나는지와 보상이 전달되는지를 따로 확인하는 편이 좋습니다. 상태를 표로 다루기 어려워진 뒤에야 Q-Network와 DQN을 검토하면 모델 문제와 환경 문제를 섞지 않을 수 있습니다.
+FrozenLake에서 Q-Learning이 실패하는 가장 흔한 이유는 현재 가장 좋아 보이는 행동만 반복하거나, 불확실한 환경에서도 Q값을 한 번의 결과로 덮어쓰기 때문입니다. 처음에는 Q-Table로 상태, 행동, 보상의 연결을 검증하고, 탐험이 실제로 일어나는지와 보상이 전달되는지를 따로 확인하는 편이 좋습니다. 상태를 표로 다루기 어려워진 뒤에야 Q-Network와 DQN을 검토하면 모델 문제와 환경 문제를 섞지 않을 수 있습니다.
 
 ## Q-Table은 무엇을 저장하고 어떻게 바뀌나
 
@@ -91,7 +91,7 @@ Q[state, action] = (1-learning_rate) * Q[state, action] \
 
 읽을 때는 다음 순서가 안전합니다.
 
-- 먼저 Q-Table 예제로 상태·행동·보상·갱신 관계를 확인한다.
+- 먼저 Q-Table 예제로 상태, 행동, 보상, 갱신 관계를 확인한다.
 - 성공률이 오르지 않으면 탐험 여부와 환경의 확률성을 분리해 본다.
 - 상태 공간 때문에 표가 한계에 부딪힐 때만 Q-Network로 옮긴다.
 - DQN에서는 replay buffer와 target network가 실제로 연결돼 있는지 확인한다.
@@ -117,9 +117,9 @@ Q[state, action] = (1-learning_rate) * Q[state, action] \
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Q-learning에서 DQN·Policy Gradient로 넘어가는 기준]({% post_url 2019-10-07-Reinforcement2 %}) — 상태·행동 공간에 따라 Q-table에서 Q-Network·DQN으로 넘어가는 기준과 replay memory·target network, 확률 정책을 배우는 Policy Gradient의 차이를 설명합니다.
-- [GUI 에이전트는 클릭 전에 다음 화면을 예측할 수 있나: Code2World]({% post_url 2026-02-11-Code2World--A-GUI-World-Model-via-Renderable-Code-Generation %}) — 현재 화면과 행동에서 렌더링 가능한 HTML로 다음 화면을 예측하는 Code2World의 학습·검증 루프와 실제 GUI 적용 한계를 분석합니다.
-- [EVA는 긴 영상 토큰을 얼마나 줄일까: SFT·KTO·GRPO와 탐색 지연]({% post_url 2026-03-27-EVA--Efficient-Reinforcement-Learning-for-End-to-End-Video-Agent %}) — EVA가 긴 영상을 요약·계획·행동·반성 루프로 탐색하는 방식을 살펴보고, 토큰 절감과 반복 추론 지연 사이의 실제 교환을 짚습니다.
+- [Q-learning에서 DQN, Policy Gradient로 넘어가는 기준]({% post_url 2019-10-07-Reinforcement2 %}) — 상태, 행동 공간에 따라 Q-table에서 Q-Network, DQN으로 넘어가는 기준과 replay memory, target network, 확률 정책을 배우는 Policy Gradient의 차이를 설명합니다.
+- [GUI 에이전트는 클릭 전에 다음 화면을 예측할 수 있나: Code2World]({% post_url 2026-02-11-Code2World--A-GUI-World-Model-via-Renderable-Code-Generation %}) — 현재 화면과 행동에서 렌더링 가능한 HTML로 다음 화면을 예측하는 Code2World의 학습, 검증 루프와 실제 GUI 적용 한계를 분석합니다.
+- [EVA는 긴 영상 토큰을 얼마나 줄일까: SFT, KTO, GRPO와 탐색 지연]({% post_url 2026-03-27-EVA--Efficient-Reinforcement-Learning-for-End-to-End-Video-Agent %}) — EVA가 긴 영상을 요약, 계획, 행동, 반성 루프로 탐색하는 방식을 살펴보고, 토큰 절감과 반복 추론 지연 사이의 실제 교환을 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -138,7 +138,7 @@ Q[state, action] = (1-learning_rate) * Q[state, action] \
 
 ## 파라미터를 바꿀 때 비교 실험은 어떻게 구성하나
 
-한 번에 탐험 확률, 학습률, 할인율을 모두 바꾸면 성공률 변화의 이유를 알 수 없습니다. 먼저 환경의 seed와 episode 수, 평가 횟수를 고정하고 한 값만 바꿉니다. 학습 중에는 보상 합, episode 길이, 서로 다른 상태·행동을 방문한 수를 기록하고, 평가에서는 탐험을 끈 성공률을 별도로 봅니다.
+한 번에 탐험 확률, 학습률, 할인율을 모두 바꾸면 성공률 변화의 이유를 알 수 없습니다. 먼저 환경의 seed와 episode 수, 평가 횟수를 고정하고 한 값만 바꿉니다. 학습 중에는 보상 합, episode 길이, 서로 다른 상태, 행동을 방문한 수를 기록하고, 평가에서는 탐험을 끈 성공률을 별도로 봅니다.
 
 탐험이 너무 빨리 줄면 초기의 우연한 경로가 정책으로 굳을 수 있습니다. 반대로 끝까지 무작위 행동 비율이 높으면 Q값이 좋아져도 평가가 흔들립니다. 학습률이 크면 새 경험에 빠르게 반응하지만 확률적 전이에 출렁일 수 있고, 너무 작으면 제한된 episode 안에 값이 충분히 바뀌지 않습니다. 각 현상을 하나의 “학습 실패”로 묶지 않습니다.
 

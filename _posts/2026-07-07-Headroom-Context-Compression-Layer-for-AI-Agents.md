@@ -11,7 +11,7 @@ tags:
   - 컨텍스트윈도우
 summary: Headroom은 대형 언어 모델(LLM)에 전달되는 방대한 도구 출력과 로그, RAG 결과물을 최대 95%까지 압축하여 토큰 비용을
   줄이고 답변 정확도를 유지하는 오픈소스 기반의 컨텍스트 압축 레이어입니다.
-description: 'Headroom이 도구 출력과 RAG 문맥을 압축하는 위치와 방식, 토큰 절감 수치의 조건 및 숫자·파일 경로·오류 로그·미해결 결정 손실 검증법을 정리합니다.'
+description: 'Headroom이 도구 출력과 RAG 문맥을 압축하는 위치와 방식, 토큰 절감 수치의 조건 및 숫자, 파일 경로, 오류 로그, 미해결 결정 손실 검증법을 정리합니다.'
 github_url: https://github.com/chopratejas/headroom
 image:
   path: https://opengraph.githubassets.com/1/chopratejas/headroom

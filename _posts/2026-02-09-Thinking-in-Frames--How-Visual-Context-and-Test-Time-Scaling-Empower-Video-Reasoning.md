@@ -7,8 +7,8 @@ tags:
   - 영상이해
   - AI트렌드
 math: true
-summary: 'Thinking in Frames가 중간 프레임을 시각적 추론 기록으로 쓰는 방식과 프레임 수를 늘리는 테스트타임 스케일링의 효과·비용을 정리합니다.'
-description: Thinking in Frames가 중간 상태를 이미지로 남겨 미로·탱그램을 푸는 원리와 프레임 예산을 늘릴 때 생기는 정확도·지연·오류 누적을 설명합니다.
+summary: 'Thinking in Frames가 중간 프레임을 시각적 추론 기록으로 쓰는 방식과 프레임 수를 늘리는 테스트타임 스케일링의 효과, 비용을 정리합니다.'
+description: Thinking in Frames가 중간 상태를 이미지로 남겨 미로, 탱그램을 푸는 원리와 프레임 예산을 늘릴 때 생기는 정확도, 지연, 오류 누적을 설명합니다.
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.21037.png
   alt: "미로를 풀 때 프레임을 늘리면 왜 나아질까: Visual Test-Time Scaling 논문 대표 이미지"
@@ -93,6 +93,6 @@ Thinking in Frames는 한 장의 입력에서 곧바로 결론을 내리지 않�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [VideoAuto-R1은 어떻게 답변을 149토큰에서 44토큰으로 줄였나]({% post_url 2026-01-10-VideoAuto-R1--Video-Auto-Reasoning-via-Thinking-Once--Answering-Twice %}) — 먼저 답하고 필요할 때만 추론한 뒤 다시 답하는 TOAT 구조, 신뢰도 분기와 과신 오답의 위험
-- [실시간 비디오 AI는 언제 먼저 말해야 할까? Proact-VL의 트리거 문제]({% post_url 2026-03-05-Proact-VL--A-Proactive-VideoLLM-for-Real-Time-AI-Companions %}) — Proact-VL이 연속 영상을 보며 SPEAK 시점과 응답 길이를 함께 결정하는 방식, Live Gaming Benchmark와 오경보·지연의 절충을 정리합니다.
-- [InternVideo는 생성·판별 학습을 어떻게 합치나: MVM·VLC·CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
+- [실시간 비디오 AI는 언제 먼저 말해야 할까? Proact-VL의 트리거 문제]({% post_url 2026-03-05-Proact-VL--A-Proactive-VideoLLM-for-Real-Time-AI-Companions %}) — Proact-VL이 연속 영상을 보며 SPEAK 시점과 응답 길이를 함께 결정하는 방식, Live Gaming Benchmark와 오경보, 지연의 절충을 정리합니다.
+- [InternVideo는 생성, 판별 학습을 어떻게 합치나: MVM, VLC, CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
 <!-- internal-links:end -->

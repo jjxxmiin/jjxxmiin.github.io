@@ -1,17 +1,17 @@
 ---
 layout: post
-title: "Multica로 코딩 Agent를 비동기 운영해도 될까: daemon·작업 큐·권한"
+title: "Multica로 코딩 Agent를 비동기 운영해도 될까: daemon, 작업 큐, 권한"
 date: '2026-04-11 06:24:39'
 categories: Tech
 tags:
   - AI코딩
   - AI에이전트
-summary: "Multica가 로컬 AI CLI를 daemon과 작업 보드에 연결하는 구조를 살펴보고, 비동기 실행의 격리·중단·로그·Skill 검증 비용을 기준으로 도입 범위를 정합니다."
-description: "Multica의 control plane·local daemon·WebSocket 작업 흐름, CLI wrapper 안정성, reusable skill 검증, sandbox·권한·중단 조건을 실무 관점에서 분석합니다."
+summary: "Multica가 로컬 AI CLI를 daemon과 작업 보드에 연결하는 구조를 살펴보고, 비동기 실행의 격리, 중단, 로그, Skill 검증 비용을 기준으로 도입 범위를 정합니다."
+description: "Multica의 control plane, local daemon, WebSocket 작업 흐름, CLI wrapper 안정성, reusable skill 검증, sandbox, 권한, 중단 조건을 실무 관점에서 분석합니다."
 github_url: https://github.com/multica-ai/multica
 faq:
   - question: "Multica를 쓰면 코딩 Agent를 지켜보지 않아도 되나요?"
-    answer: "완전히 맡길 수는 없습니다. 실행 중단 조건, diff·test 검토, 권한 요청과 실패 알림을 설계해야 비동기 실행이 안전해집니다."
+    answer: "완전히 맡길 수는 없습니다. 실행 중단 조건, diff, test 검토, 권한 요청과 실패 알림을 설계해야 비동기 실행이 안전해집니다."
   - question: "로컬 daemon이면 코드와 비밀정보가 자동으로 안전한가요?"
     answer: "아닙니다. daemon의 사용자 권한, 연결된 모델의 전송 경로, 작업 디렉터리와 로그를 별도로 격리하고 제한해야 합니다."
   - question: "재사용 Skill은 어떻게 검증해야 하나요?"
@@ -21,7 +21,7 @@ image:
   alt: "multica-ai/multica GitHub 저장소 대표 이미지"
 ---
 
-**Multica는 로컬의 AI CLI 실행을 daemon과 작업 보드에 연결해 코딩 과제를 비동기로 관리하려는 플랫폼입니다.** 터미널을 계속 지켜보는 시간을 줄일 수 있지만, Agent가 “동료”가 되는 것은 아니며 작업 격리·중단·검토 책임은 운영자가 그대로 집니다. 작은 반복 작업에서 기존 대화형 CLI와 비교한 뒤 비동기 관리 비용보다 이득이 큰 경우에만 넓히는 편이 좋습니다.
+**Multica는 로컬의 AI CLI 실행을 daemon과 작업 보드에 연결해 코딩 과제를 비동기로 관리하려는 플랫폼입니다.** 터미널을 계속 지켜보는 시간을 줄일 수 있지만, Agent가 “동료”가 되는 것은 아니며 작업 격리, 중단, 검토 책임은 운영자가 그대로 집니다. 작은 반복 작업에서 기존 대화형 CLI와 비교한 뒤 비동기 관리 비용보다 이득이 큰 경우에만 넓히는 편이 좋습니다.
 
 [Multica 저장소](https://github.com/multica-ai/multica)의 핵심 질문은 모델 성능보다 실행 수명 주기입니다. 이슈를 누가 가져갔는지, 어떤 workspace와 runtime에서 돌았는지, 어디서 막혔고 무엇을 변경했는지를 control plane에서 추적하려 합니다.
 
@@ -65,7 +65,7 @@ async function executeAgentTask(task: Task, workspace: Workspace) {
   }
 }
 ```
-WebSocket은 stdout·stderr와 상태 이벤트를 빠르게 전달할 수 있지만 CLI 출력 형식이 바뀌면 `BLOCKER` 감지가 누락될 수 있습니다. 일정 시간 출력이 없을 때의 timeout, 최대 명령·토큰·비용, test 실패 횟수와 사람 승인이 필요한 명령을 daemon 자체의 정책으로 둬야 합니다.
+WebSocket은 stdout, stderr와 상태 이벤트를 빠르게 전달할 수 있지만 CLI 출력 형식이 바뀌면 `BLOCKER` 감지가 누락될 수 있습니다. 일정 시간 출력이 없을 때의 timeout, 최대 명령, 토큰, 비용, test 실패 횟수와 사람 승인이 필요한 명령을 daemon 자체의 정책으로 둬야 합니다.
 
 ### 비교표는 운영 책임의 위치를 보여 준다
 
@@ -84,7 +84,7 @@ WebSocket은 stdout·stderr와 상태 이벤트를 빠르게 전달할 수 있�
 
 ### 여러 저장소의 ORM 변경
 
-레거시 ORM을 바꾸는 작업이라면 저장소마다 이슈와 독립 workspace를 만들 수 있습니다. 하지만 migration 순서, 공유 schema와 호환 버전을 먼저 고정해야 합니다. Review 상태는 완료가 아니라 diff·test·migration rollback을 사람이 확인할 준비가 됐다는 뜻으로 정의합니다.
+레거시 ORM을 바꾸는 작업이라면 저장소마다 이슈와 독립 workspace를 만들 수 있습니다. 하지만 migration 순서, 공유 schema와 호환 버전을 먼저 고정해야 합니다. Review 상태는 완료가 아니라 diff, test, migration rollback을 사람이 확인할 준비가 됐다는 뜻으로 정의합니다.
 
 ### 사내 인증 연동 Skill 재사용
 
@@ -102,7 +102,7 @@ WebSocket은 stdout·stderr와 상태 이벤트를 빠르게 전달할 수 있�
 
 ### daemon 권한이 작업 경계를 넘을 수 있다
 
-`multica daemon`을 root나 일상 개발 계정으로 띄우면 잘못된 명령이 workspace 밖 파일과 `.env`에 닿을 수 있습니다. 버릴 수 있는 clone, 최소 권한 계정과 네트워크 제한을 사용하고 배포·삭제·secret 접근은 사람 승인 없이는 실행되지 않게 해야 합니다.
+`multica daemon`을 root나 일상 개발 계정으로 띄우면 잘못된 명령이 workspace 밖 파일과 `.env`에 닿을 수 있습니다. 버릴 수 있는 clone, 최소 권한 계정과 네트워크 제한을 사용하고 배포, 삭제, secret 접근은 사람 승인 없이는 실행되지 않게 해야 합니다.
 
 ### 작은 수정에는 관리 절차가 더 비쌀 수 있다
 
@@ -112,9 +112,9 @@ WebSocket은 stdout·stderr와 상태 이벤트를 빠르게 전달할 수 있�
 
 ## 도입은 완료율보다 안전한 인계율로 판단한다
 
-한 개의 버릴 수 있는 저장소에서 읽기·수정 범위가 좁은 작업 10개로 시작합니다. daemon이 스스로 완료했다고 표시한 비율뿐 아니라 사람이 추가 수정 없이 승인한 비율, 잘못된 파일 접근, 중단 이후 복구 시간과 로그 누락을 기록합니다. 비동기 실행이 사람의 관찰 시간을 줄이면서도 review 부담을 늘리지 않을 때 범위를 넓힐 수 있습니다.
+한 개의 버릴 수 있는 저장소에서 읽기, 수정 범위가 좁은 작업 10개로 시작합니다. daemon이 스스로 완료했다고 표시한 비율뿐 아니라 사람이 추가 수정 없이 승인한 비율, 잘못된 파일 접근, 중단 이후 복구 시간과 로그 누락을 기록합니다. 비동기 실행이 사람의 관찰 시간을 줄이면서도 review 부담을 늘리지 않을 때 범위를 넓힐 수 있습니다.
 
-Multica의 실질적 가치는 Agent를 사람처럼 부르는 데 있지 않고 실행 상태와 인계물을 중앙에서 추적하는 데 있습니다. control plane과 daemon 사이의 연결이 끊겨도 안전하게 멈추고, 어떤 runtime·prompt·commit이 결과를 만들었는지 재현할 수 있어야 관리 플랫폼의 이점이 생깁니다.
+Multica의 실질적 가치는 Agent를 사람처럼 부르는 데 있지 않고 실행 상태와 인계물을 중앙에서 추적하는 데 있습니다. control plane과 daemon 사이의 연결이 끊겨도 안전하게 멈추고, 어떤 runtime, prompt, commit이 결과를 만들었는지 재현할 수 있어야 관리 플랫폼의 이점이 생깁니다.
 
 평가표에는 과제별 시작 commit, 허용 파일, 성공 test와 최대 실행 시간을 적습니다. Agent가 다른 파일을 건드리거나 test를 삭제해 녹색 결과를 만든 경우에는 완료로 세지 않습니다. 결과 branch는 사람이 merge하기 전 보호하고, 동시에 수행한 작업들이 같은 dependency 파일을 수정하면 자동으로 후속 작업을 멈춰 충돌이 연쇄되지 않게 합니다.
 
@@ -133,7 +133,7 @@ control plane 장애도 연습해야 합니다. 연결이 끊겼을 때 daemon�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스, 최소 권한, 모델 선택의 실무 기준을 정리합니다.
 - [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
 - [OpenManus: 초대장 없이 사용하는 오픈소스 자율형 AI 에이전트 구축 가이드]({% post_url 2026-08-16-OpenManus-An-Open-Source-Autonomous-AI-Agent-Framework-Beyond-Closed-Ecosystems %}) — OpenManus는 폐쇄형 AI 에이전트 서비스의 한계를 극복하기 위해 MetaGPT 커뮤니티 중심으로 개발된 오픈소스 자율형 에이전트 프레임워크예요. 웹 브라우징, 코드 실행, 파일 조작 등의 도구를 자율적으로 호출하며 추론과 반추…
 <!-- internal-links:end -->
@@ -142,7 +142,7 @@ control plane 장애도 연습해야 합니다. 연결이 끊겼을 때 daemon�
 
 ### Multica를 쓰면 코딩 Agent를 지켜보지 않아도 되나요?
 
-완전히 맡길 수는 없습니다. 실행 중단 조건, diff·test 검토, 권한 요청과 실패 알림을 설계해야 비동기 실행이 안전해집니다.
+완전히 맡길 수는 없습니다. 실행 중단 조건, diff, test 검토, 권한 요청과 실패 알림을 설계해야 비동기 실행이 안전해집니다.
 
 ### 로컬 daemon이면 코드와 비밀정보가 자동으로 안전한가요?
 

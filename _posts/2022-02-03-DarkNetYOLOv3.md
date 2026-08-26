@@ -2,7 +2,7 @@
 layout: post
 title:  "YOLOv3는 왜 3개 Scale과 BCE를 쓸까? 출력 Tensor 계산법"
 summary: "YOLOv3가 세 해상도에서 anchor를 나누고 softmax 대신 독립 BCE를 쓰는 이유를 출력 tensor 식, Darknet-53, 작은 객체 개선과 localization 한계까지 설명합니다."
-description: "YOLOv3의 세 scale 출력 tensor, anchor 배분, BCE 기반 다중 label, upsample·concatenate와 작은 객체 디버깅 기준을 설명합니다."
+description: "YOLOv3의 세 scale 출력 tensor, anchor 배분, BCE 기반 다중 label, upsample, concatenate와 작은 객체 디버깅 기준을 설명합니다."
 date:   2022-02-03 16:00 -0400
 categories: DarkNet
 image:
@@ -55,7 +55,7 @@ YOLOv3는 class를 서로 배타적인 하나의 선택으로 강제하지 않�
 
 논문은 시도했지만 채택하지 않은 실험도 공개합니다. 중심 offset을 선형으로 예측하는 방식은 학습을 불안정하게 했고, focal loss는 약 2% 성능 저하를 보였으며, 두 개의 IoU threshold를 쓰는 assignment도 이득이 없었습니다. 실패한 조합은 다른 데이터에서 영원히 무효라는 뜻이 아니라 이 구조와 설정에서 개선을 확인하지 못했다는 뜻입니다.
 
-디버깅 순서는 scale별 출력 shape, anchor 배분, upsample·concatenate 크기, BCE label, 마지막으로 NMS threshold입니다. 특히 작은 객체가 계속 빠진다면 단순히 입력 크기만 올리기 전에 높은 해상도 branch가 실제로 연결됐는지부터 확인해야 합니다.
+디버깅 순서는 scale별 출력 shape, anchor 배분, upsample, concatenate 크기, BCE label, 마지막으로 NMS threshold입니다. 특히 작은 객체가 계속 빠진다면 단순히 입력 크기만 올리기 전에 높은 해상도 branch가 실제로 연결됐는지부터 확인해야 합니다.
 
 ## 세 Scale에 Anchor를 어떻게 연결하나요?
 
@@ -67,13 +67,13 @@ Anchor 전체를 한 출력에 반복하는 것이 아니라 크기 구간에 �
 
 Objectness target은 해당 anchor가 객체를 담당하는지 나타내고 class target은 positive anchor에 어떤 label이 있는지 나타냅니다. 모든 배경 anchor에 class loss까지 계산하면 압도적인 음성 신호가 class 학습을 지배할 수 있으므로 구현의 mask 범위를 확인해야 합니다. 다중 label 데이터라면 하나의 positive anchor에서 여러 class target이 1일 수 있습니다.
 
-추론에서는 objectness와 class probability를 결합해 class별 score를 만들고 threshold를 적용합니다. BCE를 썼다는 이유로 모든 class를 무조건 출력하는 것이 아니며, threshold는 calibration과 precision·recall 요구에 따라 정합니다. Softmax 결과와 같은 방식으로 합이 1인지 검사하면 독립 sigmoid 출력의 정상적인 결과를 오류로 오해하게 됩니다.
+추론에서는 objectness와 class probability를 결합해 class별 score를 만들고 threshold를 적용합니다. BCE를 썼다는 이유로 모든 class를 무조건 출력하는 것이 아니며, threshold는 calibration과 precision, recall 요구에 따라 정합니다. Softmax 결과와 같은 방식으로 합이 1인지 검사하면 독립 sigmoid 출력의 정상적인 결과를 오류로 오해하게 됩니다.
 
 ## AP50만 좋아질 때 무엇을 의심하나요?
 
 AP50은 올라가지만 더 엄격한 IoU 지표가 낮다면 객체 존재와 class는 찾았어도 box 경계가 거칠 가능성이 큽니다. 입력 크기만 올리기 전에 label box 품질, 좌표 decode, anchor matching과 regression loss의 scale별 값을 봅니다. NMS를 바꾸어 중복을 줄이는 일은 잘못된 좌표 자체를 고치지 못합니다.
 
-큰 객체·중간 객체·작은 객체로 나눠 recall과 localization error를 보면 어느 branch가 병목인지 알 수 있습니다. 모든 크기에서 box가 일정 방향으로 밀리면 letterbox 보정이나 grid offset을, 작은 객체만 사라지면 고해상도 feature와 assignment를 우선 조사합니다.
+큰 객체, 중간 객체, 작은 객체로 나눠 recall과 localization error를 보면 어느 branch가 병목인지 알 수 있습니다. 모든 크기에서 box가 일정 방향으로 밀리면 letterbox 보정이나 grid offset을, 작은 객체만 사라지면 고해상도 feature와 assignment를 우선 조사합니다.
 
 ## 자주 남는 질문
 
@@ -92,7 +92,7 @@ Class를 서로 배타적인 하나로 강제하지 않고, 겹치거나 계층�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box·좌표 제약·Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
+- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box, 좌표 제약, Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
 - [YOLOv2에 Anchor Box를 넣었는데 mAP가 떨어진 이유: Recall부터 다시 보기]({% post_url 2022-02-02-DarkNetYOLOv2 %}) — YOLOv2에서 anchor box가 recall은 높였지만 초기 mAP는 소폭 낮춘 이유와 k-means anchor, direct location prediction, passthrough, multi-scale 학습의 역할을…
-- [YOLOv4 Bag of Freebies와 Specials, 무엇이 추론 비용을 늘릴까?]({% post_url 2022-02-04-DarkNetYOLOv4 %}) — YOLOv4의 Mosaic·SAT·CmBN 같은 학습 전용 기법과 SPP·PAN·SAM·Mish 같은 구조 변경을 구분하고, CSPDarknet-53 조합과 실험 결과를 읽는 법을 정리합니다.
+- [YOLOv4 Bag of Freebies와 Specials, 무엇이 추론 비용을 늘릴까?]({% post_url 2022-02-04-DarkNetYOLOv4 %}) — YOLOv4의 Mosaic, SAT, CmBN 같은 학습 전용 기법과 SPP, PAN, SAM, Mish 같은 구조 변경을 구분하고, CSPDarknet-53 조합과 실험 결과를 읽는 법을 정리합니다.
 <!-- internal-links:end -->

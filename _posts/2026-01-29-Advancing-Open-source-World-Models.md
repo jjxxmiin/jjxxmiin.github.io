@@ -10,15 +10,15 @@ tags:
   - 오픈소스
   - 경량화
 math: true
-summary: 16 FPS·1초 미만 지연·분 단위 기억 주장을 처리량, 입력 반응성, 물리 정확도로 나눠 검토합니다.
-description: "LingBot-World의 16 FPS·1초 미만 반응·분 단위 memory 주장을 throughput·action latency·state 보존·물리 정확도로 나누고 intervention test와 배포 조건을 설명합니다."
+summary: 16 FPS, 1초 미만 지연, 분 단위 기억 주장을 처리량, 입력 반응성, 물리 정확도로 나눠 검토합니다.
+description: "LingBot-World의 16 FPS, 1초 미만 반응, 분 단위 memory 주장을 throughput, action latency, state 보존, 물리 정확도로 나누고 intervention test와 배포 조건을 설명합니다."
 faq:
   - question: "16 FPS이면 입력에도 62.5ms 안에 반응하나요?"
     answer: "아닙니다. FPS는 연속 frame throughput이고 입력 반영 latency는 별도 수치이므로 첫 frame, action 반영과 frame 간격을 각각 측정해야 합니다."
   - question: "분 단위 memory는 과거 상태를 모두 정확히 기억하나요?"
-    answer: "아닙니다. 긴 sequence 생성 가능성과 object·event state 보존은 다르며 시간 간격별 identity, 위치, 수량과 이전 action 결과를 별도로 검사해야 합니다."
+    answer: "아닙니다. 긴 sequence 생성 가능성과 object, event state 보존은 다르며 시간 간격별 identity, 위치, 수량과 이전 action 결과를 별도로 검사해야 합니다."
   - question: "World model을 물리 simulator 대신 쓸 수 있나요?"
-    answer: "시각적으로 그럴듯한 미래가 수치적으로 정확하다는 보장은 없으므로 robot·과학 용도에서는 intervention consistency, 충돌·보존 법칙 오차와 실제 환경 전이를 검증해야 합니다."
+    answer: "시각적으로 그럴듯한 미래가 수치적으로 정확하다는 보장은 없으므로 robot, 과학 용도에서는 intervention consistency, 충돌, 보존 법칙 오차와 실제 환경 전이를 검증해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.20540.png
   alt: "LingBot-World의 16 FPS는 실시간 월드 모델을 뜻할까: 1초 지연과 장기 기억 점검 논문 대표 이미지"
@@ -42,7 +42,7 @@ LingBot-World의 16 FPS와 1초 미만 지연은 상호작용형 비디오 생�
 
 하지만 “분 단위 생성 가능”과 “분 동안 모든 상태가 보존됨”은 다릅니다. 평가할 때는 길이만 늘리기보다 다음 변화를 찾아야 합니다.
 
-1. 같은 객체의 색·형태·개수가 유지되는가
+1. 같은 객체의 색, 형태, 개수가 유지되는가
 2. 화면 밖으로 나간 객체가 다시 등장할 때 정체성이 보존되는가
 3. 사용자의 이전 행동이 몇 분 뒤 결과에 남아 있는가
 4. 작은 오류가 다음 프레임에 누적되는가
@@ -66,15 +66,15 @@ LingBot-World의 16 FPS와 1초 미만 지연은 상호작용형 비디오 생�
 
 ## 보기 좋은 미래와 정확한 미래는 다르다
 
-FVD와 CLIPSIM에서 기존 오픈소스 모델보다 낫고, 공이 벽에 부딪힐 때 그럴듯한 운동을 만든다는 정성적 설명이 있습니다. 이 결과는 시각적 자연스러움과 텍스트 정렬을 평가하는 데는 도움이 되지만, 마찰계수·속도·충돌량이 실제 값과 맞는지는 알려주지 않습니다.
+FVD와 CLIPSIM에서 기존 오픈소스 모델보다 낫고, 공이 벽에 부딪힐 때 그럴듯한 운동을 만든다는 정성적 설명이 있습니다. 이 결과는 시각적 자연스러움과 텍스트 정렬을 평가하는 데는 도움이 되지만, 마찰계수, 속도, 충돌량이 실제 값과 맞는지는 알려주지 않습니다.
 
 그래서 적용 범위도 나눠야 합니다.
 
 | 용도 | 먼저 확인할 것 |
 |---|---|
-| 게임·인터랙티브 콘텐츠 | 입력 반응성, 장기 캐릭터 일관성, 시각 품질 |
+| 게임, 인터랙티브 콘텐츠 | 입력 반응성, 장기 캐릭터 일관성, 시각 품질 |
 | 로봇 정책 연습 | 행동에 따른 상태 전이, 실패 장면의 분포, 실제 환경 전이 |
-| 과학·공학 시뮬레이션 | 수치 오차, 보존 법칙, 경계 조건 |
+| 과학, 공학 시뮬레이션 | 수치 오차, 보존 법칙, 경계 조건 |
 | 교육용 시각화 | 개념 오류와 그럴듯한 환각 |
 
 월드 모델은 다양한 미래를 빠르게 제안할 수 있지만, 전통적인 수치 해석기를 자동으로 대체하지 않습니다. 잘못된 물리를 매끄럽게 보여주는 경우가 가장 위험할 수 있습니다.
@@ -83,20 +83,20 @@ FVD와 CLIPSIM에서 기존 오픈소스 모델보다 낫고, 공이 벽에 부�
 
 실시간 데모 하나보다 짧고 반복 가능한 시험 세트가 유용합니다. 같은 초기 상태에서 행동만 바꿔 결과가 일관되게 달라지는지, 입력을 멈췄을 때 상태가 안정적으로 이어지는지, 1분 이상 지나도 주요 객체가 유지되는지를 확인합니다. 동시에 GPU 메모리와 전력, 첫 반응 지연, 연속 FPS를 기록해야 합니다.
 
-LingBot-World의 가치는 오픈소스 월드 모델이 상호작용성과 긴 시퀀스를 함께 목표로 했다는 데 있습니다. 채택 여부는 “16 FPS”라는 한 숫자가 아니라, 필요한 해상도와 하드웨어에서 행동 반영·기억·물리 오차가 용도에 맞는지로 결정해야 합니다.
+LingBot-World의 가치는 오픈소스 월드 모델이 상호작용성과 긴 시퀀스를 함께 목표로 했다는 데 있습니다. 채택 여부는 “16 FPS”라는 한 숫자가 아니라, 필요한 해상도와 하드웨어에서 행동 반영, 기억, 물리 오차가 용도에 맞는지로 결정해야 합니다.
 
 ## 같은 초기 상태에서 action만 바꾸면 무엇이 달라져야 하나
 
-World model의 핵심은 그럴듯한 video를 이어 만드는 능력만이 아니라 intervention에 맞춰 다음 state를 바꾸는 능력입니다. 같은 initial frame과 seed를 두고 action만 왼쪽·오른쪽·정지로 바꾼 뒤, 영향받아야 할 object만 일관되게 달라지는지 비교할 수 있습니다.
+World model의 핵심은 그럴듯한 video를 이어 만드는 능력만이 아니라 intervention에 맞춰 다음 state를 바꾸는 능력입니다. 같은 initial frame과 seed를 두고 action만 왼쪽, 오른쪽, 정지로 바꾼 뒤, 영향받아야 할 object만 일관되게 달라지는지 비교할 수 있습니다.
 
-예를 들어 공이 table 위에 있는 장면에서 “왼쪽으로 밀기”와 “아무것도 하지 않기”를 넣습니다. 두 결과가 거의 같으면 action conditioning이 약하고, 배경과 공의 색까지 모두 바뀌면 intervention 이외의 drift가 큽니다. 반대로 공의 이동 방향만 달라지고 table·조명·다른 object가 유지되면 causal control에 가까운 증거가 됩니다.
+예를 들어 공이 table 위에 있는 장면에서 “왼쪽으로 밀기”와 “아무것도 하지 않기”를 넣습니다. 두 결과가 거의 같으면 action conditioning이 약하고, 배경과 공의 색까지 모두 바뀌면 intervention 이외의 drift가 큽니다. 반대로 공의 이동 방향만 달라지고 table, 조명, 다른 object가 유지되면 causal control에 가까운 증거가 됩니다.
 
 | 시험 | 유지돼야 할 것 | 달라져야 할 것 |
 |---|---|---|
-| Action swap | object identity·background | action 대상의 위치·motion |
+| Action swap | object identity, background | action 대상의 위치, motion |
 | Action 없음 | scene state | 자연 시간 변화만 허용 |
 | 같은 action 반복 | 동일 초기 조건의 결과 분포 | 확률적 variation 범위 |
-| 불가능한 action | 물리·안전 제약 | 거부·무효 반응 여부 |
+| 불가능한 action | 물리, 안전 제약 | 거부, 무효 반응 여부 |
 
 하나의 정성 영상보다 여러 seed의 trajectory 차이와 action adherence를 기록해야 합니다. Model이 text 명령에 맞는 표면적 motion만 만들고 이전 velocity나 contact를 무시할 수 있기 때문입니다.
 
@@ -106,7 +106,7 @@ World model의 핵심은 그럴듯한 video를 이어 만드는 능력만이 아
 
 ```text
 t=0:   red cube 1개, shelf 위, door 닫힘
-t=30s: cube identity·수량·위치, door state
+t=30s: cube identity, 수량, 위치, door state
 t=60s: 화면 밖 object 재등장 시 identity, 이전 action 결과
 ```
 
@@ -116,16 +116,16 @@ Memory를 오래 유지할수록 GPU 사용량이 증가하는지도 함께 봅�
 
 ## 실시간 판정은 어떤 측정표로 내릴까
 
-첫 화면이 나오기까지의 startup latency, 사용자가 action을 넣은 뒤 변화가 보이는 input-to-effect latency, 안정 상태의 FPS를 각각 p50·p95로 기록합니다. Batch 1과 여러 stream을 묶은 throughput도 구분하고, frame drop이나 지연이 생겼을 때 memory state가 어긋나는지 확인합니다.
+첫 화면이 나오기까지의 startup latency, 사용자가 action을 넣은 뒤 변화가 보이는 input-to-effect latency, 안정 상태의 FPS를 각각 p50, p95로 기록합니다. Batch 1과 여러 stream을 묶은 throughput도 구분하고, frame drop이나 지연이 생겼을 때 memory state가 어긋나는지 확인합니다.
 
-게임·콘텐츠에서는 일부 물리 오차보다 반응성과 visual continuity가 중요할 수 있습니다. Robot policy 연습에서는 반대로 낮은 latency보다 action-conditioned transition과 failure 분포가 중요합니다. 같은 16 FPS라도 합격 기준이 다른 이유입니다. 배포 결정은 용도별 필수 지표에 threshold를 정한 뒤 내려야 합니다.
+게임, 콘텐츠에서는 일부 물리 오차보다 반응성과 visual continuity가 중요할 수 있습니다. Robot policy 연습에서는 반대로 낮은 latency보다 action-conditioned transition과 failure 분포가 중요합니다. 같은 16 FPS라도 합격 기준이 다른 이유입니다. 배포 결정은 용도별 필수 지표에 threshold를 정한 뒤 내려야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [두 플레이어가 본 세계를 동시에 맞출 수 있나: Minecraft 월드 모델 Solaris]({% post_url 2026-02-26-Solaris--Building-a-Multiplayer-Video-World-Model-in-Minecraft %}) — Solaris가 플레이어별 영상 토큰을 인터리빙해 같은 사건을 여러 시점에 반영하는 방법, 1,264만 프레임 데이터와 확장성 한계를 정리합니다.
-- [memU는 LLM 기억 비용을 90% 줄일까: Locomo 92%와 거짓 기억 점검]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-and-Deep-Dive-into-memU %}) — memU의 3단계 기억 구조와 Locomo 92%·토큰 비용 최대 90% 절감 주장을 살펴보고, 거짓 기억·동시성·운영 비용까지 도입 기준으로 정리합니다.
-- [로봇 메모리는 무엇을 기억해야 하나: RoboMME 16개 과제의 답]({% post_url 2026-03-09-RoboMME--Benchmarking-and-Understanding-Memory-for-Robotic-Generalist-Policies %}) — RoboMME가 π0.5에서 14개 메모리 변형을 시간·공간·객체·절차 기억 16개 과제로 비교한 이유와 배포 선택 기준을 정리합니다.
+- [memU는 LLM 기억 비용을 90% 줄일까: Locomo 92%와 거짓 기억 점검]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-and-Deep-Dive-into-memU %}) — memU의 3단계 기억 구조와 Locomo 92%, 토큰 비용 최대 90% 절감 주장을 살펴보고, 거짓 기억, 동시성, 운영 비용까지 도입 기준으로 정리합니다.
+- [로봇 메모리는 무엇을 기억해야 하나: RoboMME 16개 과제의 답]({% post_url 2026-03-09-RoboMME--Benchmarking-and-Understanding-Memory-for-Robotic-Generalist-Policies %}) — RoboMME가 π0.5에서 14개 메모리 변형을 시간, 공간, 객체, 절차 기억 16개 과제로 비교한 이유와 배포 선택 기준을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -136,10 +136,10 @@ Memory를 오래 유지할수록 GPU 사용량이 증가하는지도 함께 봅�
 
 ### 분 단위 memory는 과거 상태를 모두 정확히 기억하나요?
 
-아닙니다. 긴 sequence 생성 가능성과 object·event state 보존은 다르며 시간 간격별 identity, 위치, 수량과 이전 action 결과를 별도로 검사해야 합니다.
+아닙니다. 긴 sequence 생성 가능성과 object, event state 보존은 다르며 시간 간격별 identity, 위치, 수량과 이전 action 결과를 별도로 검사해야 합니다.
 
 ### World model을 물리 simulator 대신 쓸 수 있나요?
 
-시각적으로 그럴듯한 미래가 수치적으로 정확하다는 보장은 없으므로 robot·과학 용도에서는 intervention consistency, 충돌·보존 법칙 오차와 실제 환경 전이를 검증해야 합니다.
+시각적으로 그럴듯한 미래가 수치적으로 정확하다는 보장은 없으므로 robot, 과학 용도에서는 intervention consistency, 충돌, 보존 법칙 오차와 실제 환경 전이를 검증해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.20540)

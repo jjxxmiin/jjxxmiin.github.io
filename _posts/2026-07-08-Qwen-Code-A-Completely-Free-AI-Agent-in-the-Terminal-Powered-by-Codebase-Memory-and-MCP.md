@@ -12,7 +12,7 @@ tags:
 summary: Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을
   갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다. 이 글에서는 로컬 모델과 결합하여 API
   비용 없이 자율적인 개발 워크플로우를 구축하는 아키텍처와 활용법을 심층적으로 분석합니다.
-description: 'Qwen Code의 터미널 도구·QWEN.md 문맥·MCP 연결 구조와 로컬 모델 사용 조건, 파일 권한·비용·성능을 점검하는 방법을 설명합니다.'
+description: 'Qwen Code의 터미널 도구, QWEN.md 문맥, MCP 연결 구조와 로컬 모델 사용 조건, 파일 권한, 비용, 성능을 점검하는 방법을 설명합니다.'
 github_url: https://github.com/QwenLM/qwen-code
 image:
   path: https://opengraph.githubassets.com/1/QwenLM/qwen-code
@@ -36,7 +36,7 @@ mermaid: true
 chart: true
 ---
 
-Qwen Code는 터미널에서 파일·명령·MCP 도구를 사용하는 오픈소스 코딩 에이전트이며, 로컬 모델을 연결하면 모델 API 요금을 줄일 수 있습니다. 그러나 “완전 무료”는 하드웨어·전력·모델 다운로드와 선택한 외부 서비스 비용까지 사라진다는 뜻이 아닙니다. 작은 저장소에서 수정 범위, 테스트 근거, 지연과 권한을 확인한 뒤 더 넓은 작업으로 확장하세요.
+Qwen Code는 터미널에서 파일, 명령, MCP 도구를 사용하는 오픈소스 코딩 에이전트이며, 로컬 모델을 연결하면 모델 API 요금을 줄일 수 있습니다. 그러나 “완전 무료”는 하드웨어, 전력, 모델 다운로드와 선택한 외부 서비스 비용까지 사라진다는 뜻이 아닙니다. 작은 저장소에서 수정 범위, 테스트 근거, 지연과 권한을 확인한 뒤 더 넓은 작업으로 확장하세요.
 
 [관련 링크]
 - [Qwen Code GitHub 저장소](https://github.com/QwenLM/qwen-code)
@@ -393,8 +393,8 @@ Qwen Code의 등장은 AI 코딩 도구의 패러다임이 '인라인 자동완�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
-- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프, MCP, API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve, MCP 권한, 무한 루프, API 비용과 Diff 검토 기준을 정리합니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스, 최소 권한, 모델 선택의 실무 기준을 정리합니다.
 - [prime-agent: 지속형 파이썬 커널과 재귀적 서브에이전트로 구축하는 자가개선 AI 코딩 하네스]({% post_url 2026-08-09-prime-agent-Self-Improving-RLM-Harness-for-Autonomous-Coding-and-Research-Workflows %}) — prime-agent는 영속적인 IPython 커널을 단일 도구 인터페이스로 활용하여 AI 에이전트가 코드와 상태를 파이썬 변수로 유지할 수 있게 만든 오픈소스 코딩 하네스입니다. 재귀적 언어 모델(RLM) 구조를 통해 서브에이전트를…
 <!-- internal-links:end -->
 

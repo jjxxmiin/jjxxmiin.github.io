@@ -18,6 +18,7 @@ image:
 mermaid: true
 chart: true
 sitemap: true
+home_presentation: compact
 faq:
   - question: 클로드 무료 요금제로 Claude Code를 쓸 수 있나요?
     answer: 쓸 수 없습니다. Claude Code는 Pro 이상 유료 구독 또는 Anthropic Console의 API 키가 있어야 사용할 수 있습니다.
@@ -172,7 +173,7 @@ Claude Code는 두 방식 모두로 쓸 수 있습니다. 구독으로 쓰면 �
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Claude Code로 영상을 대화하듯 편집하는 Video Use의 원리와 실전 활용법]({% post_url 2026-08-01-Video-Use-How-AI-Coding-Agents-Edit-Raw-Footage-Through-Text-and-FFmpeg %}) — Video Use는 Claude Code, Codex 등 AI 코딩 에이전트와 자연어로 대화하며 타임라인 편집 없이 영상을 완성하는 오픈소스 파이프라인입니다. 영상 프레임을 직접 LLM에 전달하는 대신 단어 단위 음성 스크립트를…
-- [Claude Code는 어떻게 코딩 작업을 수행할까: 설치·권한·검증 가이드]({% post_url 2026-02-22-Claude-Code-The-Terminal-Agent %}) — Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서 직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히…
+- [Claude Code는 어떻게 코딩 작업을 수행할까: 설치, 권한, 검증 가이드]({% post_url 2026-02-22-Claude-Code-The-Terminal-Agent %}) — Anthropic이 공개한 혁신적인 CLI 도구 'Claude Code'의 모든 것을 파헤칩니다. 단순한 챗봇을 넘어, 터미널에서 직접 코드를 수정하고 명령어를 실행하는 진정한 AI 에이전트의 설치부터 고급 활용법까지 상세히…
 - [Claude 3.7 Sonnet 확장 사고는 언제 켤까: Claude Code와 비용 판단]({% post_url 2025-02-25-claude37 %}) — 빠른 표준 응답과 확장 사고를 나누는 기준, Claude Code 작업 검수법, 발표 당시 가격과 캐싱 오해를 정리한다
 <!-- internal-links:end -->
 

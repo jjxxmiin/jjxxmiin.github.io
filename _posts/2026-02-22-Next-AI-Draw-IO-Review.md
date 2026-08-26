@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치·검증 가이드"
+title: "next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치, 검증 가이드"
 date: '2026-02-22'
 categories: Tech
 tags:
@@ -9,7 +9,7 @@ tags:
   - 멀티모달
   - 오픈소스
   - 웹개발
-summary: next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용·정확성·보안 검증 기준을 정리합니다.
+summary: next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용, 정확성, 보안 검증 기준을 정리합니다.
 description: "next-ai-draw-io의 자연어 생성과 대화형 수정 구조를 살펴보고, 로컬 설치부터 XML 검증, 민감 문서 처리와 실무 도입 판단 기준까지 설명합니다."
 image:
   path: https://opengraph.githubassets.com/1/DayuanJiang/next-ai-draw-io
@@ -109,7 +109,7 @@ docker run -d -p 3000:3000 --name next-ai-draw-io dayuanjiang/next-ai-draw-io
 설치가 완료되었다면 실제로 어떻게 사용하는지 시나리오를 통해 알아봅시다.
 
 **1단계: AI 설정**
-설정 메뉴에서 사용할 수 있는 모델과 API 연결을 선택합니다. 모델 이름만으로 정확성을 가정하지 말고, 같은 요구사항을 작은 예제로 시험해 XML 유효성·라벨 누락·연결 방향과 비용을 비교합니다.
+설정 메뉴에서 사용할 수 있는 모델과 API 연결을 선택합니다. 모델 이름만으로 정확성을 가정하지 말고, 같은 요구사항을 작은 예제로 시험해 XML 유효성, 라벨 누락, 연결 방향과 비용을 비교합니다.
 
 **2단계: 프롬프트 입력**
 채팅창에 다음과 같이 입력해 보세요.
@@ -147,7 +147,7 @@ docker run -d -p 3000:3000 --name next-ai-draw-io dayuanjiang/next-ai-draw-io
 
 ## 생성 결과를 배포해도 되는지는 어떻게 판단하나요?
 
-배포 전에는 XML이 정상적으로 다시 열리는지, 모든 노드에 이름과 책임이 있는지, 화살표 방향과 예외 경로가 요구사항과 일치하는지를 확인합니다. 아키텍처 그림이라면 네트워크·신뢰 경계와 데이터 저장 위치를, 업무 흐름이라면 실패·취소·재시도 경로를 별도로 점검해야 합니다. 시각 모델의 재검토가 통과했더라도 시스템 담당자와 문서 소유자의 확인을 남깁니다.
+배포 전에는 XML이 정상적으로 다시 열리는지, 모든 노드에 이름과 책임이 있는지, 화살표 방향과 예외 경로가 요구사항과 일치하는지를 확인합니다. 아키텍처 그림이라면 네트워크, 신뢰 경계와 데이터 저장 위치를, 업무 흐름이라면 실패, 취소, 재시도 경로를 별도로 점검해야 합니다. 시각 모델의 재검토가 통과했더라도 시스템 담당자와 문서 소유자의 확인을 남깁니다.
 
 민감한 문서나 레거시 코드에서 도식을 만들 때는 입력이 어느 모델 제공자에게 전송되는지, 로그가 얼마나 보관되는지, API 키가 브라우저와 서버 중 어디에 놓이는지를 먼저 확인해야 합니다. `.env.local`을 버전 관리에서 제외하고, Docker 이미지의 출처와 마운트 범위를 확인하는 것도 설치 단계의 일부입니다. 직접 호스팅은 애플리케이션을 통제한다는 뜻이지 외부 모델로 보내는 데이터까지 자동으로 비공개가 된다는 뜻은 아닙니다.
 
@@ -155,18 +155,18 @@ docker run -d -p 3000:3000 --name next-ai-draw-io dayuanjiang/next-ai-draw-io
 
 ## draw.io XML 결과를 어떻게 회귀 테스트하나요?
 
-먼저 팀이 정답을 알고 있는 작은 업무 흐름 하나를 기준 문서로 정합니다. 필수 node와 label, 연결 방향, 실패·취소 경로의 개수를 목록으로 만들고 생성된 `.drawio` 파일을 닫았다가 다시 열어 같은 구조가 유지되는지 확인합니다. XML parsing이 성공했다는 사실만으로 의미가 맞는 것은 아니므로, 고립된 node와 중복 ID, 이름 없는 화살표, 요구사항에는 없던 외부 연결도 따로 검사합니다.
+먼저 팀이 정답을 알고 있는 작은 업무 흐름 하나를 기준 문서로 정합니다. 필수 node와 label, 연결 방향, 실패, 취소 경로의 개수를 목록으로 만들고 생성된 `.drawio` 파일을 닫았다가 다시 열어 같은 구조가 유지되는지 확인합니다. XML parsing이 성공했다는 사실만으로 의미가 맞는 것은 아니므로, 고립된 node와 중복 ID, 이름 없는 화살표, 요구사항에는 없던 외부 연결도 따로 검사합니다.
 
-대화형 수정에서는 수정 전후 XML을 버전 관리에 저장합니다. “결제 실패 경로만 추가” 같은 요청이 기존 정상 경로의 ID·위치·label까지 대량으로 바꾸면 작은 수정이 전체 재생성으로 처리된 것입니다. 이런 변화는 사람이 검토하기 어렵고 이후 diff도 불안정하게 만듭니다. 같은 prompt를 여러 번 실행해 필수 구조의 누락률과 불필요한 변화량을 비교하면 결과가 한 번의 우연에 의존하는지 알 수 있습니다.
+대화형 수정에서는 수정 전후 XML을 버전 관리에 저장합니다. “결제 실패 경로만 추가” 같은 요청이 기존 정상 경로의 ID, 위치, label까지 대량으로 바꾸면 작은 수정이 전체 재생성으로 처리된 것입니다. 이런 변화는 사람이 검토하기 어렵고 이후 diff도 불안정하게 만듭니다. 같은 prompt를 여러 번 실행해 필수 구조의 누락률과 불필요한 변화량을 비교하면 결과가 한 번의 우연에 의존하는지 알 수 있습니다.
 
 마지막 평가는 생성 시간만이 아니라 사람이 오류를 찾고 고쳐 승인하는 시간까지 포함합니다. 단순 flowchart, 예외가 많은 업무 절차, 보안 경계가 있는 architecture처럼 난도를 나누고 수동 작성 기준선과 비교합니다. 필수 요소 검사가 자동화되고, 작은 수정의 diff가 설명 가능하며, 총 검토 시간이 반복해서 줄어드는 범위부터 템플릿으로 채택하는 편이 안전합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [CoCo는 이미지 속 글자·배치를 코드로 고칠까: +68.83%와 Sandbox 비용]({% post_url 2026-03-11-CoCo--Code-as-CoT-for-Text-to-Image-Preview-and-Rare-Concept-Generation %}) — 자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안·지연·복잡한 장면 한계를 정리합니다.
-- [DOM이 바뀌어도 웹 자동화가 살아남을까? MolmoWeb의 화면 기반 접근]({% post_url 2026-03-30-Deep-Dive-into-MolmoWeb-The-End-of-DOM-Parsing-AI2s-8B-Visual-Web-Agent-is-a-Game-Changer %}) — 스크린샷만 보고 클릭하는 8B MolmoWeb이 DOM 자동화의 취약점을 줄이는 방식과 Pass@4 수치, OCR·지연·권한 한계 및 검증 순서를 짚습니다.
-- [클로드(Claude) 사용법: 무료·Pro 요금제, 프로젝트·PDF·Skills 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 2026년 8월 26일 기준 Claude 무료·Pro 플랜, 프로젝트와 RAG, 채팅·프로젝트 파일 제한, PDF·Artifacts·Skills·공유 기능을 공식 문서로 비교합니다.
+- [CoCo는 이미지 속 글자, 배치를 코드로 고칠까: +68.83%와 Sandbox 비용]({% post_url 2026-03-11-CoCo--Code-as-CoT-for-Text-to-Image-Preview-and-Rare-Concept-Generation %}) — 자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안, 지연, 복잡한 장면 한계를 정리합니다.
+- [DOM이 바뀌어도 웹 자동화가 살아남을까? MolmoWeb의 화면 기반 접근]({% post_url 2026-03-30-Deep-Dive-into-MolmoWeb-The-End-of-DOM-Parsing-AI2s-8B-Visual-Web-Agent-is-a-Game-Changer %}) — 스크린샷만 보고 클릭하는 8B MolmoWeb이 DOM 자동화의 취약점을 줄이는 방식과 Pass@4 수치, OCR, 지연, 권한 한계 및 검증 순서를 짚습니다.
+- [클로드(Claude) 사용법: 프로젝트, PDF, Artifacts, Skills 실전 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 무료 계정으로 프로젝트와 PDF 분석을 시험하고 Artifacts, Skills, 메모리, 공유 기능을 안전하게 활용하는 순서와 Pro 전환 기준을 정리합니다.
 <!-- internal-links:end -->
 
 ## References

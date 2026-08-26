@@ -10,7 +10,7 @@ tags:
   - 오픈소스
   - 웹개발
 summary: 100% 로컬 환경에서 작동하여 완벽한 데이터 주권을 보장하는 오픈소스 AI 회의 비서 Meetily의 아키텍처, 작동 원리, 그리고 기존 클라우드 기반 도구들과의 차이점을 심층 분석합니다.
-description: 'Meetily가 회의 음성 전사와 요약을 로컬에서 처리하는 구조를 살피고, 모델 다운로드·시스템 자원·화자 분리·데이터 보존 및 네트워크 경계를 점검합니다.'
+description: 'Meetily가 회의 음성 전사와 요약을 로컬에서 처리하는 구조를 살피고, 모델 다운로드, 시스템 자원, 화자 분리, 데이터 보존 및 네트워크 경계를 점검합니다.'
 github_url: https://github.com/Zackriya-Solutions/meetily
 image:
   path: https://opengraph.githubassets.com/1/Zackriya-Solutions/meetily
@@ -52,7 +52,7 @@ project:
   files: 524
 ---
 
-Meetily는 음성 전사와 요약 모델을 사용자 기기에서 실행해 회의 원문을 외부 서비스로 보내지 않는 구성을 지향합니다. 다만 로컬 실행만으로 데이터 주권이 자동 보장되지는 않으므로 모델 다운로드, 업데이트 확인, 로그·백업 경로의 네트워크와 저장 동작을 점검해야 합니다. 대표 회의에서 전사 정확도, 화자 분리, 처리 지연과 배터리 사용량을 비교한 뒤 도입하세요.
+Meetily는 음성 전사와 요약 모델을 사용자 기기에서 실행해 회의 원문을 외부 서비스로 보내지 않는 구성을 지향합니다. 다만 로컬 실행만으로 데이터 주권이 자동 보장되지는 않으므로 모델 다운로드, 업데이트 확인, 로그, 백업 경로의 네트워크와 저장 동작을 점검해야 합니다. 대표 회의에서 전사 정확도, 화자 분리, 처리 지연과 배터리 사용량을 비교한 뒤 도입하세요.
 
 [GitHub 저장소](https://github.com/Zackriya-Solutions/meetily) | [공식 웹사이트](https://meetily.ai) | [Zackriya Solutions](https://www.zackriya.com)
 
@@ -391,7 +391,7 @@ AI가 업무의 모든 영역에 스며들면서 우리는 편리함을 얻은 �
 ## 함께 읽으면 이해가 이어지는 글
 
 - [FluidVoice: 구독료 없이 Mac에서 작동하는 온디바이스 AI 음성 받아쓰기 구축기]({% post_url 2026-08-14-FluidVoice-On-Device-AI-Dictation-for-macOS-with-Zero-Latency-and-Total-Privacy %}) — FluidVoice는 Apple Silicon 환경에서 완전 오프라인으로 동작하는 무료 오픈소스 음성 인식 및 AI 문맥 교정 애플리케이션입니다. 외부 서버 전송 없이 로컬에서 음성-텍스트 변환(STT)과 Fluid-1 모델 후처리를…
-- [AI가 화면의 버튼을 직접 짚어주면 안전할까? Clicky의 좌표·프라이버시]({% post_url 2026-04-10-No-More-YouTube-Tutorials-A-Deep-Dive-into-farzaaclicky-the-AI-That-Moves-the-Real-Cursor %}) — macOS 화면과 음성 질문을 Vision 모델에 보내 가상 커서로 위치를 알려 주는 Clicky의 구조, 다중 모니터 좌표 오차와 화면 유출 위험을 점검합니다.
+- [AI가 화면의 버튼을 직접 짚어주면 안전할까? Clicky의 좌표, 프라이버시]({% post_url 2026-04-10-No-More-YouTube-Tutorials-A-Deep-Dive-into-farzaaclicky-the-AI-That-Moves-the-Real-Cursor %}) — macOS 화면과 음성 질문을 Vision 모델에 보내 가상 커서로 위치를 알려 주는 Clicky의 구조, 다중 모니터 좌표 오차와 화면 유출 위험을 점검합니다.
 - [pocket-tts: 무거운 GPU 없이 CPU만으로 작동하는 실시간 AI 음성 합성의 원리]({% post_url 2026-07-22-pocket-tts-How-Real-Time-AI-Speech-Synthesis-Works-on-CPU-Without-Heavy-GPUs %}) — Kyutai Labs가 공개한 Pocket TTS는 단 1억 개의 매개변수와 신경망 오디오 코덱을 활용해 최신 CPU 환경에서 실시간 음성 합성과 목소리 복제를 수행하는 초경량 모델입니다. 이 글에서는 기술적 배경부터 세부 아키텍처…
 <!-- internal-links:end -->
 

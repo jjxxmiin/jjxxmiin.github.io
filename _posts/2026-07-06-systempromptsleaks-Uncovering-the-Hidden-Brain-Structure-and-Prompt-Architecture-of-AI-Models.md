@@ -11,7 +11,7 @@ tags:
   - AI보안
 summary: 글로벌 AI 기업들의 1급 비밀인 '시스템 프롬프트' 유출본을 집대성한 system_prompts_leaks 저장소를 심층 분석합니다.
   각 모델의 행동 강령, 도구 사용 규칙, 그리고 프롬프트 엔지니어링의 최신 진화 트렌드를 살펴봅니다.
-description: 'system_prompts_leaks의 자료를 역할·도구·안전 규칙 관점에서 읽는 법과 출처·버전·저작권·보안 위험, 복사 전 검증 기준을 정리합니다.'
+description: 'system_prompts_leaks의 자료를 역할, 도구, 안전 규칙 관점에서 읽는 법과 출처, 버전, 저작권, 보안 위험, 복사 전 검증 기준을 정리합니다.'
 github_url: https://github.com/asgeirtj/system_prompts_leaks
 image:
   path: https://opengraph.githubassets.com/1/asgeirtj/system_prompts_leaks
@@ -39,7 +39,7 @@ mermaid: true
 chart: true
 ---
 
-system_prompts_leaks는 여러 AI 제품 이름으로 수집된 지침을 비교하는 자료이지만, 각 파일이 공식 현재 프롬프트라는 보장은 없습니다. 역할·도구 계약·안전 규칙을 설계 사례로 읽되 출처와 시점, 재구성 가능성, 사용 권리를 파일별로 구분해야 합니다. 문구를 그대로 복제하기보다 자신의 권한 검사와 출력 검증에서 효과가 있는 원칙만 회귀 테스트하세요.
+system_prompts_leaks는 여러 AI 제품 이름으로 수집된 지침을 비교하는 자료이지만, 각 파일이 공식 현재 프롬프트라는 보장은 없습니다. 역할, 도구 계약, 안전 규칙을 설계 사례로 읽되 출처와 시점, 재구성 가능성, 사용 권리를 파일별로 구분해야 합니다. 문구를 그대로 복제하기보다 자신의 권한 검사와 출력 검증에서 효과가 있는 원칙만 회귀 테스트하세요.
 
 TL;DR
 - system_prompts_leaks는 Anthropic, OpenAI, Google 등 세계 최고 AI 모델들의 비공개 시스템 프롬프트를 수집한 오픈소스 아카이브입니다.
@@ -271,8 +271,8 @@ AI가 어떻게 생각하고 행동하도록 통제받는지 그 기저 원리�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [MCP 서버를 만들었다고 착각하기 쉬운 이유: Host·Client·Server와 도구 호출 흐름]({% post_url 2025-03-24-MCP %}) — MCP가 prompting 기법이 아니라 host와 외부 도구를 잇는 protocol임을 설명하고, resources·tools·prompts의 역할, 기존 날씨 예제가 실제로는 client 코드인 문제와 보안 체크리스트를…
-- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할·제약·출력 형식을 분석하는 법과 진위·버전·저작권을 확인해야 하는 이유를 정리합니다.
+- [MCP 서버를 만들었다고 착각하기 쉬운 이유: Host, Client, Server와 도구 호출 흐름]({% post_url 2025-03-24-MCP %}) — MCP가 prompting 기법이 아니라 host와 외부 도구를 잇는 protocol임을 설명하고, resources, tools, prompts의 역할, 기존 날씨 예제가 실제로는 client 코드인 문제와 보안 체크리스트를…
+- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할, 제약, 출력 형식을 분석하는 법과 진위, 버전, 저작권을 확인해야 하는 이유를 정리합니다.
 - [open-code-review: 2만 명의 개발자가 검증한 알리바바의 하이브리드 AI 코드 리뷰 시스템]({% post_url 2026-07-25-open-code-review-Alibabas-Hybrid-AI-Code-Review-System-Battle-Tested-by-20000-Developers %}) — 알리바바가 오픈소스로 공개한 open-code-review는 결정론적 파이프라인과 LLM을 결합한 하이브리드 아키텍처를 통해 기존 AI 코드 리뷰의 토큰 낭비와 환각 현상을 해결합니다. 정확한 라인 단위 코멘트와 세밀한 규칙을 통해…
 <!-- internal-links:end -->
 

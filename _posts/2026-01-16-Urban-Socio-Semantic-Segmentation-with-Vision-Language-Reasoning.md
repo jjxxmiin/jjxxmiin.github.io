@@ -9,20 +9,20 @@ tags:
   - 멀티모달
 math: true
 summary: 건물 경계를 넘어 장소의 사회적 기능을 분할하기 위해 위성 영상과 디지털 지도, 계층 레이블을 추론하는 방법과 한계
-description: "SocioReasoner가 위성 image·지도 text·주변 맥락으로 도시 기능을 계층 segmentation하는 구조를 설명하고, 지도 시차·도시 편향·정책 오용을 검증합니다."
+description: "SocioReasoner가 위성 image, 지도 text, 주변 맥락으로 도시 기능을 계층 segmentation하는 구조를 설명하고, 지도 시차, 도시 편향, 정책 오용을 검증합니다."
 faq:
   - question: "위성 사진만으로 학교와 병원을 확정할 수 있나요?"
-    answer: "비슷한 건물 형태가 많아 어렵습니다. 지도 POI·도로·인접 시설을 함께 보더라도 사회 기능은 추정값으로 다뤄야 합니다."
+    answer: "비슷한 건물 형태가 많아 어렵습니다. 지도 POI, 도로, 인접 시설을 함께 보더라도 사회 기능은 추정값으로 다뤄야 합니다."
   - question: "SocioSeg의 계층 label은 왜 필요한가요?"
-    answer: "세부 시설 유형을 틀려도 상위 주거·상업·공공 기능은 맞는지 평가하고, 필요한 정밀도에 따라 결과를 사용할 수 있기 때문입니다."
+    answer: "세부 시설 유형을 틀려도 상위 주거, 상업, 공공 기능은 맞는지 평가하고, 필요한 정밀도에 따라 결과를 사용할 수 있기 때문입니다."
   - question: "지도 정보가 오래되면 어떻게 하나요?"
-    answer: "위성 촬영일과 지도 update 날짜를 함께 기록하고 충돌하는 지역은 confidence를 낮추거나 현장·공식 자료로 재확인해야 합니다."
+    answer: "위성 촬영일과 지도 update 날짜를 함께 기록하고 충돌하는 지역은 confidence를 낮추거나 현장, 공식 자료로 재확인해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.10477.png
   alt: "위성 사진만 보고 학교와 병원을 구분할 수 있을까: SocioReasoner 논문 대표 이미지"
 ---
 
-SocioReasoner는 위성 영상의 모양만으로 학교와 병원을 단정하지 않고, 디지털 지도의 텍스트 정보와 주변 도로·건물 맥락을 함께 추론해 장소의 사회적 기능을 픽셀 단위로 분류합니다. 학교·병원 같은 사회 기능은 물리적 건물 경계보다 불확실하므로 source 날짜와 계층별 confidence를 결과에 함께 표시해야 합니다.
+SocioReasoner는 위성 영상의 모양만으로 학교와 병원을 단정하지 않고, 디지털 지도의 텍스트 정보와 주변 도로, 건물 맥락을 함께 추론해 장소의 사회적 기능을 픽셀 단위로 분류합니다. 학교, 병원 같은 사회 기능은 물리적 건물 경계보다 불확실하므로 source 날짜와 계층별 confidence를 결과에 함께 표시해야 합니다.
 
 - [Urban Socio-Semantic Segmentation 논문](https://huggingface.co/papers/2601.10477)
 
@@ -40,10 +40,10 @@ SocioSeg 데이터셋은 고해상도 위성 이미지, 디지털 지도, 픽셀
 
 계층 레이블은 세부 클래스가 틀려도 상위 기능은 맞는지 볼 수 있게 합니다. 평가할 때는 최하위 클래스 mIoU 하나뿐 아니라 다음을 함께 보는 편이 좋습니다.
 
-- 상위·하위 계층별 정확도
+- 상위, 하위 계층별 정확도
 - 지도 정보가 있는 지역과 없는 지역의 차이
 - 학습 도시와 새로운 도시의 차이
-- 주거·상업이 혼재된 경계의 오류
+- 주거, 상업이 혼재된 경계의 오류
 
 레이블 자체도 사회적 정의와 지도 갱신 시점에 영향을 받습니다. 같은 건물이 시간이 지나 용도를 바꾸면 영상은 비슷해도 정답은 달라질 수 있습니다.
 
@@ -56,7 +56,7 @@ SocioSeg 데이터셋은 고해상도 위성 이미지, 디지털 지도, 픽셀
 3. 도로 구조와 인접 시설 같은 추가 증거를 모읍니다.
 4. 근거를 종합해 사회 기능과 분할 결과를 결정합니다.
 
-텍스트 추론과 행동 선택은 일반적인 픽셀 손실만으로 학습하기 어려워 최종 mIoU와 추론 품질을 보상으로 삼는 강화학습을 사용합니다. 원문은 기존 물리 속성 기반 모델보다 SocioSeg mIoU가 약 15~20% 높다고 설명하지만, 이 수치가 %p인지 상대 증가인지와 비교 모델·도시 분할을 확인해야 합니다.
+텍스트 추론과 행동 선택은 일반적인 픽셀 손실만으로 학습하기 어려워 최종 mIoU와 추론 품질을 보상으로 삼는 강화학습을 사용합니다. 원문은 기존 물리 속성 기반 모델보다 SocioSeg mIoU가 약 15~20% 높다고 설명하지만, 이 수치가 %p인지 상대 증가인지와 비교 모델, 도시 분할을 확인해야 합니다.
 
 효과를 분리하려면 위성 영상만 쓴 조건, 디지털 지도만 쓴 조건, 두 정보를 결합한 조건을 같은 데이터 분할에서 비교해야 합니다. 지도 답을 그대로 복사한 것인지 실제 시각 추론이 더해졌는지도 이 비교에서 드러납니다.
 
@@ -64,38 +64,38 @@ SocioSeg 데이터셋은 고해상도 위성 이미지, 디지털 지도, 픽셀
 
 디지털 지도가 부실하거나 오래된 지역에서는 핵심 증거가 빠집니다. 학교와 시장의 공간 형태는 문화권마다 달라 한 지역에서 학습한 배치 규칙이 다른 대륙에서 실패할 수 있습니다. 멀티스테이지 VLM 추론은 일반 세그멘테이션보다 느리고, 생성된 설명이 실제 판단 근거와 일치한다는 보장도 없습니다.
 
-도시 계획, 부동산 평가, 재난 대응에 사용한다면 모델이 표시한 병원·학교를 현장 확인 없이 확정 시설로 취급해서는 안 됩니다. 지도 출처와 날짜, 클래스별 신뢰도, 사람이 수정한 기록을 결과와 함께 남겨야 합니다.
+도시 계획, 부동산 평가, 재난 대응에 사용한다면 모델이 표시한 병원, 학교를 현장 확인 없이 확정 시설로 취급해서는 안 됩니다. 지도 출처와 날짜, 클래스별 신뢰도, 사람이 수정한 기록을 결과와 함께 남겨야 합니다.
 
-SocioReasoner의 의미는 위성 사진이 사회를 완전히 읽게 됐다는 데 있지 않습니다. 물리적 경계만으로 부족한 도시 기능을 시각·언어 추론 문제로 명시하고, 어떤 추가 정보와 검증이 필요한지 보여 준 데 있습니다.
+SocioReasoner의 의미는 위성 사진이 사회를 완전히 읽게 됐다는 데 있지 않습니다. 물리적 경계만으로 부족한 도시 기능을 시각, 언어 추론 문제로 명시하고, 어떤 추가 정보와 검증이 필요한지 보여 준 데 있습니다.
 
 ## Label Hierarchy는 오류 비용과 연결한다
 
-쇼핑몰과 대형 마트를 혼동하는 오류와 상업 시설을 병원으로 분류하는 오류는 영향이 다릅니다. 대·중·소분류별 confusion matrix를 만들고, 하위 label confidence가 낮으면 상위 기능까지만 반환하는 정책을 둡니다. 최하위 mIoU 하나만 보면 유용한 상위 판단과 위험한 category 전환을 구분할 수 없습니다.
+쇼핑몰과 대형 마트를 혼동하는 오류와 상업 시설을 병원으로 분류하는 오류는 영향이 다릅니다. 대분류, 중분류, 소분류별 confusion matrix를 만들고, 하위 label confidence가 낮으면 상위 기능까지만 반환하는 정책을 둡니다. 최하위 mIoU 하나만 보면 유용한 상위 판단과 위험한 category 전환을 구분할 수 없습니다.
 
 | 평가 축 | 확인할 질문 | 결과 사용 방식 |
 |---|---|---|
-| 물리 경계 | 건물·도로 polygon이 맞는가 | 공간 범위 표시 |
-| 상위 기능 | 주거·상업·공공인가 | 넓은 도시 분석 |
-| 세부 기능 | 학교·병원·시장인가 | 낮은 confidence면 보류 |
+| 물리 경계 | 건물, 도로 polygon이 맞는가 | 공간 범위 표시 |
+| 상위 기능 | 주거, 상업, 공공인가 | 넓은 도시 분석 |
+| 세부 기능 | 학교, 병원, 시장인가 | 낮은 confidence면 보류 |
 | 혼합 지역 | 한 공간에 여러 기능이 있는가 | 단일 label 강제 금지 |
 
 label 제작 기준과 지도 taxonomy도 version으로 남깁니다. 도시마다 “시장”이나 “학교”의 공간 형태와 행정 정의가 다르면 같은 label 이름이 다른 의미를 가질 수 있습니다.
 
-## Vision·Map 결합은 세 조건 Ablation으로 본다
+## Vision, Map 결합은 세 조건 Ablation으로 본다
 
 위성 image only, map text only, 두 입력 결합을 같은 도시 split에서 비교합니다. map-only가 결합 결과와 거의 같다면 model이 시각 증거를 활용하지 않고 POI를 복사할 수 있습니다. 반대로 map이 없는 지역에서 성능이 급락하면 visual generalization보다 외부 data coverage 의존이 큽니다.
 
-지도 text를 의도적으로 일부 지우거나 오래된 POI를 넣어 model이 시각·주변 맥락으로 충돌을 감지하는지 봅니다. 생성된 reasoning 문장이 그럴듯하다는 이유로 근거 사용을 인정하지 않고, input ablation에서 실제 prediction이 바뀌는지 확인합니다.
+지도 text를 의도적으로 일부 지우거나 오래된 POI를 넣어 model이 시각, 주변 맥락으로 충돌을 감지하는지 봅니다. 생성된 reasoning 문장이 그럴듯하다는 이유로 근거 사용을 인정하지 않고, input ablation에서 실제 prediction이 바뀌는지 확인합니다.
 
 ## 도시 간 Domain Shift는 공간 단위로 분리한다
 
-random pixel split은 같은 동네의 건물과 도로 pattern이 train과 test에 동시에 들어가 성능을 높일 수 있습니다. 도시 전체를 holdout하거나 문화권·도시 규모별 test를 둡니다. 고층 도심, 교외 campus, 비공식 settlement, 농촌 경계에서 class별 성능을 비교합니다.
+random pixel split은 같은 동네의 건물과 도로 pattern이 train과 test에 동시에 들어가 성능을 높일 수 있습니다. 도시 전체를 holdout하거나 문화권, 도시 규모별 test를 둡니다. 고층 도심, 교외 campus, 비공식 settlement, 농촌 경계에서 class별 성능을 비교합니다.
 
-위성 해상도, 촬영 계절, cloud·shadow, 지도 coverage도 지역 편향을 만듭니다. 도시별 source quality와 오류를 함께 공개해야 낮은 coverage 지역에 같은 confidence를 주지 않습니다. mixed-use building은 단일 기능 label보다 다중 label이나 uncertainty가 더 적절할 수 있습니다.
+위성 해상도, 촬영 계절, cloud, shadow, 지도 coverage도 지역 편향을 만듭니다. 도시별 source quality와 오류를 함께 공개해야 낮은 coverage 지역에 같은 confidence를 주지 않습니다. mixed-use building은 단일 기능 label보다 다중 label이나 uncertainty가 더 적절할 수 있습니다.
 
 ## 정책 활용에는 확인 가능한 Source가 필요하다
 
-도시 계획·재난 대응·부동산 판단에서 model polygon을 시설 존재의 확정 근거로 쓰지 않습니다. 각 결과에 위성 date, map provider·update date, 사용한 POI, class confidence와 사람 수정 기록을 붙입니다. 중요한 시설은 공식 registry와 현장 data로 재확인합니다.
+도시 계획, 재난 대응, 부동산 판단에서 model polygon을 시설 존재의 확정 근거로 쓰지 않습니다. 각 결과에 위성 date, map provider, update date, 사용한 POI, class confidence와 사람 수정 기록을 붙입니다. 중요한 시설은 공식 registry와 현장 data로 재확인합니다.
 
 reasoning trace가 실제 근거와 일치하는지 표본 감사하고, 설명이 틀려도 label이 맞는 경우와 설명은 자연스럽지만 label이 틀린 경우를 나눕니다. SocioReasoner의 실용성은 사회를 “읽는다”는 표현이 아니라 **물리 boundary와 사회 기능의 불확실성을 구분하고, 지도 의존과 도시 편향을 드러낸 상태로 계층 결과를 제공하는가**에 있습니다.
 
@@ -108,21 +108,21 @@ reasoning trace가 실제 근거와 일치하는지 표본 감사하고, 설명�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet blas.c를 어디서부터 읽을까? 배열 연산·Loss·Feature Map 지도]({% post_url 2022-02-08-DarkNetBlas %}) — 천 줄이 넘는 Darknet blas.c를 copy·axpy 같은 배열 primitive, loss와 softmax, reorg·upsample 같은 tensor 변환으로 나눠 읽고 stride와 누적 semantics를 점검합니다.
-- [Darknet 계층 분류 확률이 너무 작을 때: 부모 확률을 곱하는 Tree 구조]({% post_url 2022-03-20-DarkNetTree %}) — Darknet tree가 sibling별 조건부 확률을 부모 경로와 곱해 최종 class 확률을 만드는 방식과 tree 파일의 노드 순서·group 구성·threshold 탐색 조건을 설명합니다.
-- [MMDetection 구조 읽는 법: Backbone·Neck·Head와 테스트 명령 연결]({% post_url 2019-08-29-mmdetection %}) — MMDetection 설정을 backbone·neck·dense/RoI head로 분해하고 2019년 config, checkpoint, dataset, 테스트 명령의 대응 관계를 안전하게 읽는 방법입니다.
+- [Darknet blas.c를 어디서부터 읽을까? 배열 연산, Loss, Feature Map 지도]({% post_url 2022-02-08-DarkNetBlas %}) — 천 줄이 넘는 Darknet blas.c를 copy, axpy 같은 배열 primitive, loss와 softmax, reorg, upsample 같은 tensor 변환으로 나눠 읽고 stride와 누적 semantics를…
+- [Darknet 계층 분류 확률이 너무 작을 때: 부모 확률을 곱하는 Tree 구조]({% post_url 2022-03-20-DarkNetTree %}) — Darknet tree가 sibling별 조건부 확률을 부모 경로와 곱해 최종 class 확률을 만드는 방식과 tree 파일의 노드 순서, group 구성, threshold 탐색 조건을 설명합니다.
+- [MMDetection 구조 읽는 법: Backbone, Neck, Head와 테스트 명령 연결]({% post_url 2019-08-29-mmdetection %}) — MMDetection 설정을 backbone, neck, dense/RoI head로 분해하고 2019년 config, checkpoint, dataset, 테스트 명령의 대응 관계를 안전하게 읽는 방법입니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 위성 사진만으로 학교와 병원을 확정할 수 있나요?
 
-비슷한 건물 형태가 많아 어렵습니다. 지도 POI·도로·인접 시설을 함께 보더라도 사회 기능은 추정값으로 다뤄야 합니다.
+비슷한 건물 형태가 많아 어렵습니다. 지도 POI, 도로, 인접 시설을 함께 보더라도 사회 기능은 추정값으로 다뤄야 합니다.
 
 ### SocioSeg의 계층 label은 왜 필요한가요?
 
-세부 시설 유형을 틀려도 상위 주거·상업·공공 기능은 맞는지 평가하고, 필요한 정밀도에 따라 결과를 사용할 수 있기 때문입니다.
+세부 시설 유형을 틀려도 상위 주거, 상업, 공공 기능은 맞는지 평가하고, 필요한 정밀도에 따라 결과를 사용할 수 있기 때문입니다.
 
 ### 지도 정보가 오래되면 어떻게 하나요?
 
-위성 촬영일과 지도 update 날짜를 함께 기록하고 충돌하는 지역은 confidence를 낮추거나 현장·공식 자료로 재확인해야 합니다.
+위성 촬영일과 지도 update 날짜를 함께 기록하고 충돌하는 지역은 confidence를 낮추거나 현장, 공식 자료로 재확인해야 합니다.

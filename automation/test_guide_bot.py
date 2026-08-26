@@ -184,6 +184,12 @@ class GuideBotPublishingTests(unittest.TestCase):
         self.assertIn("요약 누락", message)
         self.assertIn("근거 없는 1인칭 경험", message)
 
+    def test_generated_guide_rejects_middle_dot_before_save(self):
+        post = self.valid_post()
+        post["title_korean"] = "가격·기능 비교 가이드"
+        errors = bot._generated_post_errors(post)
+        self.assertTrue(any("가운뎃점 사용 금지" in error for error in errors))
+
     def test_research_keeps_five_reachable_direct_facts_and_prefers_official(self):
         payload = {
             "facts": [
@@ -353,6 +359,59 @@ class GuideBotPublishingTests(unittest.TestCase):
                     json.load(handle)["written"][self.topic["id"]],
                     existing[:-3],
                 )
+
+
+class GuideTopicDiversityTests(unittest.TestCase):
+    def _pick(self, topics, written, topic_id=None):
+        with tempfile.TemporaryDirectory() as directory:
+            queue = os.path.join(directory, "topic_queue.json")
+            ledger = os.path.join(directory, "written_topics.json")
+            with open(queue, "w", encoding="utf-8") as handle:
+                json.dump({"topics": topics}, handle, ensure_ascii=False)
+            with open(ledger, "w", encoding="utf-8") as handle:
+                json.dump({"written": written}, handle, ensure_ascii=False)
+            with mock.patch.object(bot, "QUEUE", queue), mock.patch.object(
+                bot, "LEDGER", ledger
+            ):
+                return bot.pick_topic(topic_id)
+
+    def test_automatic_pick_rotates_away_from_recent_pricing_guides(self):
+        topics = [
+            {"id": "price-1", "format": "가격과 요금제", "status": "done"},
+            {"id": "price-2", "format": "가격과 요금제", "status": "done"},
+            {"id": "compare-1", "format": "비교와 추천", "status": "done"},
+            {"id": "price-3", "format": "가격과 요금제", "status": "done"},
+            {"id": "usage-1", "format": "실전 사용법", "status": "done"},
+            {"id": "price-next", "format": "가격과 요금제", "status": "pending"},
+            {"id": "prompt-next", "format": "프롬프트와 템플릿", "status": "pending"},
+            {"id": "usage-next", "format": "실전 사용법", "status": "pending"},
+        ]
+        written = {
+            "price-1": "one",
+            "price-2": "two",
+            "compare-1": "three",
+            "price-3": "four",
+            "usage-1": "five",
+        }
+        self.assertEqual(self._pick(topics, written)["id"], "prompt-next")
+
+    def test_manual_topic_id_bypasses_automatic_format_rotation(self):
+        topics = [
+            {"id": "price-done", "format": "가격과 요금제", "status": "done"},
+            {"id": "price-next", "format": "가격과 요금제", "status": "pending"},
+            {"id": "usage-next", "format": "실전 사용법", "status": "pending"},
+        ]
+        selected = self._pick(topics, {"price-done": "one"}, "price-next")
+        self.assertEqual(selected["id"], "price-next")
+
+    def test_only_remaining_capped_format_does_not_stall_queue(self):
+        topics = [
+            {"id": "price-done", "format": "가격과 요금제", "status": "done"},
+            {"id": "price-next", "format": "가격과 요금제", "status": "pending"},
+        ]
+        self.assertEqual(
+            self._pick(topics, {"price-done": "one"})["id"], "price-next"
+        )
 
 
 if __name__ == "__main__":

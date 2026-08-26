@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet image.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/image.c"
 layout: post
-title:  "Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱·리사이즈·메모리 소유권"
-summary: "Darknet의 image 구조체가 픽셀을 저장하고 복사·리사이즈·letterbox·증강·탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다."
-description: "Darknet image.c의 CHW index, view·copy 소유권, crop·resize·letterbox 좌표, 색 증강과 detection drawing 실패 조건을 설명합니다."
+title:  "Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱, 리사이즈, 메모리 소유권"
+summary: "Darknet의 image 구조체가 픽셀을 저장하고 복사, 리사이즈, letterbox, 증강, 탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다."
+description: "Darknet image.c의 CHW index, view, copy 소유권, crop, resize, letterbox 좌표, 색 증강과 detection drawing 실패 조건을 설명합니다."
 date:   2022-03-01 16:00 -0400
 categories: DarkNet
 image:
@@ -21,7 +21,7 @@ faq:
   - question: "float_to_image 반환값을 항상 free_image해도 되나요?"
     answer: "아닙니다. 새 buffer를 만들지 않고 전달받은 pointer를 빌려 보는 view이므로 실제 소유자와 해제 책임을 확인해야 합니다."
   - question: "Letterbox 뒤 box가 밀릴 때 무엇을 확인하나요?"
-    answer: "종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우·상하 padding을 원본 좌표로 되돌렸는지 확인합니다."
+    answer: "종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우, 상하 padding을 원본 좌표로 되돌렸는지 확인합니다."
 ---
 
 Darknet의 `image.c`를 읽을 때 가장 먼저 잡아야 할 것은 **데이터가 CHW 순서의 1차원 `float` 배열이고, 함수마다 새 메모리를 만드는지 기존 포인터를 빌리는지가 다르다**는 점이다. 이 두 가지를 놓치면 색 채널이 뒤섞이거나 같은 버퍼를 두 번 해제하기 쉽다.
@@ -133,7 +133,7 @@ void free_image(image m)
 
 특히 `resize_max`와 `resize_min`은 크기가 이미 맞으면 입력 `image`를 그대로 반환하고, 다르면 새 이미지를 만든다. 호출부가 원본과 반환값을 둘 다 해제하면 같은 포인터를 두 번 해제할 가능성이 생긴다. 반환값이 항상 새 버퍼라고 가정하지 말고 `data` 소유권을 호출 경로별로 확인해야 한다.
 
-## 3. crop·resize·letterbox는 결과가 어떻게 다른가
+## 3. crop, resize, letterbox는 결과가 어떻게 다른가
 
 `crop_image`는 `(dx, dy)`에서 `w×h` 영역을 뽑고, 범위를 벗어난 좌표는 가장 가까운 경계로 제한한다.
 
@@ -179,7 +179,7 @@ embed_image(resized, boxed,
             (w-new_w)/2, (h-new_h)/2);
 ```
 
-여기서 resize된 영상 좌표와 원본 좌표는 같지 않다. 탐지 상자를 원본에 다시 그릴 때는 resize 비율뿐 아니라 좌우·상하 여백도 되돌려야 한다. `letterbox`를 단순 resize로 취급하면 상자가 일정하게 밀린다.
+여기서 resize된 영상 좌표와 원본 좌표는 같지 않다. 탐지 상자를 원본에 다시 그릴 때는 resize 비율뿐 아니라 좌우, 상하 여백도 되돌려야 한다. `letterbox`를 단순 resize로 취급하면 상자가 일정하게 밀린다.
 
 ## 4. 기하 변환과 색 변환은 어디서 이어지나
 
@@ -247,7 +247,7 @@ draw_box_width(im, left, top, right, bot,
 
 2×3 RGB 입력의 각 channel과 위치에 서로 다른 값을 넣고 `get_pixel`, copy, crop, resize와 OpenCV 변환을 순서대로 확인한다. 정사각 image나 같은 RGB 값은 x/y와 channel 오류를 숨긴다. 원본과 copy의 pointer가 다른지, view의 pointer는 같은지도 주소로 확인한다.
 
-Letterbox에는 가로로 긴 image와 세로로 긴 image를 각각 넣어 실제 new_w·new_h와 padding을 손으로 계산한다. 정규화 box 하나를 resize canvas에 옮겼다가 원본으로 되돌리는 round-trip을 만들면 scale 중복과 padding 부호 오류가 드러난다. 보간값 비교에는 작은 float 오차를 허용하되 channel swap이나 한 pixel 이동은 허용하지 않는다.
+Letterbox에는 가로로 긴 image와 세로로 긴 image를 각각 넣어 실제 new_w, new_h와 padding을 손으로 계산한다. 정규화 box 하나를 resize canvas에 옮겼다가 원본으로 되돌리는 round-trip을 만들면 scale 중복과 padding 부호 오류가 드러난다. 보간값 비교에는 작은 float 오차를 허용하되 channel swap이나 한 pixel 이동은 허용하지 않는다.
 
 ## In-place 함수는 어떤 순서에서 위험할까
 
@@ -267,7 +267,7 @@ Resize helper처럼 크기가 같으면 원본을 그대로 반환하는 함수�
 
 ### Letterbox 뒤 box가 밀릴 때 무엇을 확인하나요?
 
-종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우·상하 padding을 원본 좌표로 되돌렸는지 확인합니다.
+종횡비 유지 resize scale뿐 아니라 중앙 canvas에 생긴 좌우, 상하 padding을 원본 좌표로 되돌렸는지 확인합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -278,7 +278,7 @@ Resize helper처럼 크기가 같으면 원본을 그대로 반환하는 함수�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet data.c 읽는 법: 이미지 경로가 X·y 배치가 되기까지]({% post_url 2022-02-17-DarkNetData %}) — DarkNet data.c의 경로 샘플링, 이미지·라벨 동시 증강, 데이터 유형별 로더 분기와 멀티스레드 병합을 메모리 소유권 주의점까지 연결해 설명합니다.
+- [DarkNet data.c 읽는 법: 이미지 경로가 X, y 배치가 되기까지]({% post_url 2022-02-17-DarkNetData %}) — DarkNet data.c의 경로 샘플링, 이미지, 라벨 동시 증강, 데이터 유형별 로더 분기와 멀티스레드 병합을 메모리 소유권 주의점까지 연결해 설명합니다.
 - [Darknet layer 구조를 해제할 때 왜 터질까: LAYER\_TYPE과 free\_layer 소유권]({% post_url 2022-03-04-DarkNetLayer %}) — Darknet의 LAYER_TYPE enum이 실행 분기를 만드는 방식과 free_layer가 선택적 버퍼를 해제할 때 확인해야 할 메모리 소유권을 짚습니다.
-- [Darknet 연결 리스트가 한 번 pop 뒤 깨지는 이유: front·back과 메모리 소유권]({% post_url 2022-03-05-DarkNetList %}) — Darknet list 구현의 삽입·pop 불변식과 node, val, array를 각각 누가 해제해야 하는지 코드로 추적합니다.
+- [Darknet 연결 리스트가 한 번 pop 뒤 깨지는 이유: front, back과 메모리 소유권]({% post_url 2022-03-05-DarkNetList %}) — Darknet list 구현의 삽입, pop 불변식과 node, val, array를 각각 누가 해제해야 하는지 코드로 추적합니다.
 <!-- internal-links:end -->

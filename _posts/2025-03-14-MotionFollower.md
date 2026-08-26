@@ -1,13 +1,13 @@
 ---
 layout: post
 title: "MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석"
-summary: "MotionFollower의 pose·reference controller, reconstruction·editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과 PSNR·SSIM·LPIPS·FID를 과장 없이 비교합니다."
-description: "MotionFollower가 pose·reference controller와 reconstruction·editing branch로 인물 동작을 바꾸는 원리, 9.8GB 수치와 시간 일관성 검증법을 설명합니다."
+summary: "MotionFollower의 pose, reference controller, reconstruction, editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과 PSNR, SSIM, LPIPS, FID를 과장 없이 비교합니다."
+description: "MotionFollower가 pose, reference controller와 reconstruction, editing branch로 인물 동작을 바꾸는 원리, 9.8GB 수치와 시간 일관성 검증법을 설명합니다."
 faq:
   - question: "9.8GB GPU면 모든 영상을 처리할 수 있나요?"
     answer: "보장되지 않습니다. 해상도, frame 수, dtype과 sampling 조건에 따라 peak memory가 달라지므로 같은 설정으로 profile해야 합니다."
   - question: "동작 품질은 Pose 점수만 보면 되나요?"
-    answer: "아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경·camera 보존, frame flicker를 따로 평가해야 합니다."
+    answer: "아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경, camera 보존, frame flicker를 따로 평가해야 합니다."
   - question: "42.6GB와 9.8GB 비교를 어떻게 읽나요?"
     answer: "글의 동일 비교 조건에서 약 77% 감소한 결과입니다. 자신의 hardware와 입력 조건에서 end-to-end memory와 시간을 다시 재야 합니다."
 image:
@@ -21,14 +21,14 @@ tags:
 math: true
 ---
 
-MotionFollower의 비교표에서 GPU 메모리는 42.6GB에서 9.8GB로 줄어 약 77% 감소했으며, 정확히 80%는 아닙니다. 같은 표에서 화질 지표도 개선됐지만, 측정한 영상 길이·해상도·batch 조건이 이 글에 없으므로 9.8GB를 모든 영상의 요구량으로 일반화하면 안 됩니다.
+MotionFollower의 비교표에서 GPU 메모리는 42.6GB에서 9.8GB로 줄어 약 77% 감소했으며, 정확히 80%는 아닙니다. 같은 표에서 화질 지표도 개선됐지만, 측정한 영상 길이, 해상도, batch 조건이 이 글에 없으므로 9.8GB를 모든 영상의 요구량으로 일반화하면 안 됩니다.
 
 <video src="/assets/img/post_img/motionfollower/0.mp4" width="100%" height="auto" controls preload="auto"></video>
 
 자료는 [GitHub](https://github.com/Francis-Rings/MotionFollower), [프로젝트 페이지](https://francis-rings.github.io/MotionFollower/), [논문](https://arxiv.org/abs/2405.20325)에 연결돼 있습니다.
 
 
-MotionFollower의 9.8GB는 특정 실험 조건의 peak memory이며 어떤 길이·해상도에서도 같은 요구량이라는 뜻이 아닙니다. 동작 정확도, 인물·배경 보존, frame 일관성과 실제 memory를 자신의 영상 조건에서 함께 재야 합니다.
+MotionFollower의 9.8GB는 특정 실험 조건의 peak memory이며 어떤 길이, 해상도에서도 같은 요구량이라는 뜻이 아닙니다. 동작 정확도, 인물, 배경 보존, frame 일관성과 실제 memory를 자신의 영상 조건에서 함께 재야 합니다.
 
 ## 무엇을 바꾸고 무엇을 남기는 모델인가
 
@@ -80,7 +80,7 @@ MotionFollower에는 입력 역할이 다른 controller가 있습니다.
 - LPIPS: 약 35.3% 감소
 - FID: 약 17.8% 감소
 
-기존 글은 PSNR·SSIM을 묶어 “화질 20%”, LPIPS·FID를 묶어 “자연스러움 35%”라고 표현했습니다. 하지만 두 지표의 변화율은 서로 다릅니다. 각각의 방향과 수치를 따로 읽는 편이 정확합니다.
+기존 글은 PSNR, SSIM을 묶어 “화질 20%”, LPIPS, FID를 묶어 “자연스러움 35%”라고 표현했습니다. 하지만 두 지표의 변화율은 서로 다릅니다. 각각의 방향과 수치를 따로 읽는 편이 정확합니다.
 
 또한 낮은 FID와 LPIPS가 target motion을 정확히 따라갔다는 뜻은 아닙니다. 결과가 원본과 비슷한지, 분포상 자연스러운지, pose가 맞는지는 서로 다른 질문입니다. motion 편집 평가에는 target pose 오차와 frame 간 안정성도 함께 봐야 합니다.
 
@@ -97,13 +97,13 @@ MotionFollower에는 입력 역할이 다른 controller가 있습니다.
 
 | 조건 | 확인할 실패 |
 |---|---|
-| 정적 camera·단순 배경 | 기본 pose 추종 |
+| 정적 camera, 단순 배경 | 기본 pose 추종 |
 | 빠른 camera movement | 배경과 외형 drift |
 | 복잡한 배경 | 경계 flicker와 재구성 |
-| 손에 작은 소품 | 객체 소실·형태 왜곡 |
+| 손에 작은 소품 | 객체 소실, 형태 왜곡 |
 | frame 수 증가 | 누적되는 시간 불일치 |
 
-특히 춤과 스포츠처럼 빠른 motion에서는 target pose만 보지 말고 손·발, 의상 무늬, 접촉한 물체가 frame 사이에서 유지되는지 확대해 봐야 합니다.
+특히 춤과 스포츠처럼 빠른 motion에서는 target pose만 보지 말고 손, 발, 의상 무늬, 접촉한 물체가 frame 사이에서 유지되는지 확대해 봐야 합니다.
 
 ## 9.8GB로 실행된다는 숫자 전에 확인할 것
 
@@ -111,7 +111,7 @@ MotionFollower를 실제로 선택하려면 같은 입력 조건에서 MotionEdi
 
 1. 해상도, frame 수, batch와 precision을 고정합니다.
 2. peak GPU memory와 총 처리 시간을 함께 기록합니다.
-3. pose 추종과 배경·외형 보존을 별도 점수와 영상으로 봅니다.
+3. pose 추종과 배경, 외형 보존을 별도 점수와 영상으로 봅니다.
 4. 작은 물체와 camera movement가 있는 실패 세트를 따로 둡니다.
 5. 긴 영상을 구간별로 잘랐을 때 경계와 identity가 유지되는지 확인합니다.
 
@@ -121,22 +121,22 @@ MotionFollower의 의미는 품질을 포기해 메모리만 줄인 것이 아�
 
 ## Motion과 보존 영역을 따로 채점한다
 
-Target pose와 생성 인물의 주요 관절 거리를 재고, 발 미끄러짐과 손·얼굴의 세부를 사람이 확인합니다. 동시에 reference의 옷·얼굴·배경·camera movement가 얼마나 남았는지 별도 점수로 둡니다. Pose만 잘 맞고 identity가 바뀌거나, 배경은 같지만 motion이 약하면 모두 실패입니다.
+Target pose와 생성 인물의 주요 관절 거리를 재고, 발 미끄러짐과 손, 얼굴의 세부를 사람이 확인합니다. 동시에 reference의 옷, 얼굴, 배경, camera movement가 얼마나 남았는지 별도 점수로 둡니다. Pose만 잘 맞고 identity가 바뀌거나, 배경은 같지만 motion이 약하면 모두 실패입니다.
 
-영상은 시작·중간·끝 frame뿐 아니라 빠른 전환과 가림 구간을 확인해야 합니다. 같은 인물이 다시 나타난 뒤 외형이 달라지거나 pose가 급변할 수 있습니다. frame별 metric의 평균과 함께 최악 구간, flicker 빈도, 오류가 연속된 길이를 기록합니다.
+영상은 시작, 중간, 끝 frame뿐 아니라 빠른 전환과 가림 구간을 확인해야 합니다. 같은 인물이 다시 나타난 뒤 외형이 달라지거나 pose가 급변할 수 있습니다. frame별 metric의 평균과 함께 최악 구간, flicker 빈도, 오류가 연속된 길이를 기록합니다.
 
 ## 9.8GB를 재현하는 Profile
 
-입력 해상도, frame 수, batch, dtype, sampling step, model·decoder 포함 범위를 고정합니다. 모델 로딩 직후 memory와 실제 generation peak를 분리하고, 길이와 해상도를 한 축씩 늘립니다. OOM이 나지 않아도 swapping이나 offload 때문에 latency가 급증할 수 있어 총 처리 시간도 함께 봐야 합니다.
+입력 해상도, frame 수, batch, dtype, sampling step, model, decoder 포함 범위를 고정합니다. 모델 로딩 직후 memory와 실제 generation peak를 분리하고, 길이와 해상도를 한 축씩 늘립니다. OOM이 나지 않아도 swapping이나 offload 때문에 latency가 급증할 수 있어 총 처리 시간도 함께 봐야 합니다.
 
-기존 방식과 비교할 때 동일한 pose, reference, output 크기를 사용합니다. memory 감소가 preprocessing·postprocessing을 제외한 값인지 확인하고 quality metric이 같은 checkpoint 조건인지 봅니다. MotionFollower가 유용한지는 낮은 memory 숫자보다 목표 GPU에서 통과본의 품질과 처리 시간이 재현되는지로 결정됩니다.
+기존 방식과 비교할 때 동일한 pose, reference, output 크기를 사용합니다. memory 감소가 preprocessing, postprocessing을 제외한 값인지 확인하고 quality metric이 같은 checkpoint 조건인지 봅니다. MotionFollower가 유용한지는 낮은 memory 숫자보다 목표 GPU에서 통과본의 품질과 처리 시간이 재현되는지로 결정됩니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA·MoE·MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8·MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
-- [BitNet b1.58은 GPU 없이도 빠를까? 3값 가중치와 전용 커널의 조건]({% post_url 2026-03-16-The-Magic-of-1-Bit-Choosing-Addition-Over-Multiplication-A-Deep-Dive-into-Microsoft-BitNet-b158-Architecture %}) — 가중치를 -1·0·1로 제한하는 BitNet b1.58이 메모리와 행렬 연산을 줄이는 원리, 학습 방식과 실제 가속에 필요한 커널 조건을 정리합니다.
-- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M·25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng·영어 중심·감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
+- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA, MoE, MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8, MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
+- [BitNet b1.58은 GPU 없이도 빠를까? 3값 가중치와 전용 커널의 조건]({% post_url 2026-03-16-The-Magic-of-1-Bit-Choosing-Addition-Over-Multiplication-A-Deep-Dive-into-Microsoft-BitNet-b158-Architecture %}) — 가중치를 -1, 0, 1로 제한하는 BitNet b1.58이 메모리와 행렬 연산을 줄이는 원리, 학습 방식과 실제 가속에 필요한 커널 조건을 정리합니다.
+- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M, 25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng, 영어 중심, 감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -147,7 +147,7 @@ Target pose와 생성 인물의 주요 관절 거리를 재고, 발 미끄러짐
 
 ### 동작 품질은 Pose 점수만 보면 되나요?
 
-아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경·camera 보존, frame flicker를 따로 평가해야 합니다.
+아닙니다. 관절과 발 미끄러짐 외에 인물 identity, 배경, camera 보존, frame flicker를 따로 평가해야 합니다.
 
 ### 42.6GB와 9.8GB 비교를 어떻게 읽나요?
 

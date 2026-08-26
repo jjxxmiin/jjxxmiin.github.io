@@ -1,6 +1,6 @@
 ---
 layout: post
-title: '손은 움직였는데 AI 영상 속 물체가 안 따라오면? Generated Reality의 2D·3D 제어'
+title: '손은 움직였는데 AI 영상 속 물체가 안 따라오면? Generated Reality의 2D, 3D 제어'
 date: '2026-02-23'
 categories: Tech
 tags:
@@ -10,13 +10,13 @@ tags:
   - 트랜스포머
 math: true
 summary: Generated Reality가 손의 2D 골격과 3D 관절, 머리 움직임을 함께 조건으로 써 상호작용 영상을 제어하는 방법과 실시간 적용의 한계를 살펴봅니다.
-description: "Generated Reality가 2D 손 골격·3D 관절·머리 자세로 다음 영상을 제어하는 구조를 설명하고, 지연·추적 오류·물리 일관성을 평가하는 기준을 정리합니다."
+description: "Generated Reality가 2D 손 골격, 3D 관절, 머리 자세로 다음 영상을 제어하는 구조를 설명하고, 지연, 추적 오류, 물리 일관성을 평가하는 기준을 정리합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.18422.png
-  alt: "손은 움직였는데 AI 영상 속 물체가 안 따라오면? Generated Reality의 2D·3D 제어 논문 대표 이미지"
+  alt: "손은 움직였는데 AI 영상 속 물체가 안 따라오면? Generated Reality의 2D, 3D 제어 논문 대표 이미지"
 ---
 
-2D 손 골격만으로는 부족합니다. Generated Reality는 3D 손 관절과 6DoF 머리 자세를 함께 넣어 사용자가 어디를 보고 어떤 손동작을 하는지 영상 생성 모델에 직접 전달합니다. 다만 반응하는 영상이 곧 물리적으로 정확한 시뮬레이션은 아니므로, 제어 지연·추적 실패·접촉 뒤의 시간 일관성을 따로 검증해야 합니다.
+2D 손 골격만으로는 부족합니다. Generated Reality는 3D 손 관절과 6DoF 머리 자세를 함께 넣어 사용자가 어디를 보고 어떤 손동작을 하는지 영상 생성 모델에 직접 전달합니다. 다만 반응하는 영상이 곧 물리적으로 정확한 시뮬레이션은 아니므로, 제어 지연, 추적 실패, 접촉 뒤의 시간 일관성을 따로 검증해야 합니다.
 
 [논문](https://huggingface.co/papers/2602.18422)은 미리 정한 키보드 입력으로 장면을 움직이는 방식보다 사람의 실제 몸동작을 조건으로 쓰는 월드 시뮬레이션을 제안합니다. 목표는 완전한 물리 엔진을 만드는 것이 아니라, 헤드셋이 측정한 손과 카메라 움직임에 반응하는 다음 영상을 생성하는 것입니다.
 
@@ -27,7 +27,7 @@ image:
 - 2D 경로는 손 골격을 이미지 평면에 렌더링해 손의 위치와 모양을 제공합니다.
 - 3D 경로는 관절과 머리 자세를 MLP와 이미지 인코더로 표현해 깊이와 시점 정보를 보충합니다.
 
-![Generated Reality의 손·카메라 제어 구조](/assets/img/papers/2602.18422/x2.png)
+![Generated Reality의 손, 카메라 제어 구조](/assets/img/papers/2602.18422/x2.png)
 
 두 조건은 Diffusion Transformer의 토큰에 더해집니다. 모델은 직전 몇 프레임과 현재 동작을 보고 다음 프레임을 자기회귀적으로 만듭니다. 2D만 쓰면 화면상 위치는 알기 쉽지만 깊이 방향 움직임이 모호하고, 3D 수치만 쓰면 영상의 구체적인 배치와 연결하기 어렵습니다. 두 표현을 함께 쓰는 이유가 여기에 있습니다.
 
@@ -95,7 +95,7 @@ Generated Reality의 의미는 현실을 그대로 복제했다는 데 있지 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [정면 춤 영상을 측면으로 바꾸면 Pose가 무너지는 이유: 3DiMo의 Motion Token]({% post_url 2026-02-04-3D-Aware-Implicit-Motion-Control-for-View-Adaptive-Human-Video-Generation %}) — 3DiMo가 2D pose의 view 종속성과 SMPL reconstruction 오류 사이에서 body·hand motion encoder, perspective augmentation, annealed geometry…
-- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성·평가·비용의 한계를 짚습니다.
+- [정면 춤 영상을 측면으로 바꾸면 Pose가 무너지는 이유: 3DiMo의 Motion Token]({% post_url 2026-02-04-3D-Aware-Implicit-Motion-Control-for-View-Adaptive-Human-Video-Generation %}) — 3DiMo가 2D pose의 view 종속성과 SMPL reconstruction 오류 사이에서 body, hand motion encoder, perspective augmentation, annealed geometry…
 - [12시간 AI 영상은 정말 일관적인가? LoL의 Sink-Collapse와 RoPE Jitter]({% post_url 2026-02-01-LoL--Longer-than-Longer--Scaling-Video-Generation-to-Hour %}) — LoL이 attention sink와 RoPE 주기 때문에 여러 head가 초기 frame에 동시에 쏠리는 sink-collapse를 추론 시 jitter로 완화하는 원리와 12시간 결과의 해석 한계를 정리합니다.
+- [알리바바 Wan 3.0 공개 베타 개시, 문서 입력으로 30초 AI 비디오 원컷 생성]({% post_url 2026-08-10-alibaba-launches-wan-3-0-public-beta-supporting-30-second-ai-video-and-document-inputs %}) — 알리바바 클라우드가 차세대 비디오 생성 AI 모델인 Wan 3.0(통의완상 3.0)의 공개 베타 테스트를 시작했습니다. 기존 15초에서 2배 늘어난 최대 30초 단일 샷 비디오 생성을 지원하며, PDF와 PPT 등 오피스 문서와…
 <!-- internal-links:end -->

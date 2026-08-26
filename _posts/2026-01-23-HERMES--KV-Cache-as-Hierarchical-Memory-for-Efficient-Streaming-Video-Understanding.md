@@ -9,7 +9,7 @@ tags:
   - 온디바이스AI
   - 컨텍스트윈도우
 math: true
-summary: HERMES가 최근 frame은 local cache에, 과거 핵심 token은 global summary에 남겨 query TTFT와 token 수를 줄이는 방식, 10배·68%·11.4% 수치의 조건과 망각 위험을 정리합니다.
+summary: HERMES가 최근 frame은 local cache에, 과거 핵심 token은 global summary에 남겨 query TTFT와 token 수를 줄이는 방식, 10배, 68%, 11.4% 수치의 조건과 망각 위험을 정리합니다.
 description: "HERMES가 streaming video KV cache를 local detail과 global summary로 계층화해 TTFT를 줄이는 원리, delayed relevance와 eviction 손실, 총비용 검증법을 설명합니다."
 faq:
   - question: "Training-free이면 stream 처리 비용도 없나요?"
@@ -47,8 +47,8 @@ Hierarchical memory는 두 cache로 설명됩니다.
 
 | Cache | 남기는 정보 | 강점 | 위험 |
 |---|---|---|---|
-| Local granularity | 최근 frame의 세부 token | 즉각적인 motion·변화 | 오래 유지할 수 없음 |
-| Global summary | 과거의 중요한 token | 장기 context | detail·rare event 유실 |
+| Local granularity | 최근 frame의 세부 token | 즉각적인 motion, 변화 | 오래 유지할 수 없음 |
+| Global summary | 과거의 중요한 token | 장기 context | detail, rare event 유실 |
 
 HERMES는 pretrained model의 attention pattern에서 video token 중요도를 계산하고 낮은 token을 evict합니다. 별도 fine-tuning 없이 기존 attention을 memory selection signal로 재사용하는 training-free 방식입니다.
 
@@ -64,7 +64,7 @@ Query가 오면 이미 압축된 KV가 준비돼 있어 과거 video를 다시 �
 
 TTFT 비교가 공정하려면 query-time뿐 아니라 frame당 ingest latency와 누적 GPU 사용량을 함께 측정해야 합니다.
 
-## 10배·68%·11.4%는 서로 다른 축이다
+## 10배, 68%, 11.4%는 서로 다른 축이다
 
 원문은 세 가지 최대 결과를 제시합니다.
 
@@ -100,7 +100,7 @@ Training-free는 base model weight를 바꾸지 않아 적용 비용이 낮습�
 3. 나중 query가 그 정보를 요구합니다.
 4. KV에서 이미 사라져 답을 복원할 수 없습니다.
 
-빠른 scene cut에서는 local cache가 새 frame으로 급격히 교체되고, global summary가 event boundary를 놓칠 수 있습니다. 의료·보안처럼 드물지만 중요한 frame이 있는 domain에서는 평균 attention만으로 eviction하는 위험을 별도로 시험해야 합니다.
+빠른 scene cut에서는 local cache가 새 frame으로 급격히 교체되고, global summary가 event boundary를 놓칠 수 있습니다. 의료, 보안처럼 드물지만 중요한 frame이 있는 domain에서는 평균 attention만으로 eviction하는 위험을 별도로 시험해야 합니다.
 
 ## Cache policy를 배포 전에 검증하는 방법
 
@@ -116,15 +116,15 @@ HERMES를 평가할 때 query 직전의 쉬운 질문만 사용하면 local cach
 
 Baseline은 full history, sliding window, uniform sampling, HERMES를 같은 token budget과 base model에서 비교해야 합니다. 기록할 값은 frame ingest throughput, TTFT, peak KV memory, task accuracy, evicted event recall입니다.
 
-Always-on assistant나 CCTV에 바로 안전하게 적용할 수 있다는 기존 전망은 10배 TTFT만으로 입증되지 않습니다. Privacy, multi-stream capacity, missed event rate가 필요하고 자율주행·robot에는 최악 조건의 latency도 봐야 합니다.
+Always-on assistant나 CCTV에 바로 안전하게 적용할 수 있다는 기존 전망은 10배 TTFT만으로 입증되지 않습니다. Privacy, multi-stream capacity, missed event rate가 필요하고 자율주행, robot에는 최악 조건의 latency도 봐야 합니다.
 
 ## 미래 질문을 모르는 eviction을 어떻게 시험할까
 
-평가 query를 cache 선택 전에 공개하면 attention importance가 특정 질문에 유리하게 작동할 수 있습니다. 실제 stream처럼 eviction이 끝난 뒤 질문을 제시하고, 같은 video에 현재 사건·오래된 사건·짧은 예외 사건을 묻는 세 묶음을 준비해야 미래-query blind 성능을 볼 수 있습니다.
+평가 query를 cache 선택 전에 공개하면 attention importance가 특정 질문에 유리하게 작동할 수 있습니다. 실제 stream처럼 eviction이 끝난 뒤 질문을 제시하고, 같은 video에 현재 사건, 오래된 사건, 짧은 예외 사건을 묻는 세 묶음을 준비해야 미래-query blind 성능을 볼 수 있습니다.
 
 예를 들어 사람이 방에 들어와 잠깐 key를 table에 두었다가 가방으로 옮긴 stream을 생각할 수 있습니다. 마지막 frame만 묻는 질문은 local cache로 답할 수 있지만 “key를 처음 둔 곳”은 짧은 과거 event가 global memory에 남아야 합니다. 두 질문의 평균 정확도만 내면 첫 질문이 두 번째 실패를 가릴 수 있으므로 event age별 recall을 따로 표시해야 합니다.
 
-Memory budget도 고정합니다. Full history, sliding window, uniform sampling, HERMES가 서로 다른 token 수를 쓴다면 policy가 좋아서인지 budget이 커서인지 구분할 수 없습니다. 같은 token 수에서 local/global 배분 비율을 바꾸고, scene cut·정적 장면·빠른 motion별로 어느 계층이 포화되는지 기록하면 cache 설계의 실제 민감도를 알 수 있습니다.
+Memory budget도 고정합니다. Full history, sliding window, uniform sampling, HERMES가 서로 다른 token 수를 쓴다면 policy가 좋아서인지 budget이 커서인지 구분할 수 없습니다. 같은 token 수에서 local/global 배분 비율을 바꾸고, scene cut, 정적 장면, 빠른 motion별로 어느 계층이 포화되는지 기록하면 cache 설계의 실제 민감도를 알 수 있습니다.
 
 총비용은 다음처럼 나눠 보는 편이 명확합니다.
 
@@ -142,7 +142,7 @@ HERMES의 핵심은 모든 frame을 기억하는 것이 아니라 미래에 유�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [화면 밖 자동차를 비디오 모델이 잊는다면? HyDRA의 Top-K 기억]({% post_url 2026-03-30-Out-of-Sight-but-Not-Out-of-Mind--Hybrid-Memory-for-Dynamic-Video-World-Models %}) — 과거 프레임을 모두 쌓지 않고 압축 메모리에서 관련 토큰만 찾는 HyDRA의 객체 영속성 설계, HM-World 범위와 검색 병목을 살펴봅니다.
-- [Context Mode가 토큰을 98% 줄인다는 수치를 믿어도 될까? 측정법과 누락]({% post_url 2026-05-09-Why-Your-AI-Agent-Gets-Dumb-in-30-Minutes-A-Deep-Dive-into-Claude-Codes-Context-Mode-Architecture %}) — Context Mode의 SQLite FTS5 기반 출력 압축 구조를 이해하고, 98% 절감 수치를 일반화하기 전에 확인할 저장소 불일치·검색 누락·우회 경로를 점검합니다.
+- [Context Mode가 토큰을 98% 줄인다는 수치를 믿어도 될까? 측정법과 누락]({% post_url 2026-05-09-Why-Your-AI-Agent-Gets-Dumb-in-30-Minutes-A-Deep-Dive-into-Claude-Codes-Context-Mode-Architecture %}) — Context Mode의 SQLite FTS5 기반 출력 압축 구조를 이해하고, 98% 절감 수치를 일반화하기 전에 확인할 저장소 불일치, 검색 누락, 우회 경로를 점검합니다.
 - [Qwen3.8-Max 2.4조 파라미터 MoE: 95B 활성 구조와 오픈 웨이트 계획]({% post_url 2026-08-06-alibaba-launches-2-4-trillion-parameter-qwen3-8-max-moe-model-with-open-weight-plans %}) — 알리바바가 2026년 8월 3일 2.4조 파라미터 규모의 Mixture-of-Experts(MoE) 기반 Qwen3.8-Max를 출시했습니다. 이 모델은 추론 시 950억 개의 활성 파라미터를 사용하며, 알리바바는 장기 소프트웨어…
 <!-- internal-links:end -->
 

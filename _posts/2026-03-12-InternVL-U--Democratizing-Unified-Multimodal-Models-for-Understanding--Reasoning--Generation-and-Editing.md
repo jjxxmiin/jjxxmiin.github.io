@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "InternVL-U 4B가 14B를 이길까: 이해·생성 분리와 실제 VRAM 조건"
+title: "InternVL-U 4B가 14B를 이길까: 이해, 생성 분리와 실제 VRAM 조건"
 date: '2026-03-12 04:37:11'
 categories: Tech
 tags:
@@ -8,21 +8,21 @@ tags:
   - 이미지생성
   - MLOps
 math: true
-summary: "4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM·지식·서빙 한계를 점검합니다."
-description: 'InternVL-U 4B가 시각 이해와 이미지 생성을 분리해 연결하는 구조와 14B 비교 범위, 계획 오류·편집 보존·실제 VRAM을 검증하는 법을 설명합니다.'
+summary: "4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM, 지식, 서빙 한계를 점검합니다."
+description: 'InternVL-U 4B가 시각 이해와 이미지 생성을 분리해 연결하는 구조와 14B 비교 범위, 계획 오류, 편집 보존, 실제 VRAM을 검증하는 법을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.09877.png
-  alt: "InternVL-U 4B가 14B를 이길까: 이해·생성 분리와 실제 VRAM 조건 논문 대표 이미지"
+  alt: "InternVL-U 4B가 14B를 이길까: 이해, 생성 분리와 실제 VRAM 조건 논문 대표 이미지"
 faq:
   - question: 'InternVL-U 4B가 모든 작업에서 14B 모델보다 좋은가요?'
-    answer: '그렇게 볼 수 없습니다. 원문의 우위는 특정 생성·편집 평가 조건에서 보고된 것이며 이해, 추론, 안전성과 실제 사용자 작업은 과제별로 다시 비교해야 합니다.'
+    answer: '그렇게 볼 수 없습니다. 원문의 우위는 특정 생성, 편집 평가 조건에서 보고된 것이며 이해, 추론, 안전성과 실제 사용자 작업은 과제별로 다시 비교해야 합니다.'
   - question: 'Text Reasoning 계획이 정확하면 최종 이미지도 정확한가요?'
-    answer: '보장되지 않습니다. 계획이 생성 헤드에 잘 전달되지 않거나 최종 이미지가 좌표·문자열을 지키지 않을 수 있으므로 계획과 결과를 별도로 평가해야 합니다.'
+    answer: '보장되지 않습니다. 계획이 생성 헤드에 잘 전달되지 않거나 최종 이미지가 좌표, 문자열을 지키지 않을 수 있으므로 계획과 결과를 별도로 평가해야 합니다.'
   - question: '4B 모델이면 12GB GPU에서 항상 실행할 수 있나요?'
     answer: '항상 그렇지는 않습니다. 정밀도, 해상도, diffusion step, KV cache, batch와 두 모듈의 동시 로딩 방식에 따라 최대 VRAM이 달라집니다.'
 ---
 
-InternVL-U 4B가 일부 생성·편집 평가에서 더 큰 모델보다 나을 수는 있지만, 모든 이해·추론 과제에서 14B를 대체한다고 볼 수는 없습니다.
+InternVL-U 4B가 일부 생성, 편집 평가에서 더 큰 모델보다 나을 수는 있지만, 모든 이해, 추론 과제에서 14B를 대체한다고 볼 수는 없습니다.
 
 [논문 2603.09877](https://arxiv.org/abs/2603.09877)은 이해, 추론, 생성, 편집을 한 Model에서 다루되 시각 표현을 하나의 가중치 공간에 억지로 합치지 않습니다. 이해를 담당하는 MLLM과 생성을 담당하는 MMDiT Head를 분리하고 Text Reasoning을 두 모듈 사이의 계획으로 사용합니다. Parameter 수보다 책임 분리가 핵심인 설계입니다.
 
@@ -42,7 +42,7 @@ Chain-of-Thought가 길거나 그럴듯하다고 Image가 정확해지는 것은
 
 원문은 InternVL-U가 Parameter가 세 배 이상 큰 14B 계열 Model보다 생성과 편집 Task에서 일관되게 좋은 결과를 보였다고 설명합니다. 이는 해당 Benchmark와 학습 데이터의 비교이며 Model 크기만으로 전체 성능 순위를 정하는 근거는 아닙니다.
 
-고밀도 합성 데이터는 Text Rendering과 추론 기반 편집의 간극을 줄이는 데 기여합니다. 그러나 합성 데이터의 문구·Layout·Style 분포가 실제 사용자 요청과 다르면 성능이 이동할 수 있습니다. 이해, 생성, 편집, Text 정확도와 안전성을 각각 분리해 비교해야 합니다.
+고밀도 합성 데이터는 Text Rendering과 추론 기반 편집의 간극을 줄이는 데 기여합니다. 그러나 합성 데이터의 문구, Layout, Style 분포가 실제 사용자 요청과 다르면 성능이 이동할 수 있습니다. 이해, 생성, 편집, Text 정확도와 안전성을 각각 분리해 비교해야 합니다.
 
 ## 4B라도 실제 VRAM은 실행 조건에 달렸다
 
@@ -56,7 +56,7 @@ vLLM 같은 Text Serving Engine과 Generation Head의 호환도 자동으로 주
 
 - Image 질문 답변의 정확도와 근거
 - Text Reasoning 계획의 오류
-- Prompt만으로 만든 Image의 객체·Text 품질
+- Prompt만으로 만든 Image의 객체, Text 품질
 - 편집 전후 Identity와 바꾸지 말아야 할 영역
 - End-to-end 지연, Peak VRAM과 실패율
 
@@ -66,7 +66,7 @@ vLLM 같은 Text Serving Engine과 Generation Head의 호환도 자동으로 주
 
 MLLM이 “왼쪽 표의 제목만 바꾼다”는 계획을 올바르게 만들었어도 생성 헤드가 대상 영역을 잘못 찾을 수 있습니다. 반대로 최종 이미지는 그럴듯하지만 계획에 없던 배경이나 객체를 함께 바꿀 수 있습니다. 이해 오류, 계획 오류, 모듈 전달 오류, 생성 오류를 분리해야 어느 부분을 개선할지 알 수 있습니다.
 
-같은 입력에서 정답 계획을 사람이 제공한 조건과 모델 계획을 사용한 조건을 비교할 수 있습니다. 정답 계획에서도 이미지가 틀리면 생성·연결 쪽이 병목이고, 정답 계획에서는 성공하지만 모델 계획에서 실패하면 이해·추론이 병목입니다. 두 모듈을 통합했다는 사실만으로 끝단 오류의 원인이 하나가 되는 것은 아닙니다.
+같은 입력에서 정답 계획을 사람이 제공한 조건과 모델 계획을 사용한 조건을 비교할 수 있습니다. 정답 계획에서도 이미지가 틀리면 생성, 연결 쪽이 병목이고, 정답 계획에서는 성공하지만 모델 계획에서 실패하면 이해, 추론이 병목입니다. 두 모듈을 통합했다는 사실만으로 끝단 오류의 원인이 하나가 되는 것은 아닙니다.
 
 ## 이미지 편집은 무엇을 보존해야 하나
 
@@ -88,27 +88,27 @@ MLLM이 “왼쪽 표의 제목만 바꾼다”는 계획을 올바르게 만들
 
 ## 작은 PoC에서 어떤 순서로 검증할까
 
-먼저 이해, 생성, 편집의 독립 기준선을 만듭니다. 다음으로 사람이 만든 올바른 계획을 넣어 모듈 연결을 확인하고, 마지막에 모델이 직접 계획하는 끝단 흐름을 평가합니다. 각 단계에서 오류 사례와 VRAM·지연을 저장하면 통합으로 새로 생긴 실패를 찾을 수 있습니다.
+먼저 이해, 생성, 편집의 독립 기준선을 만듭니다. 다음으로 사람이 만든 올바른 계획을 넣어 모듈 연결을 확인하고, 마지막에 모델이 직접 계획하는 끝단 흐름을 평가합니다. 각 단계에서 오류 사례와 VRAM, 지연을 저장하면 통합으로 새로 생긴 실패를 찾을 수 있습니다.
 
 자체 데이터에는 작은 글자, 표, 여러 객체, 바꾸지 말아야 할 영역과 반복 편집을 포함합니다. 공개 체크포인트와 실행 코드가 실제로 제공하는 기능과 라이선스를 확인한 뒤 필요한 한 기능부터 비교합니다. 모든 기능을 한 번에 도입하는 것보다 병목을 확인하며 범위를 넓히는 편이 안전합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석]({% post_url 2026-01-18-VIBE--Visual-Instruction-Based-Editor %}) — Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초·24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
-- [이미지 생성 Step을 1에서 50까지 바꿔도 될까? Self-E의 Any-Step 학습]({% post_url 2026-01-01-Self-Evaluation-Unlocks-Any-Step-Text-to-Image-Generation %}) — Self-E가 별도 teacher distillation 없이 flow matching의 local supervision과 자체 sample 평가를 결합해 하나의 weight로 1~50 step 생성을 지원하는 원리와 비용을…
-- [AI 규제 문서가 흩어져 있다면? AI Atlas Nexus로 리스크 연결하는 법]({% post_url 2026-03-02-Why-Am-I-Just-Discovering-This-An-Honest-Review-of-IBMs-Ultimate-AI-Governance-Tool-AI-Atlas-Nexus %}) — AI Atlas Nexus가 NIST·MIT·EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
+- [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해, 생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
+- [VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석]({% post_url 2026-01-18-VIBE--Visual-Instruction-Based-Editor %}) — Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초, 24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
+- [이미지 이해와 생성이 서로 방해한다면? Cheers의 의미, 디테일 토큰 분리]({% post_url 2026-03-16-Cheers--Decoupling-Patch-Details-from-Semantic-Representations-Enables-Unified-Multimodal-Comprehension-and-Generation %}) — 한 모델에서 이미지 이해와 생성을 함께 할 때 생기는 표현 충돌을 Cheers가 의미, 디테일 경로로 나누는 방식과 비용 수치의 조건을 살펴봅니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### InternVL-U 4B가 모든 작업에서 14B 모델보다 좋은가요?
 
-그렇게 볼 수 없습니다. 원문의 우위는 특정 생성·편집 평가 조건에서 보고된 것이며 이해, 추론, 안전성과 실제 사용자 작업은 과제별로 다시 비교해야 합니다.
+그렇게 볼 수 없습니다. 원문의 우위는 특정 생성, 편집 평가 조건에서 보고된 것이며 이해, 추론, 안전성과 실제 사용자 작업은 과제별로 다시 비교해야 합니다.
 
 ### Text Reasoning 계획이 정확하면 최종 이미지도 정확한가요?
 
-보장되지 않습니다. 계획이 생성 헤드에 잘 전달되지 않거나 최종 이미지가 좌표·문자열을 지키지 않을 수 있으므로 계획과 결과를 별도로 평가해야 합니다.
+보장되지 않습니다. 계획이 생성 헤드에 잘 전달되지 않거나 최종 이미지가 좌표, 문자열을 지키지 않을 수 있으므로 계획과 결과를 별도로 평가해야 합니다.
 
 ### 4B 모델이면 12GB GPU에서 항상 실행할 수 있나요?
 

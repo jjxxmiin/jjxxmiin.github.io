@@ -55,7 +55,7 @@ article_images:
   source_url: https://www.worldbank.org/en/publication/wdr2026
 ---
 
-World Bank의 결론은 개발도상국이 초대형 데이터센터부터 지어야 AI의 생산성 효과를 얻는다는 통념과 다릅니다. 우선순위는 의료·교육·사법·농업의 구체적 업무를 고르고, 현지 언어와 통신 환경에서 작동하는 소형 도구를 시험하는 것입니다. 다만 보고서의 16.2%는 가능한 영향 범위를 나타내는 분석값이지, 모델을 배포하면 그만큼 생산성이 자동으로 오른다는 보장은 아닙니다.
+World Bank의 결론은 개발도상국이 초대형 데이터센터부터 지어야 AI의 생산성 효과를 얻는다는 통념과 다릅니다. 우선순위는 의료, 교육, 사법, 농업의 구체적 업무를 고르고, 현지 언어와 통신 환경에서 작동하는 소형 도구를 시험하는 것입니다. 다만 보고서의 16.2%는 가능한 영향 범위를 나타내는 분석값이지, 모델을 배포하면 그만큼 생산성이 자동으로 오른다는 보장은 아닙니다.
 
 ```mermaid
 flowchart TD
@@ -128,7 +128,7 @@ flowchart LR
 
 World Bank 보고서는 개도국이 AI를 적용해야 할 4대 핵심 분야로 의료 진료, 교육, 사법 서비스, 농업을 콕 집어 제시했습니다 <sup class="source-citation"><a href="#source-1" aria-label="World Bank 출처">[1]</a></sup>. 전문가가 부족한 지방 의료원에 보조 진단용 소형 AI 도구를 배포하거나, 오지 학교에 맞춤형 학습 보조 AI를 도입하고, 농가에 기상과 병충해 예측 AI를 보급하는 방식입니다 <sup class="source-citation"><a href="#source-2" aria-label="World Bank 출처">[2]</a></sup>.
 
-4.5%는 저·중소득국의 일자리 가운데 생성형 AI 자동화 위험에 노출된 비율로 제시된 값이고, 16.2%는 생산성 향상 가능성이 있는 일자리 비율입니다. 두 수치는 서로 빼서 순고용 효과로 계산할 수 없으며, 개별 국가의 해고율이나 성장률을 예측하는 값도 아닙니다. 직업 구성과 디지털 접근성이 다른 국가·지역·직종에서는 실제 영향이 평균과 다를 수 있으므로, 정책과 사업 타당성 검토에서는 보고서의 정의와 분류 기준을 함께 확인해야 합니다.
+4.5%는 저소득국과 중소득국의 일자리 가운데 생성형 AI 자동화 위험에 노출된 비율로 제시된 값이고, 16.2%는 생산성 향상 가능성이 있는 일자리 비율입니다. 두 수치는 서로 빼서 순고용 효과로 계산할 수 없으며, 개별 국가의 해고율이나 성장률을 예측하는 값도 아닙니다. 직업 구성과 디지털 접근성이 다른 국가, 지역, 직종에서는 실제 영향이 평균과 다를 수 있으므로, 정책과 사업 타당성 검토에서는 보고서의 정의와 분류 기준을 함께 확인해야 합니다.
 
 기업과 정부가 여기서 얻을 수 있는 전략은 초거대 솔루션을 그대로 배포하기보다 특정 지역의 언어, 환경, 작업 절차에 맞춘 도구를 작은 단위로 검증하는 것입니다. 의료에서는 전문가의 최종 판단을 대체하지 않는 보조 업무, 교육에서는 교사가 오류를 확인할 수 있는 자료 준비처럼 책임 주체가 분명한 작업부터 시작할 수 있습니다. 농업이나 사법 분야도 “AI 도입” 자체를 목표로 두기보다 처리 시간, 오류, 접근성처럼 측정할 문제를 먼저 정해야 합니다.
 
@@ -172,9 +172,9 @@ flowchart TD
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [Colibri: 25GB 램 노트북으로 744B 초거대 AI 모델을 구동하는 순수 C 추론 엔진의 원리]({% post_url 2026-07-10-Colibri-The-Pure-C-Inference-Engine-Running-a-744B-MoE-Model-on-a-25GB-RAM-Laptop %}) — Colibri는 7440억 파라미터(744B) 규모의 초거대 혼합 전문가(MoE) 모델인 GLM-5.2를 25GB 램만 장착된 일반 노트북에서 구동하게 해주는 독창적인 순수 C 기반 추론 엔진입니다. 전체 모델을 램에 올리는 대신…
 - [NVIDIA, 데이터센터 전력 병목 풀 800 VDC 직류 전력 아키텍처 공개]({% post_url 2026-08-15-nvidia-unveils-800-vdc-power-architecture-to-overcome-ai-data-center-bottlenecks %}) — NVIDIA가 Google, Microsoft 및 80개 이상의 OCP 파트너와 함께 AI 데이터센터 전력 병목을 극복할 MGX 호환 800 VDC 전력 아키텍처를 발표했습니다. 기존 데이터센터 건물의 AC 인프라를 재건축하지 않고도…
 - [OpenAI 프론티어 API 제로 데이터 보존 발표, Private Safety Processing으로 기업 보안 강화]({% post_url 2026-08-21-openai-announces-zero-data-retention-and-previews-private-safety-processing-for-frontier-api-models %}) — OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력…
-- [100달러로 ChatGPT를 처음부터 학습할 수 있을까? NanoChat의 비용 조건]({% post_url 2026-03-02-Why-Didnt-I-Know-This-Sooner-Building-My-Own-ChatGPT-for-100-Honest-Review-of-NanoChat %}) — NanoChat의 토크나이저·사전학습·SFT·웹 UI 전 과정을 살펴보고 100달러·4시간이라는 문구에 숨은 8×H100 조건과 교육용 코드의 경계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

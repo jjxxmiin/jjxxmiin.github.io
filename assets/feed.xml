@@ -4,7 +4,7 @@ permalink: /feed.xml
 # Atom Feed, reference: https://validator.w3.org/feed/docs/atom.html
 #
 # 테마(jekyll-theme-chirpy) 원본을 덮어쓴 사본이다. 바꾼 곳은 두 군데.
-#   1. limit 5 -> 20. 네이버 서치어드바이저·다음은 RSS를 주기적으로 읽어
+#   1. limit 5 -> 20. 네이버 서치어드바이저, 다음은 RSS를 주기적으로 읽어
 #      새 글을 색인하는데, 하루 2편 발행 체제에서 5편이면 수집 주기가 조금만
 #      늦어도 글이 통째로 누락된다.
 #   2. 태그를 category term으로 함께 내보낸다. 수집기가 주제를 파악하는 데 쓰인다.

@@ -10,15 +10,15 @@ tags:
   - 멀티모달
   - Gemini
 math: true
-summary: Think3D가 point cloud를 만들고 camera rotate·zoom·shift 도구로 새 view를 탐색하는 3D CoT, RL view policy의 성과와 미관측 공간을 복원할 때의 오류를 정리합니다.
-description: "Think3D가 3D reconstruction과 camera tool loop로 공간 추론을 돕는 원리, 관측·추정의 경계, view 선택 비용과 robot 적용 전 실패 조건을 검증합니다."
+summary: Think3D가 point cloud를 만들고 camera rotate, zoom, shift 도구로 새 view를 탐색하는 3D CoT, RL view policy의 성과와 미관측 공간을 복원할 때의 오류를 정리합니다.
+description: "Think3D가 3D reconstruction과 camera tool loop로 공간 추론을 돕는 원리, 관측, 추정의 경계, view 선택 비용과 robot 적용 전 실패 조건을 검증합니다."
 faq:
   - question: "렌더링한 새 view는 실제로 새로 관측한 장면인가요?"
-    answer: "아닙니다. 기존 image·video로 만든 point cloud를 다른 각도에서 투영한 결과이며, 원본에 없던 geometry와 texture는 reconstruction의 추정입니다."
+    answer: "아닙니다. 기존 image, video로 만든 point cloud를 다른 각도에서 투영한 결과이며, 원본에 없던 geometry와 texture는 reconstruction의 추정입니다."
   - question: "Think3D의 오류는 어느 단계에서 생기나요?"
-    answer: "depth·camera pose를 만드는 reconstruction, point cloud를 image로 바꾸는 rendering, 필요한 view를 선택하고 관계를 해석하는 reasoning 단계에서 각각 생길 수 있습니다."
+    answer: "depth, camera pose를 만드는 reconstruction, point cloud를 image로 바꾸는 rendering, 필요한 view를 선택하고 관계를 해석하는 reasoning 단계에서 각각 생길 수 있습니다."
   - question: "정확도 외에 무엇을 함께 측정해야 하나요?"
-    answer: "평균 camera action 수, reconstruction·rendering·VLM별 latency, point cloud memory, 실제 관측과 추정 영역별 정확도를 함께 기록해야 합니다."
+    answer: "평균 camera action 수, reconstruction, rendering, VLM별 latency, point cloud memory, 실제 관측과 추정 영역별 정확도를 함께 기록해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.13029.png
   alt: "Think3D는 가려진 물체를 실제로 볼 수 있을까: 3D CoT와 재구성 오류의 한계 논문 대표 이미지"
@@ -39,14 +39,14 @@ Agent는 다음 loop를 반복합니다.
 ```text
 현재 view 관찰
 → 답에 부족한 공간 정보 판단
-→ rotate·zoom·shift camera action 선택
+→ rotate, zoom, shift camera action 선택
 → point cloud에서 ego/global view rendering
 → 새 view를 보고 답 또는 다음 action
 ```
 
 Text Chain-of-Thought가 문장 속 reasoning step을 늘린다면 Think3D의 3D CoT는 관찰 view 자체를 바꿉니다. “오른쪽 뒤가 가려졌으니 camera를 30도 회전” 같은 action이 reasoning의 일부입니다.
 
-이 방식은 raw 3D data를 VLM 전체에 다시 pretrain하지 않고 기존 VLM에 reconstruction·rendering tool을 붙인다는 장점이 있습니다. 대신 tool 결과를 믿을 수 있는지가 새로운 병목이 됩니다.
+이 방식은 raw 3D data를 VLM 전체에 다시 pretrain하지 않고 기존 VLM에 reconstruction, rendering tool을 붙인다는 장점이 있습니다. 대신 tool 결과를 믿을 수 있는지가 새로운 병목이 됩니다.
 
 ## 새 view는 관측과 추정을 구분해야 한다
 
@@ -58,7 +58,7 @@ Text Chain-of-Thought가 문장 속 reasoning step을 늘린다면 Think3D의 3D
 
 | 단계 | 대표 오류 |
 |---|---|
-| Reconstruction | depth·camera pose·point 위치가 틀림 |
+| Reconstruction | depth, camera pose, point 위치가 틀림 |
 | Rendering | hole, occlusion, 왜곡된 novel view |
 | Reasoning | 올바른 view를 보고도 관계를 잘못 판단 |
 
@@ -90,7 +90,7 @@ Think3D query에는 3D reconstruction, 여러 rendering, VLM call이 들어갑�
 
 1. 정답률 상승
 2. 평균 camera action 수
-3. reconstruction·rendering·VLM별 latency
+3. reconstruction, rendering, VLM별 latency
 4. 실패 query의 불필요한 view 수
 5. point cloud memory와 input view 수
 
@@ -108,7 +108,7 @@ Think3D가 잘 맞는 경우는 이미 multi-view image나 video가 있고, 질�
 
 - single-view와 true multi-view 입력
 - 가림이 약한 장면과 완전한 occlusion
-- 반사·투명·texture-less object
+- 반사, 투명, texture-less object
 - camera pose error
 - rendering hole이 있는 point cloud
 
@@ -121,13 +121,13 @@ Novel view 한 장만 보면 어느 pixel이 실제 input에 대응하고 어느
 | 영역 | 근거 | 답변에서의 취급 |
 |---|---|---|
 | 여러 input view에서 일치한 표면 | 실제 관측이 겹침 | 비교적 강한 근거로 사용 |
-| 한 view에서만 보인 표면 | depth·pose 오차 영향이 큼 | confidence를 낮추고 다른 view 확인 |
-| 어떤 input에도 없던 뒤쪽 | model의 geometry·texture 추정 | 사실처럼 확정하지 않음 |
-| rendering hole·겹침 경계 | 투영 과정의 artifact 가능 | 관계 판단에서 제외하거나 재관측 |
+| 한 view에서만 보인 표면 | depth, pose 오차 영향이 큼 | confidence를 낮추고 다른 view 확인 |
+| 어떤 input에도 없던 뒤쪽 | model의 geometry, texture 추정 | 사실처럼 확정하지 않음 |
+| rendering hole, 겹침 경계 | 투영 과정의 artifact 가능 | 관계 판단에서 제외하거나 재관측 |
 
 예를 들어 “상자 뒤에 컵이 있는가”라는 질문에서 회전 view에 컵 모양이 나타났더라도, 해당 point가 원본 video의 다른 frame에서 관측됐는지를 먼저 확인해야 합니다. 관측 frame이 없다면 답은 “있다”가 아니라 “재구성상 그렇게 추정되지만 추가 관측이 필요하다”가 되어야 합니다. 이 구분이 없으면 tool이 불확실성을 줄이는 대신 보기 좋은 hallucination을 만들 수 있습니다.
 
-View policy 자체의 기여도도 분리해 볼 수 있습니다. 같은 point cloud에서 random action, 고정된 정면·측면 view, 사람이 고른 oracle view, RL policy를 같은 call budget으로 비교하면 reconstruction 이득과 탐색 policy 이득이 섞이지 않습니다. 재구성을 정답 3D로 바꾼 조건까지 두면 낮은 점수가 geometry 때문인지 reasoning 때문인지 더 분명해집니다.
+View policy 자체의 기여도도 분리해 볼 수 있습니다. 같은 point cloud에서 random action, 고정된 정면, 측면 view, 사람이 고른 oracle view, RL policy를 같은 call budget으로 비교하면 reconstruction 이득과 탐색 policy 이득이 섞이지 않습니다. 재구성을 정답 3D로 바꾼 조건까지 두면 낮은 점수가 geometry 때문인지 reasoning 때문인지 더 분명해집니다.
 
 중단 기준도 필요합니다. 연속한 view에서 답이 바뀌지 않고 새로 확인된 관측 point가 없거나, action budget을 다 썼거나, rendering artifact 비율이 임계치를 넘으면 더 회전하지 않고 불확실 답변을 반환해야 합니다. Camera action을 많이 쓴다는 사실 자체가 더 많은 실제 정보를 얻었다는 뜻은 아닙니다.
 
@@ -136,21 +136,21 @@ Think3D의 기여는 VLM이 3D를 완전히 이해했다는 선언이 아니라,
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [VLM이 카메라 이동과 객체 이동을 헷갈리는 이유: DSR Suite와 GSM]({% post_url 2025-12-27-Learning-to-Reason-in-4D--Dynamic-Spatial-Understanding-for-Vision-Language-Models %}) — DSR Suite가 2D video에 camera pose·point cloud·mask·trajectory를 더해 동적 공간 질문을 만드는 과정과, GSM이 질문에 필요한 geometry만 고르는 이유를 설명합니다.
+- [VLM이 카메라 이동과 객체 이동을 헷갈리는 이유: DSR Suite와 GSM]({% post_url 2025-12-27-Learning-to-Reason-in-4D--Dynamic-Spatial-Understanding-for-Vision-Language-Models %}) — DSR Suite가 2D video에 camera pose, point cloud, mask, trajectory를 더해 동적 공간 질문을 만드는 과정과, GSM이 질문에 필요한 geometry만 고르는 이유를 설명합니다.
 - [lingbot-map: 단일 카메라로 1만 프레임의 3D 공간을 실시간으로 그려내는 원리]({% post_url 2026-07-19-lingbot-map-The-Underlying-Mechanism-of-Real-Time-3D-Rendering-of-10000-Frames-with-a-Single-Camera %}) — 단일 일반 카메라만으로 3D 공간을 실시간 스트리밍 방식으로 재구성하는 Robbyant의 오픈소스 파운데이션 모델, lingbot-map의 작동 원리, 아키텍처, 그리고 한계를 깊이 있게 분석합니다.
-- [LiDAR·RGB-D·CAD를 한 3D 인코더로 처리할 수 있을까? Utonia의 범위]({% post_url 2026-03-04-Utonia--Toward-One-Encoder-for-All-Point-Clouds %}) — Utonia가 밀도와 센싱 방식이 다른 다섯 종류의 포인트 클라우드를 한 자기지도 인코더에 학습시키는 방법과 범용 표현의 검증 한계를 짚습니다.
+- [LiDAR, RGB-D, CAD를 한 3D 인코더로 처리할 수 있을까? Utonia의 범위]({% post_url 2026-03-04-Utonia--Toward-One-Encoder-for-All-Point-Clouds %}) — Utonia가 밀도와 센싱 방식이 다른 다섯 종류의 포인트 클라우드를 한 자기지도 인코더에 학습시키는 방법과 범용 표현의 검증 한계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 렌더링한 새 view는 실제로 새로 관측한 장면인가요?
 
-아닙니다. 기존 image·video로 만든 point cloud를 다른 각도에서 투영한 결과이며, 원본에 없던 geometry와 texture는 reconstruction의 추정입니다.
+아닙니다. 기존 image, video로 만든 point cloud를 다른 각도에서 투영한 결과이며, 원본에 없던 geometry와 texture는 reconstruction의 추정입니다.
 
 ### Think3D의 오류는 어느 단계에서 생기나요?
 
-depth·camera pose를 만드는 reconstruction, point cloud를 image로 바꾸는 rendering, 필요한 view를 선택하고 관계를 해석하는 reasoning 단계에서 각각 생길 수 있습니다.
+depth, camera pose를 만드는 reconstruction, point cloud를 image로 바꾸는 rendering, 필요한 view를 선택하고 관계를 해석하는 reasoning 단계에서 각각 생길 수 있습니다.
 
 ### 정확도 외에 무엇을 함께 측정해야 하나요?
 
-평균 camera action 수, reconstruction·rendering·VLM별 latency, point cloud memory, 실제 관측과 추정 영역별 정확도를 함께 기록해야 합니다.
+평균 camera action 수, reconstruction, rendering, VLM별 latency, point cloud memory, 실제 관측과 추정 영역별 정확도를 함께 기록해야 합니다.

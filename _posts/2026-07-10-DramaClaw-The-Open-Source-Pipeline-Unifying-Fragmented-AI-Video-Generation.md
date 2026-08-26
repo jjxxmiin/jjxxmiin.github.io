@@ -13,7 +13,7 @@ summary: DramaClaw는 텍스트 대본 입력부터 캐릭터 추출, 스토리�
   오픈소스 비디오 엔진입니다. 노드 기반 무한 캔버스와 DAG 병렬 처리 스케줄링을 통해 단방향 생성의 한계를 극복하고 캐릭터 일관성 유지와 압도적인
   제작 속도를 제공합니다. 텍스트, 이미지, 비디오, 음성 생성 등 흩어진 AI 모델들을 하나의 게이트웨이로 통합하여 개인 서버 환경에서도 완벽한
   영상 제작 파이프라인을 구축할 수 있습니다.
-description: 'DramaClaw가 대본·스토리보드·영상·음성·합성을 DAG로 연결하는 구조와 캐릭터 일관성, 노드 재시도 비용·생성 모델의 권리·단계별 검수 지점을 정리합니다.'
+description: 'DramaClaw가 대본, 스토리보드, 영상, 음성, 합성을 DAG로 연결하는 구조와 캐릭터 일관성, 노드 재시도 비용, 생성 모델의 권리, 단계별 검수 지점을 정리합니다.'
 github_url: https://github.com/dramaclaw/dramaclaw
 image:
   path: https://opengraph.githubassets.com/1/dramaclaw/dramaclaw
@@ -43,7 +43,7 @@ mermaid: true
 chart: true
 ---
 
-DramaClaw는 대본, 이미지, 영상, 음성, 합성을 노드와 DAG로 연결해 생성 작업의 순서와 재실행 범위를 관리하려는 파이프라인입니다. 여러 모델을 한 화면에서 호출한다고 캐릭터·입 모양·권리가 자동으로 일관되는 것은 아닙니다. 각 단계의 입력·모델 버전·비용을 남기고 실패한 노드만 재실행할 수 있는지 대표 프로젝트로 확인하세요.
+DramaClaw는 대본, 이미지, 영상, 음성, 합성을 노드와 DAG로 연결해 생성 작업의 순서와 재실행 범위를 관리하려는 파이프라인입니다. 여러 모델을 한 화면에서 호출한다고 캐릭터, 입 모양, 권리가 자동으로 일관되는 것은 아닙니다. 각 단계의 입력, 모델 버전, 비용을 남기고 실패한 노드만 재실행할 수 있는지 대표 프로젝트로 확인하세요.
 
 ## 파편화된 영상 제작에서 무엇을 먼저 통합할까
 
@@ -377,8 +377,8 @@ DramaClaw는 단순히 영상을 편하게 만들어주는 도구 이상의 의�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [AI 영상의 소리와 장면이 어긋난다면? JavisDiT++의 시간 정렬]({% post_url 2026-02-26-JavisDiT----Unified-Modeling-and-Optimization-for-Joint-Audio-Video-Generation %}) — JavisDiT++가 공유 attention과 모달리티별 FFN, TA-RoPE, AV-DPO로 영상과 오디오를 함께 생성하는 원리와 100만 데이터 결과의 범위를 짚습니다.
-- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성·평가·비용의 한계를 짚습니다.
-- [MILS 톺아보기]({% post_url 2025-02-13-MILS %}) — 추론만으로 멀티모달 작업을 수행하는 새로운 패러다임
+- [Clawra는 어떻게 일관된 캐릭터 이미지를 보내나: 설치와 안전 기준]({% post_url 2026-02-13-OpenClaw-The-AI-Agent-Clawra %}) — 최근 깃허브에서 화제가 된 오픈소스 AI 에이전트 'Clawra'를 심층 분석합니다. OpenClaw 프레임워크 기반으로 작동하며, 일관된 캐릭터 유지와 자가 촬영(Selfie) 기능이 특징입니다. 설치부터 SOUL.md 설정…
+- [이미지 생성 Step을 1에서 50까지 바꿔도 될까? Self-E의 Any-Step 학습]({% post_url 2026-01-01-Self-Evaluation-Unlocks-Any-Step-Text-to-Image-Generation %}) — Self-E가 별도 teacher distillation 없이 flow matching의 local supervision과 자체 sample 평가를 결합해 하나의 weight로 1~50 step 생성을 지원하는 원리와 비용을…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

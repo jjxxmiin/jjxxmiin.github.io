@@ -11,7 +11,7 @@ tags:
   - AI에이전트
 summary: 기존 터미널 멀티플렉서의 한계를 넘어, AI 에이전트의 작업 상태(대기, 작업 중, 완료)를 실시간으로 자동 추적하고 제어하는 herdr의
   구조와 활용법을 알아봅니다.
-description: 'herdr가 여러 AI 코딩 세션의 대기·작업·완료 상태를 추적하는 방식과 Socket API, 오분류·세션 복구·권한 분리 기준을 설명합니다.'
+description: 'herdr가 여러 AI 코딩 세션의 대기, 작업, 완료 상태를 추적하는 방식과 Socket API, 오분류, 세션 복구, 권한 분리 기준을 설명합니다.'
 github_url: https://github.com/ogulcancelik/herdr
 image:
   path: https://opengraph.githubassets.com/1/ogulcancelik/herdr
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-herdr는 여러 터미널의 AI 코딩 세션을 한 화면에서 묶고 대기·작업·완료 상태를 추적하려는 멀티플렉서입니다. 상태 표시는 에이전트가 실제로 요구를 충족했다는 검증이 아니라 다음에 사람이 볼 세션을 고르는 운영 신호입니다. 세션이 끊기거나 권한 질문에서 멈췄을 때 감지·재개되는지, Socket API가 허용된 작업만 제어하는지 확인하세요.
+herdr는 여러 터미널의 AI 코딩 세션을 한 화면에서 묶고 대기, 작업, 완료 상태를 추적하려는 멀티플렉서입니다. 상태 표시는 에이전트가 실제로 요구를 충족했다는 검증이 아니라 다음에 사람이 볼 세션을 고르는 운영 신호입니다. 세션이 끊기거나 권한 질문에서 멈췄을 때 감지, 재개되는지, Socket API가 허용된 작업만 제어하는지 확인하세요.
 
 상단 링크 블록
 - [herdr 공식 GitHub 저장소](https://github.com/ogulcancelik/herdr)

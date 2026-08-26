@@ -1,13 +1,13 @@
 ---
 layout: post
-title: 'Browser-use는 셀렉터 자동화를 대체할까: 비용·권한·실패 복구 기준'
+title: 'Browser-use는 셀렉터 자동화를 대체할까: 비용, 권한, 실패 복구 기준'
 date: '2026-03-01'
 categories: Tech
 tags:
   - LLM
   - AI에이전트
-summary: 'Browser-use가 LLM과 Playwright로 웹 작업을 수행하는 방식, 고정 셀렉터 자동화와의 차이, 토큰 비용·권한·재현성·복구 기준을 정리합니다.'
-description: 'Browser-use의 LLM·Playwright·비전 기반 브라우저 제어가 적합한 업무와 고정 스크립트가 나은 조건, 비용·보안·승인·실패 복구법을 설명합니다.'
+summary: 'Browser-use가 LLM과 Playwright로 웹 작업을 수행하는 방식, 고정 셀렉터 자동화와의 차이, 토큰 비용, 권한, 재현성, 복구 기준을 정리합니다.'
+description: 'Browser-use의 LLM, Playwright, 비전 기반 브라우저 제어가 적합한 업무와 고정 스크립트가 나은 조건, 비용, 보안, 승인, 실패 복구법을 설명합니다.'
 github_url: https://github.com/browser-use/browser-use
 image:
   path: https://opengraph.githubassets.com/1/browser-use/browser-use
@@ -18,10 +18,10 @@ faq:
   - question: '자연어로 지시하면 UI가 바뀌어도 항상 복구되나요?'
     answer: '문맥으로 다른 요소를 찾을 가능성은 있지만 같은 이름의 버튼, 모달, 광고, 로그인 상태에 따라 잘못된 행동을 할 수 있습니다. 중요한 작업은 사전조건과 성공조건, 허용 행동을 명시해야 합니다.'
   - question: '결제나 메시지 발송도 에이전트에 맡겨도 되나요?'
-    answer: '되돌리기 어려운 행동은 실행 직전 사람 승인과 금액·대상 제한을 두는 편이 안전합니다. 세션·비밀 권한을 최소화하고 모든 행동과 근거를 감사 로그에 남겨야 합니다.'
+    answer: '되돌리기 어려운 행동은 실행 직전 사람 승인과 금액, 대상 제한을 두는 편이 안전합니다. 세션, 비밀 권한을 최소화하고 모든 행동과 근거를 감사 로그에 남겨야 합니다.'
 ---
 
-Browser-use는 LLM이 페이지 상태를 해석하고 Playwright를 통해 행동하게 만드는 브라우저 에이전트 프레임워크입니다. UI가 자주 바뀌고 탐색 과정에 판단이 필요한 업무에는 고정 셀렉터 코드를 줄일 수 있지만, 속도·비용·재현성과 잘못된 클릭 위험은 더 커질 수 있습니다. 어떤 작업을 맡길지는 “자연어로 된다”는 인상보다 행동의 가역성, 성공조건, 실패 시 피해를 기준으로 정해야 합니다.
+Browser-use는 LLM이 페이지 상태를 해석하고 Playwright를 통해 행동하게 만드는 브라우저 에이전트 프레임워크입니다. UI가 자주 바뀌고 탐색 과정에 판단이 필요한 업무에는 고정 셀렉터 코드를 줄일 수 있지만, 속도, 비용, 재현성과 잘못된 클릭 위험은 더 커질 수 있습니다. 어떤 작업을 맡길지는 “자연어로 된다”는 인상보다 행동의 가역성, 성공조건, 실패 시 피해를 기준으로 정해야 합니다.
 
 ## Browser-use는 기존 자동화와 무엇이 다른가
 
@@ -66,13 +66,13 @@ async def main():
 asyncio.run(main())
 ```
 
-이 조각은 agent와 모델, 자연어 task를 연결하는 최소 형태입니다. 패키지·모델 버전, API key, 브라우저 설치, timeout, 허용 도메인, 결과 검증과 비용 상한은 빠져 있습니다. 가격 비교처럼 값이 변하는 작업은 출처 URL과 확인 시각을 결과에 남기고, 같은 상품인지 사람이 확인할 수 있어야 합니다.
+이 조각은 agent와 모델, 자연어 task를 연결하는 최소 형태입니다. 패키지, 모델 버전, API key, 브라우저 설치, timeout, 허용 도메인, 결과 검증과 비용 상한은 빠져 있습니다. 가격 비교처럼 값이 변하는 작업은 출처 URL과 확인 시각을 결과에 남기고, 같은 상품인지 사람이 확인할 수 있어야 합니다.
 
 ## 어떤 실무 작업부터 시험할까
 
 후보 업무는 다음처럼 행동과 실패 비용이 분명한 작은 단위가 좋습니다.
 
-* **가격 모니터링:** 읽기 전용으로 시작하고 상품 식별·통화·재고를 검증한 뒤 알림만 보냅니다.
+* **가격 모니터링:** 읽기 전용으로 시작하고 상품 식별, 통화, 재고를 검증한 뒤 알림만 보냅니다.
 * **탐색형 QA:** 에이전트가 발견한 경로를 기록하되 핵심 회귀 시나리오는 결정적 테스트로 다시 고정합니다.
 * **링크 점검:** 외부 상태를 바꾸지 않으면서 페이지 이동과 오류 분류 능력을 평가할 수 있습니다.
 
@@ -95,17 +95,17 @@ asyncio.run(main())
 
 읽기 전용 계정과 별도 브라우저 profile로 시작하고 허용 도메인을 제한합니다. 비밀번호와 session cookie가 모델 입력이나 screenshot log에 들어가지 않는지 확인합니다. 파일 다운로드와 업로드, clipboard, 새 탭 이동은 각각 별도 권한으로 취급해야 합니다.
 
-결제, 삭제, 공개 게시, 메시지 발송은 실행 직전에 사람 승인을 둡니다. 승인 화면에는 대상·금액·최종 payload를 보여 줘야 단순한 “계속할까요?”보다 의미가 있습니다. 동일 action이 재시도에서 두 번 실행되지 않도록 transaction ID나 완료 기록을 확인하는 절차도 필요합니다.
+결제, 삭제, 공개 게시, 메시지 발송은 실행 직전에 사람 승인을 둡니다. 승인 화면에는 대상, 금액, 최종 payload를 보여 줘야 단순한 “계속할까요?”보다 의미가 있습니다. 동일 action이 재시도에서 두 번 실행되지 않도록 transaction ID나 완료 기록을 확인하는 절차도 필요합니다.
 
 실패 로그에는 각 단계의 관찰, 선택한 action, 결과 URL, 성공조건 판정을 남깁니다. 개인정보와 secret은 가리고, 잘못된 행동을 재현할 수 있는 최소 정보는 보존합니다. 에이전트가 마지막에 “완료”라고 말한 사실이 아니라 실제 페이지 상태나 외부 시스템의 확인 응답으로 성공을 판정해야 합니다.
 
 ## 자연어 작업을 실행 규칙으로 어떻게 바꿀까
 
-“두 상품의 가격을 비교해 줘”라는 지시에는 같은 저장 용량과 판매 조건인지, 할인·배송비·통화를 어떻게 다룰지 빠져 있습니다. 에이전트에 상품 식별 필드, 허용 도메인, 최대 페이지 수, 결과에 반드시 포함할 URL과 확인 시각을 명시합니다. 조건을 만족하지 못하면 추측해서 표를 채우지 말고 `확인 불가`로 반환하게 해야 합니다.
+“두 상품의 가격을 비교해 줘”라는 지시에는 같은 저장 용량과 판매 조건인지, 할인, 배송비, 통화를 어떻게 다룰지 빠져 있습니다. 에이전트에 상품 식별 필드, 허용 도메인, 최대 페이지 수, 결과에 반드시 포함할 URL과 확인 시각을 명시합니다. 조건을 만족하지 못하면 추측해서 표를 채우지 말고 `확인 불가`로 반환하게 해야 합니다.
 
 회원가입 QA라면 test account와 허용 입력, 제출 직전까지인지 실제 생성까지인지 경계를 적습니다. 성공조건은 “에이전트가 완료라고 답함”이 아니라 특정 URL, 확인 message, database의 test record처럼 외부 상태로 정합니다. 실패조건에는 개인정보가 화면에 노출됨, 허용하지 않은 domain 이동, 같은 form의 중복 제출을 포함할 수 있습니다.
 
-작업을 몇 단계의 checkpoint로 나누면 긴 실행의 drift를 줄일 수 있습니다. 탐색 결과를 먼저 검토하고, action plan을 승인한 뒤, 쓰기 행동을 실행하는 방식입니다. 각 checkpoint에서 남은 token·시간·행동 수를 확인하고 한도를 넘으면 중단합니다. 자연어의 유연성은 유지하되 실행 가능 범위는 기계적으로 검증할 수 있게 만드는 것이 핵심입니다.
+작업을 몇 단계의 checkpoint로 나누면 긴 실행의 drift를 줄일 수 있습니다. 탐색 결과를 먼저 검토하고, action plan을 승인한 뒤, 쓰기 행동을 실행하는 방식입니다. 각 checkpoint에서 남은 token, 시간, 행동 수를 확인하고 한도를 넘으면 중단합니다. 자연어의 유연성은 유지하되 실행 가능 범위는 기계적으로 검증할 수 있게 만드는 것이 핵심입니다.
 
 성공률은 쉬운 페이지에서만 재면 과대평가됩니다. 로그인 만료, 느린 loading, 동일 이름의 버튼, modal, mobile layout을 포함한 작은 실패 세트를 반복합니다. Model이나 browser-use version을 바꿀 때 같은 세트를 돌려 이전에는 없던 잘못된 클릭을 찾습니다.
 
@@ -124,9 +124,9 @@ asyncio.run(main())
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [pinchtab은 Playwright를 대체할까: 12MB HTTP 브리지와 800토큰 접근성 트리]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-pinchtab-the-Ultimate-Browser-Control-for-AI-Agents %}) — 12MB Go 바이너리로 Chrome을 HTTP 제어하는 pinchtab의 토큰 절감 구조와, 접근성 품질·세션 보안·시각 작업 한계를 비교합니다.
-- [셀렉터가 자꾸 깨질 때 Page Agent를 써도 될까: 속도·안전 판단법]({% post_url 2026-03-09-Does-a-Silver-Bullet-for-Web-Automation-Exist-The-Future-of-Declarative-Browsing-with-Page-Agents %}) — Page Agent의 시맨틱 DOM·시각 입력·계획·Playwright 실행 구조와 셀렉터 자동화 대비 장점, 지연·비용·오작동 한계를 살펴봅니다.
-- [Obscura는 정말 RAM 30MB로 V8을 돌릴까: CDP 호환성과 렌더링 공백]({% post_url 2026-04-28-Running-V8-on-30MB-RAM-A-Deep-Dive-into-Obscura-the-Monster-Rust-built-Headless-Browser %}) — Obscura의 30~40MB RAM·70MB 바이너리·85ms 시작 주장을 구분해 읽고, Blink를 덜어낸 대가인 CSS 렌더링·Web API·CDP 호환 공백을 점검합니다.
+- [pinchtab은 Playwright를 대체할까: 12MB HTTP 브리지와 800토큰 접근성 트리]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-pinchtab-the-Ultimate-Browser-Control-for-AI-Agents %}) — 12MB Go 바이너리로 Chrome을 HTTP 제어하는 pinchtab의 토큰 절감 구조와, 접근성 품질, 세션 보안, 시각 작업 한계를 비교합니다.
+- [셀렉터가 자꾸 깨질 때 Page Agent를 써도 될까: 속도, 안전 판단법]({% post_url 2026-03-09-Does-a-Silver-Bullet-for-Web-Automation-Exist-The-Future-of-Declarative-Browsing-with-Page-Agents %}) — Page Agent의 시맨틱 DOM, 시각 입력, 계획, Playwright 실행 구조와 셀렉터 자동화 대비 장점, 지연, 비용, 오작동 한계를 살펴봅니다.
+- [Obscura는 정말 RAM 30MB로 V8을 돌릴까: CDP 호환성과 렌더링 공백]({% post_url 2026-04-28-Running-V8-on-30MB-RAM-A-Deep-Dive-into-Obscura-the-Monster-Rust-built-Headless-Browser %}) — Obscura의 30~40MB RAM, 70MB 바이너리, 85ms 시작 주장을 구분해 읽고, Blink를 덜어낸 대가인 CSS 렌더링, Web API, CDP 호환 공백을 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -141,7 +141,7 @@ asyncio.run(main())
 
 ### 결제나 메시지 발송도 에이전트에 맡겨도 되나요?
 
-되돌리기 어려운 행동은 실행 직전 사람 승인과 금액·대상 제한을 두는 편이 안전합니다. 세션·비밀 권한을 최소화하고 모든 행동과 근거를 감사 로그에 남겨야 합니다.
+되돌리기 어려운 행동은 실행 직전 사람 승인과 금액, 대상 제한을 두는 편이 안전합니다. 세션, 비밀 권한을 최소화하고 모든 행동과 근거를 감사 로그에 남겨야 합니다.
 
 ## References
 - [GitHub 저장소](https://github.com/browser-use/browser-use)

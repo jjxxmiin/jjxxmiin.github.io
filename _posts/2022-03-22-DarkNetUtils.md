@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/utils.c"
 layout: post
 title:  "Darknet utils.c 이름만 믿으면 틀리는 7곳: mse_array는 MSE가 아니다"
-summary: "Darknet utils.c의 CLI 파서·문자열·파일·CSV·난수·배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위·0 나눗셈·입력 변경 위험을 짚습니다."
-description: "Darknet utils.c의 mutating CLI·string·CSV·array·random helper를 따라 RMS 오명, bounds·zero division·ownership·thread 실패를 설명합니다."
+summary: "Darknet utils.c의 CLI 파서, 문자열, 파일, CSV, 난수, 배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위, 0 나눗셈, 입력 변경 위험을 짚습니다."
+description: "Darknet utils.c의 mutating CLI, string, CSV, array, random helper를 따라 RMS 오명, bounds, zero division, ownership, thread 실패를 설명합니다."
 date:   2022-03-22 16:00 -0400
 categories: DarkNet
 image:
@@ -26,7 +26,7 @@ faq:
 
 Darknet `utils.c`를 포팅할 때는 함수 이름보다 배열을 직접 바꾸는지, 범위와 0을 검사하는지부터 봐야 하며, 특히 `mse_array`는 MSE가 아니라 root mean square를 반환합니다.
 
-원문은 수십 개 helper를 사전처럼 나열하지만 실제 문제는 짧은 코드의 숨은 전제에서 생깁니다. 이 글은 CLI, 문자열·파일, CSV, 배열·난수로 묶어 코드에서 바로 확인되는 위험 지점을 추립니다. 모든 조각은 Darknet의 list·error helper와 C runtime을 전제로 하며 독립 라이브러리가 아닙니다.
+원문은 수십 개 helper를 사전처럼 나열하지만 실제 문제는 짧은 코드의 숨은 전제에서 생깁니다. 이 글은 CLI, 문자열, 파일, CSV, 배열, 난수로 묶어 코드에서 바로 확인되는 위험 지점을 추립니다. 모든 조각은 Darknet의 list, error helper와 C runtime을 전제로 하며 독립 라이브러리가 아닙니다.
 
 ## CLI Parser는 argv를 읽기만 하지 않습니다
 
@@ -47,7 +47,7 @@ if(0==strcmp(argv[i], arg)){
 
 더 직접적인 인덱스 문제는 `random_index_order`입니다. 배열은 `max-min`개만 할당하지만 loop는 `inds[i]`에 `i=min...max-1`로 씁니다. `min=0`이 아닐 때 시작부터 배열 offset과 맞지 않으므로 이 조각을 그대로 일반 구간 shuffle로 사용하면 안 됩니다.
 
-## 문자열·파일 Helper는 소유권과 종료 코드를 봅니다
+## 문자열, 파일 Helper는 소유권과 종료 코드를 봅니다
 
 `split_str`은 구분자를 null 문자로 바꾸므로 입력 문자열 자체를 훼손하고, 반환 list의 항목은 그 원본 buffer 안을 가리킵니다. 반면 `copy_string`과 `fgetl`은 새 메모리를 반환하므로 호출자가 해제해야 합니다. 비슷한 문자열 반환 함수라도 소유권이 다릅니다.
 
@@ -81,7 +81,7 @@ float mse_array(float *a, int n)
 
 `sample_array`는 합으로 배열 전체를 나눠 확률화하므로 입력 `a`를 직접 변경합니다. 합이 0이거나 음수 값이 섞인 경우를 검사하지 않습니다. `one_hot_encode`도 `(int)a[i]`가 `0...k-1`인지 확인하지 않고 바로 index로 씁니다.
 
-`rand_int`와 `rand_uniform`은 min·max 순서가 반대면 교환하지만 암호학적 난수 함수가 아닙니다. `rand_normal`은 Box–Muller 변환의 두 번째 값을 static 변수에 보관합니다. 재현성과 동시 접근 요구가 있다면 외부 seed와 호출 모델까지 함께 관리해야 합니다.
+`rand_int`와 `rand_uniform`은 min, max 순서가 반대면 교환하지만 암호학적 난수 함수가 아닙니다. `rand_normal`은 Box–Muller 변환의 두 번째 값을 static 변수에 보관합니다. 재현성과 동시 접근 요구가 있다면 외부 seed와 호출 모델까지 함께 관리해야 합니다.
 
 실용적인 검증 순서는 mutation, bounds, empty input, allocation ownership입니다. 각 helper에 정상값 하나만 넣는 대신 `min!=0`, `n=0`, 합이 0인 배열, 너무 긴 문자열, field 수 초과를 넣어야 이름 뒤에 숨은 전제가 드러납니다.
 
@@ -89,7 +89,7 @@ float mse_array(float *a, int n)
 
 입력 변경 여부, 새 allocation 반환 여부, 허용 범위, empty input, 오류 시 종료 코드와 thread safety를 함수마다 기록합니다. 짧은 helper일수록 이름만 보고 호출되기 쉬우므로 unit test를 원 source behavior에 고정합니다. Mutable parser에는 원본 copy가 필요한 호출부도 표시합니다.
 
-CLI는 dangling option, 중복 option과 숫자 변환 실패를, CSV는 quote·field 초과와 빈 line을 시험합니다. Array는 n=0, constant, NaN·Inf, 합 0과 class index 범위를 넣습니다.
+CLI는 dangling option, 중복 option과 숫자 변환 실패를, CSV는 quote, field 초과와 빈 line을 시험합니다. Array는 n=0, constant, NaN, Inf, 합 0과 class index 범위를 넣습니다.
 
 ## 난수 재현성은 어떻게 관리하나요?
 
@@ -101,9 +101,9 @@ File open 실패가 exit 0이면 orchestration이 성공으로 오해할 수 있
 
 ## Porting 우선순위는 어떻게 정하나요?
 
-전체 utils를 한 번에 옮기기보다 실제 call graph에서 쓰이는 helper부터 mutation·ownership test와 함께 포팅합니다. 이름이 표준 함수와 비슷해도 return·error·side effect 계약을 wrapper에 명시합니다. 사용되지 않는 실험 helper를 production API로 노출하지 않으면 검증 범위를 줄일 수 있습니다.
+전체 utils를 한 번에 옮기기보다 실제 call graph에서 쓰이는 helper부터 mutation, ownership test와 함께 포팅합니다. 이름이 표준 함수와 비슷해도 return, error, side effect 계약을 wrapper에 명시합니다. 사용되지 않는 실험 helper를 production API로 노출하지 않으면 검증 범위를 줄일 수 있습니다.
 
-CPU 32·64-bit와 Windows·Linux에서 `int`, `size_t`, newline과 exit code 차이가 있는 경계를 선택해 테스트합니다. Compiler warning과 sanitizer를 오류로 취급하면 format string·signed overflow·범위 문제를 일찍 찾을 수 있습니다.
+CPU 32, 64-bit와 Windows, Linux에서 `int`, `size_t`, newline과 exit code 차이가 있는 경계를 선택해 테스트합니다. Compiler warning과 sanitizer를 오류로 취급하면 format string, signed overflow, 범위 문제를 일찍 찾을 수 있습니다.
 
 ## 자주 남는 질문
 
@@ -128,7 +128,7 @@ CPU 32·64-bit와 Windows·Linux에서 `int`, `size_t`, newline과 exit code 차
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유]({% post_url 2022-02-10-DarkNetCol2im %}) — Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다.
-- [DarkNet image와 OpenCV Mat 변환: 채널 순서·스트림 설정 주의점]({% post_url 2022-02-25-DarkNetImageOpencv %}) — DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB·BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다.
 - [Darknet avgpool은 일반 Average Pooling이 아니다: Global Average 코드 읽기]({% post_url 2022-02-06-DarkNetAvgpool %}) — Darknet avgpool_layer가 window와 stride 없이 채널마다 h×w 전체를 평균내는 Global Average Pooling인 이유와 backward에서 gradient를 균등 분배하는 방식을 설명합니다.
+- [Darknet blas.c를 어디서부터 읽을까? 배열 연산, Loss, Feature Map 지도]({% post_url 2022-02-08-DarkNetBlas %}) — 천 줄이 넘는 Darknet blas.c를 copy, axpy 같은 배열 primitive, loss와 softmax, reorg, upsample 같은 tensor 변환으로 나눠 읽고 stride와 누적 semantics를…
+- [Darknet ISEG Layer는 무엇을 학습하나: 픽셀 클래스와 인스턴스 임베딩 해설]({% post_url 2022-03-02-DarkNetIsegLayer %}) — Darknet의 ISEG layer가 truth mask를 읽어 클래스 delta와 인스턴스 embedding delta를 만드는 과정을 배열 인덱스와 함께 추적합니다.
 <!-- internal-links:end -->

@@ -7,8 +7,8 @@ tags:
   - LLM
   - 웹개발
   - AI보안
-summary: "Prompt·Provider·Test Matrix와 Assertion을 자동 실행하는 Promptfoo의 장점, Judge 비결정성·Cache 무효화·YAML 관리·CI 차단 기준을 정리합니다."
-description: 'Promptfoo로 프롬프트·모델 회귀 테스트를 구성하는 방법과 결정적 assertion, LLM Judge 보정, 캐시·비용·CI 차단 기준을 설명합니다.'
+summary: "Prompt, Provider, Test Matrix와 Assertion을 자동 실행하는 Promptfoo의 장점, Judge 비결정성, Cache 무효화, YAML 관리, CI 차단 기준을 정리합니다."
+description: 'Promptfoo로 프롬프트, 모델 회귀 테스트를 구성하는 방법과 결정적 assertion, LLM Judge 보정, 캐시, 비용, CI 차단 기준을 설명합니다.'
 github_url: https://github.com/promptfoo/promptfoo
 image:
   path: https://opengraph.githubassets.com/1/promptfoo/promptfoo
@@ -19,7 +19,7 @@ faq:
   - question: 'LLM Judge 결과를 바로 CI 차단 조건으로 써도 되나요?'
     answer: '처음부터 바로 차단하는 것은 위험합니다. 같은 답에 대한 반복 합의율과 사람 판정 일치율을 측정하고 신뢰도가 높은 사례부터 단계적으로 Gate로 승격해야 합니다.'
   - question: '프롬프트 회귀 테스트 사례는 어디서 모아야 하나요?'
-    answer: '실제 운영 장애, 사용자 피드백과 명시된 정책에서 재현 가능한 입력을 먼저 모으고 정상·경계·악의적 입력을 함께 관리하는 편이 좋습니다.'
+    answer: '실제 운영 장애, 사용자 피드백과 명시된 정책에서 재현 가능한 입력을 먼저 모으고 정상, 경계, 악의적 입력을 함께 관리하는 편이 좋습니다.'
 ---
 
 Promptfoo로 프롬프트 회귀 테스트를 반복할 수는 있지만, LLM 출력을 일반 함수처럼 완전히 결정적인 단위 테스트로 만들 수는 없습니다.
@@ -34,7 +34,7 @@ N개의 Prompt × M개의 Provider × K개의 Test Case를 선언하면 가능�
 
 ## Assertion은 가능한 한 결정적 기준부터 쓴다
 
-Promptfoo는 `equals`, `contains`, `regex`, `is-json` 같은 구조·문자열 검사와 `similar`, `llm-rubric`, `factuality` 같은 의미 평가를 제공합니다. JSON Schema, 금지 문자열, Function Call처럼 기계적으로 판단 가능한 조건은 LLM Judge보다 먼저 적용하는 것이 좋습니다.
+Promptfoo는 `equals`, `contains`, `regex`, `is-json` 같은 구조, 문자열 검사와 `similar`, `llm-rubric`, `factuality` 같은 의미 평가를 제공합니다. JSON Schema, 금지 문자열, Function Call처럼 기계적으로 판단 가능한 조건은 LLM Judge보다 먼저 적용하는 것이 좋습니다.
 
 `llm-rubric`은 답변과 평가 기준을 Judge Prompt로 묶어 별도 Model이 Pass와 이유를 내게 합니다. Temperature 0은 변동성을 낮출 수 있지만 같은 결과를 보장하지 않습니다. Model Update, Backend 차이, 모호한 Rubric 때문에 동일 답이 Pass와 Fail 사이에서 흔들릴 수 있습니다. 중요한 Case는 사람 Label과 Judge 판정을 주기적으로 비교해야 합니다.
 
@@ -76,9 +76,9 @@ Model Provider가 같은 이름 뒤의 Serving Model을 바꾸는 경우에는 C
 
 ## CI 차단은 신뢰도 높은 Test부터 적용한다
 
-처음부터 수백 개 Case로 Merge를 막으면 Flaky Judge 때문에 팀이 Test를 무시하게 될 수 있습니다. 최근 장애 다섯 개를 고정 Case로 만들고, JSON·금지 동작·필수 근거 같은 결정적 Assertion부터 CI에 넣습니다. Judge 기반 평가는 반복 실행의 합의율과 사람 판정 일치율이 충분할 때 Gate로 승격합니다.
+처음부터 수백 개 Case로 Merge를 막으면 Flaky Judge 때문에 팀이 Test를 무시하게 될 수 있습니다. 최근 장애 다섯 개를 고정 Case로 만들고, JSON, 금지 동작, 필수 근거 같은 결정적 Assertion부터 CI에 넣습니다. Judge 기반 평가는 반복 실행의 합의율과 사람 판정 일치율이 충분할 때 Gate로 승격합니다.
 
-Case가 늘면 YAML 한 파일에 모두 넣기보다 JSONL·CSV 등 외부 Dataset과 Schema Version을 관리할 수 있습니다. [Expected Outputs 문서](https://www.promptfoo.dev/docs/configuration/expected-outputs/)를 기준으로 실패 이유가 검토 가능한지 확인합니다. Promptfoo가 제공하는 것은 TDD라는 이름의 완벽한 정답기가 아니라 변경 전후를 같은 기준으로 비교하는 Eval Harness입니다.
+Case가 늘면 YAML 한 파일에 모두 넣기보다 JSONL, CSV 등 외부 Dataset과 Schema Version을 관리할 수 있습니다. [Expected Outputs 문서](https://www.promptfoo.dev/docs/configuration/expected-outputs/)를 기준으로 실패 이유가 검토 가능한지 확인합니다. Promptfoo가 제공하는 것은 TDD라는 이름의 완벽한 정답기가 아니라 변경 전후를 같은 기준으로 비교하는 Eval Harness입니다.
 
 ## 좋은 회귀 사례는 어떤 조건을 갖추나
 
@@ -92,9 +92,9 @@ Case가 늘면 YAML 한 파일에 모두 넣기보다 JSONL·CSV 등 외부 Data
 
 같은 답을 여러 번 평가해 판정이 흔들리는 사례를 찾습니다. 변동이 큰 항목은 CI 차단보다 경고나 사람 검토로 두고, 결정적 검사로 바꿀 수 있는 부분을 분리합니다. Judge 모델이나 프롬프트가 바뀌면 기존 보정 세트를 다시 실행해야 과거 점수와 비교할 수 있습니다.
 
-## 모델·프롬프트 변경을 어떻게 분리할까
+## 모델, 프롬프트 변경을 어떻게 분리할까
 
-프롬프트와 모델을 동시에 바꾸면 결과 변화의 원인을 알기 어렵습니다. 먼저 같은 모델에서 이전·새 프롬프트를 비교하고, 그 다음 같은 프롬프트에서 모델 버전을 비교합니다. 모델 파라미터와 도구 정의, 검색 데이터 버전도 실행 결과에 함께 남겨야 합니다.
+프롬프트와 모델을 동시에 바꾸면 결과 변화의 원인을 알기 어렵습니다. 먼저 같은 모델에서 이전, 새 프롬프트를 비교하고, 그 다음 같은 프롬프트에서 모델 버전을 비교합니다. 모델 파라미터와 도구 정의, 검색 데이터 버전도 실행 결과에 함께 남겨야 합니다.
 
 모든 조합을 매번 실행할 수 없다면 변경 유형에 따라 범위를 선택합니다. 프롬프트 수정은 관련 의도와 핵심 안전 사례를 빠르게 실행하고, 모델 교체와 배포 전에는 전체 세트를 실행합니다. 라우터나 도구 코드가 바뀌었다면 프롬프트 답변뿐 아니라 실제 호출 인수와 부작용 없는지까지 검사해야 합니다.
 
@@ -119,9 +119,9 @@ PR마다 실행할 예상 호출 수와 상한을 계산하고 대상 모델, Ju
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Caveman식 짧은 LLM 답변은 비용을 줄일까: 품질·가독성·측정 기준]({% post_url 2026-04-12-Making-AI-a-Caveman-A-Deep-Dive-into-the-Caveman-Architecture-that-Halves-LLM-Token-Costs %}) — Caveman식 출력 지시가 LLM의 불필요한 문구와 출력 token을 줄이는 원리, code·error 보존 한계와 품질·지연·사람의 재질문 비용을 함께 평가합니다.
-- [Gemini 3 기능·비용·한계 읽는 법: 벤치마크와 실무 검증 기준]({% post_url 2025-11-28-Gemini3 %}) — Gemini 3의 멀티모달·추론·코딩 기능, 공개 벤치마크와 API 비용을 발표 조건 안에서 읽고 실제 도입 전 확인할 한계를 정리합니다.
-- [멀티모달 에이전트가 25번 도구를 써도 답을 찾을까: AgentVista]({% post_url 2026-03-06-AgentVista--Evaluating-Multimodal-Agents-in-Ultra-Challenging-Realistic-Visual-Scenarios %}) — AgentVista의 25개 하위 도메인·7개 범주와 장기 도구 사용 평가, Gemini-3-Pro 27.3% 결과를 비용·연쇄 오류 관점에서 해석합니다.
+- [Caveman식 짧은 LLM 답변은 비용을 줄일까: 품질, 가독성, 측정 기준]({% post_url 2026-04-12-Making-AI-a-Caveman-A-Deep-Dive-into-the-Caveman-Architecture-that-Halves-LLM-Token-Costs %}) — Caveman식 출력 지시가 LLM의 불필요한 문구와 출력 token을 줄이는 원리, code, error 보존 한계와 품질, 지연, 사람의 재질문 비용을 함께 평가합니다.
+- [Gemini 3 기능, 비용, 한계 읽는 법: 벤치마크와 실무 검증 기준]({% post_url 2025-11-28-Gemini3 %}) — Gemini 3의 멀티모달, 추론, 코딩 기능, 공개 벤치마크와 API 비용을 발표 조건 안에서 읽고 실제 도입 전 확인할 한계를 정리합니다.
+- [멀티모달 에이전트가 25번 도구를 써도 답을 찾을까: AgentVista]({% post_url 2026-03-06-AgentVista--Evaluating-Multimodal-Agents-in-Ultra-Challenging-Realistic-Visual-Scenarios %}) — AgentVista의 25개 하위 도메인, 7개 범주와 장기 도구 사용 평가, Gemini-3-Pro 27.3% 결과를 비용, 연쇄 오류 관점에서 해석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -136,4 +136,4 @@ PR마다 실행할 예상 호출 수와 상한을 계산하고 대상 모델, Ju
 
 ### 프롬프트 회귀 테스트 사례는 어디서 모아야 하나요?
 
-실제 운영 장애, 사용자 피드백과 명시된 정책에서 재현 가능한 입력을 먼저 모으고 정상·경계·악의적 입력을 함께 관리하는 편이 좋습니다.
+실제 운영 장애, 사용자 피드백과 명시된 정책에서 재현 가능한 입력을 먼저 모으고 정상, 경계, 악의적 입력을 함께 관리하는 편이 좋습니다.

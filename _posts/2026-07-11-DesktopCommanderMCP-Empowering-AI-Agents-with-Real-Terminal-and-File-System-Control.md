@@ -10,7 +10,7 @@ tags:
   - AI에이전트
 summary: DesktopCommanderMCP는 Claude 등의 AI에게 사용자의 로컬 터미널, 파일 시스템, 대용량 파일 부분 읽기 및 프로세스
   관리 권한을 제공하여 복사-붙여넣기 없는 진정한 자동화 페어 프로그래밍을 구현하는 MCP 서버입니다.
-description: 'DesktopCommanderMCP가 터미널·파일·프로세스를 에이전트에 노출하는 방식과 허용 경로, 명령 승인·로그·복구·최소 권한 기준을 설명합니다.'
+description: 'DesktopCommanderMCP가 터미널, 파일, 프로세스를 에이전트에 노출하는 방식과 허용 경로, 명령 승인, 로그, 복구, 최소 권한 기준을 설명합니다.'
 github_url: https://github.com/wonderwhy-er/DesktopCommanderMCP
 image:
   path: https://opengraph.githubassets.com/1/wonderwhy-er/DesktopCommanderMCP
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-DesktopCommanderMCP는 에이전트가 로컬 파일, 터미널, 장기 실행 프로세스를 직접 다룰 수 있게 하는 MCP 서버입니다. 복사·붙여넣기를 줄이는 대신 잘못된 명령이 사용자 데이터와 비밀값에 닿을 위험도 함께 커집니다. 읽기 전용 경로와 테스트 명령부터 허용하고 대상 확인·승인·diff·복구가 가능한지 검증한 뒤 쓰기 범위를 넓히세요.
+DesktopCommanderMCP는 에이전트가 로컬 파일, 터미널, 장기 실행 프로세스를 직접 다룰 수 있게 하는 MCP 서버입니다. 복사, 붙여넣기를 줄이는 대신 잘못된 명령이 사용자 데이터와 비밀값에 닿을 위험도 함께 커집니다. 읽기 전용 경로와 테스트 명령부터 허용하고 대상 확인, 승인, diff, 복구가 가능한지 검증한 뒤 쓰기 범위를 넓히세요.
 
 ## 로컬 제어권을 어디까지 맡겨도 될까
 - GitHub: [wonderwhy-er/DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP)
@@ -339,7 +339,7 @@ DesktopCommanderMCP는 AI가 더 이상 수동적인 텍스트 생성기가 아�
 
 물론, 강력한 권한에 따르는 보안 문제와 윈도우 환경에서의 일부 불안정성은 우리가 계속 풀어가야 할 숙제입니다. 하지만 수십 번 복사-붙여넣기를 반복하며 소모하던 우리의 귀중한 시간과 에너지를 구출해 준다는 점에서, 이 도구는 도입할 가치가 충분합니다.
 
-로컬 제어가 필요한 작업이라면 별도 테스트 저장소에서 읽기와 진단 명령만 허용한 구성부터 시작할 수 있습니다. 에이전트가 제안한 변경과 실제 diff, 실행 로그가 일치하고 중단·복구 절차가 작동할 때만 쓰기와 장기 프로세스 권한을 단계적으로 넓히는 편이 안전합니다.
+로컬 제어가 필요한 작업이라면 별도 테스트 저장소에서 읽기와 진단 명령만 허용한 구성부터 시작할 수 있습니다. 에이전트가 제안한 변경과 실제 diff, 실행 로그가 일치하고 중단, 복구 절차가 작동할 때만 쓰기와 장기 프로세스 권한을 단계적으로 넓히는 편이 안전합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -350,8 +350,8 @@ DesktopCommanderMCP는 AI가 더 이상 수동적인 텍스트 생성기가 아�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
-- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스, 최소 권한, 모델 선택의 실무 기준을 정리합니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프, MCP, API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve, MCP 권한, 무한 루프, API 비용과 Diff 검토 기준을 정리합니다.
 - [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
 <!-- internal-links:end -->
 

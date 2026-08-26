@@ -11,7 +11,7 @@ tags:
   - 업무자동화
 summary: AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는
   C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
-description: 'OfficeCLI가 Word·Excel·PowerPoint 문서를 단일 도구로 다루는 구조와 서식 보존, 렌더링 검수, 매크로·외부 링크·권한 위험을 설명합니다.'
+description: 'OfficeCLI가 Word, Excel, PowerPoint 문서를 단일 도구로 다루는 구조와 서식 보존, 렌더링 검수, 매크로, 외부 링크, 권한 위험을 설명합니다.'
 github_url: https://github.com/iOfficeAI/OfficeCLI
 image:
   path: https://opengraph.githubassets.com/1/iOfficeAI/OfficeCLI
@@ -42,7 +42,7 @@ mermaid: true
 chart: true
 ---
 
-OfficeCLI는 에이전트가 Word·Excel·PowerPoint 파일을 읽고 수정할 수 있도록 문서 작업을 명령 인터페이스로 노출합니다. 파일이 열리고 저장됐다는 사실은 수식·서식·차트가 보존됐다는 뜻이 아니므로 구조 diff와 렌더링 결과를 함께 확인해야 합니다. 원본 복사본과 허용 출력 경로를 두고 매크로, 외부 링크, 숨김 시트가 있는 대표 문서부터 시험하세요.
+OfficeCLI는 에이전트가 Word, Excel, PowerPoint 파일을 읽고 수정할 수 있도록 문서 작업을 명령 인터페이스로 노출합니다. 파일이 열리고 저장됐다는 사실은 수식, 서식, 차트가 보존됐다는 뜻이 아니므로 구조 diff와 렌더링 결과를 함께 확인해야 합니다. 원본 복사본과 허용 출력 경로를 두고 매크로, 외부 링크, 숨김 시트가 있는 대표 문서부터 시험하세요.
 
 [참고 링크]
 - [OfficeCLI GitHub 저장소](https://github.com/iOfficeAI/OfficeCLI)
@@ -352,8 +352,8 @@ OfficeCLI는 AI가 인간의 비즈니스 문서를 시각적으로 인지하고
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
-- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
 - [마크다운 직무 기술서만으로 서브 에이전트가 될까? agency-agents의 실제 역할]({% post_url 2026-03-14-Old-Prompt-Crafters-Can-Rest-Now-The-Dawn-of-the-Sub-Agent-Era-Proven-by-agency-agents %}) — 120여 개 역할 문서를 에이전트로 활용하는 agency-agents의 구조를 살피고, 실행 엔진과 기억 장치가 따로 필요한 이유와 도입 판단 기준을 정리합니다.
+- [PPT Master: AI가 슬라이드 통이미지 대신 진짜 수정 가능한 파워포인트를 만드는 방법]({% post_url 2026-08-13-PPT-Master-Generating-Natively-Editable-PowerPoint-Presentations-with-AI %}) — PPT Master는 PDF, 마이그레이션 문서, 텍스트 등을 수정 가능한 고품질 파워포인트(.pptx) 파일로 변환해 주는 오픈소스 AI 프레젠테이션 자동화 도구입니다. 기존 AI 도구들이 슬라이드를 수정 불가능한 통이미지로 만들던…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

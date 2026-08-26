@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/convolutional_layer.c"
 layout: post
 title: "DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나"
-summary: "DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다."
-description: "DarkNet Convolutional Layer의 출력 크기, group별 im2col·GEMM, weight·input gradient와 원문 backward 인자 검증 기준을 설명합니다."
+summary: "DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다."
+description: "DarkNet Convolutional Layer의 출력 크기, group별 im2col, GEMM, weight, input gradient와 원문 backward 인자 검증 기준을 설명합니다."
 date:   2022-02-13 16:00 -0400
 categories: DarkNet
 image:
@@ -16,7 +16,7 @@ tags:
   - 컴퓨터비전
 math: true
 faq:
-  - question: "DarkNet convolution forward에서 GEMM의 m·n·k는 무엇인가요?"
+  - question: "DarkNet convolution forward에서 GEMM의 m, n, k는 무엇인가요?"
     answer: "m은 group당 출력 filter 수, k는 filter 하나의 원소 수, n은 출력 공간 위치 수입니다."
   - question: "1×1 convolution에서는 왜 im2col을 건너뛸 수 있나요?"
     answer: "각 출력 위치가 같은 위치의 channel vector만 사용하므로 입력 memory를 GEMM의 column 행렬로 바로 볼 수 있기 때문입니다."
@@ -101,7 +101,7 @@ if (l.size != 1) {
 
 - 같은 함수에서 `m`은 필터 수, `k`는 필터 원소 수, `n`은 출력 공간 수로 정의됩니다. 그런데 첫 backward GEMM은 결과를 `m × n`으로 지정하면서 필터별 `m × k` 크기인 `weight_updates`에 쓰고, delta 포인터도 `m × k`만큼 이동합니다. 두 번째 GEMM의 결과 차원도 `col2im`이 기대하는 `k × n`과 반대로 배치돼 있습니다. 이 인자 순서가 실제 사용 버전에서도 같은지 확인하기 전에는 위 수학적 역할과 이 코드 호출이 일치한다고 볼 수 없습니다.
 - `backward_convolutional_layer`는 편향 역전파의 마지막 인자로 `k`를 넘깁니다. 같은 글의 `backward_bias`는 이 인자를 채널별로 합산할 출력 위치 수로 사용하므로, `out_h × out_w`가 아니라 필터 원소 수인 `k`가 맞는지 확인이 필요합니다.
-- `adam`이 참이면 모멘트 배열을 할당하지만, 여기에 나온 `update_convolutional_layer` 본문은 학습률·decay·momentum 갱신만 보여 줍니다. Adam 동작은 이 함수만으로 판단할 수 없습니다.
+- `adam`이 참이면 모멘트 배열을 할당하지만, 여기에 나온 `update_convolutional_layer` 본문은 학습률, decay, momentum 갱신만 보여 줍니다. Adam 동작은 이 함수만으로 판단할 수 없습니다.
 
 출력 모양이 틀리면 먼저 `out_w/out_h`와 그룹 나눗셈을, 값이 틀리면 `im2col → GEMM → bias 또는 batch norm → activation` 순서로 확인하는 것이 가장 빠릅니다.
 
@@ -121,7 +121,7 @@ Im2col workspace는 대략 group당 `k×out_h×out_w` 원소를 담아야 하며
 
 Forward를 `Y=W×Xcol`로 적으면 `dW=dY×Xcolᵀ`, `dXcol=Wᵀ×dY`가 됩니다. 각 행렬 shape를 `W:m×k`, `Xcol:k×n`, `dY:m×n`으로 먼저 적고 GEMM flag와 leading dimension을 맞춥니다. 결과 buffer가 `m×k`인지 `k×n`인지 확인한 뒤 포인터가 group 크기만큼 이동하는지 봅니다.
 
-원문 조각처럼 인자가 의심될 때는 컴파일 성공을 근거로 삼지 않습니다. C 포인터에는 shape 정보가 없어 잘못된 GEMM도 메모리 범위 안에서는 숫자를 만들 수 있습니다. 비정사각 `m,k,n`의 작은 사례와 finite difference로 weight 한 칸·input 한 칸의 gradient를 비교해야 실제 의미가 맞는지 알 수 있습니다.
+원문 조각처럼 인자가 의심될 때는 컴파일 성공을 근거로 삼지 않습니다. C 포인터에는 shape 정보가 없어 잘못된 GEMM도 메모리 범위 안에서는 숫자를 만들 수 있습니다. 비정사각 `m,k,n`의 작은 사례와 finite difference로 weight 한 칸, input 한 칸의 gradient를 비교해야 실제 의미가 맞는지 알 수 있습니다.
 
 ## Binary/XNOR 경로는 무엇을 보존해야 하나요?
 
@@ -131,7 +131,7 @@ Binary 경로의 속도 이득은 실제 bit 연산 kernel이 연결됐을 때�
 
 ## 자주 남는 질문
 
-### DarkNet convolution forward에서 GEMM의 m·n·k는 무엇인가요?
+### DarkNet convolution forward에서 GEMM의 m, n, k는 무엇인가요?
 
 m은 group당 출력 filter 수, k는 filter 하나의 원소 수, n은 출력 공간 위치 수입니다.
 
@@ -152,7 +152,7 @@ m은 group당 출력 filter 수, k는 filter 하나의 원소 수, n은 출력 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
-- [DarkNet Connected Layer 순전파·역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
-- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파·초기화 주의점을 코드 차원으로 설명합니다.
+- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col, GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
+- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파, 초기화 주의점을 코드 차원으로 설명합니다.
+- [DarkNet im2col 배열 모양 계산: 픽셀은 data\_col 어디에 놓이나]({% post_url 2022-02-24-DarkNetIm2col %}) — DarkNet im2col이 채널×커널 위치를 행으로, 출력 공간 위치를 열로 펼치는 인덱스를 계산하고 padding 바깥을 0으로 채우는 과정을 설명합니다.
 <!-- internal-links:end -->

@@ -8,10 +8,10 @@ tags:
   - AI트렌드
 math: true
 summary: 단안 비디오에서 카메라 궤적과 애니메이션 시간을 분리하는 임베딩, 워핑 학습, 합성 데이터의 역할과 한계
-description: "SpaceTimePilot이 animation time τ와 camera ray를 분리해 동작·시점을 독립 제어하는 원리와 CamxTime 합성 간극·새 시점 환각·추론 비용을 검증합니다."
+description: "SpaceTimePilot이 animation time τ와 camera ray를 분리해 동작, 시점을 독립 제어하는 원리와 CamxTime 합성 간극, 새 시점 환각, 추론 비용을 검증합니다."
 faq:
   - question: "Animation Time τ는 일반 frame 번호와 같은가요?"
-    answer: "출력 frame이 원본 동작의 어느 순간을 참조할지 지정하는 별도 조건으로, 같은 값을 반복하거나 순서를 바꿔 정지·속도 조절·역방향을 표현합니다."
+    answer: "출력 frame이 원본 동작의 어느 순간을 참조할지 지정하는 별도 조건으로, 같은 값을 반복하거나 순서를 바꿔 정지, 속도 조절, 역방향을 표현합니다."
   - question: "새 camera 시점은 실제 3D 복원인가요?"
     answer: "단안 입력에 보이지 않은 면은 모델이 생성한 추정이므로 측정 가능한 정확한 3D reconstruction과 구분해야 합니다."
   - question: "동작과 camera가 정말 분리됐는지는 어떻게 확인하나요?"
@@ -55,17 +55,17 @@ Temporal-Warping은 시점 변화와 시간 변화의 관계를 모델에 노출
 
 단안 영상에는 피사체 뒤쪽과 가려진 공간 정보가 없습니다. 모델이 새 시점을 만들 때 그 영역은 관측 복원이 아니라 생성된 추정입니다. 여러 객체가 서로 가리는 장면이나 군중처럼 깊이 관계가 복잡한 경우에는 형상 변화와 시간적 불일치가 남을 수 있습니다.
 
-CamxTime 의존도에는 합성 데이터와 실제 촬영 영상 사이의 간극도 따릅니다. 또한 비디오 확산 샘플링은 실시간 인터랙티브 렌더링과 다른 비용 구조를 가집니다. 특정 객체 하나만 되감고 나머지는 그대로 두는 객체별 시간 제어도 이 글에서 설명한 공간·시간 분리와는 별도 과제입니다.
+CamxTime 의존도에는 합성 데이터와 실제 촬영 영상 사이의 간극도 따릅니다. 또한 비디오 확산 샘플링은 실시간 인터랙티브 렌더링과 다른 비용 구조를 가집니다. 특정 객체 하나만 되감고 나머지는 그대로 두는 객체별 시간 제어도 이 글에서 설명한 공간, 시간 분리와는 별도 과제입니다.
 
 따라서 SpaceTimePilot은 촬영본의 카메라를 사후에 정확히 복원하는 도구라기보다, 한 영상에서 동작 시간과 새로운 시점을 조합해 후보 연출을 만드는 방법으로 이해하는 편이 안전합니다.
 
 ## 제어 분리는 3×3 교차표로 시험한다
 
-camera path 하나와 τ schedule 하나만 보면 모델이 두 조건을 실제로 구분했는지 알 수 없습니다. 고정·직선·회전 camera와 정방향·정지·역방향 τ를 교차해 아홉 조합을 만듭니다. 각 조합에서 camera trajectory 오차와 object state 오차를 따로 기록합니다.
+camera path 하나와 τ schedule 하나만 보면 모델이 두 조건을 실제로 구분했는지 알 수 없습니다. 고정, 직선, 회전 camera와 정방향, 정지, 역방향 τ를 교차해 아홉 조합을 만듭니다. 각 조합에서 camera trajectory 오차와 object state 오차를 따로 기록합니다.
 
 | 조건을 바꿀 때 | 유지돼야 할 것 | 흔한 실패 |
 |---|---|---|
-| camera만 변경 | 동일 τ의 pose·형태 | viewpoint 변화에 동작도 변함 |
+| camera만 변경 | 동일 τ의 pose, 형태 | viewpoint 변화에 동작도 변함 |
 | τ만 변경 | camera ray와 배경 시점 | 속도 조절 때 시점이 흔들림 |
 | 둘 다 변경 | 각 조건의 독립 목표 | 한 조건이 다른 조건을 덮음 |
 | τ 고정 | object state | 정지 구간에서 미세 움직임 |
@@ -80,7 +80,7 @@ camera path 하나와 τ schedule 하나만 보면 모델이 두 조건을 실�
 
 ## CamxTime의 합성 이득과 Domain Gap을 분리한다
 
-합성 data로 잘 분리된 camera·time 조합을 배울 수 있지만 실제 video의 blur, rolling shutter, 복잡한 조명에서는 다르게 작동할 수 있습니다. CamxTime을 뺀 조건과 넣은 조건을 합성·실제 test set에서 각각 비교합니다. 합성 점수만 오르고 실제 입력이 그대로라면 data gap이 남습니다.
+합성 data로 잘 분리된 camera, time 조합을 배울 수 있지만 실제 video의 blur, rolling shutter, 복잡한 조명에서는 다르게 작동할 수 있습니다. CamxTime을 뺀 조건과 넣은 조건을 합성, 실제 test set에서 각각 비교합니다. 합성 점수만 오르고 실제 입력이 그대로라면 data gap이 남습니다.
 
 추론 비용은 video diffusion step, 출력 frame 수, camera path 길이에 따라 기록합니다. 짧은 sample의 제어 성공이 interactive 속도를 뜻하지 않으므로 목표 workflow에서 한 수정마다 기다리는 시간을 측정합니다. SpaceTimePilot의 선택 기준은 자유로운 demo가 아니라 **요청한 camera와 τ가 서로 간섭하지 않고, 새로 생성한 영역이 허용 가능한 범위에서 일관되며, 제작 시간 예산을 지키는가**입니다.
 
@@ -90,21 +90,21 @@ camera path 하나와 τ schedule 하나만 보면 모델이 두 조건을 실�
 
 조건이 충돌하는 입력도 필요합니다. camera가 빠르게 회전하는 동안 τ를 정지시키거나, object가 camera 반대 방향으로 빠르게 움직이도록 설정해 한 조건이 다른 조건을 압도하는지 봅니다. 실패하면 camera 속도와 τ 변화량에 허용 범위를 정하거나 복잡한 조합을 여러 구간으로 나눠 생성해야 합니다.
 
-최종 delivery에서는 입력에 있던 영역과 새로 hallucinate된 영역, 사용한 camera·τ schedule을 함께 보관합니다. 이후 결과가 사실적 복원인지 창작된 view인지 설명할 수 있고, 같은 조건을 다시 실행할 때 drift를 비교할 기준도 생깁니다.
+최종 delivery에서는 입력에 있던 영역과 새로 hallucinate된 영역, 사용한 camera, τ schedule을 함께 보관합니다. 이후 결과가 사실적 복원인지 창작된 view인지 설명할 수 있고, 같은 조건을 다시 실행할 때 drift를 비교할 기준도 생깁니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Darknet ISEG Layer는 무엇을 학습하나: 픽셀 클래스와 인스턴스 임베딩 해설]({% post_url 2022-03-02-DarkNetIsegLayer %}) — Darknet의 ISEG layer가 truth mask를 읽어 클래스 delta와 인스턴스 embedding delta를 만드는 과정을 배열 인덱스와 함께 추적합니다.
-- [CodeGraph가 grep보다 나을 때: 함수 영향 범위와 오래된 그래프를 구분하는 법]({% post_url 2026-05-23-Stop-the-Grep-Deep-Dive-into-CodeGraph-Architecture-that-Opened-the-Eyes-of-AI-Coding-Agents %}) — CodeGraph가 AST 관계·임베딩·그래프 순회를 결합해 함수 영향 범위를 찾는 원리를 설명하고, 동적 호출·인덱스 지연·커스텀 파서 때문에 놓칠 수 있는 경계를 정리합니다.
-- [GraphRAG가 필요한 질문은 무엇인가: 벡터 RAG와 비용·평가 비교]({% post_url 2026-05-28-Thought-RAG-was-the-Silver-Bullet-A-Deep-Dive-into-GraphRAG-from-the-Production-Trenches %}) — GraphRAG의 엔티티·관계 추출, 커뮤니티 군집과 요약, 로컬·글로벌 검색을 벡터 RAG와 비교하고 인덱싱 비용·근거·갱신·평가 기준을 정리합니다.
+- [CodeGraph가 grep보다 나을 때: 함수 영향 범위와 오래된 그래프를 구분하는 법]({% post_url 2026-05-23-Stop-the-Grep-Deep-Dive-into-CodeGraph-Architecture-that-Opened-the-Eyes-of-AI-Coding-Agents %}) — CodeGraph가 AST 관계, 임베딩, 그래프 순회를 결합해 함수 영향 범위를 찾는 원리를 설명하고, 동적 호출, 인덱스 지연, 커스텀 파서 때문에 놓칠 수 있는 경계를 정리합니다.
+- [GraphRAG가 필요한 질문은 무엇인가: 벡터 RAG와 비용, 평가 비교]({% post_url 2026-05-28-Thought-RAG-was-the-Silver-Bullet-A-Deep-Dive-into-GraphRAG-from-the-Production-Trenches %}) — GraphRAG의 엔티티, 관계 추출, 커뮤니티 군집과 요약, 로컬, 글로벌 검색을 벡터 RAG와 비교하고 인덱싱 비용, 근거, 갱신, 평가 기준을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Animation Time τ는 일반 frame 번호와 같은가요?
 
-출력 frame이 원본 동작의 어느 순간을 참조할지 지정하는 별도 조건으로, 같은 값을 반복하거나 순서를 바꿔 정지·속도 조절·역방향을 표현합니다.
+출력 frame이 원본 동작의 어느 순간을 참조할지 지정하는 별도 조건으로, 같은 값을 반복하거나 순서를 바꿔 정지, 속도 조절, 역방향을 표현합니다.
 
 ### 새 camera 시점은 실제 3D 복원인가요?
 

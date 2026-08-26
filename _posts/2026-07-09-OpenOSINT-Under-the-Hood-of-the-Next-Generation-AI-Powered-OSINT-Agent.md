@@ -10,7 +10,7 @@ tags:
   - 파이썬
   - AI코딩
 summary: 복잡한 명령어와 수동 데이터 연결의 피로도를 덜어주는 오픈소스 프로젝트 OpenOSINT의 내부 구조와 연동 기법을 깊이 있게 다룹니다.
-description: 'OpenOSINT가 여러 조사 도구를 MCP로 연결하는 흐름과 근거 추적, 수집 권한·개인정보 최소화·동명이인 오탐·도구 실패를 통제하는 기준을 정리합니다.'
+description: 'OpenOSINT가 여러 조사 도구를 MCP로 연결하는 흐름과 근거 추적, 수집 권한, 개인정보 최소화, 동명이인 오탐, 도구 실패를 통제하는 기준을 정리합니다.'
 github_url: https://github.com/OpenOSINT/OpenOSINT
 image:
   path: https://opengraph.githubassets.com/1/OpenOSINT/OpenOSINT
@@ -41,7 +41,7 @@ mermaid: true
 chart: true
 ---
 
-OpenOSINT는 여러 공개 정보 수집 도구를 에이전트가 순서대로 호출하도록 묶어 조사 과정을 자동화합니다. 실제 도구 호출은 근거 후보를 만들 뿐 결과가 동일인·동일 조직을 가리킨다는 사실을 자동 증명하지 않습니다. 허가된 목적과 최소 수집 범위를 정하고 원문 URL, 조회 시점, 반대 근거를 함께 남기는지 확인해야 합니다.
+OpenOSINT는 여러 공개 정보 수집 도구를 에이전트가 순서대로 호출하도록 묶어 조사 과정을 자동화합니다. 실제 도구 호출은 근거 후보를 만들 뿐 결과가 동일인, 동일 조직을 가리킨다는 사실을 자동 증명하지 않습니다. 허가된 목적과 최소 수집 범위를 정하고 원문 URL, 조회 시점, 반대 근거를 함께 남기는지 확인해야 합니다.
 
 TL;DR
 - OpenOSINT는 터미널 환경에서 AI(Claude, GPT-4 등)와 대화하며 대상의 정보를 추적하는 오픈소스 정보 수집 에이전트입니다.
@@ -300,7 +300,7 @@ OpenOSINT는 단순한 스크립트 모음을 넘어, 보안 분석가가 기계
 
 - [메타의 1만 3천 개 앱을 지탱하는 AI 네이티브 디자인 시스템: Astryx 원리와 활용법]({% post_url 2026-07-13-Metas-AI-Native-Design-System-Backing-13000-Apps-Understanding-and-Using-Astryx %}) — 메타(Meta)가 8년간 내부에서 사용해 온 코어 디자인 시스템 Astryx의 구조와 활용법을 심층적으로 정리합니다. AI 에이전트와 인간이 동일한 기준으로 UI를 구축할 수 있도록 설계된 아키텍처와 MCP 통신 원리, 그리고…
 - [Model Context Protocol: AI 에이전트가 외부 데이터와 소통하는 범용 인터페이스 작동 원리]({% post_url 2026-07-18-Model-Context-Protocol-The-Universal-Interface-for-AI-Agents-to-Communicate-with-External-Data %}) — Anthropic과 GitHub이 주도하는 오픈소스 프로젝트인 Model Context Protocol(MCP)의 탄생 배경, 클라이언트-서버 간 핵심 통신 아키텍처, 그리고 공식 저장소에서 제공되는 서버 구현체들의 작동 원리를 깊이…
-- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md·MCP·검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md·컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태·성능·검증 문제를 짚습니다.
+- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md, MCP, 검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md, 컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태, 성능, 검증 문제를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

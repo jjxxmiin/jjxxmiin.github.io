@@ -12,7 +12,7 @@ tags:
 summary: Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬
   기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해 오래된 데이터에 갇힌 에이전트의 한계를 근본적으로
   해결합니다.
-description: 'Wigolo가 검색·JS 렌더링·PDF 파싱·캐시를 로컬 MCP로 묶는 방식과 사이트별 크롤링 권한·자료 최신성·캐시 오염·CPU 및 저장 공간 비용을 정리합니다.'
+description: 'Wigolo가 검색, JS 렌더링, PDF 파싱, 캐시를 로컬 MCP로 묶는 방식과 사이트별 크롤링 권한, 자료 최신성, 캐시 오염, CPU 및 저장 공간 비용을 정리합니다.'
 github_url: https://github.com/KnockOutEZ/wigolo
 image:
   path: https://opengraph.githubassets.com/1/KnockOutEZ/wigolo
@@ -42,7 +42,7 @@ mermaid: true
 chart: true
 ---
 
-Wigolo는 검색, 웹 페이지 렌더링, PDF 추출과 캐시를 로컬 MCP 서버로 묶어 코딩 에이전트에 제공하려는 도구입니다. 로컬 실행은 검색 API 비용을 줄일 수 있지만 인터넷·사이트 자원은 무제한이 아니며 robots 정책, 이용약관, 차단과 컴퓨터 자원을 지켜야 합니다. 공식 문서 질의부터 시작해 출처 URL·조회 시점·캐시 만료와 추출 누락을 확인하세요.
+Wigolo는 검색, 웹 페이지 렌더링, PDF 추출과 캐시를 로컬 MCP 서버로 묶어 코딩 에이전트에 제공하려는 도구입니다. 로컬 실행은 검색 API 비용을 줄일 수 있지만 인터넷, 사이트 자원은 무제한이 아니며 robots 정책, 이용약관, 차단과 컴퓨터 자원을 지켜야 합니다. 공식 문서 질의부터 시작해 출처 URL, 조회 시점, 캐시 만료와 추출 누락을 확인하세요.
 
 ## 로컬 검색 계층이 필요한 작업은 무엇인가
 
@@ -383,7 +383,7 @@ Wigolo 프로젝트가 시사하는 바는 매우 명확합니다. 에이전트�
 
 - [holaOS: Claude Code와 Codex를 하나의 공유 메모리로 연결하는 통합 AI 에이전트 워크스페이스]({% post_url 2026-08-15-holaOS-Open-Source-All-in-One-AI-Agent-Workspace-with-Shared-Memory-and-MCP %}) — holaOS는 Claude Code, Codex 등 여러 AI 에이전트를 단일 환경에서 구동하며 컨텍스트, 공유 메모리, MCP 도구를 상호 공유할 수 있게 지원하는 로컬 기반의 오픈소스 통합 에이전트 워크스페이스입니다.
 - [codebase-memory-mcp: AI 코딩 에이전트가 코드를 진짜로 기억하는 법]({% post_url 2026-07-05-codebase-memory-mcp-How-AI-Coding-Agents-Truly-Remember-Your-Code %}) — AI 코딩 에이전트의 토큰 낭비를 최대 99퍼센트까지 줄여주는 혁신적인 구조적 지식 그래프 MCP 서버, codebase-memory-mcp의 작동 원리와 실전 활용법을 심층 분석합니다.
-- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP·브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연·권한·변경 범위·벤더 종속성을 기준으로 팀 도입법을 정리합니다.
+- [claude-plugins-official을 팀에 깔아도 될까: LSP 검증과 실행 권한의 경계]({% post_url 2026-05-22-The-Toy-Era-of-AI-Coding-Assistants-is-Over-What-the-Under-the-Hood-Architecture-of-claude-plugins-official-Reveals-About-the-Future-of-Real-Agentic-Development %}) — claude-plugins-official이 필요한 도구를 불러오고 LSP, 브라우저 검증을 연결하는 방식을 살펴본 뒤, 지연, 권한, 변경 범위, 벤더 종속성을 기준으로 팀 도입법을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

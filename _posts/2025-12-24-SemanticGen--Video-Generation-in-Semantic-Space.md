@@ -8,14 +8,14 @@ tags:
   - 트랜스포머
 math: true
 summary: "SemanticGen이 먼저 저차원 semantic feature에서 장면과 움직임을 계획하고 뒤에서 VAE latent의 질감을 채우는 이유, 효율 이득과 2단계 오류 전파를 함께 정리합니다."
-description: "SemanticGen의 semantic diffusion과 latent 복원 2단계를 구분하고, 전역 계획·세부 품질·오류 전파·합산 비용을 따로 측정하는 재현 기준을 설명합니다."
+description: "SemanticGen의 semantic diffusion과 latent 복원 2단계를 구분하고, 전역 계획, 세부 품질, 오류 전파, 합산 비용을 따로 측정하는 재현 기준을 설명합니다."
 faq:
   - question: "SemanticGen은 픽셀이나 VAE latent를 전혀 쓰지 않나요?"
     answer: "아닙니다. 첫 단계는 semantic feature를 만들고, 두 번째 단계가 이를 조건으로 VAE latent와 최종 video의 세부 묘사를 복원합니다."
   - question: "두 단계면 긴 영상이 자동으로 일관되나요?"
     answer: "그렇지 않습니다. semantic plan이 작은 물체나 빠른 motion을 놓치면 후단이 복구하기 어렵고, 긴 sequence의 drift도 별도 평가해야 합니다."
   - question: "효율을 비교할 때 어떤 시간을 포함해야 하나요?"
-    answer: "semantic stage와 latent stage의 학습·추론 시간, feature 추출, 두 모델의 memory를 모두 합친 end-to-end 비용을 비교해야 합니다."
+    answer: "semantic stage와 latent stage의 학습, 추론 시간, feature 추출, 두 모델의 memory를 모두 합친 end-to-end 비용을 비교해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.20619.png
   alt: "비디오를 Pixel부터 만들지 않는 이유: SemanticGen의 Semantic→Latent 2단계 논문 대표 이미지"
@@ -35,9 +35,9 @@ Semantic diffusion Transformer는 text condition을 받아 낮은 차원의 feat
 
 두 모델의 역할을 나누면 semantic stage는 전역 구조에 집중하고 latent stage는 시각적 품질에 집중할 수 있습니다. 반대로 stage 사이 표현이 충분히 맞지 않으면 semantic plan은 맞아도 결과가 흐리거나, detail은 선명해도 객체 관계가 달라질 수 있습니다. 따라서 최종 FVD만 보지 말고 semantic consistency와 reconstruction quality를 각각 평가해야 합니다.
 
-## 보고된 효율은 학습·추론 조건에 묶여 있다
+## 보고된 효율은 학습, 추론 조건에 묶여 있다
 
-원문에는 WebVid-10M과 HD-VILA-100M, DINOv2 Large의 1/16 feature map, H100 기반 PyTorch·Diffusers 환경이 제시됩니다. 추론은 50~100 step과 classifier-free guidance 7.5~10의 설정으로 설명됩니다. 이 조합은 논문 실험의 구성이지, 어떤 video에서도 최적인 범용 recipe가 아닙니다.
+원문에는 WebVid-10M과 HD-VILA-100M, DINOv2 Large의 1/16 feature map, H100 기반 PyTorch, Diffusers 환경이 제시됩니다. 추론은 50~100 step과 classifier-free guidance 7.5~10의 설정으로 설명됩니다. 이 조합은 논문 실험의 구성이지, 어떤 video에서도 최적인 범용 recipe가 아닙니다.
 
 기존 latent diffusion 대비 FVD 약 15~20% 개선과 학습 수렴 약 3배 향상이 보고됩니다. 하지만 extractor, 해상도, frame 수, compute budget이 달라지면 비교도 달라집니다. 같은 dataset split과 같은 생성 길이에서 semantic stage 비용까지 포함한 total training time과 end-to-end latency를 비교해야 “효율적”이라는 결론을 낼 수 있습니다.
 
@@ -76,9 +76,9 @@ semantic sequence를 먼저 만들면 긴 시간의 구조를 계층적 또는 s
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [HunyuanVideo 13B는 어떻게 영상을 만들까: 데이터·3D VAE·실행 전제]({% post_url 2025-02-14-HunyuanVideo %}) — HunyuanVideo의 다단계 영상 필터링, Causal 3D VAE 압축, Transformer Diffusion 학습 흐름과 공개 명령을 실행 전에 확인할 조건을 정리합니다.
+- [HunyuanVideo 13B는 어떻게 영상을 만들까: 데이터, 3D VAE, 실행 전제]({% post_url 2025-02-14-HunyuanVideo %}) — HunyuanVideo의 다단계 영상 필터링, Causal 3D VAE 압축, Transformer Diffusion 학습 흐름과 공개 명령을 실행 전에 확인할 조건을 정리합니다.
 - [RAE가 VAE보다 빨리 수렴할까: 1152차원 표현 공간의 이득과 비용]({% post_url 2026-01-25-Scaling-Text-to-Image-Diffusion-Transformers-with-Representation-Autoencoders %}) — SigLIP-2 표현을 쓰는 RAE가 100k 스텝에서 보인 수렴 이득과 고차원 잠재 공간의 비용을 함께 살펴봅니다.
-- [VLM은 텍스트 모델부터 학습해야 할까? Transfusion 공동 사전학습의 대안]({% post_url 2026-03-05-Beyond-Language-Modeling--An-Exploration-of-Multimodal-Pretraining %}) — 텍스트 next-token loss와 이미지 diffusion loss를 처음부터 한 Transformer에서 학습하는 Transfusion 구조, RAE와 MoE의 역할 및 데이터 비용을 설명합니다.
+- [로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL, Dream-VLA]({% post_url 2025-12-30-Dream-VL---Dream-VLA--Open-Vision-Language-and-Vision-Language-Action-Models-with-Diffusion-Language-Model-Backbone %}) — Dream-VL과 Dream-VLA가 masked diffusion language backbone으로 양방향 문맥과 action chunk 병렬 복원을 시도한 이유, benchmark 성과와 반복 denoising 비용을 함께…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -93,6 +93,6 @@ semantic sequence를 먼저 만들면 긴 시간의 구조를 계층적 또는 s
 
 ### 효율을 비교할 때 어떤 시간을 포함해야 하나요?
 
-semantic stage와 latent stage의 학습·추론 시간, feature 추출, 두 모델의 memory를 모두 합친 end-to-end 비용을 비교해야 합니다.
+semantic stage와 latent stage의 학습, 추론 시간, feature 추출, 두 모델의 memory를 모두 합친 end-to-end 비용을 비교해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.20619)

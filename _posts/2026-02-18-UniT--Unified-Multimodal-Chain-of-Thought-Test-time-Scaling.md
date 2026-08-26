@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'UniT는 Best-of-N보다 순차 편집이 나을까: 3.6회 학습·4.7회 추론의 비용'
+title: 'UniT는 Best-of-N보다 순차 편집이 나을까: 3.6회 학습, 4.7회 추론의 비용'
 date: '2026-02-18'
 categories: Tech
 tags:
@@ -8,14 +8,14 @@ tags:
   - 이미지생성
   - AI에이전트
 math: true
-summary: 같은 이미지 생성 예산에서 순차 수정이 병렬 후보보다 나았던 이유와 verifier 오류·과편집·중단 비용을 살펴봅니다.
-description: 'UniT가 이미지 생성 결과를 검증하고 순차 편집해 복합 지시를 맞추는 원리, Best-of-N 비교와 과편집·중단·비용 판단 기준을 설명합니다.'
+summary: 같은 이미지 생성 예산에서 순차 수정이 병렬 후보보다 나았던 이유와 verifier 오류, 과편집, 중단 비용을 살펴봅니다.
+description: 'UniT가 이미지 생성 결과를 검증하고 순차 편집해 복합 지시를 맞추는 원리, Best-of-N 비교와 과편집, 중단, 비용 판단 기준을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.12279.png
-  alt: "UniT는 Best-of-N보다 순차 편집이 나을까: 3.6회 학습·4.7회 추론의 비용 논문 대표 이미지"
+  alt: "UniT는 Best-of-N보다 순차 편집이 나을까: 3.6회 학습, 4.7회 추론의 비용 논문 대표 이미지"
 ---
 
-UniT는 같은 수의 test-time image를 쓸 때 Best-of-N 후보를 독립적으로 뽑는 것보다 이전 결과를 검증하고 순차 수정하는 방식이 복합 지시를 더 잘 만족했다고 보고합니다. 다만 한 라운드마다 다시 생성·검증해야 하므로 3.6회 학습 궤적에서 4.7회 추론으로 늘어난 능력은 품질 향상과 함께 지연·과편집 위험도 키웁니다.
+UniT는 같은 수의 test-time image를 쓸 때 Best-of-N 후보를 독립적으로 뽑는 것보다 이전 결과를 검증하고 순차 수정하는 방식이 복합 지시를 더 잘 만족했다고 보고합니다. 다만 한 라운드마다 다시 생성, 검증해야 하므로 3.6회 학습 궤적에서 4.7회 추론으로 늘어난 능력은 품질 향상과 함께 지연, 과편집 위험도 키웁니다.
 
 ![같은 이미지 예산에서 parallel sampling과 sequential CoT refinement를 비교한 UniT.](/assets/img/papers/2602.12279/x1.png)
 *같은 이미지 예산에서 parallel sampling과 sequential CoT refinement를 비교한 UniT.*
@@ -26,17 +26,17 @@ UniT는 같은 수의 test-time image를 쓸 때 Best-of-N 후보를 독립적�
 
 순차 편집은 첫 결과에서 목줄 누락을 찾고, 다음 라운드는 그 하위 목표만 수정합니다. 동시에 강아지와 배경의 identity를 memory로 유지해야 합니다. UniT가 test-time compute를 쓰는 방식은 후보 수를 늘리기보다 실패 정보를 다음 생성에 넘기는 것입니다.
 
-## Actor·Verifier·Planner는 어떻게 학습 궤적을 만들까?
+## Actor, Verifier, Planner는 어떻게 학습 궤적을 만들까?
 
 사람이 여러 단계의 수정 과정을 대량으로 labeling하기 어려워 세 모델이 합성 데이터를 만듭니다.
 
 1. Actor가 초기 이미지를 생성합니다.
 2. Verifier VLM이 prompt의 조건과 결과를 비교합니다.
-3. Planner가 누락·오류를 하위 목표로 나누고 수정 지시를 씁니다.
+3. Planner가 누락, 오류를 하위 목표로 나누고 수정 지시를 씁니다.
 4. 검증이 통과할 때까지 결과와 지시를 이어갑니다.
 
-![생성·검증·계획을 반복해 multi-turn training trajectory를 만드는 과정.](/assets/img/papers/2602.12279/x3.png)
-*생성·검증·계획을 반복해 multi-turn training trajectory를 만드는 과정.*
+![생성, 검증, 계획을 반복해 multi-turn training trajectory를 만드는 과정.](/assets/img/papers/2602.12279/x3.png)
+*생성, 검증, 계획을 반복해 multi-turn training trajectory를 만드는 과정.*
 
 UniT는 이미지 전후에 `<thought>` 형태의 planning text를 생성하도록 학습합니다. 중요한 것은 생각 문장의 길이가 아니라, 발견한 오류가 다음 editing instruction과 실제 결과 변화로 연결되는지입니다.
 
@@ -63,7 +63,7 @@ Verifier가 놓친 조건은 성공으로 잘못 종료되고, 존재하지 않�
 ![Compute budget에 따라 단계적으로 바뀌는 생성 결과.](/assets/img/papers/2602.12279/x5.png)
 *Compute budget에 따라 단계적으로 바뀌는 생성 결과.*
 
-이 글에는 benchmark별 절대 점수나 인간 평가표가 없습니다. CLIP·VLM score가 올라도 스타일, 심미성, 원본 보존이 좋아졌다고 자동으로 말할 수 없습니다. 매 라운드에는 최소한 prompt constraint 충족도, 수정 대상 외 영역의 변화, subject identity, artifact를 따로 평가해야 합니다.
+이 글에는 benchmark별 절대 점수나 인간 평가표가 없습니다. CLIP, VLM score가 올라도 스타일, 심미성, 원본 보존이 좋아졌다고 자동으로 말할 수 없습니다. 매 라운드에는 최소한 prompt constraint 충족도, 수정 대상 외 영역의 변화, subject identity, artifact를 따로 평가해야 합니다.
 
 ## 더 편집할지 멈출지를 어떤 규칙으로 정할까?
 
@@ -73,7 +73,7 @@ UniT가 잘 맞는 과제는 여러 독립 조건을 순서대로 고칠 수 있
 
 - 모든 필수 조건이 verifier threshold를 넘음
 - 두 라운드 연속 점수 개선이 없음
-- 최대 이미지 수·시간·비용에 도달
+- 최대 이미지 수, 시간, 비용에 도달
 - 수정 대상 밖 변화가 허용치를 초과
 - verifier들이 서로 모순된 판정을 냄
 
@@ -81,13 +81,13 @@ Sequential scaling의 장점은 계산을 많이 쓴다는 사실이 아니라, 
 
 ## Best-of-N과 공정하게 비교하려면 무엇을 고정할까?
 
-순차 수정과 병렬 후보를 비교할 때는 최종 이미지 수만 같게 두는 것으로 충분하지 않을 수 있습니다. 순차 방식은 각 라운드마다 verifier와 planner를 호출하고 이전 이미지 문맥을 읽는 반면, Best-of-N은 후보를 독립 생성한 뒤 선택기를 사용합니다. 총 이미지 생성 횟수, VLM 호출 수, 입력·출력 토큰, 벽시계 시간과 GPU 사용량을 함께 맞추거나 별도로 보고해야 계산 예산 대비 이득을 알 수 있습니다.
+순차 수정과 병렬 후보를 비교할 때는 최종 이미지 수만 같게 두는 것으로 충분하지 않을 수 있습니다. 순차 방식은 각 라운드마다 verifier와 planner를 호출하고 이전 이미지 문맥을 읽는 반면, Best-of-N은 후보를 독립 생성한 뒤 선택기를 사용합니다. 총 이미지 생성 횟수, VLM 호출 수, 입력, 출력 토큰, 벽시계 시간과 GPU 사용량을 함께 맞추거나 별도로 보고해야 계산 예산 대비 이득을 알 수 있습니다.
 
-평가 prompt는 오류가 한 개인 사례와 여러 조건이 얽힌 사례를 나눕니다. 단순 생성에서는 병렬 후보 중 하나를 고르는 편이 빠를 수 있고, 목줄 위치·동작·배경처럼 독립 조건을 순서대로 고칠 수 있는 요청에서는 순차 방식이 유리할 수 있습니다. 두 집단을 평균 하나로 합치면 어떤 요청을 라우팅해야 하는지 알 수 없습니다.
+평가 prompt는 오류가 한 개인 사례와 여러 조건이 얽힌 사례를 나눕니다. 단순 생성에서는 병렬 후보 중 하나를 고르는 편이 빠를 수 있고, 목줄 위치, 동작, 배경처럼 독립 조건을 순서대로 고칠 수 있는 요청에서는 순차 방식이 유리할 수 있습니다. 두 집단을 평균 하나로 합치면 어떤 요청을 라우팅해야 하는지 알 수 없습니다.
 
 ## 편집이 좋아지다가 다시 무너지는 시점을 어떻게 찾을까?
 
-각 라운드에서 전체 점수만 보지 말고 “이번에 고칠 조건”과 “보존할 조건”을 구분해 채점해야 합니다. 목줄을 고치며 강아지의 얼굴이 바뀌면 새 조건 점수는 올라도 결과 전체는 후퇴합니다. 수정 대상 밖의 픽셀·주체 정체성·스타일 변화가 허용치를 넘으면 이전 체크포인트로 되돌리고 다른 지시를 시도하는 rollback 규칙이 필요합니다.
+각 라운드에서 전체 점수만 보지 말고 “이번에 고칠 조건”과 “보존할 조건”을 구분해 채점해야 합니다. 목줄을 고치며 강아지의 얼굴이 바뀌면 새 조건 점수는 올라도 결과 전체는 후퇴합니다. 수정 대상 밖의 픽셀, 주체 정체성, 스타일 변화가 허용치를 넘으면 이전 체크포인트로 되돌리고 다른 지시를 시도하는 rollback 규칙이 필요합니다.
 
 Verifier가 성공이라고 말한 뒤에도 사람 평가나 독립 검증기로 표본을 다시 확인할 수 있습니다. 같은 verifier가 학습 trajectory를 만들고 배포 때 종료까지 판단하면 그 모델의 맹점이 반복됩니다. 서로 다른 검증기가 필수 조건에서 불일치하면 추가 편집보다 답을 보류하는 편이 낫고, 불일치 기록은 다음 학습 데이터의 우선 검수 대상으로 쓸 수 있습니다.
 
@@ -108,7 +108,7 @@ Verifier가 성공이라고 말한 뒤에도 사람 평가나 독립 검증기�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석]({% post_url 2026-01-18-VIBE--Visual-Instruction-Based-Editor %}) — Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초·24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
 - [이미지 편집 후보를 많이 뽑을수록 좋을까? ADE-CoT의 조기 중단]({% post_url 2026-03-03-From-Scale-to-Speed--Adaptive-Test-Time-Scaling-for-Image-Editing %}) — ADE-CoT가 편집 난이도에 따라 후보 수를 바꾸고 실패 후보를 일찍 제거하는 방식, Best-of-N 대비 속도 이득과 검증 모델 의존성을 살펴봅니다.
-- [UniTok은 이미지 생성과 이해를 둘 다 잘할까: rFID 0.38과 정확도 78.6의 의미]({% post_url 2025-03-07-UniTok %}) — UniTok이 단일 대형 코드북 대신 Multi-Codebook Quantization을 쓰는 이유와 이미지 재구성·비전 언어 이해를 한 토큰으로 연결하는 방식, 벤치마크의 생성·이해 trade-off를 정리합니다.
+- [UniTok은 이미지 생성과 이해를 둘 다 잘할까: rFID 0.38과 정확도 78.6의 의미]({% post_url 2025-03-07-UniTok %}) — UniTok이 단일 대형 코드북 대신 Multi-Codebook Quantization을 쓰는 이유와 이미지 재구성, 비전 언어 이해를 한 토큰으로 연결하는 방식, 벤치마크의 생성, 이해 trade-off를 정리합니다.
+- [Clawra는 어떻게 일관된 캐릭터 이미지를 보내나: 설치와 안전 기준]({% post_url 2026-02-13-OpenClaw-The-AI-Agent-Clawra %}) — 최근 깃허브에서 화제가 된 오픈소스 AI 에이전트 'Clawra'를 심층 분석합니다. OpenClaw 프레임워크 기반으로 작동하며, 일관된 캐릭터 유지와 자가 촬영(Selfie) 기능이 특징입니다. 설치부터 SOUL.md 설정…
 <!-- internal-links:end -->

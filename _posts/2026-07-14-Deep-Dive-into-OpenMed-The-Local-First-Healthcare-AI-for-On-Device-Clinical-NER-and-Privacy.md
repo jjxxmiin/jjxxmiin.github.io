@@ -11,7 +11,7 @@ tags:
   - 반도체
 summary: 환자의 민감한 의료 데이터를 외부 클라우드로 보내지 않고, 완벽하게 통제된 로컬 기기 내에서 처리하는 오픈소스 의료 인공지능 프레임워크
   OpenMed의 아키텍처, 17개국어 기반 개인정보 비식별화 원리, 그리고 현업 활용 시나리오를 심층적으로 분석합니다.
-description: 'OpenMed가 의료 텍스트의 개체와 개인정보를 로컬에서 찾는 방식과 언어·기관·문서 형식별 정확도, 비식별화 누락·임상 및 규제 검증 한계를 정리합니다.'
+description: 'OpenMed가 의료 텍스트의 개체와 개인정보를 로컬에서 찾는 방식과 언어, 기관, 문서 형식별 정확도, 비식별화 누락, 임상 및 규제 검증 한계를 정리합니다.'
 github_url: https://github.com/maziyarpanahi/openmed
 image:
   path: https://opengraph.githubassets.com/1/maziyarpanahi/openmed
@@ -63,7 +63,7 @@ faq:
     평범한 사양의 기기에서도 VRAM 부족 현상 없이 쾌적한 속도를 보장합니다.
 ---
 
-OpenMed는 의료 텍스트에서 임상 개체와 개인정보 후보를 기기 안에서 찾도록 모델과 실행 경로를 모은 프레임워크입니다. 로컬 처리는 전송 범위를 줄일 수 있지만 비식별화 누락, 잘못된 임상 개체, 로그·백업 노출과 규제 적합성을 자동 해결하지 않습니다. 대상 언어·기관·문서 형식별 사람 정답 세트로 재현율과 오탐을 확인한 뒤 보조 처리에 사용하세요.
+OpenMed는 의료 텍스트에서 임상 개체와 개인정보 후보를 기기 안에서 찾도록 모델과 실행 경로를 모은 프레임워크입니다. 로컬 처리는 전송 범위를 줄일 수 있지만 비식별화 누락, 잘못된 임상 개체, 로그, 백업 노출과 규제 적합성을 자동 해결하지 않습니다. 대상 언어, 기관, 문서 형식별 사람 정답 세트로 재현율과 오탐을 확인한 뒤 보조 처리에 사용하세요.
 
 [GitHub 공식 저장소](https://github.com/maziyarpanahi/openmed)
 [공식 모델 허브 (Hugging Face)](https://huggingface.co/OpenMed)
@@ -374,8 +374,8 @@ Apple의 M 시리즈 칩셋이 장착된 장비이거나, 고성능 그래픽 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [서술형 의료 AI는 무엇으로 채점해야 하나: MediX-R1의 복합 보상]({% post_url 2026-02-27-MediX-R1--Open-Ended-Medical-Reinforcement-Learning %}) — MediX-R1이 객관식 일치 대신 LLM 판정·의료 의미·형식·이미지 근거를 조합해 자유 응답을 학습하는 방법과 임상 적용 한계를 설명합니다.
-- [UA-VLS의 불확실성 점수는 의료 판단을 안전하게 할까: SEU Loss와 Dice 3~5% 향상]({% post_url 2026-02-20-Uncertainty-Aware-Vision-Language-Segmentation-for-Medical-Imaging %}) — 임상 텍스트와 영상을 SSMix로 결합하는 UA-VLS의 계산 이득, SEU Loss의 보정 의미와 임상 적용 전 한계를 설명합니다.
+- [민감한 문서를 NotebookLM에 올리기 어렵다면? Open Notebook 점검표]({% post_url 2026-03-02-Why-Did-I-Only-Find-Out-About-This-Now-An-Honest-Review-of-Open-Notebook-the-Open-Source-Alternative-Threatening-Googles-NotebookLM %}) — Open Notebook의 문서 Q&A, 요약, 다중 화자 오디오 기능을 살펴보고 로컬 LLM을 써도 외부 전송이 남을 수 있는 지점과 설치 전 확인 사항을 정리합니다.
+- [서술형 의료 AI는 무엇으로 채점해야 하나: MediX-R1의 복합 보상]({% post_url 2026-02-27-MediX-R1--Open-Ended-Medical-Reinforcement-Learning %}) — MediX-R1이 객관식 일치 대신 LLM 판정, 의료 의미, 형식, 이미지 근거를 조합해 자유 응답을 학습하는 방법과 임상 적용 한계를 설명합니다.
 - [OpenAI ChatGPT Health 출시: 건강 기록과 Apple Health 연동의 모든 것]({% post_url 2026-07-26-openai-launches-health-in-chatgpt-integrating-emr-and-apple-health-data %}) — OpenAI가 2026년 7월 23일 개인 건강 데이터를 ChatGPT와 안전하게 연동하는 'Health in ChatGPT'를 공식 출시했습니다. 미국 내 만 18세 이상 사용자는 Apple Health 및 주요 병원 의료 기록을…
 <!-- internal-links:end -->
 

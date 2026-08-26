@@ -9,7 +9,7 @@ tags:
   - AI에이전트
 math: true
 summary: "LongVideoAgent가 긴 영상을 한 번에 요약하지 않고 질문 관련 구간을 먼저 찾은 뒤 고해상도 frame을 확인하는 이유, 역할 분리의 이득과 grounding 오류 전파를 정리합니다."
-description: "LongVideoAgent가 긴 영상 질문을 계획·구간 검색·고해상도 확인으로 나누는 이유를 설명하고, 근거 timestamp·호출 비용·검색 실패를 함께 평가하는 방법입니다."
+description: "LongVideoAgent가 긴 영상 질문을 계획, 구간 검색, 고해상도 확인으로 나누는 이유를 설명하고, 근거 timestamp, 호출 비용, 검색 실패를 함께 평가하는 방법입니다."
 faq:
   - question: "긴 영상을 먼저 전체 요약하면 왜 세부 질문에 약한가요?"
     answer: "요약 과정에서 잠깐 등장한 물체, 두 번째 사건, 정확한 순서가 사라질 수 있어 질문 관련 구간을 먼저 검색하고 해당 frame을 확인해야 합니다."
@@ -24,7 +24,7 @@ image:
 
 긴 영상 질문에 답할 때 전체를 한 번에 요약하면 **짧게 등장한 물체나 사건 순서가 압축 과정에서 사라지므로, 질문과 관련된 구간을 먼저 찾고 그 부분만 자세히 보는 편이 정확합니다.** LongVideoAgent는 이 과정을 Master, Grounding, Vision 세 역할로 나눈 프레임워크입니다.
 
-## 세 Agent는 계획·검색·확인을 나눠 맡는다
+## 세 Agent는 계획, 검색, 확인을 나눠 맡는다
 
 Master Agent는 질문을 해석하고 어떤 정보가 필요한지 계획합니다. Grounding Agent는 subtitle이나 미리 만든 description을 이용해 관련 timestamp를 찾습니다. Vision Agent는 선택된 구간의 고해상도 frame을 보고 색, 객체, 행동처럼 요약에서 빠지기 쉬운 세부 정보를 확인합니다.
 
@@ -42,7 +42,7 @@ Master Agent는 질문을 해석하고 어떤 정보가 필요한지 계획합�
 
 평가는 LongTVQA와 LongTVQA+를 사용하고 여러 multimodal backbone을 비교합니다. 원문은 non-agent baseline보다 약 15~20% 높은 결과를 보고합니다. 이 값은 dataset, backbone, 영상 길이, 사용할 수 있는 subtitle과 description 조건에 묶여 있습니다.
 
-실제 테스트에서는 질문을 시간 순서, 짧은 객체 확인, 원인·결과, 전체 주제처럼 나누는 편이 좋습니다. 전체 주제 질문은 요약이 잘 맞을 수 있지만, 짧은 세부 질문은 grounding 품질이 좌우합니다. 같은 평균 점수라도 어느 유형에서 개선됐는지 모르면 도입 판단을 내리기 어렵습니다.
+실제 테스트에서는 질문을 시간 순서, 짧은 객체 확인, 원인, 결과, 전체 주제처럼 나누는 편이 좋습니다. 전체 주제 질문은 요약이 잘 맞을 수 있지만, 짧은 세부 질문은 grounding 품질이 좌우합니다. 같은 평균 점수라도 어느 유형에서 개선됐는지 모르면 도입 판단을 내리기 어렵습니다.
 
 Agent trace는 디버깅에 도움이 됩니다. 어떤 query로 어느 timestamp를 골랐고 어떤 frame을 근거로 답했는지 기록하면 오류 지점을 찾을 수 있습니다. 다만 trace가 남는다는 사실이 reasoning의 진실성을 보장하지는 않습니다. 선택된 실제 frame과 답의 관계를 사람이 표본 검수해야 합니다.
 
@@ -61,7 +61,7 @@ Agent trace는 디버깅에 도움이 됩니다. 어떤 query로 어느 timestam
 |---|---|---|
 | 사건 순서 | 여러 timestamp의 앞뒤 관계 | 첫 사건과 두 번째 사건 혼동 |
 | 짧은 객체 | 해당 구간의 고해상도 frame | subtitle에 없는 물체를 놓침 |
-| 원인·결과 | 행동 전·후 구간 | 시간상 가까운 장면을 원인으로 오인 |
+| 원인, 결과 | 행동 전후 구간 | 시간상 가까운 장면을 원인으로 오인 |
 | 전체 주제 | 넓은 구간의 반복 단서 | 한 장면을 전체 내용으로 일반화 |
 
 근거 contract는 설명 가능성을 꾸미기 위한 문장이 아니라 오류 검출 장치입니다. 선택 timestamp가 질문보다 뒤에만 있거나 답에 등장한 물체가 frame에 없으면 검색 또는 vision 단계가 실패한 것입니다. 사람이 모든 답을 볼 수 없더라도 이런 구조적 모순은 자동으로 보류할 수 있습니다.
@@ -80,7 +80,7 @@ Grounding은 정답 구간이 후보 안에 들어오는 recall로, Vision은 �
 
 ## Subtitle이 없는 영상은 별도 경로가 필요하다
 
-Grounding이 subtitle과 미리 만든 description에 크게 의존하면 대사가 없거나 자막 품질이 낮은 영상에서 후보 구간을 찾지 못할 수 있습니다. 이런 입력은 일정 간격의 visual index, 장면 전환, 객체·행동 description을 이용한 검색을 따로 평가해야 합니다. 자동 description이 실제 frame에 없는 사건을 적으면 검색 단계부터 잘못된 근거가 만들어지므로 index 생성 결과도 표본 검수합니다.
+Grounding이 subtitle과 미리 만든 description에 크게 의존하면 대사가 없거나 자막 품질이 낮은 영상에서 후보 구간을 찾지 못할 수 있습니다. 이런 입력은 일정 간격의 visual index, 장면 전환, 객체, 행동 description을 이용한 검색을 따로 평가해야 합니다. 자동 description이 실제 frame에 없는 사건을 적으면 검색 단계부터 잘못된 근거가 만들어지므로 index 생성 결과도 표본 검수합니다.
 
 자막이 있는 영상에서도 질문이 시각적 세부만 묻는다면 text 검색어가 정답 구간을 직접 가리키지 않을 수 있습니다. 대사 주변만 보는 방식과 넓은 시간 window, visual index를 함께 쓰는 방식을 비교해 정답 timestamp recall을 측정합니다. 어떤 source에서 찾은 후보인지 기록하면 subtitle 검색과 visual 검색의 기여를 구분할 수 있습니다.
 
@@ -93,9 +93,9 @@ Grounding이 subtitle과 미리 만든 description에 크게 의존하면 대사
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [MA-EgoQA는 로봇 6대의 영상을 함께 이해할까: 7일 기억과 EgoMAS 검색]({% post_url 2026-03-12-MA-EgoQA--Question-Answering-over-Egocentric-Videos-from-Multiple-Embodied-Agents %}) — 여섯 에이전트의 7일치 1인칭 영상에서 질문에 답하는 MA-EgoQA와, Agent별 검색·공유 Memory를 쓰는 EgoMAS의 정확도·연산 한계를 정리합니다.
-- [EVA는 긴 영상 토큰을 얼마나 줄일까: SFT·KTO·GRPO와 탐색 지연]({% post_url 2026-03-27-EVA--Efficient-Reinforcement-Learning-for-End-to-End-Video-Agent %}) — EVA가 긴 영상을 요약·계획·행동·반성 루프로 탐색하는 방식을 살펴보고, 토큰 절감과 반복 추론 지연 사이의 실제 교환을 짚습니다.
-- [MMM은 1분 영상을 빠르고 선명하게 만들까: Global Mean·Local Mode의 경계]({% post_url 2026-03-02-Mode-Seeking-meets-Mean-Seeking-for-Fast-Long-Video-Generation %}) — MMM이 긴 영상의 전체 흐름과 짧은 영상의 세부 품질을 두 Head로 나누는 방식을 살펴보고, 슬라이딩 윈도 경계·데이터·속도 검증 과제를 정리합니다.
+- [MA-EgoQA는 로봇 6대의 영상을 함께 이해할까: 7일 기억과 EgoMAS 검색]({% post_url 2026-03-12-MA-EgoQA--Question-Answering-over-Egocentric-Videos-from-Multiple-Embodied-Agents %}) — 여섯 에이전트의 7일치 1인칭 영상에서 질문에 답하는 MA-EgoQA와, Agent별 검색, 공유 Memory를 쓰는 EgoMAS의 정확도, 연산 한계를 정리합니다.
+- [EVA는 긴 영상 토큰을 얼마나 줄일까: SFT, KTO, GRPO와 탐색 지연]({% post_url 2026-03-27-EVA--Efficient-Reinforcement-Learning-for-End-to-End-Video-Agent %}) — EVA가 긴 영상을 요약, 계획, 행동, 반성 루프로 탐색하는 방식을 살펴보고, 토큰 절감과 반복 추론 지연 사이의 실제 교환을 짚습니다.
+- [MMM은 1분 영상을 빠르고 선명하게 만들까: Global Mean, Local Mode의 경계]({% post_url 2026-03-02-Mode-Seeking-meets-Mean-Seeking-for-Fast-Long-Video-Generation %}) — MMM이 긴 영상의 전체 흐름과 짧은 영상의 세부 품질을 두 Head로 나누는 방식을 살펴보고, 슬라이딩 윈도 경계, 데이터, 속도 검증 과제를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

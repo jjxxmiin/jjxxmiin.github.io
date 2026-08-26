@@ -76,7 +76,7 @@ flowchart TD
     N3 --> N4
 ```
 
-이번 발표에는 서로 다른 두 계획이 들어 있습니다. SpaceXAI는 Grok 주변의 오케스트레이션·도구 실행·코드 처리·시뮬레이션을 위해 지상 인프라에 Vera CPU를 도입하고, 별도로 Vera Rubin NVL72 기반 1세대 AI 위성 Starmind를 계획하고 있습니다. 지상 CPU 도입과 발사 일정이 공개되지 않은 위성 계획을 하나의 완성된 시스템처럼 읽어서는 안 됩니다.
+이번 발표에는 서로 다른 두 계획이 들어 있습니다. SpaceXAI는 Grok 주변의 오케스트레이션, 도구 실행, 코드 처리, 시뮬레이션을 위해 지상 인프라에 Vera CPU를 도입하고, 별도로 Vera Rubin NVL72 기반 1세대 AI 위성 Starmind를 계획하고 있습니다. 지상 CPU 도입과 발사 일정이 공개되지 않은 위성 계획을 하나의 완성된 시스템처럼 읽어서는 안 됩니다.
 
 > **먼저 알아둘 용어**
 >
@@ -152,8 +152,8 @@ flowchart TD
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Starcloud, Nvidia 투자 유치하며 2억 5천만 달러 규모 우주 AI 데이터센터 구축 추진]({% post_url 2026-08-22-starcloud-secures-250-million-for-orbital-ai-data-center-constellation %}) — 우주 컴퓨팅 스타트업 Starcloud가 23억 달러의 기업가치로 2억 5천만 달러 규모의 시리즈 A 확장 투자를 마무리했습니다. Nvidia와 Cisco Investments 등이 신규 투자자로 참여했으며, 워싱턴주 우딘빌 공장에서…
-- [Cilium은 iptables보다 얼마나 빠를까: 재현 가능한 네트워크 성능 검증법]({% post_url 2026-05-30-Still-Drowning-in-iptables-Why-a-10-Year-Engineer-Switched-to-eBPF-Cilium %}) — iptables·IPVS·Cilium eBPF를 같은 클러스터 조건에서 비교하기 위해 서비스 수, endpoint churn, 연결 유형과 정책을 고정하고 지연·CPU·drop을 측정하는 법입니다.
-- [병렬처리는 왜 코어를 늘려도 계속 빨라지지 않을까: CPU·GPU·FPGA 선택 기준]({% post_url 2019-02-18-accelerator %}) — 클록을 높이는 방식이 전력과 발열의 벽에 부딪힌 이유부터 멀티코어, 파이프라이닝, GPU·FPGA 가속기, Amdahl의 법칙까지 한 흐름으로 정리하고 오래된 Thor 작업 명령을 안전하게 읽는 법을 설명합니다.
+- [Cilium은 iptables보다 얼마나 빠를까: 재현 가능한 네트워크 성능 검증법]({% post_url 2026-05-30-Still-Drowning-in-iptables-Why-a-10-Year-Engineer-Switched-to-eBPF-Cilium %}) — iptables, IPVS, Cilium eBPF를 같은 클러스터 조건에서 비교하기 위해 서비스 수, endpoint churn, 연결 유형과 정책을 고정하고 지연, CPU, drop을 측정하는 법입니다.
+- [병렬처리는 왜 코어를 늘려도 계속 빨라지지 않을까: CPU, GPU, FPGA 선택 기준]({% post_url 2019-02-18-accelerator %}) — 클록을 높이는 방식이 전력과 발열의 벽에 부딪힌 이유부터 멀티코어, 파이프라이닝, GPU, FPGA 가속기, Amdahl의 법칙까지 한 흐름으로 정리하고 오래된 Thor 작업 명령을 안전하게 읽는 법을 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

@@ -11,12 +11,13 @@ tags:
   - OpenAI
   - 튜토리얼
   - 이미지생성
-description: "챗GPT 무료·Plus·Business·Enterprise 요금제의 가격과 선택 기준, API 별도 과금, 변경·해지·환불 때 확인할 조건을 비교합니다."
+description: "챗GPT 무료, Plus, Business, Enterprise 요금제의 가격과 선택 기준, API 별도 과금, 변경, 해지, 환불 때 확인할 조건을 비교합니다."
 summary: 개인 작업은 무료 플랜이나 Plus를, 팀 협업과 보안이 필요하다면 Business 플랜이 적합합니다. 각 요금제별 정확한 가격 조건과
   변경, 해지 절차를 안내합니다.
 target_keyword: 챗gpt 요금제 추천
 keyword_tier: T1
 sitemap: true
+home_presentation: compact
 mermaid: true
 chart: true
 image:
@@ -36,7 +37,7 @@ faq:
     될 수 있습니다.
 ---
 
-가끔 대화하고 기본 기능만 쓴다면 무료 플랜부터 시작하고, 파일 분석·이미지 생성과 더 높은 사용 한도가 업무에 반복해서 필요할 때 Plus를 검토하면 됩니다. 두 명 이상이 중앙 관리와 기본적인 학습 미사용 조건을 함께 필요로 한다면 Business가 비교 대상입니다. 가격과 제공 기능은 바뀔 수 있으므로 결제 직전에는 공식 요금제 페이지와 결제 화면을 다시 확인해야 합니다.
+가끔 대화하고 기본 기능만 쓴다면 무료 플랜부터 시작하고, 파일 분석, 이미지 생성과 더 높은 사용 한도가 업무에 반복해서 필요할 때 Plus를 검토하면 됩니다. 두 명 이상이 중앙 관리와 기본적인 학습 미사용 조건을 함께 필요로 한다면 Business가 비교 대상입니다. 가격과 제공 기능은 바뀔 수 있으므로 결제 직전에는 공식 요금제 페이지와 결제 화면을 다시 확인해야 합니다.
 
 > **먼저 알아둘 용어**
 >
@@ -137,9 +138,9 @@ chatgpt.com 웹사이트에서 가입한 구독을 해지하려면 로그인 후
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [클로드(Claude) 사용법: 무료·Pro 요금제, 프로젝트·PDF·Skills 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 2026년 8월 26일 기준 Claude 무료·Pro 플랜, 프로젝트와 RAG, 채팅·프로젝트 파일 제한, PDF·Artifacts·Skills·공유 기능을 공식 문서로 비교합니다.
-- [GPT-4o 이미지 생성, 실무에 바로 써도 될까? 한글·작은 글자·부분 편집 한계]({% post_url 2025-03-26-GPT4oIG %}) — GPT-4o 네이티브 이미지 생성의 텍스트 표현·다중 객체·대화형 수정 장점과 잘림, 비라틴 문자, 작은 글자, 의도하지 않은 변경 문제를 실무 검수 순서로 정리합니다.
-- [이미지 생성 모델이 너무 많다면? Diffusion-GPT 라우터의 선택 기준]({% post_url 2026-03-02-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-and-Honest-Review-of-Diffusion-GPT %}) — Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연·오선택·모델 로딩 비용을 짚습니다.
+- [GPT-4o 이미지 생성, 실무에 바로 써도 될까? 한글, 작은 글자, 부분 편집 한계]({% post_url 2025-03-26-GPT4oIG %}) — GPT-4o 네이티브 이미지 생성의 텍스트 표현, 다중 객체, 대화형 수정 장점과 잘림, 비라틴 문자, 작은 글자, 의도하지 않은 변경 문제를 실무 검수 순서로 정리합니다.
+- [클로드(Claude) 사용법: 프로젝트, PDF, Artifacts, Skills 실전 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 무료 계정으로 프로젝트와 PDF 분석을 시험하고 Artifacts, Skills, 메모리, 공유 기능을 안전하게 활용하는 순서와 Pro 전환 기준을 정리합니다.
+- [유휴 노트북을 GPU 클러스터처럼 쓸 수 있을까? HyperspaceAI의 현실]({% post_url 2026-03-29-The-Prelude-to-the-Counterattack-for-the-GPU-Poor-A-Deep-Dive-into-HyperspaceAI-Architecture %}) — libp2p 가십과 연산 검증으로 이기종 노드를 묶는 HyperspaceAI의 구상, 잘 맞는 비동기 작업과 대역폭, 결정론, 신뢰 비용을 구분합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

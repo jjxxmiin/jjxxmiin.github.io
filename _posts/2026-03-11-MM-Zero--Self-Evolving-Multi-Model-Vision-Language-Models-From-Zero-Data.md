@@ -1,29 +1,29 @@
 ---
 layout: post
-title: "MM-Zero의 '데이터 0'은 사실일까: Proposer·Coder·Solver와 합성 편향"
+title: "MM-Zero의 '데이터 0'은 사실일까: Proposer, Coder, Solver와 합성 편향"
 date: '2026-03-11 20:12:15'
 categories: Tech
 tags:
   - 강화학습
   - 디퓨전모델
 math: true
-summary: "외부 이미지 없이 Proposer·Coder·Solver가 코드 렌더링 문제를 만들고 GRPO로 학습하는 MM-Zero의 의미와, 실사 일반화·Sandbox·GPU 한계를 정리합니다."
-description: 'MM-Zero가 제안·코드 렌더링·풀이 역할로 합성 시각 문제를 만드는 구조와 보상 해킹, 합성 편향·실사 일반화·연산 비용을 검증하는 법을 설명합니다.'
+summary: "외부 이미지 없이 Proposer, Coder, Solver가 코드 렌더링 문제를 만들고 GRPO로 학습하는 MM-Zero의 의미와, 실사 일반화, Sandbox, GPU 한계를 정리합니다."
+description: 'MM-Zero가 제안, 코드 렌더링, 풀이 역할로 합성 시각 문제를 만드는 구조와 보상 해킹, 합성 편향, 실사 일반화, 연산 비용을 검증하는 법을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.09206.png
-  alt: "MM-Zero의 '데이터 0'은 사실일까: Proposer·Coder·Solver와 합성 편향 논문 대표 이미지"
+  alt: "MM-Zero의 '데이터 0'은 사실일까: Proposer, Coder, Solver와 합성 편향 논문 대표 이미지"
 faq:
   - question: 'MM-Zero의 Zero Data는 학습 데이터와 비용이 전혀 없다는 뜻인가요?'
-    answer: '아닙니다. 외부 이미지 데이터셋 없이 문제를 합성한다는 뜻이며 사전학습 모델, 렌더링 코드, GRPO 학습과 GPU·CPU 연산은 여전히 필요합니다.'
+    answer: '아닙니다. 외부 이미지 데이터셋 없이 문제를 합성한다는 뜻이며 사전학습 모델, 렌더링 코드, GRPO 학습과 GPU, CPU 연산은 여전히 필요합니다.'
   - question: '코드로 만든 문제에서 성능이 오르면 실제 사진도 잘 이해하나요?'
-    answer: '그렇게 단정할 수 없습니다. 렌더러의 글꼴·색·배치 단서를 외울 수 있으므로 다른 렌더러와 사람이 검수한 실제 이미지 평가에서 일반화를 확인해야 합니다.'
+    answer: '그렇게 단정할 수 없습니다. 렌더러의 글꼴, 색, 배치 단서를 외울 수 있으므로 다른 렌더러와 사람이 검수한 실제 이미지 평가에서 일반화를 확인해야 합니다.'
   - question: 'MM-Zero를 작은 팀이 시험하려면 어디서 시작해야 하나요?'
     answer: '차트나 UI처럼 코드로 정답을 계산할 수 있는 한 도메인에서 문제 유효율, 코드 실행률, 정답 일치율과 문제당 비용을 측정한 뒤 실제 이미지 평가를 추가하는 편이 좋습니다.'
 ---
 
-MM-Zero의 “Zero Data”는 외부 Image Dataset 없이 학습 문제를 만든다는 뜻이지, 사전학습 Model·합성 데이터·GPU 연산까지 0이라는 뜻은 아닙니다.
+MM-Zero의 “Zero Data”는 외부 Image Dataset 없이 학습 문제를 만든다는 뜻이지, 사전학습 Model, 합성 데이터, GPU 연산까지 0이라는 뜻은 아닙니다.
 
-[Paper ID 2603.09206](https://huggingface.co/papers/2603.09206)은 모델이 문제를 제안하고, Code로 Image를 렌더링하고, 그 Image를 다시 푸는 자기진화 Loop를 제시합니다. Diffusion Model로 매번 실사 이미지를 생성하는 대신 Python·Matplotlib·SVG 같은 결정 가능한 Renderer를 이용해 시각 문제와 정답의 연결을 통제합니다.
+[Paper ID 2603.09206](https://huggingface.co/papers/2603.09206)은 모델이 문제를 제안하고, Code로 Image를 렌더링하고, 그 Image를 다시 푸는 자기진화 Loop를 제시합니다. Diffusion Model로 매번 실사 이미지를 생성하는 대신 Python, Matplotlib, SVG 같은 결정 가능한 Renderer를 이용해 시각 문제와 정답의 연결을 통제합니다.
 
 ## 세 역할이 학습 문제를 만드는 방식
 
@@ -32,34 +32,34 @@ MM-Zero는 하나의 Base Model을 세 역할로 나눕니다.
 | 역할 | 하는 일 | 실패 지점 |
 | :--- | :--- | :--- |
 | Proposer | 시각 개념과 질문 제안 | 쉬운 문제 반복, 모호한 지시 |
-| Coder | 질문을 실행 Code로 변환 | Syntax·Runtime·Layout 오류 |
-| Solver | 렌더링 Image를 보고 답변 | 시각 인식·추론 오류 |
+| Coder | 질문을 실행 Code로 변환 | Syntax, Runtime, Layout 오류 |
+| Solver | 렌더링 Image를 보고 답변 | 시각 인식, 추론 오류 |
 
-Proposer의 자연어만으로는 실제 시각 입력이 없습니다. Coder가 이를 좌표·도형·Text가 있는 Code로 바꾸고 실행해 Image를 만들면서 Solver가 학습할 환경이 생깁니다. 같은 Renderer를 쓰면 Ground Truth를 Code에서 계산하거나 점검할 수 있다는 점이 강점입니다.
+Proposer의 자연어만으로는 실제 시각 입력이 없습니다. Coder가 이를 좌표, 도형, Text가 있는 Code로 바꾸고 실행해 Image를 만들면서 Solver가 학습할 환경이 생깁니다. 같은 Renderer를 쓰면 Ground Truth를 Code에서 계산하거나 점검할 수 있다는 점이 강점입니다.
 
-## 실행·시각·난이도 Reward가 Loop를 제어한다
+## 실행, 시각, 난이도 Reward가 Loop를 제어한다
 
 세 역할은 GRPO로 함께 학습됩니다. Coder의 Code가 실행되지 않으면 Execution Feedback으로 감점하고, 렌더링 결과가 Proposer의 의도와 다르면 Visual Verification으로 보상을 낮춥니다. 난이도 Reward는 계속 원이나 네모 같은 쉬운 문제만 내는 전략을 막는 역할을 합니다.
 
-그렇다고 Reward가 데이터 품질을 완벽히 보장하지는 않습니다. 실행되는 Code도 잘못된 정답을 만들 수 있고, Visual Verifier가 놓치는 모순이 있을 수 있습니다. Solver가 특정 Renderer의 Font·색상·배치 패턴을 외우는 방식으로 점수만 높일 가능성도 확인해야 합니다.
+그렇다고 Reward가 데이터 품질을 완벽히 보장하지는 않습니다. 실행되는 Code도 잘못된 정답을 만들 수 있고, Visual Verifier가 놓치는 모순이 있을 수 있습니다. Solver가 특정 Renderer의 Font, 색상, 배치 패턴을 외우는 방식으로 점수만 높일 가능성도 확인해야 합니다.
 
-## “0원·무한 생성”으로 표현하면 안 되는 이유
+## “0원, 무한 생성”으로 표현하면 안 되는 이유
 
-외부 Image를 구매하거나 크롤링하지 않아 Licensing 부담을 줄일 수 있지만, 세 역할 Model의 추론과 GRPO 학습, 수많은 Sandbox Process가 필요합니다. 데이터 수집비 대신 GPU·CPU·Storage와 Reward 설계 비용이 생깁니다.
+외부 Image를 구매하거나 크롤링하지 않아 Licensing 부담을 줄일 수 있지만, 세 역할 Model의 추론과 GRPO 학습, 수많은 Sandbox Process가 필요합니다. 데이터 수집비 대신 GPU, CPU, Storage와 Reward 설계 비용이 생깁니다.
 
 합성 가능한 조합도 무한하지 않습니다. Renderer와 Proposer가 표현할 수 있는 Domain 안에서 다양성이 만들어집니다. Font, Chart Style, Coordinate 범위가 좁으면 대량 생성해도 같은 분포를 반복할 수 있습니다. 비용은 “0원”이 아니라 외부 Dataset에서 계산 가능한 합성 환경으로 이동합니다.
 
 ## 코드 렌더링은 실사 세계를 충분히 담지 못한다
 
-Geometry, Chart, UI, Diagram처럼 규칙이 명시적인 Domain에는 Python·SVG가 잘 맞습니다. 반면 사람 표정, 자연광, 복잡한 재질과 가림 같은 Photorealistic Scene은 간단한 Code Renderer로 재현하기 어렵습니다. 합성 문제에서 좋아진 VLM이 실제 사진에서도 같은 추론을 한다고 볼 수 없습니다.
+Geometry, Chart, UI, Diagram처럼 규칙이 명시적인 Domain에는 Python, SVG가 잘 맞습니다. 반면 사람 표정, 자연광, 복잡한 재질과 가림 같은 Photorealistic Scene은 간단한 Code Renderer로 재현하기 어렵습니다. 합성 문제에서 좋아진 VLM이 실제 사진에서도 같은 추론을 한다고 볼 수 없습니다.
 
 Domain 이동을 확인하려면 합성 Test뿐 아니라 사람이 검수한 실제 Image 세트를 별도로 유지해야 합니다. Renderer 종류와 Style을 바꿔도 성능이 유지되는지, Image가 아닌 Code Artifact를 단서로 답하는지 확인합니다. “외부 데이터 0”은 일반화 평가를 생략할 이유가 아닙니다.
 
 ## 작은 Domain과 격리된 Renderer로 시작한다
 
-사내 Dashboard·Chart나 HMI UI처럼 Code로 정확히 만들 수 있는 한 Domain을 고릅니다. Proposer가 낸 문제의 유효율, Coder 실행 성공률, 정답 일치율, Solver 성능과 한 문제당 연산량을 단계별로 기록합니다. 실제 Image Benchmark를 마지막 관문으로 둡니다.
+사내 Dashboard, Chart나 HMI UI처럼 Code로 정확히 만들 수 있는 한 Domain을 고릅니다. Proposer가 낸 문제의 유효율, Coder 실행 성공률, 정답 일치율, Solver 성능과 한 문제당 연산량을 단계별로 기록합니다. 실제 Image Benchmark를 마지막 관문으로 둡니다.
 
-생성 Code는 Network와 Host File에 접근할 수 없는 Sandbox에서 시간·Memory를 제한해 실행해야 합니다. 세 역할을 동시에 학습하는 전체 Framework가 부담스럽다면 먼저 고정된 Proposer와 Renderer로 합성 Dataset만 만들어 효과를 비교할 수 있습니다. MM-Zero의 핵심은 데이터가 필요 없다는 선언보다 Code가 검증 가능한 시각 환경 생성기가 될 수 있다는 점입니다.
+생성 Code는 Network와 Host File에 접근할 수 없는 Sandbox에서 시간, Memory를 제한해 실행해야 합니다. 세 역할을 동시에 학습하는 전체 Framework가 부담스럽다면 먼저 고정된 Proposer와 Renderer로 합성 Dataset만 만들어 효과를 비교할 수 있습니다. MM-Zero의 핵심은 데이터가 필요 없다는 선언보다 Code가 검증 가능한 시각 환경 생성기가 될 수 있다는 점입니다.
 
 ## 합성 문제의 유효성은 어떻게 판정할까
 
@@ -81,7 +81,7 @@ Coder는 복잡한 장면을 피하고 항상 실행되는 단순 코드를 만�
 
 ## 실사 일반화는 어떤 대조군으로 확인할까
 
-합성 평가에는 학습에 사용하지 않은 렌더러, 글꼴, 색상과 배치를 넣습니다. 실사 평가는 사람이 정답을 검수한 사진·문서·차트로 구성하고 합성 학습 전후를 같은 모델에서 비교합니다. 전체 평균뿐 아니라 합성 도메인과 실제 도메인의 변화가 반대 방향인지 살펴야 합니다.
+합성 평가에는 학습에 사용하지 않은 렌더러, 글꼴, 색상과 배치를 넣습니다. 실사 평가는 사람이 정답을 검수한 사진, 문서, 차트로 구성하고 합성 학습 전후를 같은 모델에서 비교합니다. 전체 평균뿐 아니라 합성 도메인과 실제 도메인의 변화가 반대 방향인지 살펴야 합니다.
 
 합성 데이터를 기존 실제 데이터와 섞을 경우 혼합 비율을 바꿔 퇴행 지점을 찾습니다. 합성에서 큰 개선이 나도 실제 사진 성능이 내려가면 적용 목적에 맞지 않을 수 있습니다. 실제 이미지 평가를 학습 보상에 직접 사용하지 않았다면 그 결과가 독립된 검증에 더 가깝습니다.
 
@@ -94,20 +94,20 @@ Proposer와 Coder 추론, 샌드박스 시작과 렌더링, 시각 검증, Solve
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [GUI 에이전트는 클릭 전에 다음 화면을 예측할 수 있나: Code2World]({% post_url 2026-02-11-Code2World--A-GUI-World-Model-via-Renderable-Code-Generation %}) — 현재 화면과 행동에서 렌더링 가능한 HTML로 다음 화면을 예측하는 Code2World의 학습·검증 루프와 실제 GUI 적용 한계를 분석합니다.
-- [5B 이미지 모델이 80B보다 낫다는 말은 어디까지 사실일까: DeepGen 1.0]({% post_url 2026-02-13-DeepGen-1-0--A-Lightweight-Unified-Multimodal-Model-for-Advancing-Image-Generation-and-Editing %}) — DeepGen 1.0의 SCB·Think Token·MR-GRPO 구조와 WISE·UniREditBench 비교 수치를 조건별로 읽고 배포 가능성을 판단합니다.
-- [VLM이 추론 중 이미지를 잊는다면: HopChain의 멀티홉 데이터 설계]({% post_url 2026-03-23-HopChain--Multi-Hop-Data-Synthesis-for-Generalizable-Vision-Language-Reasoning %}) — HopChain이 객체 식별·분할·질문 체인·수치 정답으로 시각 재확인을 강제하는 방식과 보고 성능, 합성 오류·학습 비용 한계를 설명합니다.
+- [GUI 에이전트는 클릭 전에 다음 화면을 예측할 수 있나: Code2World]({% post_url 2026-02-11-Code2World--A-GUI-World-Model-via-Renderable-Code-Generation %}) — 현재 화면과 행동에서 렌더링 가능한 HTML로 다음 화면을 예측하는 Code2World의 학습, 검증 루프와 실제 GUI 적용 한계를 분석합니다.
+- [5B 이미지 모델이 80B보다 낫다는 말은 어디까지 사실일까: DeepGen 1.0]({% post_url 2026-02-13-DeepGen-1-0--A-Lightweight-Unified-Multimodal-Model-for-Advancing-Image-Generation-and-Editing %}) — DeepGen 1.0의 SCB, Think Token, MR-GRPO 구조와 WISE, UniREditBench 비교 수치를 조건별로 읽고 배포 가능성을 판단합니다.
+- [Smolagents CodeAgent가 JSON 파싱을 없앨까: Python 실행과 Sandbox 위험]({% post_url 2026-04-29-Stop-the-JSON-Parsing-Madness-The-Bone-Striking-Counterattack-of-Hugging-Faces-Smolagents-in-1000-Lines-of-Code %}) — Smolagents가 JSON 도구 호출 대신 Python 코드로 여러 행동을 묶는 방식을 살펴보고, 줄어든 왕복 호출과 맞바꾼 임의 코드 실행, 디버깅, 격리 비용을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### MM-Zero의 Zero Data는 학습 데이터와 비용이 전혀 없다는 뜻인가요?
 
-아닙니다. 외부 이미지 데이터셋 없이 문제를 합성한다는 뜻이며 사전학습 모델, 렌더링 코드, GRPO 학습과 GPU·CPU 연산은 여전히 필요합니다.
+아닙니다. 외부 이미지 데이터셋 없이 문제를 합성한다는 뜻이며 사전학습 모델, 렌더링 코드, GRPO 학습과 GPU, CPU 연산은 여전히 필요합니다.
 
 ### 코드로 만든 문제에서 성능이 오르면 실제 사진도 잘 이해하나요?
 
-그렇게 단정할 수 없습니다. 렌더러의 글꼴·색·배치 단서를 외울 수 있으므로 다른 렌더러와 사람이 검수한 실제 이미지 평가에서 일반화를 확인해야 합니다.
+그렇게 단정할 수 없습니다. 렌더러의 글꼴, 색, 배치 단서를 외울 수 있으므로 다른 렌더러와 사람이 검수한 실제 이미지 평가에서 일반화를 확인해야 합니다.
 
 ### MM-Zero를 작은 팀이 시험하려면 어디서 시작해야 하나요?
 

@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet image_opencv.cpp 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/image_opencv.cpp"
 layout: post
-title: "DarkNet image와 OpenCV Mat 변환: 채널 순서·스트림 설정 주의점"
-summary: "DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB·BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다."
-description: "DarkNet CHW float image와 OpenCV HWC byte Mat의 layout·RGB/BGR·stride 변환, stream 속성·빈 frame·안전한 실패 처리를 설명합니다."
+title: "DarkNet image와 OpenCV Mat 변환: 채널 순서, 스트림 설정 주의점"
+summary: "DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB, BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다."
+description: "DarkNet CHW float image와 OpenCV HWC byte Mat의 layout, RGB/BGR, stride 변환, stream 속성, 빈 frame, 안전한 실패 처리를 설명합니다."
 date:   2022-02-25 16:00 -0400
 categories: DarkNet
 image:
@@ -22,10 +22,10 @@ faq:
   - question: "원문 open_video_stream의 height와 FPS 설정은 왜 의심해야 하나요?"
     answer: "해당 property의 값으로 h와 fps가 아니라 w를 전달해 두 설정이 요청과 다르게 적용될 수 있기 때문입니다."
   - question: "이미지 로드 실패 때 10×10 대체 이미지를 반환하면 무엇이 위험한가요?"
-    answer: "호출자가 실패를 정상 입력으로 학습·추론할 수 있고, 원문 shell 명령 기록은 신뢰할 수 없는 filename에서 명령 주입과 buffer overflow 위험도 있습니다."
+    answer: "호출자가 실패를 정상 입력으로 학습, 추론할 수 있고, 원문 shell 명령 기록은 신뢰할 수 없는 filename에서 명령 주입과 buffer overflow 위험도 있습니다."
 ---
 
-DarkNet `image`는 채널별 평면을 잇는 float 배열이고 OpenCV 이미지는 픽셀별 채널이 붙은 8비트 배열이므로, 변환할 때 메모리 배치와 RGB·BGR 순서를 모두 바꿔야 합니다. 여기에 0–1 float와 0–255 byte의 값 범위 변환도 함께 일어납니다. 결과의 색이나 밝기가 틀리면 layout, 채널 순서, scale을 한꺼번에 고치지 말고 단계별 왕복 변환으로 확인해야 합니다.
+DarkNet `image`는 채널별 평면을 잇는 float 배열이고 OpenCV 이미지는 픽셀별 채널이 붙은 8비트 배열이므로, 변환할 때 메모리 배치와 RGB, BGR 순서를 모두 바꿔야 합니다. 여기에 0–1 float와 0–255 byte의 값 범위 변환도 함께 일어납니다. 결과의 색이나 밝기가 틀리면 layout, 채널 순서, scale을 한꺼번에 고치지 말고 단계별 왕복 변환으로 확인해야 합니다.
 
 ## CHW float와 HWC byte를 서로 옮긴다
 
@@ -110,7 +110,7 @@ Float가 음수 또는 1보다 큰 상태에서 255를 곱해 unsigned char로 �
 
 반대 방향은 byte를 255로 나눠 0~1 float를 만듭니다. Model이 -1~1이나 mean/std normalize를 기대한다면 이 함수 뒤 별도 전처리를 한 번만 적용해야 합니다. 이미 normalize된 DarkNet image를 화면에 보이려고 역정규화하지 않고 constrain만 하면 색이 왜곡될 수 있으므로 추론 입력과 표시 copy를 분리합니다.
 
-## Channel 수가 1·3이 아닐 때 무엇을 해야 하나요?
+## Channel 수가 1, 3이 아닐 때 무엇을 해야 하나요?
 
 RGB/BGR swap은 적어도 세 channel이 있다는 전제가 있습니다. Grayscale Mat에 무조건 `rgbgr_image`를 적용하는 경로가 channel index를 어떻게 처리하는지 사용 source를 확인하고, 안전하지 않으면 `c==3` 조건을 둡니다. Alpha를 가진 4채널 input은 alpha를 버릴지 보존할지 명시적으로 정합니다.
 
@@ -130,7 +130,7 @@ Capture object 수명은 성공과 실패 경로 모두에서 해제해야 합�
 
 ## 실패 파일 기록을 안전하게 바꾸는 기준
 
-Filename을 shell command 문자열에 삽입하지 말고 파일 API로 `bad.list`를 열어 한 줄을 기록합니다. 고정 크기 sprintf buffer 대신 길이를 검사하는 방식과 encoding·newline 정책을 사용합니다. 공격자가 조작할 수 있는 경로뿐 아니라 공백, 따옴표와 아주 긴 정상 경로도 시험합니다.
+Filename을 shell command 문자열에 삽입하지 말고 파일 API로 `bad.list`를 열어 한 줄을 기록합니다. 고정 크기 sprintf buffer 대신 길이를 검사하는 방식과 encoding, newline 정책을 사용합니다. 공격자가 조작할 수 있는 경로뿐 아니라 공백, 따옴표와 아주 긴 정상 경로도 시험합니다.
 
 대체 image를 자동 반환하기보다 호출자에게 명확한 failure 상태를 전달하면 학습에서 skip 수를 세고 허용 한도를 넘을 때 중단할 수 있습니다. 호환성 때문에 placeholder가 필요하다면 label과 함께 유효 mask를 전달해 정상 sample로 loss에 들어가지 않게 합니다.
 
@@ -146,7 +146,7 @@ CHW와 HWC memory layout, float 0~1과 8-bit 0~255 범위, 3채널에서는 RGB�
 
 ### 이미지 로드 실패 때 10×10 대체 이미지를 반환하면 무엇이 위험한가요?
 
-호출자가 실패를 정상 입력으로 학습·추론할 수 있고, 원문 shell 명령 기록은 신뢰할 수 없는 filename에서 명령 주입과 buffer overflow 위험도 있습니다.
+호출자가 실패를 정상 입력으로 학습, 추론할 수 있고, 원문 shell 명령 기록은 신뢰할 수 없는 filename에서 명령 주입과 buffer overflow 위험도 있습니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -158,6 +158,6 @@ CHW와 HWC memory layout, float 0~1과 8-bit 0~255 범위, 3채널에서는 RGB�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유]({% post_url 2022-02-10-DarkNetCol2im %}) — Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다.
-- [Darknet utils.c 이름만 믿으면 틀리는 7곳: mse\_array는 MSE가 아니다]({% post_url 2022-03-22-DarkNetUtils %}) — Darknet utils.c의 CLI 파서·문자열·파일·CSV·난수·배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위·0 나눗셈·입력 변경 위험을 짚습니다.
-- [Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱·리사이즈·메모리 소유권]({% post_url 2022-03-01-DarkNetImage %}) — Darknet의 image 구조체가 픽셀을 저장하고 복사·리사이즈·letterbox·증강·탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다.
+- [Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱, 리사이즈, 메모리 소유권]({% post_url 2022-03-01-DarkNetImage %}) — Darknet의 image 구조체가 픽셀을 저장하고 복사, 리사이즈, letterbox, 증강, 탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다.
+- [DarkNet Demo 실시간 파이프라인: 3개 버퍼와 3프레임 평균]({% post_url 2022-02-19-DarkNetDemo %}) — DarkNet OpenCV 데모가 캡처, 추론, 표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다.
 <!-- internal-links:end -->

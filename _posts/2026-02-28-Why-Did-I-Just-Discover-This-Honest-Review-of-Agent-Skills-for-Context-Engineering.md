@@ -9,7 +9,7 @@ tags:
   - 프롬프트엔지니어링
   - AI에이전트
 summary: '메타데이터 뒤 필요한 지침만 읽는 2-Tier 구조가 실제 토큰을 줄이는지, 요약 전후 핵심 정보 보존율과 라우팅 정확도로 검증하는 법을 정리합니다.'
-description: 'Agent Skills의 2-Tier 점진 로딩이 실제 컨텍스트 비용을 줄이는 조건과 라우팅 정확도, 요약 보존율, 충돌·보안·버전 관리 점검법을 설명합니다.'
+description: 'Agent Skills의 2-Tier 점진 로딩이 실제 컨텍스트 비용을 줄이는 조건과 라우팅 정확도, 요약 보존율, 충돌, 보안, 버전 관리 점검법을 설명합니다.'
 image:
   path: https://opengraph.githubassets.com/1/muratcankoylan/Agent-Skills-for-Context-Engineering
   alt: "muratcankoylan/Agent-Skills-for-Context-Engineering GitHub 저장소 대표 이미지"
@@ -49,7 +49,7 @@ multiagent-patterns와 evaluation 같은 추가 주제도 원문에 소개되지
 
 숫자만 남고 맥락이 사라지는 문제도 주의해야 합니다. “최소 3,200자”라는 값이 남아도 무엇의 길이인지 빠지면 실행 지침으로 쓸 수 없습니다. 파일 경로 역시 이름만 보존하고 대상 저장소를 잃으면 잘못된 위치를 수정할 수 있습니다. 중요한 항목은 값, 대상, 조건을 한 묶음으로 검사합니다.
 
-압축 전후를 같은 최종 과제로 평가합니다. 원문 문맥을 그대로 준 실행과 스킬로 압축한 실행이 같은 결정과 산출물을 내는지 비교하고, 입력 토큰·추가 검색·재질문·수정 횟수를 모두 합산합니다. 처음 프롬프트가 짧아졌어도 누락을 복구하느라 원문을 다시 읽었다면 순절감은 작거나 음수가 될 수 있습니다.
+압축 전후를 같은 최종 과제로 평가합니다. 원문 문맥을 그대로 준 실행과 스킬로 압축한 실행이 같은 결정과 산출물을 내는지 비교하고, 입력 토큰, 추가 검색, 재질문, 수정 횟수를 모두 합산합니다. 처음 프롬프트가 짧아졌어도 누락을 복구하느라 원문을 다시 읽었다면 순절감은 작거나 음수가 될 수 있습니다.
 
 ## 토큰 비용은 어디까지 합산해야 하나
 
@@ -82,7 +82,7 @@ multiagent-patterns와 evaluation 같은 추가 주제도 원문에 소개되지
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [everything-claude-code를 팀에 도입할까: 역할 분리·스킬·훅의 비용]({% post_url 2026-03-22-Review-The-Naked-Truth-of-AI-Coding-Uncovered-by-everything-claude-code-and-True-Agent-Orchestration %}) — everything-claude-code의 역할별 에이전트, 필요할 때 불러오는 스킬, 훅 기반 기록 구조를 살펴보고 컨텍스트·권한·비용·팀 설정의 도입 기준을 정리합니다.
-- [Claude-HUD는 무엇을 보여 주나? Statusline·Transcript 구조와 도입 기준]({% post_url 2026-04-01-Anatomy-of-Claude-HUD-Shattering-the-Black-Box-in-the-Terminal-An-Architectural-Approach-to-Overcoming-Context-Blindness %}) — Claude Code의 공식 statusline 입력과 transcript를 이용해 컨텍스트·도구·에이전트 상태를 표시하는 Claude-HUD의 구조, 보안 경계와 성능·운영 검증법을 설명합니다.
-- [유출 코드 기반 AI 에이전트를 써도 될까? Claw Code의 출처·법적 리스크]({% post_url 2026-04-02-Deep-Dive-A-Monster-Born-on-the-Border-of-Legal-and-Illegal-Dissecting-the-Architecture-of-Claw-Code %}) — Claude Code 유출·클린룸 재작성 주장이 얽힌 Claw Code에서 검증된 사실과 서사를 구분하고, 유용한 설계 패턴만 안전하게 읽는 기준을 제시합니다.
+- [everything-claude-code를 팀에 도입할까: 역할 분리, 스킬, 훅의 비용]({% post_url 2026-03-22-Review-The-Naked-Truth-of-AI-Coding-Uncovered-by-everything-claude-code-and-True-Agent-Orchestration %}) — everything-claude-code의 역할별 에이전트, 필요할 때 불러오는 스킬, 훅 기반 기록 구조를 살펴보고 컨텍스트, 권한, 비용, 팀 설정의 도입 기준을 정리합니다.
+- [Claude-HUD는 무엇을 보여 주나? Statusline, Transcript 구조와 도입 기준]({% post_url 2026-04-01-Anatomy-of-Claude-HUD-Shattering-the-Black-Box-in-the-Terminal-An-Architectural-Approach-to-Overcoming-Context-Blindness %}) — Claude Code의 공식 statusline 입력과 transcript를 이용해 컨텍스트, 도구, 에이전트 상태를 표시하는 Claude-HUD의 구조, 보안 경계와 성능, 운영 검증법을 설명합니다.
+- [유출 코드 기반 AI 에이전트를 써도 될까? Claw Code의 출처, 법적 리스크]({% post_url 2026-04-02-Deep-Dive-A-Monster-Born-on-the-Border-of-Legal-and-Illegal-Dissecting-the-Architecture-of-Claw-Code %}) — Claude Code 유출, 클린룸 재작성 주장이 얽힌 Claw Code에서 검증된 사실과 서사를 구분하고, 유용한 설계 패턴만 안전하게 읽는 기준을 제시합니다.
 <!-- internal-links:end -->

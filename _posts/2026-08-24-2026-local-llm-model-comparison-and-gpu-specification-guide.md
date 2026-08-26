@@ -11,7 +11,7 @@ tags:
   - DeepSeek
   - HuggingFace
   - Llama
-description: "Llama·Qwen·DeepSeek 로컬 LLM의 용도와 4비트 메모리 요구량을 비교하고, VRAM·긴 컨텍스트·라이선스 기준으로 장비를 고르는 방법을 정리합니다."
+description: "Llama, Qwen, DeepSeek 로컬 LLM의 용도와 4비트 메모리 요구량을 비교하고, VRAM, 긴 컨텍스트, 라이선스 기준으로 장비를 고르는 방법을 정리합니다."
 summary: 컴퓨터에 직접 거대언어모델을 띄워 쓰려는 분들을 위해 Llama 3.1, Qwen 2.5, DeepSeek-R1-Distill 모델의
   성능, 필요한 그래픽 카드 사양과 메모리 크기, 선택 기준을 명확하게 비교해 정리했습니다.
 target_keyword: 로컬 llm 모델 비교
@@ -123,9 +123,9 @@ DeepSeek-R1-Distill-Qwen-14B 모델을 설치하여 복잡한 보고서 작성 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [모델 경량화, Pruning·Quantization·Distillation 중 무엇부터 해야 할까?]({% post_url 2021-07-19-ModelCompression %}) — 정확도만 보고 경량화 기법을 고르면 실제 배포 단계에서 다시 막힙니다. 지연시간·메모리·모델 크기를 먼저 정하고 프루닝, 양자화, 증류를 고르는 실전 순서를 설명합니다.
+- [모델 경량화, Pruning, Quantization, Distillation 중 무엇부터 해야 할까?]({% post_url 2021-07-19-ModelCompression %}) — 정확도만 보고 경량화 기법을 고르면 실제 배포 단계에서 다시 막힙니다. 지연시간, 메모리, 모델 크기를 먼저 정하고 프루닝, 양자화, 증류를 고르는 실전 순서를 설명합니다.
 - [Apple Mac Studio M5 Ultra 공개: 512GB 메모리와 로컬 AI 활용 조건]({% post_url 2026-08-26-apple-unveils-mac-studio-with-m5-ultra-and-512gb-memory-for-local-ai %}) — Apple은 2026년 8월 25일 M5 Max 및 M5 Ultra 칩을 탑재한 신형 Mac Studio 데스크톱을 공식 발표했습니다. M5 Ultra 모델은 최대 512GB 통합 메모리와 1.2TB/s 메모리 대역폭을 갖추어 외부…
-- [OpenMythos 770M이 1.3B를 이길까: 16회 Recurrent Depth와 TTFT]({% post_url 2026-04-23-The-Era-of-Parameter-Inflation-is-Over-A-Practitioners-Deep-Dive-into-OpenMythos-and-Recurrent-Depth-Transformers %}) — 같은 블록을 최대 16회 반복하는 OpenMythos의 Prelude·Recurrent Block·Coda 구조를 살펴보고, 적은 파라미터와 늘어난 연산 및 TTFT의 교환을 짚습니다.
+- [OpenMythos 770M이 1.3B를 이길까: 16회 Recurrent Depth와 TTFT]({% post_url 2026-04-23-The-Era-of-Parameter-Inflation-is-Over-A-Practitioners-Deep-Dive-into-OpenMythos-and-Recurrent-Depth-Transformers %}) — 같은 블록을 최대 16회 반복하는 OpenMythos의 Prelude, Recurrent Block, Coda 구조를 살펴보고, 적은 파라미터와 늘어난 연산 및 TTFT의 교환을 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

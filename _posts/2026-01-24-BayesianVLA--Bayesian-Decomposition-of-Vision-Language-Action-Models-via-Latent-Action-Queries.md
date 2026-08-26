@@ -7,7 +7,7 @@ tags:
   - 로보틱스
   - AI트렌드
 math: true
-summary: Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior·posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD 성과를 점검합니다.
+summary: Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior, posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD 성과를 점검합니다.
 description: "BayesianVLA가 vision-only prior와 vision-language posterior의 PMI로 instruction 무시를 줄이는 구조, 목적 함수 부호, 11.3%p 성과와 반사실 검증법을 설명합니다."
 faq:
   - question: "Prior와 posterior는 무엇이 다른가요?"
@@ -63,7 +63,7 @@ $$
 - Posterior $\\pi(a|v,\\ell)$: vision과 instruction을 모두 보고 action을 예측
 - Ratio: 특정 action이 instruction을 얼마나 더 잘 설명하는지 반영
 
-Architecture도 두 branch를 둡니다. Prior branch는 visual token만 받고, posterior branch는 visual·language token을 함께 받습니다. Latent action query는 전체 token interaction을 모아 최종 action 표현을 만드는 learnable query입니다.
+Architecture도 두 branch를 둡니다. Prior branch는 visual token만 받고, posterior branch는 visual, language token을 함께 받습니다. Latent action query는 전체 token interaction을 모아 최종 action 표현을 만드는 learnable query입니다.
 
 Conditional pointwise mutual information은 두 log probability 차이로 표현됩니다.
 
@@ -111,19 +111,19 @@ SimplerEnv Visual Matching OOD 결과는 다음과 같습니다.
 
 상대 증가율로 계산하면 약 32.8%이지만, robot reliability 관점에서는 절대 성공률 45.8%를 함께 봐야 합니다. “11.3% 향상”만 적으면 relative percent인지 percentage point인지 혼동됩니다.
 
-원문은 RoboCasa에서도 Octo·RT-1-X보다 높은 일반화를 보였다고 설명하지만 정확한 task별 표는 없습니다. Microwave를 열고 apple을 넣는 복합 instruction처럼 language가 action 분기에 중요한 task에서 실제 어느 step이 실패했는지 봐야 합니다.
+원문은 RoboCasa에서도 Octo, RT-1-X보다 높은 일반화를 보였다고 설명하지만 정확한 task별 표는 없습니다. Microwave를 열고 apple을 넣는 복합 instruction처럼 language가 action 분기에 중요한 task에서 실제 어느 step이 실패했는지 봐야 합니다.
 
-OOD benchmark 상승도 real robot safety를 보장하지 않습니다. Simulation의 background·camera 변화와 실제 friction, sensor noise, collision은 다른 문제입니다.
+OOD benchmark 상승도 real robot safety를 보장하지 않습니다. Simulation의 background, camera 변화와 실제 friction, sensor noise, collision은 다른 문제입니다.
 
 ## 언어 의존성을 실제로 평가하는 방법
 
 BayesianVLA가 맞는지 확인하려면 일반 success 외에 instruction sensitivity를 따로 측정합니다.
 
-1. 같은 scene에서 target noun·color·position만 바꿉니다.
+1. 같은 scene에서 target noun, color, position만 바꿉니다.
 2. Instruction을 제거하거나 무관한 문장으로 바꾼 prior를 측정합니다.
 3. Posterior action과 prior action의 차이를 기록합니다.
 4. Vision과 language가 충돌하는 case에서 어느 쪽을 따라야 맞는지 label합니다.
-5. OOD success와 collision·timeout을 함께 봅니다.
+5. OOD success와 collision, timeout을 함께 봅니다.
 
 대화형 correction이나 장기 instruction은 기존 글도 미검증 한계로 남깁니다. 한 문장 명령에서 PMI가 유용해도 “아니, 왼쪽 것이 아니라 뒤의 컵” 같은 history를 처리하려면 temporal language context가 필요합니다.
 
@@ -135,7 +135,7 @@ Counterfactual test는 instruction 단어만 바꾸는 것에서 끝나지 않�
 |---|---|---|
 | 같은 위치, target noun만 변경 | posterior action이 target에 맞게 변경 | instruction 무시 |
 | instruction은 같고 target 위치 변경 | 새 visual 위치로 action 변경 | language 문구 암기 |
-| 존재하지 않는 물체를 지시 | 실행 대신 실패·재질문 | 지시 과신과 unsafe motion |
+| 존재하지 않는 물체를 지시 | 실행 대신 실패, 재질문 | 지시 과신과 unsafe motion |
 | vision이 가려져 target이 불명확 | confidence 하락 또는 추가 관측 | prior의 잘못된 확신 |
 | 무관한 문장을 instruction으로 입력 | prior와 큰 차이가 없어야 함 | 모든 text에 과민 반응 |
 
@@ -150,9 +150,9 @@ BayesianVLA의 핵심은 language를 무조건 vision보다 우선하는 것이 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL·Dream-VLA]({% post_url 2025-12-30-Dream-VL---Dream-VLA--Open-Vision-Language-and-Vision-Language-Action-Models-with-Diffusion-Language-Model-Backbone %}) — Dream-VL과 Dream-VLA가 masked diffusion language backbone으로 양방향 문맥과 action chunk 병렬 복원을 시도한 이유, benchmark 성과와 반복 denoising 비용을 함께…
+- [TwinBrainVLA는 지능을 보존하며 20Hz 제어할까: Frozen VLM과 Action Expert의 대가]({% post_url 2026-01-26-TwinBrainVLA--Unleashing-the-Potential-of-Generalist-VLMs-for-Embodied-Tasks-via-Asymmetric-Mixture-of-Transformers %}) — 범용 VLM을 동결하고 제어 전문가만 학습하는 TwinBrainVLA의 성능 이득과 실시간 제어 비용을 구분해 봅니다.
+- [로봇 진행률을 말로 묻지 않고 잴 수 있을까? TOPReward의 토큰 확률]({% post_url 2026-02-24-TOPReward--Token-Probabilities-as-Hidden-Zero-Shot-Rewards-for-Robotics %}) — TOPReward가 비디오 VLM의 생성 문장 대신 내부 토큰 확률로 작업 진행률을 추정하는 이유와 VOC 지표가 놓치는 실패를 살펴봅니다.
 - [VLANeXt의 12가지 VLA 설계 레시피는 어떻게 검증해야 할까]({% post_url 2026-02-24-VLANeXt--Recipes-for-Building-Strong-VLA-Models %}) — VLANeXt가 VLA 설계 요소를 같은 틀에서 비교해 2.5B 모델을 구성하는 과정과 LIBERO 결과, 실제 로봇 이전에 확인할 조건을 정리합니다.
-- [스마트폰 피드백만으로 로봇 정책을 고칠 수 있나: RoboPocket]({% post_url 2026-03-06-RoboPocket--Improve-Robot-Policies-Instantly-with-Your-Phone %}) — RoboPocket이 원격 정책 궤적을 AR로 보여주고 사용자의 스마트폰 교정을 비동기 파인튜닝에 반영하는 방식, 2배 효율 보고와 현실 간극을 분석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

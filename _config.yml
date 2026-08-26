@@ -17,10 +17,10 @@ timezone: Asia/Seoul
 
 title: OPSOAI # the main title
 
-tagline: AI 논문·오픈소스·실전 선택 가이드 # it will display as the sub-title
+tagline: AI 논문, 오픈소스, 실전 선택 가이드 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  AI 논문, 오픈소스, 모델·도구 업데이트를 원자료로 검증하고 작동 원리, 선택 기준, 적용 방법과 한계를 한국어로 깊이 있게 설명합니다. 연구자, 개발자, 실무자가 바로 판단할 수 있는 근거 중심 가이드입니다.
+  AI 논문, 오픈소스, 모델, 도구 업데이트를 원자료로 검증하고 작동 원리, 선택 기준, 적용 방법과 한계를 한국어로 깊이 있게 설명합니다. 연구자, 개발자, 실무자가 바로 판단할 수 있는 근거 중심 가이드입니다.
 keywords: [인공지능, AI, 논문, 딥러닝, 머신러닝, 무료 논문, OPSOAI, 논문 리뷰, 최신 기술, 연구 동향]
 logo: /assets/img/logo.png
 author:

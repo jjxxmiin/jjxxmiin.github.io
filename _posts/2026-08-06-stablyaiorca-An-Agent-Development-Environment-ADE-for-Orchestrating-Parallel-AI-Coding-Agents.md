@@ -13,7 +13,7 @@ summary: stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI �
   프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development Environment)입니다. Git Worktree
   기반 작업 영역 격리, WebSocket RPC 통신, 임베디드 브라우저 연동, 휴면 기능 및 원격 SSH 실행을 통해 소프트웨어 개발 생산성을
   상향시킵니다.
-description: 'stablyai/orca가 Git worktree와 RPC로 여러 코딩 에이전트를 분리하는 방식과 병합 충돌·권한·원격 실행·중단 후 복구 기준을 설명합니다.'
+description: 'stablyai/orca가 Git worktree와 RPC로 여러 코딩 에이전트를 분리하는 방식과 병합 충돌, 권한, 원격 실행, 중단 후 복구 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/stablyai/orca
 image:
@@ -64,7 +64,7 @@ faq:
     Orca에 의해 하나의 프롬프트 맥락으로 패키징되어 해당 에이전트의 터미널 콘솔로 직접 피드백 스트리밍 전송됩니다.
 ---
 
-stablyai/orca는 여러 터미널 코딩 에이전트를 Git worktree로 분리하고 한 화면과 RPC 경로에서 제어하려는 개발 환경입니다. 작업 트리 분리는 파일 충돌을 줄이지만 같은 설계 오류, 포트·데이터베이스 자원 충돌, 최종 병합 충돌까지 없애지는 않습니다. 두 개의 작은 독립 이슈로 시작해 브랜치 소유권, 테스트 결과, 취소·재개와 병합 절차를 확인하세요.
+stablyai/orca는 여러 터미널 코딩 에이전트를 Git worktree로 분리하고 한 화면과 RPC 경로에서 제어하려는 개발 환경입니다. 작업 트리 분리는 파일 충돌을 줄이지만 같은 설계 오류, 포트, 데이터베이스 자원 충돌, 최종 병합 충돌까지 없애지는 않습니다. 두 개의 작은 독립 이슈로 시작해 브랜치 소유권, 테스트 결과, 취소, 재개와 병합 절차를 확인하세요.
 
 - [stablyai/orca GitHub 저장소](https://github.com/stablyai/orca)
 - [Orca 공식 프로젝트 페이지](https://onorca.dev)

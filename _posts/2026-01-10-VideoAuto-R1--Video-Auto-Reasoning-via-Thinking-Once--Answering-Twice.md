@@ -8,7 +8,7 @@ tags:
   - AI트렌드
 math: true
 summary: 먼저 답하고 필요할 때만 추론한 뒤 다시 답하는 TOAT 구조, 신뢰도 분기와 과신 오답의 위험
-description: "VideoAuto-R1이 initial answer의 confidence에 따라 선택적으로 reasoning하는 TOAT 구조를 설명하고, 44-token 보고값·과신 오류·calibration·지연을 검증합니다."
+description: "VideoAuto-R1이 initial answer의 confidence에 따라 선택적으로 reasoning하는 TOAT 구조를 설명하고, 44-token 보고값, 과신 오류, calibration, 지연을 검증합니다."
 faq:
   - question: "VideoAuto-R1은 모든 질문에서 reasoning을 생략하나요?"
     answer: "아닙니다. initial answer의 confidence가 높으면 바로 답하고 낮으면 reasoning 뒤 reviewed answer를 생성하는 선택적 경로를 사용합니다."
@@ -51,7 +51,7 @@ Thinking Once, Answering Twice(TOAT)의 학습 흐름은 세 단계입니다.
 
 - 전체 정확도와 질문 유형별 정확도
 - 추론 모드가 켜진 비율
-- 평균·상위 지연 시간
+- 평균, 상위 지연 시간
 - 평균 출력 토큰과 추론 실패율
 
 지각과 인과 질문을 미리 규칙으로 분류하는 방식보다 모델의 실제 불확실성을 쓸 수 있지만, 신뢰도 교정이 맞아야 한다는 조건이 붙습니다. 벤치마크의 객관식 확신도가 서술형 질문에서도 같은 의미인지도 별도 검증이 필요합니다.
@@ -72,10 +72,10 @@ initial과 reviewed answer의 맞고 틀림을 교차하면 reasoning의 실제 
 |---|---|---|---|
 | 정답 | 정답 | 유지 | reasoning 비용 검토 |
 | 오답 | 정답 | 회복 | 유용한 branch 사례 |
-| 정답 | 오답 | 퇴행 | review reward·evidence 점검 |
-| 오답 | 오답 | 미회복 | video 이해·근거 탐색 점검 |
+| 정답 | 오답 | 퇴행 | review reward, evidence 점검 |
+| 오답 | 오답 | 미회복 | video 이해, 근거 탐색 점검 |
 
-전체 정확도와 함께 네 비율을 질문 유형별로 냅니다. 색상·객체 질문에서 reasoning이 퇴행을 만들고 인과 질문에서는 회복을 만든다면 하나의 threshold가 최적이 아닐 수 있습니다.
+전체 정확도와 함께 네 비율을 질문 유형별로 냅니다. 색상, 객체 질문에서 reasoning이 퇴행을 만들고 인과 질문에서는 회복을 만든다면 하나의 threshold가 최적이 아닐 수 있습니다.
 
 ## Confidence Calibration은 분기 품질 그 자체다
 
@@ -91,7 +91,7 @@ initial answer가 맞아도 감사 가능한 근거 timestamp가 필요한 업�
 
 ## Token과 Latency는 질문 단위 분포로 기록한다
 
-평균 44 token은 긴 tail을 가릴 수 있습니다. direct·reasoning branch별 video encoding 시간, generation 시간, token 수의 중앙값과 상위 구간을 봅니다. threshold를 움직여 accuracy, missed-reasoning, latency, token cost가 어떻게 변하는지 curve로 제시합니다.
+평균 44 token은 긴 tail을 가릴 수 있습니다. direct, reasoning branch별 video encoding 시간, generation 시간, token 수의 중앙값과 상위 구간을 봅니다. threshold를 움직여 accuracy, missed-reasoning, latency, token cost가 어떻게 변하는지 curve로 제시합니다.
 
 VideoAuto-R1의 성공 조건은 짧은 문장 자체가 아닙니다. **쉬운 질문은 안정적으로 direct 처리하고, 어려운 질문과 과신 위험을 reasoning으로 보내며, review가 맞는 initial answer를 망치지 않는 threshold를 유지하는 것**입니다.
 
@@ -99,14 +99,14 @@ VideoAuto-R1의 성공 조건은 짧은 문장 자체가 아닙니다. **쉬운 
 
 학습 때보다 긴 video, 흐린 frame, 새로운 질문 표현이 들어오면 confidence가 낮아질 수도 있지만 오히려 잘못 높게 유지될 수도 있습니다. input 유형별 direct 비율과 오답률을 시간에 따라 모니터링하고, 갑작스러운 변화가 있으면 calibration set을 다시 평가합니다. token 사용량만 늘었다고 threshold를 낮추면 정확도 손실을 숨길 수 있습니다.
 
-모델 version을 바꿀 때는 같은 threshold를 자동 승계하지 않습니다. logits scale과 answer format이 달라질 수 있어 이전 cutoff의 의미가 바뀝니다. 고정 regression set에서 accuracy·overconfidence·review regression·latency curve를 다시 만든 뒤 운영점을 선택해야 합니다.
+모델 version을 바꿀 때는 같은 threshold를 자동 승계하지 않습니다. logits scale과 answer format이 달라질 수 있어 이전 cutoff의 의미가 바뀝니다. 고정 regression set에서 accuracy, overconfidence, review regression, latency curve를 다시 만든 뒤 운영점을 선택해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [미로를 풀 때 프레임을 늘리면 왜 나아질까: Visual Test-Time Scaling]({% post_url 2026-02-09-Thinking-in-Frames--How-Visual-Context-and-Test-Time-Scaling-Empower-Video-Reasoning %}) — Thinking in Frames가 중간 프레임을 시각적 추론 기록으로 쓰는 방식과 프레임 수를 늘리는 테스트타임 스케일링의 효과·비용을 정리합니다.
-- [실시간 비디오 AI는 언제 먼저 말해야 할까? Proact-VL의 트리거 문제]({% post_url 2026-03-05-Proact-VL--A-Proactive-VideoLLM-for-Real-Time-AI-Companions %}) — Proact-VL이 연속 영상을 보며 SPEAK 시점과 응답 길이를 함께 결정하는 방식, Live Gaming Benchmark와 오경보·지연의 절충을 정리합니다.
-- [InternVideo는 생성·판별 학습을 어떻게 합치나: MVM·VLC·CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
+- [미로를 풀 때 프레임을 늘리면 왜 나아질까: Visual Test-Time Scaling]({% post_url 2026-02-09-Thinking-in-Frames--How-Visual-Context-and-Test-Time-Scaling-Empower-Video-Reasoning %}) — Thinking in Frames가 중간 프레임을 시각적 추론 기록으로 쓰는 방식과 프레임 수를 늘리는 테스트타임 스케일링의 효과, 비용을 정리합니다.
+- [실시간 비디오 AI는 언제 먼저 말해야 할까? Proact-VL의 트리거 문제]({% post_url 2026-03-05-Proact-VL--A-Proactive-VideoLLM-for-Real-Time-AI-Companions %}) — Proact-VL이 연속 영상을 보며 SPEAK 시점과 응답 길이를 함께 결정하는 방식, Live Gaming Benchmark와 오경보, 지연의 절충을 정리합니다.
+- [InternVideo는 생성, 판별 학습을 어떻게 합치나: MVM, VLC, CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

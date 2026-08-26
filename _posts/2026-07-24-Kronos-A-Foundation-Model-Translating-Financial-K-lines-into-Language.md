@@ -12,7 +12,7 @@ tags:
 summary: 칭화대학교 연구진이 개발한 Kronos는 전 세계 45개 거래소의 120억 개 K선(OHLCV) 데이터를 자연어처럼 토큰화하여 학습한
   최초의 오픈소스 시계열 파운데이션 모델입니다. 연속적인 수치 데이터를 이산적인 토큰으로 변환하는 독창적인 접근을 통해, 기존 시계열 모델의 한계를
   극복하고 예측 및 시뮬레이션 성능을 비약적으로 끌어올렸습니다.
-description: 'Kronos가 OHLCV K선을 이산 토큰으로 바꿔 자기회귀 학습하는 원리와 데이터 시점 누출·거래비용·유동성·시장 국면 변화·시간 외 예측 평가 한계를 설명합니다.'
+description: 'Kronos가 OHLCV K선을 이산 토큰으로 바꿔 자기회귀 학습하는 원리와 데이터 시점 누출, 거래비용, 유동성, 시장 국면 변화, 시간 외 예측 평가 한계를 설명합니다.'
 github_url: https://github.com/shiyu-coder/Kronos
 image:
   path: https://opengraph.githubassets.com/1/shiyu-coder/Kronos
@@ -365,8 +365,8 @@ stateDiagram-v2
 ## 함께 읽으면 이해가 이어지는 글
 
 - [TimesFM으로 수천 예측 모델을 하나로 합쳐도 될까: 제로샷 기준선]({% post_url 2026-04-14-The-LLM-Momentum-of-Time-Series-Forecasting-Googles-TimesFM-Unifying-Tens-of-Thousands-of-Pipelines-into-One-Model %}) — TimesFM 1.0의 패치 기반 예측 구조와 제로샷 활용 범위를 살펴보고, 기존 시계열 파이프라인을 대체하기 전에 검증할 기준을 정리합니다.
-- [daily\_stock\_analysis를 0원으로 운영할 수 있을까: GitHub Actions·데이터 품질·비용 조건]({% post_url 2026-04-29-Zero-Cost-AI-Quant-Analyst-Deep-Dive-into-ZhuLinsendailystockanalysis-Source-Code %}) — daily_stock_analysis가 GitHub Actions로 금융 데이터 수집·LLM 요약·알림을 예약 실행하는 구조와 무료 한도, 데이터 품질, 비밀 관리와 투자 판단의 한계를 분석합니다.
-- [금융 API를 MCP로 감싸면 규제·권한 문제가 끝날까? 현실적인 경계]({% post_url 2026-05-08-Stop-Baking-API-Spaghetti-A-Deep-Dive-into-Financial-Services-MCP-Saving-Financial-Legacy-Systems %}) — MCP가 금융 시스템의 도구 발견과 호출 형식을 표준화하는 범위, 그리고 권한·감사·상태·고빈도 처리까지 자동 해결하지는 못하는 이유를 구분합니다.
+- [daily\_stock\_analysis를 0원으로 운영할 수 있을까: GitHub Actions, 데이터 품질, 비용 조건]({% post_url 2026-04-29-Zero-Cost-AI-Quant-Analyst-Deep-Dive-into-ZhuLinsendailystockanalysis-Source-Code %}) — daily_stock_analysis가 GitHub Actions로 금융 데이터 수집, LLM 요약, 알림을 예약 실행하는 구조와 무료 한도, 데이터 품질, 비밀 관리와 투자 판단의 한계를 분석합니다.
+- [금융 API를 MCP로 감싸면 규제, 권한 문제가 끝날까? 현실적인 경계]({% post_url 2026-05-08-Stop-Baking-API-Spaghetti-A-Deep-Dive-into-Financial-Services-MCP-Saving-Financial-Legacy-Systems %}) — MCP가 금융 시스템의 도구 발견과 호출 형식을 표준화하는 범위, 그리고 권한, 감사, 상태, 고빈도 처리까지 자동 해결하지는 못하는 이유를 구분합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

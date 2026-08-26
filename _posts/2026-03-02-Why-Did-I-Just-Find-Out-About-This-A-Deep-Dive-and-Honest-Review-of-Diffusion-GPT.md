@@ -8,22 +8,22 @@ tags:
   - 이미지생성
   - 튜토리얼
   - 파인튜닝
-summary: Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연·오선택·모델 로딩 비용을 짚습니다.
-description: "Diffusion-GPT가 LLM·Tree-of-Thought·Advantage Database로 specialist diffusion model을 routing하는 원리, catalog drift·cold start·오선택과 fallback 비용을 설명합니다."
+summary: Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연, 오선택, 모델 로딩 비용을 짚습니다.
+description: "Diffusion-GPT가 LLM, Tree-of-Thought, Advantage Database로 specialist diffusion model을 routing하는 원리, catalog drift, cold start, 오선택과 fallback 비용을 설명합니다."
 faq:
   - question: "Diffusion-GPT는 새로운 image generator인가요?"
     answer: "직접 생성하는 foundation model보다 prompt를 분석해 catalog의 existing specialist 중 하나를 고르는 router이며 최종 품질은 선택 model에도 의존합니다."
   - question: "Training-free이면 새 model을 등록만 하면 되나요?"
-    answer: "Generator 전체 재학습은 피하지만 model card·domain·resource 정보를 catalog에 넣고 representative prompt의 human preference와 routing regression을 갱신해야 합니다."
+    answer: "Generator 전체 재학습은 피하지만 model card, domain, resource 정보를 catalog에 넣고 representative prompt의 human preference와 routing regression을 갱신해야 합니다."
   - question: "Router가 틀리면 어떤 fallback이 필요한가요?"
-    answer: "Confidence가 낮거나 top candidates 차이가 작으면 default model·user 선택 또는 두 후보 preview로 전환하고 routing·load·generation 실패를 구분해야 합니다."
+    answer: "Confidence가 낮거나 top candidates 차이가 작으면 default model, user 선택 또는 두 후보 preview로 전환하고 routing, load, generation 실패를 구분해야 합니다."
 github_url: https://github.com/HKUNLP/diffusion-gpt
 image:
   path: https://opengraph.githubassets.com/1/HKUNLP/diffusion-gpt
   alt: "HKUNLP/diffusion-gpt GitHub 저장소 대표 이미지"
 ---
 
-모델을 매번 사람이 바꿀 필요는 없습니다. Diffusion-GPT는 LLM이 프롬프트의 대상과 스타일을 해석하고, 인간 선호 기록을 참고해 모델 풀에서 적합한 디퓨전 모델 하나를 고르는 라우팅 프레임워크입니다. 다만 catalog coverage, routing 오선택과 model cold start가 single-model baseline보다 나은지는 end-to-end 품질·latency·cost로 확인해야 합니다.
+모델을 매번 사람이 바꿀 필요는 없습니다. Diffusion-GPT는 LLM이 프롬프트의 대상과 스타일을 해석하고, 인간 선호 기록을 참고해 모델 풀에서 적합한 디퓨전 모델 하나를 고르는 라우팅 프레임워크입니다. 다만 catalog coverage, routing 오선택과 model cold start가 single-model baseline보다 나은지는 end-to-end 품질, latency, cost로 확인해야 합니다.
 
 [논문](https://arxiv.org/abs/2401.10061)은 모든 요청을 하나의 범용 모델로 처리하는 대신 이미 존재하는 도메인별 전문가를 조합합니다. 핵심 경쟁력은 새 이미지를 직접 그리는 기초 모델보다 어떤 모델에 작업을 맡길지 결정하는 앞단에 있습니다.
 
@@ -67,23 +67,23 @@ Diffusion-GPT는 전문가 모델을 하나의 거대한 모델로 다시 파인
 
 ## Model Catalog에는 어떤 정보가 있어야 하나
 
-이름과 style 설명만 있으면 LLM이 marketing 문구로 model을 고를 수 있습니다. Supported subject·style, resolution·license, inference memory·latency, safety restriction와 evaluation version을 구조화합니다.
+이름과 style 설명만 있으면 LLM이 marketing 문구로 model을 고를 수 있습니다. Supported subject, style, resolution, license, inference memory, latency, safety restriction와 evaluation version을 구조화합니다.
 
 | Catalog field | Routing에 필요한 이유 |
 |---|---|
-| Domain·negative cases | 잘하는 영역과 failure 범위 |
+| Domain, negative cases | 잘하는 영역과 failure 범위 |
 | Prompt format | trigger word 의존과 입력 변환 |
-| Hardware·precision | load 가능 여부와 latency |
-| License·usage scope | commercial·redistribution 제한 |
-| Eval date·version | weight update 뒤 stale score 방지 |
+| Hardware, precision | load 가능 여부와 latency |
+| License, usage scope | commercial, redistribution 제한 |
+| Eval date, version | weight update 뒤 stale score 방지 |
 
 Model file이나 configuration이 바뀌면 이전 preference를 그대로 재사용하지 않습니다. Catalog entry와 weight hash를 연결하고 representative prompt를 다시 평가합니다.
 
 ## Routing Accuracy는 어떻게 측정할까
 
-Prompt마다 전문가가 고른 one-hot 정답을 전제하기보다 candidate별 실제 image를 blind preference로 비교합니다. Router top-1, top-2와 default model result를 같은 seed budget으로 생성하고 human·task metric을 봅니다. 두 model 차이가 거의 없는 case는 오선택 cost가 낮습니다.
+Prompt마다 전문가가 고른 one-hot 정답을 전제하기보다 candidate별 실제 image를 blind preference로 비교합니다. Router top-1, top-2와 default model result를 같은 seed budget으로 생성하고 human, task metric을 봅니다. 두 model 차이가 거의 없는 case는 오선택 cost가 낮습니다.
 
-Prompt를 실사·anime·text rendering·spatial relation과 ambiguous multi-style로 나눕니다. Catalog에 없는 domain에서는 자신 있게 틀린 model을 고르지 않고 out-of-catalog를 감지하는지 봅니다. Wording을 조금 바꿨을 때 route가 불안정하게 뒤집히는지도 기록합니다.
+Prompt를 실사, anime, text rendering, spatial relation과 ambiguous multi-style로 나눕니다. Catalog에 없는 domain에서는 자신 있게 틀린 model을 고르지 않고 out-of-catalog를 감지하는지 봅니다. Wording을 조금 바꿨을 때 route가 불안정하게 뒤집히는지도 기록합니다.
 
 ## Cold Start와 Concurrency를 어떻게 계산할까
 
@@ -93,7 +93,7 @@ Cache hit rate, model switch 수, first-image p95와 GPU memory를 기록합니�
 
 ## Human Preference Database가 낡으면 무엇이 생기나
 
-과거 preference가 특정 aesthetic과 user group에 치우치면 새 request에서도 같은 model을 과추천할 수 있습니다. Domain·time·annotator segment를 기록하고 pair 수가 적은 route의 confidence를 낮춥니다. Business KPI와 general aesthetic score를 섞지 않습니다.
+과거 preference가 특정 aesthetic과 user group에 치우치면 새 request에서도 같은 model을 과추천할 수 있습니다. Domain, time, annotator segment를 기록하고 pair 수가 적은 route의 confidence를 낮춥니다. Business KPI와 general aesthetic score를 섞지 않습니다.
 
 Feedback loop에서 router가 고른 model만 노출하면 다른 candidate data가 줄어 self-reinforcement가 생길 수 있습니다. 작은 exploration bucket으로 alternative를 평가하되 user consent와 생성 비용을 관리합니다.
 
@@ -106,9 +106,9 @@ Feedback loop에서 router가 고른 model만 노출하면 다른 candidate data
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [PhotoDoodle은 30~50쌍으로 스타일을 배울까: 배경 보존 구조와 실행 코드 함정]({% post_url 2025-03-03-PhotoDoodle %}) — PhotoDoodle의 OmniEditor 사전학습과 EditLoRA 미세조정, positional encoding cloning이 배경을 보존하는 방식, 비교·ablation 결과와 예제 코드의 해상도 주의점을 정리합니다.
-- [Diffusion 학습 코드는 왜 원본 이미지 대신 Noise를 맞출까?]({% post_url 2023-03-06-StableDiffusion %}) — DDPM 코드의 perturb_x·get_losses·sample 흐름을 따라 정답 noise를 예측하는 학습과 역순 denoising 추론을 연결하고, Stable Diffusion·conditioning의 위치를 설명합니다.
-- [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime·realistic preset, input image와 advanced 기능을 정리합니다.
+- [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해, 생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
+- [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime, realistic preset, input image와 advanced 기능을 정리합니다.
+- [2^256 바이너리 토큰이 코드북을 없앨까: BitDance FID 1.24와 30.2배 속도의 조건]({% post_url 2026-02-18-BitDance--Scaling-Autoregressive-Generative-Models-with-Binary-Tokens %}) — 256비트 토큰과 Binary Diffusion Head가 거대한 Softmax를 피하는 방법, FID 1.24와 30.2배 수치의 적용 범위를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -119,8 +119,8 @@ Feedback loop에서 router가 고른 model만 노출하면 다른 candidate data
 
 ### Training-free이면 새 model을 등록만 하면 되나요?
 
-Generator 전체 재학습은 피하지만 model card·domain·resource 정보를 catalog에 넣고 representative prompt의 human preference와 routing regression을 갱신해야 합니다.
+Generator 전체 재학습은 피하지만 model card, domain, resource 정보를 catalog에 넣고 representative prompt의 human preference와 routing regression을 갱신해야 합니다.
 
 ### Router가 틀리면 어떤 fallback이 필요한가요?
 
-Confidence가 낮거나 top candidates 차이가 작으면 default model·user 선택 또는 두 후보 preview로 전환하고 routing·load·generation 실패를 구분해야 합니다.
+Confidence가 낮거나 top candidates 차이가 작으면 default model, user 선택 또는 두 후보 preview로 전환하고 routing, load, generation 실패를 구분해야 합니다.

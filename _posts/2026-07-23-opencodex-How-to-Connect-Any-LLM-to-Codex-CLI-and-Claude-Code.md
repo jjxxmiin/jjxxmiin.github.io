@@ -11,7 +11,7 @@ tags:
   - DeepSeek
 summary: opencodex는 OpenAI Codex 도구 및 Claude Code에서 기본 모델 대신 Ollama, Gemini, DeepSeek
   등 원하는 모든 언어 모델을 사용할 수 있게 해주는 강력한 로컬 프록시 도구입니다.
-description: 'opencodex가 서로 다른 모델 API와 코딩 도구 사이 요청·스트리밍·도구 호출을 번역하는 방식과 호환성·약관·키 보관 위험을 설명합니다.'
+description: 'opencodex가 서로 다른 모델 API와 코딩 도구 사이 요청, 스트리밍, 도구 호출을 번역하는 방식과 호환성, 약관, 키 보관 위험을 설명합니다.'
 github_url: https://github.com/lidge-jun/opencodex
 image:
   path: https://opengraph.githubassets.com/1/lidge-jun/opencodex

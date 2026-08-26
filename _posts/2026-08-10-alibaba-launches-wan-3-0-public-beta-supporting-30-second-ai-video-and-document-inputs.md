@@ -48,7 +48,7 @@ mermaid: true
 chart: true
 ---
 
-Wan 3.0 공개 베타의 실질적인 변화는 최대 30초 단일 샷과 문서·URL을 참조하는 영상 생성 흐름입니다. 기획서에서 빠르게 시안을 만드는 데는 유용할 수 있지만, 30초 내내 인물·텍스트·카메라 동작이 일관된지와 문서의 숫자를 정확히 옮겼는지는 별도로 검수해야 합니다. 공개 베타인 만큼 해상도·FPS·최종 요금과 입력 자료의 처리 조건을 확인하기 전에는 납품 파이프라인을 고정하지 않는 편이 안전합니다.
+Wan 3.0 공개 베타의 실질적인 변화는 최대 30초 단일 샷과 문서, URL을 참조하는 영상 생성 흐름입니다. 기획서에서 빠르게 시안을 만드는 데는 유용할 수 있지만, 30초 내내 인물, 텍스트, 카메라 동작이 일관된지와 문서의 숫자를 정확히 옮겼는지는 별도로 검수해야 합니다. 공개 베타인 만큼 해상도, FPS, 최종 요금과 입력 자료의 처리 조건을 확인하기 전에는 납품 파이프라인을 고정하지 않는 편이 안전합니다.
 
 ```mermaid
 flowchart TD
@@ -99,7 +99,7 @@ flowchart TD
 
 짧은 생성 클립으로 긴 장면을 만들려면 여러 결과를 이어 붙이고 색과 동작을 맞춰야 합니다. Wan 3.0은 최대 30초 단일 샷을 제공해 이 연결 작업을 줄일 가능성이 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>. 다만 길이가 두 배가 됐다는 사실만으로 재작업이 절반이 되지는 않습니다. 뒤쪽에서 인물 외형이 바뀌거나 움직임이 끊기면 짧은 클립 여러 개를 연결하는 방식보다 수정 범위가 커질 수 있습니다.
 
-다양한 문서와 웹페이지 URL을 참조 입력으로 받는 기능은 보고서나 기획안을 시안으로 옮기는 단계를 줄일 수 있습니다. PDF, PPT, XLS나 웹페이지를 넣으면 모델이 자료를 바탕으로 영상을 생성하도록 안내할 수 있습니다 <sup class="source-citation"><a href="#source-2" aria-label="Moomoo 출처">[2]</a></sup>. 그러나 문서를 읽는 기능과 핵심을 정확히 선별하는 능력은 별개이므로, 표의 열·단위·각주가 영상에서 어떻게 표현됐는지 원문과 대조해야 합니다.
+다양한 문서와 웹페이지 URL을 참조 입력으로 받는 기능은 보고서나 기획안을 시안으로 옮기는 단계를 줄일 수 있습니다. PDF, PPT, XLS나 웹페이지를 넣으면 모델이 자료를 바탕으로 영상을 생성하도록 안내할 수 있습니다 <sup class="source-citation"><a href="#source-2" aria-label="Moomoo 출처">[2]</a></sup>. 그러나 문서를 읽는 기능과 핵심을 정확히 선별하는 능력은 별개이므로, 표의 열, 단위, 각주가 영상에서 어떻게 표현됐는지 원문과 대조해야 합니다.
 
 ```mermaid
 flowchart LR
@@ -115,11 +115,11 @@ flowchart LR
 
 ## 문서 입력은 어떤 자료부터 시험해야 할까?
 
-콘텐츠 마케터와 업무 담당자는 신제품 소개용 PPT나 서비스 안내 페이지를 영상 시안의 참조 자료로 사용할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>. 첫 시험에는 공개해도 되는 짧은 문서와 정답이 분명한 제품명·숫자를 넣는 것이 좋습니다. 모델이 어느 슬라이드를 우선하는지, 표를 장면으로 어떻게 바꾸는지와 출처에 없는 문구를 덧붙이는지를 확인한 뒤 복잡한 자료로 넓혀야 합니다.
+콘텐츠 마케터와 업무 담당자는 신제품 소개용 PPT나 서비스 안내 페이지를 영상 시안의 참조 자료로 사용할 수 있습니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>. 첫 시험에는 공개해도 되는 짧은 문서와 정답이 분명한 제품명, 숫자를 넣는 것이 좋습니다. 모델이 어느 슬라이드를 우선하는지, 표를 장면으로 어떻게 바꾸는지와 출처에 없는 문구를 덧붙이는지를 확인한 뒤 복잡한 자료로 넓혀야 합니다.
 
 이미 작성한 보고서와 데이터 문서를 활용해 촬영 전 콘티나 내부 검토용 시각 자료를 만들 수 있습니다. 엑셀 스프레드시트나 워드 문서를 참조 입력으로 쓸 수 있다는 설명이 있지만, 결과가 곧 공식 데이터 시각화가 되는 것은 아닙니다 <sup class="source-citation"><a href="#source-2" aria-label="Moomoo 출처">[2]</a></sup>. 숫자와 브랜드 자산이 중요한 외부 영상은 편집 가능한 원본 그래픽과 비교해 사람이 다시 확인해야 합니다.
 
-지능형 영상 길이 제어가 연출 시간을 제안하고 비디오 연장 도구도 제공되지만, 추천 길이가 곧 최적 길이라는 뜻은 아닙니다. 긴 분량이 필요할 때 연장 도구를 사용할 수 있으나, 확장 경계에서 피사체와 배경·오디오가 이어지는지 확인해야 합니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>.
+지능형 영상 길이 제어가 연출 시간을 제안하고 비디오 연장 도구도 제공되지만, 추천 길이가 곧 최적 길이라는 뜻은 아닙니다. 긴 분량이 필요할 때 연장 도구를 사용할 수 있으나, 확장 경계에서 피사체와 배경, 오디오가 이어지는지 확인해야 합니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>.
 
 ## 공개 베타에서 어떤 합격 기준을 세울까?
 
@@ -139,9 +139,9 @@ flowchart TD
 
 30초라는 긴 시간 동안 단일 샷 비디오를 생성할 때 인물이나 피사체, 카메라 워킹의 연속성이 무너지지 않고 자연스럽게 유지되는지도 핵심적인 관전 포인트입니다 <sup class="source-citation"><a href="#source-1" aria-label="Alibaba Cloud Community 출처">[1]</a></sup>. AI가 추천하는 지능형 시간 배정이 실제 프롬프트 의도와 얼마나 부합하는지도 검증해볼 필요가 있습니다 <sup class="source-citation"><a href="#source-2" aria-label="Moomoo 출처">[2]</a></sup>.
 
-합격 기준은 “보기 좋다”보다 구체적이어야 합니다. 인물과 제품의 동일성, 화면 속 글자의 정확성, 시작·중간·끝의 동작 연결, 오디오와 입 모양의 관계, 잘못 생성된 로고나 숫자 유무를 항목별로 기록합니다. 같은 입력을 여러 번 생성해 성공한 결과의 비율과 평균 재시도 횟수를 계산해야 한 번의 좋은 샘플에 과대평가되지 않습니다.
+합격 기준은 “보기 좋다”보다 구체적이어야 합니다. 인물과 제품의 동일성, 화면 속 글자의 정확성, 시작, 중간, 끝의 동작 연결, 오디오와 입 모양의 관계, 잘못 생성된 로고나 숫자 유무를 항목별로 기록합니다. 같은 입력을 여러 번 생성해 성공한 결과의 비율과 평균 재시도 횟수를 계산해야 한 번의 좋은 샘플에 과대평가되지 않습니다.
 
-문서와 URL에는 공개 전 정보나 개인정보가 들어갈 수 있으므로 업로드 전에 서비스의 저장·학습·삭제 조건을 확인해야 합니다. 입력 자료와 생성 영상의 상업적 이용 조건, 제3자 이미지·음성의 권리도 공개 베타 이용 가능 여부와는 별개의 문제입니다. 이 조건이 불명확하면 비식별화한 샘플로 기능만 검증하고 실제 고객 자료는 넣지 않는 편이 안전합니다.
+문서와 URL에는 공개 전 정보나 개인정보가 들어갈 수 있으므로 업로드 전에 서비스의 저장, 학습, 삭제 조건을 확인해야 합니다. 입력 자료와 생성 영상의 상업적 이용 조건, 제3자 이미지, 음성의 권리도 공개 베타 이용 가능 여부와는 별개의 문제입니다. 이 조건이 불명확하면 비식별화한 샘플로 기능만 검증하고 실제 고객 자료는 넣지 않는 편이 안전합니다.
 
 ## 아직은 선을 그어야 할 부분
 
@@ -173,9 +173,9 @@ flowchart TD
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone·Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능·실시간 주장과 1~2-step 한계를 점검합니다.
-- [화질 좋은 AI 영상이 물리 법칙은 틀리는 이유: RISE-Video 467개 Test]({% post_url 2026-02-07-RISE-Video--Can-Video-Generators-Decode-Implicit-World-Rules %}) — RISE-Video가 467개 human-annotated prompt로 영상 생성기의 상식·공간 변화·물리·시간 인과를 평가하고, visual quality와 reasoning score가 갈리는 지점을 보여줍니다.
-- [3D 라벨 없이 장면의 앞뒤를 읽을 수 있을까: VEGA-3D의 대가]({% post_url 2026-03-20-Generation-Models-Know-Space--Unleashing-Implicit-3D-Priors-for-Scene-Understanding %}) — VEGA-3D가 동결 비디오 생성 모델의 중간 피처를 MLLM에 게이트 방식으로 결합하는 구조와 정밀 좌표·메모리·지연 한계를 짚습니다.
+- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone, Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능, 실시간 주장과 1~2-step 한계를 점검합니다.
+- [대화문만으로 장편 AI 영상을 만들 수 있을까: ScripterAgent와 VSA의 현실적 한계]({% post_url 2026-01-27-The-Script-is-All-You-Need--An-Agentic-Framework-for-Long-Horizon-Dialogue-to-Cinematic-Video-Generation %}) — 대화를 장면별 실행 대본으로 바꾸는 두 에이전트 구조와 장면 일관성, 평가, 비용의 한계를 짚습니다.
+- [12시간 AI 영상은 정말 일관적인가? LoL의 Sink-Collapse와 RoPE Jitter]({% post_url 2026-02-01-LoL--Longer-than-Longer--Scaling-Video-Generation-to-Hour %}) — LoL이 attention sink와 RoPE 주기 때문에 여러 head가 초기 frame에 동시에 쏠리는 sink-collapse를 추론 시 jitter로 완화하는 원리와 12시간 결과의 해석 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

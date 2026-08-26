@@ -12,7 +12,7 @@ tags:
 summary: 텐센트 클라우드가 2026년 새롭게 오픈소스로 공개한 CubeSandbox는 RustVMM과 KVM 기반의 하드웨어 격리를 제공하면서도
   60ms 이하의 부팅 속도를 자랑하는 초경량 AI 샌드박스입니다. 기존 E2B SDK와 완벽히 호환되며 자체 인프라에서 수천 개의 에이전트를 안전하게
   동시 실행할 수 있는 내부 원리와 구체적 활용법을 살펴봅니다.
-description: 'CubeSandbox가 KVM·RustVMM으로 에이전트 코드를 격리하는 구조와 60ms 수치의 조건, 커널 요구·네트워크·이미지·복구 한계를 설명합니다.'
+description: 'CubeSandbox가 KVM, RustVMM으로 에이전트 코드를 격리하는 구조와 60ms 수치의 조건, 커널 요구, 네트워크, 이미지, 복구 한계를 설명합니다.'
 github_url: https://github.com/TencentCloud/CubeSandbox
 image:
   path: https://opengraph.githubassets.com/1/TencentCloud/CubeSandbox
@@ -39,7 +39,7 @@ mermaid: true
 chart: true
 ---
 
-CubeSandbox는 KVM·RustVMM 기반 마이크로VM으로 에이전트 코드를 프로세스 컨테이너보다 강한 경계에 실행하려는 샌드박스입니다. 60ms 부팅 수치는 특정 하드웨어·이미지·측정 경계의 결과로 보고, 자신의 환경에서 격리 강도와 시작 지연을 따로 재야 합니다. 호스트 커널 지원, 네트워크 정책, 이미지 공급망, 종료 뒤 디스크 정리를 검증한 뒤 민감한 작업에 사용하세요.
+CubeSandbox는 KVM, RustVMM 기반 마이크로VM으로 에이전트 코드를 프로세스 컨테이너보다 강한 경계에 실행하려는 샌드박스입니다. 60ms 부팅 수치는 특정 하드웨어, 이미지, 측정 경계의 결과로 보고, 자신의 환경에서 격리 강도와 시작 지연을 따로 재야 합니다. 호스트 커널 지원, 네트워크 정책, 이미지 공급망, 종료 뒤 디스크 정리를 검증한 뒤 민감한 작업에 사용하세요.
 
 ## 마이크로VM 격리가 필요한 작업은 무엇인가
 
@@ -304,8 +304,8 @@ pie title "CubeSandbox를 구성하는 핵심 프로그래밍 언어 비중 추�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [오픈소스 AI 모의해킹 도구 Strix: 실제 해커처럼 생각하고 검증하는 자율형 보안 에이전트]({% post_url 2026-07-05-In-Depth-Guide-to-Strix-The-Open-Source-Autonomous-AI-Penetration-Testing-Agent %}) — Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해 오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
-- [Open SWE가 PR을 대신 만들게 할 때: 샌드박스·자체 리뷰의 경계]({% post_url 2026-03-21-Review-Is-the-Copilot-Era-Over-The-True-Face-of-Asynchronous-Agents-Revealed-by-LangChains-Open-SWE %}) — Open SWE의 Manager·Planner·Programmer·Reviewer 상태 흐름, 일회성 클라우드 샌드박스와 중간 개입 구조를 바탕으로 맡길 작업과 최종 책임을 구분합니다.
-- [Claude Scientific Skills가 계산 환각을 없앨까: 코드 실행과 인과 추론의 차이]({% post_url 2026-03-02-Is-Claude-the-New-Scientist-Deep-Dive-into-Claudes-Scientific-Capabilities--Code-Execution %}) — Claude가 Python으로 계산·통계·차트를 실행할 때 얻는 재현성과, 잘못된 코드·데이터 전제·상관관계 해석에서 남는 오류를 구분합니다.
+- [Open SWE가 PR을 대신 만들게 할 때: 샌드박스, 자체 리뷰의 경계]({% post_url 2026-03-21-Review-Is-the-Copilot-Era-Over-The-True-Face-of-Asynchronous-Agents-Revealed-by-LangChains-Open-SWE %}) — Open SWE의 Manager, Planner, Programmer, Reviewer 상태 흐름, 일회성 클라우드 샌드박스와 중간 개입 구조를 바탕으로 맡길 작업과 최종 책임을 구분합니다.
+- [Claude Scientific Skills가 계산 환각을 없앨까: 코드 실행과 인과 추론의 차이]({% post_url 2026-03-02-Is-Claude-the-New-Scientist-Deep-Dive-into-Claudes-Scientific-Capabilities--Code-Execution %}) — Claude가 Python으로 계산, 통계, 차트를 실행할 때 얻는 재현성과, 잘못된 코드, 데이터 전제, 상관관계 해석에서 남는 오류를 구분합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

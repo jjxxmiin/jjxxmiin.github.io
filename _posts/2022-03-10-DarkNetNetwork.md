@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet network.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/network.c"
 layout: post
-title:  "Darknet network.c 학습·예측 흐름: subdivisions 업데이트와 포인터 수명 함정"
-summary: "Darknet network가 layer forward·backward·update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다."
-description: "Darknet network.c의 subdivisions update, forward·backward와 rate schedule, borrowed prediction·batch resize·detection memory 수명을 설명합니다."
+title:  "Darknet network.c 학습, 예측 흐름: subdivisions 업데이트와 포인터 수명 함정"
+summary: "Darknet network가 layer forward, backward, update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다."
+description: "Darknet network.c의 subdivisions update, forward, backward와 rate schedule, borrowed prediction, batch resize, detection memory 수명을 설명합니다."
 date:   2022-03-10 16:00 -0400
 categories: DarkNet
 image:
@@ -26,7 +26,7 @@ faq:
 
 Darknet `network.c`의 핵심은 **layer의 함수 포인터를 순서대로 호출하고, `subdivisions`번 backward가 누적된 시점에만 update하며, 예측 결과는 새 배열이 아니라 network 내부 output 포인터로 돌려준다는 것**이다. 학습과 추론 오류를 찾으려면 이 세 수명을 함께 봐야 한다.
 
-## seen·batch·subdivisions가 update 시점을 정한다
+## seen, batch, subdivisions가 update 시점을 정한다
 
 현재 batch 번호는 지금까지 본 sample 수를 `batch*subdivisions`로 나눈 값이다.
 
@@ -86,7 +86,7 @@ network *load_network(
 
 `STEP`의 `step`, `POLY`의 `max_batches`, subdivisions와 batch가 0이 아닌지도 호출 전에 보장해야 한다. 이 함수들은 잘못된 분모를 자체적으로 검증하지 않는다.
 
-## forward·backward·cost는 어떻게 연결되나
+## forward, backward, cost는 어떻게 연결되나
 
 forward는 network를 값으로 복사하고 layer를 앞에서부터 실행한다.
 
@@ -124,7 +124,7 @@ for(i = 0; i < net.n; ++i){
 
 cost layer가 하나도 없으면 `count`가 0인 채 나눗셈을 한다. 추론 전용 network라도 `forward_network` 끝에서 이 함수가 호출되므로, 구성에 cost pointer가 없는 경우의 처리를 확인해야 한다.
 
-backward는 layer를 역순으로 걷는다. 첫 layer에는 원래 network input과 delta를 돌려주고, 나머지는 바로 앞 layer의 output·delta를 사용한다.
+backward는 layer를 역순으로 걷는다. 첫 layer에는 원래 network input과 delta를 돌려주고, 나머지는 바로 앞 layer의 output, delta를 사용한다.
 
 ```c
 for(i = net.n-1; i >= 0; --i){
@@ -184,7 +184,7 @@ for(i = 0; i < net->n; ++i){
 }
 ```
 
-output·delta buffer를 새 batch 크기로 재할당하지 않는다. 기존보다 큰 batch로 올리는 용도로 호출하면 buffer capacity와 field가 달라질 수 있다. `network_predict_image`는 batch를 1로 바꾼 뒤 원래 값으로 복원하지 않으므로, 이후 학습이나 batch 예측이 같은 network를 쓴다면 상태 변화를 고려해야 한다.
+output, delta buffer를 새 batch 크기로 재할당하지 않는다. 기존보다 큰 batch로 올리는 용도로 호출하면 buffer capacity와 field가 달라질 수 있다. `network_predict_image`는 batch를 1로 바꾼 뒤 원래 값으로 복원하지 않으므로, 이후 학습이나 batch 예측이 같은 network를 쓴다면 상태 변화를 고려해야 한다.
 
 ## resize와 detection 배열은 어떤 전제를 공유하나
 
@@ -218,7 +218,7 @@ for(i = 0; i < nboxes; ++i){
 }
 ```
 
-그다음 YOLO·REGION·DETECTION layer를 순회하며 채운 개수만큼 `dets` 포인터를 이동한다. 할당부는 **마지막 layer의** `classes`와 `coords`를 모든 box에 사용한다. 여러 detection head의 metadata가 다르다면 이 전제가 맞는지 확인해야 한다.
+그다음 YOLO, REGION, DETECTION layer를 순회하며 채운 개수만큼 `dets` 포인터를 이동한다. 할당부는 **마지막 layer의** `classes`와 `coords`를 모든 box에 사용한다. 여러 detection head의 metadata가 다르다면 이 전제가 맞는지 확인해야 한다.
 
 반환된 배열은 내부 포인터까지 함께 해제해야 한다.
 
@@ -271,19 +271,19 @@ Network 수준 디버깅은 layer 하나의 출력만 보는 것으로 끝나지
 
 ## 학습 Loop를 어떤 Counter로 검증할까
 
-매 datum 뒤 seen, current batch, subdivisions 내 index, learning rate와 update 호출 횟수를 기록한다. 작은 batch·subdivisions로 예상 표를 만든 뒤 checkpoint clear on/off에서 schedule이 이어지는지 확인한다. Gradient buffer가 subdivision 시작에만 초기화되고 각 backward에서 누적되는지도 layer별 norm으로 본다.
+매 datum 뒤 seen, current batch, subdivisions 내 index, learning rate와 update 호출 횟수를 기록한다. 작은 batch, subdivisions로 예상 표를 만든 뒤 checkpoint clear on/off에서 schedule이 이어지는지 확인한다. Gradient buffer가 subdivision 시작에만 초기화되고 각 backward에서 누적되는지도 layer별 norm으로 본다.
 
 Cost가 없는 inference network에서는 count 0 평균을 보호하고, 여러 cost의 단순 평균이 원하는 가중치인지 확인한다. Stopbackward index 전후 weight가 실제로 변하는지도 테스트한다.
 
 ## Borrowed Output과 State 변경을 어떻게 관리할까
 
-Prediction을 보관하려면 output length를 확인해 즉시 deep copy한다. 동시에 같은 network로 두 thread가 predict하면 shared output과 top-level input·train field를 바꾸므로 lock 또는 network instance 분리가 필요하다. Image predict가 batch를 1로 바꾼 뒤 학습에 재사용할 때 원래 batch와 buffer 상태를 복원한다.
+Prediction을 보관하려면 output length를 확인해 즉시 deep copy한다. 동시에 같은 network로 두 thread가 predict하면 shared output과 top-level input, train field를 바꾸므로 lock 또는 network instance 분리가 필요하다. Image predict가 batch를 1로 바꾼 뒤 학습에 재사용할 때 원래 batch와 buffer 상태를 복원한다.
 
-Resize와 batch 변경은 metadata, output·delta·workspace·truth allocation을 한 transaction으로 다룬다. 실패 중간에 network가 절반만 새 shape가 되지 않도록 검증 후 교체한다.
+Resize와 batch 변경은 metadata, output, delta, workspace, truth allocation을 한 transaction으로 다룬다. 실패 중간에 network가 절반만 새 shape가 되지 않도록 검증 후 교체한다.
 
 ## Detection Allocation 계약은 어떻게 확인할까
 
-Head마다 classes와 coords가 다를 수 있다면 box별 metadata로 정확한 prob·mask 길이를 할당한다. `num_detections` 결과와 실제 fill count가 같은지 assertion을 두고, 0 detection과 여러 head를 시험한다. 반환 배열은 각 내부 pointer 후 바깥 배열 순서로 한 번만 해제한다.
+Head마다 classes와 coords가 다를 수 있다면 box별 metadata로 정확한 prob, mask 길이를 할당한다. `num_detections` 결과와 실제 fill count가 같은지 assertion을 두고, 0 detection과 여러 head를 시험한다. 반환 배열은 각 내부 pointer 후 바깥 배열 순서로 한 번만 해제한다.
 
 ## 자주 남는 질문
 
@@ -308,7 +308,7 @@ Head마다 classes와 coords가 다를 수 있다면 box별 metadata로 정확�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Detection Layer 출력 배열 읽는 법: class·objectness·box]({% post_url 2022-02-20-DarkNetDetectionLayer %}) — DarkNet의 구형 Detection Layer가 셀별 클래스, 박스별 objectness와 좌표를 한 배열에 배치하고 담당 박스를 고르는 학습·디코딩 흐름을 설명합니다.
-- [Darknet RNN의 State 포인터가 깨질 때: batch·steps 메모리 계약 읽기]({% post_url 2022-03-16-DarkNetRNNLayer %}) — Darknet rnn_layer가 세 connected layer를 시간축으로 이동시키는 구조와 batch를 steps로 나누는 이유, state 포인터·shortcut·역방향 순회의 위험 조건을 코드로 점검합니다.
+- [DarkNet Detection Layer 출력 배열 읽는 법: class, objectness, box]({% post_url 2022-02-20-DarkNetDetectionLayer %}) — DarkNet의 구형 Detection Layer가 셀별 클래스, 박스별 objectness와 좌표를 한 배열에 배치하고 담당 박스를 고르는 학습, 디코딩 흐름을 설명합니다.
+- [Darknet RNN의 State 포인터가 깨질 때: batch, steps 메모리 계약 읽기]({% post_url 2022-03-16-DarkNetRNNLayer %}) — Darknet rnn_layer가 세 connected layer를 시간축으로 이동시키는 구조와 batch를 steps로 나누는 이유, state 포인터, shortcut, 역방향 순회의 위험 조건을 코드로 점검합니다.
 - [Darknet data.cfg 옵션이 조용히 잘못 읽히는 이유: '=' 파싱과 문자열 수명]({% post_url 2022-03-12-DarkNetOptionList %}) — Darknet option_list.c가 설정 한 줄을 key와 value로 나누는 과정, used 추적, 기본값 처리, 원본 문자열에 기대는 메모리 소유권을 코드 중심으로 점검합니다.
 <!-- internal-links:end -->

@@ -8,15 +8,15 @@ tags:
   - 강화학습
   - 문서AI
 math: true
-summary: AdaReasoner의 적응형 도구 선택 구조와 +24.9% 성능 주장을 재현성·지연 시간·안전성 관점에서 해석합니다.
-description: "AdaReasoner가 Tool-GRPO로 visual·reasoning tool의 호출 순서와 중단을 학습하는 원리, +24.9% 주장의 범위, reward hacking·latency·권한 검증법을 설명합니다."
+summary: AdaReasoner의 적응형 도구 선택 구조와 +24.9% 성능 주장을 재현성, 지연 시간, 안전성 관점에서 해석합니다.
+description: "AdaReasoner가 Tool-GRPO로 visual, reasoning tool의 호출 순서와 중단을 학습하는 원리, +24.9% 주장의 범위, reward hacking, latency, 권한 검증법을 설명합니다."
 faq:
   - question: "7B AdaReasoner가 GPT-5보다 전반적으로 뛰어난가요?"
-    answer: "아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version·prompt·tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다."
+    answer: "아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version, prompt, tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다."
   - question: "Tool-GRPO는 정답이면 올바른 호출 과정도 보장하나요?"
     answer: "아닙니다. 최종 sparse reward만 쓰면 우연한 정답, 검증기 허점이나 불필요한 호출도 보상될 수 있어 과정 audit와 도구별 ablation이 필요합니다."
   - question: "배포 전 최소한 어떤 제한이 필요한가요?"
-    answer: "읽기 전용 tool부터 시작하고 호출·시간·비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다."
+    answer: "읽기 전용 tool부터 시작하고 호출, 시간, 비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.18631.png
   alt: "7B AdaReasoner가 GPT-5를 이겼다는 말은 맞을까: Tool-GRPO +24.9% 읽는 법 논문 대표 이미지"
@@ -26,7 +26,7 @@ AdaReasoner의 중요한 결과는 7B 모델이 도구를 더 많이 호출해�
 
 ## 도구 사용을 API 암기에서 경로 선택으로 바꾼다
 
-기존 도구 학습은 “이 질문에는 이 함수를 호출하라”는 지도 예시에 기대기 쉽습니다. 학습에 없던 도구가 추가되거나 한 호출의 결과가 다음 호출의 입력이 되는 긴 문제에서는 절차가 쉽게 깨집니다. 반대로 모든 문제에 OCR·검색·계산기를 붙이면 정답률보다 지연 시간과 오류 경로가 먼저 늘어날 수 있습니다.
+기존 도구 학습은 “이 질문에는 이 함수를 호출하라”는 지도 예시에 기대기 쉽습니다. 학습에 없던 도구가 추가되거나 한 호출의 결과가 다음 호출의 입력이 되는 긴 문제에서는 절차가 쉽게 깨집니다. 반대로 모든 문제에 OCR, 검색, 계산기를 붙이면 정답률보다 지연 시간과 오류 경로가 먼저 늘어날 수 있습니다.
 
 AdaReasoner는 도구 사용을 세 가지 선택의 연속으로 봅니다.
 
@@ -38,7 +38,7 @@ AdaReasoner는 도구 사용을 세 가지 선택의 연속으로 봅니다.
 
 ## Tool-GRPO가 보상하는 것은 최종 결과다
 
-Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그룹 안에서 상대적으로 좋은 경로에 더 높은 보상을 줍니다. 지도 학습이 정해진 호출 예시를 따라 하게 만든다면, 이 방식은 최종 정답에 도달하는 경로를 탐색하게 합니다.
+Tool-GRPO는 같은 질문에 여러 추론, 호출 경로를 생성한 뒤 그룹 안에서 상대적으로 좋은 경로에 더 높은 보상을 줍니다. 지도 학습이 정해진 호출 예시를 따라 하게 만든다면, 이 방식은 최종 정답에 도달하는 경로를 탐색하게 합니다.
 
 원문은 단계마다 보상을 주기보다 최종 결과에 sparse reward를 주는 구성을 설명합니다. 이 선택에는 분명한 장단점이 있습니다.
 
@@ -57,7 +57,7 @@ Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그�
 |---|---|---|
 | 기본 모델 대비 평균 +24.9% | 여러 과제의 평균 | 절대 점수, 평균 방식, 퍼센트와 퍼센트포인트 구분 |
 | VSP에서 기존 7B 대비 30% 이상 향상 | 시각 공간 추론 | 비교 모델과 도구 예산 |
-| Jigsaw에서 GPT-5 능가 | 특정 퍼즐·논리 과제 | 정확한 GPT-5 버전, 프롬프트, 호출 가능한 도구 |
+| Jigsaw에서 GPT-5 능가 | 특정 퍼즐, 논리 과제 | 정확한 GPT-5 버전, 프롬프트, 호출 가능한 도구 |
 
 원문은 베이스 모델도 Llama-3 또는 InternLM 계열 7B라고만 적어 정확한 체크포인트를 확정하지 않습니다. GAIA, VSP, Jigsaw가 평가에 언급되지만 세부 결과표도 이 글에는 없습니다. 그러므로 이 수치들은 “작은 모델도 도구 정책으로 특정 과제에서 큰 이득을 낼 수 있다”는 근거이지, 폐쇄형 상위 모델보다 전반적으로 뛰어나다는 증거가 아닙니다.
 
@@ -70,7 +70,7 @@ Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그�
 서비스 시험에서는 정답률과 함께 아래 값을 남겨야 합니다.
 
 - 질문당 도구 호출 수의 평균과 상위 95% 구간
-- 각 도구의 실패·시간 초과·잘못된 형식 비율
+- 각 도구의 실패, 시간 초과, 잘못된 형식 비율
 - 도구 없이 맞힌 문제와 도구 때문에 틀린 문제
 - 첫 응답 및 최종 응답까지 걸린 시간
 - 동일 질문을 반복했을 때 선택 경로의 변동성
@@ -79,19 +79,19 @@ Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그�
 
 ## 배포 전에는 도구 권한과 실패 경로를 제한한다
 
-이 글은 학습 아이디어를 설명할 뿐, 의료 진단·과학 실험·보안 분석을 안전하게 자동화하는 완성된 운영 절차를 제공하지 않습니다. 그런 도메인에서는 최종 정답 보상만으로 권한 부여를 결정하면 안 됩니다.
+이 글은 학습 아이디어를 설명할 뿐, 의료 진단, 과학 실험, 보안 분석을 안전하게 자동화하는 완성된 운영 절차를 제공하지 않습니다. 그런 도메인에서는 최종 정답 보상만으로 권한 부여를 결정하면 안 됩니다.
 
 초기 배포는 읽기 전용 도구와 자동 검증 가능한 과제부터 시작하는 편이 안전합니다. 호출 횟수와 시간 제한을 두고, 도구가 실패하거나 서로 모순된 결과를 낼 때 중단하는 규칙도 별도로 필요합니다. AdaReasoner가 보여주는 실용적 포인트는 큰 모델을 대체한다는 선언보다, “언제 도구를 쓰지 않을 것인가”까지 학습 목표에 포함해야 한다는 점입니다.
 
 ## 성능 향상이 어느 도구에서 왔는지 어떻게 분리할까
 
-전체 tool set을 한 번에 붙인 정확도만 보면 좋은 policy가 생긴 것인지 강한 OCR·검색 모델을 추가한 효과인지 구분하기 어렵습니다. 같은 base model과 prompt에서 단계별 ablation을 두는 편이 낫습니다.
+전체 tool set을 한 번에 붙인 정확도만 보면 좋은 policy가 생긴 것인지 강한 OCR, 검색 모델을 추가한 효과인지 구분하기 어렵습니다. 같은 base model과 prompt에서 단계별 ablation을 두는 편이 낫습니다.
 
 | 비교 조건 | 확인하는 질문 |
 |---|---|
 | 도구 없음 | base model 자체가 풀 수 있는 범위는 어디까지인가 |
 | 도구는 제공하되 고정 순서 | 외부 정보 자체의 이득은 얼마인가 |
-| AdaReasoner policy | 동적 선택·중단이 추가로 주는 이득은 얼마인가 |
+| AdaReasoner policy | 동적 선택, 중단이 추가로 주는 이득은 얼마인가 |
 | Random tool 또는 같은 call 수 | 단순 호출 증가 효과인가 |
 | Oracle tool 결과 | tool output이 정확할 때 reasoning 상한은 얼마인가 |
 
@@ -103,9 +103,9 @@ Tool-GRPO는 같은 질문에 여러 추론·호출 경로를 생성한 뒤 그�
 
 ```text
 model이 tool call 제안
-→ permission·argument·budget 검사
+→ permission, argument, budget 검사
 → sandbox 또는 read-only 실행
-→ schema·timeout·오류 확인
+→ schema, timeout, 오류 확인
 → 검증된 결과만 다음 reasoning에 전달
 ```
 
@@ -124,16 +124,16 @@ PoC 합격 기준은 특정 benchmark 승리가 아니라 제한된 call budget 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도·비용·프라이버시 판단
-- [물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각·논리 학습]({% post_url 2026-02-11-P1-VL--Bridging-Visual-Perception-and-Scientific-Reasoning-in-Physics-Olympiads %}) — P1-VL이 올림피아드 물리의 도식 정보를 추론과 연결하는 커리큘럼 RL, PhysicsMinions 검증 구조와 벤치마크 해석법을 설명합니다.
-- [VideoLLaMA 3는 중복 프레임을 어떻게 줄일까: AVT·DiffFP]({% post_url 2025-02-22-VideoLLama3 %}) — 고해상도 입력을 토큰화하는 AVT, 유사 프레임을 덜어내는 DiffFP, 7B 벤치마크와 추론 코드의 실행 전제
+- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도, 비용, 프라이버시 판단
+- [물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각, 논리 학습]({% post_url 2026-02-11-P1-VL--Bridging-Visual-Perception-and-Scientific-Reasoning-in-Physics-Olympiads %}) — P1-VL이 올림피아드 물리의 도식 정보를 추론과 연결하는 커리큘럼 RL, PhysicsMinions 검증 구조와 벤치마크 해석법을 설명합니다.
+- [VideoLLaMA 3는 중복 프레임을 어떻게 줄일까: AVT, DiffFP]({% post_url 2025-02-22-VideoLLama3 %}) — 고해상도 입력을 토큰화하는 AVT, 유사 프레임을 덜어내는 DiffFP, 7B 벤치마크와 추론 코드의 실행 전제
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 7B AdaReasoner가 GPT-5보다 전반적으로 뛰어난가요?
 
-아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version·prompt·tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다.
+아닙니다. GPT-5 비교는 특정 Jigsaw 과제의 주장이고 정확한 model version, prompt, tool budget이 이 글에 없어 일반 능력의 우위로 확대할 수 없습니다.
 
 ### Tool-GRPO는 정답이면 올바른 호출 과정도 보장하나요?
 
@@ -141,6 +141,6 @@ PoC 합격 기준은 특정 benchmark 승리가 아니라 제한된 call budget 
 
 ### 배포 전 최소한 어떤 제한이 필요한가요?
 
-읽기 전용 tool부터 시작하고 호출·시간·비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다.
+읽기 전용 tool부터 시작하고 호출, 시간, 비용 상한, schema validation, timeout과 모순 결과의 중단 규칙, 외부 action의 별도 승인 단계를 둬야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.18631)

@@ -1,35 +1,35 @@
 ---
 layout: post
-title: "CoCo는 이미지 속 글자·배치를 코드로 고칠까: +68.83%와 Sandbox 비용"
+title: "CoCo는 이미지 속 글자, 배치를 코드로 고칠까: +68.83%와 Sandbox 비용"
 date: '2026-03-11 04:35:29'
 categories: Tech
 tags:
   - AI코딩
   - 컴퓨터비전
 math: true
-summary: "자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안·지연·복잡한 장면 한계를 정리합니다."
-description: 'CoCo가 자연어를 실행 코드와 초안 이미지로 바꾸는 3단계 구조와 레이아웃 검증, 최종 생성 드리프트·샌드박스 비용을 판단하는 법을 설명합니다.'
+summary: "자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안, 지연, 복잡한 장면 한계를 정리합니다."
+description: 'CoCo가 자연어를 실행 코드와 초안 이미지로 바꾸는 3단계 구조와 레이아웃 검증, 최종 생성 드리프트, 샌드박스 비용을 판단하는 법을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.08652.png
-  alt: "CoCo는 이미지 속 글자·배치를 코드로 고칠까: +68.83%와 Sandbox 비용 논문 대표 이미지"
+  alt: "CoCo는 이미지 속 글자, 배치를 코드로 고칠까: +68.83%와 Sandbox 비용 논문 대표 이미지"
 faq:
   - question: 'CoCo의 코드 초안대로 최종 이미지가 정확히 생성되나요?'
     answer: '보장되지 않습니다. 초안의 좌표와 문자열은 구조를 안내하지만 최종 생성 단계는 확률적이므로 위치, 철자와 객체 수가 다시 달라질 수 있습니다.'
   - question: '생성된 코드를 호스트에서 바로 실행해도 되나요?'
-    answer: '안 됩니다. 사용자 입력이 코드에 영향을 주므로 네트워크와 파일 접근을 막고 CPU·메모리·시간·허용 API를 제한한 일회성 샌드박스에서 실행해야 합니다.'
+    answer: '안 됩니다. 사용자 입력이 코드에 영향을 주므로 네트워크와 파일 접근을 막고 CPU, 메모리, 시간, 허용 API를 제한한 일회성 샌드박스에서 실행해야 합니다.'
   - question: 'CoCo는 어떤 이미지 작업부터 비교하기 좋나요?'
-    answer: '배너, 다이어그램, UI 모형처럼 좌표·텍스트·쌓임 순서가 중요한 작업부터 직접 생성과 비교하면 중간 코드의 통제 이득을 확인하기 쉽습니다.'
+    answer: '배너, 다이어그램, UI 모형처럼 좌표, 텍스트, 쌓임 순서가 중요한 작업부터 직접 생성과 비교하면 중간 코드의 통제 이득을 확인하기 쉽습니다.'
 ---
 
-CoCo는 좌표·크기·문자열을 코드로 명시해 이미지 배치를 더 잘 통제할 수 있지만, 최종 이미지까지 결정론적으로 만드는 것은 아닙니다.
+CoCo는 좌표, 크기, 문자열을 코드로 명시해 이미지 배치를 더 잘 통제할 수 있지만, 최종 이미지까지 결정론적으로 만드는 것은 아닙니다.
 
-[CoCo 논문](https://arxiv.org/abs/2603.08652)은 자연어 Chain-of-Thought 대신 실행 가능한 Code를 중간 표현으로 사용합니다. 모델이 Code로 Layout Draft를 만들고, 그 이미지를 원래 Prompt와 함께 최종 생성 단계에 전달합니다. 배치를 수정 가능한 산출물로 노출한다는 점이 장점이지만, Code 생성과 실행을 위한 새로운 실패·보안 지점이 생깁니다.
+[CoCo 논문](https://arxiv.org/abs/2603.08652)은 자연어 Chain-of-Thought 대신 실행 가능한 Code를 중간 표현으로 사용합니다. 모델이 Code로 Layout Draft를 만들고, 그 이미지를 원래 Prompt와 함께 최종 생성 단계에 전달합니다. 배치를 수정 가능한 산출물로 노출한다는 점이 장점이지만, Code 생성과 실행을 위한 새로운 실패, 보안 지점이 생깁니다.
 
 ## Code-as-CoT는 세 단계로 동작한다
 
-첫 단계에서 모델은 객체 좌표, 크기, 쌓임 순서, Text 내용을 표현하는 Code를 생성합니다. 원문은 HTML·CSS나 Python PIL·Canvas에 가까운 형태를 예로 듭니다.
+첫 단계에서 모델은 객체 좌표, 크기, 쌓임 순서, Text 내용을 표현하는 Code를 생성합니다. 원문은 HTML, CSS나 Python PIL, Canvas에 가까운 형태를 예로 듭니다.
 
-두 번째 단계에서는 Code를 격리된 Sandbox에서 실행해 Wireframe, Bounding Box, Text가 포함된 Draft Image를 렌더링합니다. 같은 Code와 환경에서는 Draft를 재현하고 Syntax·Layout 오류를 찾기 쉽습니다.
+두 번째 단계에서는 Code를 격리된 Sandbox에서 실행해 Wireframe, Bounding Box, Text가 포함된 Draft Image를 렌더링합니다. 같은 Code와 환경에서는 Draft를 재현하고 Syntax, Layout 오류를 찾기 쉽습니다.
 
 세 번째 단계에서는 Draft와 원 Prompt를 이용해 Texture와 Style을 입힌 최종 Image를 생성합니다. 이 단계는 다시 생성 모델의 확률적 추론이므로 Draft의 모든 좌표와 철자가 그대로 보존된다고 보장할 수 없습니다.
 
@@ -43,13 +43,13 @@ CoCo는 1만 쌍의 구조적 Draft와 최종 Image로 구성된 CoCo-10K를 사
 
 ## 수정 가능한 Code가 디버깅을 바꾼다
 
-기존 생성에서는 객체를 조금 옮기려면 Prompt를 바꾸고 전체 결과를 다시 뽑았습니다. CoCo에서는 중간 Code의 `x`·`y`·`width` 같은 값을 바꾸고 Draft를 다시 렌더링할 수 있습니다. Layout 규칙을 Version 관리하거나 회사 Logo·Text 영역을 고정하는 작업에 유리합니다.
+기존 생성에서는 객체를 조금 옮기려면 Prompt를 바꾸고 전체 결과를 다시 뽑았습니다. CoCo에서는 중간 Code의 `x`, `y`, `width` 같은 값을 바꾸고 Draft를 다시 렌더링할 수 있습니다. Layout 규칙을 Version 관리하거나 회사 Logo, Text 영역을 고정하는 작업에 유리합니다.
 
 하지만 생성된 Code가 실제 API와 Brand Rule을 정확히 따르는지는 별도 검사해야 합니다. Code Schema, 허용 Component, Canvas 크기를 제한하지 않으면 모델마다 서로 다른 표현을 만들어 후처리가 복잡해질 수 있습니다. 결과물의 원인을 찾기 쉬워지는 대신 중간 표현의 규격을 관리하는 일이 생깁니다.
 
 ## Sandbox는 선택 기능이 아니라 실행 전제다
 
-사용자 Prompt가 Code 생성에 영향을 주므로, 생성된 Code를 Host에서 바로 실행하면 File·Network·Process 접근 위험이 생깁니다. Production에서는 Network 차단, Read-only Base Image, CPU·Memory·시간 제한, 일회성 File System과 Process 격리가 필요합니다. 렌더러가 허용할 API도 좁혀야 합니다.
+사용자 Prompt가 Code 생성에 영향을 주므로, 생성된 Code를 Host에서 바로 실행하면 File, Network, Process 접근 위험이 생깁니다. Production에서는 Network 차단, Read-only Base Image, CPU, Memory, 시간 제한, 일회성 File System과 Process 격리가 필요합니다. 렌더러가 허용할 API도 좁혀야 합니다.
 
 Code 생성 → Sandbox 시작 → Draft 렌더링 → 최종 생성이라는 세 단계는 단일 생성보다 지연이 큽니다. Cold Start와 실패 재시도까지 포함해 한 장의 비용을 측정해야 합니다. CoCo의 원문에는 이 인프라를 그대로 재현할 실행 Code가 없으므로, 논문 구조를 곧바로 완성 API로 받아들여서는 안 됩니다.
 
@@ -57,11 +57,11 @@ Code 생성 → Sandbox 시작 → Draft 렌더링 → 최종 생성이라는 �
 
 CoCo는 Banner, Diagram, UI Mockup처럼 객체 위치와 Text가 중요한 작업에 먼저 시험할 가치가 있습니다. 추상적 Style이나 자연 장면에서는 Code라는 중간 단계가 표현을 제한할 수 있습니다.
 
-평가 세트에는 긴 Text, 같은 종류의 여러 객체, 가림, Z-index, 비정상 Canvas와 실행 실패를 넣습니다. Direct Generation과 비교해 Layout 정확도·철자·최종 미감·Latency·Sandbox 실패율을 함께 기록해야 합니다. [코드 저장소](https://github.com/micky-li-hd/CoCo)와 [Paper ID 2603.08652](https://huggingface.co/papers/2603.08652)은 구현 범위를 확인하는 출발점이며, Code-as-CoT의 가치는 통제력 증가가 추가 실행 계층의 비용보다 클 때 드러납니다.
+평가 세트에는 긴 Text, 같은 종류의 여러 객체, 가림, Z-index, 비정상 Canvas와 실행 실패를 넣습니다. Direct Generation과 비교해 Layout 정확도, 철자, 최종 미감, Latency, Sandbox 실패율을 함께 기록해야 합니다. [코드 저장소](https://github.com/micky-li-hd/CoCo)와 [Paper ID 2603.08652](https://huggingface.co/papers/2603.08652)은 구현 범위를 확인하는 출발점이며, Code-as-CoT의 가치는 통제력 증가가 추가 실행 계층의 비용보다 클 때 드러납니다.
 
 ## 중간 코드에는 어떤 규격이 필요한가
 
-모델이 임의의 HTML·Python을 만들게 두면 렌더러와 후처리가 매번 다른 구조를 해석해야 합니다. 허용 객체, 좌표 단위, 캔버스 크기, 색상과 글꼴, 쌓임 순서를 제한한 스키마를 두는 편이 좋습니다. 스키마 밖의 속성은 실행 전에 거부하고 누락된 필수 값은 모델에게 다시 묻거나 안전한 기본값으로 처리합니다.
+모델이 임의의 HTML, Python을 만들게 두면 렌더러와 후처리가 매번 다른 구조를 해석해야 합니다. 허용 객체, 좌표 단위, 캔버스 크기, 색상과 글꼴, 쌓임 순서를 제한한 스키마를 두는 편이 좋습니다. 스키마 밖의 속성은 실행 전에 거부하고 누락된 필수 값은 모델에게 다시 묻거나 안전한 기본값으로 처리합니다.
 
 좌표는 픽셀인지 비율인지 명확해야 합니다. 화면 밖 요소, 음수 크기, 겹쳐서는 안 되는 텍스트를 정적 검사할 수 있습니다. 같은 프롬프트에서 코드가 얼마나 달라지는지와 동일 코드가 같은 초안을 만드는지도 기록해야 중간 표현의 재현성을 평가할 수 있습니다.
 
@@ -85,16 +85,16 @@ CoCo는 Banner, Diagram, UI Mockup처럼 객체 위치와 Text가 중요한 작�
 
 ## 벤치마크 개선을 자체 작업에 옮기려면
 
-논문의 상대 개선 수치는 해당 벤치마크와 기준선의 결과입니다. 자체 평가에서는 텍스트 길이, 객체 수, 겹침, 희귀 개념을 난이도별로 나누고 직접 생성과 같은 모델·해상도·시드 수로 비교합니다. 레이아웃 정확도와 OCR뿐 아니라 사람이 보는 자연스러움도 분리해 기록합니다.
+논문의 상대 개선 수치는 해당 벤치마크와 기준선의 결과입니다. 자체 평가에서는 텍스트 길이, 객체 수, 겹침, 희귀 개념을 난이도별로 나누고 직접 생성과 같은 모델, 해상도, 시드 수로 비교합니다. 레이아웃 정확도와 OCR뿐 아니라 사람이 보는 자연스러움도 분리해 기록합니다.
 
 구조적 정확도가 중요한 작업에서만 뚜렷한 이득이 나고 자연 장면에서는 표현력이 줄 수 있습니다. 한 종합 점수보다 작업 유형별 승패와 한 장당 비용을 함께 보면 CoCo를 적용할 경계를 정할 수 있습니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [9router로 AI 코딩 쿼터를 넘겨도 될까: 프록시·폴백의 함정]({% post_url 2026-05-10-The-Era-of-Interrupted-AI-Coding-is-Over-A-Deep-Dive-into-9router-Architecture-and-Local-Proxy-Evolution %}) — 9router의 포맷 변환, 토큰 압축, 3단계 폴백을 살펴보고 모델 교체와 API 키 집중이 만드는 품질·보안 위험을 점검합니다.
-- [next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치·검증 가이드]({% post_url 2026-02-22-Next-AI-Draw-IO-Review %}) — next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용·정확성·보안 검증 기준을 정리합니다.
-- [Andrej Karpathy Skills는 AI 코딩 범위를 줄일까: 지침·검증·질문 한계]({% post_url 2026-04-13-Shattering-the-AI-Coding-Illusion-How-Andrej-Karpathy-Skills-Rewrites-the-Rules-of-Production %}) — Andrej Karpathy Skills의 Think Before Coding·Surgical Changes·Goal-Driven 지침이 수정 범위와 검증을 돕는 방식, prompt만으로 보장할 수 없는 한계를 분석합니다.
+- [9router로 AI 코딩 쿼터를 넘겨도 될까: 프록시, 폴백의 함정]({% post_url 2026-05-10-The-Era-of-Interrupted-AI-Coding-is-Over-A-Deep-Dive-into-9router-Architecture-and-Local-Proxy-Evolution %}) — 9router의 포맷 변환, 토큰 압축, 3단계 폴백을 살펴보고 모델 교체와 API 키 집중이 만드는 품질, 보안 위험을 점검합니다.
+- [next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치, 검증 가이드]({% post_url 2026-02-22-Next-AI-Draw-IO-Review %}) — next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용, 정확성, 보안 검증 기준을 정리합니다.
+- [Andrej Karpathy Skills는 AI 코딩 범위를 줄일까: 지침, 검증, 질문 한계]({% post_url 2026-04-13-Shattering-the-AI-Coding-Illusion-How-Andrej-Karpathy-Skills-Rewrites-the-Rules-of-Production %}) — Andrej Karpathy Skills의 Think Before Coding, Surgical Changes, Goal-Driven 지침이 수정 범위와 검증을 돕는 방식, prompt만으로 보장할 수 없는 한계를 분석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -105,8 +105,8 @@ CoCo는 Banner, Diagram, UI Mockup처럼 객체 위치와 Text가 중요한 작�
 
 ### 생성된 코드를 호스트에서 바로 실행해도 되나요?
 
-안 됩니다. 사용자 입력이 코드에 영향을 주므로 네트워크와 파일 접근을 막고 CPU·메모리·시간·허용 API를 제한한 일회성 샌드박스에서 실행해야 합니다.
+안 됩니다. 사용자 입력이 코드에 영향을 주므로 네트워크와 파일 접근을 막고 CPU, 메모리, 시간, 허용 API를 제한한 일회성 샌드박스에서 실행해야 합니다.
 
 ### CoCo는 어떤 이미지 작업부터 비교하기 좋나요?
 
-배너, 다이어그램, UI 모형처럼 좌표·텍스트·쌓임 순서가 중요한 작업부터 직접 생성과 비교하면 중간 코드의 통제 이득을 확인하기 쉽습니다.
+배너, 다이어그램, UI 모형처럼 좌표, 텍스트, 쌓임 순서가 중요한 작업부터 직접 생성과 비교하면 중간 코드의 통제 이득을 확인하기 쉽습니다.

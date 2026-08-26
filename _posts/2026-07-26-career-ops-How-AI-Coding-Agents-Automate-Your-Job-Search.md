@@ -11,7 +11,7 @@ tags:
   - 오픈소스
 summary: career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며,
   ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
-description: 'career-ops가 공고 분석·적합도 점수·이력서 초안을 로컬 파이프라인으로 묶는 방식과 점수 편향·경력 사실성·개인정보 보관·오래된 공고·중복 지원을 점검합니다.'
+description: 'career-ops가 공고 분석, 적합도 점수, 이력서 초안을 로컬 파이프라인으로 묶는 방식과 점수 편향, 경력 사실성, 개인정보 보관, 오래된 공고, 중복 지원을 점검합니다.'
 github_url: https://github.com/santifer/career-ops
 image:
   path: https://opengraph.githubassets.com/1/santifer/career-ops
@@ -308,9 +308,9 @@ career-ops는 이 기울어진 운동장의 균형을 맞추기 위한 강력한
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
-- [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
 - [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
+- [reverse-skill: AI 코딩 에이전트를 안전하고 정교한 보안 분석가로 바꾸는 스킬 라우터]({% post_url 2026-08-03-reverse-skill-AI-powered-Cybersecurity-Skill-Router-for-Reverse-Engineering-and-Penetration-Testing %}) — reverse-skill은 Claude Code, Cursor, Cline 등 AI 코딩 에이전트가 리버스 엔지니어링과 침투 테스트를 안전하게 실행하도록 안내하는 오픈소스 스킬 라우팅 프레임워크입니다. 경로 우선 실행 모델, 로컬…
+- [공장형 AI UI를 거부하다: Hallmark가 코딩 에이전트의 디자인 감각을 뜯어고치는 원리]({% post_url 2026-07-21-Rejecting-AI-Factory-UIs-How-Hallmark-Rewires-the-Design-Sense-of-Coding-Agents %}) — Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록 강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

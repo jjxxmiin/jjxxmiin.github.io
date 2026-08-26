@@ -11,7 +11,7 @@ tags:
   - AI에이전트
 summary: 클로드 코드(Claude Code)를 기반으로 공고 수집, 적합도 평가, 맞춤형 이력서 작성 등 구직 전 과정을 자동화하는 ai-job-search
   프레임워크의 작동 원리와 실전 활용법을 깊이 있게 분석합니다.
-description: 'ai-job-search가 공고 수집·적합도 평가·지원 문서 작성을 나누는 방식과 허위 경력 방지, 개인정보·중복 지원·사람 승인 기준을 설명합니다.'
+description: 'ai-job-search가 공고 수집, 적합도 평가, 지원 문서 작성을 나누는 방식과 허위 경력 방지, 개인정보, 중복 지원, 사람 승인 기준을 설명합니다.'
 github_url: https://github.com/MadsLorentzen/ai-job-search
 image:
   path: https://opengraph.githubassets.com/1/MadsLorentzen/ai-job-search
@@ -261,9 +261,9 @@ ai-job-search는 생성형 AI를 실생활의 고통스러운 문제에 적용�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
 - [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
-- [Claude Code Game Studios의 48개 역할은 필요한가: Gate·Context·비용]({% post_url 2026-04-15-Deep-Dive-Taming-the-Chaos-of-Vibe-Coding-with-48-AI-Agents-Unpacking-Claude-Code-Game-Studios %}) — Claude Code Game Studios가 역할·context·품질 gate를 나누는 구조를 살펴보고, 실제 격리 여부와 역할별 기여·token·deadlock·review 비용을 평가합니다.
+- [Claude Code Game Studios의 48개 역할은 필요한가: Gate, Context, 비용]({% post_url 2026-04-15-Deep-Dive-Taming-the-Chaos-of-Vibe-Coding-with-48-AI-Agents-Unpacking-Claude-Code-Game-Studios %}) — Claude Code Game Studios가 역할, context, 품질 gate를 나누는 구조를 살펴보고, 실제 격리 여부와 역할별 기여, token, deadlock, review 비용을 평가합니다.
+- [oh-my-claudecode의 32개 Agent는 필요한가: Routing, State, 검증 비용]({% post_url 2026-04-21-10-Year-Seniors-View-Is-Claude-Code-Dead-The-Shocking-Reality-and-Limits-of-oh-my-claudecode-Orchestrating-32-AIs %}) — oh-my-claudecode가 역할, model routing, hook, state로 코딩 작업을 나누는 구조를 살펴보고, 실제 병렬성, 검증 독립성, token, 복구, 권한 한계를 평가합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

@@ -1,19 +1,19 @@
 ---
 layout: post
-title: 'Aye Chat이 허락 없이 파일을 고쳐도 안전할까: .aye Snapshot·restore 한계'
+title: 'Aye Chat이 허락 없이 파일을 고쳐도 안전할까: .aye Snapshot, restore 한계'
 date: '2026-04-30 07:11:15'
 categories: Tech
 tags:
   - LLM
   - 프롬프트엔지니어링
-summary: 'Aye Chat의 action-first 편집과 .aye 스냅샷·restore 흐름을 살펴보고, 파일은 되돌려도 명령 실행·외부 효과·토큰 비용은 복구되지 않는 한계를 짚습니다.'
-description: "Aye Chat의 action-first edit와 .aye snapshot을 Git 상태·untracked·permission·external side effect·approval 경계, 복원 drill과 작업당 비용으로 검증합니다."
+summary: 'Aye Chat의 action-first 편집과 .aye 스냅샷, restore 흐름을 살펴보고, 파일은 되돌려도 명령 실행, 외부 효과, 토큰 비용은 복구되지 않는 한계를 짚습니다.'
+description: "Aye Chat의 action-first edit와 .aye snapshot을 Git 상태, untracked, permission, external side effect, approval 경계, 복원 drill과 작업당 비용으로 검증합니다."
 github_url: https://github.com/acrotron/aye-chat
 faq:
   - question: "Aye Chat의 restore는 AI가 만든 모든 변경을 되돌리나요?"
-    answer: "아닙니다. snapshot에 포함된 local file은 복원할 수 있어도 이미 실행한 command, database·remote repository·message 같은 외부 효과는 자동 취소되지 않습니다."
+    answer: "아닙니다. snapshot에 포함된 local file은 복원할 수 있어도 이미 실행한 command, database, remote repository, message 같은 외부 효과는 자동 취소되지 않습니다."
   - question: "AGENTS.md에 금지 규칙을 쓰면 모델이 반드시 지키나요?"
-    answer: "아닙니다. 지시를 일관되게 전달하는 데는 유용하지만 물리적 권한 경계가 아니므로 중요한 규칙은 lint·test·policy와 sandbox로 강제해야 합니다."
+    answer: "아닙니다. 지시를 일관되게 전달하는 데는 유용하지만 물리적 권한 경계가 아니므로 중요한 규칙은 lint, test, policy와 sandbox로 강제해야 합니다."
   - question: "action-first 방식에 적합한 첫 작업은 무엇인가요?"
     answer: "깨끗한 작업 branch의 작은 모듈처럼 diff가 명확하고 test가 빠르며 외부 write가 없는 변경부터 제한적으로 비교하는 것이 좋습니다."
 image:
@@ -37,7 +37,7 @@ Aye Chat의 스냅샷은 파일 편집을 되돌릴 수 있지만, AI가 실행�
 
 `workspace.snapshot_engine`, LLM 서비스, 명령 판별과 subprocess 격리가 정의되지 않았고 실제 Aye Chat 코드의 클래스라고 검증되지 않았습니다. 이 조각은 UX 흐름을 설명하는 의사 코드이지, 플러그인을 구현하거나 보안 경계를 증명하는 예제가 아닙니다.
 
-특히 자연어와 쉘 명령을 어떻게 구분하는지가 모호합니다. 잘못 분류된 입력이 실행되지 않는지, 파이프·리다이렉션·대화형 명령은 어떻게 처리하는지 실제 제품에서 확인해야 합니다.
+특히 자연어와 쉘 명령을 어떻게 구분하는지가 모호합니다. 잘못 분류된 입력이 실행되지 않는지, 파이프, 리다이렉션, 대화형 명령은 어떻게 처리하는지 실제 제품에서 확인해야 합니다.
 
 ## restore가 되돌리지 못하는 것을 목록으로 만든다
 
@@ -77,21 +77,21 @@ Aye 스냅샷을 Git의 대체물로 보지 말고 빠른 로컬 undo 계층으�
 
 | 행동 | `.aye` restore | 추가 보호 |
 |---|---|---|
-| tracked source edit | 포함 여부를 시험 | Git branch·diff·test |
-| untracked 생성·삭제 | 구현별 확인 | 별도 backup·허용 path |
+| tracked source edit | 포함 여부를 시험 | Git branch, diff, test |
+| untracked 생성, 삭제 | 구현별 확인 | 별도 backup, 허용 path |
 | dependency install | lockfile 일부만 복원 가능 | 일회성 environment |
-| DB·cloud·remote write | 복원 불가 | 사전 승인·idempotency·rollback |
-| message·email 전송 | 복원 불가 | preview·수신자 승인 |
+| DB, cloud, remote write | 복원 불가 | 사전 승인, idempotency, rollback |
+| message, email 전송 | 복원 불가 | preview, 수신자 승인 |
 
-명령 실행기는 파일 편집기보다 좁은 권한으로 둡니다. 기본 profile은 workspace 내부 읽기·쓰기와 test command만 허용하고, network·credential·package install·Git push를 차단합니다. 자연어를 shell로 잘못 분류하는 경우를 대비해 실행 전 parsed command, working directory와 예상 side effect를 policy가 검사합니다. 위험한 명령을 prompt 지시만으로 금지해서는 안 됩니다.
+명령 실행기는 파일 편집기보다 좁은 권한으로 둡니다. 기본 profile은 workspace 내부 읽기, 쓰기와 test command만 허용하고, network, credential, package install, Git push를 차단합니다. 자연어를 shell로 잘못 분류하는 경우를 대비해 실행 전 parsed command, working directory와 예상 side effect를 policy가 검사합니다. 위험한 명령을 prompt 지시만으로 금지해서는 안 됩니다.
 
 ## 실패를 발견하는 시간까지 pilot에서 측정한다
 
 대표 작업을 오타 수정, 작은 refactor, dependency 변경과 schema migration으로 나누고 승인 기반 방식과 비교합니다. 첫 편집 시간뿐 아니라 첫 test 실패까지의 시간, 사람이 diff를 이해한 시간, restore 성공률, 남은 찌꺼기와 최종 수정 횟수를 기록합니다. 빠르게 적용한 잘못된 변경을 오래 뒤에 찾으면 체감 응답은 짧아도 완료 시간은 길어집니다.
 
-실패 주입도 필요합니다. test가 hang하거나 disk가 가득 차고, snapshot 도중 process가 종료되며, AI가 허용 path 밖을 수정하려 할 때 안전하게 멈추는지 확인합니다. restore 실패 뒤에는 Git 원본에서 복구할 수 있어야 하고 `.aye/` 자체가 손상돼도 source history를 잃어서는 안 됩니다. snapshot 크기·보존 개수와 자동 정리 시점을 정하되 현재 작업의 유일한 복구본을 먼저 지우지 않게 합니다.
+실패 주입도 필요합니다. test가 hang하거나 disk가 가득 차고, snapshot 도중 process가 종료되며, AI가 허용 path 밖을 수정하려 할 때 안전하게 멈추는지 확인합니다. restore 실패 뒤에는 Git 원본에서 복구할 수 있어야 하고 `.aye/` 자체가 손상돼도 source history를 잃어서는 안 됩니다. snapshot 크기, 보존 개수와 자동 정리 시점을 정하되 현재 작업의 유일한 복구본을 먼저 지우지 않게 합니다.
 
-운영 승격 조건은 “몇 초 빨랐다”가 아니라 작은 reversible edit의 성공률이 유지되고 위험 행동이 모두 차단되는지입니다. action-first profile과 approval-first profile을 명령 종류별로 나누면 파일 format 같은 저위험 변경은 빠르게 처리하면서 배포·migration·external write는 기존 검토를 유지할 수 있습니다.
+운영 승격 조건은 “몇 초 빨랐다”가 아니라 작은 reversible edit의 성공률이 유지되고 위험 행동이 모두 차단되는지입니다. action-first profile과 approval-first profile을 명령 종류별로 나누면 파일 format 같은 저위험 변경은 빠르게 처리하면서 배포, migration, external write는 기존 검토를 유지할 수 있습니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -103,19 +103,19 @@ Aye 스냅샷을 Git의 대체물로 보지 말고 빠른 로컬 undo 계층으�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [OpenCode는 어떤 개발자에게 맞을까: 터미널 에이전트의 설치와 권한]({% post_url 2026-02-20-OpenCode-The-Terminal-AI-Agent %}) — 터미널 환경에서 벗어나지 않고 모든 AI 모델을 자유롭게 사용하는 Go 언어 기반의 초고속 AI 에이전트, OpenCode를 소개합니다. 설치부터 아키텍처, 실전 활용법까지 완벽하게 가이드합니다.
-- [pi-mono의 네 가지 기본 도구로 충분할까: 확장성·권한·유지비 판단법]({% post_url 2026-03-17-For-Those-Tired-of-Everything-Everywhere-AI-Agents-A-Deep-Dive-into-pi-mono-Architecture %}) — pi-mono가 read·write·edit·bash와 TypeScript 확장으로 코딩 에이전트를 구성하는 방식과 최소 기능의 장점, 권한·확장 유지비 한계를 정리합니다.
-- [Mission Control에 Sentry 자동 PR을 맡겨도 될까: 이벤트·Aegis·비용 한도]({% post_url 2026-03-24-Tech-Deep-Dive-Stop-Prompting-Start-Orchestrating-Inside-the-Mission-Control-Architecture-for-AI-Agents %}) — 오류 이벤트에서 코드 분석과 PR 생성까지 이어지는 Mission Control 구조를 따라가며, 자동 배포 대신 승인 가능한 자동화로 시작해야 하는 이유를 설명합니다.
+- [pi-mono의 네 가지 기본 도구로 충분할까: 확장성, 권한, 유지비 판단법]({% post_url 2026-03-17-For-Those-Tired-of-Everything-Everywhere-AI-Agents-A-Deep-Dive-into-pi-mono-Architecture %}) — pi-mono가 read, write, edit, bash와 TypeScript 확장으로 코딩 에이전트를 구성하는 방식과 최소 기능의 장점, 권한, 확장 유지비 한계를 정리합니다.
+- [Mission Control에 Sentry 자동 PR을 맡겨도 될까: 이벤트, Aegis, 비용 한도]({% post_url 2026-03-24-Tech-Deep-Dive-Stop-Prompting-Start-Orchestrating-Inside-the-Mission-Control-Architecture-for-AI-Agents %}) — 오류 이벤트에서 코드 분석과 PR 생성까지 이어지는 Mission Control 구조를 따라가며, 자동 배포 대신 승인 가능한 자동화로 시작해야 하는 이유를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Aye Chat의 restore는 AI가 만든 모든 변경을 되돌리나요?
 
-아닙니다. snapshot에 포함된 local file은 복원할 수 있어도 이미 실행한 command, database·remote repository·message 같은 외부 효과는 자동 취소되지 않습니다.
+아닙니다. snapshot에 포함된 local file은 복원할 수 있어도 이미 실행한 command, database, remote repository, message 같은 외부 효과는 자동 취소되지 않습니다.
 
 ### AGENTS.md에 금지 규칙을 쓰면 모델이 반드시 지키나요?
 
-아닙니다. 지시를 일관되게 전달하는 데는 유용하지만 물리적 권한 경계가 아니므로 중요한 규칙은 lint·test·policy와 sandbox로 강제해야 합니다.
+아닙니다. 지시를 일관되게 전달하는 데는 유용하지만 물리적 권한 경계가 아니므로 중요한 규칙은 lint, test, policy와 sandbox로 강제해야 합니다.
 
 ### action-first 방식에 적합한 첫 작업은 무엇인가요?
 

@@ -11,7 +11,7 @@ tags:
   - LLM
 summary: Anthropic과 GitHub이 주도하는 오픈소스 프로젝트인 Model Context Protocol(MCP)의 탄생 배경, 클라이언트-서버
   간 핵심 통신 아키텍처, 그리고 공식 저장소에서 제공되는 서버 구현체들의 작동 원리를 깊이 있게 분석합니다.
-description: 'MCP의 클라이언트·서버·도구·리소스 통신 구조와 로컬·원격 전송 차이, 사용자 승인·서버 신뢰 경계·버전 호환·시간 초과 및 오류 처리 기준을 설명합니다.'
+description: 'MCP의 클라이언트, 서버, 도구, 리소스 통신 구조와 로컬, 원격 전송 차이, 사용자 승인, 서버 신뢰 경계, 버전 호환, 시간 초과 및 오류 처리 기준을 설명합니다.'
 github_url: https://github.com/modelcontextprotocol/servers
 image:
   path: https://opengraph.githubassets.com/1/modelcontextprotocol/servers
@@ -350,7 +350,7 @@ Language Server Protocol이 전 세계 개발자들의 에디터 환경을 상�
 
 - [OpenOSINT: AI와 결합된 차세대 오픈소스 정보 수집 에이전트의 작동 원리와 실전 활용법]({% post_url 2026-07-09-OpenOSINT-Under-the-Hood-of-the-Next-Generation-AI-Powered-OSINT-Agent %}) — 복잡한 명령어와 수동 데이터 연결의 피로도를 덜어주는 오픈소스 프로젝트 OpenOSINT의 내부 구조와 연동 기법을 깊이 있게 다룹니다.
 - [메타의 1만 3천 개 앱을 지탱하는 AI 네이티브 디자인 시스템: Astryx 원리와 활용법]({% post_url 2026-07-13-Metas-AI-Native-Design-System-Backing-13000-Apps-Understanding-and-Using-Astryx %}) — 메타(Meta)가 8년간 내부에서 사용해 온 코어 디자인 시스템 Astryx의 구조와 활용법을 심층적으로 정리합니다. AI 에이전트와 인간이 동일한 기준으로 UI를 구축할 수 있도록 설계된 아키텍처와 MCP 통신 원리, 그리고…
-- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md·MCP·검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md·컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태·성능·검증 문제를 짚습니다.
+- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md, MCP, 검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md, 컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태, 성능, 검증 문제를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

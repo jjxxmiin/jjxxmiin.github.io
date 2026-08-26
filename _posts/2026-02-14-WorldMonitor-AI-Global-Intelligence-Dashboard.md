@@ -9,14 +9,14 @@ tags:
   - 웹개발
   - AI보안
   - 트랜스포머
-summary: 'WorldMonitor가 뉴스·분쟁·인프라 공개 데이터를 지도와 AI 요약으로 묶는 구조, 로컬 설치법과 출처·시의성 검증 기준을 정리합니다.'
-description: 'WorldMonitor가 뉴스·분쟁·인프라 공개 데이터를 지도와 AI 요약으로 묶는 구조, 엣지 함수·캐시·로컬 설치와 오판 방지 기준을 설명합니다.'
+summary: 'WorldMonitor가 뉴스, 분쟁, 인프라 공개 데이터를 지도와 AI 요약으로 묶는 구조, 로컬 설치법과 출처, 시의성 검증 기준을 정리합니다.'
+description: 'WorldMonitor가 뉴스, 분쟁, 인프라 공개 데이터를 지도와 AI 요약으로 묶는 구조, 엣지 함수, 캐시, 로컬 설치와 오판 방지 기준을 설명합니다.'
 image:
   path: https://opengraph.githubassets.com/1/koala73/worldmonitor
   alt: "koala73/worldmonitor GitHub 저장소 대표 이미지"
 ---
 
-**WorldMonitor**는 뉴스, 지정학적 사건, 인프라와 시장 관련 공개 데이터를 한 지도 인터페이스에서 살펴보게 하는 오픈소스 상황 인식 대시보드입니다. 여러 소스를 겹쳐 탐색하고 AI 요약을 붙일 수 있지만, 화면의 점과 위험 점수는 검증된 정보기관 판단이나 투자 신호가 아닙니다. 실제 의사결정에 쓰려면 각 레이어의 출처·수집 시각·누락 상태와 원문을 함께 확인해야 합니다.
+**WorldMonitor**는 뉴스, 지정학적 사건, 인프라와 시장 관련 공개 데이터를 한 지도 인터페이스에서 살펴보게 하는 오픈소스 상황 인식 대시보드입니다. 여러 소스를 겹쳐 탐색하고 AI 요약을 붙일 수 있지만, 화면의 점과 위험 점수는 검증된 정보기관 판단이나 투자 신호가 아닙니다. 실제 의사결정에 쓰려면 각 레이어의 출처, 수집 시각, 누락 상태와 원문을 함께 확인해야 합니다.
 
 ---
 
@@ -140,7 +140,7 @@ npm run build
 
 | 특징 | 상용 OSINT 툴 (Dataminr 등) | WorldMonitor (오픈소스) |
 | :--- | :--- | :--- |
-| **비용** | 제품별 계약·사용 비용 | 오픈소스 코드 + API·호스팅 비용 |
+| **비용** | 제품별 계약, 사용 비용 | 오픈소스 코드 + API, 호스팅 비용 |
 | **접근성** | 기업/정부 기관 한정 | 누구나 사용 가능 |
 | **커스터마이징** | 제한적 | 코드 수정 가능 |
 | **데이터 소스** | 독점 데이터 포함 | 공개 데이터(OSINT) 중심 |
@@ -152,9 +152,9 @@ npm run build
 
 ## 결론: WorldMonitor를 의사결정에 써도 되는 조건은 무엇인가?
 
-WorldMonitor의 장점은 흩어진 공개 정보를 위치와 시간 기준으로 탐색하는 인터페이스에 있습니다. 그러나 AI 분류와 수렴 알림은 원자료의 오류·지연·편향을 제거하지 못하며, 여러 마커가 가까이 있다는 사실만으로 사건 사이 인과를 입증하지도 않습니다.
+WorldMonitor의 장점은 흩어진 공개 정보를 위치와 시간 기준으로 탐색하는 인터페이스에 있습니다. 그러나 AI 분류와 수렴 알림은 원자료의 오류, 지연, 편향을 제거하지 못하며, 여러 마커가 가까이 있다는 사실만으로 사건 사이 인과를 입증하지도 않습니다.
 
-대표 사건을 골라 원출처 도달 가능성, 수집 지연, 중복과 누락, 잘못된 위치, AI 요약 오류를 기록해야 합니다. 특정 소스가 끊겼을 때 화면이 이를 명확히 표시하고 중요한 판단을 원문으로 재검증할 절차가 있을 때 보조 상황판으로 사용할 수 있습니다. 투자·안보·안전 결정을 자동화하거나 확인되지 않은 경보를 배포하는 용도로는 별도의 전문 검증이 필요합니다.
+대표 사건을 골라 원출처 도달 가능성, 수집 지연, 중복과 누락, 잘못된 위치, AI 요약 오류를 기록해야 합니다. 특정 소스가 끊겼을 때 화면이 이를 명확히 표시하고 중요한 판단을 원문으로 재검증할 절차가 있을 때 보조 상황판으로 사용할 수 있습니다. 투자, 안보, 안전 결정을 자동화하거나 확인되지 않은 경보를 배포하는 용도로는 별도의 전문 검증이 필요합니다.
 
 **참고 링크:**
 *   [GitHub Repository](https://github.com/koala73/worldmonitor)
@@ -164,9 +164,9 @@ WorldMonitor의 장점은 흩어진 공개 정보를 위치와 시간 기준으�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Claude for Legal이 법률 환각을 끝낼까: 출처·권한·승인 설계]({% post_url 2026-05-18-The-End-of-Paying-Settlements-for-Hallucinations-A-Developers-Deep-Dive-into-Claude-for-Legal-and-Its-True-Impact %}) — Claude for Legal의 도구 연결 구조를 법률 검색, 문서 수정, 외부 전송으로 나눠 보고 환각·권한·감사 위험을 통제하는 기준을 정리합니다.
-- [next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치·검증 가이드]({% post_url 2026-02-22-Next-AI-Draw-IO-Review %}) — next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용·정확성·보안 검증 기준을 정리합니다.
-- [OpenMed 완벽 정리: 의료 데이터를 외부로 내보내지 않는 100% 로컬 인공지능의 원리와 활용]({% post_url 2026-07-14-Deep-Dive-into-OpenMed-The-Local-First-Healthcare-AI-for-On-Device-Clinical-NER-and-Privacy %}) — 환자의 민감한 의료 데이터를 외부 클라우드로 보내지 않고, 완벽하게 통제된 로컬 기기 내에서 처리하는 오픈소스 의료 인공지능 프레임워크 OpenMed의 아키텍처, 17개국어 기반 개인정보 비식별화 원리, 그리고 현업 활용 시나리오를…
+- [Supermemory는 RAG를 대체할까: 관계, 시간, 삭제를 포함한 메모리 계층의 조건]({% post_url 2026-03-25-The-End-of-RAG-or-its-Evolution-A-10-Year-Developers-Deep-Dive-into-Supermemory %}) — Supermemory가 벡터 검색에 관계와 시간 정보를 더하는 구조를 살펴보고, 출처 추적, 충돌 처리, 삭제, 권한, MCP 도입 조건을 정리합니다.
+- [OpenClaw는 누구에게 맞을까: 로컬 AI 에이전트 설치와 권한 관리]({% post_url 2026-02-10-OpenClaw-The-Ultimate-Local-AI-Agent-Guide %}) — 최근 깃허브에서 폭발적인 반응을 얻고 있는 오픈소스 AI 에이전트 OpenClaw(구 Moltbot)의 설치부터 기능, 활용법까지 상세하게 다룹니다. 내 로컬 환경에서 돌아가는 나만의 자비스를 만들어보세요.
+- [PicoClaw는 저사양 보드에서 무엇을 실행하나: 설치와 비용, 권한 기준]({% post_url 2026-02-16-PicoClaw-The-Ultra-Lightweight-AI-Agent %}) — PicoClaw가 Go 단일 바이너리와 외부 LLM API로 저사양 보드에서 동작하는 구조, 저장소의 자원 수치와 설치, 보안 판단 기준을 정리합니다.
 <!-- internal-links:end -->
 
 ## References

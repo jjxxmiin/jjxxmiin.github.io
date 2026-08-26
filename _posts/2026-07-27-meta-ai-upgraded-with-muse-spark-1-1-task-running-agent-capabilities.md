@@ -62,7 +62,7 @@ article_images:
   source_url: https://siliconangle.com/2026/07/24/meta-makes-muse-spark-1-1-available-consumers-debuts-new-facebook-features
 ---
 
-인용된 Meta 자료는 Muse Spark 1.1 기반 Meta AI가 Gmail·Google Calendar 연결과 여러 단계 작업을 지원한다고 설명합니다. 제공 지역과 계정별 기능은 다를 수 있고, 메일·일정 접근은 편의만큼 큰 개인정보 권한을 요구합니다. 연결 전 읽기 범위, 외부 메시지·일정 생성 승인, 작업 로그와 연결 해제 절차를 확인하세요.
+인용된 Meta 자료는 Muse Spark 1.1 기반 Meta AI가 Gmail, Google Calendar 연결과 여러 단계 작업을 지원한다고 설명합니다. 제공 지역과 계정별 기능은 다를 수 있고, 메일, 일정 접근은 편의만큼 큰 개인정보 권한을 요구합니다. 연결 전 읽기 범위, 외부 메시지, 일정 생성 승인, 작업 로그와 연결 해제 절차를 확인하세요.
 
 ```mermaid
 graph TD
@@ -154,9 +154,9 @@ flowchart TD
 
 ## Gmail과 Calendar 권한은 어떻게 최소화할까?
 
-메일 요약에 필요한 읽기 권한과 메시지 전송·삭제 권한은 분리해야 합니다. 일정 조회와 일정 생성도 같은 권한이 아닙니다. 초기 시험에서는 별도 테스트 계정과 제한된 캘린더를 연결하고, 첨부파일·연락처·과거 메일까지 넓게 읽는지 확인합니다.
+메일 요약에 필요한 읽기 권한과 메시지 전송, 삭제 권한은 분리해야 합니다. 일정 조회와 일정 생성도 같은 권한이 아닙니다. 초기 시험에서는 별도 테스트 계정과 제한된 캘린더를 연결하고, 첨부파일, 연락처, 과거 메일까지 넓게 읽는지 확인합니다.
 
-연결된 메일에는 외부 발신자가 넣은 명령형 문장도 포함됩니다. 에이전트가 메일 본문을 사용자 지시로 오인해 파일을 전송하거나 일정을 만들지 않는지 시험해야 합니다. 외부 행동 전에는 대상·내용·시간을 보여 주고 사람이 승인할 수 있어야 합니다.
+연결된 메일에는 외부 발신자가 넣은 명령형 문장도 포함됩니다. 에이전트가 메일 본문을 사용자 지시로 오인해 파일을 전송하거나 일정을 만들지 않는지 시험해야 합니다. 외부 행동 전에는 대상, 내용, 시간을 보여 주고 사람이 승인할 수 있어야 합니다.
 
 ## 자율 작업이 실제로 끝났는지는 무엇으로 확인할까?
 
@@ -183,9 +183,9 @@ Google 권한을 철회한 뒤 Meta 쪽에 저장된 브리핑, 작업 로그, �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail·OAuth·LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
+- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail, OAuth, LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
 - [Composio는 에이전트 인증을 얼마나 줄여 주나: 권한과 실행 검증]({% post_url 2026-02-21-Composio-The-Integration-Platform-for-AI-Agents %}) — AI 에이전트 개발의 가장 큰 장벽인 '인증(Auth)'과 '도구 연동(Integration)'을 한 번에 해결해주는 Composio를 상세히 분석합니다. LangChain, AutoGen 등 주요 프레임워크와의 연동법과 실전…
-- [Agentic Inbox가 Gmail Polling을 대체할까: Durable Object·SQLite의 상태 경계]({% post_url 2026-05-20-Giving-Gmail-to-Agents-Was-a-Disaster--A-Deep-Dive-into-Agentic-Inbox-the-Stateful-Infrastructure-for-AI %}) — Agentic Inbox의 이벤트 기반 수신과 Durable Object·SQLite·R2 상태 구조를 분석하고, 중복 처리·승인·MIME·벤더 종속성까지 도입 전에 정할 경계를 설명합니다.
+- [Agentic Inbox가 Gmail Polling을 대체할까: Durable Object, SQLite의 상태 경계]({% post_url 2026-05-20-Giving-Gmail-to-Agents-Was-a-Disaster--A-Deep-Dive-into-Agentic-Inbox-the-Stateful-Infrastructure-for-AI %}) — Agentic Inbox의 이벤트 기반 수신과 Durable Object, SQLite, R2 상태 구조를 분석하고, 중복 처리, 승인, MIME, 벤더 종속성까지 도입 전에 정할 경계를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

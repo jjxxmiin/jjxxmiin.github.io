@@ -11,23 +11,23 @@ tags:
   - 트랜스포머
 math: true
 summary: 시각을 예측 대상으로 삼는 VLUAS와 별도 디코더 없이 dense prediction을 수행하는 NTP-M의 이득과 비용을 분석합니다.
-description: "Youtu-VL이 vision-as-target VLUAS와 NTP-M으로 VQA·detection·segmentation을 한 구조에 묶는 원리, tokenizer 정보 손실과 token 비용, 전용 model 대체 조건을 설명합니다."
+description: "Youtu-VL이 vision-as-target VLUAS와 NTP-M으로 VQA, detection, segmentation을 한 구조에 묶는 원리, tokenizer 정보 손실과 token 비용, 전용 model 대체 조건을 설명합니다."
 faq:
-  - question: "Youtu-VL은 객체 검출·세그멘테이션 head가 전혀 필요 없나요?"
-    answer: "과제별 auxiliary decoder나 task-specific token 없이 공통 autoregressive 구조로 dense prediction을 목표로 하지만 출력 supervision과 좌표·mask 표현 설계까지 사라지는 것은 아닙니다."
+  - question: "Youtu-VL은 객체 검출, 세그멘테이션 head가 전혀 필요 없나요?"
+    answer: "과제별 auxiliary decoder나 task-specific token 없이 공통 autoregressive 구조로 dense prediction을 목표로 하지만 출력 supervision과 좌표, mask 표현 설계까지 사라지는 것은 아닙니다."
   - question: "Vision-as-target이면 원본 pixel을 모두 기억하나요?"
-    answer: "아닙니다. 학습 target은 tokenizer와 encoder가 만든 시각 표현이며 작은 글자·얇은 경계처럼 앞단에서 잃은 정보는 language model이 완전히 복원하기 어렵습니다."
+    answer: "아닙니다. 학습 target은 tokenizer와 encoder가 만든 시각 표현이며 작은 글자, 얇은 경계처럼 앞단에서 잃은 정보는 language model이 완전히 복원하기 어렵습니다."
   - question: "전용 detection model을 대체할지는 어떻게 판단하나요?"
-    answer: "같은 image·해상도·hardware에서 위치·경계 정확도, 작은 객체 recall, token 수, latency·memory와 출력 형식 오류를 전용 pipeline과 비교해야 합니다."
+    answer: "같은 image, 해상도, hardware에서 위치, 경계 정확도, 작은 객체 recall, token 수, latency, memory와 출력 형식 오류를 전용 pipeline과 비교해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.19798.png
   alt: "Youtu-VL은 객체 검출 헤드를 없앨 수 있을까: Vision-as-Target과 NTP-M 구조 논문 대표 이미지"
 ---
 
-Youtu-VL은 이미지를 입력 문맥으로만 쓰지 않고 예측 대상에도 포함해, 별도의 검출·세그멘테이션 디코더 없이 여러 시각 과제를 한 자동회귀 구조로 처리하려는 모델입니다. 다만 헤드를 줄였다고 계산량까지 줄어드는 것은 아니며, 시각 토큰의 길이와 토크나이저 품질이 새 병목이 됩니다.
+Youtu-VL은 이미지를 입력 문맥으로만 쓰지 않고 예측 대상에도 포함해, 별도의 검출, 세그멘테이션 디코더 없이 여러 시각 과제를 한 자동회귀 구조로 처리하려는 모델입니다. 다만 헤드를 줄였다고 계산량까지 줄어드는 것은 아니며, 시각 토큰의 길이와 토크나이저 품질이 새 병목이 됩니다.
 
-![Youtu-VL이 하나의 표준 구조로 지원하는 일반 멀티모달·시각 중심 과제 범위.](/assets/img/papers/2601.19798/x1.png)
-*Youtu-VL이 하나의 표준 구조로 지원하는 일반 멀티모달·시각 중심 과제 범위.*
+![Youtu-VL이 하나의 표준 구조로 지원하는 일반 멀티모달, 시각 중심 과제 범위.](/assets/img/papers/2601.19798/x1.png)
+*Youtu-VL이 하나의 표준 구조로 지원하는 일반 멀티모달, 시각 중심 과제 범위.*
 
 ## Vision-as-Input만으로는 왜 부족하다고 봤나
 
@@ -61,12 +61,12 @@ Youtu-VL의 Vision-Language Unified Autoregressive Supervision(VLUAS)은 시각�
 
 | 과제 | 확인할 지표 |
 |---|---|
-| VQA·문서 이해 | 답 정확도, 작은 글자 OCR, 환각 |
-| 객체 검출 | 위치 정확도, 작은 객체·다중 객체 재현율 |
+| VQA, 문서 이해 | 답 정확도, 작은 글자 OCR, 환각 |
+| 객체 검출 | 위치 정확도, 작은 객체, 다중 객체 재현율 |
 | 세그멘테이션 | 경계 품질, 겹친 객체와 얇은 구조 |
 | 통합 서비스 | 과제 전환 시 메모리, 지연 시간, 출력 형식 오류 |
 
-웹의 이미지·텍스트, 바운딩 박스·마스크·dense caption, instruction data를 함께 쓴다는 원문 설명도 중요합니다. 통합 능력이 구조만의 결과인지, 여러 종류의 supervision을 한데 모은 데이터 효과인지 분리해 봐야 합니다.
+웹의 이미지, 텍스트, 바운딩 박스, 마스크, dense caption, instruction data를 함께 쓴다는 원문 설명도 중요합니다. 통합 능력이 구조만의 결과인지, 여러 종류의 supervision을 한데 모은 데이터 효과인지 분리해 봐야 합니다.
 
 ## 시각 토큰은 길이와 손실 균형을 청구한다
 
@@ -84,7 +84,7 @@ Youtu-VL이 유리한 상황은 VQA, 검출, 세그멘테이션을 한 서비스
 
 작은 object를 놓쳤을 때 바로 language model 크기를 늘리기보다 입력 해상도, tokenizer representation, NTP-M output 순서로 분리해 봅니다. 원본 crop을 tokenizer가 이미 구분하지 못하면 뒤의 autoregressive prediction이 맞힐 근거가 없습니다. Tokenizer feature에는 차이가 남았지만 bbox나 mask가 틀리면 dense supervision 또는 decoding 형식이 병목일 수 있습니다.
 
-Task별 data 양도 맞춰 봐야 합니다. 통합 model이 더 많은 detection·segmentation label을 학습했다면 구조와 supervision 효과가 섞입니다. 같은 training data subset, 같은 input resolution과 compute budget에서 VLUAS를 끈 ablation과 전용 head baseline을 비교하면 vision-as-target의 추가 기여를 확인할 수 있습니다.
+Task별 data 양도 맞춰 봐야 합니다. 통합 model이 더 많은 detection, segmentation label을 학습했다면 구조와 supervision 효과가 섞입니다. 같은 training data subset, 같은 input resolution과 compute budget에서 VLUAS를 끈 ablation과 전용 head baseline을 비교하면 vision-as-target의 추가 기여를 확인할 수 있습니다.
 
 Production에서는 한 image에 VQA와 mask를 연속 요청하는 case와 detection만 한 번 요청하는 case를 나눕니다. 여러 과제를 한 번의 공통 encoding으로 처리할 때는 통합 이득이 커질 수 있지만, 단일 task만 반복하면 긴 visual sequence의 비용이 전용 model보다 클 수 있습니다.
 
@@ -94,22 +94,22 @@ Production에서는 한 image에 VQA와 mask를 연속 요청하는 case와 dete
 ## 함께 읽으면 이해가 이어지는 글
 
 - [비디오 검색 에이전트가 더 자율적이면 왜 더 틀릴까: VideoDR]({% post_url 2026-01-13-Watching--Reasoning--and-Searching--A-Video-Deep-Research-Benchmark-on-Open-Web-for-Agentic-Video-Reasoning %}) — 영상 단서와 공개 웹을 함께 써야 푸는 벤치마크에서 Workflow와 Agentic 구조가 갈린 이유와 Goal Drift 방지법
-- [코드를 이미지로 읽으면 Token은 줄지만 정확할까? CodeOCR의 8배 압축]({% post_url 2026-02-03-CodeOCR--On-the-Effectiveness-of-Vision-Language-Models-in-Code-Understanding %}) — CodeOCR이 source code를 syntax-highlighted image로 렌더링해 visual token으로 압축하는 실험, clone detection의 강점과 작은 변수·연산자 오독 위험을 task별로 정리합니다.
-- [SORT가 빠른 대신 ID를 놓치는 이유: Kalman Filter와 Hungarian 매칭]({% post_url 2019-04-27-sort %}) — SORT가 검출 box만으로 다중 객체를 실시간 추적하는 전체 흐름을 설명합니다. Kalman Filter의 상태 예측, IoU 비용행렬, Hungarian assignment, track 생성·삭제 조건을 코드 구조와 연결하고…
+- [코드를 이미지로 읽으면 Token은 줄지만 정확할까? CodeOCR의 8배 압축]({% post_url 2026-02-03-CodeOCR--On-the-Effectiveness-of-Vision-Language-Models-in-Code-Understanding %}) — CodeOCR이 source code를 syntax-highlighted image로 렌더링해 visual token으로 압축하는 실험, clone detection의 강점과 작은 변수, 연산자 오독 위험을 task별로 정리합니다.
+- [SORT가 빠른 대신 ID를 놓치는 이유: Kalman Filter와 Hungarian 매칭]({% post_url 2019-04-27-sort %}) — SORT가 검출 box만으로 다중 객체를 실시간 추적하는 전체 흐름을 설명합니다. Kalman Filter의 상태 예측, IoU 비용행렬, Hungarian assignment, track 생성, 삭제 조건을 코드 구조와 연결하고…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
-### Youtu-VL은 객체 검출·세그멘테이션 head가 전혀 필요 없나요?
+### Youtu-VL은 객체 검출, 세그멘테이션 head가 전혀 필요 없나요?
 
-과제별 auxiliary decoder나 task-specific token 없이 공통 autoregressive 구조로 dense prediction을 목표로 하지만 출력 supervision과 좌표·mask 표현 설계까지 사라지는 것은 아닙니다.
+과제별 auxiliary decoder나 task-specific token 없이 공통 autoregressive 구조로 dense prediction을 목표로 하지만 출력 supervision과 좌표, mask 표현 설계까지 사라지는 것은 아닙니다.
 
 ### Vision-as-target이면 원본 pixel을 모두 기억하나요?
 
-아닙니다. 학습 target은 tokenizer와 encoder가 만든 시각 표현이며 작은 글자·얇은 경계처럼 앞단에서 잃은 정보는 language model이 완전히 복원하기 어렵습니다.
+아닙니다. 학습 target은 tokenizer와 encoder가 만든 시각 표현이며 작은 글자, 얇은 경계처럼 앞단에서 잃은 정보는 language model이 완전히 복원하기 어렵습니다.
 
 ### 전용 detection model을 대체할지는 어떻게 판단하나요?
 
-같은 image·해상도·hardware에서 위치·경계 정확도, 작은 객체 recall, token 수, latency·memory와 출력 형식 오류를 전용 pipeline과 비교해야 합니다.
+같은 image, 해상도, hardware에서 위치, 경계 정확도, 작은 객체 recall, token 수, latency, memory와 출력 형식 오류를 전용 pipeline과 비교해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.19798)

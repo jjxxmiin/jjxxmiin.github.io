@@ -11,7 +11,7 @@ tags:
   - MCP
 summary: 파편화된 메신저 플랫폼과 다수의 대형 언어 모델(LLM)을 하나로 통합하여, 샌드박스 기반의 안전한 코드 실행과 웹 시각화 도구를
   제공하는 오픈소스 에이전트 프레임워크 AstrBot의 내부 아키텍처와 활용법을 깊이 있게 분석합니다.
-description: 'AstrBot가 메신저 이벤트·모델·플러그인·코드 실행을 추상화하는 구조와 채널별 발신자 검증·도구 승인·샌드박스 경계·다중 채널 운영 비용을 설명합니다.'
+description: 'AstrBot가 메신저 이벤트, 모델, 플러그인, 코드 실행을 추상화하는 구조와 채널별 발신자 검증, 도구 승인, 샌드박스 경계, 다중 채널 운영 비용을 설명합니다.'
 github_url: https://github.com/Soulter/AstrBot
 image:
   path: https://opengraph.githubassets.com/1/Soulter/AstrBot
@@ -329,7 +329,7 @@ AstrBot은 이러한 시대적 변화의 중심을 정확히 관통하고 있습
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스·최소 권한·모델 선택의 실무 기준을 정리합니다.
+- [AI 코딩 에이전트에 터미널 권한을 줘도 될까? Goose의 안전 경계]({% post_url 2026-03-15-Beyond-Code-Suggestions-Taking-the-Keyboard-Dissecting-Blocks-Open-Source-AI-Agent-Goose %}) — Block의 오픈소스 에이전트 Goose가 명령 실행과 MCP 도구를 연결하는 방식을 살피고, 샌드박스, 최소 권한, 모델 선택의 실무 기준을 정리합니다.
 - [DeepSeek Harness: 모든 기능이 플러그인인 AI 에이전트 실행 환경의 설계와 동작 원리]({% post_url 2026-08-22-DeepSeek-Harness-Everything-is-a-Plugin-Architecture-for-AI-Agents %}) — DeepSeek Harness는 모델, 도구, 세션, 샌드박스 등 AI 에이전트의 모든 구성 요소를 독립된 플러그인으로 조립하는 오픈소스 실행 런타임입니다. Cordis 메타 프레임워크 기반의 마이크로커널 구조와 이벤트 궤적 기록을…
 - [Openwork: 내 컴퓨터에서 50개 이상의 LLM으로 자유롭게 일하는 오픈소스 AI 동료]({% post_url 2026-07-31-Openwork-Open-Source-Local-First-Alternative-to-Claude-Cowork-Powered-by-OpenCode %}) — Openwork는 앤트로픽의 독점 데스크톱 에이전트인 Claude Cowork를 대체하는 오픈소스 데스크톱 애플리케이션입니다. Tauri와 OpenCode 엔진을 기반으로 내 컴퓨터의 파일 시스템과 50개 이상의 다양한 LLM…
 <!-- internal-links:end -->

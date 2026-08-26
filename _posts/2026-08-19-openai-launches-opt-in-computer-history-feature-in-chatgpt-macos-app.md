@@ -66,7 +66,7 @@ article_images:
   source_url: https://www.cnet.com/tech/services-and-software/chatgpt-mac-activity-computer-history
 ---
 
-Computer History는 macOS 작업 맥락을 다시 설명하는 수고를 줄일 수 있지만, 접근성 이벤트에는 클릭뿐 아니라 입력한 텍스트와 앱 전환 정보가 포함될 수 있습니다. 스크린샷을 찍지 않는다는 사실만으로 민감 정보 위험이 사라지는 것은 아닙니다. 기능을 켜기 전 제외 앱·사이트, 관리자 승인, 일시 정지와 삭제가 실제 업무 환경에서 작동하는지 작은 기간으로 시험해야 합니다.
+Computer History는 macOS 작업 맥락을 다시 설명하는 수고를 줄일 수 있지만, 접근성 이벤트에는 클릭뿐 아니라 입력한 텍스트와 앱 전환 정보가 포함될 수 있습니다. 스크린샷을 찍지 않는다는 사실만으로 민감 정보 위험이 사라지는 것은 아닙니다. 기능을 켜기 전 제외 앱, 사이트, 관리자 승인, 일시 정지와 삭제가 실제 업무 환경에서 작동하는지 작은 기간으로 시험해야 합니다.
 
 ```mermaid
 graph TD
@@ -178,9 +178,9 @@ flowchart TD
 
 ## 스크린샷이 아니면 개인정보 위험이 낮아질까?
 
-이미지 전체를 주기적으로 저장하지 않는 방식은 화면 픽셀 수집을 줄이지만, 키보드 입력과 앱 이름·전환 시각만으로도 업무 내용이 드러날 수 있습니다. 비밀번호 관리자, 금융·의료 시스템, 비공개 메시지와 고객 데이터가 있는 앱은 제외 목록에 넣고 기록 중 표시가 항상 보이는지 확인해야 합니다. 제외 설정이 앱 업데이트나 브라우저 프로필 변경 뒤에도 유지되는지도 시험합니다.
+이미지 전체를 주기적으로 저장하지 않는 방식은 화면 픽셀 수집을 줄이지만, 키보드 입력과 앱 이름, 전환 시각만으로도 업무 내용이 드러날 수 있습니다. 비밀번호 관리자, 금융, 의료 시스템, 비공개 메시지와 고객 데이터가 있는 앱은 제외 목록에 넣고 기록 중 표시가 항상 보이는지 확인해야 합니다. 제외 설정이 앱 업데이트나 브라우저 프로필 변경 뒤에도 유지되는지도 시험합니다.
 
-“로컬 타임라인”이라는 설명과 ChatGPT·Codex가 답변에 해당 기억을 쓰는 데이터 흐름도 구분해야 합니다. 기기에 저장되는 원본, 모델에 전달되는 요약, 진단 로그의 위치와 보존 기간을 공식 설정과 조직 계약에서 확인합니다. 개인 기기의 삭제 버튼뿐 아니라 회사의 보존·법적 보류·백업 정책과 충돌하지 않는지도 관리자 검토가 필요합니다.
+“로컬 타임라인”이라는 설명과 ChatGPT, Codex가 답변에 해당 기억을 쓰는 데이터 흐름도 구분해야 합니다. 기기에 저장되는 원본, 모델에 전달되는 요약, 진단 로그의 위치와 보존 기간을 공식 설정과 조직 계약에서 확인합니다. 개인 기기의 삭제 버튼뿐 아니라 회사의 보존, 법적 보류, 백업 정책과 충돌하지 않는지도 관리자 검토가 필요합니다.
 
 ## 옵트인 뒤 어떤 사용 사례부터 시험할까?
 
@@ -210,8 +210,8 @@ Computer History 기능이 매력적이지만 몇 가지 명확한 한계점과 
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Google Gemini 3.7 Flash 출시: 코딩 성능 향상과 50% 수준의 API 가격 할인]({% post_url 2026-08-14-google-gemini-3-7-flash-released-with-enhanced-coding-and-api-discount %}) — Google AI가 2026년 8월 13일 소프트웨어 엔지니어링과 에이전트 추론 성능을 끌어올린 Gemini 3.7 Flash 모델을 정식 출시했습니다. 100만 토큰 문맥 창과 최대 64K 출력 토큰을 지원하며…
-- [OpenHuman이 Slack·GitHub를 로컬 기억으로 모아도 될까: OAuth·동기화·가짜 기억]({% post_url 2026-05-13-What-We-Wanted-Wasnt-a-Chatbot-But-a-Clone-of-Our-Brain-Deep-Dive-into-OpenHuman-Architecture %}) — OpenHuman이 Rust·Tauri desktop에서 SaaS 활동을 markdown·SQLite memory로 수집한다는 구조를 살펴보고, OAuth·egress·압축 손실·오래된 기억과 삭제 조건을 정리합니다.
-- [Redpanda로 Kafka를 바로 바꿔도 될까: 호환성·p99·메모리 비용 체크]({% post_url 2026-05-26-Forget-Kafka-Unveiling-Redpandas-Architecture-and-How-It-Disrupts-Data-Streaming %}) — Redpanda의 C++·Seastar·thread-per-core·Raft 구조가 지연에 미치는 영향을 살펴보고, Kafka API 호환성과 기능·라이선스·메모리·운영 차이를 검증하는 이전 절차를 제시합니다.
+- [OpenHuman이 Slack, GitHub를 로컬 기억으로 모아도 될까: OAuth, 동기화, 가짜 기억]({% post_url 2026-05-13-What-We-Wanted-Wasnt-a-Chatbot-But-a-Clone-of-Our-Brain-Deep-Dive-into-OpenHuman-Architecture %}) — OpenHuman이 Rust, Tauri desktop에서 SaaS 활동을 markdown, SQLite memory로 수집한다는 구조를 살펴보고, OAuth, egress, 압축 손실, 오래된 기억과 삭제 조건을 정리합니다.
+- [Redpanda로 Kafka를 바로 바꿔도 될까: 호환성, p99, 메모리 비용 체크]({% post_url 2026-05-26-Forget-Kafka-Unveiling-Redpandas-Architecture-and-How-It-Disrupts-Data-Streaming %}) — Redpanda의 C++, Seastar, thread-per-core, Raft 구조가 지연에 미치는 영향을 살펴보고, Kafka API 호환성과 기능, 라이선스, 메모리, 운영 차이를 검증하는 이전 절차를 제시합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

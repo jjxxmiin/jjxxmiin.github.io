@@ -10,15 +10,15 @@ tags:
   - Qwen
   - 컴퓨터비전
 math: true
-summary: "DSR Suite가 2D video에 camera pose·point cloud·mask·trajectory를 더해 동적 공간 질문을 만드는 과정과, GSM이 질문에 필요한 geometry만 고르는 이유를 설명합니다."
-description: "DSR Suite가 video에 camera·point cloud·object trajectory를 더하고 GSM이 질문 관련 geometry만 고르는 원리를 설명하며, 상류 오류와 비용을 검증합니다."
+summary: "DSR Suite가 2D video에 camera pose, point cloud, mask, trajectory를 더해 동적 공간 질문을 만드는 과정과, GSM이 질문에 필요한 geometry만 고르는 이유를 설명합니다."
+description: "DSR Suite가 video에 camera, point cloud, object trajectory를 더하고 GSM이 질문 관련 geometry만 고르는 원리를 설명하며, 상류 오류와 비용을 검증합니다."
 faq:
   - question: "왜 2D video만으로 camera와 객체 이동을 구분하기 어렵나요?"
     answer: "frame에서 위치가 달라졌다는 사실만으로 관찰자가 움직였는지 물체가 3D 공간에서 움직였는지 분리하기 어렵기 때문입니다."
   - question: "GSM은 모든 point cloud와 trajectory를 VLM에 넣나요?"
     answer: "아닙니다. 질문과 geometry feature 사이의 관련성을 이용해 필요한 token만 선택해 context와 memory를 줄이려는 모듈입니다."
   - question: "DSR 성능 상승이 실시간 로봇 적용을 보장하나요?"
-    answer: "아닙니다. offline reconstruction·tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다."
+    answer: "아닙니다. offline reconstruction, tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.20557.png
   alt: "VLM이 카메라 이동과 객체 이동을 헷갈리는 이유: DSR Suite와 GSM 논문 대표 이미지"
@@ -30,7 +30,7 @@ VLM이 카메라 이동과 객체 이동을 헷갈리는 이유는 **2D frame의
 
 Dynamic Spatial Reasoning은 3D 구조에 시간 변화를 더해 묻습니다. “두 물체 중 어느 것이 카메라에 가까워졌는가”, “가려진 뒤 다시 나타난 물체가 같은 대상인가” 같은 문제는 색과 모양만 봐서는 풀기 어렵습니다.
 
-원문의 pipeline은 DUSt3R·MASt3R 계열로 camera와 point cloud를 추정하고, SAM2로 object mask와 tracking을 만들며, CoTracker로 point trajectory를 얻습니다. 이 결과를 이용해 viewpoint, motion, 관계 변화에 관한 질문을 구성합니다. 약 1만 1천 video의 DSR-Train과 사람이 검토한 약 1천 video의 DSR-Bench가 제시됩니다.
+원문의 pipeline은 DUSt3R, MASt3R 계열로 camera와 point cloud를 추정하고, SAM2로 object mask와 tracking을 만들며, CoTracker로 point trajectory를 얻습니다. 이 결과를 이용해 viewpoint, motion, 관계 변화에 관한 질문을 구성합니다. 약 1만 1천 video의 DSR-Train과 사람이 검토한 약 1천 video의 DSR-Bench가 제시됩니다.
 
 자동 pipeline의 출력은 ground truth 그 자체가 아닙니다. reconstruction이 틀리면 camera motion과 object motion을 잘못 분리한 질문이 생길 수 있고, mask가 다른 객체로 넘어가면 trajectory도 오염됩니다. 사람이 검토한 benchmark와 대규모 자동 학습 data를 분리한 이유를 여기서 찾을 수 있습니다.
 
@@ -50,7 +50,7 @@ point cloud와 trajectory를 전부 language model context에 넣으면 token과
 
 texture가 적은 벽, 심한 occlusion, 빠른 camera motion에서는 reconstruction과 tracking이 불안정할 수 있습니다. DSR pipeline이 offline 처리에 의존하면 real-time robot이나 streaming video에도 그대로 적용하기 어렵습니다. 학습 domain 밖의 실내외 장면에서도 질문과 geometry 품질을 다시 확인해야 합니다.
 
-실용적인 도입 순서는 먼저 upstream point cloud와 track을 시각화해 실패율을 측정하고, 다음으로 질문 유형별 GSM 선택을 검사한 뒤, 마지막에 end-to-end 정답률과 latency를 잽니다. 이 연구의 중요한 메시지는 4D 정보를 무조건 많이 주라는 것이 아닙니다. **2D video가 숨기는 camera·object motion의 차이를 geometry로 복원하되, 질문에 필요한 부분만 선별해야 한다**는 것입니다.
+실용적인 도입 순서는 먼저 upstream point cloud와 track을 시각화해 실패율을 측정하고, 다음으로 질문 유형별 GSM 선택을 검사한 뒤, 마지막에 end-to-end 정답률과 latency를 잽니다. 이 연구의 중요한 메시지는 4D 정보를 무조건 많이 주라는 것이 아닙니다. **2D video가 숨기는 camera, object motion의 차이를 geometry로 복원하되, 질문에 필요한 부분만 선별해야 한다**는 것입니다.
 
 
 ## Geometry를 넣기 전에 상류 출력을 먼저 감사한다
@@ -60,9 +60,9 @@ VLM 정답만 보면 point cloud와 track이 틀렸는데 언어 단서로 우�
 | 상류 요소 | 확인할 질문 | downstream 오류 |
 |---|---|---|
 | camera pose | 고정 배경이 일관되게 정렬되는가 | camera 이동을 object motion으로 오인 |
-| point cloud | 깊이와 표면이 시간에 따라 이어지는가 | 가까움·멀어짐 관계가 뒤집힘 |
+| point cloud | 깊이와 표면이 시간에 따라 이어지는가 | 가까움, 멀어짐 관계가 뒤집힘 |
 | object mask | 같은 객체를 계속 가리키는가 | 다른 물체의 trajectory가 섞임 |
-| point track | 가림 전후 위치가 연결되는가 | 동일성·운동 방향을 잘못 판단 |
+| point track | 가림 전후 위치가 연결되는가 | 동일성, 운동 방향을 잘못 판단 |
 
 자동 학습 질문은 상류 confidence가 낮은 구간을 제거하거나 별도 표시해야 합니다. 오류가 많은 geometry로 질문을 대량 생성하면 모델이 시각적 사실보다 pipeline artifact를 학습할 수 있습니다. 사람이 검토한 DSR-Bench는 최종 답뿐 아니라 상류 annotation도 표본으로 다시 확인해야 합니다.
 
@@ -82,8 +82,8 @@ reconstruction, segmentation, tracking, GSM, VLM 추론을 모두 합친 시간�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [NeoVerse는 흔들린 단안 영상으로 4D를 어떻게 만드나: Pose-free의 의미]({% post_url 2026-01-05-NeoVerse--Enhancing-4D-World-Model-with-in-the-wild-Monocular-Videos %}) — 카메라 포즈 전처리와 장면별 최적화를 줄이는 피드포워드 4D 표현, 열화 시뮬레이션, 새 궤적 생성의 경계
-- [Think3D는 가려진 물체를 실제로 볼 수 있을까: 3D CoT와 재구성 오류의 한계]({% post_url 2026-01-22-Think3D--Thinking-with-Space-for-Spatial-Reasoning %}) — Think3D가 point cloud를 만들고 camera rotate·zoom·shift 도구로 새 view를 탐색하는 3D CoT, RL view policy의 성과와 미관측 공간을 복원할 때의 오류를 정리합니다.
-- [Holi-Spatial은 3D 라벨링을 없앨까: 1.2만 Scene·400만 자동 데이터의 검증]({% post_url 2026-03-10-Holi-Spatial--Evolving-Video-Streams-into-Holistic-3D-Spatial-Intelligence %}) — 비디오를 3DGS Scene, 2D Mask, 3D Box, 공간 QA로 바꾸는 Holi-Spatial-4M 파이프라인과 자동 라벨 오류·GPU 비용·도메인 검증을 정리합니다.
+- [Think3D는 가려진 물체를 실제로 볼 수 있을까: 3D CoT와 재구성 오류의 한계]({% post_url 2026-01-22-Think3D--Thinking-with-Space-for-Spatial-Reasoning %}) — Think3D가 point cloud를 만들고 camera rotate, zoom, shift 도구로 새 view를 탐색하는 3D CoT, RL view policy의 성과와 미관측 공간을 복원할 때의 오류를 정리합니다.
+- [Holi-Spatial은 3D 라벨링을 없앨까: 1.2만 Scene, 400만 자동 데이터의 검증]({% post_url 2026-03-10-Holi-Spatial--Evolving-Video-Streams-into-Holistic-3D-Spatial-Intelligence %}) — 비디오를 3DGS Scene, 2D Mask, 3D Box, 공간 QA로 바꾸는 Holi-Spatial-4M 파이프라인과 자동 라벨 오류, GPU 비용, 도메인 검증을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -98,6 +98,6 @@ frame에서 위치가 달라졌다는 사실만으로 관찰자가 움직였는�
 
 ### DSR 성능 상승이 실시간 로봇 적용을 보장하나요?
 
-아닙니다. offline reconstruction·tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다.
+아닙니다. offline reconstruction, tracking 오류와 처리 지연이 남으므로 실제 camera 조건에서 upstream 품질과 end-to-end latency를 다시 측정해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.20557)

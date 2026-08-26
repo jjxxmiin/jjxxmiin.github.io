@@ -1,25 +1,25 @@
 ---
 layout: post
-title: 'Claude Skills가 긴 프롬프트를 줄이는 방식: 파일 구조·라우팅·실행 한계'
+title: 'Claude Skills가 긴 프롬프트를 줄이는 방식: 파일 구조, 라우팅, 실행 한계'
 date: '2026-03-09 18:21:22'
 categories: Tech
 tags:
   - Claude
   - 프롬프트엔지니어링
   - MCP
-summary: 'claude-skills 저장소가 보여 주는 메타데이터 우선 로딩과 지연 지침·스크립트 구조를 살펴보고 공식 규격과 혼동하지 않을 점을 정리합니다.'
-description: 'Claude Skills식 점진적 컨텍스트 로딩의 구조와 라우팅 설명 작성법, 스크립트 권한·충돌·비용을 실제 요청 세트로 검증하는 방법을 설명합니다.'
+summary: 'claude-skills 저장소가 보여 주는 메타데이터 우선 로딩과 지연 지침, 스크립트 구조를 살펴보고 공식 규격과 혼동하지 않을 점을 정리합니다.'
+description: 'Claude Skills식 점진적 컨텍스트 로딩의 구조와 라우팅 설명 작성법, 스크립트 권한, 충돌, 비용을 실제 요청 세트로 검증하는 방법을 설명합니다.'
 github_url: https://github.com/alirezarezvani/claude-skills
 image:
   path: https://opengraph.githubassets.com/1/alirezarezvani/claude-skills
   alt: "alirezarezvani/claude-skills GitHub 저장소 대표 이미지"
 faq:
   - question: 'Claude Skills를 쓰면 프롬프트 엔지니어링이 필요 없어지나요?'
-    answer: '아닙니다. 긴 지침을 메타데이터와 작업별 파일로 나눌 뿐이며, 선택 조건·우선순위·도구 검증을 더 정확하게 설계해야 합니다.'
+    answer: '아닙니다. 긴 지침을 메타데이터와 작업별 파일로 나눌 뿐이며, 선택 조건, 우선순위, 도구 검증을 더 정확하게 설계해야 합니다.'
   - question: '스킬 설명은 어떻게 써야 올바르게 선택되나요?'
     answer: '입력과 결과물, 사용해야 하는 조건과 사용하지 말아야 하는 조건을 구체적으로 적는 편이 좋습니다. 비슷한 스킬과 구분되는 경계도 같은 요청 세트로 시험해야 합니다.'
   - question: '스킬 폴더의 스크립트는 자동으로 안전한가요?'
-    answer: '아닙니다. 파일·네트워크·명령 실행 권한은 별도로 제한하고 코드를 검토해야 하며, 프런트매터의 필드 이름만으로 런타임 격리가 보장된다고 가정하면 안 됩니다.'
+    answer: '아닙니다. 파일, 네트워크, 명령 실행 권한은 별도로 제한하고 코드를 검토해야 하며, 프런트매터의 필드 이름만으로 런타임 격리가 보장된다고 가정하면 안 됩니다.'
 ---
 
 이 글의 Claude Skills 패턴은 모든 지침을 처음부터 넣지 않고, 짧은 메타데이터로 후보를 찾은 뒤 필요한 지침과 스크립트만 불러 컨텍스트를 아끼는 방식입니다. 다만 여기서 다루는 [claude-skills 저장소](https://github.com/alirezarezvani/claude-skills)의 구조를 모든 Claude 환경의 공식 규격이나 자동 보안 경계로 일반화해서는 안 됩니다.
@@ -92,7 +92,7 @@ faq:
 
 이 글의 저장소는 구조를 살펴볼 수 있는 하나의 구현 사례입니다. 특정 디렉터리 이름이나 프런트매터 필드가 모든 Claude 환경에서 같은 의미로 작동한다고 일반화할 수 없습니다. 사용하는 환경의 공식 문서에서 지원 필드와 로딩 순서를 확인하고, 작은 샘플로 실제 선택과 권한 동작을 시험해야 합니다.
 
-MCP는 모델과 외부 도구·자료를 연결하는 맥락에서 함께 언급될 수 있지만 스킬 폴더의 점진적 지침 로딩과 같은 개념은 아닙니다. 연결 규약, 지침 선택, 런타임 권한을 각각 분리해 검토해야 합니다. 한 영역의 설정이 다른 영역의 보안을 자동 해결한다고 가정하면 통제되지 않은 틈이 생깁니다.
+MCP는 모델과 외부 도구, 자료를 연결하는 맥락에서 함께 언급될 수 있지만 스킬 폴더의 점진적 지침 로딩과 같은 개념은 아닙니다. 연결 규약, 지침 선택, 런타임 권한을 각각 분리해 검토해야 합니다. 한 영역의 설정이 다른 영역의 보안을 자동 해결한다고 가정하면 통제되지 않은 틈이 생깁니다.
 
 도입 문서에는 저장소에서 관찰한 패턴, 실제 제품이 보장하는 동작, 팀이 추가한 운영 규칙을 구분해 적는 것이 좋습니다. 그러면 버전이 바뀌거나 다른 환경으로 옮길 때 무엇을 다시 검증해야 하는지 분명해집니다.
 
@@ -105,16 +105,16 @@ MCP는 모델과 외부 도구·자료를 연결하는 맥락에서 함께 언�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail·OAuth·LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
-- [Ruflo로 멀티 에이전트를 조율할까: 토폴로지·기억·드리프트 검증]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-Honest-Review-and-Deep-Dive-into-Ruflo-the-Ultimate-Claude-Multi-Agent-Orchestrator %}) — Ruflo가 특화 에이전트·토폴로지·AgentDB·MCP로 작업을 분담하는 방식과, 병렬 비용·권한·드리프트·검증 책임을 정리합니다.
-- [Gemini CLI에 파일 수정 권한을 줘도 될까: Plan Mode·MCP 안전선]({% post_url 2026-03-20-Why-the-Gemini-CLI-an-AI-Agent-in-the-Terminal-Disrupted-a-10-Year-Developers-Workflow-feat-MCP-Architecture-Deep-Dive %}) — Gemini CLI의 도구 반복, MCP 연결, Plan Mode와 ask_user를 기준으로 로컬 코딩 에이전트의 권한·컨텍스트·검토 범위를 정리합니다.
+- [클로드(Claude) 사용법: 프로젝트, PDF, Artifacts, Skills 실전 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 무료 계정으로 프로젝트와 PDF 분석을 시험하고 Artifacts, Skills, 메모리, 공유 기능을 안전하게 활용하는 순서와 Pro 전환 기준을 정리합니다.
+- [Rowboat는 정말 로컬 AI 동료일까: Markdown 기억과 외부 API 경계]({% post_url 2026-02-17-Rowboat-The-Local-First-AI-Coworker %}) — Rowboat가 업무 기억을 Markdown으로 남기는 방식과 Gmail, OAuth, LLM API를 연결할 때 달라지는 프라이버시 경계를 살펴봅니다.
+- [Gemini CLI에 파일 수정 권한을 줘도 될까: Plan Mode, MCP 안전선]({% post_url 2026-03-20-Why-the-Gemini-CLI-an-AI-Agent-in-the-Terminal-Disrupted-a-10-Year-Developers-Workflow-feat-MCP-Architecture-Deep-Dive %}) — Gemini CLI의 도구 반복, MCP 연결, Plan Mode와 ask_user를 기준으로 로컬 코딩 에이전트의 권한, 컨텍스트, 검토 범위를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Claude Skills를 쓰면 프롬프트 엔지니어링이 필요 없어지나요?
 
-아닙니다. 긴 지침을 메타데이터와 작업별 파일로 나눌 뿐이며, 선택 조건·우선순위·도구 검증을 더 정확하게 설계해야 합니다.
+아닙니다. 긴 지침을 메타데이터와 작업별 파일로 나눌 뿐이며, 선택 조건, 우선순위, 도구 검증을 더 정확하게 설계해야 합니다.
 
 ### 스킬 설명은 어떻게 써야 올바르게 선택되나요?
 
@@ -122,4 +122,4 @@ MCP는 모델과 외부 도구·자료를 연결하는 맥락에서 함께 언�
 
 ### 스킬 폴더의 스크립트는 자동으로 안전한가요?
 
-아닙니다. 파일·네트워크·명령 실행 권한은 별도로 제한하고 코드를 검토해야 하며, 프런트매터의 필드 이름만으로 런타임 격리가 보장된다고 가정하면 안 됩니다.
+아닙니다. 파일, 네트워크, 명령 실행 권한은 별도로 제한하고 코드를 검토해야 하며, 프런트매터의 필드 이름만으로 런타임 격리가 보장된다고 가정하면 안 됩니다.

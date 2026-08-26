@@ -10,8 +10,8 @@ tags:
   - 로보틱스
   - 멀티모달
 math: true
-summary: "InsertAnywhere가 4D scene geometry로 frame별 mask와 occlusion을 계산하고 diffusion 합성으로 reference 외형·조명을 맞추는 구조와 한계를 정리합니다."
-description: "InsertAnywhere가 4D geometry로 frame별 mask와 occlusion을 만들고 diffusion으로 appearance를 합성하는 구조를 설명하며, 깊이·조명·drift 실패를 검증합니다."
+summary: "InsertAnywhere가 4D scene geometry로 frame별 mask와 occlusion을 계산하고 diffusion 합성으로 reference 외형, 조명을 맞추는 구조와 한계를 정리합니다."
+description: "InsertAnywhere가 4D geometry로 frame별 mask와 occlusion을 만들고 diffusion으로 appearance를 합성하는 구조를 설명하며, 깊이, 조명, drift 실패를 검증합니다."
 faq:
   - question: "InsertAnywhere는 2D mask만 옮겨 객체를 삽입하나요?"
     answer: "아닙니다. camera와 scene geometry를 추정해 객체 위치를 3D에 두고 frame별 2D mask와 occlusion을 계산한 뒤 합성합니다."
@@ -24,11 +24,11 @@ image:
   alt: "InsertAnywhere는 영상 속 객체 위치를 어떻게 고정할까? 4D Mask와 Diffusion 논문 대표 이미지"
 ---
 
-InsertAnywhere는 **삽입 객체를 frame마다 다시 그리는 대신 4D scene geometry에서 위치·가림 mask를 먼저 계산하고, video diffusion이 외형과 주변 픽셀을 합성하는 방식**입니다. 이 분리는 drift와 occlusion을 줄이려는 설계지만 depth 추정이 틀리면 mask 전체가 흔들리고, geometry가 맞아도 조명과 motion blur는 별도 실패할 수 있습니다.
+InsertAnywhere는 **삽입 객체를 frame마다 다시 그리는 대신 4D scene geometry에서 위치, 가림 mask를 먼저 계산하고, video diffusion이 외형과 주변 픽셀을 합성하는 방식**입니다. 이 분리는 drift와 occlusion을 줄이려는 설계지만 depth 추정이 틀리면 mask 전체가 흔들리고, geometry가 맞아도 조명과 motion blur는 별도 실패할 수 있습니다.
 
 ## Geometry와 Appearance를 왜 나누나
 
-Video Object Insertion은 객체의 3D 위치, camera 이동에 따른 2D projection, 앞뒤 물체의 occlusion, reference 외형과 조명을 동시에 맞춰야 합니다. InsertAnywhere는 앞의 공간 문제를 4D-aware mask가 맡고 뒤의 시각 합성을 diffusion model이 맡깁니다. 따라서 결과를 평가할 때도 mask warp error와 appearance·temporal quality를 한 점수로 섞지 않는 편이 정확합니다.
+Video Object Insertion은 객체의 3D 위치, camera 이동에 따른 2D projection, 앞뒤 물체의 occlusion, reference 외형과 조명을 동시에 맞춰야 합니다. InsertAnywhere는 앞의 공간 문제를 4D-aware mask가 맡고 뒤의 시각 합성을 diffusion model이 맡깁니다. 따라서 결과를 평가할 때도 mask warp error와 appearance, temporal quality를 한 점수로 섞지 않는 편이 정확합니다.
 
 ## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
 
@@ -96,7 +96,7 @@ DragAnything과 같은 궤적 제어 모델은 객체의 이동 경로는 잘 �
 
 ## 6. 활용 가능성은 검증 수준을 구분한다
 
-영화·광고의 후반 작업, 가구 배치 시안, 로봇·주행 데이터 보강 같은 사용처를 생각할 수 있습니다. 하지만 보기 좋은 편집 결과와 안전 검증용 합성 data는 요구 수준이 다릅니다. 창작 시안은 사람이 artifact를 고를 수 있지만 학습 data는 잘못된 geometry와 물리가 대량으로 들어가도 눈치채기 어렵습니다.
+영화, 광고의 후반 작업, 가구 배치 시안, 로봇, 주행 데이터 보강 같은 사용처를 생각할 수 있습니다. 하지만 보기 좋은 편집 결과와 안전 검증용 합성 data는 요구 수준이 다릅니다. 창작 시안은 사람이 artifact를 고를 수 있지만 학습 data는 잘못된 geometry와 물리가 대량으로 들어가도 눈치채기 어렵습니다.
 
 따라서 사용처별로 허용할 drift, occlusion 오류, 조명 차이와 사람 검수 비율을 정해야 합니다. 실제 제품 배치에서는 크기와 바닥 접촉을, 안전 data에서는 원래 label과 삽입 object trajectory의 정확성을 우선합니다. 활용 분야가 많다는 사실이 각 분야의 검증을 대신하지는 않습니다.
 
@@ -122,9 +122,9 @@ InsertAnywhere의 의미는 완벽한 video 합성이 아니라 **명시적 geom
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [Diffusion 학습 코드는 왜 원본 이미지 대신 Noise를 맞출까?]({% post_url 2023-03-06-StableDiffusion %}) — DDPM 코드의 perturb_x, get_losses, sample 흐름을 따라 정답 noise를 예측하는 학습과 역순 denoising 추론을 연결하고, Stable Diffusion, conditioning의 위치를 설명합니다.
 - [NeoVerse는 흔들린 단안 영상으로 4D를 어떻게 만드나: Pose-free의 의미]({% post_url 2026-01-05-NeoVerse--Enhancing-4D-World-Model-with-in-the-wild-Monocular-Videos %}) — 카메라 포즈 전처리와 장면별 최적화를 줄이는 피드포워드 4D 표현, 열화 시뮬레이션, 새 궤적 생성의 경계
-- [Holi-Spatial은 3D 라벨링을 없앨까: 1.2만 Scene·400만 자동 데이터의 검증]({% post_url 2026-03-10-Holi-Spatial--Evolving-Video-Streams-into-Holistic-3D-Spatial-Intelligence %}) — 비디오를 3DGS Scene, 2D Mask, 3D Box, 공간 QA로 바꾸는 Holi-Spatial-4M 파이프라인과 자동 라벨 오류·GPU 비용·도메인 검증을 정리합니다.
-- [VLM은 텍스트 모델부터 학습해야 할까? Transfusion 공동 사전학습의 대안]({% post_url 2026-03-05-Beyond-Language-Modeling--An-Exploration-of-Multimodal-Pretraining %}) — 텍스트 next-token loss와 이미지 diffusion loss를 처음부터 한 Transformer에서 학습하는 Transfusion 구조, RAE와 MoE의 역할 및 데이터 비용을 설명합니다.
+- [Holi-Spatial은 3D 라벨링을 없앨까: 1.2만 Scene, 400만 자동 데이터의 검증]({% post_url 2026-03-10-Holi-Spatial--Evolving-Video-Streams-into-Holistic-3D-Spatial-Intelligence %}) — 비디오를 3DGS Scene, 2D Mask, 3D Box, 공간 QA로 바꾸는 Holi-Spatial-4M 파이프라인과 자동 라벨 오류, GPU 비용, 도메인 검증을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

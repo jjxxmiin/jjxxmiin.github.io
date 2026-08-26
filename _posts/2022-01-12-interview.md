@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "딥러닝 면접에서 자주 막히는 확률 질문 7개: Logit·Entropy·Binomial까지"
-summary: "공식을 외웠는데 설명이 막히는 딥러닝 면접 대비자를 위해 odds와 logit, sigmoid 미분, NLL, 조건부확률, entropy, Bernoulli·Binomial의 연결을 답변형으로 정리합니다."
-description: "딥러닝 면접의 odds·logit·sigmoid·NLL·조건부확률·Bernoulli·Binomial·entropy를 정의, 수식, 직관과 반례 순서로 설명합니다."
+title:  "딥러닝 면접에서 자주 막히는 확률 질문 7개: Logit, Entropy, Binomial까지"
+summary: "공식을 외웠는데 설명이 막히는 딥러닝 면접 대비자를 위해 odds와 logit, sigmoid 미분, NLL, 조건부확률, entropy, Bernoulli, Binomial의 연결을 답변형으로 정리합니다."
+description: "딥러닝 면접의 odds, logit, sigmoid, NLL, 조건부확률, Bernoulli, Binomial, entropy를 정의, 수식, 직관과 반례 순서로 설명합니다."
 image:
   path: /assets/img/thumb/interview.jpg
   alt: Deep Learning Interviews 끄적이기 대표 이미지
@@ -18,7 +18,7 @@ faq:
   - question: "NLL을 최소화한다는 것은 무슨 뜻인가요?"
     answer: "관측된 정답의 likelihood를 최대화하되, 확률의 곱을 로그의 합으로 바꾸고 부호를 뒤집어 최소화 문제로 푸는 것입니다."
   - question: "Bernoulli 분포와 Binomial 분포는 어떻게 구분하나요?"
-    answer: "Bernoulli는 한 번의 성공·실패 시행이고, Binomial은 독립적이며 성공 확률이 같은 Bernoulli 시행을 여러 번 했을 때 성공 횟수의 분포입니다."
+    answer: "Bernoulli는 한 번의 성공, 실패 시행이고, Binomial은 독립적이며 성공 확률이 같은 Bernoulli 시행을 여러 번 했을 때 성공 횟수의 분포입니다."
 ---
 
 딥러닝 확률 면접은 공식을 길게 나열하기보다 “확률을 어떤 공간으로 바꾸고, 무엇을 최대화하며, 불확실성을 어떻게 재는가”를 한 문장씩 연결해 답하면 훨씬 선명해집니다.
@@ -27,11 +27,11 @@ faq:
 
 ## 좋은 답변은 무엇을 더 설명해야 하나요?
 
-좋은 답변은 정의 뒤에 수식의 각 항을 설명하고, 작은 예와 전제·반례를 붙입니다. 이름만 비슷한 개념을 구분하고 모델 학습에서 어디에 쓰이는지 연결해야 암기보다 오래 남습니다.
+좋은 답변은 정의 뒤에 수식의 각 항을 설명하고, 작은 예와 전제, 반례를 붙입니다. 이름만 비슷한 개념을 구분하고 모델 학습에서 어디에 쓰이는지 연결해야 암기보다 오래 남습니다.
 
 ## 확률 질문에는 어떤 순서로 답해야 하나요?
 
-먼저 개념을 한 문장으로 정의하고, 입력과 출력이 어느 범위에 있는지 말합니다. 다음으로 수식의 분자·분모나 합의 대상이 무엇인지 짚고, 마지막에 모델 학습에서 쓰이는 지점과 공식이 성립하지 않는 조건을 덧붙이면 됩니다. 이 네 단계를 지키면 수식만 읊거나 직관만 말하는 답변을 피할 수 있습니다.
+먼저 개념을 한 문장으로 정의하고, 입력과 출력이 어느 범위에 있는지 말합니다. 다음으로 수식의 분자, 분모나 합의 대상이 무엇인지 짚고, 마지막에 모델 학습에서 쓰이는 지점과 공식이 성립하지 않는 조건을 덧붙이면 됩니다. 이 네 단계를 지키면 수식만 읊거나 직관만 말하는 답변을 피할 수 있습니다.
 
 예를 들어 logit을 묻는다면 “확률의 odds에 로그를 취한 값”이라고 정의한 뒤 `p`는 `(0,1)`, logit은 실수 전체라는 범위를 밝힙니다. 이어 logistic regression의 선형 출력이 log-odds가 된다고 연결하고, `p=0` 또는 `p=1`에서는 유한한 logit을 얻지 못한다는 경계 조건을 말할 수 있습니다. 반대로 처음부터 sigmoid 미분식만 적으면 질문의 핵심인 확률 해석을 놓치기 쉽습니다.
 
@@ -81,7 +81,7 @@ Relative Risk는 두 집단의 사건 발생 확률을 비교하고, Odds Ratio�
 
 작은 표를 머릿속에 그려 보는 방법도 좋습니다. 노출 집단과 비노출 집단을 행으로, 사건 발생과 미발생을 열로 둔 뒤 Relative Risk는 각 행의 발생 비율을 비교하고 Odds Ratio는 각 행 안의 발생 대 미발생 비율을 비교합니다. 사건이 드물 때 두 값이 비슷해 보일 수 있지만, 이것이 두 정의가 같다는 뜻은 아닙니다. 표본 선택 방식 때문에 실제 위험도를 직접 계산할 수 없는 상황에서는 odds ratio가 쓰일 수 있다는 정도까지 구분하면 답변이 단단해집니다.
 
-## Bernoulli·Binomial과 Entropy를 한 흐름으로 설명하기
+## Bernoulli, Binomial과 Entropy를 한 흐름으로 설명하기
 
 Bernoulli random variable은 한 번의 성공과 실패를 나타냅니다. 성공 확률이 `p`라면 기댓값은 `p`, 분산은 `p(1-p)`입니다. 독립적인 Bernoulli 시행을 `n`번 더한 Binomial 변수는 성공 횟수를 세며, 기댓값과 분산은 다음과 같습니다.
 
@@ -117,12 +117,12 @@ Odds는 p/(1-p)이고, logit은 그 odds에 로그를 취해 0과 1 사이 확�
 
 ### Bernoulli 분포와 Binomial 분포는 어떻게 구분하나요?
 
-Bernoulli는 한 번의 성공·실패 시행이고, Binomial은 독립적이며 성공 확률이 같은 Bernoulli 시행을 여러 번 했을 때 성공 횟수의 분포입니다.
+Bernoulli는 한 번의 성공, 실패 시행이고, Binomial은 독립적이며 성공 확률이 같은 Bernoulli 시행을 여러 번 했을 때 성공 횟수의 분포입니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [LLM 추출값이 원문 어디서 왔는지 확인하려면: LangExtract]({% post_url 2026-02-12-Google-LangExtract-Deep-Dive %}) — LangExtract의 원문 span·offset 연결, 긴 문서 청킹과 다중 패스 구조를 중심으로 신뢰 가능한 정보 추출 파이프라인을 설계하는 법을 정리합니다.
-- [예시 이미지의 변화만 다른 사진에 옮길 수 있을까? LoRWeB의 LoRA Basis]({% post_url 2026-02-23-Spanning-the-Visual-Analogy-Space-with-a-Weight-Basis-of-LoRAs %}) — LoRWeB이 한 쌍의 전후 이미지에서 변환을 읽고 여러 LoRA Basis를 조합해 새 이미지에 적용하는 원리와 표현 범위의 한계를 정리합니다.
-- [WorldMonitor는 공개 정보를 어떻게 한 지도에 모으나: 설치와 검증 기준]({% post_url 2026-02-14-WorldMonitor-AI-Global-Intelligence-Dashboard %}) — WorldMonitor가 뉴스·분쟁·인프라 공개 데이터를 지도와 AI 요약으로 묶는 구조, 로컬 설치법과 출처·시의성 검증 기준을 정리합니다.
+- [LLM 추출값이 원문 어디서 왔는지 확인하려면: LangExtract]({% post_url 2026-02-12-Google-LangExtract-Deep-Dive %}) — LangExtract의 원문 span, offset 연결, 긴 문서 청킹과 다중 패스 구조를 중심으로 신뢰 가능한 정보 추출 파이프라인을 설계하는 법을 정리합니다.
+- [next-ai-draw-io는 실무 다이어그램에 쓸 만할까: 설치, 검증 가이드]({% post_url 2026-02-22-Next-AI-Draw-IO-Review %}) — next-ai-draw-io가 자연어를 편집 가능한 draw.io XML로 바꾸는 구조와 설치법, 모델 비용, 정확성, 보안 검증 기준을 정리합니다.
+- [OpenPlanter로 OSINT 조사를 자동화해도 될까: 재귀 에이전트와 검증 책임]({% post_url 2026-03-01-Why-Am-I-Just-Finding-Out-About-This-An-Honest-Review-of-OpenPlanter-Your-Personal-Open-Source-Palantir %}) — OpenPlanter가 PDF, CSV, JSON을 재귀 하위 에이전트로 조사하고 엔티티를 연결하는 방식, shell 권한, 환각, 비용, 인간 검증 조건을 정리합니다.
 <!-- internal-links:end -->

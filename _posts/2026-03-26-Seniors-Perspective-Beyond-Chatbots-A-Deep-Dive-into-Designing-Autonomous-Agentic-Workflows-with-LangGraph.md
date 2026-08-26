@@ -1,14 +1,14 @@
 ---
 layout: post
-title: 'LangGraph 순환 Agent가 무한 루프를 막아줄까: State·Checkpoint·Retry 상한'
+title: 'LangGraph 순환 Agent가 무한 루프를 막아줄까: State, Checkpoint, Retry 상한'
 date: '2026-03-26 18:24:03'
 categories: Tech
 tags:
   - LLM
   - 멀티에이전트
   - AI에이전트
-summary: 'LangGraph의 State·Node·조건부 Edge·Checkpoint가 무엇을 통제하는지 살펴보고, 무한 재시도와 토큰 증가를 막기 위해 개발자가 정해야 할 종료 규칙을 정리합니다.'
-description: 'LangGraph의 State·Node·조건부 Edge·Checkpoint 구조를 살펴보고 재시도 상한, 멱등성, 문맥 축약, 사람 승인과 그래프 테스트 기준을 설명합니다.'
+summary: 'LangGraph의 State, Node, 조건부 Edge, Checkpoint가 무엇을 통제하는지 살펴보고, 무한 재시도와 토큰 증가를 막기 위해 개발자가 정해야 할 종료 규칙을 정리합니다.'
+description: 'LangGraph의 State, Node, 조건부 Edge, Checkpoint 구조를 살펴보고 재시도 상한, 멱등성, 문맥 축약, 사람 승인과 그래프 테스트 기준을 설명합니다.'
 github_url: https://github.com/langchain-ai/langgraph
 image:
   path: https://opengraph.githubassets.com/1/langchain-ai/langgraph
@@ -59,7 +59,7 @@ class AgentState(TypedDict):
 
 첫째, 그래프가 커질수록 경로 조합이 늘어 디버깅이 어렵습니다. 상태 변화와 노드 입출력을 구조적으로 기록해야 하며, 원문은 관찰 도구로 LangSmith를 소개하는 동시에 의존성과 비용을 지적합니다.
 
-둘째, 순환은 토큰을 불립니다. 모든 오류 로그와 대화를 계속 더하면 비용이 증가하고 오래된 문맥이 판단을 흐릴 수 있습니다. 재시도 상한과 함께 오래된 메시지 요약·절단 규칙, 노드별 토큰 예산을 정해야 합니다.
+둘째, 순환은 토큰을 불립니다. 모든 오류 로그와 대화를 계속 더하면 비용이 증가하고 오래된 문맥이 판단을 흐릴 수 있습니다. 재시도 상한과 함께 오래된 메시지 요약, 절단 규칙, 노드별 토큰 예산을 정해야 합니다.
 
 셋째, LLM은 비결정적입니다. 어제 통과한 경로가 오늘 다른 출력을 만들 수 있습니다. 조건은 가능한 한 구조화된 검증 결과를 사용하고, 중요한 외부 작업 앞에는 사람 승인이나 결정적 검사기를 둬야 합니다.
 
@@ -67,7 +67,7 @@ class AgentState(TypedDict):
 
 처음부터 다중 에이전트를 만들기보다 “생성 → 검증 → 종료 또는 한 번 수정” 흐름으로 시작하십시오. 실패가 반복되면 세 번째 경로인 사람 검토로 보냅니다. 각 노드 전에 입력 상태를, 이후에는 변경된 필드와 비용을 기록하고 체크포인트에서 실제 재개도 시험합니다.
 
-LangGraph가 잘 맞는 일은 여러 단계가 오래 이어지고, 중간 실패에서 재개해야 하며, 사람이 개입할 명확한 지점이 있는 작업입니다. 호출 몇 번으로 끝나는 선형 파이프라인이라면 그래프의 학습·관찰 비용이 이득보다 클 수 있습니다. “자율성”보다 종료 조건을 먼저 그릴 수 있을 때 도입하는 것이 맞습니다.
+LangGraph가 잘 맞는 일은 여러 단계가 오래 이어지고, 중간 실패에서 재개해야 하며, 사람이 개입할 명확한 지점이 있는 작업입니다. 호출 몇 번으로 끝나는 선형 파이프라인이라면 그래프의 학습, 관찰 비용이 이득보다 클 수 있습니다. “자율성”보다 종료 조건을 먼저 그릴 수 있을 때 도입하는 것이 맞습니다.
 
 ## State에는 사실과 실행 기록을 분리해 담는다
 
@@ -97,7 +97,7 @@ LangGraph가 잘 맞는 일은 여러 단계가 오래 이어지고, 중간 실�
 
 LLM 출력 대신 고정된 가짜 노드를 사용하면 조건부 엣지와 상태 변화를 결정적으로 시험할 수 있습니다. 첫 시도 성공, 검증 실패 뒤 성공, 재시도 상한, 사람 거부, 도구 시간 초과와 체크포인트 재개 경로를 각각 만듭니다. 모든 경로가 종료점이나 명시된 대기점에 도달하는지 확인해야 숨은 무한 순환을 찾을 수 있습니다.
 
-그다음 실제 모델을 넣고 같은 입력을 여러 번 실행해 경로 분포를 봅니다. 성공률만 아니라 평균·최대 노드 수, 토큰, 사람이 개입한 비율과 잘못된 외부 호출을 기록합니다. 모델 버전이나 프롬프트가 바뀌면 대표 경로를 다시 실행해 이전보다 재시도가 늘지 않았는지 비교합니다.
+그다음 실제 모델을 넣고 같은 입력을 여러 번 실행해 경로 분포를 봅니다. 성공률만 아니라 평균, 최대 노드 수, 토큰, 사람이 개입한 비율과 잘못된 외부 호출을 기록합니다. 모델 버전이나 프롬프트가 바뀌면 대표 경로를 다시 실행해 이전보다 재시도가 늘지 않았는지 비교합니다.
 
 장애 시험에서는 체크포인트 저장소 연결을 끊고, 노드 실행 중 프로세스를 종료하며, 외부 도구가 성공했지만 응답만 유실되는 상황을 만듭니다. 재개 후 상태와 실제 외부 결과가 일치하고 중복 효과가 없는지가 복구 기능의 핵심입니다.
 
@@ -105,7 +105,7 @@ LLM 출력 대신 고정된 가짜 노드를 사용하면 조건부 엣지와 �
 
 한 번의 검색과 생성으로 끝나고 실패 시 전체를 다시 실행해도 싼 작업에는 선형 함수가 더 읽기 쉽습니다. 상태가 몇 개 없고 사람 승인이나 장기 재개가 필요하지 않다면 그래프 런타임, 체크포인트 저장소와 관찰 도구가 새 운영 비용이 됩니다. 먼저 일반 코드로 종료 규칙을 설명할 수 있는지 살펴보는 편이 좋습니다.
 
-반대로 여러 시간 이어지는 작업, 외부 도구와 사람 승인이 섞인 작업, 실패한 지점에서 재개해야 하는 업무라면 명시적 그래프가 유리합니다. 도입 근거는 에이전트가 더 자율적으로 보이는지가 아니라 모든 순환·쓰기·대기 상태를 열거하고 복구할 수 있다는 점입니다.
+반대로 여러 시간 이어지는 작업, 외부 도구와 사람 승인이 섞인 작업, 실패한 지점에서 재개해야 하는 업무라면 명시적 그래프가 유리합니다. 도입 근거는 에이전트가 더 자율적으로 보이는지가 아니라 모든 순환, 쓰기, 대기 상태를 열거하고 복구할 수 있다는 점입니다.
 
 그래프를 선택한 뒤에도 노드 수를 성숙도의 지표로 삼지 않습니다. 적은 노드와 분명한 계약으로 실패 경로를 통제하는 구성이 많은 전문 에이전트를 연결한 구성보다 운영하기 쉽습니다. 첫 파일럿에서 종료와 재개가 안정적인지 확인한 뒤 필요한 경로만 추가해야 합니다.
 
@@ -124,7 +124,7 @@ LLM 출력 대신 고정된 가짜 노드를 사용하면 조건부 엣지와 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Google ADK Python 예제가 실행되지 않는 이유: 상태·도구·재시도 경계]({% post_url 2026-04-24-The-End-of-Prompt-Engineering-A-10-Year-Developers-Deep-Dive-into-ADK-Python-Architecture %}) — ADK가 프롬프트 밖의 상태·도구·순환 제어를 구조화하는 이유를 설명하고, 프레임워크 개념이 섞인 예제를 실제 Google ADK 코드로 오해하지 않도록 전제와 누락을 짚습니다.
-- [DeerFlow 딥 리서치, 사내에 바로 둘 수 있을까: 구조·보안·운영 검증]({% post_url 2026-02-28-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Open-Source-Deep-Research-Framework-DeerFlow %}) — DeerFlow의 LangGraph 기반 역할 분담과 검색·코드·보고서 파이프라인을 살피고, 샌드박스·API 키·출처·비용을 검증하는 도입 기준을 정리합니다.
-- [oh-my-claudecode의 32개 Agent는 필요한가: Routing·State·검증 비용]({% post_url 2026-04-21-10-Year-Seniors-View-Is-Claude-Code-Dead-The-Shocking-Reality-and-Limits-of-oh-my-claudecode-Orchestrating-32-AIs %}) — oh-my-claudecode가 역할·model routing·hook·state로 코딩 작업을 나누는 구조를 살펴보고, 실제 병렬성·검증 독립성·token·복구·권한 한계를 평가합니다.
+- [Google ADK Python 예제가 실행되지 않는 이유: 상태, 도구, 재시도 경계]({% post_url 2026-04-24-The-End-of-Prompt-Engineering-A-10-Year-Developers-Deep-Dive-into-ADK-Python-Architecture %}) — ADK가 프롬프트 밖의 상태, 도구, 순환 제어를 구조화하는 이유를 설명하고, 프레임워크 개념이 섞인 예제를 실제 Google ADK 코드로 오해하지 않도록 전제와 누락을 짚습니다.
+- [DeerFlow 딥 리서치, 사내에 바로 둘 수 있을까: 구조, 보안, 운영 검증]({% post_url 2026-02-28-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Open-Source-Deep-Research-Framework-DeerFlow %}) — DeerFlow의 LangGraph 기반 역할 분담과 검색, 코드, 보고서 파이프라인을 살피고, 샌드박스, API 키, 출처, 비용을 검증하는 도입 기준을 정리합니다.
+- [oh-my-claudecode의 32개 Agent는 필요한가: Routing, State, 검증 비용]({% post_url 2026-04-21-10-Year-Seniors-View-Is-Claude-Code-Dead-The-Shocking-Reality-and-Limits-of-oh-my-claudecode-Orchestrating-32-AIs %}) — oh-my-claudecode가 역할, model routing, hook, state로 코딩 작업을 나누는 구조를 살펴보고, 실제 병렬성, 검증 독립성, token, 복구, 권한 한계를 평가합니다.
 <!-- internal-links:end -->

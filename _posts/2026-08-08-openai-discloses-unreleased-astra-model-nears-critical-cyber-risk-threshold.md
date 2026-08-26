@@ -66,7 +66,7 @@ OpenAI는 개발 중인 미공개 프론티어 AI 모델 Astra가 자체 안전 
 
 OpenAI는 내부 안전 규정인 준비태스크 프레임워크(Preparedness Framework)에 따라 Astra가 '치명적' 사이버보안 능력 기준을 충족할 가능성을 배제할 수 없다고 밝혔습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 이에 따라 OpenAI는 새롭게 강화된 보안 제어 요구사항을 아직 충족하지 못한 Astra 관련 내부 연구 및 작업 활동을 일시적으로 중단하는 조치를 취했습니다 <sup class="source-citation"><a href="#source-1" aria-label="OpenAI 발표 출처">[1]</a></sup>.
 
-이번 사이버보안 업데이트에 앞서 Astra가 수학 및 이론 컴퓨터 과학 문제 10개를 해결했다는 설명도 보도됐습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 다만 수학 문제 해결 결과만으로 사이버 능력을 추론할 수는 없으며, 위험 판단은 별도의 코딩·보안 평가를 근거로 읽어야 합니다.
+이번 사이버보안 업데이트에 앞서 Astra가 수학 및 이론 컴퓨터 과학 문제 10개를 해결했다는 설명도 보도됐습니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 다만 수학 문제 해결 결과만으로 사이버 능력을 추론할 수는 없으며, 위험 판단은 별도의 코딩, 보안 평가를 근거로 읽어야 합니다.
 
 <figure class="news-source-image">
   <img src="https://d15shllkswkct0.cloudfront.net/wp-content/blogs.dir/1/files/2026/08/OpenAI.png" alt="SiliconANGLE 원문에 게시된 AI 뉴스 이미지" loading="lazy" decoding="async">
@@ -94,7 +94,7 @@ OpenAI의 프레임워크 정의에 따르면 '치명적' 사이버보안 등급
 
 ## 일부 내부 작업 중단은 어떤 거버넌스 신호일까?
 
-이번 사례는 능력 평가 결과가 개발·연구 절차에 연결되는 방식을 보여줍니다. 발표상 중단 대상은 강화된 보안 제어 요구사항을 아직 충족하지 못한 Astra 관련 내부 활동이며, 모든 연구와 모델 개발이 멈췄다고 표현하면 범위가 넓어집니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 실효성을 판단하려면 어떤 통제가 추가되고 재개 전에 어떤 검증을 통과하는지가 후속 공개에서 확인돼야 합니다.
+이번 사례는 능력 평가 결과가 개발, 연구 절차에 연결되는 방식을 보여줍니다. 발표상 중단 대상은 강화된 보안 제어 요구사항을 아직 충족하지 못한 Astra 관련 내부 활동이며, 모든 연구와 모델 개발이 멈췄다고 표현하면 범위가 넓어집니다 <sup class="source-citation"><a href="#source-2" aria-label="SiliconANGLE 출처">[2]</a></sup>. 실효성을 판단하려면 어떤 통제가 추가되고 재개 전에 어떤 검증을 통과하는지가 후속 공개에서 확인돼야 합니다.
 
 ```mermaid
 sequenceDiagram
@@ -126,7 +126,7 @@ flowchart TD
 
 위 다이어그램은 Astra 모델이 향후 개발 재개 및 배포로 나아가기 위해 거쳐야 하는 보안 검증 판단 로직을 보여줍니다.
 
-앞으로 확인할 의사결정 포인트는 세 가지입니다. 첫째, 일시 중단의 정확한 대상과 재개 조건이 무엇인지입니다. 둘째, 접근 통제·모니터링·모델 동작 제한 등 추가 대책이 위험 평가에서 어떻게 검증되는지입니다. 셋째, 회사 자체 평가 외에 재현 가능한 근거나 외부 검토가 어느 범위까지 제공되는지입니다. 모델 공개 일정만 추적하기보다 이 근거가 제시돼야 위험 완화가 충분한지 판단할 수 있습니다.
+앞으로 확인할 의사결정 포인트는 세 가지입니다. 첫째, 일시 중단의 정확한 대상과 재개 조건이 무엇인지입니다. 둘째, 접근 통제, 모니터링, 모델 동작 제한 등 추가 대책이 위험 평가에서 어떻게 검증되는지입니다. 셋째, 회사 자체 평가 외에 재현 가능한 근거나 외부 검토가 어느 범위까지 제공되는지입니다. 모델 공개 일정만 추적하기보다 이 근거가 제시돼야 위험 완화가 충분한지 판단할 수 있습니다.
 
 통제의 효과를 볼 때는 모델 답변을 거절하게 만드는 장치만 확인해서는 부족합니다. 고위험 평가 환경에 누가 접근할 수 있는지, 모델 가중치와 인증 정보가 어떻게 분리되는지, 도구 실행이 격리된 시스템 안에서만 가능한지, 이상 행동을 사후 조사할 로그가 남는지가 함께 작동해야 합니다. 어느 한 층이 실패해도 다음 층이 피해를 제한하는 구조인지가 핵심이며, “안전성 향상”이라는 요약만으로는 이를 판단할 수 없습니다.
 
@@ -151,8 +151,8 @@ OpenAI Astra 모델의 공개 출시 날짜나 사용자 대상 배포 일정은
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개 Model 2와 정렬 위험 등급 상향]({% post_url 2026-08-16-anthropic-details-unreleased-model-2-and-upgrades-ai-risk-assessment-level %}) — Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해…
-- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할·제약·출력 형식을 분석하는 법과 진위·버전·저작권을 확인해야 하는 이유를 정리합니다.
-- [AI 규제 문서가 흩어져 있다면? AI Atlas Nexus로 리스크 연결하는 법]({% post_url 2026-03-02-Why-Am-I-Just-Discovering-This-An-Honest-Review-of-IBMs-Ultimate-AI-Governance-Tool-AI-Atlas-Nexus %}) — AI Atlas Nexus가 NIST·MIT·EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
+- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할, 제약, 출력 형식을 분석하는 법과 진위, 버전, 저작권을 확인해야 하는 이유를 정리합니다.
+- [AI 규제 문서가 흩어져 있다면? AI Atlas Nexus로 리스크 연결하는 법]({% post_url 2026-03-02-Why-Am-I-Just-Discovering-This-An-Honest-Review-of-IBMs-Ultimate-AI-Governance-Tool-AI-Atlas-Nexus %}) — AI Atlas Nexus가 NIST, MIT, EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

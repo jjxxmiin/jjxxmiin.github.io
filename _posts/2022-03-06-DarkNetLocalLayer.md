@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/local_layer.c"
 layout: post
 title:  "Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정"
-summary: "Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다."
-description: "Darknet Local Layer의 위치별 weight·bias, im2col·GEMM offset과 backward·workspace를 따라 parameter 폭증과 초기화 범위 오류를 설명합니다."
+summary: "Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col, GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다."
+description: "Darknet Local Layer의 위치별 weight, bias, im2col, GEMM offset과 backward, workspace를 따라 parameter 폭증과 초기화 범위 오류를 설명합니다."
 date:   2022-03-06 15:00 -0400
 categories: DarkNet
 image:
@@ -176,7 +176,7 @@ for(i = 0; i < c*n*size*size; ++i){
 
 1. `out_h`, `out_w`가 양수이며 기대한 pad 규칙과 맞는가?
 2. network workspace가 `out_h*out_w*size*size*c` 원소를 담는가?
-3. weight와 weight update가 `locations`까지 포함해 할당·초기화됐는가?
+3. weight와 weight update가 `locations`까지 포함해 할당, 초기화됐는가?
 4. bias 길이가 `n`이 아니라 `locations*n`이라는 점을 반영했는가?
 5. forward와 backward에서 같은 위치별 offset을 사용하는가?
 
@@ -184,7 +184,7 @@ Local Layer를 이해하는 가장 빠른 방법은 convolution이라는 이름�
 
 ## 숫자로 Memory 비용을 어떻게 계산할까
 
-입력 channel, kernel, output filter와 locations를 실제 값으로 곱해 weight, update와 optimizer buffer byte를 각각 계산한다. Bias도 n이 아니라 n×locations다. Batch 크기는 weight 수를 바꾸지 않지만 output·delta와 im2col workspace를 늘린다. 이 합을 장치 memory와 비교한 뒤 input resolution을 정한다.
+입력 channel, kernel, output filter와 locations를 실제 값으로 곱해 weight, update와 optimizer buffer byte를 각각 계산한다. Bias도 n이 아니라 n×locations다. Batch 크기는 weight 수를 바꾸지 않지만 output, delta와 im2col workspace를 늘린다. 이 합을 장치 memory와 비교한 뒤 input resolution을 정한다.
 
 Convolution 기준선과 같은 output shape를 두고 parameter 수와 latency를 측정한다. 위치별 작은 GEMM 반복은 총 FLOPs뿐 아니라 호출과 memory 접근 비용이 커질 수 있다. 평균 시간만 아니라 peak memory와 batch 1 지연을 기록한다.
 
@@ -196,7 +196,7 @@ Backward에서도 한 output delta만 1로 두면 그 location의 weight_updates
 
 ## 초기화 오류는 학습 곡선에서 어떻게 보일까
 
-첫 위치만 random이고 나머지가 0이면 초기 output은 대부분 bias와 activation에 의존하고 공간 위치별 gradient 대칭이 오래 남을 수 있다. 전체 weight의 0 비율과 location별 mean·variance를 학습 전 출력하면 바로 드러난다. Loop 상한을 할당 원소 수와 맞춘 수정은 seed를 고정해 범위 밖 쓰기 없이 모든 block을 채우는지 검사한다.
+첫 위치만 random이고 나머지가 0이면 초기 output은 대부분 bias와 activation에 의존하고 공간 위치별 gradient 대칭이 오래 남을 수 있다. 전체 weight의 0 비율과 location별 mean, variance를 학습 전 출력하면 바로 드러난다. Loop 상한을 할당 원소 수와 맞춘 수정은 seed를 고정해 범위 밖 쓰기 없이 모든 block을 채우는지 검사한다.
 
 초기화 scale도 fan-in `size²×c`를 기준으로 하는지 activation과 함께 본다. Location 수를 fan-in에 또 넣으면 각 filter 값이 지나치게 작아질 수 있다.
 
@@ -204,7 +204,7 @@ Backward에서도 한 output delta만 1로 두면 그 location의 weight_updates
 
 객체가 어느 위치에 있어도 같은 특징을 찾고 싶다면 weight sharing이 없는 local layer는 translation 일반화와 parameter 효율에 불리할 수 있다. 반대로 센서 위치처럼 각 공간 위치 의미가 고정돼 있고 충분한 data가 있다면 위치별 mapping이 목적에 맞을 수 있다. Train과 validation에서 위치 분포가 달라질 때 성능을 따로 본다.
 
-단지 convolution보다 표현력이 크다는 이유로 선택하지 않고, 같은 예산의 convolution·position encoding 기준선과 비교한다. Dataset이 작으면 위치별 weight가 관측되지 않은 영역에서 학습되지 않을 수 있다.
+단지 convolution보다 표현력이 크다는 이유로 선택하지 않고, 같은 예산의 convolution, position encoding 기준선과 비교한다. Dataset이 작으면 위치별 weight가 관측되지 않은 영역에서 학습되지 않을 수 있다.
 
 ## 자주 남는 질문
 
@@ -229,7 +229,7 @@ Backward에서도 한 output delta만 1로 두면 그 location의 weight_updates
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Connected Layer 순전파·역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
-- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파·초기화 주의점을 코드 차원으로 설명합니다.
+- [DarkNet Connected Layer 순전파, 역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름]({% post_url 2022-02-18-DarkNetDeconvLayer %}) — DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파, 초기화 주의점을 코드 차원으로 설명합니다.
 <!-- internal-links:end -->

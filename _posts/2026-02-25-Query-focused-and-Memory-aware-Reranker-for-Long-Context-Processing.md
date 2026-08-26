@@ -8,8 +8,8 @@ tags:
   - 컨텍스트윈도우
   - 트랜스포머
 math: true
-summary: QRRanker가 4B 모델의 query-focused attention head로 후보 문서를 함께 재정렬하고 대화·서사 메모리를 활용하는 방법과 적용 한계를 정리합니다.
-description: "QRRanker가 4B 모델의 query-focused attention head와 대화 메모리로 후보 문서를 재정렬하는 원리와 recall·지연·기억 오염 검증 기준을 설명합니다."
+summary: QRRanker가 4B 모델의 query-focused attention head로 후보 문서를 함께 재정렬하고 대화, 서사 메모리를 활용하는 방법과 적용 한계를 정리합니다.
+description: "QRRanker가 4B 모델의 query-focused attention head와 대화 메모리로 후보 문서를 재정렬하는 원리와 recall, 지연, 기억 오염 검증 기준을 설명합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.12192.png
   alt: "긴 대화 RAG에서 관련 문서를 다시 골라야 할까? QRRanker의 4B 해법 논문 대표 이미지"
@@ -31,7 +31,7 @@ QRRanker는 질문 토큰이 문서 토큰을 볼 때 특정 attention head가 �
 
 Pointwise 점수는 각 문서를 독립적으로 처리해 병렬화하기 쉽지만 후보 집합 안의 중복을 직접 보지 못합니다. 같은 근거를 표현만 바꾼 문서가 여럿 있으면 모두 높은 점수를 받고, 서로 다른 두 문서가 함께 있어야 답할 수 있는 질문은 각각 낮게 평가될 수 있습니다. Listwise 입력은 이 상대 관계를 볼 수 있는 대신 후보 수와 전체 토큰이 늘 때 비용이 빠르게 커집니다.
 
-후보 순서가 모델 출력에 영향을 주는지도 확인해야 합니다. 같은 문서 집합을 여러 순서로 넣었을 때 상위 결과가 크게 바뀐다면 내용 관련도뿐 아니라 위치 편향을 학습했을 수 있습니다. 정답 문서를 처음·중간·끝에 놓는 대조로 query-focused head가 실제 질문 근거를 찾는지 시험할 수 있습니다.
+후보 순서가 모델 출력에 영향을 주는지도 확인해야 합니다. 같은 문서 집합을 여러 순서로 넣었을 때 상위 결과가 크게 바뀐다면 내용 관련도뿐 아니라 위치 편향을 학습했을 수 있습니다. 정답 문서를 처음, 중간, 끝에 놓는 대조로 query-focused head가 실제 질문 근거를 찾는지 시험할 수 있습니다.
 
 ## Query-focused attention head는 어떻게 검증하나요?
 
@@ -51,7 +51,7 @@ Pointwise 점수는 각 문서를 독립적으로 처리해 병렬화하기 쉽�
 
 메모리를 많이 넣는 것이 항상 유리하지는 않습니다. 오래되거나 잘못 요약된 기억이 들어가면 관련 없는 문서가 위로 올라올 수 있고, 메모리 생성과 갱신 비용도 추가됩니다.
 
-메모리는 현재 질문의 생략된 대상을 복원하는 데 필요한 최소 사실을 담아야 합니다. 대화 전체를 다시 넣으면 장문 처리 문제를 reranker 앞단으로 옮길 뿐이고, 너무 짧게 압축하면 “그때”가 가리키는 인물·장소와 시점을 잃을 수 있습니다. 결정된 사실, 사용자의 현재 목표와 출처가 있는 사건을 분리해 저장하는 것이 좋습니다.
+메모리는 현재 질문의 생략된 대상을 복원하는 데 필요한 최소 사실을 담아야 합니다. 대화 전체를 다시 넣으면 장문 처리 문제를 reranker 앞단으로 옮길 뿐이고, 너무 짧게 압축하면 “그때”가 가리키는 인물, 장소와 시점을 잃을 수 있습니다. 결정된 사실, 사용자의 현재 목표와 출처가 있는 사건을 분리해 저장하는 것이 좋습니다.
 
 요약 메모리에 추측이 들어가면 순위 오류가 반복됩니다. “사용자가 서울에서 만나기로 했다”는 확정 발화와 “아마 서울을 선호한다”는 모델 추론을 같은 신뢰도로 넣지 말고, 원문 턴과 생성 시점을 연결합니다. 사용자가 정정했을 때 과거 요약과 검색 캐시가 함께 갱신되는지도 시험합니다.
 
@@ -63,11 +63,11 @@ Pointwise 점수는 각 문서를 독립적으로 처리해 병렬화하기 쉽�
 
 ## 4B라는 규모를 운영 비용으로 바로 바꾸면 왜 안 되나요?
 
-논문은 4B 규모 모델로 기존의 더 큰 pointwise·listwise reranker와 경쟁하는 성능을 제시합니다. 작은 파라미터 수는 배포 가능성을 높이지만, 인프라 비용이 일정 비율로 자동 절감된다는 뜻은 아닙니다.
+논문은 4B 규모 모델로 기존의 더 큰 pointwise, listwise reranker와 경쟁하는 성능을 제시합니다. 작은 파라미터 수는 배포 가능성을 높이지만, 인프라 비용이 일정 비율로 자동 절감된다는 뜻은 아닙니다.
 
 실제 지연은 후보 수, 문서 길이, batching, attention 구현, GPU 종류에 따라 달라집니다. 특히 listwise 입력이 길어지면 한 번의 호출이 무거워질 수 있습니다. 70B 모델과 4B 모델의 크기만 비교하기보다 같은 후보 수와 recall 목표에서 처리량과 꼬리 지연을 재야 합니다.
 
-listwise 입력은 후보를 한 번에 비교하므로 후보 수를 두 배로 늘릴 때 메모리와 지연이 단순히 두 배가 되지 않을 수 있습니다. 최대 입력 길이를 넘으면 문서를 자르거나 후보를 여러 묶음으로 나눠야 하고, 묶음별 순위를 다시 합치는 과정에서 전역 비교 이점이 줄 수 있습니다. 목표 하드웨어에서 후보 수·문서 길이별 한계를 먼저 측정합니다.
+listwise 입력은 후보를 한 번에 비교하므로 후보 수를 두 배로 늘릴 때 메모리와 지연이 단순히 두 배가 되지 않을 수 있습니다. 최대 입력 길이를 넘으면 문서를 자르거나 후보를 여러 묶음으로 나눠야 하고, 묶음별 순위를 다시 합치는 과정에서 전역 비교 이점이 줄 수 있습니다. 목표 하드웨어에서 후보 수, 문서 길이별 한계를 먼저 측정합니다.
 
 4B 모델을 낮은 정밀도로 배포하면 메모리는 줄 수 있지만 미세한 순위 차이가 흔들릴 수 있습니다. 원본과 양자화 모델의 상위 결과 일치율, 정답 근거의 순위 변화와 p95 지연을 같이 봅니다. 파라미터 수가 작아도 요청마다 긴 문서를 읽으면 임베딩 기반 1차 검색보다 비용이 큰 구간이 남습니다.
 
@@ -86,7 +86,7 @@ reranker는 첫 retriever가 놓친 문서를 새로 만들어낼 수 없습니�
 3. 후보 수에 따른 p95 지연과 메모리 사용량
 4. 오래된 memory를 넣었을 때의 성능 하락
 
-도메인 문서로 특정 attention head를 조정할 수 있지만, 원문은 모든 도메인에서 같은 head 위치가 최적이라고 보장하지 않습니다. 법률·의료처럼 오류 비용이 큰 분야에서는 순위 점수만으로 근거를 확정하지 말고 원문 인용과 사람 검토를 유지해야 합니다.
+도메인 문서로 특정 attention head를 조정할 수 있지만, 원문은 모든 도메인에서 같은 head 위치가 최적이라고 보장하지 않습니다. 법률, 의료처럼 오류 비용이 큰 분야에서는 순위 점수만으로 근거를 확정하지 말고 원문 인용과 사람 검토를 유지해야 합니다.
 
 QRRanker의 가치는 긴 문맥을 무조건 모델에 더 넣는 대신, 현재 질문에 필요한 부분을 먼저 고르는 데 있습니다. 성능 판단도 모델 크기보다 “같은 지연 예산에서 올바른 근거를 더 앞에 놓는가”로 해야 합니다.
 
@@ -97,7 +97,7 @@ QRRanker의 가치는 긴 문맥을 무조건 모델에 더 넣는 대신, 현�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [GSD가 Context Rot을 해결할까: 4개 Markdown State와 Fresh Context 비용]({% post_url 2026-03-28-Tech-Deep-Dive-The-Illusion-of-Vibecoding-and-How-the-GSD-Get-Shit-Done-Framework-Found-the-Answer %}) — GSD가 PROJECT·REQUIREMENTS·ROADMAP·STATE 파일로 대화 밖에 상태를 남기는 방식을 살펴보고, fresh context의 토큰 비용과 검증 책임을 짚습니다.
+- [GSD가 Context Rot을 해결할까: 4개 Markdown State와 Fresh Context 비용]({% post_url 2026-03-28-Tech-Deep-Dive-The-Illusion-of-Vibecoding-and-How-the-GSD-Get-Shit-Done-Framework-Found-the-Answer %}) — GSD가 PROJECT, REQUIREMENTS, ROADMAP, STATE 파일로 대화 밖에 상태를 남기는 방식을 살펴보고, fresh context의 토큰 비용과 검증 책임을 짚습니다.
 - [TencentDB-Agent-Memory: AI 코딩 에이전트가 맥락 폭발을 막고 진짜 기억을 갖는 법]({% post_url 2026-07-15-TencentDB-Agent-Memory-How-AI-Coding-Agents-Prevent-Context-Bloat-and-Build-Real-Memory %}) — 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억 시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로…
-- [Athena-Public은 모델을 바꿔도 기억할까: 10K 부팅·278개 프로토콜 검증]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-Athena-Public-Curing-LLM-Amnesia %}) — Athena-Public이 로컬 마크다운으로 상태를 보존하는 방식과 10K 부팅·278개 프로토콜 주장을 살펴보고, 검색·충돌·클라우드 전송 한계를 정리합니다.
+- [Athena-Public은 모델을 바꿔도 기억할까: 10K 부팅, 278개 프로토콜 검증]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-Athena-Public-Curing-LLM-Amnesia %}) — Athena-Public이 로컬 마크다운으로 상태를 보존하는 방식과 10K 부팅, 278개 프로토콜 주장을 살펴보고, 검색, 충돌, 클라우드 전송 한계를 정리합니다.
 <!-- internal-links:end -->

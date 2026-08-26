@@ -10,13 +10,13 @@ tags:
   - 문서AI
   - 컴퓨터비전
 math: true
-summary: "MMFineReason이 180만 sample과 51억 solution token을 만든 뒤 난이도·정확성으로 약 7%를 선별해 작은 VLM을 학습한 과정과 teacher 오류·생성 비용을 함께 봅니다."
-description: "MMFineReason이 180만 multimodal reasoning 후보 중 정확하고 적정 난도인 약 7%를 선별하는 과정, teacher 오류·선별 편향·총 생성비용과 재현 실험을 설명합니다."
+summary: "MMFineReason이 180만 sample과 51억 solution token을 만든 뒤 난이도, 정확성으로 약 7%를 선별해 작은 VLM을 학습한 과정과 teacher 오류, 생성 비용을 함께 봅니다."
+description: "MMFineReason이 180만 multimodal reasoning 후보 중 정확하고 적정 난도인 약 7%를 선별하는 과정, teacher 오류, 선별 편향, 총 생성비용과 재현 실험을 설명합니다."
 faq:
   - question: "7% data만 만들면 MMFineReason 성능을 얻을 수 있나요?"
-    answer: "아닙니다. 연구는 180만 후보와 rationale을 먼저 만들고 평가한 뒤 약 7%를 골랐으므로 training subset은 작아도 generation·filtering 비용은 별도로 남습니다."
+    answer: "아닙니다. 연구는 180만 후보와 rationale을 먼저 만들고 평가한 뒤 약 7%를 골랐으므로 training subset은 작아도 generation, filtering 비용은 별도로 남습니다."
   - question: "Random 7%와 difficulty-selected 7%는 같은가요?"
-    answer: "아닙니다. 핵심 주장은 검증된 정답과 base model에 적절한 난도로 선별한 subset의 효율이며 random subset과 같은 budget·seed로 비교해야 selection 효과를 알 수 있습니다."
+    answer: "아닙니다. 핵심 주장은 검증된 정답과 base model에 적절한 난도로 선별한 subset의 효율이며 random subset과 같은 budget, seed로 비교해야 selection 효과를 알 수 있습니다."
   - question: "Teacher rationale가 길수록 더 좋은 학습 data인가요?"
     answer: "아닙니다. 긴 설명도 image evidence를 잘못 읽거나 불필요한 단계를 반복할 수 있어 정답, grounding, 논리 일관성과 student latency를 함께 평가해야 합니다."
 image:
@@ -42,11 +42,11 @@ MMFineReason pipeline은 reasoning의 논리적 일관성과 정답을 평가하
 
 ## 작은 Model이 큰 Baseline을 이긴 조건을 읽어야 한다
 
-Qwen3-VL-Instruct를 기반으로 2B·4B·8B model을 fine-tuning했습니다. 원문 결과에서는 4B가 Qwen3-VL-8B-Thinking을, 8B가 Qwen3-VL-30B-A3B-Thinking을 앞서고 32B Thinking model에 근접했습니다. MMMU, MathVista, SciVerse 등 visual reasoning benchmark가 비교에 쓰였습니다.
+Qwen3-VL-Instruct를 기반으로 2B, 4B, 8B model을 fine-tuning했습니다. 원문 결과에서는 4B가 Qwen3-VL-8B-Thinking을, 8B가 Qwen3-VL-30B-A3B-Thinking을 앞서고 32B Thinking model에 근접했습니다. MMMU, MathVista, SciVerse 등 visual reasoning benchmark가 비교에 쓰였습니다.
 
 이 결과는 parameter 수보다 data 구성의 영향이 클 수 있음을 보여주지만, 어떤 작은 model도 좋은 data만 있으면 큰 model을 이긴다는 일반 법칙은 아닙니다. base checkpoint, teacher, training mixture와 benchmark가 함께 고정된 비교입니다. 일반 VLM 능력을 유지하려고 reasoning data와 일반 data도 섞었습니다.
 
-도입 검증에서는 전체 data, random 7%, difficulty-selected 7%를 같은 step·seed·base model로 비교해야 합니다. 그래야 줄어든 data 양과 selection 품질의 효과를 분리할 수 있습니다.
+도입 검증에서는 전체 data, random 7%, difficulty-selected 7%를 같은 step, seed, base model로 비교해야 합니다. 그래야 줄어든 data 양과 selection 품질의 효과를 분리할 수 있습니다.
 
 ## 7% 학습 뒤에도 Teacher 비용과 지연은 남는다
 
@@ -56,13 +56,13 @@ Qwen3-VL-Instruct를 기반으로 2B·4B·8B model을 fine-tuning했습니다. �
 
 ## 7% 선별기가 무엇을 버렸는지 먼저 본다
 
-Difficulty filter가 base model이 자주 틀리는 문제를 우선하면 학습 정보는 늘 수 있지만, 특정 benchmark style이나 teacher가 자신 있어 하는 표현만 남길 수 있습니다. 전체 pool과 selected subset의 domain·image type·answer length·reasoning length 분포를 비교해야 선별 편향을 알 수 있습니다.
+Difficulty filter가 base model이 자주 틀리는 문제를 우선하면 학습 정보는 늘 수 있지만, 특정 benchmark style이나 teacher가 자신 있어 하는 표현만 남길 수 있습니다. 전체 pool과 selected subset의 domain, image type, answer length, reasoning length 분포를 비교해야 선별 편향을 알 수 있습니다.
 
 | 비교 축 | 확인할 위험 |
 |---|---|
-| STEM·diagram·game 비율 | 쉬운 domain만 과도하게 제거되거나 한 domain 집중 |
-| 짧은 답·긴 답 | 긴 rationale가 difficulty로 오인됨 |
-| OCR·geometry·knowledge 문제 | teacher가 잘하는 유형만 생존 |
+| STEM, diagram, game 비율 | 쉬운 domain만 과도하게 제거되거나 한 domain 집중 |
+| 짧은 답, 긴 답 | 긴 rationale가 difficulty로 오인됨 |
+| OCR, geometry, knowledge 문제 | teacher가 잘하는 유형만 생존 |
 | 정답 label 분포 | 특정 answer format 암기 |
 | grounding 포함률 | box가 있는 문제만 높은 품질로 판정 |
 
@@ -73,10 +73,10 @@ Difficulty filter가 base model이 자주 틀리는 문제를 우선하면 학�
 정답 일치만으로 rationale 품질을 보장할 수 없습니다. Teacher가 image를 잘못 읽은 뒤 우연히 맞는 숫자를 낼 수도 있고, 답을 먼저 안 뒤 근거를 꾸밀 수도 있습니다. 검증은 세 층으로 나누는 편이 낫습니다.
 
 1. **Answer check**: 최종 답과 계산 가능한 중간 값이 맞는지 봅니다.
-2. **Visual grounding check**: rationale가 언급한 object·box·text가 실제 image에 있는지 봅니다.
+2. **Visual grounding check**: rationale가 언급한 object, box, text가 실제 image에 있는지 봅니다.
 3. **Reasoning consistency**: 중간 전제에서 결론이 이어지고 서로 모순되지 않는지 봅니다.
 
-Teacher와 같은 계열 model 하나로 생성과 판정을 모두 하면 공통 오류를 통과시킬 수 있습니다. Rule로 확인 가능한 수학·좌표는 독립 검증기를 쓰고, 애매한 visual reasoning 표본은 사람이 audit합니다. 여러 seed에서 teacher 답이 크게 달라지는 sample도 불안정 data로 표시할 수 있습니다.
+Teacher와 같은 계열 model 하나로 생성과 판정을 모두 하면 공통 오류를 통과시킬 수 있습니다. Rule로 확인 가능한 수학, 좌표는 독립 검증기를 쓰고, 애매한 visual reasoning 표본은 사람이 audit합니다. 여러 seed에서 teacher 답이 크게 달라지는 sample도 불안정 data로 표시할 수 있습니다.
 
 ## 총비용은 어떤 식으로 계산할까
 
@@ -84,7 +84,7 @@ Training subset 비용만 보면 절감폭이 크게 보입니다. 실제 pipeli
 
 ```text
 총비용 = pool 정제 + teacher rationale 생성
-       + answer·difficulty·grounding 평가
+       + answer, difficulty, grounding 평가
        + selected subset 학습 + 실패 run 재실행
 ```
 
@@ -97,18 +97,18 @@ Student 평가에는 accuracy와 함께 output reasoning token, first-token late
 
 - [OV-Encoder는 비디오 토큰을 80% 줄여도 더 정확할까: 3.1~25% Residual 선택의 맹점]({% post_url 2026-02-17-OneVision-Encoder--Codec-Aligned-Sparsity-as-a-Foundational-Principle-for-Multimodal-Intelligence %}) — 코덱 잔차 영역만 토큰화하는 OV-Encoder의 +4.1% 성능과 최대 80% 토큰 절감이 성립하는 조건을 분석합니다.
 - [OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트]({% post_url 2025-02-23-omniparser %}) — GUI 인터페이스를 자동화하는 강력한 AI 기술, OmniParser의 원리와 응용
-- [VLM의 잠재 추론은 정말 이미지를 쓰고 있나: CapImagine 연구가 던진 질문]({% post_url 2026-02-27-Imagination-Helps-Visual-Reasoning--But-Not-Yet-in-Latent-Space %}) — 인과 매개 분석으로 이미지·잠재 토큰·답의 연결을 검사한 연구와 명시적 캡션 기반 CapImagine의 장점, 일반화 한계를 정리합니다.
+- [VLM의 잠재 추론은 정말 이미지를 쓰고 있나: CapImagine 연구가 던진 질문]({% post_url 2026-02-27-Imagination-Helps-Visual-Reasoning--But-Not-Yet-in-Latent-Space %}) — 인과 매개 분석으로 이미지, 잠재 토큰, 답의 연결을 검사한 연구와 명시적 캡션 기반 CapImagine의 장점, 일반화 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 7% data만 만들면 MMFineReason 성능을 얻을 수 있나요?
 
-아닙니다. 연구는 180만 후보와 rationale을 먼저 만들고 평가한 뒤 약 7%를 골랐으므로 training subset은 작아도 generation·filtering 비용은 별도로 남습니다.
+아닙니다. 연구는 180만 후보와 rationale을 먼저 만들고 평가한 뒤 약 7%를 골랐으므로 training subset은 작아도 generation, filtering 비용은 별도로 남습니다.
 
 ### Random 7%와 difficulty-selected 7%는 같은가요?
 
-아닙니다. 핵심 주장은 검증된 정답과 base model에 적절한 난도로 선별한 subset의 효율이며 random subset과 같은 budget·seed로 비교해야 selection 효과를 알 수 있습니다.
+아닙니다. 핵심 주장은 검증된 정답과 base model에 적절한 난도로 선별한 subset의 효율이며 random subset과 같은 budget, seed로 비교해야 selection 효과를 알 수 있습니다.
 
 ### Teacher rationale가 길수록 더 좋은 학습 data인가요?
 

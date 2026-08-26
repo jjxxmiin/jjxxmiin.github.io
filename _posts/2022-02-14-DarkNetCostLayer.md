@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet cost_layer.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/cost_layer.c"
 layout: post
-title: "DarkNet Cost Layer에서 SSE·L1·MASKED가 실제로 갈리는 지점"
-summary: "DarkNet Cost Layer의 문자열 파싱, L2·L1·Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다."
-description: "DarkNet Cost Layer의 실제 L2·L1·Smooth L1 분기, MASKED 입력 변경, 합계 reduction과 delta 누적을 설정·수치 검증 기준으로 설명합니다."
+title: "DarkNet Cost Layer에서 SSE, L1, MASKED가 실제로 갈리는 지점"
+summary: "DarkNet Cost Layer의 문자열 파싱, L2, L1, Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다."
+description: "DarkNet Cost Layer의 실제 L2, L1, Smooth L1 분기, MASKED 입력 변경, 합계 reduction과 delta 누적을 설정, 수치 검증 기준으로 설명합니다."
 date:   2022-02-14 16:00 -0400
 categories: DarkNet
 image:
@@ -155,7 +155,7 @@ SEG나 WGAN처럼 enum 이름과 실제 forward 분기가 다른 항목은 문�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법]({% post_url 2022-03-17-DarkNetRouteLayer %}) — Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w·out_h·out_c가 0이 되는 조건, delta 누적 방식을 설명합니다.
+- [Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법]({% post_url 2022-03-17-DarkNetRouteLayer %}) — Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w, out_h, out_c가 0이 되는 조건, delta 누적 방식을 설명합니다.
 - [Darknet Normalize Layer 역전파가 정확하지 않은 이유: 채널 정규화와 delta 덮어쓰기]({% post_url 2022-03-11-DarkNetNormalizeLayer %}) — Darknet normalization_layer의 채널별 순방향 계산을 코드로 추적하고, 원본 주석이 밝힌 근사 역전파와 net.delta 덮어쓰기 문제를 점검합니다.
-- [DarkNet Demo 실시간 파이프라인: 3개 버퍼와 3프레임 평균]({% post_url 2022-02-19-DarkNetDemo %}) — DarkNet OpenCV 데모가 캡처·추론·표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다.
+- [DarkNet Demo 실시간 파이프라인: 3개 버퍼와 3프레임 평균]({% post_url 2022-02-19-DarkNetDemo %}) — DarkNet OpenCV 데모가 캡처, 추론, 표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다.
 <!-- internal-links:end -->

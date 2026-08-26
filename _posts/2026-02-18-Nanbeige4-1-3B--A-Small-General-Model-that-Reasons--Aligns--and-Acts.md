@@ -10,7 +10,7 @@ tags:
   - AI에이전트
 math: true
 summary: 3B 모델의 장기 도구 사용과 gated time-complexity reward가 보여주는 능력, 그리고 600턴이 보장하지 않는 최종 성공을 구분합니다.
-description: 'Nanbeige4.1-3B가 multi-hop 경로·턴별 지도·시간 복잡도 보상으로 긴 작업을 학습하는 방식과 600턴 누적 오류 검증법을 설명합니다.'
+description: 'Nanbeige4.1-3B가 multi-hop 경로, 턴별 지도, 시간 복잡도 보상으로 긴 작업을 학습하는 방식과 600턴 누적 오류 검증법을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.13367.png
   alt: "3B 모델이 600턴 도구 사용을 버틸까: Nanbeige4.1의 Turn-level 지도와 누적 오류 논문 대표 이미지"
@@ -64,7 +64,7 @@ Agent 학습은 tool을 호출하는 각 turn에 supervision을 주어 장기 �
 | 유효 tool-call 비율 | schema와 argument가 맞았는가 |
 | 중간 단계 정확도 | 각 call이 필요한 정보를 얻었는가 |
 | 최종 task 성공률 | 누적 결과가 원래 목표를 달성했는가 |
-| 총 비용·지연 | 긴 trajectory가 운영 가능한가 |
+| 총 비용, 지연 | 긴 trajectory가 운영 가능한가 |
 
 오류 확률이 turn마다 작아도 600번 누적되면 최종 성공률은 크게 달라질 수 있습니다. 원문도 세밀한 success-rate 분석이 더 필요하다고 지적합니다.
 
@@ -78,7 +78,7 @@ Qwen3-4B, 일부 Qwen3-30B-A3B 추론 과제, LiveCodeBench와 HumanEval에서�
 
 1. **Reasoning**: 같은 token budget에서 multi-hop 정답률과 근거 누락
 2. **Code**: test 통과, 실행 시간, memory, reference가 없는 과제의 품질
-3. **Agent**: 10·100·600턴별 schema 오류, recovery, 최종 성공과 총 비용
+3. **Agent**: 10, 100, 600턴별 schema 오류, recovery, 최종 성공과 총 비용
 
 Nanbeige4.1-3B가 보여주는 포인트는 파라미터 수가 중요하지 않다는 선언이 아닙니다. 작은 모델도 각 turn의 피드백과 검증 가능한 효율 reward를 촘촘히 설계하면 특정 장기 작업에서 훨씬 큰 모델과 경쟁할 수 있다는 것입니다. 그 경쟁 범위는 실제 tool과 실패 복구를 포함한 end-to-end 평가로 정해야 합니다.
 
@@ -88,7 +88,7 @@ Nanbeige4.1-3B가 보여주는 포인트는 파라미터 수가 중요하지 않
 
 도구 결과에는 성공 응답뿐 아니라 빈 결과, 시간 초과, 형식 변경, 부분 실패를 섞어야 합니다. 모델이 같은 호출을 무한 반복하는지, 대체 경로를 찾는지, 근거가 없을 때 멈추는지 확인합니다. 복구 행동도 최종 목표를 향하는지 봐야 하며 단순히 유효한 JSON을 계속 출력하는 것을 성공으로 세면 안 됩니다.
 
-장기 상태는 인물·파일·숫자 같은 서로 다른 종류로 평가할 수 있습니다. 앞에서 읽은 값이 뒤의 계산과 쓰기 작업에 정확히 쓰이는지, 새 결과가 나왔을 때 오래된 가정을 갱신하는지 확인합니다. 전체 context가 길어질 때 중요한 제약이 묻힌다면 요약이나 외부 메모리를 붙인 구성과 비교할 수 있습니다.
+장기 상태는 인물, 파일, 숫자 같은 서로 다른 종류로 평가할 수 있습니다. 앞에서 읽은 값이 뒤의 계산과 쓰기 작업에 정확히 쓰이는지, 새 결과가 나왔을 때 오래된 가정을 갱신하는지 확인합니다. 전체 context가 길어질 때 중요한 제약이 묻힌다면 요약이나 외부 메모리를 붙인 구성과 비교할 수 있습니다.
 
 ## 코드 효율 보상이 실무에서도 유효한지 어떻게 볼까?
 
@@ -105,7 +105,7 @@ Nanbeige4.1-3B가 보여주는 포인트는 파라미터 수가 중요하지 않
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [AI 에이전트와 챗봇은 무엇이 다른가: 도구 실행·메모리·권한까지 만드는 순서]({% post_url 2025-03-19-aiagent %}) — AI 에이전트의 perception-reasoning-action loop를 챗봇과 구분하고, LLM·도구·메모리·검증을 연결하는 개발 순서와 기존 Python 예제가 완전한 에이전트가 아닌 이유를 설명합니다.
-- [멀티모달 에이전트가 25번 도구를 써도 답을 찾을까: AgentVista]({% post_url 2026-03-06-AgentVista--Evaluating-Multimodal-Agents-in-Ultra-Challenging-Realistic-Visual-Scenarios %}) — AgentVista의 25개 하위 도메인·7개 범주와 장기 도구 사용 평가, Gemini-3-Pro 27.3% 결과를 비용·연쇄 오류 관점에서 해석합니다.
-- [Smolagents CodeAgent가 JSON 파싱을 없앨까: Python 실행과 Sandbox 위험]({% post_url 2026-04-29-Stop-the-JSON-Parsing-Madness-The-Bone-Striking-Counterattack-of-Hugging-Faces-Smolagents-in-1000-Lines-of-Code %}) — Smolagents가 JSON 도구 호출 대신 Python 코드로 여러 행동을 묶는 방식을 살펴보고, 줄어든 왕복 호출과 맞바꾼 임의 코드 실행·디버깅·격리 비용을 정리합니다.
+- [AI 에이전트와 챗봇은 무엇이 다른가: 도구 실행, 메모리, 권한까지 만드는 순서]({% post_url 2025-03-19-aiagent %}) — AI 에이전트의 perception-reasoning-action loop를 챗봇과 구분하고, LLM, 도구, 메모리, 검증을 연결하는 개발 순서와 기존 Python 예제가 완전한 에이전트가 아닌 이유를 설명합니다.
+- [멀티모달 에이전트가 25번 도구를 써도 답을 찾을까: AgentVista]({% post_url 2026-03-06-AgentVista--Evaluating-Multimodal-Agents-in-Ultra-Challenging-Realistic-Visual-Scenarios %}) — AgentVista의 25개 하위 도메인, 7개 범주와 장기 도구 사용 평가, Gemini-3-Pro 27.3% 결과를 비용, 연쇄 오류 관점에서 해석합니다.
+- [Smolagents CodeAgent가 JSON 파싱을 없앨까: Python 실행과 Sandbox 위험]({% post_url 2026-04-29-Stop-the-JSON-Parsing-Madness-The-Bone-Striking-Counterattack-of-Hugging-Faces-Smolagents-in-1000-Lines-of-Code %}) — Smolagents가 JSON 도구 호출 대신 Python 코드로 여러 행동을 묶는 방식을 살펴보고, 줄어든 왕복 호출과 맞바꾼 임의 코드 실행, 디버깅, 격리 비용을 정리합니다.
 <!-- internal-links:end -->

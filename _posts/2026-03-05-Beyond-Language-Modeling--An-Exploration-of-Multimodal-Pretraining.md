@@ -11,7 +11,7 @@ tags:
   - 로보틱스
 math: true
 summary: 텍스트 next-token loss와 이미지 diffusion loss를 처음부터 한 Transformer에서 학습하는 Transfusion 구조, RAE와 MoE의 역할 및 데이터 비용을 설명합니다.
-description: 'Transfusion이 텍스트 next-token과 이미지 diffusion을 한 Transformer에서 공동 학습하는 방식, RAE·MoE·데이터 비율과 world model의 검증 한계를 설명합니다.'
+description: 'Transfusion이 텍스트 next-token과 이미지 diffusion을 한 Transformer에서 공동 학습하는 방식, RAE, MoE, 데이터 비율과 world model의 검증 한계를 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2603.03276.png
   alt: "VLM은 텍스트 모델부터 학습해야 할까? Transfusion 공동 사전학습의 대안 논문 대표 이미지"
@@ -19,9 +19,9 @@ faq:
   - question: '텍스트와 이미지를 처음부터 함께 학습하면 adapter 방식보다 항상 좋나요?'
     answer: '공동 표현을 만들 가능성은 있지만 더 많은 혼합 데이터와 계산, loss 균형 설계가 필요합니다. 공개 checkpoint와 실제 task가 없다면 기존 LLM+vision adapter가 더 빠르고 저렴할 수 있습니다.'
   - question: 'RAE를 쓰면 이미지 정보 손실이 없어지나요?'
-    answer: '연속 latent가 이산 code의 제약을 줄일 수 있지만 encoder·decoder의 재구성 오류는 남습니다. 작은 text·세부 구조·색과 downstream 이해에 필요한 정보가 보존되는지 확인해야 합니다.'
+    answer: '연속 latent가 이산 code의 제약을 줄일 수 있지만 encoder, decoder의 재구성 오류는 남습니다. 작은 text, 세부 구조, 색과 downstream 이해에 필요한 정보가 보존되는지 확인해야 합니다.'
   - question: 'Action-conditioned video가 물리적으로 정확한 world model인가요?'
-    answer: '행동에 따른 다음 장면을 생성하는 능력은 world modeling의 한 단서입니다. 장기 rollout·희귀 충돌·제어 성공과 실제 transition 오차를 검증하기 전에는 안전한 simulator로 볼 수 없습니다.'
+    answer: '행동에 따른 다음 장면을 생성하는 능력은 world modeling의 한 단서입니다. 장기 rollout, 희귀 충돌, 제어 성공과 실제 transition 오차를 검증하기 전에는 안전한 simulator로 볼 수 없습니다.'
 ---
 
 반드시 텍스트 모델을 먼저 만든 뒤 비전 인코더를 붙일 필요는 없습니다. 이 연구는 하나의 Transformer를 처음부터 텍스트 next-token 예측과 이미지 diffusion에 공동 학습시켜 두 모달리티의 표현을 함께 형성합니다.
@@ -52,7 +52,7 @@ MoE가 계산을 없애는 것은 아닙니다. 전체 parameter를 저장해야
 
 ## 처음부터 공동 학습할 수 있는 팀은 제한적이다
 
-이 접근은 기존 LLM 가중치에 작은 adapter만 붙이는 방식보다 데이터와 계산 요구가 큽니다. 고품질 이미지-텍스트뿐 아니라 action-video pair까지 수집·정제해야 하며, 비전이 더 많은 데이터를 요구한다는 분석 자체가 비용을 보여 줍니다.
+이 접근은 기존 LLM 가중치에 작은 adapter만 붙이는 방식보다 데이터와 계산 요구가 큽니다. 고품질 이미지-텍스트뿐 아니라 action-video pair까지 수집, 정제해야 하며, 비전이 더 많은 데이터를 요구한다는 분석 자체가 비용을 보여 줍니다.
 
 실무 판단은 두 선택지로 나뉩니다.
 
@@ -65,7 +65,7 @@ MoE가 계산을 없애는 것은 아닙니다. 전체 parameter를 저장해야
 
 Text loss와 diffusion loss는 값의 scale과 수렴 속도가 다를 수 있습니다. 단순 합산하면 큰 gradient를 내는 모달리티가 shared layer를 지배하고 다른 쪽 성능이 떨어질 수 있습니다. Loss weight와 batch 구성, 모달리티별 validation curve를 함께 기록해야 합니다.
 
-Text와 image가 짝을 이룬 sample뿐 아니라 한쪽만 있는 대규모 데이터도 사용할 수 있습니다. 이때 paired·unpaired 비율이 cross-modal alignment와 단일 모달리티 품질에 미치는 영향을 분리합니다. Caption이 부정확하거나 생성된 image-text pair가 많으면 shared representation이 잘못된 관계를 학습할 수 있습니다.
+Text와 image가 짝을 이룬 sample뿐 아니라 한쪽만 있는 대규모 데이터도 사용할 수 있습니다. 이때 paired, unpaired 비율이 cross-modal alignment와 단일 모달리티 품질에 미치는 영향을 분리합니다. Caption이 부정확하거나 생성된 image-text pair가 많으면 shared representation이 잘못된 관계를 학습할 수 있습니다.
 
 공동 model의 평균 점수가 좋아도 언어의 factuality나 이미지 text rendering 같은 세부 능력이 나빠질 수 있습니다. 모달리티별 baseline, 같은 compute의 sequential model과 비교하고 특정 task의 하락을 전체 score가 가리지 않게 해야 합니다.
 
@@ -75,11 +75,11 @@ RAE의 latent가 연속적이면 diffusion에 자연스럽지만 원본을 완�
 
 MoE는 modality와 token에 따라 capacity를 다르게 쓸 수 있지만 router가 한 expert에 몰리면 일부 capacity가 놀고 일부가 과부하됩니다. Expert utilization과 load balancing loss, modality별 routing 분포를 봅니다. Image expert와 text expert가 완전히 분리되면 기대한 shared representation이 약해질 수도 있습니다.
 
-Inference에서도 전체 expert weight storage와 통신 비용이 남습니다. 한 장 image generation과 짧은 text answer, 긴 multimodal context에서 활성 expert·latency·memory를 따로 측정해야 합니다. Training IsoFLOP 이득이 serving 비용으로 같은 비율로 이어진다고 가정하지 않습니다.
+Inference에서도 전체 expert weight storage와 통신 비용이 남습니다. 한 장 image generation과 짧은 text answer, 긴 multimodal context에서 활성 expert, latency, memory를 따로 측정해야 합니다. Training IsoFLOP 이득이 serving 비용으로 같은 비율로 이어진다고 가정하지 않습니다.
 
 ## world model 주장은 어떤 시험을 통과해야 하나
 
-한 step 뒤 영상이 자연스러운지와 여러 step action rollout이 정확한지는 다릅니다. 같은 초기 상태에서 행동 sequence를 바꾸고 실제 기록과 생성 결과의 object 위치·접촉·상태 변화를 비교합니다. 시간이 길어질수록 작은 오류가 누적돼 물체가 사라지거나 행동 효과가 과장되는지 봅니다.
+한 step 뒤 영상이 자연스러운지와 여러 step action rollout이 정확한지는 다릅니다. 같은 초기 상태에서 행동 sequence를 바꾸고 실제 기록과 생성 결과의 object 위치, 접촉, 상태 변화를 비교합니다. 시간이 길어질수록 작은 오류가 누적돼 물체가 사라지거나 행동 효과가 과장되는지 봅니다.
 
 Dataset에 자주 나온 행동은 잘 생성해도 희귀 실패와 안전 경계는 틀릴 수 있습니다. Robot이 넘어지는 상황, 충돌 직전, action이 실행되지 않은 경우를 별도 set에 둡니다. 시각적 품질보다 control policy가 생성 world model에서 배운 뒤 실제 환경에서도 성공하는지 확인해야 합니다.
 
@@ -87,16 +87,16 @@ World model을 planning에 쓰면 model uncertainty를 행동 선택에 반영�
 
 ## 작은 팀은 어떤 선택을 할 수 있나
 
-Foundation model을 처음부터 학습하지 않아도 공개 checkpoint를 frozen backbone으로 평가할 수 있습니다. Captioning·VQA·image editing 중 필요한 기능 하나를 고르고 기존 VLM과 품질·GPU memory·fine-tuning data를 비교합니다. 공동 model의 기능 수가 아니라 실제 제품에서 쓰는 경로의 이득을 봅니다.
+Foundation model을 처음부터 학습하지 않아도 공개 checkpoint를 frozen backbone으로 평가할 수 있습니다. Captioning, VQA, image editing 중 필요한 기능 하나를 고르고 기존 VLM과 품질, GPU memory, fine-tuning data를 비교합니다. 공동 model의 기능 수가 아니라 실제 제품에서 쓰는 경로의 이득을 봅니다.
 
-기존 LLM에 adapter를 붙이는 기준선은 개발 속도와 이미 검증된 언어 능력에서 유리할 수 있습니다. Transfusion 계열은 여러 모달리티를 장기적으로 하나의 model에 통합하고 충분한 data·compute를 관리할 때 가치가 큽니다. 어느 접근도 이름만으로 정답이 아니며 update와 회귀 범위를 포함한 총 유지비가 선택 기준입니다.
+기존 LLM에 adapter를 붙이는 기준선은 개발 속도와 이미 검증된 언어 능력에서 유리할 수 있습니다. Transfusion 계열은 여러 모달리티를 장기적으로 하나의 model에 통합하고 충분한 data, compute를 관리할 때 가치가 큽니다. 어느 접근도 이름만으로 정답이 아니며 update와 회귀 범위를 포함한 총 유지비가 선택 기준입니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로봇 Action을 한 Token씩 만들지 않으면 나아질까? Dream-VL·Dream-VLA]({% post_url 2025-12-30-Dream-VL---Dream-VLA--Open-Vision-Language-and-Vision-Language-Action-Models-with-Diffusion-Language-Model-Backbone %}) — Dream-VL과 Dream-VLA가 masked diffusion language backbone으로 양방향 문맥과 action chunk 병렬 복원을 시도한 이유, benchmark 성과와 반복 denoising 비용을 함께…
-- [Green-VLA의 5단계 Curriculum은 무엇을 더하나? R2 RL과 OOD 검증]({% post_url 2026-02-03-Green-VLA--Staged-Vision-Language-Action-Model-for-Generalist-Robots %}) — Green-VLA가 L0·L1·R0·R1·R2 단계로 vision-language grounding, multi-embodiment pretraining, robot adaptation과 RL alignment를 나누는 구조를…
-- [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해·생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
+- [Green-VLA의 5단계 Curriculum은 무엇을 더하나? R2 RL과 OOD 검증]({% post_url 2026-02-03-Green-VLA--Staged-Vision-Language-Action-Model-for-Generalist-Robots %}) — Green-VLA가 L0, L1, R0, R1, R2 단계로 vision-language grounding, multi-embodiment pretraining, robot adaptation과 RL alignment를 나누는 구조를…
+- [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해, 생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
+- [VibeVoice로 90분 팟캐스트를 한 번에 만들까: 7.5Hz 토큰과 중단된 공식 지원]({% post_url 2026-03-01-Why-Did-I-Discover-This-So-Late-Honest-Review-of-Microsoft-VibeVoice-for-90-Min-Podcast-Generation %}) — 7.5Hz 토크나이저와 LLM, Diffusion 구조가 4명, 90분 음성을 다루는 방식, community fork 의존과 환각 한계를 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -107,8 +107,8 @@ Foundation model을 처음부터 학습하지 않아도 공개 checkpoint를 fro
 
 ### RAE를 쓰면 이미지 정보 손실이 없어지나요?
 
-연속 latent가 이산 code의 제약을 줄일 수 있지만 encoder·decoder의 재구성 오류는 남습니다. 작은 text·세부 구조·색과 downstream 이해에 필요한 정보가 보존되는지 확인해야 합니다.
+연속 latent가 이산 code의 제약을 줄일 수 있지만 encoder, decoder의 재구성 오류는 남습니다. 작은 text, 세부 구조, 색과 downstream 이해에 필요한 정보가 보존되는지 확인해야 합니다.
 
 ### Action-conditioned video가 물리적으로 정확한 world model인가요?
 
-행동에 따른 다음 장면을 생성하는 능력은 world modeling의 한 단서입니다. 장기 rollout·희귀 충돌·제어 성공과 실제 transition 오차를 검증하기 전에는 안전한 simulator로 볼 수 없습니다.
+행동에 따른 다음 장면을 생성하는 능력은 world modeling의 한 단서입니다. 장기 rollout, 희귀 충돌, 제어 성공과 실제 transition 오차를 검증하기 전에는 안전한 simulator로 볼 수 없습니다.

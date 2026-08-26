@@ -10,7 +10,7 @@ tags:
   - OpenAI
   - MCP
 summary: Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
-description: 'Claude Code에서 Codex를 보조 검토자로 호출하는 플러그인의 흐름과 설치 전제, 독립 검토의 조건·비용·권한·실패 대응을 설명합니다.'
+description: 'Claude Code에서 Codex를 보조 검토자로 호출하는 플러그인의 흐름과 설치 전제, 독립 검토의 조건, 비용, 권한, 실패 대응을 설명합니다.'
 github_url: https://github.com/openai/codex-plugin-cc
 image:
   path: https://opengraph.githubassets.com/1/openai/codex-plugin-cc

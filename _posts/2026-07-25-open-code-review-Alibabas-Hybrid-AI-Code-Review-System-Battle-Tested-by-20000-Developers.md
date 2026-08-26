@@ -12,7 +12,7 @@ tags:
 summary: 알리바바가 오픈소스로 공개한 open-code-review는 결정론적 파이프라인과 LLM을 결합한 하이브리드 아키텍처를 통해 기존
   AI 코드 리뷰의 토큰 낭비와 환각 현상을 해결합니다. 정확한 라인 단위 코멘트와 세밀한 규칙을 통해 리뷰 품질을 극대화하는 방법을 심층적으로
   분석합니다.
-description: 'open-code-review가 결정론적 diff 처리와 LLM 코멘트를 결합하는 구조, 내부 규모 수치의 한계·오탐·보안·도입 평가법을 설명합니다.'
+description: 'open-code-review가 결정론적 diff 처리와 LLM 코멘트를 결합하는 구조, 내부 규모 수치의 한계, 오탐, 보안, 도입 평가법을 설명합니다.'
 github_url: https://github.com/alibaba/open-code-review
 image:
   path: https://opengraph.githubassets.com/1/alibaba/open-code-review
@@ -43,7 +43,7 @@ mermaid: true
 chart: true
 ---
 
-open-code-review는 diff와 관련 문맥을 결정론적 단계에서 좁힌 뒤 LLM이 라인별 코멘트를 만드는 하이브리드 코드 리뷰 구조입니다. 내부 사용 인원·결함 수는 공개된 집계의 범위와 정의를 확인해야 하며, 자신의 언어와 결함 유형에서 같은 탐지율을 보장하지 않습니다. 기존 린터·사람 리뷰와 동일 PR을 비교해 유효 결함, 오탐, 누락, 토큰과 민감 코드 전송을 측정하세요.
+open-code-review는 diff와 관련 문맥을 결정론적 단계에서 좁힌 뒤 LLM이 라인별 코멘트를 만드는 하이브리드 코드 리뷰 구조입니다. 내부 사용 인원, 결함 수는 공개된 집계의 범위와 정의를 확인해야 하며, 자신의 언어와 결함 유형에서 같은 탐지율을 보장하지 않습니다. 기존 린터, 사람 리뷰와 동일 PR을 비교해 유효 결함, 오탐, 누락, 토큰과 민감 코드 전송을 측정하세요.
 
 ## 하이브리드 리뷰가 단순 LLM 호출보다 나은 조건은 무엇인가
 

@@ -10,15 +10,15 @@ tags:
   - LLM
   - 트랜스포머
 math: true
-summary: "Being-H0.5가 human interaction data를 공통 표현으로 삼고 Mixture-of-Flow로 공유 primitive와 robot별 expert를 나누는 구조·평가 한계를 정리합니다."
-description: "Being-H0.5가 human interaction data·unified action space·Mixture-of-Flow로 cross-embodiment transfer를 시도하는 구조와 morphology·latency·장기 계획 한계를 검증합니다."
+summary: "Being-H0.5가 human interaction data를 공통 표현으로 삼고 Mixture-of-Flow로 공유 primitive와 robot별 expert를 나누는 구조, 평가 한계를 정리합니다."
+description: "Being-H0.5가 human interaction data, unified action space, Mixture-of-Flow로 cross-embodiment transfer를 시도하는 구조와 morphology, latency, 장기 계획 한계를 검증합니다."
 faq:
   - question: "인간 손동작을 로봇 action으로 바로 복사하나요?"
-    answer: "아닙니다. 인간 interaction을 공통 의미 표현으로 활용하되 각 robot의 DoF·sensor·control 주기에 맞는 embodiment-specific mapping이 필요합니다."
+    answer: "아닙니다. 인간 interaction을 공통 의미 표현으로 활용하되 각 robot의 DoF, sensor, control 주기에 맞는 embodiment-specific mapping이 필요합니다."
   - question: "Mixture-of-Flow는 무엇을 분리하나요?"
     answer: "robot 사이에 공유할 motor primitive와 특정 hardware의 저수준 action expert를 분리하고 gating으로 현재 embodiment에 맞는 경로를 선택합니다."
-  - question: "LIBERO·RoboCasa 점수가 실제 robot 일반화를 보장하나요?"
-    answer: "아닙니다. benchmark·simulation 조건의 보고값이며 unseen hardware에서 calibration·latency·안전 정지·실제 task 성공을 별도로 평가해야 합니다."
+  - question: "LIBERO, RoboCasa 점수가 실제 robot 일반화를 보장하나요?"
+    answer: "아닙니다. benchmark, simulation 조건의 보고값이며 unseen hardware에서 calibration, latency, 안전 정지, 실제 task 성공을 별도로 평가해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.12993.png
   alt: "Being-H0.5는 다른 로봇 사이에서 무엇을 공유하나? Human Data와 Mixture-of-Flow 논문 대표 이미지"
@@ -28,7 +28,7 @@ Being-H0.5의 핵심은 **인간 interaction data를 서로 다른 robot이 공�
 
 ## Human Data가 공통 기반이 될 수 있는 이유와 한계
 
-로봇마다 DoF, sensor, action frequency가 달라 raw joint trajectory를 바로 합치기 어렵습니다. 인간 demonstration은 “reach·grasp·rotate” 같은 task 의미를 공유하는 자료가 될 수 있고, unified action space가 이를 robot별 parameter로 연결합니다. 기존 글은 UniHand-2.0의 35,000시간과 30종 이상 embodiment를 소개하지만, data 분포·중복·robot별 비율이 transfer 결과에 어떤 영향을 주는지는 함께 확인해야 합니다.
+로봇마다 DoF, sensor, action frequency가 달라 raw joint trajectory를 바로 합치기 어렵습니다. 인간 demonstration은 “reach, grasp, rotate” 같은 task 의미를 공유하는 자료가 될 수 있고, unified action space가 이를 robot별 parameter로 연결합니다. 기존 글은 UniHand-2.0의 35,000시간과 30종 이상 embodiment를 소개하지만, data 분포, 중복, robot별 비율이 transfer 결과에 어떤 영향을 주는지는 함께 확인해야 합니다.
 
 ## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
 
@@ -45,7 +45,7 @@ Being-H0.5의 핵심 가설은 **"인간의 손동작은 모든 물리적 상호
 
 Being-H0.5는 단순한 모델 구조 변경을 넘어, 데이터-행동 공간-모델 아키텍처-실행 메커니즘 전반에 걸친 통합적인 접근을 취합니다.
 
-### 3.1. UniHand-2.0: Human·Robot Data 구성
+### 3.1. UniHand-2.0: Human, Robot Data 구성
 Being-H0.5의 보고된 성능은 **UniHand-2.0** 데이터셋에서 기인합니다.
 - **규모**: 35,000시간 이상의 멀티모달 데이터.
 - **다양성**: 30가지 이상의 서로 다른 로봇 엠보디먼트 포함.
@@ -67,11 +67,11 @@ Being-H0.5의 보고된 성능은 **UniHand-2.0** 데이터셋에서 기인합�
 - **MPG**: 센서 노이즈나 환경 변화(Sensory Shift)가 발생하더라도 제어 정책이 잠재 공간(Latent Manifold)을 벗어나지 않도록 규제하여 안정성을 확보합니다.
 - **UAC**: 로봇마다 다른 통신 지연시간(Latency)과 제어 주기(Control Loop)를 범용적으로 처리하기 위한 비동기식 액션 청킹 기법입니다. 이를 통해 10Hz부터 100Hz까지 다양한 로봇에서 끊김 없는 동작이 가능해졌습니다.
 
-## 4. 구현·평가 조건은 보고된 범위 안에서 읽는다
+## 4. 구현, 평가 조건은 보고된 범위 안에서 읽는다
 
-기존 글은 대규모 GPU 학습과 vision encoder 계열을 서술하지만 이 글에 정확한 configuration 표가 모두 포함돼 있지는 않습니다. 따라서 특정 H100 수, CLIP·DINOv2 선택을 확정 recipe로 복사하기보다 원문의 model card와 implementation을 다시 확인해야 합니다.
+기존 글은 대규모 GPU 학습과 vision encoder 계열을 서술하지만 이 글에 정확한 configuration 표가 모두 포함돼 있지는 않습니다. 따라서 특정 H100 수, CLIP, DINOv2 선택을 확정 recipe로 복사하기보다 원문의 model card와 implementation을 다시 확인해야 합니다.
 
-LIBERO 98.9%, RoboCasa 53.9%와 여러 실제 robot 결과는 해당 task·evaluation protocol의 보고값입니다. 두 benchmark의 난도와 분모가 다르므로 숫자를 직접 비교하지 않고, simulation 성공과 실제 hardware 성공도 분리합니다. low-resource robot 결과는 사용한 human·other-robot data, 해당 robot의 fine-tuning 시간과 함께 봐야 data efficiency를 판단할 수 있습니다.
+LIBERO 98.9%, RoboCasa 53.9%와 여러 실제 robot 결과는 해당 task, evaluation protocol의 보고값입니다. 두 benchmark의 난도와 분모가 다르므로 숫자를 직접 비교하지 않고, simulation 성공과 실제 hardware 성공도 분리합니다. low-resource robot 결과는 사용한 human, other-robot data, 해당 robot의 fine-tuning 시간과 함께 봐야 data efficiency를 판단할 수 있습니다.
 
 ## 5. 성능 평가 및 비교 (Comparative Analysis)
 
@@ -87,7 +87,7 @@ Being-H0.5는 기존의 대표적 VLA 모델인 RT-2, Octo, OpenVLA와 비교했
 
 다음으로 control frequency와 network delay를 바꿔 UAC가 오래된 action chunk를 계속 실행하지 않는지 시험합니다. sensor noise와 camera 위치 변화에서는 MPG가 단순히 보수적 motion만 만드는지, 실제 task를 완료하면서 안정성을 높이는지 확인합니다. 마지막으로 기존 robot task가 새 expert 추가 뒤 약해지지 않는지 regression set을 실행합니다.
 
-가정·제조·물류 적용 가능성은 이 검증 뒤의 문제입니다. “plug and play”라고 부르려면 robot별 calibration·data·fine-tuning 시간과 안전 certification이 실제로 줄었다는 측정이 필요합니다. architecture가 공유된다는 사실만으로 hardware integration 비용이 사라지지는 않습니다.
+가정, 제조, 물류 적용 가능성은 이 검증 뒤의 문제입니다. “plug and play”라고 부르려면 robot별 calibration, data, fine-tuning 시간과 안전 certification이 실제로 줄었다는 측정이 필요합니다. architecture가 공유된다는 사실만으로 hardware integration 비용이 사라지지는 않습니다.
 
 ## 7. 한계점 및 기술적 비평 (Discussion: Limitations & Critical Critique)
 
@@ -100,32 +100,32 @@ Being-H0.5는 기존의 대표적 VLA 모델인 RT-2, Octo, OpenVLA와 비교했
 
 ## 8. Cross-Embodiment를 무엇으로 평가해야 하나
 
-Being-H0.5는 human data와 여러 robot data를 하나의 의미적 action 구조에서 학습하고, 공유 primitive와 robot별 expert를 나누는 설계입니다. 핵심 ablation은 human data를 뺀 조건, shared block을 뺀 조건, embodiment expert만 쓴 조건을 같은 robot split에서 비교하는 것입니다. seen robot·unseen object·unseen robot을 분리해야 단순 task transfer와 morphology generalization이 섞이지 않습니다.
+Being-H0.5는 human data와 여러 robot data를 하나의 의미적 action 구조에서 학습하고, 공유 primitive와 robot별 expert를 나누는 설계입니다. 핵심 ablation은 human data를 뺀 조건, shared block을 뺀 조건, embodiment expert만 쓴 조건을 같은 robot split에서 비교하는 것입니다. seen robot, unseen object, unseen robot을 분리해야 단순 task transfer와 morphology generalization이 섞이지 않습니다.
 
-실제 평가에는 task success, contact·collision, control latency, action smoothness, safety stop, 새 robot에 필요한 data·fine-tuning 시간을 넣습니다. 인간에게 자연스러운 motion이 360도 joint 같은 robot 고유 능력을 제한하는지도 failure case로 봅니다. 장기 planning은 reactive policy와 별도 상위 계층의 문제로 남습니다.
+실제 평가에는 task success, contact, collision, control latency, action smoothness, safety stop, 새 robot에 필요한 data, fine-tuning 시간을 넣습니다. 인간에게 자연스러운 motion이 360도 joint 같은 robot 고유 능력을 제한하는지도 failure case로 봅니다. 장기 planning은 reactive policy와 별도 상위 계층의 문제로 남습니다.
 
-따라서 Being-H0.5의 의미는 범용 robot controller가 완성됐다는 선언이 아니라 **공통 interaction 의미와 embodiment-specific control을 어디서 나눌지 제시한 설계**입니다. 이 분리가 실제 새 hardware의 data·통합 비용을 줄이는지는 위 지표로 확인해야 합니다.
+따라서 Being-H0.5의 의미는 범용 robot controller가 완성됐다는 선언이 아니라 **공통 interaction 의미와 embodiment-specific control을 어디서 나눌지 제시한 설계**입니다. 이 분리가 실제 새 hardware의 data, 통합 비용을 줄이는지는 위 지표로 확인해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [MA-EgoQA는 로봇 6대의 영상을 함께 이해할까: 7일 기억과 EgoMAS 검색]({% post_url 2026-03-12-MA-EgoQA--Question-Answering-over-Egocentric-Videos-from-Multiple-Embodied-Agents %}) — 여섯 에이전트의 7일치 1인칭 영상에서 질문에 답하는 MA-EgoQA와, Agent별 검색·공유 Memory를 쓰는 EgoMAS의 정확도·연산 한계를 정리합니다.
+- [MA-EgoQA는 로봇 6대의 영상을 함께 이해할까: 7일 기억과 EgoMAS 검색]({% post_url 2026-03-12-MA-EgoQA--Question-Answering-over-Egocentric-Videos-from-Multiple-Embodied-Agents %}) — 여섯 에이전트의 7일치 1인칭 영상에서 질문에 답하는 MA-EgoQA와, Agent별 검색, 공유 Memory를 쓰는 EgoMAS의 정확도, 연산 한계를 정리합니다.
 - [LingBot-VLA의 261 samples/s는 로봇 제어 속도일까: 2만 시간 데이터와 130회 전이]({% post_url 2026-01-29-A-Pragmatic-VLA-Foundation-Model %}) — 9개 듀얼 암 구성의 2만 시간 데이터, 100개 과제, 261 samples/s를 배치 관점에서 구분해 해석합니다.
-- [GR-Dexter는 양손 42-DoF를 어떻게 다루나: 데이터·가림·제어]({% post_url 2026-01-02-GR-Dexter-Technical-Report %}) — 양손 21-DoF 로봇을 VLA로 제어할 때 생기는 액션 차원, 손-물체 가림, 데이터 부족 문제와 평가 기준
+- [GR-Dexter는 양손 42-DoF를 어떻게 다루나: 데이터, 가림, 제어]({% post_url 2026-01-02-GR-Dexter-Technical-Report %}) — 양손 21-DoF 로봇을 VLA로 제어할 때 생기는 액션 차원, 손-물체 가림, 데이터 부족 문제와 평가 기준
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 인간 손동작을 로봇 action으로 바로 복사하나요?
 
-아닙니다. 인간 interaction을 공통 의미 표현으로 활용하되 각 robot의 DoF·sensor·control 주기에 맞는 embodiment-specific mapping이 필요합니다.
+아닙니다. 인간 interaction을 공통 의미 표현으로 활용하되 각 robot의 DoF, sensor, control 주기에 맞는 embodiment-specific mapping이 필요합니다.
 
 ### Mixture-of-Flow는 무엇을 분리하나요?
 
 robot 사이에 공유할 motor primitive와 특정 hardware의 저수준 action expert를 분리하고 gating으로 현재 embodiment에 맞는 경로를 선택합니다.
 
-### LIBERO·RoboCasa 점수가 실제 robot 일반화를 보장하나요?
+### LIBERO, RoboCasa 점수가 실제 robot 일반화를 보장하나요?
 
-아닙니다. benchmark·simulation 조건의 보고값이며 unseen hardware에서 calibration·latency·안전 정지·실제 task 성공을 별도로 평가해야 합니다.
+아닙니다. benchmark, simulation 조건의 보고값이며 unseen hardware에서 calibration, latency, 안전 정지, 실제 task 성공을 별도로 평가해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.12993)

@@ -10,15 +10,15 @@ tags:
   - 경량화
   - 로보틱스
 math: true
-summary: "NEPA가 pixel 재구성이나 discrete token 없이 다음 patch embedding을 예측하는 구조와 scan 순서·표현 붕괴·전이 평가의 한계를 정리합니다."
-description: "NEPA가 pixel 복원 대신 다음 patch embedding을 예측하는 구조를 causal mask·stop-gradient·shift로 설명하고, 보고된 성능과 적용 한계를 구분합니다."
+summary: "NEPA가 pixel 재구성이나 discrete token 없이 다음 patch embedding을 예측하는 구조와 scan 순서, 표현 붕괴, 전이 평가의 한계를 정리합니다."
+description: "NEPA가 pixel 복원 대신 다음 patch embedding을 예측하는 구조를 causal mask, stop-gradient, shift로 설명하고, 보고된 성능과 적용 한계를 구분합니다."
 faq:
   - question: "NEPA는 다음 픽셀을 직접 예측하나요?"
     answer: "아닙니다. 이미지를 patch sequence로 만들고 연속 embedding 공간에서 다음 patch의 표현을 예측합니다."
   - question: "stop-gradient는 왜 필요한가요?"
     answer: "target embedding을 모델이 손실을 줄이기 위해 함께 움직이는 것을 막아 모든 표현이 같은 값으로 붕괴하는 위험을 줄이기 위해 사용됩니다."
   - question: "ImageNet 결과만으로 범용 vision backbone임을 확정할 수 있나요?"
-    answer: "아닙니다. 보고된 분류·전이 결과는 해당 데이터와 설정의 결과이며 scan 순서와 다른 도메인에서도 같은 이점이 유지되는지 별도 평가해야 합니다."
+    answer: "아닙니다. 보고된 분류, 전이 결과는 해당 데이터와 설정의 결과이며 scan 순서와 다른 도메인에서도 같은 이점이 유지되는지 별도 평가해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.16922.png
   alt: "NEPA는 왜 다음 Pixel 대신 Embedding을 예측할까? Causal Mask와 Stop-Gradient 논문 대표 이미지"
@@ -28,7 +28,7 @@ NEPA의 핵심은 **이미지의 다음 pixel이 아니라 다음 patch의 연�
 
 ## NEPA는 무엇을 바꾸려는가
 
-언어의 next-token prediction을 vision에 그대로 옮기기 어려운 이유는 pixel의 연속성과 높은 국소 중복성입니다. NEPA는 pixel decoder나 별도 discrete tokenizer 대신 ViT가 만든 embedding sequence 자체를 예측 대상으로 삼습니다. 원문은 ViT-B 83.8%, ViT-L 85.3%의 ImageNet-1K Top-1 결과를 제시하며, 이 수치는 해당 pretraining·fine-tuning 조건에서 비교해야 합니다.
+언어의 next-token prediction을 vision에 그대로 옮기기 어려운 이유는 pixel의 연속성과 높은 국소 중복성입니다. NEPA는 pixel decoder나 별도 discrete tokenizer 대신 ViT가 만든 embedding sequence 자체를 예측 대상으로 삼습니다. 원문은 ViT-B 83.8%, ViT-L 85.3%의 ImageNet-1K Top-1 결과를 제시하며, 이 수치는 해당 pretraining, fine-tuning 조건에서 비교해야 합니다.
 
 ## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
 
@@ -122,7 +122,7 @@ NEPA의 가장 큰 잠재력은 **범용성**에 있습니다. '임베딩 예측
 
 ## 7. 어떤 실험으로 유효성을 확인할까
 
-NEPA는 causal prediction을 vision embedding에 적용하면서 복잡한 decoder와 사전 tokenizer 의존을 줄이려는 설계입니다. 핵심 비교는 같은 ViT·data·학습 budget에서 MAE, discrete token 방식, NEPA를 놓고 pretraining 비용과 downstream 결과를 함께 보는 것입니다. 분류 Top-1만이 아니라 linear probing, segmentation, 적은 label 조건을 나눠야 어떤 표현이 좋아졌는지 알 수 있습니다.
+NEPA는 causal prediction을 vision embedding에 적용하면서 복잡한 decoder와 사전 tokenizer 의존을 줄이려는 설계입니다. 핵심 비교는 같은 ViT, data, 학습 budget에서 MAE, discrete token 방식, NEPA를 놓고 pretraining 비용과 downstream 결과를 함께 보는 것입니다. 분류 Top-1만이 아니라 linear probing, segmentation, 적은 label 조건을 나눠야 어떤 표현이 좋아졌는지 알 수 있습니다.
 
 실패 조건도 분명합니다. raster scan 순서를 바꾸었을 때 결과가 크게 흔들리거나, stop-gradient 설정에 따라 collapse가 발생하거나, ImageNet 밖의 장면에서 전이 이점이 사라질 수 있습니다. patch 순서별 ablation과 target embedding 분산을 기록하고, 다른 해상도와 domain에서 같은 경향이 유지되는지 확인해야 합니다.
 
@@ -133,7 +133,7 @@ NEPA는 causal prediction을 vision embedding에 적용하면서 복잡한 decod
 
 - [로봇은 미래 픽셀까지 그려야 할까? FRAPPE의 다중 VFM 정렬]({% post_url 2026-02-22-FRAPPE--Infusing-World-Modeling-into-Generalist-Policies-via-Multiple-Future-Representation-Alignment %}) — FRAPPE가 다음 화면의 픽셀 대신 여러 시각 기초 모델의 미래 표현을 맞추는 이유와 장기 조작에서 얻는 이점, 계산 비용을 정리합니다.
 - [비디오를 Pixel부터 만들지 않는 이유: SemanticGen의 Semantic→Latent 2단계]({% post_url 2025-12-24-SemanticGen--Video-Generation-in-Semantic-Space %}) — SemanticGen이 먼저 저차원 semantic feature에서 장면과 움직임을 계획하고 뒤에서 VAE latent의 질감을 채우는 이유, 효율 이득과 2단계 오류 전파를 함께 정리합니다.
-- [GigaBrain-0.5M\*는 월드 모델을 로봇 정책에 어떻게 연결하나]({% post_url 2026-02-13-GigaBrain-0-5M---a-VLA-That-Learns-From-World-Model-Based-Reinforcement-Learning %}) — GigaBrain-0.5M*의 RAMP가 월드 모델·인간 개입 롤아웃·지속 학습을 연결하는 방식과 보고된 로봇 과제 성능의 한계를 분석합니다.
+- [GigaBrain-0.5M\*는 월드 모델을 로봇 정책에 어떻게 연결하나]({% post_url 2026-02-13-GigaBrain-0-5M---a-VLA-That-Learns-From-World-Model-Based-Reinforcement-Learning %}) — GigaBrain-0.5M*의 RAMP가 월드 모델, 인간 개입 롤아웃, 지속 학습을 연결하는 방식과 보고된 로봇 과제 성능의 한계를 분석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -148,6 +148,6 @@ target embedding을 모델이 손실을 줄이기 위해 함께 움직이는 것
 
 ### ImageNet 결과만으로 범용 vision backbone임을 확정할 수 있나요?
 
-아닙니다. 보고된 분류·전이 결과는 해당 데이터와 설정의 결과이며 scan 순서와 다른 도메인에서도 같은 이점이 유지되는지 별도 평가해야 합니다.
+아닙니다. 보고된 분류, 전이 결과는 해당 데이터와 설정의 결과이며 scan 순서와 다른 도메인에서도 같은 이점이 유지되는지 별도 평가해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.16922)

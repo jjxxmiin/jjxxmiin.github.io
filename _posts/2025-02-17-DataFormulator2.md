@@ -1,11 +1,11 @@
 ---
 layout: post
-title:  "Data Formulator 2로 차트를 반복 수정하는 법: Shelf·Threads·AI 변환"
+title:  "Data Formulator 2로 차트를 반복 수정하는 법: Shelf, Threads, AI 변환"
 summary: "자연어만 믿지 않고 차트 인코딩, 파생 필드, 탐색 분기를 함께 관리하는 Data Formulator 2의 핵심 흐름"
-description: "Data Formulator 2의 Shelf·파생 필드·Data Threads를 이용해 차트를 반복 수정하고, AI가 만든 계산과 분석 분기를 검증하는 실무 절차를 설명합니다."
+description: "Data Formulator 2의 Shelf, 파생 필드, Data Threads를 이용해 차트를 반복 수정하고, AI가 만든 계산과 분석 분기를 검증하는 실무 절차를 설명합니다."
 faq:
   - question: "Shelf와 자연어는 어떻게 나눠 써야 하나요?"
-    answer: "원본 field의 X축·Y축·색상 역할은 Shelf에 고정하고, 데이터에 없는 파생 field의 계산과 변환을 자연어로 요청하는 편이 검증하기 쉽습니다."
+    answer: "원본 field의 X축, Y축, 색상 역할은 Shelf에 고정하고, 데이터에 없는 파생 field의 계산과 변환을 자연어로 요청하는 편이 검증하기 쉽습니다."
   - question: "AI가 만든 파생 필드는 바로 믿어도 되나요?"
     answer: "아닙니다. 분모, 결측값, group 기준과 단위를 확인하고 몇 행은 원자료로 직접 다시 계산해야 합니다."
   - question: "Data Threads는 단순한 실행 취소인가요?"
@@ -68,7 +68,7 @@ Data Threads는 분석 과정을 하나의 직선이 아니라 재사용 가능�
 
 논문에 소개된 사용자 연구에는 데이터 분석가 8명이 참여해 16개 차트를 만들었습니다. 표에 제시된 평균 작업 시간은 1차 세션 20분, 2차 세션 33분입니다. 참가자 피드백은 직관성과 ChatGPT 대비 시각화 생성 경험을 긍정적으로 평가했지만, 이 두 시간만으로 기존 도구보다 얼마나 빨라졌는지 계산할 비교 기준은 제시되지 않았습니다.
 
-원문이 제시한 최소 설치·실행 흐름은 다음과 같습니다.
+원문이 제시한 최소 설치, 실행 흐름은 다음과 같습니다.
 
 ~~~bash
 pip install data_formulator
@@ -92,23 +92,23 @@ AI가 만든 transform 결과에서는 몇 행을 손으로 다시 계산합니�
 
 원본 chart를 기준점으로 남기고 filter, 파생 field, average line을 각각 다른 branch에 추가하면 어느 결정이 시각적 결론을 바꿨는지 알 수 있습니다. 두 가설을 비교할 때는 공통 base에서 갈라지게 하고, branch 이름에 질문과 변경 내용을 적는 방식이 유용합니다.
 
-공유 전에는 각 branch의 질문, transform 정의, 포함·제외 조건, 최종 chart를 함께 검토합니다. AI가 이전 대화 문맥을 잘못 이어받았을 때도 새 branch에서 재현되는지 확인하면 숨은 상태 의존성을 찾을 수 있습니다. 이 도구의 가치는 완성 chart를 대신 판단하는 데보다 탐색 과정을 되돌리고 비교할 수 있게 만드는 데 있습니다.
+공유 전에는 각 branch의 질문, transform 정의, 포함, 제외 조건, 최종 chart를 함께 검토합니다. AI가 이전 대화 문맥을 잘못 이어받았을 때도 새 branch에서 재현되는지 확인하면 숨은 상태 의존성을 찾을 수 있습니다. 이 도구의 가치는 완성 chart를 대신 판단하는 데보다 탐색 과정을 되돌리고 비교할 수 있게 만드는 데 있습니다.
 
 예를 들어 “월별 매출”을 요청했는데 AI가 주문 수를 합산했다면 차트 모양을 고치기 전에 생성된 파생식과 집계 함수를 확인해야 합니다. 원본 행 몇 개를 손으로 계산해 같은 값이 나오는지 비교하면 보기 좋은 오답을 초기에 걸러낼 수 있습니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [차트 OCR은 글자만 맞으면 될까? OCRVerse의 문서·웹·수치 보상 분리]({% post_url 2026-01-30-OCRVerse--Towards-Holistic-OCR-in-End-to-End-Vision-Language-Models %}) — OCRVerse가 문서의 줄바꿈, 차트의 수치, 웹의 계층 구조를 같은 기준으로 채점하지 않고 SFT 뒤 도메인별 보상 RL로 다듬는 이유와 실제 검수 포인트를 정리합니다.
-- [차트·흐름도를 바로 읽지 말고 다시 그리면 나아질까: Thinking with Drafting]({% post_url 2026-02-14-Thinking-with-Drafting--Optical-Decompression-via-Logical-Reconstruction %}) — TwD가 이미지의 객체와 관계를 Logic Graphic DSL로 재구성한 뒤 검증하는 방식, VisAlg 성과와 OCR·DSL 범위 한계를 설명합니다.
-- [Claude Scientific Skills가 계산 환각을 없앨까: 코드 실행과 인과 추론의 차이]({% post_url 2026-03-02-Is-Claude-the-New-Scientist-Deep-Dive-into-Claudes-Scientific-Capabilities--Code-Execution %}) — Claude가 Python으로 계산·통계·차트를 실행할 때 얻는 재현성과, 잘못된 코드·데이터 전제·상관관계 해석에서 남는 오류를 구분합니다.
+- [차트 OCR은 글자만 맞으면 될까? OCRVerse의 문서, 웹, 수치 보상 분리]({% post_url 2026-01-30-OCRVerse--Towards-Holistic-OCR-in-End-to-End-Vision-Language-Models %}) — OCRVerse가 문서의 줄바꿈, 차트의 수치, 웹의 계층 구조를 같은 기준으로 채점하지 않고 SFT 뒤 도메인별 보상 RL로 다듬는 이유와 실제 검수 포인트를 정리합니다.
+- [차트, 흐름도를 바로 읽지 말고 다시 그리면 나아질까: Thinking with Drafting]({% post_url 2026-02-14-Thinking-with-Drafting--Optical-Decompression-via-Logical-Reconstruction %}) — TwD가 이미지의 객체와 관계를 Logic Graphic DSL로 재구성한 뒤 검증하는 방식, VisAlg 성과와 OCR, DSL 범위 한계를 설명합니다.
+- [Claude Scientific Skills가 계산 환각을 없앨까: 코드 실행과 인과 추론의 차이]({% post_url 2026-03-02-Is-Claude-the-New-Scientist-Deep-Dive-into-Claudes-Scientific-Capabilities--Code-Execution %}) — Claude가 Python으로 계산, 통계, 차트를 실행할 때 얻는 재현성과, 잘못된 코드, 데이터 전제, 상관관계 해석에서 남는 오류를 구분합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Shelf와 자연어는 어떻게 나눠 써야 하나요?
 
-원본 field의 X축·Y축·색상 역할은 Shelf에 고정하고, 데이터에 없는 파생 field의 계산과 변환을 자연어로 요청하는 편이 검증하기 쉽습니다.
+원본 field의 X축, Y축, 색상 역할은 Shelf에 고정하고, 데이터에 없는 파생 field의 계산과 변환을 자연어로 요청하는 편이 검증하기 쉽습니다.
 
 ### AI가 만든 파생 필드는 바로 믿어도 되나요?
 

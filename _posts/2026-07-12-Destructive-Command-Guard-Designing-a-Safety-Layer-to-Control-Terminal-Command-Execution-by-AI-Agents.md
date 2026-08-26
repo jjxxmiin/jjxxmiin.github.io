@@ -12,7 +12,7 @@ tags:
 summary: AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트
   피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일 'Destructive Command Guard'의 작동
   원리와 실무 도입 방법을 심층 분석합니다.
-description: 'Destructive Command Guard가 셸 명령을 실행 전에 분석하는 방식과 패턴·AST 검사의 범위, 우회·오탐·fail-open 정책 검증법을 설명합니다.'
+description: 'Destructive Command Guard가 셸 명령을 실행 전에 분석하는 방식과 패턴, AST 검사의 범위, 우회, 오탐, fail-open 정책 검증법을 설명합니다.'
 github_url: https://github.com/Dicklesworthstone/destructive_command_guard
 image:
   path: https://opengraph.githubassets.com/1/Dicklesworthstone/destructive_command_guard
@@ -42,7 +42,7 @@ mermaid: true
 chart: true
 ---
 
-Destructive Command Guard는 에이전트가 만든 셸 명령을 실행 전에 검사해 알려진 파괴 패턴을 차단하는 안전 계층입니다. 빠른 패턴 매칭은 유용하지만 별칭, 스크립트 내부, 간접 호출과 잘못 지정된 대상까지 모두 이해하는 권한 시스템은 아닙니다. 허용·차단 사례와 우회 사례를 함께 시험하고, 분석 실패 시 실행할지 멈출지 정책을 작업 위험도에 맞춰 정해야 합니다.
+Destructive Command Guard는 에이전트가 만든 셸 명령을 실행 전에 검사해 알려진 파괴 패턴을 차단하는 안전 계층입니다. 빠른 패턴 매칭은 유용하지만 별칭, 스크립트 내부, 간접 호출과 잘못 지정된 대상까지 모두 이해하는 권한 시스템은 아닙니다. 허용, 차단 사례와 우회 사례를 함께 시험하고, 분석 실패 시 실행할지 멈출지 정책을 작업 위험도에 맞춰 정해야 합니다.
 
 [TL;DR]
 - 자율형 AI 코딩 에이전트가 임의로 파괴적인 명령어(예: `rm -rf`, `git reset`)를 실행하는 것을 방지하는 사전 실행 보안 계층(Pre-execution Safety Layer)입니다.

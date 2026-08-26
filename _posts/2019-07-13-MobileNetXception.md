@@ -2,7 +2,7 @@
 layout: post
 title:  "Xception과 MobileNet은 Depthwise Separable Convolution을 어떻게 다르게 쓰나"
 summary: "Depthwise separable convolution을 Xception은 Inception의 상관관계 분리로, MobileNet은 모바일 계산량 절감으로 사용하는 차이와 선택 기준을 설명합니다."
-description: "Xception과 MobileNet의 depthwise·pointwise convolution 공통 원리와 연산 배치, skip connection, 모바일 속도와 표현력의 선택 기준을 비교합니다."
+description: "Xception과 MobileNet의 depthwise, pointwise convolution 공통 원리와 연산 배치, skip connection, 모바일 속도와 표현력의 선택 기준을 비교합니다."
 image:
   path: /assets/img/thumb/MobileNetXception.jpg
   alt: Xception MobileNet 톺아보기 대표 이미지
@@ -13,7 +13,7 @@ tags:
   - 논문리뷰
 faq:
   - question: "Depthwise separable convolution은 일반 convolution과 무엇이 다른가요?"
-    answer: "공간 방향 필터링을 채널별 depthwise 연산으로 하고, 채널 결합을 1×1 pointwise 연산으로 나눕니다. 두 연산이 일반 convolution의 공간·채널 처리를 분리합니다."
+    answer: "공간 방향 필터링을 채널별 depthwise 연산으로 하고, 채널 결합을 1×1 pointwise 연산으로 나눕니다. 두 연산이 일반 convolution의 공간, 채널 처리를 분리합니다."
   - question: "Xception과 MobileNet은 같은 모델 계열인가요?"
     answer: "같은 핵심 연산을 쓰지만 출발점과 설계 목적이 다릅니다. Xception은 Inception의 분리를 극단화하고, MobileNet은 모바일 환경에서 계산량과 지연을 줄이는 데 초점을 둡니다."
   - question: "파라미터가 적은 모델이 항상 실제 기기에서도 빠른가요?"
@@ -31,7 +31,7 @@ Xception과 MobileNet의 공통점은 `depthwise separable convolution`이지만
 
 ![Depthwise separable convolution 구성](/assets/img/post_img/xception/cost3.PNG)
 
-원문에서 `1x1 conv`는 채널 간 상관관계와 차원 축소를, `3x3 conv`는 공간·방향 상관관계를 담당하는 것으로 정리했습니다. 이 분리는 두 모델을 함께 이해할 수 있는 출발점입니다.
+원문에서 `1x1 conv`는 채널 간 상관관계와 차원 축소를, `3x3 conv`는 공간, 방향 상관관계를 담당하는 것으로 정리했습니다. 이 분리는 두 모델을 함께 이해할 수 있는 출발점입니다.
 
 ## Xception: Inception 모듈을 더 강하게 분리하기
 
@@ -56,7 +56,7 @@ Xception이 사용하는 강한 Inception 모듈은 각 출력 채널에 공간 
 
 ![Xception 모델 구조](/assets/img/post_img/xception/model.PNG)
 
-즉 Xception을 볼 때는 “작은 모델인가?”보다 **Inception의 공간·채널 상관관계를 얼마나 독립적으로 다루는가**를 먼저 보는 편이 정확합니다.
+즉 Xception을 볼 때는 “작은 모델인가?”보다 **Inception의 공간, 채널 상관관계를 얼마나 독립적으로 다루는가**를 먼저 보는 편이 정확합니다.
 
 ## MobileNet: 모델 크기보다 연산 속도를 먼저 보기
 
@@ -90,17 +90,17 @@ Xception이 사용하는 강한 Inception 모듈은 각 출력 채널에 공간 
 
 먼저 일반 convolution이 공간 패턴과 채널 결합을 한 번에 수행한다는 점에서 출발합니다. Depthwise 단계는 각 채널의 공간 패턴을 따로 보고, pointwise 단계가 채널 정보를 다시 섞습니다. 계산을 나눴다는 사실만 외우기보다 두 단계 사이의 비선형성과 normalization이 어디에 놓이는지 block 단위로 비교해야 합니다.
 
-Xception을 볼 때는 Inception의 여러 branch를 단순히 가벼운 convolution으로 바꾼 모델이라고 축소하지 않습니다. 채널 간·공간 상관관계를 분리한다는 가정을 더 강하게 적용하고 residual 연결로 깊은 흐름을 보완하는 설계입니다. MobileNet은 같은 연산을 반복 가능한 경량 block으로 사용해 모바일 비용을 줄이는 목적이 더 앞에 놓입니다.
+Xception을 볼 때는 Inception의 여러 branch를 단순히 가벼운 convolution으로 바꾼 모델이라고 축소하지 않습니다. 채널 간, 공간 상관관계를 분리한다는 가정을 더 강하게 적용하고 residual 연결로 깊은 흐름을 보완하는 설계입니다. MobileNet은 같은 연산을 반복 가능한 경량 block으로 사용해 모바일 비용을 줄이는 목적이 더 앞에 놓입니다.
 
 실제 선택에서는 같은 입력과 batch 조건에서 측정합니다. 작은 모델도 장치가 depthwise 연산을 효율적으로 처리하지 못하면 기대만큼 빠르지 않을 수 있고, 전처리와 메모리 복사가 전체 지연을 차지할 수도 있습니다. 정확도, 모델 크기, 단일 입력 지연을 함께 기록해야 논문의 방향을 자신의 환경으로 옮길 수 있습니다.
 
-Quantization을 적용할 계획이라면 float 모델의 순위만 보고 결정하지 않습니다. Depthwise와 pointwise 연산의 지원 정도에 따라 정확도와 지연 변화가 다를 수 있으므로 최종 runtime·정밀도에서 다시 측정해야 합니다.
+Quantization을 적용할 계획이라면 float 모델의 순위만 보고 결정하지 않습니다. Depthwise와 pointwise 연산의 지원 정도에 따라 정확도와 지연 변화가 다를 수 있으므로 최종 runtime, 정밀도에서 다시 측정해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력·순환·출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
-- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse·extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간·채널 재배치와 flatten·extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈·resize 전제를 점검합니다.
+- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력, 순환, 출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
+- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse, extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간, 채널 재배치와 flatten, extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈, resize 전제를 점검합니다.
 - [위성 사진만 보고 학교와 병원을 구분할 수 있을까: SocioReasoner]({% post_url 2026-01-16-Urban-Socio-Semantic-Segmentation-with-Vision-Language-Reasoning %}) — 건물 경계를 넘어 장소의 사회적 기능을 분할하기 위해 위성 영상과 디지털 지도, 계층 레이블을 추론하는 방법과 한계
 <!-- internal-links:end -->
 
@@ -108,7 +108,7 @@ Quantization을 적용할 계획이라면 float 모델의 순위만 보고 결�
 
 ### Depthwise separable convolution은 일반 convolution과 무엇이 다른가요?
 
-공간 방향 필터링을 채널별 depthwise 연산으로 하고, 채널 결합을 1×1 pointwise 연산으로 나눕니다. 두 연산이 일반 convolution의 공간·채널 처리를 분리합니다.
+공간 방향 필터링을 채널별 depthwise 연산으로 하고, 채널 결합을 1×1 pointwise 연산으로 나눕니다. 두 연산이 일반 convolution의 공간, 채널 처리를 분리합니다.
 
 ### Xception과 MobileNet은 같은 모델 계열인가요?
 
@@ -126,7 +126,7 @@ Quantization을 적용할 계획이라면 float 모델의 순위만 보고 결�
 
 정확도도 전체 숫자 하나보다 업무상 중요한 class와 입력 조건으로 나눕니다. 경량 모델이 평균적으로 비슷해도 작은 물체나 흐린 입력에서 오류가 늘 수 있습니다. 목표 지연을 만족하는 후보들 사이에서 실제 데이터의 실패 비용을 비교해야 MobileNet의 목적과 Xception의 표현력 차이를 현실적인 선택으로 연결할 수 있습니다.
 
-마지막으로 전처리와 후처리를 포함합니다. Resize·색상 변환이 CPU에서 오래 걸리면 모델만 바꿔 얻는 이득이 제한됩니다. 배포 시 사용하는 runtime과 정밀도, thread 수를 고정해야 구조 비교가 환경 차이로 왜곡되지 않습니다.
+마지막으로 전처리와 후처리를 포함합니다. Resize, 색상 변환이 CPU에서 오래 걸리면 모델만 바꿔 얻는 이득이 제한됩니다. 배포 시 사용하는 runtime과 정밀도, thread 수를 고정해야 구조 비교가 환경 차이로 왜곡되지 않습니다.
 
 모델을 교체할 때 출력 class와 전처리까지 같은지 확인합니다. Xception과 MobileNet의 입력 크기나 값 범위를 한 코드에서 임의로 공유하면 구조 차이가 아닌 전처리 오류를 비교하게 될 수 있습니다. 각 모델이 기대하는 계약을 지킨 뒤 같은 평가 subset과 지표로 결과를 나란히 봅니다.
 

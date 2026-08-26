@@ -11,7 +11,7 @@ tags:
   - AI메모리
 summary: 단일 일반 카메라만으로 3D 공간을 실시간 스트리밍 방식으로 재구성하는 Robbyant의 오픈소스 파운데이션 모델, lingbot-map의
   작동 원리, 아키텍처, 그리고 한계를 깊이 있게 분석합니다.
-description: 'lingbot-map의 단안 영상 스트리밍 3D 재구성 방식과 1만 프레임 수치의 조건, 장면별 누적 오차·초반 망각·메모리·카메라 이동·실시간성을 점검합니다.'
+description: 'lingbot-map의 단안 영상 스트리밍 3D 재구성 방식과 1만 프레임 수치의 조건, 장면별 누적 오차, 초반 망각, 메모리, 카메라 이동, 실시간성을 점검합니다.'
 github_url: https://github.com/Robbyant/lingbot-map
 image:
   path: https://opengraph.githubassets.com/1/Robbyant/lingbot-map
@@ -35,7 +35,7 @@ mermaid: true
 chart: true
 ---
 
-lingbot-map은 단안 영상이 들어오는 동안 기하 문맥을 갱신해 긴 시퀀스의 3D 구조를 스트리밍으로 재구성하려는 모델입니다. 1만 프레임 처리와 “실시간”은 입력 해상도·하드웨어·출력 형식·오차 기준에 묶인 주장으로 봐야 합니다. 자신의 카메라 움직임에서 초반 지도 망각, 누적 드리프트, 최대 메모리와 프레임당 시간을 함께 측정하세요.
+lingbot-map은 단안 영상이 들어오는 동안 기하 문맥을 갱신해 긴 시퀀스의 3D 구조를 스트리밍으로 재구성하려는 모델입니다. 1만 프레임 처리와 “실시간”은 입력 해상도, 하드웨어, 출력 형식, 오차 기준에 묶인 주장으로 봐야 합니다. 자신의 카메라 움직임에서 초반 지도 망각, 누적 드리프트, 최대 메모리와 프레임당 시간을 함께 측정하세요.
 
 ## 단안 스트리밍 재구성이 필요한 장면은 무엇인가
 
@@ -315,9 +315,9 @@ Robbyant가 추구하는 구체화된 인공지능(Embodied AI)의 비전 속에
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로봇 메모리는 무엇을 기억해야 하나: RoboMME 16개 과제의 답]({% post_url 2026-03-09-RoboMME--Benchmarking-and-Understanding-Memory-for-Robotic-Generalist-Policies %}) — RoboMME가 π0.5에서 14개 메모리 변형을 시간·공간·객체·절차 기억 16개 과제로 비교한 이유와 배포 선택 기준을 정리합니다.
-- [이미지 1,000장 3D 재구성에서 OOM을 피하려면: VGG-T³]({% post_url 2026-02-28-VGG-T-3--Offline-Feed-Forward-3D-Reconstruction-at-Scale %}) — VGG-T³가 가변 KV 문맥을 고정 크기 MLP에 테스트타임 학습으로 압축해 선형 확장을 얻는 방식, 54초 보고 수치와 품질·지연 조건을 풀이합니다.
-- [LoGeR가 19,000프레임 3D 재구성을 버틸까: TTT·SWA 메모리의 대가]({% post_url 2026-03-10-LoGeR--Long-Context-Geometric-Reconstruction-with-Hybrid-Memory %}) — 128프레임으로 학습한 LoGeR가 TTT 전역 메모리와 SWA 로컬 메모리로 19,000프레임을 처리하는 방식, ATE·처리량·업데이트 비용을 점검합니다.
+- [로봇 메모리는 무엇을 기억해야 하나: RoboMME 16개 과제의 답]({% post_url 2026-03-09-RoboMME--Benchmarking-and-Understanding-Memory-for-Robotic-Generalist-Policies %}) — RoboMME가 π0.5에서 14개 메모리 변형을 시간, 공간, 객체, 절차 기억 16개 과제로 비교한 이유와 배포 선택 기준을 정리합니다.
+- [이미지 1,000장 3D 재구성에서 OOM을 피하려면: VGG-T³]({% post_url 2026-02-28-VGG-T-3--Offline-Feed-Forward-3D-Reconstruction-at-Scale %}) — VGG-T³가 가변 KV 문맥을 고정 크기 MLP에 테스트타임 학습으로 압축해 선형 확장을 얻는 방식, 54초 보고 수치와 품질, 지연 조건을 풀이합니다.
+- [LoGeR가 19,000프레임 3D 재구성을 버틸까: TTT, SWA 메모리의 대가]({% post_url 2026-03-10-LoGeR--Long-Context-Geometric-Reconstruction-with-Hybrid-Memory %}) — 128프레임으로 학습한 LoGeR가 TTT 전역 메모리와 SWA 로컬 메모리로 19,000프레임을 처리하는 방식, ATE, 처리량, 업데이트 비용을 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

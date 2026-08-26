@@ -12,7 +12,7 @@ tags:
 summary: vitali87의 Code Graph RAG는 다국어 코드베이스를 Tree-sitter로 파싱하여 Memgraph 지식 그래프로 구축하는
   획기적인 도구입니다. 텍스트 의미 기반의 벡터 검색이 가진 한계를 극복하고 상속, 호출, 데이터 흐름 같은 구조적 관계를 AI에게 직접 제공함으로써,
   대규모 모노레포 환경에서도 환각 없이 정밀하게 코드를 분석하고 리팩토링할 수 있도록 돕습니다.
-description: 'Code Graph RAG가 Tree-sitter와 Memgraph로 호출·상속·데이터 흐름을 보존하는 방식과 색인 최신성·동적 코드·질의 검증을 설명합니다.'
+description: 'Code Graph RAG가 Tree-sitter와 Memgraph로 호출, 상속, 데이터 흐름을 보존하는 방식과 색인 최신성, 동적 코드, 질의 검증을 설명합니다.'
 github_url: https://github.com/vitali87/code-graph-rag
 image:
   path: https://opengraph.githubassets.com/1/vitali87/code-graph-rag

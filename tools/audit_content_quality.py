@@ -14,6 +14,9 @@ import yaml
 
 FRONT_MATTER = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 FENCE = re.compile(r"```.*?```|~~~.*?~~~", re.DOTALL)
+MATH = re.compile(r"\$\$.*?\$\$|\$[^$\n]+\$", re.DOTALL)
+CODE_TAG = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE)
+INLINE_CODE = re.compile(r"`[^`\n]+`")
 HTML_COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 HTML_TAG = re.compile(r"</?[A-Za-z][^>\n]*>")
 LIQUID = re.compile(r"\{[%{].*?[}%]\}")
@@ -60,6 +63,7 @@ TITLE_HYPE = re.compile(
 )
 EMOJI = re.compile(r"[\U0001F300-\U0001FAFF\u2600-\u27BF]")
 KEYCAP = re.compile(r"[0-9]\ufe0f?\u20e3")
+MIDDOT = "\u00b7"
 
 
 def visible_text(body: str) -> str:
@@ -156,6 +160,9 @@ def audit(root: Path) -> tuple[list[str], list[str], dict[str, int]]:
         body = raw[match.end() :]
         core_body = PRIMARY_SOURCE_BLOCK.sub("", INTERNAL_LINK_BLOCK.sub("", body))
         plain = visible_text(core_body)
+        prose_without_code_or_math = visible_text(
+            MATH.sub(" ", INLINE_CODE.sub(" ", CODE_TAG.sub(" ", core_body)))
+        )
         visible_len = len(re.sub(r"\s", "", plain))
         reader_visible_len = len(re.sub(r"\s", "", visible_text(body)))
         stats["posts"] += 1
@@ -173,6 +180,15 @@ def audit(root: Path) -> tuple[list[str], list[str], dict[str, int]]:
         summary = SPACE.sub(" ", str(data.get("summary") or "")).strip()
         description = SPACE.sub(" ", str(data.get("description") or summary)).strip()
         published = data.get("published", True) is not False
+        for field_name, value in (
+            ("title", title),
+            ("summary", summary),
+            ("description", description),
+        ):
+            if MIDDOT in value:
+                errors.append(f"{rel}: middle dot remains in {field_name}")
+        if MIDDOT in prose_without_code_or_math:
+            errors.append(f"{rel}: stylistic middle dot remains in visible prose")
         if not title:
             errors.append(f"{rel}: title missing")
         elif title.startswith("[") or TITLE_HYPE.search(title):
@@ -210,6 +226,8 @@ def audit(root: Path) -> tuple[list[str], list[str], dict[str, int]]:
             errors.append(f"{rel}: hero image metadata is missing")
         else:
             hero_alt = SPACE.sub(" ", str(hero.get("alt") or "")).strip()
+            if MIDDOT in hero_alt:
+                errors.append(f"{rel}: middle dot remains in hero image alt")
             if not 5 <= len(hero_alt) <= 160:
                 errors.append(f"{rel}: hero image alt length {len(hero_alt)}")
             if hero_alt.casefold() in {"paper thumbnail", "preview image", "thumbnail"}:

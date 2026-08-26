@@ -18,6 +18,7 @@ summary: 클로드 코드는 무료 플랜을 지원하지 않으며 월 20달�
 target_keyword: 클로드 코드 가격
 keyword_tier: T1
 sitemap: true
+home_presentation: compact
 image:
   path: /assets/img/thumb/claude-code-pricing-and-plan-comparison-guide-2026.jpg
   alt: 클로드 코드 가격 및 요금제 완벽 비교 가이드 (2026년 기준) 대표 이미지

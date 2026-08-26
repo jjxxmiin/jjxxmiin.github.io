@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "MiroFish의 에이전트 사회는 예측 엔진일까: GraphRAG·OASIS와 비용 폭발"
+title: "MiroFish의 에이전트 사회는 예측 엔진일까: GraphRAG, OASIS와 비용 폭발"
 date: '2026-03-12 06:29:26'
 categories: Tech
 tags:
@@ -9,8 +9,8 @@ tags:
   - 웹개발
   - 컨텍스트윈도우
   - AI에이전트
-summary: "GraphRAG 기억과 OASIS 환경에서 에이전트 사회를 돌리는 MiroFish의 구조를 살펴보고, 확률 보정·상관된 환각·Context·JSON·운영 비용 한계를 정리합니다."
-description: 'MiroFish의 GraphRAG·OASIS 멀티에이전트 사회 시뮬레이션 구조와 확률 해석, 시나리오 민감도·상태 복구·호출 비용을 검증하는 법을 설명합니다.'
+summary: "GraphRAG 기억과 OASIS 환경에서 에이전트 사회를 돌리는 MiroFish의 구조를 살펴보고, 확률 보정, 상관된 환각, Context, JSON, 운영 비용 한계를 정리합니다."
+description: 'MiroFish의 GraphRAG, OASIS 멀티에이전트 사회 시뮬레이션 구조와 확률 해석, 시나리오 민감도, 상태 복구, 호출 비용을 검증하는 법을 설명합니다.'
 github_url: https://github.com/666ghj/MiroFish
 image:
   path: https://opengraph.githubassets.com/1/666ghj/MiroFish
@@ -19,18 +19,18 @@ faq:
   - question: 'MiroFish가 제시한 확률을 실제 사건의 예측 확률로 써도 되나요?'
     answer: '그대로 쓰면 안 됩니다. 반복 시뮬레이션과 과거 사건에서 보정되지 않은 숫자는 모델이 만든 요약일 수 있으며 통계적으로 검증된 확률이 아닙니다.'
   - question: '에이전트 수를 늘리면 현실 사람들의 다양성을 재현할 수 있나요?'
-    answer: '자동으로 그렇지는 않습니다. 같은 모델·초기 그래프·행동 규칙을 공유하면 오류와 편향도 상관되므로 페르소나 수보다 가정 변화에 대한 민감도를 확인해야 합니다.'
+    answer: '자동으로 그렇지는 않습니다. 같은 모델, 초기 그래프, 행동 규칙을 공유하면 오류와 편향도 상관되므로 페르소나 수보다 가정 변화에 대한 민감도를 확인해야 합니다.'
   - question: 'MiroFish는 어떤 용도로 쓰는 것이 적절한가요?'
-    answer: '미래를 단정하기보다 특정 가정에서 가능한 반응 경로를 찾고, Seed 데이터·페르소나·사건 주입을 바꿨을 때 결론이 어떻게 달라지는지 탐색하는 용도가 적절합니다.'
+    answer: '미래를 단정하기보다 특정 가정에서 가능한 반응 경로를 찾고, Seed 데이터, 페르소나, 사건 주입을 바꿨을 때 결론이 어떻게 달라지는지 탐색하는 용도가 적절합니다.'
 ---
 
 MiroFish는 가정을 바꿔가며 가능한 반응을 탐색하는 사회 시뮬레이터이지, 현실 사건의 확률을 자동으로 보정해 주는 예측기는 아닙니다.
 
-[MiroFish](https://github.com/666ghj/MiroFish)는 뉴스·정책·서사 같은 Seed Data로 지식 그래프를 만들고, 여러 Persona Agent가 가상 환경에서 상호작용하게 합니다. 결과를 ReportAgent가 요약하므로 “이 조건에서 어떤 반응 경로가 나왔는가”를 살펴볼 수 있습니다. 하지만 Agent가 100명으로 늘어도 같은 Model의 가정과 편향을 공유하면 독립적인 100명의 표본이 되지 않습니다.
+[MiroFish](https://github.com/666ghj/MiroFish)는 뉴스, 정책, 서사 같은 Seed Data로 지식 그래프를 만들고, 여러 Persona Agent가 가상 환경에서 상호작용하게 합니다. 결과를 ReportAgent가 요약하므로 “이 조건에서 어떤 반응 경로가 나왔는가”를 살펴볼 수 있습니다. 하지만 Agent가 100명으로 늘어도 같은 Model의 가정과 편향을 공유하면 독립적인 100명의 표본이 되지 않습니다.
 
 ## GraphRAG는 세계관과 장기 기억을 만든다
 
-시뮬레이션 전 Seed Data에서 인물·사건·관계 Entity를 추출해 GraphRAG로 구성합니다. 단순 Vector 유사도보다 적대·협력·영향 같은 연결을 Persona의 초기 Memory에 전달하기 위한 구조입니다. 원문은 지속적인 기억을 위해 Zep Cloud도 통합한다고 설명합니다.
+시뮬레이션 전 Seed Data에서 인물, 사건, 관계 Entity를 추출해 GraphRAG로 구성합니다. 단순 Vector 유사도보다 적대, 협력, 영향 같은 연결을 Persona의 초기 Memory에 전달하기 위한 구조입니다. 원문은 지속적인 기억을 위해 Zep Cloud도 통합한다고 설명합니다.
 
 초기 Graph가 틀리면 이후 상호작용은 그 오류를 사실로 사용합니다. Source 문장과 Graph Edge를 연결하고, 동일 이름의 다른 사람이나 사건이 합쳐지지 않았는지 확인해야 합니다. 외부 Memory Service를 쓴다면 민감 데이터 전송, Tenant 격리와 삭제도 별도 요구 사항입니다.
 
@@ -52,25 +52,25 @@ MiroFish의 중심에는 CAMEL-AI 팀의 OASIS Simulation Engine이 있습니다
 - Agent 주장에 원문에 없는 사실이 추가됐는가
 - 과거 사건을 시점 당시 정보만으로 재생했을 때 맞는가
 
-실제 정책·투자 결정을 MiroFish Report 하나에 맡기기보다 논의할 위험 가설을 찾는 용도로 제한해야 합니다.
+실제 정책, 투자 결정을 MiroFish Report 하나에 맡기기보다 논의할 위험 가설을 찾는 용도로 제한해야 합니다.
 
-## Context·JSON·상태 동기화가 운영 병목이다
+## Context, JSON, 상태 동기화가 운영 병목이다
 
-상호작용이 늘면 Memory와 대화 Context가 커지고 Model 호출 수도 증가합니다. 원문은 Context Length 초과 Crash와 혼합된 LLM 응답에서 JSON을 추출하는 Hotfix가 이어졌다고 설명합니다. 긴 대화를 무조건 보존하기보다 요약·만료·상한과 실패 시 재시도 예산이 필요합니다.
+상호작용이 늘면 Memory와 대화 Context가 커지고 Model 호출 수도 증가합니다. 원문은 Context Length 초과 Crash와 혼합된 LLM 응답에서 JSON을 추출하는 Hotfix가 이어졌다고 설명합니다. 긴 대화를 무조건 보존하기보다 요약, 만료, 상한과 실패 시 재시도 예산이 필요합니다.
 
 Python 3.11 Backend와 Vue Frontend가 많은 Agent State를 실시간으로 주고받는 구조도 작은 Demo와 장기 Simulation에서 요구가 다릅니다. 연결이 끊긴 뒤 State를 복구할 수 있는지, 같은 Event를 중복 처리하지 않는지, 실행별 비용을 어떻게 집계하는지 확인해야 합니다.
 
-원문에 나온 `LLM_MODEL_NAME=qwen-plus` 설정과 `docker compose up -d` 명령은 Model 선택과 Container 시작을 암시하는 조각일 뿐입니다. Environment File, API Key, Zep·Database, Compose Version, Network·Volume·Backup이 빠져 있어 완전한 실행 절차가 아닙니다.
+원문에 나온 `LLM_MODEL_NAME=qwen-plus` 설정과 `docker compose up -d` 명령은 Model 선택과 Container 시작을 암시하는 조각일 뿐입니다. Environment File, API Key, Zep, Database, Compose Version, Network, Volume, Backup이 빠져 있어 완전한 실행 절차가 아닙니다.
 
 ## 과거 사건으로 먼저 보정한다
 
-첫 PoC는 결과를 이미 아는 과거 사건을 시점 당시 자료만으로 구성합니다. 실제로 관찰된 반응과 Simulation의 핵심 경로를 비교하고, Model·Persona·Random Seed별 변동과 전체 Token 비용을 기록합니다. 예상이 틀렸을 때 Graph, 행동 규칙, Report 중 어느 단계가 원인인지 추적해야 합니다.
+첫 PoC는 결과를 이미 아는 과거 사건을 시점 당시 자료만으로 구성합니다. 실제로 관찰된 반응과 Simulation의 핵심 경로를 비교하고, Model, Persona, Random Seed별 변동과 전체 Token 비용을 기록합니다. 예상이 틀렸을 때 Graph, 행동 규칙, Report 중 어느 단계가 원인인지 추적해야 합니다.
 
 원문의 “10일 개발과 3천만 위안 투자” 이야기는 프로젝트의 화제성을 설명하지만 예측 성능의 증거는 아닙니다. MiroFish의 실용 가치는 미래를 맞히는 평행우주보다 사람이 놓친 반응 경로를 여러 조건에서 탐색하고 그 가정을 드러내는 데 있습니다.
 
 ## 시나리오의 가정은 어떻게 기록할까
 
-Seed 문서의 범위와 기준 시점, 포함한 인물·집단, 각 페르소나의 목표와 제약, 주입한 사건을 하나의 시나리오 버전으로 묶습니다. 실행 뒤 설정이 조금이라도 바뀌면 새 버전으로 남겨야 결과 차이를 설명할 수 있습니다. Report만 저장하고 초기 세계관을 잃으면 같은 결론을 다시 만들 수 없습니다.
+Seed 문서의 범위와 기준 시점, 포함한 인물, 집단, 각 페르소나의 목표와 제약, 주입한 사건을 하나의 시나리오 버전으로 묶습니다. 실행 뒤 설정이 조금이라도 바뀌면 새 버전으로 남겨야 결과 차이를 설명할 수 있습니다. Report만 저장하고 초기 세계관을 잃으면 같은 결론을 다시 만들 수 없습니다.
 
 가정과 관찰 사실도 구분합니다. 원문에 있는 관계와 사람이 추가한 행동 규칙, 모델이 상호작용 중 새로 만든 주장을 서로 다른 필드로 남깁니다. 모델이 만든 내용이 다음 에이전트의 사실로 재사용될 때 출처가 없음을 표시해야 환각이 사회 전체에 전파되는 과정을 찾을 수 있습니다.
 
@@ -108,8 +108,8 @@ JSON 파싱 실패나 컨텍스트 초과가 생겼을 때 일부 에이전트�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [TencentDB-Agent-Memory: AI 코딩 에이전트가 맥락 폭발을 막고 진짜 기억을 갖는 법]({% post_url 2026-07-15-TencentDB-Agent-Memory-How-AI-Coding-Agents-Prevent-Context-Bloat-and-Build-Real-Memory %}) — 기존 벡터 데이터베이스의 평면적 구조를 탈피해 대화(L0)부터 페르소나(L3)까지 4단계로 지식을 압축하는 완전 로컬 에이전트 기억 시스템입니다. 장기 실행 작업에서 발생하는 '맥락 폭발'을 막기 위해 방대한 도구 로그를 외부 파일로…
-- [GenericAgent는 30K 컨텍스트로 충분할까: Skill 결정화의 효과와 오염 위험]({% post_url 2026-05-19-The-End-of-Blindly-Expanding-Context-Windows-The-Shocking-Reality-of-Self-Evolving-Architecture-Proven-by-GenericAgent %}) — GenericAgent가 긴 대화 기록 대신 성공한 작업을 실행 가능한 Skill로 저장하는 구조를 살펴보고, 반복 비용 절감과 스킬 오염·콜드 스타트·실행 권한의 교환 조건을 정리합니다.
-- [Mem0를 장기 기억 계층으로 써도 될까: ADD·UPDATE·DELETE와 격리 조건]({% post_url 2026-05-04-The-Most-Elegant-Scalpel-Curing-LLM-Amnesia-A-Deep-Dive-into-Mem0 %}) — Mem0가 대화에서 장기 사실을 추출해 ADD·UPDATE·DELETE·NOOP로 갱신하고 vector·graph에 저장하는 구조와 오판·격리·삭제·평가 조건을 정리합니다.
+- [GenericAgent는 30K 컨텍스트로 충분할까: Skill 결정화의 효과와 오염 위험]({% post_url 2026-05-19-The-End-of-Blindly-Expanding-Context-Windows-The-Shocking-Reality-of-Self-Evolving-Architecture-Proven-by-GenericAgent %}) — GenericAgent가 긴 대화 기록 대신 성공한 작업을 실행 가능한 Skill로 저장하는 구조를 살펴보고, 반복 비용 절감과 스킬 오염, 콜드 스타트, 실행 권한의 교환 조건을 정리합니다.
+- [Mem0를 장기 기억 계층으로 써도 될까: ADD, UPDATE, DELETE와 격리 조건]({% post_url 2026-05-04-The-Most-Elegant-Scalpel-Curing-LLM-Amnesia-A-Deep-Dive-into-Mem0 %}) — Mem0가 대화에서 장기 사실을 추출해 ADD, UPDATE, DELETE, NOOP로 갱신하고 vector, graph에 저장하는 구조와 오판, 격리, 삭제, 평가 조건을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -120,8 +120,8 @@ JSON 파싱 실패나 컨텍스트 초과가 생겼을 때 일부 에이전트�
 
 ### 에이전트 수를 늘리면 현실 사람들의 다양성을 재현할 수 있나요?
 
-자동으로 그렇지는 않습니다. 같은 모델·초기 그래프·행동 규칙을 공유하면 오류와 편향도 상관되므로 페르소나 수보다 가정 변화에 대한 민감도를 확인해야 합니다.
+자동으로 그렇지는 않습니다. 같은 모델, 초기 그래프, 행동 규칙을 공유하면 오류와 편향도 상관되므로 페르소나 수보다 가정 변화에 대한 민감도를 확인해야 합니다.
 
 ### MiroFish는 어떤 용도로 쓰는 것이 적절한가요?
 
-미래를 단정하기보다 특정 가정에서 가능한 반응 경로를 찾고, Seed 데이터·페르소나·사건 주입을 바꿨을 때 결론이 어떻게 달라지는지 탐색하는 용도가 적절합니다.
+미래를 단정하기보다 특정 가정에서 가능한 반응 경로를 찾고, Seed 데이터, 페르소나, 사건 주입을 바꿨을 때 결론이 어떻게 달라지는지 탐색하는 용도가 적절합니다.

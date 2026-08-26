@@ -2,7 +2,7 @@
 layout: post
 title:  "YOLOv2에 Anchor Box를 넣었는데 mAP가 떨어진 이유: Recall부터 다시 보기"
 summary: "YOLOv2에서 anchor box가 recall은 높였지만 초기 mAP는 소폭 낮춘 이유와 k-means anchor, direct location prediction, passthrough, multi-scale 학습의 역할을 연결합니다."
-description: "YOLOv2의 anchor·IoU k-means·direct location prediction·passthrough·multi-scale 학습을 recall과 localization 관점에서 설명합니다."
+description: "YOLOv2의 anchor, IoU k-means, direct location prediction, passthrough, multi-scale 학습을 recall과 localization 관점에서 설명합니다."
 date:   2022-02-02 16:00 -0400
 categories: DarkNet
 image:
@@ -23,7 +23,7 @@ faq:
 
 YOLOv2에서 anchor box를 처음 넣었을 때 mAP가 69.5에서 69.2로 조금 내려간 것은 실패가 아니라, 더 많은 후보를 찾는 recall 81→88의 이득을 위치 예측 안정화가 아직 점수로 바꾸지 못한 상태였습니다.
 
-[YOLOv2·YOLO9000 논문](https://arxiv.org/abs/1612.08242)은 YOLOv1의 빠른 단일 단계 탐지를 유지하면서 정확도와 recall을 단계적으로 개선합니다. 각 기법의 숫자를 따로 외우기보다 “후보를 늘리고, 좌표를 안정화하고, 작은 특징을 보존한다”는 순서로 보면 설계가 읽힙니다.
+[YOLOv2, YOLO9000 논문](https://arxiv.org/abs/1612.08242)은 YOLOv1의 빠른 단일 단계 탐지를 유지하면서 정확도와 recall을 단계적으로 개선합니다. 각 기법의 숫자를 따로 외우기보다 “후보를 늘리고, 좌표를 안정화하고, 작은 특징을 보존한다”는 순서로 보면 설계가 읽힙니다.
 
 ## Anchor는 후보를 늘리지만 자동으로 정확해지지 않습니다
 
@@ -31,7 +31,7 @@ Fully connected 예측부를 convolutional anchor 방식으로 바꾸면 다양�
 
 Anchor 모양은 손으로 고르지 않고 학습 데이터의 box를 k-means로 군집화했습니다. 거리로 Euclidean distance 대신 `1-IoU`를 사용해 크기가 큰 box에 군집이 과도하게 끌리는 것을 줄였습니다. 논문은 `k=5`를 정확도와 복잡도의 절충으로 선택했습니다.
 
-실무에서는 데이터셋의 box 크기·aspect ratio 분포가 바뀌면 원래 anchor를 그대로 쓰기보다 다시 군집화해야 합니다. anchor 개수만 늘리면 출력량과 중복 후보도 늘기 때문에 NMS와 학습 assignment까지 같이 봐야 합니다.
+실무에서는 데이터셋의 box 크기, aspect ratio 분포가 바뀌면 원래 anchor를 그대로 쓰기보다 다시 군집화해야 합니다. anchor 개수만 늘리면 출력량과 중복 후보도 늘기 때문에 NMS와 학습 assignment까지 같이 봐야 합니다.
 
 ## Direct location prediction이 좌표 학습을 안정화합니다
 
@@ -39,7 +39,7 @@ Anchor 모양은 손으로 고르지 않고 학습 데이터의 box를 k-means�
 
 입력 크기를 416처럼 홀수 배수로 택한 것도 최종 feature map을 13×13으로 만들어 중앙 cell 하나가 생기게 하려는 선택입니다. 큰 객체가 이미지 중앙에 놓이는 경우가 많은 데이터에서 중앙 위치 표현이 명확해집니다. 다만 이는 데이터 경향에 기대는 설계이므로 다른 입력 비율에서 무조건 같은 이득을 보장하지 않습니다.
 
-## BatchNorm·고해상도·passthrough가 서로 다른 문제를 고칩니다
+## BatchNorm, 고해상도, passthrough가 서로 다른 문제를 고칩니다
 
 모든 convolution layer에 Batch Normalization을 적용해 약 2 mAP를 얻고, 분류 사전학습 단계부터 고해상도 입력에 적응시켜 약 4 mAP를 더했습니다. 탐지 head를 convolution만으로 구성하고 backbone에는 Darknet-19를 사용했습니다.
 
@@ -90,7 +90,7 @@ BatchNorm 통계도 영향을 받습니다. 해상도마다 batch size가 달라
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box·좌표 제약·Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
-- [Darknet YOLO Layer에서 ignore\_thresh와 truth\_thresh가 다른 이유]({% post_url 2022-04-01-DarkNetYoloLayer %}) — Darknet yolo_layer가 모든 anchor의 배경 delta를 만든 뒤 IoU에 따라 무시·양성 처리하고, ground truth를 최적 anchor mask에 배정하는 두 단계 학습 흐름을 설명합니다.
+- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box, 좌표 제약, Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
+- [Darknet YOLO Layer에서 ignore\_thresh와 truth\_thresh가 다른 이유]({% post_url 2022-04-01-DarkNetYoloLayer %}) — Darknet yolo_layer가 모든 anchor의 배경 delta를 만든 뒤 IoU에 따라 무시, 양성 처리하고, ground truth를 최적 anchor mask에 배정하는 두 단계 학습 흐름을 설명합니다.
 - [YOLOv3는 왜 3개 Scale과 BCE를 쓸까? 출력 Tensor 계산법]({% post_url 2022-02-03-DarkNetYOLOv3 %}) — YOLOv3가 세 해상도에서 anchor를 나누고 softmax 대신 독립 BCE를 쓰는 이유를 출력 tensor 식, Darknet-53, 작은 객체 개선과 localization 한계까지 설명합니다.
 <!-- internal-links:end -->

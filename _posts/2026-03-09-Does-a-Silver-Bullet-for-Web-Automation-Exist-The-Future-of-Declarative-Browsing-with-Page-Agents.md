@@ -1,13 +1,13 @@
 ---
 layout: post
-title: '셀렉터가 자꾸 깨질 때 Page Agent를 써도 될까: 속도·안전 판단법'
+title: '셀렉터가 자꾸 깨질 때 Page Agent를 써도 될까: 속도, 안전 판단법'
 date: '2026-03-09 06:30:43'
 categories: Tech
 tags:
   - AI보안
   - AI에이전트
-summary: 'Page Agent의 시맨틱 DOM·시각 입력·계획·Playwright 실행 구조와 셀렉터 자동화 대비 장점, 지연·비용·오작동 한계를 살펴봅니다.'
-description: 'Page Agent의 의미 기반 웹 자동화 구조와 Playwright 대비 선택 기준, 성공률·지연·비용·보안 실패를 검증하는 방법을 설명합니다.'
+summary: 'Page Agent의 시맨틱 DOM, 시각 입력, 계획, Playwright 실행 구조와 셀렉터 자동화 대비 장점, 지연, 비용, 오작동 한계를 살펴봅니다.'
+description: 'Page Agent의 의미 기반 웹 자동화 구조와 Playwright 대비 선택 기준, 성공률, 지연, 비용, 보안 실패를 검증하는 방법을 설명합니다.'
 github_url: https://github.com/alibaba/page-agent
 image:
   path: https://opengraph.githubassets.com/1/alibaba/page-agent
@@ -39,7 +39,7 @@ Page Agent는 자주 바뀌는 화면에서 고정 셀렉터 유지보수를 줄
 
 페이지 구조가 자주 달라지고 실패해도 되돌리기 쉬운 정보 수집이나 내부 테스트는 후보가 될 수 있습니다. 반면 결제, 예약 확정, 게시, 삭제, 계정 권한 변경은 잘못된 한 번의 클릭이 큰 손실로 이어집니다. 이런 단계는 미리 정한 허용 목록과 사람의 최종 승인 뒤에만 실행해야 합니다.
 
-입력란에 개인정보가 나타나거나 페이지 내용에 악의적인 지시가 섞일 수도 있습니다. 브라우저 프로필과 비밀을 최소화하고, 허용 도메인과 행동을 제한하며, 화면·DOM·도구 호출 로그를 남겨야 합니다. 에이전트가 현재 페이지 텍스트를 읽는다는 사실 자체가 신뢰 경계를 넓힌다는 점을 잊으면 안 됩니다.
+입력란에 개인정보가 나타나거나 페이지 내용에 악의적인 지시가 섞일 수도 있습니다. 브라우저 프로필과 비밀을 최소화하고, 허용 도메인과 행동을 제한하며, 화면, DOM, 도구 호출 로그를 남겨야 합니다. 에이전트가 현재 페이지 텍스트를 읽는다는 사실 자체가 신뢰 경계를 넓힌다는 점을 잊으면 안 됩니다.
 
 ## 속도와 안정성으로 혼합 구조를 고른다
 
@@ -96,9 +96,9 @@ role, aria-label, 보이는 텍스트는 요소의 의미를 찾는 데 유용�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Browser-use는 셀렉터 자동화를 대체할까: 비용·권한·실패 복구 기준]({% post_url 2026-03-01-Stop-Clicking-Start-Prompting-Building-Real-AI-Agents-with-Browser-use %}) — Browser-use가 LLM과 Playwright로 웹 작업을 수행하는 방식, 고정 셀렉터 자동화와의 차이, 토큰 비용·권한·재현성·복구 기준을 정리합니다.
-- [pinchtab은 Playwright를 대체할까: 12MB HTTP 브리지와 800토큰 접근성 트리]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-pinchtab-the-Ultimate-Browser-Control-for-AI-Agents %}) — 12MB Go 바이너리로 Chrome을 HTTP 제어하는 pinchtab의 토큰 절감 구조와, 접근성 품질·세션 보안·시각 작업 한계를 비교합니다.
-- [Obscura는 정말 RAM 30MB로 V8을 돌릴까: CDP 호환성과 렌더링 공백]({% post_url 2026-04-28-Running-V8-on-30MB-RAM-A-Deep-Dive-into-Obscura-the-Monster-Rust-built-Headless-Browser %}) — Obscura의 30~40MB RAM·70MB 바이너리·85ms 시작 주장을 구분해 읽고, Blink를 덜어낸 대가인 CSS 렌더링·Web API·CDP 호환 공백을 점검합니다.
+- [Browser-use는 셀렉터 자동화를 대체할까: 비용, 권한, 실패 복구 기준]({% post_url 2026-03-01-Stop-Clicking-Start-Prompting-Building-Real-AI-Agents-with-Browser-use %}) — Browser-use가 LLM과 Playwright로 웹 작업을 수행하는 방식, 고정 셀렉터 자동화와의 차이, 토큰 비용, 권한, 재현성, 복구 기준을 정리합니다.
+- [pinchtab은 Playwright를 대체할까: 12MB HTTP 브리지와 800토큰 접근성 트리]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-pinchtab-the-Ultimate-Browser-Control-for-AI-Agents %}) — 12MB Go 바이너리로 Chrome을 HTTP 제어하는 pinchtab의 토큰 절감 구조와, 접근성 품질, 세션 보안, 시각 작업 한계를 비교합니다.
+- [Obscura는 정말 RAM 30MB로 V8을 돌릴까: CDP 호환성과 렌더링 공백]({% post_url 2026-04-28-Running-V8-on-30MB-RAM-A-Deep-Dive-into-Obscura-the-Monster-Rust-built-Headless-Browser %}) — Obscura의 30~40MB RAM, 70MB 바이너리, 85ms 시작 주장을 구분해 읽고, Blink를 덜어낸 대가인 CSS 렌더링, Web API, CDP 호환 공백을 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

@@ -9,14 +9,14 @@ tags:
   - 디퓨전모델
 math: true
 summary: "Self-E가 별도 teacher distillation 없이 flow matching의 local supervision과 자체 sample 평가를 결합해 하나의 weight로 1~50 step 생성을 지원하는 원리와 비용을 정리합니다."
-description: "Self-E가 teacher 없이 local flow matching과 global self-evaluation을 결합해 1~50 step 생성을 지원하는 원리와 학습 비용·step별 품질을 검증합니다."
+description: "Self-E가 teacher 없이 local flow matching과 global self-evaluation을 결합해 1~50 step 생성을 지원하는 원리와 학습 비용, step별 품질을 검증합니다."
 faq:
   - question: "Self-E는 step 수마다 별도 model이 필요한가요?"
     answer: "아닙니다. 하나의 weight가 여러 시간 간격을 학습해 1, 2, 4, 8, 16, 50 step 같은 설정을 선택하도록 설계됩니다."
   - question: "teacher model이 없으면 학습 비용도 항상 낮나요?"
     answer: "그렇지 않습니다. 별도 pretrained teacher는 필요 없지만 training 중 self-sampling과 self-evaluation을 수행해 일반 flow matching보다 계산이 늘 수 있습니다."
   - question: "1 step 결과가 50 step과 항상 같은가요?"
-    answer: "아닙니다. 적은 step은 빠른 preview에 적합할 수 있지만 복잡한 관계·미세 detail·artifact는 step별로 같은 seed에서 검증해야 합니다."
+    answer: "아닙니다. 적은 step은 빠른 preview에 적합할 수 있지만 복잡한 관계, 미세 detail, artifact는 step별로 같은 seed에서 검증해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.22374.png
   alt: "이미지 생성 Step을 1에서 50까지 바꿔도 될까? Self-E의 Any-Step 학습 논문 대표 이미지"
@@ -53,13 +53,13 @@ Self-E는 training 중 현재 model로 sample을 만들고 그 결과를 다시 
 
 ## Any-Step은 품질 곡선이 실제로 이어지는지 확인한다
 
-지원 가능한 step 목록이 많아도 2 step보다 4 step이 나쁘거나 특정 구간 이후 개선이 없다면 사용자가 예측 가능한 품질·시간 trade-off를 만들기 어렵습니다. 같은 seed와 prompt를 1, 2, 4, 8, 16, 50 step으로 생성하고 구조, text alignment, artifact, latency를 한 표에 기록합니다. 평균뿐 아니라 step을 늘렸는데 품질이 떨어진 역전 사례를 모읍니다.
+지원 가능한 step 목록이 많아도 2 step보다 4 step이 나쁘거나 특정 구간 이후 개선이 없다면 사용자가 예측 가능한 품질, 시간 trade-off를 만들기 어렵습니다. 같은 seed와 prompt를 1, 2, 4, 8, 16, 50 step으로 생성하고 구조, text alignment, artifact, latency를 한 표에 기록합니다. 평균뿐 아니라 step을 늘렸는데 품질이 떨어진 역전 사례를 모읍니다.
 
 | Prompt 유형 | 적은 Step에서 볼 것 | 많은 Step에서 볼 것 |
 |---|---|---|
 | 단일 객체 | 윤곽과 배치 유지 | texture와 경계 개선 |
-| 여러 객체 | 수량·관계 누락 | 관계가 유지되는지 |
-| 작은 text | 읽을 수 있는 글자 | 철자·정렬 개선 |
+| 여러 객체 | 수량, 관계 누락 | 관계가 유지되는지 |
+| 작은 text | 읽을 수 있는 글자 | 철자, 정렬 개선 |
 | 긴 묘사 | 핵심 조건 포함 | 세부 조건 회복 여부 |
 
 monotonic improvement를 평가할 때 seed가 달라지면 단순한 sample 차이를 step 효과로 오인할 수 있습니다. guidance와 해상도도 고정하고, step별 wall-clock 시간은 warm-up 이후 같은 batch 조건에서 측정해야 합니다.
@@ -81,9 +81,9 @@ Self-E의 도입 기준은 1-step 최고 사례가 아니라 **한 weight의 ste
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석]({% post_url 2026-01-18-VIBE--Visual-Instruction-Based-Editor %}) — Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초·24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
-- [InternVL-U 4B가 14B를 이길까: 이해·생성 분리와 실제 VRAM 조건]({% post_url 2026-03-12-InternVL-U--Democratizing-Unified-Multimodal-Models-for-Understanding--Reasoning--Generation-and-Editing %}) — 4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM·지식·서빙 한계를 점검합니다.
-- [이미지 편집 후보를 많이 뽑을수록 좋을까? ADE-CoT의 조기 중단]({% post_url 2026-03-03-From-Scale-to-Speed--Adaptive-Test-Time-Scaling-for-Image-Editing %}) — ADE-CoT가 편집 난이도에 따라 후보 수를 바꾸고 실패 후보를 일찍 제거하는 방식, Best-of-N 대비 속도 이득과 검증 모델 의존성을 살펴봅니다.
+- [VIBE 3.6B로 2K 이미지 편집이 가능한가: H100 4초와 24GB 조건 해석]({% post_url 2026-01-18-VIBE--Visual-Instruction-Based-Editor %}) — Qwen2-VL 2B와 Sana1.5 1.6B를 결합한 VIBE가 instruction 이해와 고해상도 생성을 나누는 방식, 2K 4초, 24GB 수치의 적용 범위와 source consistency 한계를 정리합니다.
+- [Alterbute는 색, 재질을 바꿔도 같은 객체를 유지할까: VNE와 마스크 의존성]({% post_url 2026-01-20-Alterbute--Editing-Intrinsic-Attributes-of-Objects-in-Images %}) — Alterbute가 Visual Named Entity, 참조 이미지, text attribute, 배경, mask를 분리해 identity와 편집 자유도의 충돌을 다루는 방식과 VNE, mask 오류의 한계를 정리합니다.
+- [UniTok은 이미지 생성과 이해를 둘 다 잘할까: rFID 0.38과 정확도 78.6의 의미]({% post_url 2025-03-07-UniTok %}) — UniTok이 단일 대형 코드북 대신 Multi-Codebook Quantization을 쓰는 이유와 이미지 재구성, 비전 언어 이해를 한 토큰으로 연결하는 방식, 벤치마크의 생성, 이해 trade-off를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -98,6 +98,6 @@ Self-E의 도입 기준은 1-step 최고 사례가 아니라 **한 weight의 ste
 
 ### 1 step 결과가 50 step과 항상 같은가요?
 
-아닙니다. 적은 step은 빠른 preview에 적합할 수 있지만 복잡한 관계·미세 detail·artifact는 step별로 같은 seed에서 검증해야 합니다.
+아닙니다. 적은 step은 빠른 preview에 적합할 수 있지만 복잡한 관계, 미세 detail, artifact는 step별로 같은 seed에서 검증해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2512.22374)

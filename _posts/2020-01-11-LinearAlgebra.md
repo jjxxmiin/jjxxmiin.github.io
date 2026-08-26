@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "PCA와 LDA가 헷갈릴 때 보는 선형대수: 고유벡터부터 차원축소까지"
-summary: "벡터·기저·고유값·공분산을 하나의 흐름으로 연결하고 PCA와 LDA가 각각 무엇을 보존하려는지 비교합니다."
-description: "벡터·기저·고유값·공분산을 연결해 PCA의 분산 보존과 LDA의 클래스 분리 목적, 차원 선택 기준, 전처리와 대표 실패 조건의 차이를 설명합니다."
+summary: "벡터, 기저, 고유값, 공분산을 하나의 흐름으로 연결하고 PCA와 LDA가 각각 무엇을 보존하려는지 비교합니다."
+description: "벡터, 기저, 고유값, 공분산을 연결해 PCA의 분산 보존과 LDA의 클래스 분리 목적, 차원 선택 기준, 전처리와 대표 실패 조건의 차이를 설명합니다."
 image:
   path: /assets/img/thumb/LinearAlgebra.jpg
   alt: 선형대수학 끄적이기 대표 이미지
@@ -142,11 +142,11 @@ $$S_w^{-1}S_bw=\lambda w$$
 
 ## PCA를 적용하기 전에 무엇을 확인하나
 
-Feature마다 단위와 범위가 크게 다르면 분산이 큰 단위가 주성분을 지배할 수 있다. 어떤 중심화·스케일링을 적용했는지 training 데이터 기준으로 기록하고 validation·test에는 같은 변환을 사용한다. 전체 데이터를 미리 이용해 전처리하면 평가 정보가 섞일 수 있다.
+Feature마다 단위와 범위가 크게 다르면 분산이 큰 단위가 주성분을 지배할 수 있다. 어떤 중심화, 스케일링을 적용했는지 training 데이터 기준으로 기록하고 validation, test에는 같은 변환을 사용한다. 전체 데이터를 미리 이용해 전처리하면 평가 정보가 섞일 수 있다.
 
 공분산 행렬의 shape와 feature 수를 확인하고 고유값을 큰 순서로 정렬한다. 선택한 축이 서로 다른 방향을 이루는지, 투영 결과의 차원이 의도와 맞는지 작은 배열로 검증한다. 고유벡터의 부호가 바뀌어도 같은 축을 나타낼 수 있으므로 그림 방향만으로 구현 실패를 단정하지 않는다.
 
-축 수는 시각화를 위해 2개로 고정하는 선택과 압축 품질을 위한 선택이 다르다. 누적 설명 분산과 downstream 모델 성능, 저장·계산 비용을 함께 본다. 가장 큰 두 축에 class가 겹쳐 보인다고 원래 공간에서도 분리 불가능하다고 결론 내리지 않는다.
+축 수는 시각화를 위해 2개로 고정하는 선택과 압축 품질을 위한 선택이 다르다. 누적 설명 분산과 downstream 모델 성능, 저장, 계산 비용을 함께 본다. 가장 큰 두 축에 class가 겹쳐 보인다고 원래 공간에서도 분리 불가능하다고 결론 내리지 않는다.
 
 ## LDA에서 label과 클래스 분포를 어떻게 다루나
 
@@ -158,17 +158,17 @@ LDA는 각 class 평균과 class 내부 산포, class 사이 산포를 사용하
 
 ## PCA와 LDA를 공정하게 비교하는 실험
 
-같은 training·validation split, 같은 원본 feature와 downstream classifier를 사용한다. PCA와 LDA가 각각 어느 데이터를 보고 축을 배웠는지 기록하고, 투영 차원도 비교 목적에 맞게 정한다. LDA가 label을 쓴다는 차이를 숨긴 채 단순 그림만 비교하지 않는다.
+같은 training, validation split, 같은 원본 feature와 downstream classifier를 사용한다. PCA와 LDA가 각각 어느 데이터를 보고 축을 배웠는지 기록하고, 투영 차원도 비교 목적에 맞게 정한다. LDA가 label을 쓴다는 차이를 숨긴 채 단순 그림만 비교하지 않는다.
 
 평가에는 원본 feature baseline을 포함한다. 차원축소로 속도나 메모리가 줄었는지, 전체와 class별 성능이 어떻게 변했는지 본다. 실패 샘플이 특정 class나 작은 분산 방향에 몰리는지도 확인한다.
 
-새 샘플에는 training에서 구한 평균·scale·투영 행렬을 그대로 적용한다. 매 batch마다 PCA를 다시 계산하면 좌표계가 달라져 저장된 모델과 비교할 수 없다. 이 변환 순서를 하나의 pipeline으로 관리해야 재현 가능하다.
+새 샘플에는 training에서 구한 평균, scale, 투영 행렬을 그대로 적용한다. 매 batch마다 PCA를 다시 계산하면 좌표계가 달라져 저장된 모델과 비교할 수 없다. 이 변환 순서를 하나의 pipeline으로 관리해야 재현 가능하다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [LightGBM vs XGBoost, 무엇부터 튜닝할까: 과적합을 줄이는 파라미터 순서]({% post_url 2021-06-29-LightgbmXgboost %}) — Decision Tree와 bagging·boosting의 차이를 짚고 LightGBM·XGBoost의 depth, leaves, sampling, learning rate를 같은 역할끼리 비교합니다.
-- [DarkNet GEMM 인자 읽는 법: TA·TB·lda·BETA]({% post_url 2022-02-22-DarkNetGEMM %}) — DarkNet GEMM 호출을 C=βC+αop(A)op(B)로 해석하고, 네 가지 전치 분기와 leading dimension이 실제 메모리 인덱스에 미치는 영향을 설명합니다.
+- [LightGBM vs XGBoost, 무엇부터 튜닝할까: 과적합을 줄이는 파라미터 순서]({% post_url 2021-06-29-LightgbmXgboost %}) — Decision Tree와 bagging, boosting의 차이를 짚고 LightGBM, XGBoost의 depth, leaves, sampling, learning rate를 같은 역할끼리 비교합니다.
+- [DarkNet GEMM 인자 읽는 법: TA, TB, lda, BETA]({% post_url 2022-02-22-DarkNetGEMM %}) — DarkNet GEMM 호출을 C=βC+αop(A)op(B)로 해석하고, 네 가지 전치 분기와 leading dimension이 실제 메모리 인덱스에 미치는 영향을 설명합니다.
 - [백혈구 4종 분류, 정확도만 보면 위험한 이유: Keras 모델과 CAM 점검]({% post_url 2019-12-06-kaggle1 %}) — Kaggle 백혈구 이미지로 4종 분류기를 구성하고, 데이터 분리와 클래스 순서부터 CAM 해석까지 실수하기 쉬운 지점을 짚습니다.
 <!-- internal-links:end -->
 

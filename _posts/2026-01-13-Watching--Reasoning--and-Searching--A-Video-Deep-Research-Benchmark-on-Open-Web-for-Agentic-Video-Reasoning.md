@@ -10,12 +10,12 @@ tags:
   - AI에이전트
 math: true
 summary: 영상 단서와 공개 웹을 함께 써야 푸는 벤치마크에서 Workflow와 Agentic 구조가 갈린 이유와 Goal Drift 방지법
-description: "VideoDR이 video anchor와 open-web multi-hop 검색을 결합하는 benchmark를 설명하고, agentic goal drift·출처 연결·검색 비용·재현성 문제를 검증합니다."
+description: "VideoDR이 video anchor와 open-web multi-hop 검색을 결합하는 benchmark를 설명하고, agentic goal drift, 출처 연결, 검색 비용, 재현성 문제를 검증합니다."
 faq:
   - question: "VideoDR 질문은 영상만 보고 풀 수 있나요?"
-    answer: "아닙니다. 영상에서 객체·장소·OCR 같은 anchor를 찾고 웹에서 인물·프로젝트·사건을 여러 홉으로 확인해야 답할 수 있게 구성됩니다."
+    answer: "아닙니다. 영상에서 객체, 장소, OCR 같은 anchor를 찾고 웹에서 인물, 프로젝트, 사건을 여러 홉으로 확인해야 답할 수 있게 구성됩니다."
   - question: "Agentic 방식이 고정 Workflow보다 항상 정확한가요?"
-    answer: "아닙니다. 원문 비교에서도 모델별로 상승·하락이 달라 tool 선택과 장기 상태 유지 능력이 충분한지 따로 봐야 합니다."
+    answer: "아닙니다. 원문 비교에서도 모델별로 상승, 하락이 달라 tool 선택과 장기 상태 유지 능력이 충분한지 따로 봐야 합니다."
   - question: "좋은 답변에는 어떤 근거가 남아야 하나요?"
     answer: "video timestamp, 검색 query, 각 source가 확인한 중간 사실, 최종 답과 원본 영상 맥락의 연결이 되짚을 수 있어야 합니다."
 image:
@@ -33,7 +33,7 @@ VideoDR 결과는 자율 검색 단계를 늘린다고 항상 정확해지지 �
 
 VideoDR은 이런 문제를 위해 만들어진 비디오 딥 리서치 벤치마크입니다. 인간 주석가가 직접 검색하며 영상과 웹이 모두 필요한 문제를 선별했고, 여러 도메인에 걸쳐 시각 앵커 추출과 멀티홉 검색을 요구합니다.
 
-평가의 첫 단계는 모델이 답을 많이 아는지가 아니라, 질문과 관련된 객체·로고·장소·OCR 문자를 영상에서 정확히 집어 검색 가능한 표현으로 바꾸는지입니다.
+평가의 첫 단계는 모델이 답을 많이 아는지가 아니라, 질문과 관련된 객체, 로고, 장소, OCR 문자를 영상에서 정확히 집어 검색 가능한 표현으로 바꾸는지입니다.
 
 ## Workflow와 Agentic은 자유도의 차이다
 
@@ -77,7 +77,7 @@ VideoDR이 주는 결론은 더 자율적인 에이전트를 쓰라는 것이 �
 
 ## Evidence Graph는 Video와 Web 사이의 빈 홉을 찾는다
 
-최종 답에서 출처 link만 나열하면 어느 frame의 어떤 단서가 검색을 시작했는지 알 수 없습니다. video anchor를 첫 node로 두고, 검색으로 확인한 entity·관계·최신 사실을 edge로 연결합니다. 두 node 사이에 근거가 없으면 모델이 상식이나 검색 snippet으로 건너뛴 구간입니다.
+최종 답에서 출처 link만 나열하면 어느 frame의 어떤 단서가 검색을 시작했는지 알 수 없습니다. video anchor를 첫 node로 두고, 검색으로 확인한 entity, 관계, 최신 사실을 edge로 연결합니다. 두 node 사이에 근거가 없으면 모델이 상식이나 검색 snippet으로 건너뛴 구간입니다.
 
 | Graph 요소 | 예시 | 검수 질문 |
 |---|---|---|
@@ -91,7 +91,7 @@ anchor가 잘못되면 뒤 검색이 모두 그럴듯하게 틀릴 수 있습니
 
 ## Workflow와 Agentic은 같은 Tool Budget으로 비교한다
 
-agentic 방식이 더 많은 search call과 token을 썼다면 정확도 차이만으로 구조 이득을 말하기 어렵습니다. 최대 검색 횟수, video frame budget, source 수를 맞춘 조건과 자유 예산 조건을 나눕니다. 질문당 성공, 평균·상위 latency, call 수, 중복 query, unsupported claim을 함께 기록합니다.
+agentic 방식이 더 많은 search call과 token을 썼다면 정확도 차이만으로 구조 이득을 말하기 어렵습니다. 최대 검색 횟수, video frame budget, source 수를 맞춘 조건과 자유 예산 조건을 나눕니다. 질문당 성공, 평균, 상위 latency, call 수, 중복 query, unsupported claim을 함께 기록합니다.
 
 workflow가 실패한 첫 query를 agent가 수정해 회복한 사례와, 검색을 늘리다 Goal Drift가 생긴 사례를 분리합니다. 모델별 결과가 다른 이유도 tool schema 이해, 현재 가설 유지, stopping decision으로 나눠 trace를 읽습니다. 더 큰 model의 일반 능력을 agent architecture 효과로 오인하지 않도록 같은 backbone 비교가 필요합니다.
 
@@ -111,25 +111,25 @@ open web 결과와 “최근”이라는 답은 평가 시점에 따라 달라�
 
 상위 검색 결과가 질문의 핵심 사실을 직접 확인하는 원문인지, 다른 글을 요약한 2차 page인지 구분합니다. 같은 claim을 반복 인용한 여러 page를 독립 근거로 세지 않고 최초 발표나 공식 기록으로 이어지는지 확인합니다. 날짜가 중요한 질문은 page 게시일과 사건 발생일도 나눠야 합니다.
 
-agent가 읽지 못한 paywall·동적 page를 snippet만으로 인용하거나, 제목만 보고 사실을 확정하는 실패를 따로 집계합니다. 출처 품질 규칙을 넣었을 때 accuracy뿐 아니라 unsupported claim과 검색 횟수가 어떻게 달라지는지 보면 더 엄격한 검증의 비용을 판단할 수 있습니다.
+agent가 읽지 못한 paywall, 동적 page를 snippet만으로 인용하거나, 제목만 보고 사실을 확정하는 실패를 따로 집계합니다. 출처 품질 규칙을 넣었을 때 accuracy뿐 아니라 unsupported claim과 검색 횟수가 어떻게 달라지는지 보면 더 엄격한 검증의 비용을 판단할 수 있습니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Youtu-VL은 객체 검출 헤드를 없앨 수 있을까: Vision-as-Target과 NTP-M 구조]({% post_url 2026-01-29-Youtu-VL--Unleashing-Visual-Potential-via-Unified-Vision-Language-Supervision %}) — 시각을 예측 대상으로 삼는 VLUAS와 별도 디코더 없이 dense prediction을 수행하는 NTP-M의 이득과 비용을 분석합니다.
-- [코드를 이미지로 읽으면 Token은 줄지만 정확할까? CodeOCR의 8배 압축]({% post_url 2026-02-03-CodeOCR--On-the-Effectiveness-of-Vision-Language-Models-in-Code-Understanding %}) — CodeOCR이 source code를 syntax-highlighted image로 렌더링해 visual token으로 압축하는 실험, clone detection의 강점과 작은 변수·연산자 오독 위험을 task별로 정리합니다.
-- [이미지를 생성하면 멀티모달 문제를 더 잘 풀까? UniG2U-Bench의 반례]({% post_url 2026-03-04-UniG2U-Bench--Do-Unified-Models-Advance-Multimodal-Understanding %}) — UniG2U-Bench가 생성 후 답변 방식과 직접 답변을 30개 하위 과제에서 비교한 결과, 공간 지각에는 도움이 되고 일반 이해에는 오류가 번지는 이유를 설명합니다.
+- [코드를 이미지로 읽으면 Token은 줄지만 정확할까? CodeOCR의 8배 압축]({% post_url 2026-02-03-CodeOCR--On-the-Effectiveness-of-Vision-Language-Models-in-Code-Understanding %}) — CodeOCR이 source code를 syntax-highlighted image로 렌더링해 visual token으로 압축하는 실험, clone detection의 강점과 작은 변수, 연산자 오독 위험을 task별로 정리합니다.
+- [OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트]({% post_url 2025-02-23-omniparser %}) — GUI 인터페이스를 자동화하는 강력한 AI 기술, OmniParser의 원리와 응용
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### VideoDR 질문은 영상만 보고 풀 수 있나요?
 
-아닙니다. 영상에서 객체·장소·OCR 같은 anchor를 찾고 웹에서 인물·프로젝트·사건을 여러 홉으로 확인해야 답할 수 있게 구성됩니다.
+아닙니다. 영상에서 객체, 장소, OCR 같은 anchor를 찾고 웹에서 인물, 프로젝트, 사건을 여러 홉으로 확인해야 답할 수 있게 구성됩니다.
 
 ### Agentic 방식이 고정 Workflow보다 항상 정확한가요?
 
-아닙니다. 원문 비교에서도 모델별로 상승·하락이 달라 tool 선택과 장기 상태 유지 능력이 충분한지 따로 봐야 합니다.
+아닙니다. 원문 비교에서도 모델별로 상승, 하락이 달라 tool 선택과 장기 상태 유지 능력이 충분한지 따로 봐야 합니다.
 
 ### 좋은 답변에는 어떤 근거가 남아야 하나요?
 

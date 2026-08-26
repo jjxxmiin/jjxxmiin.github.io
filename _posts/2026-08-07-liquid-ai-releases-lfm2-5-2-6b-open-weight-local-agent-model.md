@@ -41,7 +41,7 @@ entities:
 - Hugging Face
 faq:
 - question: Liquid AI의 LFM2.5-2.6B는 인터넷 연결 없이 오프라인으로 실행할 수 있나요?
-  answer: 네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱·운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
+  answer: 네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱, 운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
 - question: LFM2.5-2.6B 모델이 지원하는 주요 기술 스펙은 무엇인가요?
   answer: 26억 매개변수를 가진 비 트랜스포머 파운데이션 모델로, 128,000(128K) 토큰 컨텍스트 윈도우와 네이티브 툴 콜링 기능을 갖추고 있습니다.
 - question: 스마트폰과 PC CPU에서 디코드 속도는 어느 정도 나오나요?
@@ -200,14 +200,14 @@ flowchart TD
 
 - [Nvidia Nemotron 3.5 Lightning과 NeMo Switchyard: 에이전트 모델 라우팅 판단법]({% post_url 2026-08-13-nvidia-releases-nemotron-3-5-lightning-and-nemo-switchyard-router %}) — Nvidia가 자율 에이전트 시스템을 위해 개발된 30B 규모의 오픈 모델 Nemotron 3.5 Lightning과 오픈소스 라우터 라이브러리 NeMo Switchyard를 2026년 8월 11일 공개했습니다. NeMo…
 - [Meta Muse Glimmer 30B 로컬 에이전트: 4비트 메모리 조건과 도입 판단]({% post_url 2026-08-11-meta-releases-open-source-muse-glimmer-30b-model-for-consumer-gpus %}) — Meta가 2026년 8월 10일 소비자용 GPU 환경에 최적화된 300억 파라미터 오픈소스 모델 Muse Glimmer를 Apache 2.0 라이선스로 출시했습니다. 4비트 양자화를 적용해 메모리 점유율을 20GB RAM 이하로…
-- [jcode의 14ms 부팅은 무엇을 바꿀까: Rust Harness·Semantic Memory·Swarm 검증 기준]({% post_url 2026-05-01-I-Deleted-Claude-Code-Deep-Dive-into-jcode-the-14ms-Rust-based-Agent-Harness-that-Changes-Everything %}) — jcode가 제시하는 14ms 부팅·27.8MB idle RAM, vector semantic memory와 daemon 기반 swarm 구조를 살펴보고, 수치 재현·검색 오류·동시 편집·API 비용의 도입 조건을 정리합니다.
+- [jcode의 14ms 부팅은 무엇을 바꿀까: Rust Harness, Semantic Memory, Swarm 검증 기준]({% post_url 2026-05-01-I-Deleted-Claude-Code-Deep-Dive-into-jcode-the-14ms-Rust-based-Agent-Harness-that-Changes-Everything %}) — jcode가 제시하는 14ms 부팅, 27.8MB idle RAM, vector semantic memory와 daemon 기반 swarm 구조를 살펴보고, 수치 재현, 검색 오류, 동시 편집, API 비용의 도입 조건을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Liquid AI의 LFM2.5-2.6B는 인터넷 연결 없이 오프라인으로 실행할 수 있나요?
 
-네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱·운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
+네, 모델 자체는 클라우드 GPU 없이 스마트폰이나 PC CPU에서 로컬로 실행하도록 공개됐습니다. 다만 2.5GB 미만이라는 메모리 수치는 발표 조건에서의 모델 사용량이며, 긴 문맥과 앱, 운영체제까지 포함한 전체 기기 메모리는 별도로 확인해야 합니다.
 
 ### LFM2.5-2.6B 모델이 지원하는 주요 기술 스펙은 무엇인가요?
 

@@ -12,7 +12,7 @@ tags:
 summary: 비공개 상용 소프트웨어가 지배하던 영상 편집 시장에 등장한 완전히 새로운 대안, OpenCut 프로젝트를 조명합니다. 프라이버시를
   보장하는 로컬 기반 아키텍처부터 시작해, Rust 코어 기반의 크로스플랫폼 통합, 플러그인 생태계, 그리고 외부 AI 에이전트가 직접 편집을 수행하는
   MCP 서버 도입까지, 이 프로젝트가 영상 렌더링 파이프라인을 어떻게 밑바닥부터 재설계하고 있는지 내부 원리와 실전 활용법을 매우 상세하게 다룹니다.
-description: 'OpenCut의 타임라인 데이터·Rust 렌더링 코어·헤드리스·MCP 편집 구조를 살피고, 렌더링 재현성·코덱 호환·자막 서식·파일 권한·프로젝트 성숙도 한계를 정리합니다.'
+description: 'OpenCut의 타임라인 데이터, Rust 렌더링 코어, 헤드리스, MCP 편집 구조를 살피고, 렌더링 재현성, 코덱 호환, 자막 서식, 파일 권한, 프로젝트 성숙도 한계를 정리합니다.'
 github_url: https://github.com/OpenCut-app/OpenCut
 image:
   path: https://opengraph.githubassets.com/1/OpenCut-app/OpenCut
@@ -428,9 +428,9 @@ stateDiagram-v2
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Wigolo: AI 코딩 에이전트에게 무제한 로컬 웹 검색과 크롤링 능력을 달아주는 법]({% post_url 2026-07-18-Wigolo-Empowering-AI-Coding-Agents-with-Unlimited-Local-Web-Search-and-Crawling %}) — Wigolo는 외부 API 과금 없이 내 PC의 자원을 활용해 AI 코딩 에이전트에게 무제한 웹 검색, 크롤링, 캐싱을 제공하는 로컬 기반 MCP 서버입니다. 단순한 검색을 넘어 JS 렌더링, PDF 파싱, 데이터 영속성 관리를 통해…
 - [Claude Code로 영상을 대화하듯 편집하는 Video Use의 원리와 실전 활용법]({% post_url 2026-08-01-Video-Use-How-AI-Coding-Agents-Edit-Raw-Footage-Through-Text-and-FFmpeg %}) — Video Use는 Claude Code, Codex 등 AI 코딩 에이전트와 자연어로 대화하며 타임라인 편집 없이 영상을 완성하는 오픈소스 파이프라인입니다. 영상 프레임을 직접 LLM에 전달하는 대신 단어 단위 음성 스크립트를…
-- [WeKnora가 표·수식 PDF RAG에 맞을까: 파싱·Hybrid Retrieval 검증]({% post_url 2026-05-15-For-Those-Tired-of-Simple-ChatUI-Shells-A-Deep-Dive-Under-the-Hood-of-WeKnora-Tencents-Hardcore-RAG-Engine %}) — WeKnora의 layout·표·수식 parsing과 BM25·dense·graph 검색, agent·MCP 구조를 살펴보고 한국어 문서 정확도·인용·자원·운영 조건을 검증합니다.
+- [OpenMontage로 AI 영상을 만들 때: 에이전트 파이프라인, 비용, 검수 기준]({% post_url 2026-07-04-The-End-of-Prompt-Engineering-The-True-Value-of-OpenMontages-Agent-First-Video-Pipeline %}) — OpenMontage가 YAML 파이프라인, Markdown 스킬, Python 도구, Remotion과 FFmpeg를 연결해 영상 제작 단계를 조율하는 방식을 설명합니다. 설치 비용, 사람 승인, 재현성과 보안까지 포함한 파일럿…
+- [OpenFang은 Python 에이전트를 대체할까: 32MB, 180ms와 16개 보안층 검증]({% post_url 2026-03-01-Is-Python-Agent-Dead-Honest-Review-of-OpenFang-the-Rust-Based-AI-Agent-OS %}) — Rust 단일 바이너리의 시작 속도와 Hands, MCP 구조, 16개 보안 기능이 실제 운영에서 보장하지 않는 범위를 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/upsample_layer.c"
 layout: post
 title:  "Darknet Upsample에서 음수 Stride를 쓰면 왜 Downsample이 될까?"
-summary: "Darknet upsample_layer가 stride 부호로 reverse 모드를 정하고 출력 크기와 forward·backward 호출 방향을 뒤집는 방식, scale 초기화와 정수 나눗셈 주의점을 설명합니다."
-description: "Darknet Upsample Layer의 signed stride·reverse shape와 helper 방향을 따라 scale default·integer division·delta accumulation·resize 실패를 설명합니다."
+summary: "Darknet upsample_layer가 stride 부호로 reverse 모드를 정하고 출력 크기와 forward, backward 호출 방향을 뒤집는 방식, scale 초기화와 정수 나눗셈 주의점을 설명합니다."
+description: "Darknet Upsample Layer의 signed stride, reverse shape와 helper 방향을 따라 scale default, integer division, delta accumulation, resize 실패를 설명합니다."
 date:   2022-03-21 16:00 -0400
 categories: DarkNet
 image:
@@ -21,12 +21,12 @@ faq:
   - question: "생성부에서 scale을 설정하지 않으면 무엇을 확인해야 하나요?"
     answer: "0 초기화된 scale이 parser에서 1 등으로 설정되는지 확인해야 하며 그렇지 않으면 output이 모두 0일 수 있습니다."
   - question: "Reverse mode는 일반 resize와 같은가요?"
-    answer: "아닙니다. upsample_cpu의 input·output과 방향 flag를 뒤집는 누적 연산이므로 helper 계약을 확인해야 합니다."
+    answer: "아닙니다. upsample_cpu의 input, output과 방향 flag를 뒤집는 누적 연산이므로 helper 계약을 확인해야 합니다."
 ---
 
 Darknet Upsample Layer에 음수 stride를 주면 절댓값을 배율로 저장하고 `reverse=1`로 바꿔, 출력 크기를 곱하는 대신 나누는 downsample 경로를 사용합니다.
 
-이 layer는 학습 파라미터 없이 `upsample_cpu`의 방향을 감싸는 얇은 wrapper입니다. 하지만 resize, reverse와 scale의 계약을 놓치면 shape는 맞아도 값이 0이거나 예상과 다른 방향으로 누적될 수 있습니다. 원문 조각만으로 helper의 내부 보간·누적 방식을 모두 알 수는 없습니다.
+이 layer는 학습 파라미터 없이 `upsample_cpu`의 방향을 감싸는 얇은 wrapper입니다. 하지만 resize, reverse와 scale의 계약을 놓치면 shape는 맞아도 값이 0이거나 예상과 다른 방향으로 누적될 수 있습니다. 원문 조각만으로 helper의 내부 보간, 누적 방식을 모두 알 수는 없습니다.
 
 ## Stride 부호가 Mode와 출력 Shape를 정합니다
 
@@ -82,7 +82,7 @@ if(l.reverse){
 
 ## Resize와 수치 Test를 함께 합니다
 
-`resize_upsample_layer`도 생성부와 같은 규칙으로 `out_w/out_h`를 다시 계산하고 output·delta를 재할당합니다. 입력 `w,h`를 출력 크기로 오해하면 배율이 한 번 더 적용됩니다.
+`resize_upsample_layer`도 생성부와 같은 규칙으로 `out_w/out_h`를 다시 계산하고 output, delta를 재할당합니다. 입력 `w,h`를 출력 크기로 오해하면 배율이 한 번 더 적용됩니다.
 
 검증은 한 channel의 2×2 입력과 stride 2부터 시작하는 것이 좋습니다. Forward output shape와 각 값의 위치, scale을 바꾼 결과, backward에서 입력 delta로 돌아오는 값을 손으로 대조합니다. 그 다음 stride -2와 나누어떨어지지 않는 크기를 시험합니다. 이 글의 코드는 특정 Darknet 버전의 내부 조각이므로 다른 프레임워크의 nearest-neighbor resize와 이름만으로 동일하다고 간주하면 안 됩니다.
 
@@ -96,7 +96,7 @@ Reverse는 4×4 input에서 2×2 output으로 갈 때 어떤 위치를 합치는
 
 Stride 0, ±1, 크기보다 큰 음수 stride와 나누어떨어지지 않는 w,h를 넣어 정책을 정합니다. Reverse의 정수 나눗셈으로 버리는 border가 허용되지 않으면 parser에서 divisibility를 요구합니다. Channel과 batch는 유지되며 outputs가 `out_w*out_h*c`인지 확인합니다.
 
-Resize 뒤 output·delta capacity, metadata와 CPU/GPU mirror를 함께 갱신합니다. Realloc 전 pointer를 외부 view가 가리키지 않는지, 커진 delta를 backward 전에 초기화하는지도 봅니다.
+Resize 뒤 output, delta capacity, metadata와 CPU/GPU mirror를 함께 갱신합니다. Realloc 전 pointer를 외부 view가 가리키지 않는지, 커진 delta를 backward 전에 초기화하는지도 봅니다.
 
 ## Scale 기본값을 어디에서 확정하나요?
 
@@ -106,19 +106,19 @@ Checkpoint에는 학습 weight가 없더라도 cfg scale이 model 동작의 일�
 
 ## Downsample의 정보 손실을 어떻게 해석하나요?
 
-Reverse helper가 여러 pixel을 합한다면 scale에 따라 합·평균 의미가 달라질 수 있고 단순 sample이면 일부 위치를 버립니다. High-frequency pattern과 상수 입력을 넣어 alias와 값 크기를 봅니다. 학습 가능한 strided convolution 또는 pooling과 같은 기능이라고 가정하지 않습니다.
+Reverse helper가 여러 pixel을 합한다면 scale에 따라 합, 평균 의미가 달라질 수 있고 단순 sample이면 일부 위치를 버립니다. High-frequency pattern과 상수 입력을 넣어 alias와 값 크기를 봅니다. 학습 가능한 strided convolution 또는 pooling과 같은 기능이라고 가정하지 않습니다.
 
 ## Forward와 Backward가 Adjoints인지 어떻게 확인하나요?
 
 임의 input x와 output-space y에서 내적 `<F(x),y>`와 `<x,F^T(y)>`가 scale 계약 안에서 같은지 비교할 수 있습니다. 이 검사는 helper 방향 flag가 실제 전치 관계인지 찾는 데 유용합니다. Finite difference로 input 한 원소 gradient도 확인합니다.
 
-## Batch·Channel Layout은 어떤 Fixture가 필요한가요?
+## Batch, Channel Layout은 어떤 Fixture가 필요한가요?
 
-Batch와 channel을 서로 다른 상수로 채워 spatial replication·aggregation 중 sample이나 channel이 섞이지 않는지 봅니다. Width와 height가 다른 tensor로 x/y stride도 검증합니다.
+Batch와 channel을 서로 다른 상수로 채워 spatial replication, aggregation 중 sample이나 channel이 섞이지 않는지 봅니다. Width와 height가 다른 tensor로 x/y stride도 검증합니다.
 
 ## 평균 보존을 어떤 입력으로 확인하나요?
 
-상수 1 입력에서 일반 upsample과 reverse 결과의 평균·합을 비교하면 helper가 복제·합산·평균 중 무엇을 하는지 드러납니다. Scale을 배율 면적의 역수로 두어야 평균이 맞는 구현인지 원문 호출 목적과 함께 확인합니다. Impulse 입력으로 공간 대응과 경계도 시각화합니다.
+상수 1 입력에서 일반 upsample과 reverse 결과의 평균, 합을 비교하면 helper가 복제, 합산, 평균 중 무엇을 하는지 드러납니다. Scale을 배율 면적의 역수로 두어야 평균이 맞는 구현인지 원문 호출 목적과 함께 확인합니다. Impulse 입력으로 공간 대응과 경계도 시각화합니다.
 
 ## 자주 남는 질문
 
@@ -132,7 +132,7 @@ Batch와 channel을 서로 다른 상수로 채워 spatial replication·aggregat
 
 ### Reverse mode는 일반 resize와 같은가요?
 
-아닙니다. upsample_cpu의 input·output과 방향 flag를 뒤집는 누적 연산이므로 helper 계약을 확인해야 합니다.
+아닙니다. upsample_cpu의 input, output과 방향 flag를 뒤집는 누적 연산이므로 helper 계약을 확인해야 합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -143,7 +143,7 @@ Batch와 channel을 서로 다른 상수로 채워 spatial replication·aggregat
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse·extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간·채널 재배치와 flatten·extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈·resize 전제를 점검합니다.
-- [Darknet BatchNorm은 학습과 추론에서 왜 다른 Mean을 쓸까?]({% post_url 2022-02-07-DarkNetBatchnormLayer %}) — Darknet batchnorm_layer의 forward·backward 코드를 따라 mini-batch mean·variance와 rolling statistics, scale·bias, standalone layer의 복사…
-- [Darknet Softmax 확률 합이 1이 아닐 때: groups와 softmax\_tree 확인법]({% post_url 2022-03-19-DarkNetSoftmaxLayer %}) — Darknet softmax_layer가 전체 입력이 아니라 group 또는 tree의 sibling 묶음마다 확률을 정규화하는 방식과 temperature, cross-entropy delta, backward 누적을 설명합니다.
+- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse, extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간, 채널 재배치와 flatten, extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈, resize 전제를 점검합니다.
+- [Darknet BatchNorm은 학습과 추론에서 왜 다른 Mean을 쓸까?]({% post_url 2022-02-07-DarkNetBatchnormLayer %}) — Darknet batchnorm_layer의 forward, backward 코드를 따라 mini-batch mean, variance와 rolling statistics, scale, bias, standalone layer의 복사…
+- [Darknet utils.c 이름만 믿으면 틀리는 7곳: mse\_array는 MSE가 아니다]({% post_url 2022-03-22-DarkNetUtils %}) — Darknet utils.c의 CLI 파서, 문자열, 파일, CSV, 난수, 배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위, 0 나눗셈, 입력 변경 위험을 짚습니다.
 <!-- internal-links:end -->

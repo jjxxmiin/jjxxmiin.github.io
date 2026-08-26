@@ -12,7 +12,7 @@ tags:
 summary: reverse-skill은 Claude Code, Cursor, Cline 등 AI 코딩 에이전트가 리버스 엔지니어링과 침투 테스트를
   안전하게 실행하도록 안내하는 오픈소스 스킬 라우팅 프레임워크입니다. 경로 우선 실행 모델, 로컬 도구 절대 경로 인덱싱, 자가 치유형 설치 체계를
   통해 LLM의 환각을 억제하고 정교한 보안 조사를 지원합니다.
-description: 'reverse-skill이 보안 작업을 경로·도구·범위 지침으로 라우팅하는 방식과 허가 범위·명령 검증·도구 버전·재현성 및 오용 위험을 설명합니다.'
+description: 'reverse-skill이 보안 작업을 경로, 도구, 범위 지침으로 라우팅하는 방식과 허가 범위, 명령 검증, 도구 버전, 재현성 및 오용 위험을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/zhaoxuya520/reverse-skill
 image:
@@ -53,7 +53,7 @@ faq:
     Instructions) 주입이나 MCP 연결을 지원하는 대부분의 최신 AI 코딩 에이전트 환경과 호환됩니다.
 ---
 
-reverse-skill은 역공학·모의해킹 요청을 작업 경로와 로컬 도구 지침에 연결해 에이전트의 무작위 명령 추측을 줄이려는 라우터입니다. 지침은 법적 허가나 실행 안전을 자동 보장하지 않으므로 대상 범위와 허용 명령, 결과 증거를 별도로 강제해야 합니다. 소유한 샘플과 격리 환경에서 도구 경로·버전·실패 중단을 확인한 뒤 사용하세요.
+reverse-skill은 역공학, 모의해킹 요청을 작업 경로와 로컬 도구 지침에 연결해 에이전트의 무작위 명령 추측을 줄이려는 라우터입니다. 지침은 법적 허가나 실행 안전을 자동 보장하지 않으므로 대상 범위와 허용 명령, 결과 증거를 별도로 강제해야 합니다. 소유한 샘플과 격리 환경에서 도구 경로, 버전, 실패 중단을 확인한 뒤 사용하세요.
 
 [reverse-skill GitHub 저장소](https://github.com/zhaoxuya520/reverse-skill)
 [reverse-skill 릴리즈 노트](https://github.com/zhaoxuya520/reverse-skill/releases)
@@ -360,7 +360,7 @@ reverse-skill은 AI 보안 분석의 신뢰성을 크게 높여주지만, 모든
 
 - [addyosmani/agent-skills: AI 코딩 에이전트에게 시니어 개발자의 업무 방식을 가르치다]({% post_url 2026-07-16-addyosmaniagent-skills-Teaching-AI-Coding-Agents-the-Workflows-of-Senior-Developers %}) — 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항 명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스…
 - [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
-- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

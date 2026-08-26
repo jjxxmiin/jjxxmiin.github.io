@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "SpatialScore가 왼쪽·오른쪽 오류를 줄일까: 8만 쌍 보상모델의 범위"
+title: "SpatialScore가 왼쪽, 오른쪽 오류를 줄일까: 8만 쌍 보상모델의 범위"
 date: '2026-03-02 04:40:20'
 categories: Tech
 tags:
@@ -8,21 +8,21 @@ tags:
   - 이미지생성
   - Gemini
 math: true
-summary: "8만 쌍 이상의 공간 선호 데이터로 학습한 SpatialScore가 이미지 생성 모델을 평가·개선하는 방식과, 보상 해킹·학습 비용·평가 범위를 점검합니다."
-description: "SpatialScore가 8만 쌍의 spatial preference로 image 관계를 채점하고 online RL reward가 되는 원리, pair confounder·관계별 일반화·reward hacking과 비용 검증법을 설명합니다."
+summary: "8만 쌍 이상의 공간 선호 데이터로 학습한 SpatialScore가 이미지 생성 모델을 평가, 개선하는 방식과, 보상 해킹, 학습 비용, 평가 범위를 점검합니다."
+description: "SpatialScore가 8만 쌍의 spatial preference로 image 관계를 채점하고 online RL reward가 되는 원리, pair confounder, 관계별 일반화, reward hacking과 비용 검증법을 설명합니다."
 faq:
-  - question: "SpatialScore를 붙이면 생성 image의 왼쪽·오른쪽이 바로 고쳐지나요?"
+  - question: "SpatialScore를 붙이면 생성 image의 왼쪽, 오른쪽이 바로 고쳐지나요?"
     answer: "아닙니다. SpatialScore는 평가 reward이며 generator를 online RL 등으로 다시 최적화해야 하고 inference 때 object를 직접 이동하는 editor는 아닙니다."
   - question: "8만 preference pair면 모든 공간 관계를 평가하나요?"
-    answer: "Data에 포함된 object·관계·문장 분포에 성능이 묶이므로 가림·거리·복수 관계·unseen 조합을 relation별 held-out set에서 확인해야 합니다."
+    answer: "Data에 포함된 object, 관계, 문장 분포에 성능이 묶이므로 가림, 거리, 복수 관계, unseen 조합을 relation별 held-out set에서 확인해야 합니다."
   - question: "Reward가 오르면 image 품질도 함께 좋아지나요?"
-    answer: "보장되지 않습니다. Generator가 scorer의 shortcut을 이용해 object 수·화질·다양성을 해칠 수 있어 human spatial check와 quality·prompt alignment 지표를 함께 봐야 합니다."
+    answer: "보장되지 않습니다. Generator가 scorer의 shortcut을 이용해 object 수, 화질, 다양성을 해칠 수 있어 human spatial check와 quality, prompt alignment 지표를 함께 봐야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.24233.png
-  alt: "SpatialScore가 왼쪽·오른쪽 오류를 줄일까: 8만 쌍 보상모델의 범위 논문 대표 이미지"
+  alt: "SpatialScore가 왼쪽, 오른쪽 오류를 줄일까: 8만 쌍 보상모델의 범위 논문 대표 이미지"
 ---
 
-SpatialScore는 이미지 생성 모델의 위치 관계 오류를 줄이도록 학습 신호를 줄 수 있지만, 모든 프롬프트에서 왼쪽·오른쪽이 완벽해진다는 증거는 아닙니다. Scorer의 pairwise 정확도와 generator RL 이후의 관계 성공률을 분리하고, object count·화질·다양성 회귀와 reward hacking을 independent holdout에서 확인해야 합니다.
+SpatialScore는 이미지 생성 모델의 위치 관계 오류를 줄이도록 학습 신호를 줄 수 있지만, 모든 프롬프트에서 왼쪽, 오른쪽이 완벽해진다는 증거는 아닙니다. Scorer의 pairwise 정확도와 generator RL 이후의 관계 성공률을 분리하고, object count, 화질, 다양성 회귀와 reward hacking을 independent holdout에서 확인해야 합니다.
 
 이미지 품질이 좋아도 “컵이 접시 위에 있다”처럼 물체 사이 관계를 지키지 못하면 제품 배치나 설명 그림에는 쓰기 어렵습니다. [논문](https://huggingface.co/papers/2602.24233)은 이 문제를 공간 관계 전용 보상모델과 온라인 강화학습으로 다룹니다. 핵심은 생성기를 바로 고치는 대신, 먼저 공간 관계를 잘 판정하는 채점기를 만드는 것입니다.
 
@@ -30,7 +30,7 @@ SpatialScore는 이미지 생성 모델의 위치 관계 오류를 줄이도록 
 
 SpatialReward-Dataset은 8만 쌍 이상의 이미지 선호 데이터로 구성됩니다. 같은 공간 지시를 두고 관계를 더 잘 지킨 이미지와 그렇지 않은 이미지를 비교하게 함으로써 SpatialScore가 선호 방향을 배우는 구조입니다.
 
-쌍 비교는 단순 정답 라벨보다 “어느 쪽이 더 낫나”를 학습하는 데 유리합니다. 반면 데이터에 포함된 관계와 물체 조합이 좁으면 평가기도 그 범위에 강하게 묶일 수 있습니다. 왼쪽·오른쪽, 위·아래처럼 명시적인 관계에서 얻은 성능이 거리감, 가림, 복수 객체의 연쇄 관계까지 그대로 이어지는지는 별도로 확인해야 합니다.
+쌍 비교는 단순 정답 라벨보다 “어느 쪽이 더 낫나”를 학습하는 데 유리합니다. 반면 데이터에 포함된 관계와 물체 조합이 좁으면 평가기도 그 범위에 강하게 묶일 수 있습니다. 왼쪽, 오른쪽, 위, 아래처럼 명시적인 관계에서 얻은 성능이 거리감, 가림, 복수 객체의 연쇄 관계까지 그대로 이어지는지는 별도로 확인해야 합니다.
 
 ## SpatialScore와 생성 모델은 역할이 다르다
 
@@ -50,7 +50,7 @@ SpatialScore는 생성된 이미지가 프롬프트의 공간 관계를 지켰�
 
 확인해야 할 질문은 구체적입니다.
 
-- 평가 세트가 학습 데이터의 물체·문장과 얼마나 겹치는가
+- 평가 세트가 학습 데이터의 물체, 문장과 얼마나 겹치는가
 - 두 이미지의 차이가 공간 관계 외 화질이나 스타일에도 있는가
 - 평가기가 좋아하는 점수와 사람의 판단이 일치하는가
 - 생성 품질과 공간 정확도 사이에 손해가 생기지 않는가
@@ -62,7 +62,7 @@ SpatialScore는 생성된 이미지가 프롬프트의 공간 관계를 지켰�
 
 생성 모델은 사람이 원하는 공간 관계보다 SpatialScore가 높은 패턴을 찾을 수 있습니다. 평가기가 보지 못하는 방식으로 점수만 올리는 보상 해킹이 생기면, 위치는 맞아 보여도 물체 수나 화질, 자연스러움이 나빠질 수 있습니다. 별도의 사람 평가와 기존 이미지 품질 지표가 함께 필요한 이유입니다.
 
-비용도 작지 않습니다. 8만 쌍 이상을 구축하고 보상모델과 생성 모델을 학습하며, 온라인 강화학습 중 이미지를 반복 생성해야 합니다. 개인이 기존 모델에 바로 붙이는 플러그인이나 배포 준비가 끝난 제품으로 보기보다 연구·훈련 접근법으로 이해하는 것이 안전합니다.
+비용도 작지 않습니다. 8만 쌍 이상을 구축하고 보상모델과 생성 모델을 학습하며, 온라인 강화학습 중 이미지를 반복 생성해야 합니다. 개인이 기존 모델에 바로 붙이는 플러그인이나 배포 준비가 끝난 제품으로 보기보다 연구, 훈련 접근법으로 이해하는 것이 안전합니다.
 
 ## 실무 판단은 실패 관계별로 나눠서 한다
 
@@ -72,7 +72,7 @@ Paper ID 2602.24233의 의미는 이미지 생성의 공간 오류를 전용 보
 
 ## Preference Pair가 관계 외 단서를 포함하지 않았나
 
-좋은 image와 나쁜 image가 위치뿐 아니라 해상도·style·object 수에서도 다르면 scorer가 spatial relation 대신 쉬운 화질 단서를 배울 수 있습니다. Pair는 가능한 한 같은 prompt·seed·style에서 target relation만 달라지게 구성하고 nuisance feature를 audit해야 합니다.
+좋은 image와 나쁜 image가 위치뿐 아니라 해상도, style, object 수에서도 다르면 scorer가 spatial relation 대신 쉬운 화질 단서를 배울 수 있습니다. Pair는 가능한 한 같은 prompt, seed, style에서 target relation만 달라지게 구성하고 nuisance feature를 audit해야 합니다.
 
 | Pair 차이 | 원하는 신호인가 | 위험 |
 |---|---|---|
@@ -98,28 +98,28 @@ Generator가 reward를 높이는 동안 object identity, count, aesthetic qualit
 
 ## 실제 도입 비용은 어디에서 생기나
 
-8만 pair 수집·검수, scorer training, RL 중 반복 image generation과 human holdout 평가가 필요합니다. Existing model inference에 가벼운 score call 하나를 추가하는 수준이 아닙니다. GPU hour, generated image 수, checkpoint storage와 failed run을 포함해 계산합니다.
+8만 pair 수집, 검수, scorer training, RL 중 반복 image generation과 human holdout 평가가 필요합니다. Existing model inference에 가벼운 score call 하나를 추가하는 수준이 아닙니다. GPU hour, generated image 수, checkpoint storage와 failed run을 포함해 계산합니다.
 
 PoC에서는 업무에서 자주 실패하는 5~10개 relation으로 작은 held-out set을 먼저 만듭니다. Scorer가 그 관계를 실제로 구분하고 RL 뒤 품질 회귀 없이 성공률이 오를 때 data와 training을 확장합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [5B 이미지 모델이 80B보다 낫다는 말은 어디까지 사실일까: DeepGen 1.0]({% post_url 2026-02-13-DeepGen-1-0--A-Lightweight-Unified-Multimodal-Model-for-Advancing-Image-Generation-and-Editing %}) — DeepGen 1.0의 SCB·Think Token·MR-GRPO 구조와 WISE·UniREditBench 비교 수치를 조건별로 읽고 배포 가능성을 판단합니다.
-- [이미지 편집 RL이 배경을 망가뜨린다면? FIRM-8B의 보상 분리]({% post_url 2026-03-14-Trust-Your-Critic--Robust-Reward-Modeling-and-Reinforcement-Learning-for-Faithful-Image-Editing-and-Generation %}) — 이미지 편집과 생성의 보상을 한 점수로 뭉치지 않는 FIRM-8B의 평가 구조, 학습 데이터와 임계값·추론 비용의 한계를 정리합니다.
-- [짝지은 이미지 없이 스타일을 바꾸려면: CycleGAN 손실함수와 구현 핵심]({% post_url 2019-02-28-cycleGAN %}) — 서로 대응하지 않는 두 이미지 집합을 변환하는 CycleGAN이 왜 cycle consistency와 identity loss를 함께 쓰는지 설명합니다. 네트워크 구성, 손실 가중치, 데이터와 의존성까지 구현 전에 확인할 항목을 코드…
+- [5B 이미지 모델이 80B보다 낫다는 말은 어디까지 사실일까: DeepGen 1.0]({% post_url 2026-02-13-DeepGen-1-0--A-Lightweight-Unified-Multimodal-Model-for-Advancing-Image-Generation-and-Editing %}) — DeepGen 1.0의 SCB, Think Token, MR-GRPO 구조와 WISE, UniREditBench 비교 수치를 조건별로 읽고 배포 가능성을 판단합니다.
+- [이미지 편집 RL이 배경을 망가뜨린다면? FIRM-8B의 보상 분리]({% post_url 2026-03-14-Trust-Your-Critic--Robust-Reward-Modeling-and-Reinforcement-Learning-for-Faithful-Image-Editing-and-Generation %}) — 이미지 편집과 생성의 보상을 한 점수로 뭉치지 않는 FIRM-8B의 평가 구조, 학습 데이터와 임계값, 추론 비용의 한계를 정리합니다.
+- [NextFlow는 1024 이미지를 왜 5초에 만드나: Next-Scale의 선택]({% post_url 2026-01-06-NextFlow--Unified-Sequential-Modeling-Activates-Multimodal-Understanding-and-Generation %}) — 픽셀 토큰을 한 줄씩 생성하지 않고 저해상도 구도에서 고해상도 디테일로 확장하는 통합 AR 모델의 원리와 비용
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
-### SpatialScore를 붙이면 생성 image의 왼쪽·오른쪽이 바로 고쳐지나요?
+### SpatialScore를 붙이면 생성 image의 왼쪽, 오른쪽이 바로 고쳐지나요?
 
 아닙니다. SpatialScore는 평가 reward이며 generator를 online RL 등으로 다시 최적화해야 하고 inference 때 object를 직접 이동하는 editor는 아닙니다.
 
 ### 8만 preference pair면 모든 공간 관계를 평가하나요?
 
-Data에 포함된 object·관계·문장 분포에 성능이 묶이므로 가림·거리·복수 관계·unseen 조합을 relation별 held-out set에서 확인해야 합니다.
+Data에 포함된 object, 관계, 문장 분포에 성능이 묶이므로 가림, 거리, 복수 관계, unseen 조합을 relation별 held-out set에서 확인해야 합니다.
 
 ### Reward가 오르면 image 품질도 함께 좋아지나요?
 
-보장되지 않습니다. Generator가 scorer의 shortcut을 이용해 object 수·화질·다양성을 해칠 수 있어 human spatial check와 quality·prompt alignment 지표를 함께 봐야 합니다.
+보장되지 않습니다. Generator가 scorer의 shortcut을 이용해 object 수, 화질, 다양성을 해칠 수 있어 human spatial check와 quality, prompt alignment 지표를 함께 봐야 합니다.

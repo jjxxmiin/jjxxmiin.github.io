@@ -57,7 +57,7 @@ article_images:
   source_url: https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6
 ---
 
-이번 조정의 직접적인 수혜는 호출량이 많고 작업 난도가 비교적 낮은 API 워크로드입니다. 다만 80%라는 인하율만 보고 전체 비용이 같은 폭으로 줄어든다고 계산하면 안 됩니다. 입력·출력 토큰 비율, 재시도, 캐시 사용, 모델 교체 후 품질 보정 비용까지 함께 비교해야 실제 절감 여부를 판단할 수 있습니다.
+이번 조정의 직접적인 수혜는 호출량이 많고 작업 난도가 비교적 낮은 API 워크로드입니다. 다만 80%라는 인하율만 보고 전체 비용이 같은 폭으로 줄어든다고 계산하면 안 됩니다. 입력, 출력 토큰 비율, 재시도, 캐시 사용, 모델 교체 후 품질 보정 비용까지 함께 비교해야 실제 절감 여부를 판단할 수 있습니다.
 
 ```mermaid
 graph TD
@@ -124,7 +124,7 @@ AI 기반 서비스를 제작하거나 운용하는 개발자와 기업은 Luna�
 
 개발자 및 서비스 테크 리더라면 자사 시스템의 API 호출 패턴을 분석해 모델 배치를 재조정해야 합니다. 상대적으로 복잡도가 낮은 작업을 정교하게 분류해 GPT-5.6 Luna로 전환하는 파이프라인 개편이 주요 포인트입니다.
 
-먼저 운영 로그에서 작업 유형별 입력·출력 토큰, 재시도율, 응답 시간과 오류율을 나눠 기준선을 만듭니다. 그다음 정답을 자동으로 채점하기 쉬운 추출이나 분류 작업부터 소량의 트래픽을 Luna로 보내 기존 결과와 비교합니다. 비용이 줄어도 누락률이 높아져 사람이 다시 검수한다면 총비용은 오히려 늘 수 있으므로, API 청구액과 함께 후처리 시간도 기록해야 합니다.
+먼저 운영 로그에서 작업 유형별 입력, 출력 토큰, 재시도율, 응답 시간과 오류율을 나눠 기준선을 만듭니다. 그다음 정답을 자동으로 채점하기 쉬운 추출이나 분류 작업부터 소량의 트래픽을 Luna로 보내 기존 결과와 비교합니다. 비용이 줄어도 누락률이 높아져 사람이 다시 검수한다면 총비용은 오히려 늘 수 있으므로, API 청구액과 함께 후처리 시간도 기록해야 합니다.
 
 Terra와 Sol은 모든 요청에 고정하기보다 Luna가 불확실성을 보인 요청을 승격하는 경로로 시험할 수 있습니다. 다만 라우터가 잘못 판단하면 같은 요청이 여러 모델을 거치며 토큰을 중복 소비합니다. 따라서 승격 조건, 최대 재시도 횟수, 요청당 비용 상한을 먼저 정하고, 모델별 품질 차이가 확인된 작업에만 라우팅을 적용하는 편이 안전합니다.
 
@@ -161,7 +161,7 @@ flowchart LR
 
 - [OpenAI 프론티어 API 제로 데이터 보존 발표, Private Safety Processing으로 기업 보안 강화]({% post_url 2026-08-21-openai-announces-zero-data-retention-and-previews-private-safety-processing-for-frontier-api-models %}) — OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력…
 - [DeepSeek-V4-Flash-0731 출시: 100만 토큰당 $0.14로 V4-Pro 넘은 에이전트 성능]({% post_url 2026-08-03-deepseek-releases-deepseek-v4-flash-0731-api-and-mit-licensed-open-weights %}) — DeepSeek는 2026년 7월 31일 DeepSeek-V4-Flash-0731 모델을 API 공개 베타로 출시하고 Hugging Face에 MIT 라이선스로 가중치를 공개했습니다. 13B 활성화 파라미터와 DSpark 모듈을 통해…
-- [Replicate 모델 배포 전 꼭 계산할 것: Cold Start와 Cog setup·predict 분리]({% post_url 2024-02-01-replicate %}) — Replicate의 사용량 기반 GPU 실행이 항상 빠른 API를 뜻하지 않는 이유를 lifecycle로 설명하고, Cog의 환경 정의와 모델 1회 로드·요청별 추론 구조를 점검합니다.
+- [Replicate 모델 배포 전 꼭 계산할 것: Cold Start와 Cog setup, predict 분리]({% post_url 2024-02-01-replicate %}) — Replicate의 사용량 기반 GPU 실행이 항상 빠른 API를 뜻하지 않는 이유를 lifecycle로 설명하고, Cog의 환경 정의와 모델 1회 로드, 요청별 추론 구조를 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

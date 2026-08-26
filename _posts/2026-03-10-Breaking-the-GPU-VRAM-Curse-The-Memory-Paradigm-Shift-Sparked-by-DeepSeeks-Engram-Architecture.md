@@ -9,8 +9,8 @@ tags:
   - AI코딩
   - MLOps
   - 반도체
-summary: "정적 N-gram 지식을 DRAM·CXL에서 조회하고 GPU를 추론에 집중시키는 Engram의 구조와, 초기 레이어 삽입·PCIe·OOV·데모 코드 한계를 정리합니다."
-description: 'DeepSeek Engram이 정적 N-gram 메모리를 DRAM에서 조회하는 구조와 VRAM 절감 범위, PCIe 지연·OOV·서빙 비용을 검증하는 방법을 설명합니다.'
+summary: "정적 N-gram 지식을 DRAM, CXL에서 조회하고 GPU를 추론에 집중시키는 Engram의 구조와, 초기 레이어 삽입, PCIe, OOV, 데모 코드 한계를 정리합니다."
+description: 'DeepSeek Engram이 정적 N-gram 메모리를 DRAM에서 조회하는 구조와 VRAM 절감 범위, PCIe 지연, OOV, 서빙 비용을 검증하는 방법을 설명합니다.'
 github_url: https://github.com/deepseek-ai/Engram
 image:
   path: https://opengraph.githubassets.com/1/deepseek-ai/Engram
@@ -19,14 +19,14 @@ faq:
   - question: 'Engram을 쓰면 모델 가중치를 모두 DRAM으로 옮길 수 있나요?'
     answer: '아닙니다. 정적 N-gram 임베딩을 별도 메모리 계층에서 조회하는 구조이며 모델 가중치, 동적 컨텍스트와 Transformer 연산은 여전히 GPU 자원을 사용합니다.'
   - question: 'O(1) 조회면 토큰 생성 시간도 일정해지나요?'
-    answer: '그렇지 않습니다. 룩업 주소 계산과 DRAM 접근 외에도 PCIe 전송, 캐시 미스, Attention·MoE 연산이 남으므로 전체 지연은 별도로 측정해야 합니다.'
+    answer: '그렇지 않습니다. 룩업 주소 계산과 DRAM 접근 외에도 PCIe 전송, 캐시 미스, Attention, MoE 연산이 남으므로 전체 지연은 별도로 측정해야 합니다.'
   - question: '공개 Engram 저장소로 바로 운영 모델을 서빙할 수 있나요?'
     answer: '현재 글에서 다룬 공개 코드는 아키텍처 데모 단계입니다. 실제 학습, 비동기 조회, GPU 연동, 테이블 배포와 장애 복구를 추가로 구현하고 검증해야 합니다.'
 ---
 
 DeepSeek Engram은 정적 N-gram 메모리를 DRAM 쪽으로 분리할 수 있지만, 모델 가중치와 동적 컨텍스트까지 VRAM에서 없애 주는 기술은 아닙니다.
 
-[Engram](https://github.com/deepseek-ai/Engram)의 아이디어는 자주 반복되는 정적 패턴을 모든 신경망 층에서 다시 계산하지 말고 결정론적인 주소로 조회하자는 것입니다. Attention·MoE가 문맥과 추론을 처리하는 동안 별도 N-gram 임베딩 테이블이 기억 역할을 맡습니다. 이 분리는 HBM 사용을 줄일 여지가 있지만, 호스트 메모리 조회가 실제 생성 지연에 미치는 영향을 함께 봐야 합니다.
+[Engram](https://github.com/deepseek-ai/Engram)의 아이디어는 자주 반복되는 정적 패턴을 모든 신경망 층에서 다시 계산하지 말고 결정론적인 주소로 조회하자는 것입니다. Attention, MoE가 문맥과 추론을 처리하는 동안 별도 N-gram 임베딩 테이블이 기억 역할을 맡습니다. 이 분리는 HBM 사용을 줄일 여지가 있지만, 호스트 메모리 조회가 실제 생성 지연에 미치는 영향을 함께 봐야 합니다.
 
 ## 정적 메모리와 동적 추론은 어떻게 만나는가
 
@@ -42,7 +42,7 @@ DeepSeek Engram은 정적 N-gram 메모리를 DRAM 쪽으로 분리할 수 있�
 
 ## 27B 결과는 어떤 범위에서 읽어야 하나
 
-원문은 27B 규모 Engram 모델이 동급 일반 MoE를 상회하고, MMLU 같은 지식 평가에서 최대 3.4포인트, 긴 문맥 검색에서 12.8포인트 개선됐다고 전합니다. 이는 특정 학습·비교 조건의 결과이며 “저렴한 RAM만 추가하면 모든 70B 모델을 더 작은 GPU에서 돌린다”는 보장은 아닙니다.
+원문은 27B 규모 Engram 모델이 동급 일반 MoE를 상회하고, MMLU 같은 지식 평가에서 최대 3.4포인트, 긴 문맥 검색에서 12.8포인트 개선됐다고 전합니다. 이는 특정 학습, 비교 조건의 결과이며 “저렴한 RAM만 추가하면 모든 70B 모델을 더 작은 GPU에서 돌린다”는 보장은 아닙니다.
 
 비교할 때는 다음 조건이 같아야 합니다.
 
@@ -51,7 +51,7 @@ DeepSeek Engram은 정적 N-gram 메모리를 DRAM 쪽으로 분리할 수 있�
 - 학습 토큰과 데이터 구성
 - batch, context length와 하드웨어
 - 첫 토큰 지연과 초당 토큰
-- 테이블 hit·miss별 성능
+- 테이블 hit, miss별 성능
 
 성능 점수와 시스템 비용을 분리하면, 정확도가 오른 이유와 메모리 계층의 이점을 혼동하지 않을 수 있습니다.
 
@@ -63,7 +63,7 @@ DRAM 용량은 HBM보다 싸고 크게 구성하기 쉽지만 대역폭과 지�
 
 ## 공개 코드는 아키텍처 데모 단계다
 
-원문에 따르면 공개 저장소의 `engram_demo_v1.py`는 Attention과 MoE 같은 표준 구성요소를 모킹한 독립 실행형 데모입니다. 현재 코드가 `pip install` 한 번으로 운영 모델을 서빙하는 완성 프레임워크는 아닙니다. 실제 적용에는 학습 파이프라인, 비동기 호스트 조회, GPU 커널, 테이블 배포와 vLLM·PyTorch 생태계 연동이 남습니다.
+원문에 따르면 공개 저장소의 `engram_demo_v1.py`는 Attention과 MoE 같은 표준 구성요소를 모킹한 독립 실행형 데모입니다. 현재 코드가 `pip install` 한 번으로 운영 모델을 서빙하는 완성 프레임워크는 아닙니다. 실제 적용에는 학습 파이프라인, 비동기 호스트 조회, GPU 커널, 테이블 배포와 vLLM, PyTorch 생태계 연동이 남습니다.
 
 같은 이름의 [코딩 에이전트용 engram 도구](https://github.com/Gentleman-Programming/engram)는 SQLite 기반 영구 메모리라는 별개 프로젝트입니다. 두 프로젝트의 “기억”을 혼동하지 않는 것이 좋습니다. DeepSeek Engram의 가치는 VRAM의 저주를 즉시 없앤다는 약속보다, 모델 용량과 하드웨어 메모리 계층을 함께 설계해야 한다는 문제 제기에 있습니다.
 
@@ -106,7 +106,7 @@ GPU에서 줄어든 HBM만 보고 시스템 메모리가 절감됐다고 말하�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [카파시의 Autoresearch는 무엇을 자동화하나: 반복 실험의 범위와 한계]({% post_url 2026-03-08-Review-Andrej-Karpathys-Autoresearch-The-End-of-All-night-Hyperparameter-Tuning-and-the-Dawn-of-Agentic-Engineering %}) — Autoresearch가 단일 GPU의 고정 시간 안에서 코드를 수정하고 평가하는 방식과, 단기 지표·재현성·하드웨어 편향을 검증하는 기준을 설명합니다.
+- [카파시의 Autoresearch는 무엇을 자동화하나: 반복 실험의 범위와 한계]({% post_url 2026-03-08-Review-Andrej-Karpathys-Autoresearch-The-End-of-All-night-Hyperparameter-Tuning-and-the-Dawn-of-Agentic-Engineering %}) — Autoresearch가 단일 GPU의 고정 시간 안에서 코드를 수정하고 평가하는 방식과, 단기 지표, 재현성, 하드웨어 편향을 검증하는 기준을 설명합니다.
 - [oMLX: 애플 실리콘에서 AI 코딩 에이전트 속도를 극대화하는 MLX 추론 서버]({% post_url 2026-08-18-oMLX-High-Performance-Apple-Silicon-LLM-Inference-Server-with-Paged-SSD-Caching %}) — oMLX는 애플 실리콘 Mac 환경에서 MLX 프레임워크를 기반으로 작동하는 고성능 LLM 추론 서버입니다. 페이징 처리된 SSD KV 캐싱과 연속 배칭을 통해 AI 코딩 에이전트의 첫 토큰 생성 시간(TTFT)을 획기적으로…
 - [Unsloth: 단 한 대의 GPU로 대형 언어 모델을 5배 빠르게 학습시키는 파이썬 가속 라이브러리]({% post_url 2026-08-02-Unsloth-Fast-and-Memory-Efficient-LLM-Fine-Tuning-Library-in-Python %}) — Unsloth는 PyTorch의 역전파 연산과 아텐션 메커니즘을 Triton 커널로 직접 재작성하여 대형 언어 모델 학습 속도를 최대 5배 높이고 VRAM 사용량을 80% 절감하는 오픈소스 라이브러리입니다.
 <!-- internal-links:end -->
@@ -119,7 +119,7 @@ GPU에서 줄어든 HBM만 보고 시스템 메모리가 절감됐다고 말하�
 
 ### O(1) 조회면 토큰 생성 시간도 일정해지나요?
 
-그렇지 않습니다. 룩업 주소 계산과 DRAM 접근 외에도 PCIe 전송, 캐시 미스, Attention·MoE 연산이 남으므로 전체 지연은 별도로 측정해야 합니다.
+그렇지 않습니다. 룩업 주소 계산과 DRAM 접근 외에도 PCIe 전송, 캐시 미스, Attention, MoE 연산이 남으므로 전체 지연은 별도로 측정해야 합니다.
 
 ### 공개 Engram 저장소로 바로 운영 모델을 서빙할 수 있나요?
 

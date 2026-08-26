@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/gru_layer.c"
 layout: post
 title: "DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward"
-summary: "DarkNet GRU 순전파의 update·reset·candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다."
-description: "DarkNet GRU의 U·W Connected 6개, update·reset·candidate와 time pointer를 따라 빈 CPU backward·state·활성화 실패 조건을 설명합니다."
+summary: "DarkNet GRU 순전파의 update, reset, candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다."
+description: "DarkNet GRU의 U, W Connected 6개, update, reset, candidate와 time pointer를 따라 빈 CPU backward, state, 활성화 실패 조건을 설명합니다."
 date:   2022-02-23 16:00 -0400
 categories: DarkNet
 image:
@@ -17,7 +17,7 @@ tags:
 math: true
 faq:
   - question: "DarkNet GRU에서 U 계열과 W 계열은 각각 무엇을 입력받나요?"
-    answer: "uz·ur·uh는 현재 input을, wz·wr·wh는 이전 hidden state를 입력받아 gate와 candidate 항을 만듭니다."
+    answer: "uz, ur, uh는 현재 input을, wz, wr, wh는 이전 hidden state를 입력받아 gate와 candidate 항을 만듭니다."
   - question: "제시된 GRU의 candidate 활성화 기본값은 tanh인가요?"
     answer: "생성부에서 l.tanh를 설정하지 않아 다른 parser가 바꾸지 않는다면 0으로 초기화되어 logistic 경로를 사용합니다."
   - question: "update_gru_layer가 있으면 CPU 학습도 가능한가요?"
@@ -92,7 +92,7 @@ void backward_gru_layer(layer l, network net)
 }
 ~~~
 
-이는 학습이 내부에서 자동으로 일어난다는 뜻이 아니라 CPU 역전파가 구현되지 않았다는 뜻입니다. `update_gru_layer`가 여섯 Connected Layer의 update 함수를 호출하더라도, 이 GRU backward에서 z·r·candidate와 시간 방향의 기울기를 계산하지 않으면 해당 업데이트 버퍼를 올바르게 채울 수 없습니다.
+이는 학습이 내부에서 자동으로 일어난다는 뜻이 아니라 CPU 역전파가 구현되지 않았다는 뜻입니다. `update_gru_layer`가 여섯 Connected Layer의 update 함수를 호출하더라도, 이 GRU backward에서 z, r, candidate와 시간 방향의 기울기를 계산하지 않으면 해당 업데이트 버퍼를 올바르게 채울 수 없습니다.
 
 생성 함수가 `delta`, `prev_state`, `forgot_delta`를 할당하고 학습 순전파가 일부를 초기화하는 사실만으로 역전파가 완성되지는 않습니다. 이 코드는 독립 실행 예제나 완전한 학습 구현이 아니라 당시 DarkNet GRU의 순전파 구조를 읽는 조각입니다.
 
@@ -112,7 +112,7 @@ Hidden 크기 1, step 2의 scalar 예제로 여섯 layer weight와 bias를 단�
 
 ## Pointer 이동의 Null과 범위 문제를 어떻게 찾나요?
 
-하위 Connected에서 BatchNorm을 끄면 x와 x_norm이 할당되지 않을 수 있는데 increment helper는 조건 없이 포인터 산술을 합니다. 사용 compiler에서 우연히 crash하지 않는다고 정의된 안전 동작이 되는 것은 아닙니다. Null 여부를 확인한 조건부 이동이 필요하다면 CPU·GPU 양쪽과 pointer 복원 경로를 함께 수정해야 합니다.
+하위 Connected에서 BatchNorm을 끄면 x와 x_norm이 할당되지 않을 수 있는데 increment helper는 조건 없이 포인터 산술을 합니다. 사용 compiler에서 우연히 crash하지 않는다고 정의된 안전 동작이 되는 것은 아닙니다. Null 여부를 확인한 조건부 이동이 필요하다면 CPU, GPU 양쪽과 pointer 복원 경로를 함께 수정해야 합니다.
 
 각 pointer의 base, step offset, allocation 끝을 표로 만들고 마지막 step에서 한 구간을 넘지 않는지 sanitizer로 확인합니다. Forward 종료 후 다음 network 호출을 위해 pointer가 원래 base로 돌아오는지도 중요합니다. 범위 안의 잘못된 step은 sanitizer가 찾지 못하므로 slice별 pattern test를 병행합니다.
 
@@ -126,13 +126,13 @@ Candidate가 logistic이고 state weighted sum도 0~1 범위라면 음수 hidden
 
 Output delta는 weighted sum을 통해 이전 state, candidate와 update gate로 갈라져야 합니다. Candidate activation을 지나 uh와 wh로, wh 입력의 `r×state`에서 reset gate와 이전 state로 다시 나뉩니다. z와 r은 logistic derivative를 거쳐 U와 W Connected로 전달되고, 이전 state gradient는 다음 시간에서 온 값과 합쳐져 역순으로 흐릅니다.
 
-이 경로를 글로 아는 것과 구현이 존재하는 것은 다릅니다. 실제 branch의 backward가 여섯 layer delta와 time cache를 채우는지 보고, step 2 scalar finite difference로 input·weight·initial state gradient를 검증합니다. GPU backward만 있다면 CPU 실행이 자동으로 그것을 쓰는지도 build와 function pointer에서 확인합니다.
+이 경로를 글로 아는 것과 구현이 존재하는 것은 다릅니다. 실제 branch의 backward가 여섯 layer delta와 time cache를 채우는지 보고, step 2 scalar finite difference로 input, weight, initial state gradient를 검증합니다. GPU backward만 있다면 CPU 실행이 자동으로 그것을 쓰는지도 build와 function pointer에서 확인합니다.
 
 ## 자주 남는 질문
 
 ### DarkNet GRU에서 U 계열과 W 계열은 각각 무엇을 입력받나요?
 
-uz·ur·uh는 현재 input을, wz·wr·wh는 이전 hidden state를 입력받아 gate와 candidate 항을 만듭니다.
+uz, ur, uh는 현재 input을, wz, wr, wh는 이전 hidden state를 입력받아 gate와 candidate 항을 만듭니다.
 
 ### 제시된 GRU의 candidate 활성화 기본값은 tanh인가요?
 
@@ -152,6 +152,6 @@ uz·ur·uh는 현재 input을, wz·wr·wh는 이전 hidden state를 입력받아
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Darknet Region Layer 학습이 멈추는 이유: 빈 backward와 objectness delta 추적]({% post_url 2022-03-14-DarkNetRegionLayer %}) — Darknet region_layer의 출력 인덱스와 박스 좌표, 학습 delta 할당 순서를 따라가며 비어 있는 backward, truth 경계, 마스크 scale 형 변환, 추론 출력 변경을 점검합니다.
-- [DarkNet Connected Layer 순전파·역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [DarkNet Connected Layer 순전파, 역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
 <!-- internal-links:end -->

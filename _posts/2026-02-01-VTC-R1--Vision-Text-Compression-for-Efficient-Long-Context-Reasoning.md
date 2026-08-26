@@ -10,15 +10,15 @@ tags:
   - 멀티모달
   - 이미지생성
 math: true
-summary: "VTC-R1이 이전 reasoning segment를 text token 대신 렌더링 image로 되먹임해 optical memory로 쓰는 과정, 3.4배 압축·2.7배 속도 보고와 OCR 오류 위험을 설명합니다."
-description: "VTC-R1이 이전 reasoning을 image optical memory로 바꿔 3.4배 token 압축·2.7배 latency 개선을 보고한 원리, segment 설계·OCR 오류·text fallback 기준을 설명합니다."
+summary: "VTC-R1이 이전 reasoning segment를 text token 대신 렌더링 image로 되먹임해 optical memory로 쓰는 과정, 3.4배 압축, 2.7배 속도 보고와 OCR 오류 위험을 설명합니다."
+description: "VTC-R1이 이전 reasoning을 image optical memory로 바꿔 3.4배 token 압축, 2.7배 latency 개선을 보고한 원리, segment 설계, OCR 오류, text fallback 기준을 설명합니다."
 faq:
   - question: "Text를 image로 바꾸면 내용이 요약되나요?"
-    answer: "의미를 다시 요약하기보다 같은 reasoning text를 image로 렌더링해 vision token으로 읽게 하지만 font·해상도·tokenizer 때문에 글자 정보가 손실될 수 있습니다."
+    answer: "의미를 다시 요약하기보다 같은 reasoning text를 image로 렌더링해 vision token으로 읽게 하지만 font, 해상도, tokenizer 때문에 글자 정보가 손실될 수 있습니다."
   - question: "3.4배 압축이면 모든 문제에서 2.7배 빨라지나요?"
-    answer: "아닙니다. 3.4배는 평균 token 압축이고 2.7배는 보고된 end-to-end 조건의 latency이므로 짧은 문제·render overhead·반복 횟수에 따라 이득이 달라집니다."
+    answer: "아닙니다. 3.4배는 평균 token 압축이고 2.7배는 보고된 end-to-end 조건의 latency이므로 짧은 문제, render overhead, 반복 횟수에 따라 이득이 달라집니다."
   - question: "Optical memory 오류는 어떻게 막나요?"
-    answer: "Segment별 OCR exact match와 수식·부호 검사를 하고 작은 글자나 code처럼 오독 위험이 큰 경우 원문 text를 유지하거나 오류 시 text fallback으로 전환해야 합니다."
+    answer: "Segment별 OCR exact match와 수식, 부호 검사를 하고 작은 글자나 code처럼 오독 위험이 큰 경우 원문 text를 유지하거나 오류 시 text fallback으로 전환해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.22069.png
   alt: "긴 추론을 이미지로 저장하면 왜 빨라질까? VTC-R1의 Optical Memory 논문 대표 이미지"
@@ -60,24 +60,24 @@ VTC-R1은 수식 구조가 있고 긴 reasoning history가 필요한 문제에 �
 
 수학 segment에 `x < 0`이 있는데 optical memory가 `<`를 `>`로 읽으면 다음 단계는 문법적으로 자연스럽지만 반대 영역에서 계산을 계속할 수 있습니다. Fraction bar, minus sign, subscript와 서로 비슷한 variable도 같은 위험이 있습니다. 최종 정답만 채점하면 어느 segment에서 정보가 바뀌었는지 찾기 어렵습니다.
 
-그래서 반복마다 두 output을 남깁니다. 하나는 렌더링에 사용한 원문 text이고 다른 하나는 다음 호출 직전에 model 또는 독립 OCR이 다시 읽은 text입니다. 두 값을 character·math token 단위로 대조해 최초 divergence 지점을 기록합니다.
+그래서 반복마다 두 output을 남깁니다. 하나는 렌더링에 사용한 원문 text이고 다른 하나는 다음 호출 직전에 model 또는 독립 OCR이 다시 읽은 text입니다. 두 값을 character, math token 단위로 대조해 최초 divergence 지점을 기록합니다.
 
 | 오류 | 다음 단계 영향 | 검증 방법 |
 |---|---|---|
 | 숫자 `1`과 `7` 혼동 | 모든 후속 계산값 변경 | 수식 token exact match |
 | `-` 또는 부등호 누락 | 해의 영역 반전 | operator별 recall |
-| 줄바꿈으로 식 분리 | 전제와 결론 연결 손실 | line order·equation parse |
+| 줄바꿈으로 식 분리 | 전제와 결론 연결 손실 | line order, equation parse |
 | Variable 이름 혼동 | 다른 값을 대입 | symbol table consistency |
 
 오류가 검출되면 더 높은 해상도로 다시 렌더링하거나 해당 segment만 text로 유지해야 합니다. 틀린 optical memory를 다음 image에 다시 포함하면 손실이 누적되므로 자동 fallback은 첫 오독 지점에서 작동해야 합니다.
 
 ## Segment 길이는 어떤 비용 곡선으로 고를까
 
-Segment가 짧으면 글자가 크고 잘 읽히지만 render와 VLM call이 늘어납니다. 길면 call 수는 줄어도 한 image가 빽빽해지고 vision token 수와 OCR 오류가 증가합니다. 일정한 token 수만 기준으로 자르기보다 문장·수식 block의 경계를 보존하면서 여러 최대 줄 수를 시험합니다.
+Segment가 짧으면 글자가 크고 잘 읽히지만 render와 VLM call이 늘어납니다. 길면 call 수는 줄어도 한 image가 빽빽해지고 vision token 수와 OCR 오류가 증가합니다. 일정한 token 수만 기준으로 자르기보다 문장, 수식 block의 경계를 보존하면서 여러 최대 줄 수를 시험합니다.
 
 ```text
 짧은 segment: 높은 가독성 + 많은 반복 overhead
-긴 segment:   적은 반복 + 작은 font·복잡한 layout
+긴 segment:   적은 반복 + 작은 font, 복잡한 layout
 선택 기준:    정답률을 유지하는 범위에서 end-to-end latency 최소
 ```
 
@@ -85,7 +85,7 @@ Segment가 짧으면 글자가 크고 잘 읽히지만 render와 VLM call이 늘
 
 ## 2.7배 속도를 어떤 항목으로 재현할까
 
-Latency에는 text-to-image rendering, image decode·preprocess, vision encoder, language decoding과 반복 횟수를 모두 포함합니다. GPU kernel 시간만 재면 CPU rendering과 data transfer가 빠집니다. Warm-up 뒤 batch 1에서 p50·p95를 측정하고, plain text와 같은 정답률 또는 같은 context 정보량으로 비교합니다.
+Latency에는 text-to-image rendering, image decode, preprocess, vision encoder, language decoding과 반복 횟수를 모두 포함합니다. GPU kernel 시간만 재면 CPU rendering과 data transfer가 빠집니다. Warm-up 뒤 batch 1에서 p50, p95를 측정하고, plain text와 같은 정답률 또는 같은 context 정보량으로 비교합니다.
 
 Memory도 text KV cache 감소와 vision feature가 차지하는 공간을 함께 계산합니다. 3.4배 token 감소가 peak GPU memory와 동일한 비율의 감소를 보장하지는 않습니다. Vision encoder를 매 단계 다시 실행하는지 feature를 cache하는지에 따라 결과가 달라질 수 있습니다.
 
@@ -96,23 +96,23 @@ PoC에서는 짧은 문제, 긴 수학 CoT, punctuation이 중요한 code-like t
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [코드를 이미지로 읽으면 Token은 줄지만 정확할까? CodeOCR의 8배 압축]({% post_url 2026-02-03-CodeOCR--On-the-Effectiveness-of-Vision-Language-Models-in-Code-Understanding %}) — CodeOCR이 source code를 syntax-highlighted image로 렌더링해 visual token으로 압축하는 실험, clone detection의 강점과 작은 변수·연산자 오독 위험을 task별로 정리합니다.
-- [15B Phi-4 Vision은 왜 UI·수식 추론을 노리나: 동적 해상도와 모드 토큰]({% post_url 2026-03-07-Phi-4-reasoning-vision-15B-Technical-Report %}) — Phi-4-reasoning-vision-15B의 동적 해상도 입력, 데이터 정제, 직접 답변·추론 모드와 로컬 도입 전 확인할 한계를 정리합니다.
-- [이미지 이해와 생성이 서로 방해한다면? Cheers의 의미·디테일 토큰 분리]({% post_url 2026-03-16-Cheers--Decoupling-Patch-Details-from-Semantic-Representations-Enables-Unified-Multimodal-Comprehension-and-Generation %}) — 한 모델에서 이미지 이해와 생성을 함께 할 때 생기는 표현 충돌을 Cheers가 의미·디테일 경로로 나누는 방식과 비용 수치의 조건을 살펴봅니다.
+- [olmOCR: 비전-언어 모델로 PDF 문서의 한계를 뛰어넘다]({% post_url 2025-03-06-olmOCR %}) — olmOCR은 PDF 문서에서 텍스트를 추출하고 구조를 유지하는 강력한 비전-언어 모델입니다. 기존 OCR 도구의 한계를 극복하며, 연구 논문, 법률 문서, 기술 보고서 등 다양한 문서에서 깨끗한 텍스트 데이터를 생성할 수 있습니다.
+- [15B Phi-4 Vision은 왜 UI, 수식 추론을 노리나: 동적 해상도와 모드 토큰]({% post_url 2026-03-07-Phi-4-reasoning-vision-15B-Technical-Report %}) — Phi-4-reasoning-vision-15B의 동적 해상도 입력, 데이터 정제, 직접 답변, 추론 모드와 로컬 도입 전 확인할 한계를 정리합니다.
+- [차트, 흐름도를 바로 읽지 말고 다시 그리면 나아질까: Thinking with Drafting]({% post_url 2026-02-14-Thinking-with-Drafting--Optical-Decompression-via-Logical-Reconstruction %}) — TwD가 이미지의 객체와 관계를 Logic Graphic DSL로 재구성한 뒤 검증하는 방식, VisAlg 성과와 OCR, DSL 범위 한계를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### Text를 image로 바꾸면 내용이 요약되나요?
 
-의미를 다시 요약하기보다 같은 reasoning text를 image로 렌더링해 vision token으로 읽게 하지만 font·해상도·tokenizer 때문에 글자 정보가 손실될 수 있습니다.
+의미를 다시 요약하기보다 같은 reasoning text를 image로 렌더링해 vision token으로 읽게 하지만 font, 해상도, tokenizer 때문에 글자 정보가 손실될 수 있습니다.
 
 ### 3.4배 압축이면 모든 문제에서 2.7배 빨라지나요?
 
-아닙니다. 3.4배는 평균 token 압축이고 2.7배는 보고된 end-to-end 조건의 latency이므로 짧은 문제·render overhead·반복 횟수에 따라 이득이 달라집니다.
+아닙니다. 3.4배는 평균 token 압축이고 2.7배는 보고된 end-to-end 조건의 latency이므로 짧은 문제, render overhead, 반복 횟수에 따라 이득이 달라집니다.
 
 ### Optical memory 오류는 어떻게 막나요?
 
-Segment별 OCR exact match와 수식·부호 검사를 하고 작은 글자나 code처럼 오독 위험이 큰 경우 원문 text를 유지하거나 오류 시 text fallback으로 전환해야 합니다.
+Segment별 OCR exact match와 수식, 부호 검사를 하고 작은 글자나 code처럼 오독 위험이 큰 경우 원문 text를 유지하거나 오류 시 text fallback으로 전환해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.22069)

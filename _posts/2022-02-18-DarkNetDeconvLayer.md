@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/deconvolutional_layer.c"
 layout: post
 title: "DarkNet Deconvolutional Layer 출력 크기와 col2im 흐름"
-summary: "DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파·초기화 주의점을 코드 차원으로 설명합니다."
-description: "DarkNet Deconvolutional Layer의 출력식, GEMM·col2im 겹침, im2col backward와 workspace·delta·bilinear 초기화 실패 조건을 설명합니다."
+summary: "DarkNet 전치 합성곱층이 GEMM 결과를 col2im으로 겹쳐 쓰며 공간 크기를 키우는 과정과 역전파, 초기화 주의점을 코드 차원으로 설명합니다."
+description: "DarkNet Deconvolutional Layer의 출력식, GEMM, col2im 겹침, im2col backward와 workspace, delta, bilinear 초기화 실패 조건을 설명합니다."
 date:   2022-02-18 16:00 -0400
 categories: DarkNet
 image:
@@ -24,7 +24,7 @@ faq:
     answer: "입력 gradient GEMM이 기존 값에 누적되므로 이전 batch의 값이 남거나 의도하지 않은 중복 gradient가 더해질 수 있습니다."
 ---
 
-DarkNet의 Deconvolutional Layer는 합성곱을 되감는 함수가 아니라, 입력 위치마다 필터 크기의 값을 만든 뒤 `col2im`으로 출력 공간에 겹쳐 더하는 전치 합성곱 구현입니다. 출력 크기 식과 겹쳐 더해지는 위치를 함께 보면 stride와 padding이 결과 모양에 미치는 영향을 설명할 수 있습니다. 출력 크기나 격자 무늬가 이상하면 stride·padding을 먼저 계산하고 workspace와 정규화 경로를 뒤이어 확인해야 합니다.
+DarkNet의 Deconvolutional Layer는 합성곱을 되감는 함수가 아니라, 입력 위치마다 필터 크기의 값을 만든 뒤 `col2im`으로 출력 공간에 겹쳐 더하는 전치 합성곱 구현입니다. 출력 크기 식과 겹쳐 더해지는 위치를 함께 보면 stride와 padding이 결과 모양에 미치는 영향을 설명할 수 있습니다. 출력 크기나 격자 무늬가 이상하면 stride, padding을 먼저 계산하고 workspace와 정규화 경로를 뒤이어 확인해야 합니다.
 
 ## 출력 크기는 stride와 padding으로 바로 정해진다
 
@@ -46,7 +46,7 @@ workspace에는 입력의 모든 공간 위치마다 `size × size × n`개의 �
 return (size_t)l.h*l.w*l.size*l.size*l.n*sizeof(float);
 ~~~
 
-입력 크기를 바꾸면 출력·delta와 배치 정규화 버퍼뿐 아니라 이 workspace 크기도 다시 계산해야 합니다.
+입력 크기를 바꾸면 출력, delta와 배치 정규화 버퍼뿐 아니라 이 workspace 크기도 다시 계산해야 합니다.
 
 ## 순전파는 GEMM 결과를 col2im으로 펼친다
 
@@ -98,7 +98,7 @@ scal_cpu(l.nweights,
 // bilinear_init(l);
 ~~~
 
-갱신 함수는 편향과 선택적인 batch-normalization scale, 그리고 가중치에 학습률·decay·momentum을 적용합니다. `adam` 인자가 참이면 모멘트 배열을 할당하지만, 이 글에 나온 `update_deconvolutional_layer`에는 Adam 전용 계산이 없습니다.
+갱신 함수는 편향과 선택적인 batch-normalization scale, 그리고 가중치에 학습률, decay, momentum을 적용합니다. `adam` 인자가 참이면 모멘트 배열을 할당하지만, 이 글에 나온 `update_deconvolutional_layer`에는 Adam 전용 계산이 없습니다.
 
 또한 `bilinear_init`의 식은 `(1 - |i-center|)(1 - |j-center|)`를 그대로 사용합니다. 큰 커널에서는 중심에서 멀어진 항이 음수가 될 수 있으므로, 이 함수를 다시 활성화하려면 원하는 초기 커널과 값이 실제로 일치하는지 먼저 출력해 확인해야 합니다.
 
@@ -130,7 +130,7 @@ Upsampling 초기값을 원한다면 단일 impulse 입력이 부드러운 bilin
 
 ## Resize와 Workspace 소유권은 어떻게 맞추나요?
 
-입력 크기 변경 뒤 layer가 보고한 workspace 요구량을 network 공유 buffer가 실제로 다시 할당했는지 확인합니다. Layer 내부 계산만 갱신하고 상위 network가 이전 최대 크기를 유지하면 큰 frame에서 memory overwrite가 생길 수 있습니다. BatchNorm cache와 output·delta pointer를 참조하는 외부 image view도 realloc 뒤에는 갱신해야 합니다.
+입력 크기 변경 뒤 layer가 보고한 workspace 요구량을 network 공유 buffer가 실제로 다시 할당했는지 확인합니다. Layer 내부 계산만 갱신하고 상위 network가 이전 최대 크기를 유지하면 큰 frame에서 memory overwrite가 생길 수 있습니다. BatchNorm cache와 output, delta pointer를 참조하는 외부 image view도 realloc 뒤에는 갱신해야 합니다.
 
 여러 layer가 같은 workspace를 순차적으로 쓰는 구조에서는 비동기 실행으로 lifetime이 겹치지 않는다는 전제가 있습니다. 병렬화한다면 layer별 buffer 또는 동기화가 필요하며, 단일 스레드에서 맞던 결과가 간헐적으로 흔들리는지를 검사합니다.
 
@@ -157,7 +157,7 @@ Upsampling 초기값을 원한다면 단일 impulse 입력이 부드러운 bilin
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Connected Layer 순전파·역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
-- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [DarkNet Connected Layer 순전파, 역전파: GEMM 차원 따라가기]({% post_url 2022-02-12-DarkNetConnectedLayer %}) — DarkNet 완전연결층이 GEMM으로 출력을 만들고, 역전파로 가중치와 입력 기울기를 계산한 뒤 모멘텀 방식으로 갱신하는 순서를 코드 기준으로 설명합니다.
+- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col, GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
 <!-- internal-links:end -->

@@ -5,7 +5,7 @@ source_citations:
 layout: post
 title:  "Darknet avgpool은 일반 Average Pooling이 아니다: Global Average 코드 읽기"
 summary: "Darknet avgpool_layer가 window와 stride 없이 채널마다 h×w 전체를 평균내는 Global Average Pooling인 이유와 backward에서 gradient를 균등 분배하는 방식을 설명합니다."
-description: "Darknet avgpool layer가 채널별 h×w 전체를 평균내는 Global Average Pooling인 근거와 shape·index·gradient 누적 검증법을 설명합니다."
+description: "Darknet avgpool layer가 채널별 h×w 전체를 평균내는 Global Average Pooling인 근거와 shape, index, gradient 누적 검증법을 설명합니다."
 date:   2022-02-06 16:00 -0400
 categories: DarkNet
 image:
@@ -63,7 +63,7 @@ for(b = 0; b < l.batch; ++b){
 
 예를 들어 한 채널이 `2×2`이고 값이 1, 3, 5, 7이라면 출력은 4가 됩니다. 공간 구역별 평균 네 개가 아니라 채널 전체의 평균 하나입니다. 포팅 결과 shape가 `out_h×out_w`로 남아 있다면 다른 pooling 구현을 옮긴 것입니다.
 
-메모리 layout은 spatial index가 가장 안쪽이고, 그 위로 channel과 batch가 놓입니다. framework 간 NCHW·NHWC 변환이 개입하면 같은 평균이라도 엉뚱한 축을 줄일 수 있으므로 축을 먼저 확인해야 합니다.
+메모리 layout은 spatial index가 가장 안쪽이고, 그 위로 channel과 batch가 놓입니다. framework 간 NCHW, NHWC 변환이 개입하면 같은 평균이라도 엉뚱한 축을 줄일 수 있으므로 축을 먼저 확인해야 합니다.
 
 ## Backward는 같은 Gradient를 모든 위치에 더합니다
 
@@ -138,7 +138,7 @@ Kernel과 stride 인자가 없고 출력 높이와 폭을 모두 1로 고정해 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse·extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간·채널 재배치와 flatten·extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈·resize 전제를 점검합니다.
-- [Darknet RNN의 State 포인터가 깨질 때: batch·steps 메모리 계약 읽기]({% post_url 2022-03-16-DarkNetRNNLayer %}) — Darknet rnn_layer가 세 connected layer를 시간축으로 이동시키는 구조와 batch를 steps로 나누는 이유, state 포인터·shortcut·역방향 순회의 위험 조건을 코드로 점검합니다.
-- [Darknet Upsample에서 음수 Stride를 쓰면 왜 Downsample이 될까?]({% post_url 2022-03-21-DarkNetUpsampleLayer %}) — Darknet upsample_layer가 stride 부호로 reverse 모드를 정하고 출력 크기와 forward·backward 호출 방향을 뒤집는 방식, scale 초기화와 정수 나눗셈 주의점을 설명합니다.
+- [Darknet Reorg Layer가 forward와 backward에서 다르게 움직이는 조건: reverse, extra 우선순위]({% post_url 2022-03-15-DarkNetReorgLayer %}) — Darknet reorg_layer의 공간, 채널 재배치와 flatten, extra 분기를 비교하고, forward/backward 우선순위 불일치와 나눗셈, resize 전제를 점검합니다.
+- [Darknet RNN의 State 포인터가 깨질 때: batch, steps 메모리 계약 읽기]({% post_url 2022-03-16-DarkNetRNNLayer %}) — Darknet rnn_layer가 세 connected layer를 시간축으로 이동시키는 구조와 batch를 steps로 나누는 이유, state 포인터, shortcut, 역방향 순회의 위험 조건을 코드로 점검합니다.
+- [Darknet utils.c 이름만 믿으면 틀리는 7곳: mse\_array는 MSE가 아니다]({% post_url 2022-03-22-DarkNetUtils %}) — Darknet utils.c의 CLI 파서, 문자열, 파일, CSV, 난수, 배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위, 0 나눗셈, 입력 변경 위험을 짚습니다.
 <!-- internal-links:end -->

@@ -9,7 +9,7 @@ tags:
   - 파인튜닝
 math: true
 summary: "Act2Goal이 현재 image와 goal image 사이의 중간 상태를 visual world model로 만들고, 가까운 미래는 촘촘하게 먼 미래는 성기게 읽는 MSTH로 control에 연결하는 방식을 설명합니다."
-description: "Act2Goal이 visual world model로 중간 goal frame을 만들고 MSTH로 가까운·먼 미래를 다르게 읽는 구조를 설명하며, 환각·재계획·적응 실패를 검증합니다."
+description: "Act2Goal이 visual world model로 중간 goal frame을 만들고 MSTH로 가까운, 먼 미래를 다르게 읽는 구조를 설명하며, 환각, 재계획, 적응 실패를 검증합니다."
 faq:
   - question: "Act2Goal은 최종 goal만 보고 바로 action을 만들나요?"
     answer: "아닙니다. 현재 image와 goal image 사이의 intermediate frame을 생성하고 이를 multi-scale로 선택해 policy 조건으로 사용합니다."
@@ -57,7 +57,7 @@ Act2Goal은 reward-free online adaptation에 hindsight goal relabeling을 사용
 |---|---|---|
 | 현재 직후 | 실제 observation과의 정렬 | 시작 object 위치가 바뀜 |
 | 접근 | 충돌 없는 경로와 자세 | gripper가 물체를 관통함 |
-| 접촉 | grasp 전·후 관계 | 접촉 없이 물체가 이동함 |
+| 접촉 | grasp 전후 관계 | 접촉 없이 물체가 이동함 |
 | 목표 직전 | 최종 goal과의 연결 | 중간 object가 사라짐 |
 
 world model이 만든 plan과 실제 실행 frame을 같은 시간축에 놓고 차이를 계산합니다. 차이가 작아도 계속 진행하고, 임계값을 넘으면 재계획하는 정책을 비교합니다. 임계값이 너무 낮으면 호출이 잦아지고 너무 높으면 잘못된 plan을 오래 따르게 됩니다.
@@ -81,7 +81,7 @@ Act2Goal을 적용할 최소 조건은 **plan이 실행 가능한 상태 전이�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model]({% post_url 2026-02-02-Causal-World-Modeling-for-Robot-Control %}) — LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연·환각·안전 한계를…
+- [로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model]({% post_url 2026-02-02-Causal-World-Modeling-for-Robot-Control %}) — LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연, 환각, 안전 한계를…
 - [로봇이 미래 영상을 만들지 않고도 다음 행동을 고를 수 있나: World Guidance]({% post_url 2026-02-26-World-Guidance--World-Modeling-in-Condition-Space-for-Action-Generation %}) — WoG가 미래 관측을 Q-former 조건 표현으로 압축하고 VLA가 행동과 함께 예측하게 하는 2단계 학습, UMI 성과와 지연 한계를 설명합니다.
 - [실물 시행착오 없이 로봇 정책을 개선할 수 있나: RISE의 상상 롤아웃]({% post_url 2026-02-15-RISE--Self-Improving-Robot-Policy-with-Compositional-World-Model %}) — RISE가 동역학 모델과 진행 가치 모델을 조합해 가상 롤아웃으로 정책을 개선하는 구조, 세 조작 과제 성과와 모델 편향 위험을 분석합니다.
 <!-- internal-links:end -->

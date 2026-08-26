@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet logistic_layer.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/logistic_layer.c"
 layout: post
-title:  "Darknet Logistic Layer의 cost가 batch마다 달라지는 이유: sigmoid·cross entropy 흐름"
+title:  "Darknet Logistic Layer의 cost가 batch마다 달라지는 이유: sigmoid, cross entropy 흐름"
 summary: "Darknet LOGXENT layer가 입력을 sigmoid 출력으로 바꾸고 truth가 있을 때만 loss와 delta를 계산하는 과정을 추적합니다."
-description: "Darknet LOGXENT layer의 sigmoid output, truth 조건부 cross-entropy·delta와 sum cost를 따라 stale buffer·shape·수치 안정성 실패를 설명합니다."
+description: "Darknet LOGXENT layer의 sigmoid output, truth 조건부 cross-entropy, delta와 sum cost를 따라 stale buffer, shape, 수치 안정성 실패를 설명합니다."
 date:   2022-03-06 16:00 -0400
 categories: DarkNet
 image:
@@ -19,12 +19,12 @@ faq:
   - question: "Logistic Layer cost는 왜 batch가 커지면 함께 커질 수 있나요?"
     answer: "원소별 cross-entropy를 평균내지 않고 batch×inputs 전체에 대해 합하기 때문입니다."
   - question: "Truth가 없는 forward에서도 delta와 cost가 새로 0이 되나요?"
-    answer: "아닙니다. Sigmoid output만 갱신되므로 이전 학습 호출의 loss·delta·cost가 남을 수 있습니다."
+    answer: "아닙니다. Sigmoid output만 갱신되므로 이전 학습 호출의 loss, delta, cost가 남을 수 있습니다."
   - question: "Backward에서 sigmoid 미분을 다시 계산하지 않는 이유는 무엇인가요?"
     answer: "logistic_x_ent_cpu가 sigmoid와 cross-entropy가 결합된 delta를 forward에서 이미 만들었다는 계약이기 때문입니다."
 ---
 
-Darknet의 Logistic Layer에서 `cost`가 입력 수나 batch 크기에 따라 커지는 직접적인 이유는 **각 원소의 logistic cross-entropy loss를 평균내지 않고 모두 더해 저장하기 때문**이다. forward는 언제나 sigmoid 출력을 만들지만, truth가 있을 때만 loss·delta·cost를 계산한다.
+Darknet의 Logistic Layer에서 `cost`가 입력 수나 batch 크기에 따라 커지는 직접적인 이유는 **각 원소의 logistic cross-entropy loss를 평균내지 않고 모두 더해 저장하기 때문**이다. forward는 언제나 sigmoid 출력을 만들지만, truth가 있을 때만 loss, delta, cost를 계산한다.
 
 ## forward는 출력과 학습 상태를 따로 만든다
 
@@ -124,23 +124,23 @@ l.delta_gpu = cuda_make_array(
 
 이 layer는 학습 가능한 weight를 갖지 않는다. 역할은 입력을 sigmoid 확률 형태로 바꾸고 target이 있을 때 원소별 오차를 준비하는 것이다. 따라서 이상한 cost를 만났을 때 optimizer보다 먼저 **truth 존재 여부, 원소 수, 합계와 평균의 차이, delta의 생성 시점**을 확인해야 한다.
 
-## 손계산으로 Output·Loss·Delta를 어떻게 맞출까
+## 손계산으로 Output, Loss, Delta를 어떻게 맞출까
 
-Logit 0은 sigmoid 0.5가 되어야 한다. Truth 1과 0을 각각 넣어 loss와 delta 부호가 prediction을 올바른 방향으로 움직이는지 확인한다. 매우 큰 양수·음수에서도 NaN이나 `log(0)`이 생기지 않는지 helper의 안정화 식을 본다. 확률을 다시 sigmoid에 넣는 중복 activation도 synthetic 값으로 찾는다.
+Logit 0은 sigmoid 0.5가 되어야 한다. Truth 1과 0을 각각 넣어 loss와 delta 부호가 prediction을 올바른 방향으로 움직이는지 확인한다. 매우 큰 양수, 음수에서도 NaN이나 `log(0)`이 생기지 않는지 helper의 안정화 식을 본다. 확률을 다시 sigmoid에 넣는 중복 activation도 synthetic 값으로 찾는다.
 
 Batch 1과 2에서 같은 sample을 반복하면 raw cost는 두 배에 가깝고 원소당 평균은 같아야 한다. Logging 평균만 바꿀지 backward delta도 나눌지 구분해야 learning-rate 의미가 유지된다.
 
 ## Stale Buffer를 어떻게 막을까
 
-Truth가 null이면 loss·delta·cost를 읽지 않는다는 상태를 API로 표현하거나 명시적으로 초기화한다. 추론 직후 backward를 호출하지 않게 mode와 truth 유효성을 검사하고 `net.delta` null도 보호한다. Training과 evaluation을 번갈아 호출하는 test에서 output은 새 입력과 맞고 metric에는 이전 cost가 섞이지 않아야 한다.
+Truth가 null이면 loss, delta, cost를 읽지 않는다는 상태를 API로 표현하거나 명시적으로 초기화한다. 추론 직후 backward를 호출하지 않게 mode와 truth 유효성을 검사하고 `net.delta` null도 보호한다. Training과 evaluation을 번갈아 호출하는 test에서 output은 새 입력과 맞고 metric에는 이전 cost가 섞이지 않아야 한다.
 
-Resize나 batch 변경 시 CPU와 GPU의 output·loss·delta 길이를 모두 갱신해야 한다. Shape가 같은 pointer라도 truth의 행 순서와 output이 맞는지 batch별 pattern으로 검증한다.
+Resize나 batch 변경 시 CPU와 GPU의 output, loss, delta 길이를 모두 갱신해야 한다. Shape가 같은 pointer라도 truth의 행 순서와 output이 맞는지 batch별 pattern으로 검증한다.
 
 ## Label과 Output 계약을 어떻게 확인하나요?
 
 Binary target은 각 원소가 독립적인 0 또는 1이라는 전제를 갖습니다. Multi-class 하나만 고르는 문제에 이 layer를 쓰면 softmax와 달리 여러 output이 동시에 높아질 수 있으므로 label 의미와 threshold를 따로 정해야 합니다. Truth가 probability 형태의 soft label이라면 허용 범위 0~1과 loss helper의 지원 여부를 확인합니다.
 
-Prediction을 threshold한 값으로 loss를 계산하면 gradient가 사라지므로 raw sigmoid output을 사용합니다. Upstream이 이미 sigmoid를 적용했다면 이 layer에서 다시 activation해 확률이 왜곡됩니다. Logit 0, ±큰 값과 truth 0·1 조합을 표로 만들어 중복 activation과 delta 부호를 찾습니다.
+Prediction을 threshold한 값으로 loss를 계산하면 gradient가 사라지므로 raw sigmoid output을 사용합니다. Upstream이 이미 sigmoid를 적용했다면 이 layer에서 다시 activation해 확률이 왜곡됩니다. Logit 0, ±큰 값과 truth 0, 1 조합을 표로 만들어 중복 activation과 delta 부호를 찾습니다.
 
 ## Cost와 Gradient Scale을 어떻게 비교하나요?
 
@@ -150,7 +150,7 @@ Batch 크기와 inputs를 각각 두 배로 바꾼 fixture에서 원소당 loss�
 
 ## CPU와 GPU 경로를 어떻게 대조하나요?
 
-같은 logits와 truth를 넣어 output, 원소별 loss, delta와 cost를 허용 오차 안에서 비교합니다. GPU forward가 host cost를 언제 동기화하는지, truth null과 nolabel batch에서 stale host buffer를 읽지 않는지도 봅니다. Resize·batch 변경 뒤 세 CPU 배열과 세 GPU 배열의 길이가 모두 같아야 합니다.
+같은 logits와 truth를 넣어 output, 원소별 loss, delta와 cost를 허용 오차 안에서 비교합니다. GPU forward가 host cost를 언제 동기화하는지, truth null과 nolabel batch에서 stale host buffer를 읽지 않는지도 봅니다. Resize, batch 변경 뒤 세 CPU 배열과 세 GPU 배열의 길이가 모두 같아야 합니다.
 
 ## Backward 누적의 경계는 무엇인가요?
 
@@ -164,7 +164,7 @@ Batch 크기와 inputs를 각각 두 배로 바꾼 fixture에서 원소당 loss�
 
 ### Truth가 없는 forward에서도 delta와 cost가 새로 0이 되나요?
 
-아닙니다. Sigmoid output만 갱신되므로 이전 학습 호출의 loss·delta·cost가 남을 수 있습니다.
+아닙니다. Sigmoid output만 갱신되므로 이전 학습 호출의 loss, delta, cost가 남을 수 있습니다.
 
 ### Backward에서 sigmoid 미분을 다시 계산하지 않는 이유는 무엇인가요?
 
@@ -180,6 +180,6 @@ logistic_x_ent_cpu가 sigmoid와 cross-entropy가 결합된 delta를 forward에�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Darknet ISEG Layer는 무엇을 학습하나: 픽셀 클래스와 인스턴스 임베딩 해설]({% post_url 2022-03-02-DarkNetIsegLayer %}) — Darknet의 ISEG layer가 truth mask를 읽어 클래스 delta와 인스턴스 embedding delta를 만드는 과정을 배열 인덱스와 함께 추적합니다.
-- [Darknet network.c 학습·예측 흐름: subdivisions 업데이트와 포인터 수명 함정]({% post_url 2022-03-10-DarkNetNetwork %}) — Darknet network가 layer forward·backward·update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다.
-- [Darknet blas.c를 어디서부터 읽을까? 배열 연산·Loss·Feature Map 지도]({% post_url 2022-02-08-DarkNetBlas %}) — 천 줄이 넘는 Darknet blas.c를 copy·axpy 같은 배열 primitive, loss와 softmax, reorg·upsample 같은 tensor 변환으로 나눠 읽고 stride와 누적 semantics를 점검합니다.
+- [Darknet network.c 학습, 예측 흐름: subdivisions 업데이트와 포인터 수명 함정]({% post_url 2022-03-10-DarkNetNetwork %}) — Darknet network가 layer forward, backward, update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다.
+- [Darknet blas.c를 어디서부터 읽을까? 배열 연산, Loss, Feature Map 지도]({% post_url 2022-02-08-DarkNetBlas %}) — 천 줄이 넘는 Darknet blas.c를 copy, axpy 같은 배열 primitive, loss와 softmax, reorg, upsample 같은 tensor 변환으로 나눠 읽고 stride와 누적 semantics를…
 <!-- internal-links:end -->

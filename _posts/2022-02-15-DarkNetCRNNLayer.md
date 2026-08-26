@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/crnn_layer.c"
 layout: post
 title: "DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나"
-summary: "DarkNet CRNN이 입력·순환·출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다."
-description: "DarkNet CRNN의 input·self·output convolution, state pointer와 BPTT를 따라 shortcut·batch/steps·추론 state 실패 조건을 설명합니다."
+summary: "DarkNet CRNN이 입력, 순환, 출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다."
+description: "DarkNet CRNN의 input, self, output convolution, state pointer와 BPTT를 따라 shortcut, batch/steps, 추론 state 실패 조건을 설명합니다."
 date:   2022-02-15 16:00 -0400
 categories: DarkNet
 image:
@@ -67,7 +67,7 @@ input_conv(x_t) +
 self_conv(state_{t-1})
 $$
 
-여기서 `shortcut(state)`는 옵션이 꺼져 있을 때 0입니다. 마지막에는 입력 포인터와 세 하위 층의 출력·delta 포인터를 다음 시점만큼 이동합니다.
+여기서 `shortcut(state)`는 옵션이 꺼져 있을 때 0입니다. 마지막에는 입력 포인터와 세 하위 층의 출력, delta 포인터를 다음 시점만큼 이동합니다.
 
 ## 역전파는 마지막 시점에서 시작한다
 
@@ -90,7 +90,7 @@ if (i > 0 && l.shortcut) {
 }
 ~~~
 
-학습 파라미터 갱신은 별도 CRNN 수식이 아니라 입력·self·출력 합성곱 각각에 `update_convolutional_layer`를 호출하는 방식입니다.
+학습 파라미터 갱신은 별도 CRNN 수식이 아니라 입력, self, 출력 합성곱 각각에 `update_convolutional_layer`를 호출하는 방식입니다.
 
 ## 적용 전에는 포인터 전제를 확인한다
 
@@ -106,7 +106,7 @@ l->x_norm += num;
 
 또한 하위 합성곱 생성 함수는 배치 정규화를 켤 때만 `x`와 `x_norm`을 할당합니다. 그런데 `increment_layer`는 두 포인터를 조건 없이 이동하므로, 배치 정규화를 끈 구성에서 이 코드가 안전한지는 사용 중인 DarkNet 버전과 컴파일 환경을 반드시 확인해야 합니다.
 
-`shortcut` 경로도 대조가 필요합니다. 순전파는 새 state에 이전 state를 먼저 복사한 뒤 input·self 출력을 더하지만, 제시된 역전파가 output 층 입력을 재구성할 때는 input·self 출력만 더하고 이전 state를 포함하지 않습니다. shortcut을 켠 경우에도 이 코드가 순전파와 같은 값을 복원하는지 사용 중인 브랜치에서 확인해야 합니다.
+`shortcut` 경로도 대조가 필요합니다. 순전파는 새 state에 이전 state를 먼저 복사한 뒤 input, self 출력을 더하지만, 제시된 역전파가 output 층 입력을 재구성할 때는 input, self 출력만 더하고 이전 state를 포함하지 않습니다. shortcut을 켠 경우에도 이 코드가 순전파와 같은 값을 복원하는지 사용 중인 브랜치에서 확인해야 합니다.
 
 이 글의 조각은 독립 실행 코드가 아닙니다. 특히 추론 모드에서는 학습 모드와 state 포인터 이동 조건이 다르므로, 여러 시퀀스를 연속 처리할 때 state를 언제 초기화하거나 유지하는지도 상위 호출부에서 함께 확인해야 합니다.
 
@@ -130,13 +130,13 @@ Steps 2의 scalar 축소 예제로 마지막 output만 loss에 연결하고 첫 
 
 ## Shortcut 재구성이 다른 이유를 어떻게 확인하나요?
 
-Backward에서 output layer 입력을 재구성할 때 forward와 동일한 state가 필요할 수 있습니다. 제시된 코드가 input·self 출력만 합치고 shortcut의 old state를 빠뜨린다면 output activation 또는 weight gradient가 다른 값으로 계산될 여지가 있습니다. 사용 브랜치의 실제 code와 cache가 forward state를 따로 보존하는지 확인합니다.
+Backward에서 output layer 입력을 재구성할 때 forward와 동일한 state가 필요할 수 있습니다. 제시된 코드가 input, self 출력만 합치고 shortcut의 old state를 빠뜨린다면 output activation 또는 weight gradient가 다른 값으로 계산될 여지가 있습니다. 사용 브랜치의 실제 code와 cache가 forward state를 따로 보존하는지 확인합니다.
 
 Shortcut on/off 두 모델에서 같은 weight와 입력을 쓰고 저장된 forward state, backward 전에 재구성한 값, output weight gradient를 비교합니다. 차이가 의도된 최적화라는 증거가 없으면 수치 미분이 판단 기준입니다. 원문에 위험을 표시하는 것과 임의로 코드를 고치는 것은 구분해야 합니다.
 
 ## Pointer 이동은 어떤 도구와 표로 점검하나요?
 
-`increment_layer`가 이동하는 원소 수를 각 하위 layer의 `outputs×batch`와 비교하고, 시작·마지막 주소가 할당 구간 안인지 표로 남깁니다. BatchNorm이 꺼져 `x`와 `x_norm`이 null이라면 null pointer에 산술을 하는 코드 자체가 안전한지 확인하고 조건부 이동으로 바꿀 경우 모든 호출 위치를 시험합니다.
+`increment_layer`가 이동하는 원소 수를 각 하위 layer의 `outputs×batch`와 비교하고, 시작, 마지막 주소가 할당 구간 안인지 표로 남깁니다. BatchNorm이 꺼져 `x`와 `x_norm`이 null이라면 null pointer에 산술을 하는 코드 자체가 안전한지 확인하고 조건부 이동으로 바꿀 경우 모든 호출 위치를 시험합니다.
 
 Address sanitizer는 범위 밖 접근을 찾는 데 도움 되지만 논리적으로 잘못된 시점의 정상 범위 주소는 잡지 못합니다. 각 time slice에 고유 pattern을 넣어 output과 delta가 예상 slice에만 생기는지 확인해야 합니다. Forward 뒤 pointer를 원위치로 돌리는지, 반복 호출에서 이전 offset이 남지 않는지도 봅니다.
 
@@ -169,7 +169,7 @@ Address sanitizer는 범위 밖 접근을 찾는 데 도움 되지만 논리적�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Cost Layer에서 SSE·L1·MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2·L1·Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
-- [DarkNet Crop Layer는 학습과 추론에서 어디를 자르나]({% post_url 2022-02-16-DarkNetCropLayer %}) — DarkNet Crop Layer의 랜덤 크롭·좌우 반전, 추론 시 중앙 크롭, 값 범위 변환과 빈 역전파 구현을 코드 기준으로 점검합니다.
-- [DarkNet Demo 실시간 파이프라인: 3개 버퍼와 3프레임 평균]({% post_url 2022-02-19-DarkNetDemo %}) — DarkNet OpenCV 데모가 캡처·추론·표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다.
+- [DarkNet Cost Layer에서 SSE, L1, MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2, L1, Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
+- [DarkNet Crop Layer는 학습과 추론에서 어디를 자르나]({% post_url 2022-02-16-DarkNetCropLayer %}) — DarkNet Crop Layer의 랜덤 크롭, 좌우 반전, 추론 시 중앙 크롭, 값 범위 변환과 빈 역전파 구현을 코드 기준으로 점검합니다.
+- [Darknet LSTM 역전파가 헷갈리는 이유: 8개 Connected Layer와 포인터 이동]({% post_url 2022-03-07-DarkNetLSTMLayer %}) — Darknet LSTM이 hidden state와 input용 8개 connected layer로 네 gate를 만들고 시간축 포인터를 앞뒤로 옮기는 과정을 해설합니다.
 <!-- internal-links:end -->

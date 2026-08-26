@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "TurboDiffusion 100~200배 가속은 어떻게 나왔나? Attention·rCM·W8A8 조건"
+title: "TurboDiffusion 100~200배 가속은 어떻게 나왔나? Attention, rCM, W8A8 조건"
 date: '2025-12-25'
 categories: Tech
 tags:
@@ -10,8 +10,8 @@ tags:
   - 트랜스포머
   - 파인튜닝
 math: true
-summary: "TurboDiffusion이 attention 최적화·rCM 단계 증류·W8A8 양자화를 결합한 구조와 100~200배 보고값을 재현할 때 확인할 조건을 정리합니다."
-description: "TurboDiffusion이 attention 가속·rCM 단계 증류·W8A8 양자화를 결합해 보고한 100~200배 속도를 실험 조건과 품질 손실까지 함께 읽는 방법입니다."
+summary: "TurboDiffusion이 attention 최적화, rCM 단계 증류, W8A8 양자화를 결합한 구조와 100~200배 보고값을 재현할 때 확인할 조건을 정리합니다."
+description: "TurboDiffusion이 attention 가속, rCM 단계 증류, W8A8 양자화를 결합해 보고한 100~200배 속도를 실험 조건과 품질 손실까지 함께 읽는 방법입니다."
 faq:
   - question: "TurboDiffusion의 100~200배 가속은 모든 환경에서 나오나요?"
     answer: "아닙니다. 비교 baseline, sampling step, 모델, 해상도, GPU와 kernel 조건에 묶인 보고값이므로 같은 조건의 end-to-end 시간으로 재검증해야 합니다."
@@ -21,14 +21,14 @@ faq:
     answer: "속도 외에 prompt 충실도, 시간 일관성, 미세 질감, peak memory를 같은 영상 묶음에서 비교하고 허용 가능한 품질 저하인지 판단해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2512.16093.png
-  alt: "TurboDiffusion 100~200배 가속은 어떻게 나왔나? Attention·rCM·W8A8 조건 논문 대표 이미지"
+  alt: "TurboDiffusion 100~200배 가속은 어떻게 나왔나? Attention, rCM, W8A8 조건 논문 대표 이미지"
 ---
 
-TurboDiffusion은 **attention 가속, sampling step 축소, W8A8 양자화를 함께 적용해 비디오 확산 추론의 여러 병목을 줄이는 프레임워크**입니다. 원문이 보고한 100~200배는 baseline step, model, 해상도, RTX 5090과 kernel 조건에 묶인 값이며 모든 장비의 보장 속도가 아닙니다. 품질 유지 여부도 prompt·motion·미세 질감별로 원본과 다시 비교해야 합니다.
+TurboDiffusion은 **attention 가속, sampling step 축소, W8A8 양자화를 함께 적용해 비디오 확산 추론의 여러 병목을 줄이는 프레임워크**입니다. 원문이 보고한 100~200배는 baseline step, model, 해상도, RTX 5090과 kernel 조건에 묶인 값이며 모든 장비의 보장 속도가 아닙니다. 품질 유지 여부도 prompt, motion, 미세 질감별로 원본과 다시 비교해야 합니다.
 
 ## 세 가속 기술은 서로 다른 비용을 줄인다
 
-SageAttention과 trainable Sparse-Linear Attention은 긴 video sequence의 attention 비용을 줄이고, rCM은 반복 denoising step을 줄이며, W8A8은 weight와 activation의 memory·연산 부담을 낮춥니다. 한 요소의 speedup을 전체 배율로 해석할 수 없고, 세 요소를 적용한 순서별 ablation으로 각 기여와 품질 손실을 확인해야 합니다.
+SageAttention과 trainable Sparse-Linear Attention은 긴 video sequence의 attention 비용을 줄이고, rCM은 반복 denoising step을 줄이며, W8A8은 weight와 activation의 memory, 연산 부담을 낮춥니다. 한 요소의 speedup을 전체 배율로 해석할 수 없고, 세 요소를 적용한 순서별 ablation으로 각 기여와 품질 손실을 확인해야 합니다.
 
 ## 2. 연구 배경 및 문제 정의 (Introduction & Problem Statement)
 
@@ -132,8 +132,8 @@ TurboDiffusion의 의미는 한 가지 trick이 아니라 attention, sampling, p
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Diffusion LLM이 Qwen보다 5배 빠를까? d3LLM 병렬 디코딩의 조건]({% post_url 2026-05-04-Is-the-Autoregressive-Era-Over-Uncovering-the-True-Potential-and-Limits-of-Diffusion-LLMs-Proven-by-d3LLM %}) — 교사의 복원 순서를 증류하고 엔트로피에 따라 여러 블록을 확정하는 d3LLM의 구조, H100 5배 수치와 KV refresh·서빙 한계를 짚습니다.
-- [HunyuanVideo 13B는 어떻게 영상을 만들까: 데이터·3D VAE·실행 전제]({% post_url 2025-02-14-HunyuanVideo %}) — HunyuanVideo의 다단계 영상 필터링, Causal 3D VAE 압축, Transformer Diffusion 학습 흐름과 공개 명령을 실행 전에 확인할 조건을 정리합니다.
+- [Diffusion LLM이 Qwen보다 5배 빠를까? d3LLM 병렬 디코딩의 조건]({% post_url 2026-05-04-Is-the-Autoregressive-Era-Over-Uncovering-the-True-Potential-and-Limits-of-Diffusion-LLMs-Proven-by-d3LLM %}) — 교사의 복원 순서를 증류하고 엔트로피에 따라 여러 블록을 확정하는 d3LLM의 구조, H100 5배 수치와 KV refresh, 서빙 한계를 짚습니다.
+- [HunyuanVideo 13B는 어떻게 영상을 만들까: 데이터, 3D VAE, 실행 전제]({% post_url 2025-02-14-HunyuanVideo %}) — HunyuanVideo의 다단계 영상 필터링, Causal 3D VAE 압축, Transformer Diffusion 학습 흐름과 공개 명령을 실행 전에 확인할 조건을 정리합니다.
 - [비디오를 16 FPS로 바로 이어 만들 수 있을까? ShotStream의 캐시 조건]({% post_url 2026-03-30-ShotStream--Streaming-Multi-Shot-Video-Generation-for-Interactive-Storytelling %}) — 양방향 비디오 모델을 인과적 학생으로 증류해 스트리밍하는 ShotStream의 듀얼 캐시, 16 FPS 조건과 장기 생성의 한계 및 검증법을 설명합니다.
 <!-- internal-links:end -->
 

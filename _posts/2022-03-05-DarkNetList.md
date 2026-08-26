@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet list.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/list.c"
 layout: post
-title:  "Darknet 연결 리스트가 한 번 pop 뒤 깨지는 이유: front·back과 메모리 소유권"
-summary: "Darknet list 구현의 삽입·pop 불변식과 node, val, array를 각각 누가 해제해야 하는지 코드로 추적합니다."
-description: "Darknet 연결 list의 front·back·size 불변식, 마지막 pop 오류와 node·val·array의 분리된 소유권을 경계·순회 test로 설명합니다."
+title:  "Darknet 연결 리스트가 한 번 pop 뒤 깨지는 이유: front, back과 메모리 소유권"
+summary: "Darknet list 구현의 삽입, pop 불변식과 node, val, array를 각각 누가 해제해야 하는지 코드로 추적합니다."
+description: "Darknet 연결 list의 front, back, size 불변식, 마지막 pop 오류와 node, val, array의 분리된 소유권을 경계, 순회 test로 설명합니다."
 date:   2022-03-05 16:00 -0400
 categories: DarkNet
 image:
@@ -194,7 +194,7 @@ List가 owner인지 borrowed pointer container인지 생성 시 정하거나 fre
 
 ## 순회 중 변경은 왜 위험할까
 
-현재 node를 pop하거나 free한 뒤 `n->next`를 읽으면 use-after-free가 된다. 삭제 전 next pointer를 보존하고, 이 구현이 뒤 pop만 제공한다면 순회 중 임의 삭제를 흉내 내지 않는다. 여러 thread가 동시에 insert·pop하면 size와 양 끝 pointer 갱신이 원자적이지 않으므로 외부 lock이 필요하다.
+현재 node를 pop하거나 free한 뒤 `n->next`를 읽으면 use-after-free가 된다. 삭제 전 next pointer를 보존하고, 이 구현이 뒤 pop만 제공한다면 순회 중 임의 삭제를 흉내 내지 않는다. 여러 thread가 동시에 insert, pop하면 size와 양 끝 pointer 갱신이 원자적이지 않으므로 외부 lock이 필요하다.
 
 `list_to_array`는 size로 먼저 할당한 뒤 실제 node를 순회하므로 둘이 어긋나면 overflow 또는 빈 slot이 생긴다. 변환 중 list가 바뀌지 않는다는 전제도 명시한다.
 
@@ -212,7 +212,7 @@ String val을 list가 소유한다면 line buffer를 재사용하기 전에 복�
 
 ## 고친 Pop을 어떻게 회귀 테스트할까
 
-한 원소를 insert하고 pop한 뒤 `size==0`, `front==back==NULL`, 반환 val이 원래 pointer인지 검사한다. 이어 새 원소를 다시 insert하면 front와 back이 새 node를 가리켜야 한다. 두 원소에서는 첫 pop이 뒤 원소를 반환하고 남은 front·back이 같은 node가 되는지 본다.
+한 원소를 insert하고 pop한 뒤 `size==0`, `front==back==NULL`, 반환 val이 원래 pointer인지 검사한다. 이어 새 원소를 다시 insert하면 front와 back이 새 node를 가리켜야 한다. 두 원소에서는 첫 pop이 뒤 원소를 반환하고 남은 front, back이 같은 node가 되는지 본다.
 
 마지막으로 val을 호출자가 해제한 뒤 빈 list를 free하고 sanitizer 오류가 없는지 확인한다. Contents를 list가 소유하는 경로에서는 pop하지 않은 node만 한 번씩 해제되는 test를 별도로 둔다.
 
@@ -239,7 +239,7 @@ size는 0이고 front와 back이 모두 NULL이어야 하며, 반환된 val의 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet data.c 읽는 법: 이미지 경로가 X·y 배치가 되기까지]({% post_url 2022-02-17-DarkNetData %}) — DarkNet data.c의 경로 샘플링, 이미지·라벨 동시 증강, 데이터 유형별 로더 분기와 멀티스레드 병합을 메모리 소유권 주의점까지 연결해 설명합니다.
-- [Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱·리사이즈·메모리 소유권]({% post_url 2022-03-01-DarkNetImage %}) — Darknet의 image 구조체가 픽셀을 저장하고 복사·리사이즈·letterbox·증강·탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다.
+- [DarkNet data.c 읽는 법: 이미지 경로가 X, y 배치가 되기까지]({% post_url 2022-02-17-DarkNetData %}) — DarkNet data.c의 경로 샘플링, 이미지, 라벨 동시 증강, 데이터 유형별 로더 분기와 멀티스레드 병합을 메모리 소유권 주의점까지 연결해 설명합니다.
+- [Darknet image.c에서 자주 틀리는 5가지: CHW 인덱싱, 리사이즈, 메모리 소유권]({% post_url 2022-03-01-DarkNetImage %}) — Darknet의 image 구조체가 픽셀을 저장하고 복사, 리사이즈, letterbox, 증강, 탐지 결과를 그리는 흐름을 코드 기준으로 해설합니다.
 - [Darknet layer 구조를 해제할 때 왜 터질까: LAYER\_TYPE과 free\_layer 소유권]({% post_url 2022-03-04-DarkNetLayer %}) — Darknet의 LAYER_TYPE enum이 실행 분기를 만드는 방식과 free_layer가 선택적 버퍼를 해제할 때 확인해야 할 메모리 소유권을 짚습니다.
 <!-- internal-links:end -->

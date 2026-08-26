@@ -3,9 +3,9 @@ source_citations:
   - name: "Darknet detection_layer.c 고정 커밋 원본"
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/detection_layer.c"
 layout: post
-title: "DarkNet Detection Layer 출력 배열 읽는 법: class·objectness·box"
-summary: "DarkNet의 구형 Detection Layer가 셀별 클래스, 박스별 objectness와 좌표를 한 배열에 배치하고 담당 박스를 고르는 학습·디코딩 흐름을 설명합니다."
-description: "DarkNet 구형 Detection Layer의 class·objectness·box 배열, background delta와 책임 box, sqrt·rescore·decode 경계 조건을 설명합니다."
+title: "DarkNet Detection Layer 출력 배열 읽는 법: class, objectness, box"
+summary: "DarkNet의 구형 Detection Layer가 셀별 클래스, 박스별 objectness와 좌표를 한 배열에 배치하고 담당 박스를 고르는 학습, 디코딩 흐름을 설명합니다."
+description: "DarkNet 구형 Detection Layer의 class, objectness, box 배열, background delta와 책임 box, sqrt, rescore, decode 경계 조건을 설명합니다."
 date:   2022-02-20 16:00 -0400
 categories: DarkNet
 image:
@@ -17,7 +17,7 @@ tags:
 math: true
 faq:
   - question: "Detection Layer 한 셀의 출력에는 어떤 값이 들어가나요?"
-    answer: "셀의 class 값과 n개 box 각각의 objectness 1개 및 coords개의 좌표가 들어가며 전체 배열에서는 class·objectness·좌표 구간이 순서대로 배치됩니다."
+    answer: "셀의 class 값과 n개 box 각각의 objectness 1개 및 coords개의 좌표가 들어가며 전체 배열에서는 class, objectness, 좌표 구간이 순서대로 배치됩니다."
   - question: "객체가 있는 셀에서 어떤 predictor가 좌표를 학습하나요?"
     answer: "후보 중 정답과 IoU가 가장 큰 box가 담당하며 모두 겹치지 않으면 RMSE가 가장 작은 후보를 선택합니다."
   - question: "rescore 옵션을 켜면 objectness target은 무엇이 되나요?"
@@ -73,7 +73,7 @@ if(l.rescore){
 
 중심 `x, y`는 정답과 출력의 직접 차이를 사용합니다. `sqrt` 옵션이 켜지면 너비와 높이 정답에 제곱근을 취해 delta를 계산하고, IoU를 구할 때는 출력 너비와 높이를 다시 제곱합니다.
 
-함수 중간에는 클래스·objectness·좌표 관련 cost를 계속 더하지만, 마지막 줄에서 cost를 전체 delta 크기의 제곱으로 다시 지정합니다.
+함수 중간에는 클래스, objectness, 좌표 관련 cost를 계속 더하지만, 마지막 줄에서 cost를 전체 delta 크기의 제곱으로 다시 지정합니다.
 
 ~~~c
 *(l.cost) =
@@ -95,11 +95,11 @@ b.h = pow(predictions[box_index+3], (l.sqrt?2:1)) * h;
 
 클래스별 최종 값은 `objectness × class output`이며, `thresh`보다 클 때만 `dets[index].prob[j]`에 남습니다.
 
-이 원문은 YOLO·Region 층과 함께 존재하던 구형 DarkNet Detection Layer의 내부 코드 조각입니다. 생성 함수는 `coords`를 인자로 받지만 디코더의 `box_index` 증분과 좌표 접근은 네 값으로 고정돼 있습니다. `coords != 4`인 구성을 쓰기 전에는 배열 배치가 실제로 맞는지 확인해야 합니다. 또한 생성 시 `srand(0)`을 호출해 프로그램 전체 C 난수 상태를 초기화하므로 다른 데이터 증강의 무작위성에도 영향을 줄 수 있습니다.
+이 원문은 YOLO, Region 층과 함께 존재하던 구형 DarkNet Detection Layer의 내부 코드 조각입니다. 생성 함수는 `coords`를 인자로 받지만 디코더의 `box_index` 증분과 좌표 접근은 네 값으로 고정돼 있습니다. `coords != 4`인 구성을 쓰기 전에는 배열 배치가 실제로 맞는지 확인해야 합니다. 또한 생성 시 `srand(0)`을 호출해 프로그램 전체 C 난수 상태를 초기화하므로 다른 데이터 증강의 무작위성에도 영향을 줄 수 있습니다.
 
 ## 배열 구간은 어떤 Index 표로 확인하나요?
 
-`side=2`, classes 2, n 2, coords 4처럼 작은 값을 두면 class 구간 8개, objectness 구간 8개, 좌표 구간 32개가 됩니다. 각 원소를 연속 번호로 채우고 cell 0과 마지막 cell의 class·두 box objectness·좌표 시작 index를 손으로 계산합니다. Tensor를 box별 interleaved layout으로 착각하면 길이는 같아도 전혀 다른 값이 decode됩니다.
+`side=2`, classes 2, n 2, coords 4처럼 작은 값을 두면 class 구간 8개, objectness 구간 8개, 좌표 구간 32개가 됩니다. 각 원소를 연속 번호로 채우고 cell 0과 마지막 cell의 class, 두 box objectness, 좌표 시작 index를 손으로 계산합니다. Tensor를 box별 interleaved layout으로 착각하면 길이는 같아도 전혀 다른 값이 decode됩니다.
 
 Batch offset은 한 sample의 `outputs`만큼 이동해야 합니다. Class softmax는 각 cell의 classes 값에만 적용되어 합이 1이 되고 objectness와 좌표는 바뀌지 않아야 합니다. Class 수나 n을 바꾼 설정에서는 upstream convolution output 수와 assert 식을 함께 갱신합니다.
 
@@ -107,7 +107,7 @@ Batch offset은 한 sample의 `outputs`만큼 이동해야 합니다. Class soft
 
 모든 box를 먼저 no-object target으로 만든 뒤 담당 box의 objectness delta를 object target으로 덮습니다. Positive 위치에 두 항을 더하는 구현으로 옮기면 같은 predictor가 배경과 객체를 동시에 학습합니다. 담당이 아닌 다른 predictor는 객체가 있는 cell에서도 no-object 항을 유지하는지 확인합니다.
 
-인공 target 하나로 각 delta 구간을 출력합니다. 빈 cell에서는 class·coordinate delta가 0이고 모든 objectness만 음성 목표를 받아야 하며, positive cell에서는 class와 선택된 box coordinate, 선택된 objectness만 양성 목표로 바뀌어야 합니다. Scale 인자를 서로 다른 숫자로 두면 어느 분기가 어느 항을 썼는지 더 잘 보입니다.
+인공 target 하나로 각 delta 구간을 출력합니다. 빈 cell에서는 class, coordinate delta가 0이고 모든 objectness만 음성 목표를 받아야 하며, positive cell에서는 class와 선택된 box coordinate, 선택된 objectness만 양성 목표로 바뀌어야 합니다. Scale 인자를 서로 다른 숫자로 두면 어느 분기가 어느 항을 썼는지 더 잘 보입니다.
 
 ## Forced와 Random Assignment는 어떤 위험이 있나요?
 
@@ -119,7 +119,7 @@ Batch offset은 한 sample의 `outputs`만큼 이동해야 합니다. Class soft
 
 학습 target의 width와 height에 제곱근을 취했다면 IoU 계산과 decode에서는 prediction을 제곱해 실제 크기로 되돌립니다. 한 경로에서만 sqrt 옵션을 적용하면 loss가 줄어도 시각화 box 크기가 잘못됩니다. 음수 prediction을 제곱하면 양수 크기가 되지만 gradient와 표현이 의도한 범위인지 activation까지 확인해야 합니다.
 
-중심 offset은 cell 좌표이고 width·height는 image 비율이라는 단위 차이도 명시합니다. 정답과 같은 synthetic prediction을 만들어 IoU 1, coordinate delta 0, decode 후 원본 pixel box가 되는지 end-to-end로 시험합니다. Image resize나 letterbox 보정은 이 decoder 이후 별도 단계라면 중복하지 않습니다.
+중심 offset은 cell 좌표이고 width, height는 image 비율이라는 단위 차이도 명시합니다. 정답과 같은 synthetic prediction을 만들어 IoU 1, coordinate delta 0, decode 후 원본 pixel box가 되는지 end-to-end로 시험합니다. Image resize나 letterbox 보정은 이 decoder 이후 별도 단계라면 중복하지 않습니다.
 
 ## Cost와 로그가 NaN일 때 무엇을 보나요?
 
@@ -137,7 +137,7 @@ Batch offset은 한 sample의 `outputs`만큼 이동해야 합니다. Class soft
 
 ## Class Score와 Objectness Threshold는 어떻게 조정하나요?
 
-최종 class score는 objectness와 class output의 곱이므로 둘 중 하나가 낮으면 후보가 threshold를 넘지 못합니다. Class softmax를 쓰는 설정과 raw class 값을 쓰는 설정은 score 분포가 다를 수 있어 같은 threshold를 무조건 공유하지 않습니다. Validation에서 class별 precision·recall을 보고 결정하며 test label을 threshold 선택에 사용하지 않습니다.
+최종 class score는 objectness와 class output의 곱이므로 둘 중 하나가 낮으면 후보가 threshold를 넘지 못합니다. Class softmax를 쓰는 설정과 raw class 값을 쓰는 설정은 score 분포가 다를 수 있어 같은 threshold를 무조건 공유하지 않습니다. Validation에서 class별 precision, recall을 보고 결정하며 test label을 threshold 선택에 사용하지 않습니다.
 
 Objectness가 높은데 모든 class score가 낮은 후보, class 확률은 높지만 objectness가 낮은 후보를 따로 세면 학습 항의 문제를 구분할 수 있습니다. NMS 뒤 결과만 보면 threshold에서 사라진 후보와 겹침 때문에 억제된 후보가 섞이므로 decode 직후, threshold 후, NMS 후 개수를 각각 기록합니다.
 
@@ -145,7 +145,7 @@ Objectness가 높은데 모든 class score가 낮은 후보, class 확률은 높
 
 Layer output의 중심 offset과 상대 크기를 decoder가 정규화 image 좌표로 만들고, 전달받은 `w,h`를 곱해 pixel 크기로 바꿉니다. Network input이 letterbox된 경우 원본 image로 되돌리는 scale과 padding 제거가 다른 함수에 있다면 이 단계에서 또 적용하지 않습니다. 같은 box를 두 번 보정하면 일정한 방향으로 밀리거나 찌그러집니다.
 
-원본보다 작은 test image, 서로 다른 aspect ratio와 cell 경계에 놓인 중심으로 decoder를 시험합니다. 좌표를 clip하기 전과 후의 box를 모두 남기면 layer가 범위 밖 값을 냈는지 후처리가 숨겼는지 알 수 있습니다. Width·height가 음수 또는 0인 prediction을 어떤 단계에서 거부하는지도 정합니다.
+원본보다 작은 test image, 서로 다른 aspect ratio와 cell 경계에 놓인 중심으로 decoder를 시험합니다. 좌표를 clip하기 전과 후의 box를 모두 남기면 layer가 범위 밖 값을 냈는지 후처리가 숨겼는지 알 수 있습니다. Width, height가 음수 또는 0인 prediction을 어떤 단계에서 거부하는지도 정합니다.
 
 ## 구형 Detection Layer를 다른 YOLO Head와 혼동하면 무엇이 깨지나요?
 
@@ -163,17 +163,17 @@ Forced index, class id, cell index와 box index는 모두 사용 전 범위를 �
 
 ### 배열과 delta 순서는 코드로 확인할 수 있습니다
 
-제시된 함수에서는 class·objectness·좌표의 구간 배치, 모든 후보에 먼저 주는 no-object delta, 담당 predictor 선택과 `rescore`·`sqrt` 분기의 대입 순서를 확인할 수 있습니다. 따라서 동일 버전을 포팅할 때는 이 동작을 작은 tensor와 synthetic truth로 고정하는 기준선으로 사용할 수 있습니다.
+제시된 함수에서는 class, objectness, 좌표의 구간 배치, 모든 후보에 먼저 주는 no-object delta, 담당 predictor 선택과 `rescore`, `sqrt` 분기의 대입 순서를 확인할 수 있습니다. 따라서 동일 버전을 포팅할 때는 이 동작을 작은 tensor와 synthetic truth로 고정하는 기준선으로 사용할 수 있습니다.
 
 ### 전체 YOLO 구현의 일반 규칙으로 확대하면 안 됩니다
 
-이 글의 Detection Layer는 구형 Darknet 코드 조각이며 Region·YOLO Layer와 출력 layout과 디코딩 규칙이 다릅니다. 실제 저장소의 커밋, cfg parser가 넘기는 옵션, CPU·GPU 경로와 후처리 함수를 함께 확인하지 않으면 이 설명만으로 최신 YOLO head의 동작을 단정할 수 없습니다. 포팅 결과를 비교할 때도 NMS까지의 최종 mAP 하나보다 배열 구간, delta와 decode를 단계별로 맞추는 편이 원인 추적에 유리합니다.
+이 글의 Detection Layer는 구형 Darknet 코드 조각이며 Region, YOLO Layer와 출력 layout과 디코딩 규칙이 다릅니다. 실제 저장소의 커밋, cfg parser가 넘기는 옵션, CPU, GPU 경로와 후처리 함수를 함께 확인하지 않으면 이 설명만으로 최신 YOLO head의 동작을 단정할 수 없습니다. 포팅 결과를 비교할 때도 NMS까지의 최종 mAP 하나보다 배열 구간, delta와 decode를 단계별로 맞추는 편이 원인 추적에 유리합니다.
 
 ## 자주 남는 질문
 
 ### Detection Layer 한 셀의 출력에는 어떤 값이 들어가나요?
 
-셀의 class 값과 n개 box 각각의 objectness 1개 및 coords개의 좌표가 들어가며 전체 배열에서는 class·objectness·좌표 구간이 순서대로 배치됩니다.
+셀의 class 값과 n개 box 각각의 objectness 1개 및 coords개의 좌표가 들어가며 전체 배열에서는 class, objectness, 좌표 구간이 순서대로 배치됩니다.
 
 ### 객체가 있는 셀에서 어떤 predictor가 좌표를 학습하나요?
 
@@ -192,7 +192,7 @@ Forced index, class id, cell index와 box index는 모두 사용 전 범위를 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Darknet network.c 학습·예측 흐름: subdivisions 업데이트와 포인터 수명 함정]({% post_url 2022-03-10-DarkNetNetwork %}) — Darknet network가 layer forward·backward·update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다.
-- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box·좌표 제약·Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
+- [Darknet network.c 학습, 예측 흐름: subdivisions 업데이트와 포인터 수명 함정]({% post_url 2022-03-10-DarkNetNetwork %}) — Darknet network가 layer forward, backward, update를 연결하는 방식과 learning-rate, batch 변경, 예측 출력, detection 메모리의 경계 조건을 추적합니다.
+- [YOLOv2는 recall을 어떻게 올렸나: Anchor Box, 좌표 제약, Multi-Scale의 역할]({% post_url 2019-04-20-YOLOv2 %}) — YOLOv1의 낮은 recall과 localization error를 YOLOv2가 어떤 설계 변경으로 줄였는지 설명합니다. Batch Normalization, anchor clustering, direct location…
 - [Darknet ISEG Layer는 무엇을 학습하나: 픽셀 클래스와 인스턴스 임베딩 해설]({% post_url 2022-03-02-DarkNetIsegLayer %}) — Darknet의 ISEG layer가 truth mask를 읽어 클래스 delta와 인스턴스 embedding delta를 만드는 과정을 배열 인덱스와 함께 추적합니다.
 <!-- internal-links:end -->

@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "라즈베리파이 Google Assistant API 설정 순서: OAuth부터 푸시투토크까지"
-summary: "라즈베리파이 Google Assistant 샘플을 위해 마이크·스피커, 프로젝트와 OAuth 파일, Python 가상환경, push-to-talk 실행을 순서대로 검증합니다."
+summary: "라즈베리파이 Google Assistant 샘플을 위해 마이크, 스피커, 프로젝트와 OAuth 파일, Python 가상환경, push-to-talk 실행을 순서대로 검증합니다."
 description: "라즈베리파이 Google Assistant API 설정을 오디오 장치, OAuth 자격 증명, 가상환경, push-to-talk 샘플로 나눠 진단하는 2019년 기록입니다."
 image:
   path: /assets/img/thumb/googleapi.jpg
@@ -18,10 +18,10 @@ faq:
   - question: "push-to-talk이 되면 hotword도 성공한 것인가요?"
     answer: "아닙니다. 이 기록에서도 push-to-talk과 wake word는 별도 단계이며 hotword 문제가 남았습니다. 음성 요청 성공과 상시 호출 감지는 서로 다른 구성으로 봐야 합니다."
   - question: "2019년 OAuth scope와 패키지 명령을 그대로 따라도 되나요?"
-    answer: "현재 완전한 설치 절차로 사용하면 안 됩니다. 당시 콘솔과 패키지 흐름의 기록이므로 오디오·OAuth·가상환경·샘플을 분리하는 점검 순서를 참고해야 합니다."
+    answer: "현재 완전한 설치 절차로 사용하면 안 됩니다. 당시 콘솔과 패키지 흐름의 기록이므로 오디오, OAuth, 가상환경, 샘플을 분리하는 점검 순서를 참고해야 합니다."
 ---
 
-라즈베리파이에서 Google Assistant 샘플을 실행하려면 **프로젝트·OAuth 등록보다 먼저 마이크와 스피커를 확인하고, 그다음 자격 증명과 Python 가상환경을 연결해야 합니다.** 녹음·재생, 인증, 샘플 실행은 서로 다른 실패 지점이므로 한꺼번에 설정하면 원인을 찾기 어렵습니다. 이 글의 명령은 2019년 스냅샷으로 보고, 단계별 산출물과 남은 hotword 한계를 중심으로 읽어야 합니다.
+라즈베리파이에서 Google Assistant 샘플을 실행하려면 **프로젝트, OAuth 등록보다 먼저 마이크와 스피커를 확인하고, 그다음 자격 증명과 Python 가상환경을 연결해야 합니다.** 녹음, 재생, 인증, 샘플 실행은 서로 다른 실패 지점이므로 한꺼번에 설정하면 원인을 찾기 어렵습니다. 이 글의 명령은 2019년 스냅샷으로 보고, 단계별 산출물과 남은 hotword 한계를 중심으로 읽어야 합니다.
 
 ## 1. 프로젝트와 OAuth 파일 준비
 
@@ -82,9 +82,9 @@ aplay --format=S16_LE --rate=16000 out.raw
 speaker-test -t wav
 ```
 
-볼륨은 `alsamixer`로 조절했습니다. 이 테스트가 실패한다면 Assistant 패키지를 다시 설치하기 전에 카드·장치 번호와 오디오 출력을 먼저 해결해야 합니다.
+볼륨은 `alsamixer`로 조절했습니다. 이 테스트가 실패한다면 Assistant 패키지를 다시 설치하기 전에 카드, 장치 번호와 오디오 출력을 먼저 해결해야 합니다.
 
-## 3. 가상환경·패키지·자격 증명 연결
+## 3. 가상환경, 패키지, 자격 증명 연결
 
 원문에서 사용한 시스템 의존성과 Python 가상환경 명령입니다.
 
@@ -143,7 +143,7 @@ googlesamples-assistant-pushtotalk --lang ko-KR
 
 당시에는 push-to-talk이 되면 hotword가 동작하지 않는 문제가 남아 있었고, 글에서도 해결됐다고 주장하지 않았습니다.
 
-또한 이 명령들은 2019년의 패키지명·scope·콘솔 흐름에 맞춰진 기록입니다. 현재의 완전한 설치 절차로 간주하지 말고, 실패 지점을 **오디오 → OAuth 파일 → 가상환경 → 샘플 종류** 순으로 나누는 체크리스트로 활용해야 합니다.
+또한 이 명령들은 2019년의 패키지명, scope, 콘솔 흐름에 맞춰진 기록입니다. 현재의 완전한 설치 절차로 간주하지 말고, 실패 지점을 **오디오 → OAuth 파일 → 가상환경 → 샘플 종류** 순으로 나누는 체크리스트로 활용해야 합니다.
 
 기존 참고 자료는 [라즈베리파이 설치 기록](https://ukayzm.github.io/installing-google-assistant/)과 [오디오 설정 설명](https://www.sigmdel.ca/michel/ha/rpi/voice_rec_02_en.html#decoder)입니다.
 
@@ -158,9 +158,9 @@ googlesamples-assistant-pushtotalk --lang ko-KR
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Google Assistant 로봇, IFTTT 대신 샘플 코드를 수정한 이유]({% post_url 2019-08-01-googlebot %}) — Google Assistant 로봇에서 IFTTT 웹훅·Speech API·앱인벤터를 비교하고 pushtotalk 샘플에 gTTS 음성 응답과 시리얼 동작을 연결한 선택을 설명합니다.
-- [라즈베리파이에서 NCS2 추론이 막힐 때: OpenVINO IR 변환 체크리스트]({% post_url 2019-03-08-NCS2 %}) — 라즈베리파이 3와 Neural Compute Stick 2에서 OpenVINO 추론을 준비하는 흐름을 학습·동결·IR 변환·MYRIAD 실행 단계로 나눕니다. XML/BIN 쌍, input shape, output node, USB…
-- [NCS2에서 YOLOv3가 실행되지 않을 때: FP16 IR 변환과 입력 Shape 점검]({% post_url 2019-03-30-YOLOOpenvino %}) — 라즈베리파이 3와 Neural Compute Stick 2에서 YOLO를 추론하기 위해 weights를 PB와 OpenVINO IR로 바꾸는 흐름을 정리합니다. FP16 지정, 416×416 입력, NHWC·NCHW 변환…
+- [Google Assistant 로봇, IFTTT 대신 샘플 코드를 수정한 이유]({% post_url 2019-08-01-googlebot %}) — Google Assistant 로봇에서 IFTTT 웹훅, Speech API, 앱인벤터를 비교하고 pushtotalk 샘플에 gTTS 음성 응답과 시리얼 동작을 연결한 선택을 설명합니다.
+- [라즈베리파이에서 NCS2 추론이 막힐 때: OpenVINO IR 변환 체크리스트]({% post_url 2019-03-08-NCS2 %}) — 라즈베리파이 3와 Neural Compute Stick 2에서 OpenVINO 추론을 준비하는 흐름을 학습, 동결, IR 변환, MYRIAD 실행 단계로 나눕니다. XML/BIN 쌍, input shape, output node…
+- [NCS2에서 YOLOv3가 실행되지 않을 때: FP16 IR 변환과 입력 Shape 점검]({% post_url 2019-03-30-YOLOOpenvino %}) — 라즈베리파이 3와 Neural Compute Stick 2에서 YOLO를 추론하기 위해 weights를 PB와 OpenVINO IR로 바꾸는 흐름을 정리합니다. FP16 지정, 416×416 입력, NHWC, NCHW 변환…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -175,7 +175,7 @@ googlesamples-assistant-pushtotalk --lang ko-KR
 
 ### 2019년 OAuth scope와 패키지 명령을 그대로 따라도 되나요?
 
-현재 완전한 설치 절차로 사용하면 안 됩니다. 당시 콘솔과 패키지 흐름의 기록이므로 오디오·OAuth·가상환경·샘플을 분리하는 점검 순서를 참고해야 합니다.
+현재 완전한 설치 절차로 사용하면 안 됩니다. 당시 콘솔과 패키지 흐름의 기록이므로 오디오, OAuth, 가상환경, 샘플을 분리하는 점검 순서를 참고해야 합니다.
 
 ## 오디오가 동작하는데 샘플이 실패할 때 무엇을 비교하나
 

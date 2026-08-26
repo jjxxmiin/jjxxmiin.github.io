@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  "EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유"
-summary: "EfficientNet이 depth·width·input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다."
-description: "EfficientNet compound scaling이 depth·width·resolution을 함께 키우는 이유와 base model, 연산 예산, 실제 지연을 함께 판단하는 기준을 정리합니다."
+summary: "EfficientNet이 depth, width, input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다."
+description: "EfficientNet compound scaling이 depth, width, resolution을 함께 키우는 이유와 base model, 연산 예산, 실제 지연을 함께 판단하는 기준을 정리합니다."
 image:
   path: /assets/img/thumb/EfficientDet.jpg
   alt: EfficientDet 톺아보기 1 대표 이미지
@@ -12,7 +12,7 @@ tags:
   - 컴퓨터비전
   - 논문리뷰
 faq:
-  - question: "EfficientNet은 depth·width·resolution을 항상 같은 수치로 늘리나요?"
+  - question: "EfficientNet은 depth, width, resolution을 항상 같은 수치로 늘리나요?"
     answer: "아닙니다. Base model에서 찾은 서로 다른 비율을 고정하고 compound coefficient φ로 세 축을 함께 확장합니다. 각 축의 증가율은 같지 않습니다."
   - question: "Compound scaling은 모델 구조 검색과 같은 단계인가요?"
     answer: "먼저 base model과 세 축의 비율을 정한 뒤 그 관계를 유지하며 규모를 키우는 흐름입니다. 어떤 base에서 시작하는지와 scaling 적용을 구분해 봐야 합니다."
@@ -31,7 +31,7 @@ CNN의 크기를 조절하는 대표적인 축은 세 가지입니다.
 - width: 각 layer의 channel 수
 - resolution: 입력 이미지 해상도
 
-![Depth·width·resolution 비교](/assets/img/post_img/EfficientDet/net_figure1.PNG)
+![Depth, width, resolution 비교](/assets/img/post_img/EfficientDet/net_figure1.PNG)
 
 한 축을 키우면 모델 표현력이 늘 수 있지만 계산량도 함께 증가합니다. 원문의 그래프에서는 각 축을 따로 올릴 때 성능이 증가하다가 어느 지점부터 한계가 나타납니다.
 
@@ -125,7 +125,7 @@ Base model은 MnasNet과 비슷한 구조이며, MobileNetV2의 inverted bottlen
 
 Depth를 늘리면 더 많은 layer를 거쳐 복잡한 표현을 만들 수 있지만, channel과 입력 정보가 충분하지 않으면 추가 layer의 이득이 줄 수 있습니다. Width를 늘리면 한 layer가 더 많은 feature를 담지만 계산과 메모리가 함께 커집니다. Resolution을 올리면 세부 정보를 보존할 수 있지만 작은 feature를 처리할 network 용량도 함께 필요합니다.
 
-Compound scaling은 이 세 trade-off를 하나의 φ 아래 묶습니다. 먼저 작은 base model에서 연산 예산을 고려해 depth·width·resolution 증가 비율을 찾고, 이후 모델 규모를 키울 때 그 비율을 유지합니다. φ 숫자만 외우기보다 base와 비율이 먼저라는 순서를 이해해야 합니다.
+Compound scaling은 이 세 trade-off를 하나의 φ 아래 묶습니다. 먼저 작은 base model에서 연산 예산을 고려해 depth, width, resolution 증가 비율을 찾고, 이후 모델 규모를 키울 때 그 비율을 유지합니다. φ 숫자만 외우기보다 base와 비율이 먼저라는 순서를 이해해야 합니다.
 
 ## 내 문제에서 모델 규모를 어떻게 고르나
 
@@ -135,25 +135,25 @@ Compound scaling은 이 세 trade-off를 하나의 φ 아래 묶습니다. 먼�
 
 메모리 한계를 넘는 후보는 평균 latency가 좋아도 사용할 수 없습니다. Model weight뿐 아니라 activation, batch, 전처리 buffer를 포함한 peak를 측정합니다. 동일한 FLOPs라도 장치가 특정 연산을 잘 지원하지 않으면 실제 속도 순서가 바뀔 수 있습니다.
 
-EfficientDet을 읽을 때는 이 backbone scaling과 detector 전체 scaling을 구분합니다. 다음 글의 BiFPN과 class·box head, 입력 크기까지 함께 확장하는 설계는 EfficientNet 세 축만 설명하는 이 글의 범위를 넘어갑니다.
+EfficientDet을 읽을 때는 이 backbone scaling과 detector 전체 scaling을 구분합니다. 다음 글의 BiFPN과 class, box head, 입력 크기까지 함께 확장하는 설계는 EfficientNet 세 축만 설명하는 이 글의 범위를 넘어갑니다.
 
 규모를 정할 때는 입력 해상도를 키운 뒤 작은 물체가 실제로 더 많은 유효 픽셀을 갖는지 먼저 확인합니다. 원본 자체가 흐리거나 압축 artifact가 심하면 resize만 늘려도 정보는 생기지 않고 메모리와 지연만 증가합니다. Width를 늘렸는데 정확도가 거의 같다면 채널 용량보다 데이터 다양성이나 해상도가 병목일 수 있고, depth를 늘렸는데 학습이 불안정하다면 최적화 조건도 함께 다시 맞춰야 합니다.
 
 실험표에는 모델 이름만 적지 말고 입력 크기, batch size, 정밀도, 장치, 전처리와 실제 지연을 같이 남깁니다. FLOPs가 낮아도 메모리 접근이나 지원되지 않는 연산 때문에 장치에서 느릴 수 있기 때문입니다. 같은 정확도라면 평균 지연뿐 아니라 긴 tail latency와 peak memory도 확인해야 운영 환경에서 선택을 뒤집지 않습니다.
 
-운영 후보는 detector만 따로 재지 않고 image decode·resize·후처리까지 포함해 비교합니다. Model scale을 낮췄는데 전체 지연이 거의 줄지 않으면 network보다 입출력이나 NMS가 병목이라는 뜻이므로 더 작은 backbone으로 바꾸기 전에 pipeline을 먼저 측정해야 합니다.
+운영 후보는 detector만 따로 재지 않고 image decode, resize, 후처리까지 포함해 비교합니다. Model scale을 낮췄는데 전체 지연이 거의 줄지 않으면 network보다 입출력이나 NMS가 병목이라는 뜻이므로 더 작은 backbone으로 바꾸기 전에 pipeline을 먼저 측정해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [EfficientDet은 왜 빠른가: BiFPN 가중치 융합과 복합 스케일링 핵심]({% post_url 2019-11-24-EfficientDet2 %}) — 정확도와 연산량을 함께 잡기 위해 EfficientDet이 BiFPN과 compound scaling을 설계한 방식을 수식과 그림으로 정리합니다.
 - [Xception과 MobileNet은 Depthwise Separable Convolution을 어떻게 다르게 쓰나]({% post_url 2019-07-13-MobileNetXception %}) — Depthwise separable convolution을 Xception은 Inception의 상관관계 분리로, MobileNet은 모바일 계산량 절감으로 사용하는 차이와 선택 기준을 설명합니다.
-- [모델 경량화, Pruning·Quantization·Distillation 중 무엇부터 해야 할까?]({% post_url 2021-07-19-ModelCompression %}) — 정확도만 보고 경량화 기법을 고르면 실제 배포 단계에서 다시 막힙니다. 지연시간·메모리·모델 크기를 먼저 정하고 프루닝, 양자화, 증류를 고르는 실전 순서를 설명합니다.
+- [모델 경량화, Pruning, Quantization, Distillation 중 무엇부터 해야 할까?]({% post_url 2021-07-19-ModelCompression %}) — 정확도만 보고 경량화 기법을 고르면 실제 배포 단계에서 다시 막힙니다. 지연시간, 메모리, 모델 크기를 먼저 정하고 프루닝, 양자화, 증류를 고르는 실전 순서를 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
-### EfficientNet은 depth·width·resolution을 항상 같은 수치로 늘리나요?
+### EfficientNet은 depth, width, resolution을 항상 같은 수치로 늘리나요?
 
 아닙니다. Base model에서 찾은 서로 다른 비율을 고정하고 compound coefficient φ로 세 축을 함께 확장합니다. 각 축의 증가율은 같지 않습니다.
 

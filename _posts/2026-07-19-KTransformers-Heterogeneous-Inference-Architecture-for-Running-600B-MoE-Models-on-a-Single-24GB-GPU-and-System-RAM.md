@@ -12,7 +12,7 @@ tags:
 summary: 단일 24GB GPU와 시스템 메모리를 결합하는 이기종 컴퓨팅 기술을 통해 수백만 원대 데스크톱 환경에서도 671B 규모의 최신 MoE(전문가
   혼합) 언어 모델을 실용적인 속도로 추론하고 파인튜닝할 수 있게 해주는 오픈소스 프레임워크인 KTransformers의 내부 동작 원리와 실제
   활용법을 심층 분석합니다.
-description: 'KTransformers가 MoE의 Attention은 GPU, 전문가 연산은 CPU·RAM에 나누는 원리와 하드웨어 조건·토큰 속도·메모리 한계를 설명합니다.'
+description: 'KTransformers가 MoE의 Attention은 GPU, 전문가 연산은 CPU, RAM에 나누는 원리와 하드웨어 조건, 토큰 속도, 메모리 한계를 설명합니다.'
 github_url: https://github.com/kvcache-ai/ktransformers
 image:
   path: https://opengraph.githubassets.com/1/kvcache-ai/ktransformers
@@ -351,8 +351,8 @@ KTransformers는 단순히 '코드를 조금 빠르게 최적화한 도구'가 �
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Colibri: 25GB 램 노트북으로 744B 초거대 AI 모델을 구동하는 순수 C 추론 엔진의 원리]({% post_url 2026-07-10-Colibri-The-Pure-C-Inference-Engine-Running-a-744B-MoE-Model-on-a-25GB-RAM-Laptop %}) — Colibri는 7440억 파라미터(744B) 규모의 초거대 혼합 전문가(MoE) 모델인 GLM-5.2를 25GB 램만 장착된 일반 노트북에서 구동하게 해주는 독창적인 순수 C 기반 추론 엔진입니다. 전체 모델을 램에 올리는 대신…
-- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA·MoE·MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8·MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
-- [MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석]({% post_url 2025-03-14-MotionFollower %}) — MotionFollower의 pose·reference controller, reconstruction·editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과…
+- [DeepSeek-V3는 671B인데 왜 토큰당 37B만 쓰나: MLA, MoE, MTP]({% post_url 2026-03-01-DeepSeek-V3-The-Open-Source-Beast-Thats-Redefining-AI-Efficiency %}) — DeepSeek-V3의 671B 총 파라미터와 37B 활성 MoE, MLA의 KV 캐시 압축, FP8, MTP 설계를 수치와 배포 조건 중심으로 읽습니다.
+- [MotionFollower는 GPU 메모리를 얼마나 줄였나: 42.6GB→9.8GB와 품질 지표 해석]({% post_url 2025-03-14-MotionFollower %}) — MotionFollower의 pose, reference controller, reconstruction, editing branch와 score guidance를 설명하고, MotionEditor 대비 메모리 감소율과 PSNR…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

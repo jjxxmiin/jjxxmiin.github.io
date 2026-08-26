@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/demo.c"
 layout: post
 title: "DarkNet Demo 실시간 파이프라인: 3개 버퍼와 3프레임 평균"
-summary: "DarkNet OpenCV 데모가 캡처·추론·표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다."
-description: "DarkNet Demo의 3-slot capture·detect·display pipeline, 원시 출력 3-frame 평균, NMS와 지연·초기 buffer·종료 자원 문제를 설명합니다."
+summary: "DarkNet OpenCV 데모가 캡처, 추론, 표시를 세 버퍼로 겹쳐 처리하고 최근 세 예측을 평균한 뒤 NMS와 박스 그리기를 수행하는 흐름을 풀이합니다."
+description: "DarkNet Demo의 3-slot capture, detect, display pipeline, 원시 출력 3-frame 평균, NMS와 지연, 초기 buffer, 종료 자원 문제를 설명합니다."
 date:   2022-02-19 16:00 -0400
 categories: DarkNet
 image:
@@ -18,7 +18,7 @@ tags:
 math: true
 faq:
   - question: "DarkNet Demo 화면의 box는 현재 막 캡처한 frame 결과인가요?"
-    answer: "아닙니다. capture·detect·display가 서로 다른 ring buffer slot을 사용하므로 화면에는 pipeline 지연이 있는 이전 frame 결과가 표시됩니다."
+    answer: "아닙니다. capture, detect, display가 서로 다른 ring buffer slot을 사용하므로 화면에는 pipeline 지연이 있는 이전 frame 결과가 표시됩니다."
   - question: "3-frame 평균은 완성된 bounding box 좌표를 평균하나요?"
     answer: "아닙니다. 검출 layer의 원시 output을 세 slot에서 평균한 뒤 그 평균으로 box decode와 NMS를 수행합니다."
   - question: "Demo 시작 직후 confidence가 낮을 수 있는 이유는 무엇인가요?"
@@ -39,7 +39,7 @@ pthread_create(&detect_thread, 0, detect_in_thread, 0);
 
 fetch 스레드는 현재 `buff_index` 위치의 예전 이미지를 해제하고 스트림에서 새 프레임을 읽습니다. detect 스레드는 `(buff_index + 2) % 3` 위치의 letterbox 데이터를 읽습니다. 서로 다른 슬롯을 사용하므로 캡처가 추론 입력을 덮지 않습니다.
 
-화면에는 `(buff_index + 1) % 3` 슬롯을 보여 줍니다. 두 작업은 매 반복 끝에서 `pthread_join`으로 모두 끝난 뒤 다음 인덱스로 넘어갑니다. 이 코드는 캡처·추론·표시가 같은 프레임 번호를 즉시 공유하는 구조가 아니라, 각 단계가 한 슬롯씩 떨어진 파이프라인입니다.
+화면에는 `(buff_index + 1) % 3` 슬롯을 보여 줍니다. 두 작업은 매 반복 끝에서 `pthread_join`으로 모두 끝난 뒤 다음 인덱스로 넘어갑니다. 이 코드는 캡처, 추론, 표시가 같은 프레임 번호를 즉시 공유하는 구조가 아니라, 각 단계가 한 슬롯씩 떨어진 파이프라인입니다.
 
 ## 평균화 대상은 마지막 검출층의 원시 출력이다
 
@@ -71,7 +71,7 @@ if (nms > 0) {
 
 FPS와 객체 제목을 터미널에 출력하고, 같은 오래된 슬롯의 원본 프레임에 `draw_detections`로 박스를 그립니다. 그 뒤 detection 배열을 해제하고 예측 ring index를 다음 칸으로 옮깁니다.
 
-표시 함수는 키 코드 27이면 종료합니다. 82·84는 검출 threshold를 0.02씩 올리거나 내리고, 83·81은 hierarchy threshold를 조절합니다. 하한은 각각 0.02와 0입니다. 키 이름은 플랫폼의 OpenCV 키 코드 해석에 따라 달라질 수 있으므로 숫자만 보고 특정 문자라고 단정하지 않는 편이 안전합니다.
+표시 함수는 키 코드 27이면 종료합니다. 82, 84는 검출 threshold를 0.02씩 올리거나 내리고, 83, 81은 hierarchy threshold를 조절합니다. 하한은 각각 0.02와 0입니다. 키 이름은 플랫폼의 OpenCV 키 코드 해석에 따라 달라질 수 있으므로 숫자만 보고 특정 문자라고 단정하지 않는 편이 안전합니다.
 
 ## 실행 전 컴파일 조건과 무시되는 인자를 본다
 
@@ -100,7 +100,7 @@ fprintf(stderr, "Demo needs OpenCV for webcam images.\n");
 
 ## 평균화는 움직임과 Confidence에 어떤 영향을 주나요?
 
-정지 장면에서는 세 raw output 평균이 순간적인 score 흔들림을 줄일 수 있지만 빠르게 움직이는 객체는 서로 다른 위치 예측이 섞입니다. Decode 전 tensor 위치가 같은 의미를 유지한다는 전제도 필요합니다. Anchor·grid output을 평균한 뒤 box가 중간 위치에 나타나거나 confidence가 낮아질 수 있으므로 smoothing과 추적은 같은 기능이 아닙니다.
+정지 장면에서는 세 raw output 평균이 순간적인 score 흔들림을 줄일 수 있지만 빠르게 움직이는 객체는 서로 다른 위치 예측이 섞입니다. Decode 전 tensor 위치가 같은 의미를 유지한다는 전제도 필요합니다. Anchor, grid output을 평균한 뒤 box가 중간 위치에 나타나거나 confidence가 낮아질 수 있으므로 smoothing과 추적은 같은 기능이 아닙니다.
 
 시작 구간은 채워진 prediction 수만큼만 나누거나 warm-up 뒤 표시하는 방식과 원문 3-slot 고정 평균을 비교할 수 있습니다. 평균 frame 수를 바꾸려면 allocation, ring index와 분모가 모두 같은 값을 쓰는지 확인합니다. `avg_frames` 인자만 바꾸고 주석 처리된 대입을 그대로 두면 동작은 변하지 않습니다.
 
@@ -118,7 +118,7 @@ Hierarchy threshold는 계층 class를 쓰지 않는 모델에서는 기대한 �
 
 ## 종료와 자원 정리는 무엇을 포함하나요?
 
-Escape나 stream 종료 뒤 fetch·detect thread가 모두 join됐는지 확인하고 capture, 세 원본 image, letterbox image, prediction 배열, detection 임시 메모리와 window를 해제합니다. 루프 안에서 slot image를 교체할 때 이전 object와 underlying OpenCV frame의 소유권도 구분합니다. 장시간 실행에서 memory가 꾸준히 늘면 frame별 allocation 경로를 먼저 봅니다.
+Escape나 stream 종료 뒤 fetch, detect thread가 모두 join됐는지 확인하고 capture, 세 원본 image, letterbox image, prediction 배열, detection 임시 메모리와 window를 해제합니다. 루프 안에서 slot image를 교체할 때 이전 object와 underlying OpenCV frame의 소유권도 구분합니다. 장시간 실행에서 memory가 꾸준히 늘면 frame별 allocation 경로를 먼저 봅니다.
 
 카메라 read 실패를 빈 frame으로 계속 처리하지 않고 루프 종료 또는 재연결 정책으로 연결해야 합니다. 파일 끝과 일시적인 webcam 실패는 다를 수 있으며, 오류 메시지에 실제 source 유형과 frame id를 담아야 원인을 찾기 쉽습니다.
 
@@ -126,7 +126,7 @@ Escape나 stream 종료 뒤 fetch·detect thread가 모두 join됐는지 확인�
 
 ### DarkNet Demo 화면의 box는 현재 막 캡처한 frame 결과인가요?
 
-아닙니다. capture·detect·display가 서로 다른 ring buffer slot을 사용하므로 화면에는 pipeline 지연이 있는 이전 frame 결과가 표시됩니다.
+아닙니다. capture, detect, display가 서로 다른 ring buffer slot을 사용하므로 화면에는 pipeline 지연이 있는 이전 frame 결과가 표시됩니다.
 
 ### 3-frame 평균은 완성된 bounding box 좌표를 평균하나요?
 
@@ -145,7 +145,7 @@ Escape나 stream 종료 뒤 fetch·detect thread가 모두 join됐는지 확인�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Cost Layer에서 SSE·L1·MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2·L1·Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
-- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력·순환·출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
-- [DarkNet image와 OpenCV Mat 변환: 채널 순서·스트림 설정 주의점]({% post_url 2022-02-25-DarkNetImageOpencv %}) — DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB·BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다.
+- [DarkNet Cost Layer에서 SSE, L1, MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2, L1, Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
+- [DarkNet CRNN Layer의 state는 세 Convolution을 어떻게 순환하나]({% post_url 2022-02-15-DarkNetCRNNLayer %}) — DarkNet CRNN이 입력, 순환, 출력용 3×3 합성곱 세 개로 시퀀스 state를 만들고, 시간 역순으로 기울기를 전달하는 과정을 코드 기준으로 풀이합니다.
+- [DarkNet image와 OpenCV Mat 변환: 채널 순서, 스트림 설정 주의점]({% post_url 2022-02-25-DarkNetImageOpencv %}) — DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB, BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다.
 <!-- internal-links:end -->

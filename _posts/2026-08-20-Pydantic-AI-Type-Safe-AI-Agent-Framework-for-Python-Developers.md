@@ -12,7 +12,7 @@ tags:
 summary: Pydantic AI는 Python 대표 데이터 검증 라이브러리인 Pydantic 제작팀이 공개한 모델 불가지론적 타입 안전 AI
   에이전트 프레임워크예요. 자동 검증 재시도 루프와 RunContext 기반 의존성 주입을 통해 기존 프레임워크의 복잡성과 런타임 오류 문제를 깔끔하게
   해결해 줘요.
-description: 'Pydantic AI의 구조화 출력 검증·의존성 주입·모델 교체와 재시도 루프를 설명하고, 타입 안전이 의미 오류·도구 권한·비용을 막지 못하는 한계를 점검합니다.'
+description: 'Pydantic AI의 구조화 출력 검증, 의존성 주입, 모델 교체와 재시도 루프를 설명하고, 타입 안전이 의미 오류, 도구 권한, 비용을 막지 못하는 한계를 점검합니다.'
 automation: oss_trend
 github_url: https://github.com/pydantic/pydantic-ai
 image:
@@ -426,9 +426,9 @@ FastAPI가 Python 백엔드 개발 시장을 평정했던 핵심 이유가 Pydan
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [LLM 작업 하나에 LangChain이 꼭 필요할까? Axe 12MB CLI의 경계]({% post_url 2026-05-07-Breaking-the-Arrogance-of-Giant-AI-Frameworks-How-a-12MB-Binary-Axe-Proves-the-Synergy-of-UNIX-Philosophy-and-LLMs %}) — 단발성 LLM 작업을 UNIX 파이프라인에 붙이는 Axe의 장점과, 워크플로 엔진·재시도·권한 관리가 필요한 순간 드러나는 한계를 함께 짚습니다.
+- [LLM 작업 하나에 LangChain이 꼭 필요할까? Axe 12MB CLI의 경계]({% post_url 2026-05-07-Breaking-the-Arrogance-of-Giant-AI-Frameworks-How-a-12MB-Binary-Axe-Proves-the-Synergy-of-UNIX-Philosophy-and-LLMs %}) — 단발성 LLM 작업을 UNIX 파이프라인에 붙이는 Axe의 장점과, 워크플로 엔진, 재시도, 권한 관리가 필요한 순간 드러나는 한계를 함께 짚습니다.
 - [langchain-ai/openwiki: AI 코딩 에이전트 전용 저장소 위키가 필요한 이유와 작동 원리]({% post_url 2026-07-06-langchain-aiopenwiki-Why-We-Need-a-Dedicated-Repo-Wiki-for-AI-Coding-Agents-and-How-It-Works %}) — LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다. 이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와…
-- [LangChain을 빼면 LLM 앱이 쉬워질까: 직접 HTTP·Token·Schema를 관리하는 비용]({% post_url 2026-05-24-Smashing-the-Black-Box-AI-Engineering-From-Scratch-Beyond-Framework-Illusions %}) — LLM 프레임워크를 걷어냈을 때 얻는 가시성과 직접 책임져야 할 HTTP 호출·토큰 제한·구조화 출력·재시도를 비교하고, 어느 경계를 직접 구현할지 판단합니다.
+- [LangChain을 빼면 LLM 앱이 쉬워질까: 직접 HTTP, Token, Schema를 관리하는 비용]({% post_url 2026-05-24-Smashing-the-Black-Box-AI-Engineering-From-Scratch-Beyond-Framework-Illusions %}) — LLM 프레임워크를 걷어냈을 때 얻는 가시성과 직접 책임져야 할 HTTP 호출, 토큰 제한, 구조화 출력, 재시도를 비교하고, 어느 경계를 직접 구현할지 판단합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

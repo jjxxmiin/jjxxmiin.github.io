@@ -11,7 +11,7 @@ tags:
   - 벡터DB
 summary: 홍콩대학교 Data Intelligence Lab이 개발한 오픈소스 AI 튜터링 플랫폼 DeepTutor의 이중 루프 아키텍처, 6대
   멀티 에이전트 메커니즘, 지식 그래프 RAG 및 설치와 활용법을 상세히 분석합니다.
-description: 'DeepTutor의 지식 그래프와 학습자 기억 이중 루프, 6개 에이전트 역할, TutorBench 근거와 교육 현장 도입 전 개인정보·오개념 검수 기준을 설명합니다.'
+description: 'DeepTutor의 지식 그래프와 학습자 기억 이중 루프, 6개 에이전트 역할, TutorBench 근거와 교육 현장 도입 전 개인정보, 오개념 검수 기준을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/HKUDS/DeepTutor
 image:
@@ -476,7 +476,7 @@ DeepTutor는 학습자의 모든 개인화 데이터, 오답 노트, 교재 문�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [PraisonAI: YAML과 파이썬 코드로 구축하는 자율형 멀티 AI 에이전트 오케스트레이션]({% post_url 2026-08-10-PraisonAI-Low-Code-Multi-Agent-AI-Framework-for-Autonomous-Workflows %}) — PraisonAI는 코드 몇 줄이나 간단한 YAML 설정만으로 자율형 멀티 AI 에이전트 시스템을 구축하고 배포할 수 있게 해주는 오픈소스 프레임워크입니다. 100개 이상의 LLM 지원, 메모리 관리, RAG, MCP 도구 연동을…
-- [AI 사용자 기억에 벡터 DB가 꼭 필요할까? Memori와 SQL의 경계]({% post_url 2026-03-05-Review-AI-Finally-Starts-Remembering-Me--A-Deep-Dive-into-the-SQL-Native-AI-Memory-Engine-Memori %}) — Memori가 LLM 호출 전후에 개입해 사실·선호·규칙을 SQL에 저장하는 구조와 대규모 문서 검색은 여전히 벡터 DB가 필요한 이유를 설명합니다.
+- [AI 사용자 기억에 벡터 DB가 꼭 필요할까? Memori와 SQL의 경계]({% post_url 2026-03-05-Review-AI-Finally-Starts-Remembering-Me--A-Deep-Dive-into-the-SQL-Native-AI-Memory-Engine-Memori %}) — Memori가 LLM 호출 전후에 개입해 사실, 선호, 규칙을 SQL에 저장하는 구조와 대규모 문서 검색은 여전히 벡터 DB가 필요한 이유를 설명합니다.
 - [langchain-ai/openwiki: AI 코딩 에이전트 전용 저장소 위키가 필요한 이유와 작동 원리]({% post_url 2026-07-06-langchain-aiopenwiki-Why-We-Need-a-Dedicated-Repo-Wiki-for-AI-Coding-Agents-and-How-It-Works %}) — LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다. 이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와…
 <!-- internal-links:end -->
 

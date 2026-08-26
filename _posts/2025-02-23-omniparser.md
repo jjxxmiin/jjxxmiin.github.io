@@ -9,7 +9,7 @@ faq:
   - question: "한 번 찾은 좌표를 계속 클릭해도 되나요?"
     answer: "안 됩니다. 화면 전환과 layout 변화 뒤에는 새 화면을 다시 파싱하고 예상 상태가 맞는지 확인해야 합니다."
   - question: "무엇을 별도로 평가해야 하나요?"
-    answer: "요소 검출, 올바른 target 선택, 클릭 뒤 상태 변화를 분리해 채점해야 perception·planning·execution 오류를 구분할 수 있습니다."
+    answer: "요소 검출, 올바른 target 선택, 클릭 뒤 상태 변화를 분리해 채점해야 perception, planning, execution 오류를 구분할 수 있습니다."
 image:
   path: /assets/img/thumb/omniparser.jpg
   alt: "OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트 대표 이미지"
@@ -237,18 +237,18 @@ OmniParser는 HTML 없이 UI를 분석할 수 있는 강력한 순수 비전 기
 
 ## 실제 과제는 지각과 계획을 분리해 채점한다
 
-첫째 올바른 요소가 파싱됐는지, 둘째 agent가 그 요소를 선택했는지, 셋째 클릭·입력 뒤 상태가 목표와 맞는지를 나눠 기록합니다. 요소가 없는데 agent가 틀렸다면 perception 문제이고, 요소는 있었지만 다른 것을 골랐다면 planning 문제입니다. 성공률 하나만 쓰면 수정할 모듈을 찾기 어렵습니다.
+첫째 올바른 요소가 파싱됐는지, 둘째 agent가 그 요소를 선택했는지, 셋째 클릭, 입력 뒤 상태가 목표와 맞는지를 나눠 기록합니다. 요소가 없는데 agent가 틀렸다면 perception 문제이고, 요소는 있었지만 다른 것을 골랐다면 planning 문제입니다. 성공률 하나만 쓰면 수정할 모듈을 찾기 어렵습니다.
 
-OmniParser가 적합한지는 정적 benchmark보다 사용하는 OS·browser·해상도·확대율에서 판단해야 합니다. 접근성 tree를 쓸 수 있는 환경이라면 pixel parsing과 정확도·속도를 비교하고, 두 source가 충돌할 때 어떤 것을 우선할지도 정해야 합니다.
+OmniParser가 적합한지는 정적 benchmark보다 사용하는 OS, browser, 해상도, 확대율에서 판단해야 합니다. 접근성 tree를 쓸 수 있는 환경이라면 pixel parsing과 정확도, 속도를 비교하고, 두 source가 충돌할 때 어떤 것을 우선할지도 정해야 합니다.
 
 평가 기록에는 화면 해상도와 확대율, 모델 버전을 함께 남겨 같은 실패를 재현할 수 있어야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [RAG 답이 틀릴 때 LLM보다 PDF를 먼저 의심해야 하는 이유: RAGFlow]({% post_url 2026-04-16-RAGFlow-Deep-Dive-Garbage-In-Garbage-Out--Shattering-the-Illusion-of-Naive-Text-Chunking-with-Next-Gen-RAG-Architecture %}) — RAGFlow의 문서 이해형 수집 구조를 표, 레이아웃, 읽기 순서 중심으로 살펴보고, 검색 품질을 평가하는 실무 절차와 운영 비용을 정리합니다.
 - [온디바이스 VLM은 모든 이미지를 고해상도로 봐야 할까? HyperVL의 VRC 판단]({% post_url 2025-12-21-HyperVL--An-Efficient-and-Dynamic-Multimodal-Large-Language-Model-for-Edge-Devices %}) — HyperVL이 저해상도 thumbnail로 입력 난도를 먼저 판단하고 필요한 이미지에만 고해상도 branch를 쓰는 이유, token 절감과 routing 실패의 대가를 함께 살펴봅니다.
-- [이미지에 없는 물체를 말할 때: NoLan의 언어 사전확률 억제]({% post_url 2026-02-28-NoLan--Mitigating-Object-Hallucinations-in-Large-Vision-Language-Models-via-Dynamic-Suppression-of-Language-Priors %}) — NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용·오탐 가능성을 정리합니다.
-- [이미지 이해와 생성이 서로 방해한다면? Cheers의 의미·디테일 토큰 분리]({% post_url 2026-03-16-Cheers--Decoupling-Patch-Details-from-Semantic-Representations-Enables-Unified-Multimodal-Comprehension-and-Generation %}) — 한 모델에서 이미지 이해와 생성을 함께 할 때 생기는 표현 충돌을 Cheers가 의미·디테일 경로로 나누는 방식과 비용 수치의 조건을 살펴봅니다.
+- [이미지에 없는 물체를 말할 때: NoLan의 언어 사전확률 억제]({% post_url 2026-02-28-NoLan--Mitigating-Object-Hallucinations-in-Large-Vision-Language-Models-via-Dynamic-Suppression-of-Language-Priors %}) — NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용, 오탐 가능성을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -263,4 +263,4 @@ OmniParser가 적합한지는 정적 benchmark보다 사용하는 OS·browser·�
 
 ### 무엇을 별도로 평가해야 하나요?
 
-요소 검출, 올바른 target 선택, 클릭 뒤 상태 변화를 분리해 채점해야 perception·planning·execution 오류를 구분할 수 있습니다.
+요소 검출, 올바른 target 선택, 클릭 뒤 상태 변화를 분리해 채점해야 perception, planning, execution 오류를 구분할 수 있습니다.

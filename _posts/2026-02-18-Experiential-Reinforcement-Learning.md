@@ -9,14 +9,14 @@ tags:
   - Qwen
   - AI에이전트
 math: true
-summary: 실패를 성찰해 만든 두 번째 시도를 기본 정책에 내재화하는 ERL의 81% 향상과 학습 비용·잘못된 인과의 위험을 분석합니다.
-description: 'ERL이 첫 실패의 성찰과 수정 시도를 기본 정책에 자기증류하는 원리, Sokoban의 보고 결과와 학습 비용·잘못된 인과 위험을 함께 설명합니다.'
+summary: 실패를 성찰해 만든 두 번째 시도를 기본 정책에 내재화하는 ERL의 81% 향상과 학습 비용, 잘못된 인과의 위험을 분석합니다.
+description: 'ERL이 첫 실패의 성찰과 수정 시도를 기본 정책에 자기증류하는 원리, Sokoban의 보고 결과와 학습 비용, 잘못된 인과 위험을 함께 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.13949.png
   alt: "ERL은 추론 때 성찰하지 않고도 Sokoban 81%를 얻을까: 자기증류의 비용과 함정 논문 대표 이미지"
 ---
 
-ERL은 학습 중에는 첫 시도·성찰·수정 시도를 모두 생성하지만, 성공한 수정 경로를 기본 정책에 증류해 테스트 때 매번 성찰하지 않고도 더 나은 첫 답을 내도록 합니다. 다만 Sokoban의 81% 향상은 특정 비교 결과이며, 성찰 생성 때문에 늘어난 학습 비용과 우연한 성공을 잘못 내재화할 위험을 함께 봐야 합니다.
+ERL은 학습 중에는 첫 시도, 성찰, 수정 시도를 모두 생성하지만, 성공한 수정 경로를 기본 정책에 증류해 테스트 때 매번 성찰하지 않고도 더 나은 첫 답을 내도록 합니다. 다만 Sokoban의 81% 향상은 특정 비교 결과이며, 성찰 생성 때문에 늘어난 학습 비용과 우연한 성공을 잘못 내재화할 위험을 함께 봐야 합니다.
 
 ![결과 점수만 받지 않고 경험을 언어로 성찰한 뒤 행동 변화로 내재화하는 ERL.](/assets/img/papers/2602.13949/x1.png)
 *결과 점수만 받지 않고 경험을 언어로 성찰한 뒤 행동 변화로 내재화하는 ERL.*
@@ -27,8 +27,8 @@ FrozenLake, Sokoban, HotpotQA처럼 여러 단계를 거치는 과제에서는 �
 
 ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 오류 메시지와 결과를 모델에게 다시 보여주고, 무엇을 고쳐야 하는지 언어로 설명하게 합니다. 이 reflection은 사람이 정답 과정을 새로 labeling한 것이 아니라 같은 모델이 자신의 경험에서 만든 중간 학습 신호입니다.
 
-![독립적인 시행착오와 경험·성찰·내재화가 연결된 학습의 차이.](/assets/img/papers/2602.13949/x2.png)
-*독립적인 시행착오와 경험·성찰·내재화가 연결된 학습의 차이.*
+![독립적인 시행착오와 경험, 성찰, 내재화가 연결된 학습의 차이.](/assets/img/papers/2602.13949/x2.png)
+*독립적인 시행착오와 경험, 성찰, 내재화가 연결된 학습의 차이.*
 
 ## $a_1$, $r$, $a_2$는 어떻게 한 학습 사례가 될까?
 
@@ -71,7 +71,7 @@ ERL은 실패한 trajectory 자체를 추가 정보로 바꿉니다. 환경의 �
 - $a_1$ 실패 뒤 $a_2$가 실제로 개선된 비율
 - 성공한 $a_2$ 중 reflection을 바꿔도 성공하는 우연 경로
 - 내재화 전후 첫 시도의 성공률
-- 학습 token·wall-clock·reward당 비용
+- 학습 token, wall-clock, reward당 비용
 - 새로운 규칙이나 더 긴 horizon으로 옮겼을 때의 성능
 
 ## 어떤 검증 가능한 환경에서 먼저 써야 할까?
@@ -107,7 +107,7 @@ Verifier가 업데이트되면 기존에 증류한 성공 경로도 다시 표�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [사용자 피드백을 계속 학습하면 AI가 정말 나아질까? OpenClaw-RL의 위험]({% post_url 2026-03-03-Why-Did-I-Just-Find-Out-About-This-OpenClaw-RL-Honest-Review-An-AI-That-Evolves-From-Your-Feedback %}) — OpenClaw-RL의 비동기 서빙·평가·학습 루프와 binary RL·on-policy distillation을 살펴보고 잘못된 피드백이 가중치에 굳는 위험을 짚습니다.
-- [DeepSeek-R1은 정말 600만 달러로 o1급 추론을 만들었을까? 비용과 구조 분리]({% post_url 2026-03-04-The-6M-Miracle-That-Panicked-Silicon-Valley-A-Developers-Deep-Dive-into-DeepSeek-R1 %}) — DeepSeek-R1의 671B MoE·37B 활성 파라미터와 critic 없는 GRPO를 설명하고 600만 달러 추정치, API 가격, 증류 성능을 구분해 읽습니다.
+- [사용자 피드백을 계속 학습하면 AI가 정말 나아질까? OpenClaw-RL의 위험]({% post_url 2026-03-03-Why-Did-I-Just-Find-Out-About-This-OpenClaw-RL-Honest-Review-An-AI-That-Evolves-From-Your-Feedback %}) — OpenClaw-RL의 비동기 서빙, 평가, 학습 루프와 binary RL, on-policy distillation을 살펴보고 잘못된 피드백이 가중치에 굳는 위험을 짚습니다.
+- [DeepSeek-R1은 정말 600만 달러로 o1급 추론을 만들었을까? 비용과 구조 분리]({% post_url 2026-03-04-The-6M-Miracle-That-Panicked-Silicon-Valley-A-Developers-Deep-Dive-into-DeepSeek-R1 %}) — DeepSeek-R1의 671B MoE, 37B 활성 파라미터와 critic 없는 GRPO를 설명하고 600만 달러 추정치, API 가격, 증류 성능을 구분해 읽습니다.
 - [Open-R1: 허깅페이스가 공개한 추론형 AI 모델 재현 프로젝트와 GRPO 학습 원리]({% post_url 2026-08-05-Open-R1-Hugging-Face-Open-Source-Reproduction-of-DeepSeek-R1-and-GRPO-Training %}) — 허깅페이스의 Open-R1 프로젝트는 DeepSeek-R1의 추론 능력 복원 과정을 완벽히 오픈소스로 재현하는 이니셔티브입니다. GRPO 기반 강화학습과 지식 증류 기술을 활용해 누구나 고성능 추론 모델을 직접 학습시킬 수 있는…
 <!-- internal-links:end -->

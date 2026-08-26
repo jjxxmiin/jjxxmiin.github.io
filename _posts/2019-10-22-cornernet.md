@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "CornerNet은 Anchor 없이 박스를 어떻게 묶나: Heatmap·Embedding·Offset"
-summary: "CornerNet이 왼쪽 위·오른쪽 아래 corner heatmap, embedding, offset을 예측하고 같은 class의 두 점을 하나의 bounding box로 묶는 과정을 설명합니다."
-description: "CornerNet의 corner heatmap·pooling·embedding·offset이 anchor 없이 box를 만드는 원리와 후보 조합, 밀집 장면의 실패 조건을 정리합니다."
+title:  "CornerNet은 Anchor 없이 박스를 어떻게 묶나: Heatmap, Embedding, Offset"
+summary: "CornerNet이 왼쪽 위, 오른쪽 아래 corner heatmap, embedding, offset을 예측하고 같은 class의 두 점을 하나의 bounding box로 묶는 과정을 설명합니다."
+description: "CornerNet의 corner heatmap, pooling, embedding, offset이 anchor 없이 box를 만드는 원리와 후보 조합, 밀집 장면의 실패 조건을 정리합니다."
 image:
   path: /assets/img/thumb/cornernet.jpg
   alt: CornerNet 톺아보기 대표 이미지
@@ -21,14 +21,14 @@ faq:
 math: true
 ---
 
-CornerNet은 **왼쪽 위와 오른쪽 아래 corner의 heatmap을 찾고, embedding 거리로 같은 물체의 두 점을 묶은 뒤 offset으로 좌표를 보정해 bounding box를 만듭니다.** Heatmap만 잘 나와도 잘못된 두 점을 묶으면 엉뚱한 box가 됩니다. 따라서 누락·잘못된 pairing·좌표 보정 오류를 서로 나눠 봐야 합니다.
+CornerNet은 **왼쪽 위와 오른쪽 아래 corner의 heatmap을 찾고, embedding 거리로 같은 물체의 두 점을 묶은 뒤 offset으로 좌표를 보정해 bounding box를 만듭니다.** Heatmap만 잘 나와도 잘못된 두 점을 묶으면 엉뚱한 box가 됩니다. 따라서 누락, 잘못된 pairing, 좌표 보정 오류를 서로 나눠 봐야 합니다.
 
 ## Anchor 대신 세 종류의 출력을 예측한다
 
 Anchor 기반 one-stage detector는 이미지에 여러 크기와 종횡비의 anchor box를 촘촘히 놓고, ground-truth와의 overlap을 분류한 뒤 좌표를 회귀합니다. 기존 글은 이 방식의 부담을 두 가지로 정리합니다.
 
 - 충분히 겹치는 양성 box를 얻으려면 많은 anchor가 필요해 foreground와 background가 크게 불균형해집니다.
-- anchor 수·크기·종횡비 같은 hyperparameter를 휴리스틱하게 정해야 합니다.
+- anchor 수, 크기, 종횡비 같은 hyperparameter를 휴리스틱하게 정해야 합니다.
 
 CornerNet은 bounding box를 top-left와 bottom-right keypoint의 쌍으로 바꿉니다.
 
@@ -36,7 +36,7 @@ CornerNet은 bounding box를 top-left와 bottom-right keypoint의 쌍으로 바�
 
 하나의 convolutional network가 세 출력을 냅니다.
 
-1. 클래스별 top-left·bottom-right heatmap
+1. 클래스별 top-left, bottom-right heatmap
 2. 같은 물체의 두 corner를 묶기 위한 embedding
 3. downsampling으로 잃은 위치를 보정하는 offset
 
@@ -91,7 +91,7 @@ Downsampling된 heatmap 좌표를 입력 이미지로 되돌릴 때 생기는 �
 4. embedding의 L1 distance가 0.5보다 큰 쌍을 제거합니다.
 5. 남은 쌍으로 bounding box를 만들고 NMS를 적용합니다.
 
-학습 기록에는 입력 511×511, 출력 128×128, Adam optimizer, random horizontal flip·scaling·cropping·color jittering이 포함돼 있습니다. 전체 loss는 detection, pull, push, offset 항을 합치며 원문의 weight는 α=0.1, β=0.1, γ=1입니다.
+학습 기록에는 입력 511×511, 출력 128×128, Adam optimizer, random horizontal flip, scaling, cropping, color jittering이 포함돼 있습니다. 전체 loss는 detection, pull, push, offset 항을 합치며 원문의 weight는 α=0.1, β=0.1, γ=1입니다.
 
 ![CornerNet benchmark](/assets/img/post_img/cornernet/benchmark.PNG)
 
@@ -105,7 +105,7 @@ Downsampling된 heatmap 좌표를 입력 이미지로 되돌릴 때 생기는 �
 
 ## 잘못된 Box는 어느 출력에서 시작됐는가
 
-먼저 ground truth corner 근처에 heatmap peak가 있는지 봅니다. 한쪽 corner만 나오면 pairing을 조정하기 전에 해당 방향의 heatmap과 corner pooling을 확인합니다. 두 peak가 모두 있는데 box가 없다면 class·embedding distance·score filter 중 어느 조건에서 후보가 버려졌는지 기록합니다.
+먼저 ground truth corner 근처에 heatmap peak가 있는지 봅니다. 한쪽 corner만 나오면 pairing을 조정하기 전에 해당 방향의 heatmap과 corner pooling을 확인합니다. 두 peak가 모두 있는데 box가 없다면 class, embedding distance, score filter 중 어느 조건에서 후보가 버려졌는지 기록합니다.
 
 서로 다른 물체의 corner가 묶인 경우에는 embedding 분포를 봅니다. 같은 instance의 두 점 거리와 다른 instance 조합의 거리가 실제로 분리되는지, 밀집된 같은 class에서 겹치는지 확인합니다. Threshold를 엄격하게 하면 오조합은 줄지만 올바른 box도 끊길 수 있습니다.
 
@@ -118,8 +118,8 @@ Box가 일정한 크기만큼 밀리면 offset과 좌표 복원을 봅니다. Fe
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [CenterNet은 Anchor와 NMS 없이 어떻게 물체를 찾을까: 중심점·크기·Offset 해설]({% post_url 2019-05-24-CenterNet %}) — CenterNet이 object를 bounding box 후보가 아닌 중심점 하나로 표현하는 방식을 설명합니다. Heatmap peak, box 크기, stride offset의 C+4 출력과 focal·L1 loss를 연결하고…
-- [FSAF는 Anchor 없이 어떤 FPN 레벨을 고르나]({% post_url 2019-09-08-FSAF %}) — FSAF가 effective·ignore 영역으로 anchor-free supervision을 만들고 Online Feature Selection으로 instance별 최적 FPN 레벨을 고르는 과정을 설명합니다.
+- [CenterNet은 Anchor와 NMS 없이 어떻게 물체를 찾을까: 중심점, 크기, Offset 해설]({% post_url 2019-05-24-CenterNet %}) — CenterNet이 object를 bounding box 후보가 아닌 중심점 하나로 표현하는 방식을 설명합니다. Heatmap peak, box 크기, stride offset의 C+4 출력과 focal, L1 loss를 연결하고…
+- [FSAF는 Anchor 없이 어떤 FPN 레벨을 고르나]({% post_url 2019-09-08-FSAF %}) — FSAF가 effective, ignore 영역으로 anchor-free supervision을 만들고 Online Feature Selection으로 instance별 최적 FPN 레벨을 고르는 과정을 설명합니다.
 - [Deformable Convolution은 Offset을 어디에 더하나: DCN 수식 해설]({% post_url 2019-11-13-DCN %}) — Deformable Convolution이 고정 3×3 sampling grid에 학습 가능한 2차원 offset을 더하고 bilinear interpolation으로 비정수 위치의 값을 읽는 과정을 설명합니다.
 <!-- internal-links:end -->
 

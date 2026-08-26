@@ -11,7 +11,7 @@ tags:
   - AI투자
 summary: 일반적인 언어 모델이 투자 분석에서 보여주는 양비론적 한계와 데이터 환각을 극복하기 위해, 4대 가치투자 대가의 방법론을 다중 에이전트로
   구현한 AI Berkshire 프레임워크의 구조와 작동 원리를 깊이 있게 분석합니다.
-description: 'AI Berkshire가 가치투자 관점을 역할별로 나누는 구조와 교차 검증의 한계, 재무 데이터 기준일·백테스트 편향·거래비용·투자 판단 위험을 설명합니다.'
+description: 'AI Berkshire가 가치투자 관점을 역할별로 나누는 구조와 교차 검증의 한계, 재무 데이터 기준일, 백테스트 편향, 거래비용, 투자 판단 위험을 설명합니다.'
 github_url: https://github.com/xbtlin/ai-berkshire
 image:
   path: https://opengraph.githubassets.com/1/xbtlin/ai-berkshire

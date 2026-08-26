@@ -13,7 +13,7 @@ summary: prime-agent는 영속적인 IPython 커널을 단일 도구 인터페�
   유지할 수 있게 만든 오픈소스 코딩 하네스입니다. 재귀적 언어 모델(RLM) 구조를 통해 서브에이전트를 함수 호출 방식으로 실행하고, 자가 개선
   명령인 /refine을 통해 에이전트 스캐폴딩 상태를 보완 업데이트합니다. 터미널이 종료되어도 백그라운드 대몬을 통해 세션과 장기 작업을 지속할
   수 있어 복잡한 소프트웨어 엔지니어링 과제에 최적화되어 있습니다.
-description: 'prime-agent가 영속 IPython 커널과 재귀 서브에이전트로 상태를 유지하는 방식, 자가 수정·코드 실행·재개·비용 위험을 정리합니다.'
+description: 'prime-agent가 영속 IPython 커널과 재귀 서브에이전트로 상태를 유지하는 방식, 자가 수정, 코드 실행, 재개, 비용 위험을 정리합니다.'
 automation: oss_trend
 github_url: https://github.com/PrimeIntellect-ai/prime-agent
 image:
@@ -55,7 +55,7 @@ faq:
     커널 내의 스킬 모듈로 감싸서 실행합니다. 따라서 모델의 프롬프트 오염 없이 외부 MCP 서버 도구를 자유롭게 활용할 수 있습니다.
 ---
 
-prime-agent는 영속 IPython 커널을 중심 도구로 사용해 변수와 중간 결과를 유지하고, 서브에이전트를 함수처럼 호출하는 하네스입니다. 상태가 오래 남는 만큼 잘못된 변수·비밀값·부분 결과도 다음 단계로 전파될 수 있고, `/refine` 같은 자기 수정은 검증되지 않은 지침을 고착시킬 수 있습니다. 제한된 프로젝트에서 체크포인트·초기화·재현과 코드 실행 권한을 확인하세요.
+prime-agent는 영속 IPython 커널을 중심 도구로 사용해 변수와 중간 결과를 유지하고, 서브에이전트를 함수처럼 호출하는 하네스입니다. 상태가 오래 남는 만큼 잘못된 변수, 비밀값, 부분 결과도 다음 단계로 전파될 수 있고, `/refine` 같은 자기 수정은 검증되지 않은 지침을 고착시킬 수 있습니다. 제한된 프로젝트에서 체크포인트, 초기화, 재현과 코드 실행 권한을 확인하세요.
 
 ## 영속 커널이 유리한 작업은 무엇인가
 
@@ -399,7 +399,7 @@ Prime Intellect의 prime-agent는 지금까지 '대화창 래퍼(Wrapper)' 수�
 
 - [Qwen Code: 코드베이스 메모리와 MCP로 터미널에 구현한 완전 무료 AI 에이전트]({% post_url 2026-07-08-Qwen-Code-A-Completely-Free-AI-Agent-in-the-Terminal-Powered-by-Codebase-Memory-and-MCP %}) — Qwen Code는 알리바바 Qwen 팀이 개발한 오픈소스 터미널 AI 코딩 에이전트입니다. 파일 시스템과 영구적인 메모리 계층을 갖추고 있으며, MCP(Model Context Protocol)를 통해 외부 도구와 상호작용합니다…
 - [openai/codex-plugin-cc: Claude Code와 Codex가 하나의 에디터에서 만났을 때 일어나는 일]({% post_url 2026-07-05-openaicodex-plugin-cc-The-Synergy-of-Claude-Code-and-Codex-in-a-Single-Editor %}) — Anthropic의 Claude Code 환경 내에서 OpenAI의 Codex를 백그라운드로 호출하여 하이브리드 멀티 에이전트 워크플로우를 구현하는 플러그인의 작동 원리와 실전 활용법을 알아봅니다.
-- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프, MCP, API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve, MCP 권한, 무한 루프, API 비용과 Diff 검토 기준을 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

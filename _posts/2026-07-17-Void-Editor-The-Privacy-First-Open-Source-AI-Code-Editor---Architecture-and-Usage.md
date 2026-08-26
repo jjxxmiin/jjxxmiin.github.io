@@ -11,7 +11,7 @@ tags:
   - 온디바이스AI
 summary: 오픈소스 AI 코드 에디터인 Void의 내부 아키텍처, 기존 상용 도구와의 차별점, 로컬 언어 모델 통합 방식 및 실제 현업 활용
   시나리오를 구체적인 다이어그램과 함께 심층적으로 분석합니다.
-description: 'Void 에디터의 VS Code 포크 구조와 로컬·사용자 지정 모델 연결을 살피고, 코드 전송 경로·확장 권한·업데이트·프로젝트 성숙도를 점검합니다.'
+description: 'Void 에디터의 VS Code 포크 구조와 로컬, 사용자 지정 모델 연결을 살피고, 코드 전송 경로, 확장 권한, 업데이트, 프로젝트 성숙도를 점검합니다.'
 github_url: https://github.com/voideditor/void
 image:
   path: https://opengraph.githubassets.com/1/voideditor/void

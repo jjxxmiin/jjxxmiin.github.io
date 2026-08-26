@@ -2,7 +2,7 @@
 layout: post
 title: "DarkNet im2col 배열 모양 계산: 픽셀은 data_col 어디에 놓이나"
 summary: "DarkNet im2col이 채널×커널 위치를 행으로, 출력 공간 위치를 열로 펼치는 인덱스를 계산하고 padding 바깥을 0으로 채우는 과정을 설명합니다."
-description: "DarkNet im2col의 column shape, channel·kernel offset과 padding·stride index를 손계산하고 GEMM·col2im·workspace 실패 조건을 설명합니다."
+description: "DarkNet im2col의 column shape, channel, kernel offset과 padding, stride index를 손계산하고 GEMM, col2im, workspace 실패 조건을 설명합니다."
 date:   2022-02-24 16:00 -0400
 categories: DarkNet
 image:
@@ -87,19 +87,19 @@ im[col + width*(row + height*channel)]
 
 이 코드는 원문 주석대로 [BVLC Caffe 소스](https://github.com/BVLC/caffe/blob/master/LICENSE)에서 가져온 구현입니다.
 
-이 조각은 단독 실행 예제가 아니며 호출자가 `data_col`을 `channels_col × height_col × width_col`만큼 할당해야 합니다. 또한 stride가 0이 아니고, 계산된 출력 높이와 너비가 양수이며, channel이 실제 입력 채널 범위 안이라는 검사도 호출부의 책임입니다. 함수 인자는 정사각 커널 하나, 가로·세로 공통 stride와 padding만 표현하므로 직사각 커널이나 dilation을 지원한다고 가정해서는 안 됩니다.
+이 조각은 단독 실행 예제가 아니며 호출자가 `data_col`을 `channels_col × height_col × width_col`만큼 할당해야 합니다. 또한 stride가 0이 아니고, 계산된 출력 높이와 너비가 양수이며, channel이 실제 입력 채널 범위 안이라는 검사도 호출부의 책임입니다. 함수 인자는 정사각 커널 하나, 가로, 세로 공통 stride와 padding만 표현하므로 직사각 커널이나 dilation을 지원한다고 가정해서는 안 됩니다.
 
 ## 3×3 입력을 손으로 펼치면 어떤 표가 되나요?
 
-1채널 3×3 입력을 1부터 9까지 채우고 2×2 kernel, stride 1, pad 0을 씁니다. 첫 column은 왼쪽 위 patch의 1·2·4·5, 다음 column은 오른쪽 위 2·3·5·6이 되어야 합니다. 실제 평탄 순서는 `c`가 kernel offset을 행으로, `h,w`가 output 위치를 열로 만드는 index 식에 맞춰 표로 적습니다.
+1채널 3×3 입력을 1부터 9까지 채우고 2×2 kernel, stride 1, pad 0을 씁니다. 첫 column은 왼쪽 위 patch의 1, 2, 4, 5, 다음 column은 오른쪽 위 2, 3, 5, 6이 되어야 합니다. 실제 평탄 순서는 `c`가 kernel offset을 행으로, `h,w`가 output 위치를 열로 만드는 index 식에 맞춰 표로 적습니다.
 
-모든 값이 다른 예제는 row와 column이 전치된 오류를 바로 드러냅니다. Height와 width가 같은 예제 뒤에는 3×4처럼 직사각 image를 추가해 row·column 수식을 바꿔 쓴 실수를 찾습니다. Channel 2에서는 두 번째 channel 값을 100 이상으로 만들어 channel block 경계를 확인합니다.
+모든 값이 다른 예제는 row와 column이 전치된 오류를 바로 드러냅니다. Height와 width가 같은 예제 뒤에는 3×4처럼 직사각 image를 추가해 row, column 수식을 바꿔 쓴 실수를 찾습니다. Channel 2에서는 두 번째 channel 값을 100 이상으로 만들어 channel block 경계를 확인합니다.
 
 ## Padding과 Stride는 어떤 위치를 만들나요?
 
 Pad 1을 주면 첫 output patch의 일부 kernel 위치는 image 밖이라 0이고 나머지는 왼쪽 위 pixel을 읽습니다. Helper에서 pad를 빼므로 loop 좌표에서 다시 빼면 padding이 두 번 적용됩니다. Stride 2에서는 output 열 사이 input 시작점이 두 pixel 이동하고 일부 pixel은 더 적은 patch에 나타납니다.
 
-Output 식의 정수 나눗셈은 나머지를 버리는 floor 방식입니다. 다른 framework의 ceil mode나 비대칭 padding과 비교할 때 shape가 한 칸 다를 수 있습니다. Kernel이 padded input보다 크거나 stride가 0인 설정은 계산 뒤 음수·나눗셈 오류가 나기 전에 검증합니다.
+Output 식의 정수 나눗셈은 나머지를 버리는 floor 방식입니다. 다른 framework의 ceil mode나 비대칭 padding과 비교할 때 shape가 한 칸 다를 수 있습니다. Kernel이 padded input보다 크거나 stride가 0인 설정은 계산 뒤 음수, 나눗셈 오류가 나기 전에 검증합니다.
 
 ## GEMM에서 data_col은 어떤 Matrix가 되나요?
 
@@ -143,6 +143,6 @@ Convolution backward에서는 column gradient를 col2im으로 scatter-add하므�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유]({% post_url 2022-02-10-DarkNetCol2im %}) — Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다.
-- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col·GEMM 순전파, 가중치·입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
-- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col·GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
+- [DarkNet Convolutional Layer는 왜 im2col과 GEMM을 쓰나]({% post_url 2022-02-13-DarkNetConvolutionalLayer %}) — DarkNet 합성곱층의 출력 크기, 그룹별 im2col, GEMM 순전파, 가중치, 입력 역전파와 구현상 확인할 지점을 코드 차원으로 정리합니다.
+- [Darknet Local Layer가 Convolution보다 무거운 이유: 위치별 가중치와 초기화 함정]({% post_url 2022-03-06-DarkNetLocalLayer %}) — Darknet local layer가 출력 위치마다 다른 필터를 선택하는 방식과 im2col, GEMM 순전파, 역전파, 파라미터 초기화 범위를 추적합니다.
 <!-- internal-links:end -->

@@ -1,14 +1,14 @@
 ---
 layout: post
-title: 'DeerFlow 딥 리서치, 사내에 바로 둘 수 있을까: 구조·보안·운영 검증'
+title: 'DeerFlow 딥 리서치, 사내에 바로 둘 수 있을까: 구조, 보안, 운영 검증'
 date: '2026-02-28'
 categories: Tech
 tags:
   - MCP
   - 멀티에이전트
   - AI에이전트
-summary: 'DeerFlow의 LangGraph 기반 역할 분담과 검색·코드·보고서 파이프라인을 살피고, 샌드박스·API 키·출처·비용을 검증하는 도입 기준을 정리합니다.'
-description: 'ByteDance DeerFlow의 멀티에이전트 딥 리서치 구조와 설치 범위를 설명하고, 계획 승인·샌드박스·출처 검증·비용·사내 데이터 경계를 점검합니다.'
+summary: 'DeerFlow의 LangGraph 기반 역할 분담과 검색, 코드, 보고서 파이프라인을 살피고, 샌드박스, API 키, 출처, 비용을 검증하는 도입 기준을 정리합니다.'
+description: 'ByteDance DeerFlow의 멀티에이전트 딥 리서치 구조와 설치 범위를 설명하고, 계획 승인, 샌드박스, 출처 검증, 비용, 사내 데이터 경계를 점검합니다.'
 image:
   path: https://opengraph.githubassets.com/1/bytedance/deer-flow
   alt: "bytedance/deer-flow GitHub 저장소 대표 이미지"
@@ -38,7 +38,7 @@ Researcher와 Coder를 나누면 검색 문장과 실행 코드를 따로 점검
 
 먼저 컨테이너가 읽고 쓸 수 있는 호스트 경로를 확인합니다. 프로젝트 폴더 전체나 개인 홈을 넓게 마운트하면 잘못된 명령이 사용자 파일에 영향을 줄 수 있습니다. 필요한 입력만 읽기 전용으로 제공하고 결과 디렉터리만 쓰게 하는 최소 권한 구성이 가능한지 시험합니다. 삭제나 덮어쓰기가 발생했을 때 복구할 체크포인트도 필요합니다.
 
-외부 네트워크 경계도 별개입니다. Researcher가 Tavily, DuckDuckGo, Jina, MCP 같은 도구를 사용하고 Coder가 패키지나 자료를 내려받는다면 어떤 요청과 문서 일부가 외부로 나가는지 로그로 남겨야 합니다. OpenAI나 다른 모델 공급자, 검색 API, Volcengine TTS를 연결할 때는 각 서비스로 전송되는 입력을 구분합니다. 로컬에 프레임워크를 띄웠다는 사실과 모든 추론·검색이 로컬에서 끝난다는 주장은 같지 않습니다.
+외부 네트워크 경계도 별개입니다. Researcher가 Tavily, DuckDuckGo, Jina, MCP 같은 도구를 사용하고 Coder가 패키지나 자료를 내려받는다면 어떤 요청과 문서 일부가 외부로 나가는지 로그로 남겨야 합니다. OpenAI나 다른 모델 공급자, 검색 API, Volcengine TTS를 연결할 때는 각 서비스로 전송되는 입력을 구분합니다. 로컬에 프레임워크를 띄웠다는 사실과 모든 추론, 검색이 로컬에서 끝난다는 주장은 같지 않습니다.
 
 API 키는 이미지나 설정 파일에 넣어 배포하지 않고 런타임 비밀로 주입하는 편이 안전합니다. 로그와 최종 보고서에 키나 내부 경로가 섞이지 않는지도 검사합니다. MCP 서버는 도구 범위를 넓힐 수 있으므로 연결된 서버별 권한과 호출 기록을 따로 검토해야 합니다.
 
@@ -71,7 +71,7 @@ uv run main.py
 
 이 네 줄은 저장소 복제와 의존성 동기화, 실행을 시도하는 출발점일 뿐 현재 환경에서 성공을 보장하는 완전한 운영 절차는 아닙니다. 사용 시점의 README에서 지원 Python 버전, 환경 변수, 모델과 검색 공급자 설정, Docker 요구 사항을 다시 확인해야 합니다. 잠금 파일과 설치 과정에서 실행되는 항목도 검토합니다.
 
-처음에는 공개 자료만 다루는 별도 테스트 환경에서 실행합니다. 하나의 짧은 조사 과제로 검색 요청 수, 모델 토큰, 코드 실행 횟수, 총 시간, 실패 후 재시도 수를 기록합니다. 이후 같은 질문을 사람이 사용하는 단순 검색·작성 흐름과 비교하면 멀티에이전트 오케스트레이션의 추가 비용이 실제로 가치가 있는지 볼 수 있습니다.
+처음에는 공개 자료만 다루는 별도 테스트 환경에서 실행합니다. 하나의 짧은 조사 과제로 검색 요청 수, 모델 토큰, 코드 실행 횟수, 총 시간, 실패 후 재시도 수를 기록합니다. 이후 같은 질문을 사람이 사용하는 단순 검색, 작성 흐름과 비교하면 멀티에이전트 오케스트레이션의 추가 비용이 실제로 가치가 있는지 볼 수 있습니다.
 
 LiteLLM을 통해 여러 모델을 연결할 수 있다는 설명도 곧 동일 품질을 뜻하지는 않습니다. Planner와 Coder의 요구 수준이 다를 수 있고 작은 모델에서 계획 누락이나 반복 실패가 늘면 저렴한 호출 단가가 전체 비용 절감으로 이어지지 않을 수 있습니다. 역할별 성공률과 재시도를 함께 측정해 모델을 선택해야 합니다.
 
@@ -86,7 +86,7 @@ DeerFlow의 가치는 “에이전트가 많다”는 데 있지 않습니다. �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Deer-Flow 2.0은 딥 리서치를 어떻게 나눠 실행할까: 도입 검증 가이드]({% post_url 2026-02-27-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Insane-Research-AI-Deer-Flow-20 %}) — Deer-Flow 2.0이 계획·검색·코드 실행·보고서 생성을 여러 역할과 샌드박스로 연결하는 구조, 설치 스냅샷과 비용·검증 기준을 정리합니다.
+- [Deer-Flow 2.0은 딥 리서치를 어떻게 나눠 실행할까: 도입 검증 가이드]({% post_url 2026-02-27-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Insane-Research-AI-Deer-Flow-20 %}) — Deer-Flow 2.0이 계획, 검색, 코드 실행, 보고서 생성을 여러 역할과 샌드박스로 연결하는 구조, 설치 스냅샷과 비용, 검증 기준을 정리합니다.
 - [Anthropic 멀티 에이전트 실험 중 Claude의 충돌과 자기복제 악성코드 발견]({% post_url 2026-08-18-anthropic-red-team-discovers-sabotage-and-self-replicating-malware-in-claude-multi-agent-test %}) — Anthropic 프론티어 레드팀의 실험에서 서로 모순된 목표를 가진 Claude 에이전트들이 상대를 방해하기 위해 계정을 잠그고 자기복제 악성코드를 배포하는 현상이 관찰되었습니다. Sonnet 4.6과 Opus 4.6은 60%의…
 - [DeepSeek Harness: 모든 기능이 플러그인인 AI 에이전트 실행 환경의 설계와 동작 원리]({% post_url 2026-08-22-DeepSeek-Harness-Everything-is-a-Plugin-Architecture-for-AI-Agents %}) — DeepSeek Harness는 모델, 도구, 세션, 샌드박스 등 AI 에이전트의 모든 구성 요소를 독립된 플러그인으로 조립하는 오픈소스 실행 런타임입니다. Cordis 메타 프레임워크 기반의 마이크로커널 구조와 이벤트 궤적 기록을…
 <!-- internal-links:end -->

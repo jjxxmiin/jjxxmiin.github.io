@@ -92,6 +92,6 @@ RISE의 Compositional World Model은 Controllable Dynamics Model과 Progress Val
 ## 함께 읽으면 이해가 이어지는 글
 
 - [인간 영상 4만 4천 시간은 로봇 행동이 될 수 있나: DreamDojo]({% post_url 2026-02-09-DreamDojo--A-Generalist-Robot-World-Model-from-Large-Scale-Human-Videos %}) — DreamDojo가 사람의 1인칭 영상에서 잠재 행동을 배우고 소량의 로봇 데이터로 연결하는 방법, 10.81 FPS 성과와 실제 적용 한계를 살펴봅니다.
-- [GigaBrain-0.5M\*는 월드 모델을 로봇 정책에 어떻게 연결하나]({% post_url 2026-02-13-GigaBrain-0-5M---a-VLA-That-Learns-From-World-Model-Based-Reinforcement-Learning %}) — GigaBrain-0.5M*의 RAMP가 월드 모델·인간 개입 롤아웃·지속 학습을 연결하는 방식과 보고된 로봇 과제 성능의 한계를 분석합니다.
+- [GigaBrain-0.5M\*는 월드 모델을 로봇 정책에 어떻게 연결하나]({% post_url 2026-02-13-GigaBrain-0-5M---a-VLA-That-Learns-From-World-Model-Based-Reinforcement-Learning %}) — GigaBrain-0.5M*의 RAMP가 월드 모델, 인간 개입 롤아웃, 지속 학습을 연결하는 방식과 보고된 로봇 과제 성능의 한계를 분석합니다.
 - [로봇이 미래 영상을 만들지 않고도 다음 행동을 고를 수 있나: World Guidance]({% post_url 2026-02-26-World-Guidance--World-Modeling-in-Condition-Space-for-Action-Generation %}) — WoG가 미래 관측을 Q-former 조건 표현으로 압축하고 VLA가 행동과 함께 예측하게 하는 2단계 학습, UMI 성과와 지연 한계를 설명합니다.
 <!-- internal-links:end -->

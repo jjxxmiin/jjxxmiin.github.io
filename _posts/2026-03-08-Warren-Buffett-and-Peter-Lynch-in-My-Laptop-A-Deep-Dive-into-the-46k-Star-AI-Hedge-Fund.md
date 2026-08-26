@@ -6,7 +6,7 @@ categories: Tech
 tags:
   - 멀티에이전트
   - AI에이전트
-summary: 'ai-hedge-fund의 분석·투자자·리스크·포트폴리오 에이전트 흐름과 설치 스냅샷, 실제 투자에 쓰기 전 검증할 오류와 백테스트 한계를 정리합니다.'
+summary: 'ai-hedge-fund의 분석, 투자자, 리스크, 포트폴리오 에이전트 흐름과 설치 스냅샷, 실제 투자에 쓰기 전 검증할 오류와 백테스트 한계를 정리합니다.'
 description: 'ai-hedge-fund의 멀티에이전트 판단 구조와 백테스트 누출, 수치 검산, 리스크 제한, 모의 운용에서 확인할 핵심 실패 조건을 정리합니다.'
 github_url: https://github.com/virattt/ai-hedge-fund
 image:
@@ -14,7 +14,7 @@ image:
   alt: "virattt/ai-hedge-fund GitHub 저장소 대표 이미지"
 faq:
   - question: 'ai-hedge-fund의 결과만 보고 실제 주식을 매매해도 되나요?'
-    answer: '안 됩니다. 이 프로젝트는 교육·연구용 모의 분석이며 데이터 시점, 수치 계산, 거래 비용, 리스크 제한을 독립적으로 검증하지 않은 출력은 투자 판단의 근거가 될 수 없습니다.'
+    answer: '안 됩니다. 이 프로젝트는 교육, 연구용 모의 분석이며 데이터 시점, 수치 계산, 거래 비용, 리스크 제한을 독립적으로 검증하지 않은 출력은 투자 판단의 근거가 될 수 없습니다.'
   - question: '에이전트가 많으면 분석 신뢰도도 자동으로 높아지나요?'
     answer: '그렇지 않습니다. 여러 에이전트가 같은 데이터 누락이나 잘못된 숫자를 공유하면 의견 수만 늘고 오류는 그대로 남으므로 출처와 계산 경로를 별도로 검산해야 합니다.'
   - question: '백테스트에서 가장 먼저 확인할 것은 무엇인가요?'
@@ -25,7 +25,7 @@ ai-hedge-fund는 여러 투자 관점을 비교해 보는 교육용 모의 분�
 
 ## 투자 회사를 흉내 낸 의사결정 흐름
 
-[프로젝트](https://github.com/virattt/ai-hedge-fund)는 하나의 모델에게 종목 결론을 바로 묻지 않고 역할을 나눕니다. 데이터 노드가 입력을 준비하고, 펀더멘털·기술·감성·가치평가 에이전트가 서로 다른 관점의 신호를 만듭니다. 워런 버핏, 피터 린치, 벤저민 그레이엄, 빌 애크먼 같은 투자자 페르소나는 각 철학을 프롬프트로 표현해 같은 자료를 다르게 해석합니다.
+[프로젝트](https://github.com/virattt/ai-hedge-fund)는 하나의 모델에게 종목 결론을 바로 묻지 않고 역할을 나눕니다. 데이터 노드가 입력을 준비하고, 펀더멘털, 기술, 감성, 가치평가 에이전트가 서로 다른 관점의 신호를 만듭니다. 워런 버핏, 피터 린치, 벤저민 그레이엄, 빌 애크먼 같은 투자자 페르소나는 각 철학을 프롬프트로 표현해 같은 자료를 다르게 해석합니다.
 
 이 신호들은 리스크 매니저를 거쳐 포트폴리오 매니저의 최종 결론으로 모입니다. 구조의 장점은 어느 단계에서 판단이 갈렸는지 추적하기 쉽다는 데 있습니다. 그러나 에이전트 수가 많다고 독립적인 증거가 늘어나는 것은 아닙니다. 모두 같은 누락된 데이터나 잘못된 숫자를 보면 여러 의견이 같은 방향으로 틀릴 수 있습니다.
 
@@ -109,16 +109,16 @@ LLM의 설명과 결정론적인 계산을 분리해야 합니다. 매출 성장
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [AI-Trader로 실거래를 맡겨도 될까? 저장소 불일치와 백테스트 함정]({% post_url 2026-05-08-Seniors-View-Just-a-Bot-or-Wall-Streets-Replacement-Deep-Dive-into-the-Architecture-of-AI-Trader %}) — AI-Trader 글에 섞인 저장소·논문·예시 코드의 불일치를 먼저 확인하고, 실거래 전 반드시 검증해야 할 미래 정보 누수와 체결·위험 관리 조건을 짚습니다.
-- [TradingAgents-CN으로 자동매매해도 될까: Bull·Bear 토론과 리스크 관리의 착시]({% post_url 2026-03-01-Why-Did-I-Just-Find-This-Honest-Review-of-TradingAgents-CN-the-AI-Avengers-of-Financial-Trading %}) — 분석가·Bull/Bear 연구원·트레이더·리스크 관리자로 구성된 TradingAgents-CN을 살펴보고, 토론이 환각과 투자 위험을 없애지 못하는 이유를 정리합니다.
-- [OpenAI Agents SDK를 쓰기 전 확인할 것: handoff·guardrail·상태 소유권]({% post_url 2026-04-19-A-Seniors-Perspective-OpenAI-Agents-SDK-Innovative-Abstraction-or-Fatal-Vendor-Lock-in-A-Deep-Dive %}) — 2025년 원문 스냅샷의 OpenAI Agents SDK를 Agent·Runner·handoff·guardrail 관점에서 읽고, 도입 범위와 상태·승인 경계를 정리합니다.
+- [AI-Trader로 실거래를 맡겨도 될까? 저장소 불일치와 백테스트 함정]({% post_url 2026-05-08-Seniors-View-Just-a-Bot-or-Wall-Streets-Replacement-Deep-Dive-into-the-Architecture-of-AI-Trader %}) — AI-Trader 글에 섞인 저장소, 논문, 예시 코드의 불일치를 먼저 확인하고, 실거래 전 반드시 검증해야 할 미래 정보 누수와 체결, 위험 관리 조건을 짚습니다.
+- [TradingAgents-CN으로 자동매매해도 될까: Bull, Bear 토론과 리스크 관리의 착시]({% post_url 2026-03-01-Why-Did-I-Just-Find-This-Honest-Review-of-TradingAgents-CN-the-AI-Avengers-of-Financial-Trading %}) — 분석가, Bull/Bear 연구원, 트레이더, 리스크 관리자로 구성된 TradingAgents-CN을 살펴보고, 토론이 환각과 투자 위험을 없애지 못하는 이유를 정리합니다.
+- [OpenAI Agents SDK를 쓰기 전 확인할 것: handoff, guardrail, 상태 소유권]({% post_url 2026-04-19-A-Seniors-Perspective-OpenAI-Agents-SDK-Innovative-Abstraction-or-Fatal-Vendor-Lock-in-A-Deep-Dive %}) — 2025년 원문 스냅샷의 OpenAI Agents SDK를 Agent, Runner, handoff, guardrail 관점에서 읽고, 도입 범위와 상태, 승인 경계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### ai-hedge-fund의 결과만 보고 실제 주식을 매매해도 되나요?
 
-안 됩니다. 이 프로젝트는 교육·연구용 모의 분석이며 데이터 시점, 수치 계산, 거래 비용, 리스크 제한을 독립적으로 검증하지 않은 출력은 투자 판단의 근거가 될 수 없습니다.
+안 됩니다. 이 프로젝트는 교육, 연구용 모의 분석이며 데이터 시점, 수치 계산, 거래 비용, 리스크 제한을 독립적으로 검증하지 않은 출력은 투자 판단의 근거가 될 수 없습니다.
 
 ### 에이전트가 많으면 분석 신뢰도도 자동으로 높아지나요?
 

@@ -4,8 +4,8 @@ source_citations:
     url: "https://raw.githubusercontent.com/pjreddie/darknet/f6afaabcdf85f77e7aff2ec55c020c0e297c77f9/src/route_layer.c"
 layout: post
 title:  "Darknet Route Layer에서 Channel Concat이 깨질 때: offset과 Shape 점검법"
-summary: "Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w·out_h·out_c가 0이 되는 조건, delta 누적 방식을 설명합니다."
-description: "Darknet Route Layer의 batch별 concat offset, flat output과 spatial shape 계약, source index·resize·backward gradient 누적을 설명합니다."
+summary: "Darknet route_layer가 여러 이전 layer의 출력을 batch별로 이어 붙이는 방식과 spatial shape가 다를 때 out_w, out_h, out_c가 0이 되는 조건, delta 누적 방식을 설명합니다."
+description: "Darknet Route Layer의 batch별 concat offset, flat output과 spatial shape 계약, source index, resize, backward gradient 누적을 설명합니다."
 date:   2022-03-17 16:00 -0400
 categories: DarkNet
 image:
@@ -19,18 +19,18 @@ faq:
   - question: "Route Layer는 이전 feature를 더하나요?"
     answer: "아닙니다. 지정한 순서대로 각 batch 안에서 flat output 구간을 concatenate합니다."
   - question: "Flat outputs 합이 맞아도 spatial metadata가 0일 수 있나요?"
-    answer: "네. Source들의 width와 height가 다르면 convolution이 해석할 공통 shape가 없어 out_w·out_h·out_c를 0으로 둡니다."
+    answer: "네. Source들의 width와 height가 다르면 convolution이 해석할 공통 shape가 없어 out_w, out_h, out_c를 0으로 둡니다."
   - question: "Backward는 source delta를 덮어쓰나요?"
     answer: "아닙니다. 같은 source가 여러 branch에 쓰일 수 있어 해당 구간 gradient를 기존 delta에 더합니다."
 ---
 
 Darknet Route Layer의 출력 channel이 예상과 다르다면 각 입력의 flat `input_size` 합만 보지 말고, 모든 입력 layer의 `out_w`와 `out_h`가 같은지도 함께 확인해야 합니다.
 
-Route는 여러 이전 출력을 더하는 layer가 아니라 batch마다 순서대로 concatenate하는 layer입니다. 코드 조각은 Darknet의 `layer` 구조체와 `copy_cpu`·`axpy_cpu`를 전제로 하며, 단독 실행 예제가 아닙니다.
+Route는 여러 이전 출력을 더하는 layer가 아니라 batch마다 순서대로 concatenate하는 layer입니다. 코드 조각은 Darknet의 `layer` 구조체와 `copy_cpu`, `axpy_cpu`를 전제로 하며, 단독 실행 예제가 아닙니다.
 
 ## Forward는 Batch마다 같은 Offset에 복사합니다
 
-`make_route_layer`는 `input_sizes`의 합을 `outputs`와 `inputs`로 저장하고 그 크기의 output·delta를 할당합니다. Forward에서는 연결된 layer index를 순회하고, 한 입력이 차지할 시작 위치를 `offset`으로 관리합니다.
+`make_route_layer`는 `input_sizes`의 합을 `outputs`와 `inputs`로 저장하고 그 크기의 output, delta를 할당합니다. Forward에서는 연결된 layer index를 순회하고, 한 입력이 차지할 시작 위치를 `offset`으로 관리합니다.
 
 ```c
 for(i = 0; i < l.n; ++i){
@@ -78,7 +78,7 @@ axpy_cpu(input_size, 1,
 
 ## 작은 Tensor로 검증할 세 가지
 
-첫째, 크기 2와 3인 입력을 batch 2로 만들어 결과가 각 batch 안에서 `[2개, 3개]` 순으로 배치되는지 봅니다. 둘째, backward delta를 서로 다른 값으로 넣어 두 원본 delta의 정확한 구간에 더해지는지 확인합니다. 셋째, flat outputs가 우연히 같더라도 spatial 너비·높이가 다른 입력을 넣어 shape metadata가 0이 되는지 봅니다.
+첫째, 크기 2와 3인 입력을 batch 2로 만들어 결과가 각 batch 안에서 `[2개, 3개]` 순으로 배치되는지 봅니다. 둘째, backward delta를 서로 다른 값으로 넣어 두 원본 delta의 정확한 구간에 더해지는지 확인합니다. 셋째, flat outputs가 우연히 같더라도 spatial 너비, 높이가 다른 입력을 넣어 shape metadata가 0이 되는지 봅니다.
 
 Route는 파라미터가 없어 단순해 보이지만, 실제 오류는 숫자 합보다 layout 계약에서 발생합니다. 입력 layer 순서를 바꾸면 channel 의미도 바뀌므로 checkpoint와 cfg의 route 순서를 함께 유지해야 합니다.
 
@@ -92,7 +92,7 @@ Channel concat 목적이면 모든 spatial shape가 같아야 합니다. Metadat
 
 각 source와 batch를 다른 숫자로 채워 batch0 안 source 순서, batch1 안 source 순서로 배치되는지 확인합니다. Backward도 route delta 구간을 다른 값으로 두고 source batch stride와 누적을 비교합니다.
 
-Resize 후 input_sizes와 total outputs를 다시 계산하고 output·delta를 같은 크기로 재할당합니다. Realloc 실패와 외부 view의 stale pointer를 검사합니다.
+Resize 후 input_sizes와 total outputs를 다시 계산하고 output, delta를 같은 크기로 재할당합니다. Realloc 실패와 외부 view의 stale pointer를 검사합니다.
 
 ## Channel 의미는 왜 Route 순서에 의존하나요?
 
@@ -120,11 +120,11 @@ Concat 결과의 특정 channel만 사용하는 다음 convolution을 두면 sou
 
 ## 포팅할 때 channel concat과 flat concat 중 무엇을 선택하나요?
 
-### spatial layer로 넘기려면 공통 width·height가 필요합니다
+### spatial layer로 넘기려면 공통 width, height가 필요합니다
 
-다음 layer가 convolution처럼 `w×h×c`를 해석한다면 모든 source의 `out_w`와 `out_h`가 같아야 합니다. 이때 route 순서대로 channel 구간을 붙이고 `out_c`는 source channel의 합이 됩니다. framework의 concat API를 쓸 때 NCHW·NHWC 중 어느 layout인지 확인하고, Darknet flat index와 같은 source·channel·공간 순서가 되는지 작은 패턴으로 비교합니다.
+다음 layer가 convolution처럼 `w×h×c`를 해석한다면 모든 source의 `out_w`와 `out_h`가 같아야 합니다. 이때 route 순서대로 channel 구간을 붙이고 `out_c`는 source channel의 합이 됩니다. framework의 concat API를 쓸 때 NCHW, NHWC 중 어느 layout인지 확인하고, Darknet flat index와 같은 source, channel, 공간 순서가 되는지 작은 패턴으로 비교합니다.
 
-spatial 크기가 다른 feature를 합쳐야 한다면 route 자체가 resize나 resample을 해준다고 가정하지 않습니다. 앞에서 upsample·downsample하여 크기를 맞추거나, 공간 크기가 다른 입력을 다루는 별도 연산을 명시해야 합니다. metadata가 0인데도 다음 convolution을 실행하도록 우회하면 buffer 길이는 맞아도 channel과 좌표 의미가 없습니다.
+spatial 크기가 다른 feature를 합쳐야 한다면 route 자체가 resize나 resample을 해준다고 가정하지 않습니다. 앞에서 upsample, downsample하여 크기를 맞추거나, 공간 크기가 다른 입력을 다루는 별도 연산을 명시해야 합니다. metadata가 0인데도 다음 convolution을 실행하도록 우회하면 buffer 길이는 맞아도 channel과 좌표 의미가 없습니다.
 
 ### flat consumer만 있다면 shape가 0인 이유를 문서화합니다
 
@@ -142,9 +142,9 @@ source마다 10, 20처럼 서로 다른 시작값을 넣고 batch마다 100을 �
 
 ### 마지막으로 resize와 전체 graph를 시험합니다
 
-입력 feature 크기를 바꾼 뒤 `input_sizes`, outputs와 buffer가 함께 바뀌는지 확인하고, 외부가 보관한 오래된 output·delta 포인터가 없는지 검사합니다. 같은 source가 route와 다른 branch에 연결된 graph에서 finite difference를 수행하면 gradient 합과 네트워크의 delta 초기화 순서를 함께 검증할 수 있습니다.
+입력 feature 크기를 바꾼 뒤 `input_sizes`, outputs와 buffer가 함께 바뀌는지 확인하고, 외부가 보관한 오래된 output, delta 포인터가 없는지 검사합니다. 같은 source가 route와 다른 branch에 연결된 graph에서 finite difference를 수행하면 gradient 합과 네트워크의 delta 초기화 순서를 함께 검증할 수 있습니다.
 
-이 글은 제시된 Darknet Route Layer의 `copy_cpu`·`axpy_cpu`와 shape 전파 코드를 해설합니다. 다른 fork가 group route, channel slice나 별도 resize 옵션을 추가했을 수 있으므로 포팅 대상 커밋의 parser와 layer 구조체를 다시 확인해야 합니다. 함수 이름이 route라는 이유만으로 여기의 단순 concat 계약을 모든 버전에 적용하지 않습니다.
+이 글은 제시된 Darknet Route Layer의 `copy_cpu`, `axpy_cpu`와 shape 전파 코드를 해설합니다. 다른 fork가 group route, channel slice나 별도 resize 옵션을 추가했을 수 있으므로 포팅 대상 커밋의 parser와 layer 구조체를 다시 확인해야 합니다. 함수 이름이 route라는 이유만으로 여기의 단순 concat 계약을 모든 버전에 적용하지 않습니다.
 
 ## 자주 남는 질문
 
@@ -154,7 +154,7 @@ source마다 10, 20처럼 서로 다른 시작값을 넣고 batch마다 100을 �
 
 ### Flat outputs 합이 맞아도 spatial metadata가 0일 수 있나요?
 
-네. Source들의 width와 height가 다르면 convolution이 해석할 공통 shape가 없어 out_w·out_h·out_c를 0으로 둡니다.
+네. Source들의 width와 height가 다르면 convolution이 해석할 공통 shape가 없어 out_w, out_h, out_c를 0으로 둡니다.
 
 ### Backward는 source delta를 덮어쓰나요?
 
@@ -169,7 +169,7 @@ source마다 10, 20처럼 서로 다른 시작값을 넣고 batch마다 100을 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet Cost Layer에서 SSE·L1·MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2·L1·Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
-- [Darknet Shortcut이 단순 x+F(x)가 아닌 이유: alpha·beta와 Gradient 경로]({% post_url 2022-03-18-DarkNetShortcutLayer %}) — Darknet shortcut_layer가 현재 입력과 이전 layer 출력을 alpha·beta로 섞고 activation을 적용하는 순서, backward의 두 갈래 delta 누적과 resize 제약을 코드로 설명합니다.
+- [DarkNet Cost Layer에서 SSE, L1, MASKED가 실제로 갈리는 지점]({% post_url 2022-02-14-DarkNetCostLayer %}) — DarkNet Cost Layer의 문자열 파싱, L2, L1, Smooth L1 선택, 마스킹 처리와 delta 역전파를 코드가 실제 수행하는 범위 안에서 설명합니다.
+- [Darknet Shortcut이 단순 x+F(x)가 아닌 이유: alpha, beta와 Gradient 경로]({% post_url 2022-03-18-DarkNetShortcutLayer %}) — Darknet shortcut_layer가 현재 입력과 이전 layer 출력을 alpha, beta로 섞고 activation을 적용하는 순서, backward의 두 갈래 delta 누적과 resize 제약을 코드로 설명합니다.
 - [Darknet Normalize Layer 역전파가 정확하지 않은 이유: 채널 정규화와 delta 덮어쓰기]({% post_url 2022-03-11-DarkNetNormalizeLayer %}) — Darknet normalization_layer의 채널별 순방향 계산을 코드로 추적하고, 원본 주석이 밝힌 근사 역전파와 net.delta 덮어쓰기 문제를 점검합니다.
 <!-- internal-links:end -->

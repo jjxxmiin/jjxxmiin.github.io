@@ -113,7 +113,7 @@ flowchart TD
 
 20%는 모니터링되는 **추론 작업량**에 대한 추정치입니다. 예를 들어 감시 대상 요청의 기본 연산을 100으로 놓으면 안전 감시에 약 20이 더 필요하다는 뜻으로 읽을 수 있습니다. 전체 모델 훈련 자원이 20% 늘었다거나 모든 사용자의 청구액이 곧바로 20% 오른다는 발표는 아닙니다. 실제 비용 영향은 어떤 요청이 감시 대상인지, 운영사가 추가 연산을 가격에 어떻게 반영하는지에 따라 달라지므로 현재 수치만으로 요금 변화를 계산해서는 안 됩니다.
 
-서비스 사용자가 당장 모델을 바꿔야 할 근거도 아직 없습니다. 더 중요한 변화는 공급자가 성능 향상보다 안전 평가와 운영 통제에 시간을 배정했다는 점입니다. 기업 도입 담당자라면 향후 Astra가 공개될 때 모델 성능표만 보지 말고, 배포 조건·모니터링 범위·관리자 통제와 함께 검토하는 편이 타당합니다.
+서비스 사용자가 당장 모델을 바꿔야 할 근거도 아직 없습니다. 더 중요한 변화는 공급자가 성능 향상보다 안전 평가와 운영 통제에 시간을 배정했다는 점입니다. 기업 도입 담당자라면 향후 Astra가 공개될 때 모델 성능표만 보지 말고, 배포 조건, 모니터링 범위, 관리자 통제와 함께 검토하는 편이 타당합니다.
 
 ## 재개 판단에서 무엇을 확인해야 할까?
 
@@ -139,7 +139,7 @@ flowchart TD
 
 - [OpenAI 미공개 Astra 모델: '치명적' 사이버 위험 가능성과 내부 작업 중단 범위]({% post_url 2026-08-08-openai-discloses-unreleased-astra-model-nears-critical-cyber-risk-threshold %}) — OpenAI는 미공개 프론티어 모델 Astra가 자체 Preparedness Framework의 '치명적(Critical)' 사이버보안 위험 임계값에 도달할 가능성을 배제할 수 없다고 공개했습니다. 이에 따라 강화된 보안 제어 요건을…
 - [OpenAI GPT-5.6-Cyber 출시: 해킹과 보안 특화 모델과 Daybreak Red 프로그램 분석]({% post_url 2026-08-12-openai-launches-gpt-5-6-cyber-model-for-cybersecurity-research %}) — OpenAI가 GPT-5.6 Sol을 기반으로 개발한 사이버 보안 특화 모델 'GPT-5.6-Cyber'를 2026년 8월 10일 발표했습니다. 거부율을 줄여 제로데이 연구와 익스플로잇 체인 개발을 지원하며, 엄격히 검증된 보안…
-- [사용자 피드백을 계속 학습하면 AI가 정말 나아질까? OpenClaw-RL의 위험]({% post_url 2026-03-03-Why-Did-I-Just-Find-Out-About-This-OpenClaw-RL-Honest-Review-An-AI-That-Evolves-From-Your-Feedback %}) — OpenClaw-RL의 비동기 서빙·평가·학습 루프와 binary RL·on-policy distillation을 살펴보고 잘못된 피드백이 가중치에 굳는 위험을 짚습니다.
+- [사용자 피드백을 계속 학습하면 AI가 정말 나아질까? OpenClaw-RL의 위험]({% post_url 2026-03-03-Why-Did-I-Just-Find-Out-About-This-OpenClaw-RL-Honest-Review-An-AI-That-Evolves-From-Your-Feedback %}) — OpenClaw-RL의 비동기 서빙, 평가, 학습 루프와 binary RL, on-policy distillation을 살펴보고 잘못된 피드백이 가중치에 굳는 위험을 짚습니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

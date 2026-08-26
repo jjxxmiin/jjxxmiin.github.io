@@ -1,11 +1,11 @@
 ---
 layout: post  
-title: "InternVideo는 생성·판별 학습을 어떻게 합치나: MVM·VLC·CMA"
+title: "InternVideo는 생성, 판별 학습을 어떻게 합치나: MVM, VLC, CMA"
 summary: "InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다."
-description: "InternVideo의 MVM·VLC·CMA가 비디오의 시공간 구조와 언어 의미를 나눠 학습하는 원리, 태스크별 체크포인트와 재현 실험 기준을 설명합니다."
+description: "InternVideo의 MVM, VLC, CMA가 비디오의 시공간 구조와 언어 의미를 나눠 학습하는 원리, 태스크별 체크포인트와 재현 실험 기준을 설명합니다."
 faq:
   - question: "MVM과 VLC는 무엇이 다른가요?"
-    answer: "MVM은 가린 비디오를 복원하며 시공간 구조를 배우고, VLC는 맞는 비디오·문장 쌍을 가깝게 만들어 언어 의미를 정렬합니다."
+    answer: "MVM은 가린 비디오를 복원하며 시공간 구조를 배우고, VLC는 맞는 비디오, 문장 쌍을 가깝게 만들어 언어 의미를 정렬합니다."
   - question: "CMA 없이 두 모델을 따로 쓰면 안 되나요?"
     answer: "가능하지만 두 표현의 정보가 독립적으로 남습니다. CMA는 태스크에 사용할 때 MVM과 VLC 특징이 서로 참고하도록 만드는 결합 단계입니다."
   - question: "분류 예제로 검색까지 바로 할 수 있나요?"
@@ -21,7 +21,7 @@ tags:
 math: true  
 ---
 
-InternVideo는 비디오 자체를 복원하는 생성적 학습과 비디오·텍스트를 구별하고 정렬하는 판별적 학습을 따로 익힌 뒤, 두 표현을 attention으로 연결합니다.
+InternVideo는 비디오 자체를 복원하는 생성적 학습과 비디오, 텍스트를 구별하고 정렬하는 판별적 학습을 따로 익힌 뒤, 두 표현을 attention으로 연결합니다.
 
 - 논문: [InternVideo: General Video Foundation Models via Generative and Discriminative Learning](https://arxiv.org/abs/2212.03191)
 - 코드: [InternVideo 공식 저장소](https://github.com/OpenGVLab/InternVideo)
@@ -30,7 +30,7 @@ InternVideo는 비디오 자체를 복원하는 생성적 학습과 비디오·�
 ![InternVideo 전체 개요](/assets/img/post_img/internvideo/1.png)
 
 
-세 구성 요소는 서로 대체 관계가 아닙니다. MVM은 시간·공간 복원, VLC는 비디오와 문장 정렬, CMA는 두 표현의 교환을 맡으므로 태스크별로 어느 축이 실제 기여했는지 분리해 봐야 합니다.
+세 구성 요소는 서로 대체 관계가 아닙니다. MVM은 시간, 공간 복원, VLC는 비디오와 문장 정렬, CMA는 두 표현의 교환을 맡으므로 태스크별로 어느 축이 실제 기여했는지 분리해 봐야 합니다.
 
 ## MVM은 가려진 비디오 패치를 복원한다
 
@@ -51,7 +51,7 @@ Video-Language Contrastive Learning(VLC)은 비디오와 설명문 쌍을 각각
 3. 대조 학습으로 비디오-텍스트 관계를 익힙니다.
 4. 질의 문장과 잘 맞는 비디오를 찾을 수 있는 표현을 만듭니다.
 
-이 축이 비디오 검색, VideoQA, zero-shot·few-shot 전이의 기반으로 소개됩니다. MVM이 화면 안의 시공간 구조를 배우는 데 강하다면 VLC는 그 구조에 언어 의미를 연결합니다.
+이 축이 비디오 검색, VideoQA, zero-shot, few-shot 전이의 기반으로 소개됩니다. MVM이 화면 안의 시공간 구조를 배우는 데 강하다면 VLC는 그 구조에 언어 의미를 연결합니다.
 
 ![MVM과 VLC 학습 축](/assets/img/post_img/internvideo/3.png)
 
@@ -96,24 +96,24 @@ python demo/retrieval.py \
     --database "datasets/kinetics-400"
 ~~~
 
-이 명령은 원문 작성 시점의 핵심 조각일 뿐, 모델 다운로드·checkpoint 이름·데이터 전처리·GPU 조건을 포함한 완전 실행법은 아닙니다. 현재 저장소에 같은 스크립트와 인자가 있는지 확인하고, 분류와 검색 중 필요한 태스크의 checkpoint를 먼저 준비해야 합니다.
+이 명령은 원문 작성 시점의 핵심 조각일 뿐, 모델 다운로드, checkpoint 이름, 데이터 전처리, GPU 조건을 포함한 완전 실행법은 아닙니다. 현재 저장소에 같은 스크립트와 인자가 있는지 확인하고, 분류와 검색 중 필요한 태스크의 checkpoint를 먼저 준비해야 합니다.
 
 ## 같은 Video를 세 표현으로 비교해 본다
 
 짧은 동작 클립 하나를 예로 들면 MVM은 가려진 frame patch를 주변 시간 정보로 복원하고, VLC는 “사람이 공을 던진다”는 문장과 clip을 가까운 embedding에 놓습니다. CMA는 복원에서 얻은 동작 단서와 언어 정렬에서 얻은 의미 단서를 교환합니다. 이 흐름을 이해하면 action classification과 text retrieval이 같은 checkpoint를 요구하지 않을 수 있다는 점도 분명해집니다.
 
-검증에서는 정적인 appearance만으로 맞힐 수 있는 class와 움직임 순서가 필요한 class를 나눕니다. retrieval은 같은 객체가 등장하지만 동작이 다른 hard negative를 넣고, VideoQA는 짧게 나타나는 사건과 긴 시간 관계를 분리합니다. MVM·VLC·CMA를 하나씩 제거한 결과를 비교해야 결합 모델의 평균 점수가 어느 과제에서 나온 것인지 알 수 있습니다.
+검증에서는 정적인 appearance만으로 맞힐 수 있는 class와 움직임 순서가 필요한 class를 나눕니다. retrieval은 같은 객체가 등장하지만 동작이 다른 hard negative를 넣고, VideoQA는 짧게 나타나는 사건과 긴 시간 관계를 분리합니다. MVM, VLC, CMA를 하나씩 제거한 결과를 비교해야 결합 모델의 평균 점수가 어느 과제에서 나온 것인지 알 수 있습니다.
 
 ## 실행 예제보다 먼저 입력 계약을 맞춘다
 
 비디오 FPS, sampling frame 수, crop 크기와 normalization이 학습 조건과 다르면 모델 파일을 제대로 불러도 점수가 달라질 수 있습니다. classification checkpoint를 retrieval script에 넣는 식의 태스크 불일치도 피해야 합니다. 현재 저장소의 config에서 encoder, head, label map과 전처리를 한 묶음으로 확인하는 이유입니다.
 
-운영 비용은 clip당 decode 시간, sampled frame 수, GPU memory, embedding 저장량으로 나눠 잽니다. 긴 영상을 고정 frame 수로 줄이면 짧은 사건이 빠질 수 있고, frame 수를 늘리면 attention 비용이 커집니다. InternVideo를 선택할 기준은 표의 최고 정확도 하나가 아니라 자신의 영상 길이와 질문 유형에서 시공간 표현과 언어 정렬을 함께 쓰는 이득이 decode·추론 비용보다 큰지입니다.
+운영 비용은 clip당 decode 시간, sampled frame 수, GPU memory, embedding 저장량으로 나눠 잽니다. 긴 영상을 고정 frame 수로 줄이면 짧은 사건이 빠질 수 있고, frame 수를 늘리면 attention 비용이 커집니다. InternVideo를 선택할 기준은 표의 최고 정확도 하나가 아니라 자신의 영상 길이와 질문 유형에서 시공간 표현과 언어 정렬을 함께 쓰는 이득이 decode, 추론 비용보다 큰지입니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [인간 1인칭 영상이 로봇 학습에 바로 쓰이지 못하는 이유: PhysBrain E2E]({% post_url 2025-12-23-PhysBrain--Human-Egocentric-Data-as-a-Bridge-from-Vision-Language-Models-to-Physical-Intelligence %}) — PhysBrain이 인간 egocentric video를 perception·intention/action·state change가 연결된 E2E 데이터로 바꾸는 과정과, 사람 손에서 robot gripper로 옮길 때 남는 간극을…
+- [인간 1인칭 영상이 로봇 학습에 바로 쓰이지 못하는 이유: PhysBrain E2E]({% post_url 2025-12-23-PhysBrain--Human-Egocentric-Data-as-a-Bridge-from-Vision-Language-Models-to-Physical-Intelligence %}) — PhysBrain이 인간 egocentric video를 perception, intention/action, state change가 연결된 E2E 데이터로 바꾸는 과정과, 사람 손에서 robot gripper로 옮길 때 남는…
 - [VideoAuto-R1은 어떻게 답변을 149토큰에서 44토큰으로 줄였나]({% post_url 2026-01-10-VideoAuto-R1--Video-Auto-Reasoning-via-Thinking-Once--Answering-Twice %}) — 먼저 답하고 필요할 때만 추론한 뒤 다시 답하는 TOAT 구조, 신뢰도 분기와 과신 오답의 위험
 - [비디오 추론 데이터 200만 개면 일반화할까? VBVR의 5개 능력과 함정]({% post_url 2026-02-24-A-Very-Big-Video-Reasoning-Suite %}) — 200개 과제와 201만여 샘플로 구성된 VBVR이 비디오 모델의 다섯 추론 능력을 어떻게 나누고 자동 생성 데이터의 함정을 어떻게 드러내는지 살펴봅니다.
 <!-- internal-links:end -->
@@ -122,7 +122,7 @@ python demo/retrieval.py \
 
 ### MVM과 VLC는 무엇이 다른가요?
 
-MVM은 가린 비디오를 복원하며 시공간 구조를 배우고, VLC는 맞는 비디오·문장 쌍을 가깝게 만들어 언어 의미를 정렬합니다.
+MVM은 가린 비디오를 복원하며 시공간 구조를 배우고, VLC는 맞는 비디오, 문장 쌍을 가깝게 만들어 언어 의미를 정렬합니다.
 
 ### CMA 없이 두 모델을 따로 쓰면 안 되나요?
 
@@ -142,4 +142,4 @@ MVM은 가린 비디오를 복원하며 시공간 구조를 배우고, VLC는 �
 
 ## 모델 갱신 뒤 회귀를 찾는 기준
 
-새 checkpoint는 기존 영상 세트와 같은 frame sampling으로 비교합니다. action 분류, 검색, 질문응답 중 쓰지 않는 과제의 평균보다 실제 서비스 과제와 hard negative를 우선 봅니다. 정확도가 올라도 decode 포함 p95 지연이나 embedding 저장량이 크게 늘면 운영 개선으로 보지 않습니다. 결과와 함께 config·checkpoint hash·전처리 version을 남겨야 다음 갱신에서도 동일한 시험을 반복할 수 있습니다.
+새 checkpoint는 기존 영상 세트와 같은 frame sampling으로 비교합니다. action 분류, 검색, 질문응답 중 쓰지 않는 과제의 평균보다 실제 서비스 과제와 hard negative를 우선 봅니다. 정확도가 올라도 decode 포함 p95 지연이나 embedding 저장량이 크게 늘면 운영 개선으로 보지 않습니다. 결과와 함께 config, checkpoint hash, 전처리 version을 남겨야 다음 갱신에서도 동일한 시험을 반복할 수 있습니다.

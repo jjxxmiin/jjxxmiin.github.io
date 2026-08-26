@@ -1,6 +1,6 @@
 ---
 layout: post
-title: '오픈소스 LLM이 GPT API보다 싸질까: vLLM·PagedAttention·TCO 계산'
+title: '오픈소스 LLM이 GPT API보다 싸질까: vLLM, PagedAttention, TCO 계산'
 date: '2026-04-22 18:40:39'
 categories: Tech
 tags:
@@ -8,38 +8,38 @@ tags:
   - MLOps
   - 경량화
   - LLM
-summary: '오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache·Continuous Batching·양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.'
-description: "오픈소스 LLM self-hosting의 vLLM PagedAttention·continuous batching·AWQ를 실제 traffic replay, p95·OOM·quality·GPU 이용률·운영 TCO로 비교합니다."
+summary: '오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache, Continuous Batching, 양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.'
+description: "오픈소스 LLM self-hosting의 vLLM PagedAttention, continuous batching, AWQ를 실제 traffic replay, p95, OOM, quality, GPU 이용률, 운영 TCO로 비교합니다."
 github_url: https://github.com/Anil-matcha/Open-Generative-AI
 faq:
   - question: "오픈소스 LLM weight가 무료면 상용 API보다 항상 싼가요?"
-    answer: "아닙니다. GPU 유휴 시간, peak capacity, storage·network, 운영 인력과 장애 fallback을 포함한 총비용을 품질 조건과 함께 비교해야 합니다."
+    answer: "아닙니다. GPU 유휴 시간, peak capacity, storage, network, 운영 인력과 장애 fallback을 포함한 총비용을 품질 조건과 함께 비교해야 합니다."
   - question: "PagedAttention을 켜면 처리량이 언제나 10배 늘어나나요?"
-    answer: "보고된 수치는 특정 환경의 결과이며 model·prompt 길이·batch와 GPU에 따라 달라져 실제 traffic replay로 p95와 OOM을 측정해야 합니다."
+    answer: "보고된 수치는 특정 환경의 결과이며 model, prompt 길이, batch와 GPU에 따라 달라져 실제 traffic replay로 p95와 OOM을 측정해야 합니다."
   - question: "민감 요청만 local model로 보내는 routing은 안전한가요?"
-    answer: "분류가 틀릴 수 있으므로 불확실할 때 local 또는 차단을 기본값으로 두고 route 이유·model·전송 범위를 감사해야 합니다."
+    answer: "분류가 틀릴 수 있으므로 불확실할 때 local 또는 차단을 기본값으로 두고 route 이유, model, 전송 범위를 감사해야 합니다."
 image:
   path: https://opengraph.githubassets.com/1/Anil-matcha/Open-Generative-AI
   alt: "Anil-matcha/Open-Generative-AI GitHub 저장소 대표 이미지"
 ---
 
-오픈소스 LLM은 요청이 꾸준하고 데이터 통제가 중요할 때 비용을 낮출 수 있지만, 가중치가 무료라는 사실만으로 상용 API보다 싸지는 것은 아닙니다. 같은 품질·traffic replay에서 GPU 유휴·peak 증설·운영·fallback을 포함한 한 건당 총비용이 API보다 낮을 때만 경제적 이점이 있습니다.
+오픈소스 LLM은 요청이 꾸준하고 데이터 통제가 중요할 때 비용을 낮출 수 있지만, 가중치가 무료라는 사실만으로 상용 API보다 싸지는 것은 아닙니다. 같은 품질, traffic replay에서 GPU 유휴, peak 증설, 운영, fallback을 포함한 한 건당 총비용이 API보다 낮을 때만 경제적 이점이 있습니다.
 
 ## API 청구서가 GPU 청구서로 바뀐다
 
 상용 API는 요청한 만큼 지불하고 모델 서버를 운영하지 않아도 됩니다. 자체 서빙은 호출당 과금을 줄이는 대신 GPU가 놀고 있는 시간, 장애 대응, 모델 업데이트와 보안 책임을 팀이 떠안습니다. 트래픽이 하루 중 잠깐만 몰린다면 24시간 켜 둔 인스턴스가 더 비쌀 수 있고, 지속적으로 높은 이용률을 유지한다면 요청당 비용을 낮출 여지가 생깁니다.
 
-따라서 월 토큰 수만 비교하면 안 됩니다. 최소한 GPU 시간, 평균·최대 이용률, 엔지니어 운영 시간, 저장소와 네트워크, 장애 시 우회 API 비용을 한 표에 넣어야 합니다. 개인정보를 외부로 보낼 수 없다는 제약은 비용과 별개로 자체 서빙의 강한 이유가 될 수 있지만, 로컬에 띄웠다고 접근 제어와 로그 관리가 자동으로 해결되지는 않습니다.
+따라서 월 토큰 수만 비교하면 안 됩니다. 최소한 GPU 시간, 평균, 최대 이용률, 엔지니어 운영 시간, 저장소와 네트워크, 장애 시 우회 API 비용을 한 표에 넣어야 합니다. 개인정보를 외부로 보낼 수 없다는 제약은 비용과 별개로 자체 서빙의 강한 이유가 될 수 있지만, 로컬에 띄웠다고 접근 제어와 로그 관리가 자동으로 해결되지는 않습니다.
 
-| 비용·품질 항목 | 기록할 값 | 과소평가하기 쉬운 부분 |
+| 비용, 품질 항목 | 기록할 값 | 과소평가하기 쉬운 부분 |
 |---|---|---|
-| GPU | instance 시간, 평균·peak utilization | model loading·idle·spare capacity |
-| 요청 | input·output token, context 길이 | retry·timeout·batch tail latency |
-| 품질 | 업무별 정답·거부·형식 오류 | 작은 model의 사람 재작업 |
-| 운영 | 배포·monitoring·upgrade 시간 | on-call·driver·kernel 호환 |
-| 복구 | cold load, failover 성공·시간 | API fallback 비용·data policy |
+| GPU | instance 시간, 평균, peak utilization | model loading, idle, spare capacity |
+| 요청 | input, output token, context 길이 | retry, timeout, batch tail latency |
+| 품질 | 업무별 정답, 거부, 형식 오류 | 작은 model의 사람 재작업 |
+| 운영 | 배포, monitoring, upgrade 시간 | on-call, driver, kernel 호환 |
+| 복구 | cold load, failover 성공, 시간 | API fallback 비용, data policy |
 
-손익 계산은 월 총액만 아니라 성공한 업무 한 건당 비용으로 만듭니다. 작은 model이 싸도 답을 자주 다시 생성하거나 사람이 수정하면 분모가 줄어듭니다. 상용 API와 local model에 같은 질문·temperature·output contract를 주고 허용 품질을 먼저 통과시킵니다.
+손익 계산은 월 총액만 아니라 성공한 업무 한 건당 비용으로 만듭니다. 작은 model이 싸도 답을 자주 다시 생성하거나 사람이 수정하면 분모가 줄어듭니다. 상용 API와 local model에 같은 질문, temperature, output contract를 주고 허용 품질을 먼저 통과시킵니다.
 
 ## PagedAttention이 바꾸는 것은 KV Cache 배치다
 
@@ -49,11 +49,11 @@ Continuous Batching은 먼저 끝난 요청의 자리에 새 요청을 넣어 GP
 
 AWQ 4-bit 양자화는 가중치 메모리를 줄이는 선택지입니다. 대신 모델 품질과 지원 연산을 검증해야 하며, 긴 컨텍스트에서는 양자화한 가중치보다 KV Cache가 다시 병목이 될 수 있습니다.
 
-benchmark는 실제 prompt 길이 분포와 arrival pattern을 재생합니다. 짧은 요청만 일정 간격으로 보내면 continuous batching의 peak와 긴 요청이 짧은 요청을 늦추는 tail을 놓칩니다. TTFT, inter-token latency, output token/s, p95·p99, queue timeout과 OOM 후 worker 복구를 함께 봅니다.
+benchmark는 실제 prompt 길이 분포와 arrival pattern을 재생합니다. 짧은 요청만 일정 간격으로 보내면 continuous batching의 peak와 긴 요청이 짧은 요청을 늦추는 tail을 놓칩니다. TTFT, inter-token latency, output token/s, p95, p99, queue timeout과 OOM 후 worker 복구를 함께 봅니다.
 
 memory utilization을 높이면 batch를 더 받을 수 있지만 작은 spike에도 OOM 여유가 줄 수 있습니다. max context와 concurrent request를 동시에 최대치로 두지 말고 admission control로 총 KV budget을 제한합니다. OOM 뒤 process가 crash loop에 빠지거나 진행 중 request가 모두 재시도되는 비용도 포함합니다.
 
-양자화 평가는 일반 대화 평균 하나가 아니라 숫자·code·도메인 문서와 long-context retrieval을 나눕니다. 같은 질문의 정답뿐 아니라 JSON schema 오류, tool argument와 거부 행동을 비교합니다. VRAM 절감이 품질 회귀와 맞바뀌면 더 큰 GPU나 비양자화 route가 총비용에서 나을 수 있습니다.
+양자화 평가는 일반 대화 평균 하나가 아니라 숫자, code, 도메인 문서와 long-context retrieval을 나눕니다. 같은 질문의 정답뿐 아니라 JSON schema 오류, tool argument와 거부 행동을 비교합니다. VRAM 절감이 품질 회귀와 맞바뀌면 더 큰 GPU나 비양자화 route가 총비용에서 나을 수 있습니다.
 
 ## 원문의 vLLM 코드는 그대로 실행되지 않는다
 
@@ -79,7 +79,7 @@ memory utilization을 높이면 batch를 더 받을 수 있지만 작은 spike�
 
 짧은 내부 RAG처럼 컨텍스트를 통제할 수 있고 트래픽이 꾸준하면 자체 서빙 후보가 됩니다. 백만 토큰급 입력이나 큰 편차의 트래픽을 자주 처리한다면 필요한 VRAM과 유휴 비용이 빠르게 늘 수 있습니다. 결론은 “오픈소스가 무료인가”가 아니라, 요구 품질을 만족하는 한 건을 끝까지 처리하는 총비용이 얼마인가로 내야 합니다.
 
-production 전에는 shadow traffic으로 route 결과만 저장하고 사용자의 실제 응답은 기존 API가 담당하게 합니다. local server의 queue·quality와 API 예상 비용을 같은 request ID로 비교하고, model 장애·driver update·cold restart를 연습합니다. 충분한 이용률이 나오지 않으면 예약 GPU를 유지하는 대신 on-demand 또는 API를 계속 쓰는 결론도 타당합니다.
+production 전에는 shadow traffic으로 route 결과만 저장하고 사용자의 실제 응답은 기존 API가 담당하게 합니다. local server의 queue, quality와 API 예상 비용을 같은 request ID로 비교하고, model 장애, driver update, cold restart를 연습합니다. 충분한 이용률이 나오지 않으면 예약 GPU를 유지하는 대신 on-demand 또는 API를 계속 쓰는 결론도 타당합니다.
 
 <!-- primary-sources:start -->
 ## 원문과 버전 확인
@@ -90,24 +90,24 @@ production 전에는 shadow traffic으로 route 결과만 저장하고 사용자
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로컬 LLM은 클라우드보다 쌀까: VRAM·전력·운영비 계산]({% post_url 2026-05-14-LLMs-in-My-Room-The-Reality-and-Limits-of-Building-Personal-AI-Infrastructure %}) — 로컬 LLM의 양자화·메모리 대역폭·KV 캐시를 이해하고, 하드웨어 구매 전에 품질·동시성·전력·운영비를 비교하는 방법을 정리합니다.
-- [내 GPU에 맞는 LLM은 어떻게 고를까: whichllm 숫자 검증법]({% post_url 2026-05-17-What-Actually-Runs-on-My-GPU-The-End-of-VRAM-Tetris-and-a-Deep-Dive-into-whichllm %}) — whichllm이 가중치·KV 캐시·MoE 활성 파라미터와 벤치마크를 조합하는 방식을 살펴보고, 추천을 실제 추론으로 검증하는 절차를 정리합니다.
-- [vLLM과 FSDP를 함께 쓰면 LLM RL의 OOM이 사라질까? veRL의 조건]({% post_url 2026-05-03-Escaping-the-LLM-RL-Hell-A-Deep-Dive-into-ByteDances-Hidden-RL-Weapon-veRL %}) — veRL이 rollout과 학습 엔진을 HybridFlow로 연결하는 방식, resharing·Ray 구조의 이점과 버전·VRAM 튜닝 난도를 정리합니다.
+- [로컬 LLM은 클라우드보다 쌀까: VRAM, 전력, 운영비 계산]({% post_url 2026-05-14-LLMs-in-My-Room-The-Reality-and-Limits-of-Building-Personal-AI-Infrastructure %}) — 로컬 LLM의 양자화, 메모리 대역폭, KV 캐시를 이해하고, 하드웨어 구매 전에 품질, 동시성, 전력, 운영비를 비교하는 방법을 정리합니다.
+- [내 GPU에 맞는 LLM은 어떻게 고를까: whichllm 숫자 검증법]({% post_url 2026-05-17-What-Actually-Runs-on-My-GPU-The-End-of-VRAM-Tetris-and-a-Deep-Dive-into-whichllm %}) — whichllm이 가중치, KV 캐시, MoE 활성 파라미터와 벤치마크를 조합하는 방식을 살펴보고, 추천을 실제 추론으로 검증하는 절차를 정리합니다.
+- [vLLM과 FSDP를 함께 쓰면 LLM RL의 OOM이 사라질까? veRL의 조건]({% post_url 2026-05-03-Escaping-the-LLM-RL-Hell-A-Deep-Dive-into-ByteDances-Hidden-RL-Weapon-veRL %}) — veRL이 rollout과 학습 엔진을 HybridFlow로 연결하는 방식, resharing, Ray 구조의 이점과 버전, VRAM 튜닝 난도를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 오픈소스 LLM weight가 무료면 상용 API보다 항상 싼가요?
 
-아닙니다. GPU 유휴 시간, peak capacity, storage·network, 운영 인력과 장애 fallback을 포함한 총비용을 품질 조건과 함께 비교해야 합니다.
+아닙니다. GPU 유휴 시간, peak capacity, storage, network, 운영 인력과 장애 fallback을 포함한 총비용을 품질 조건과 함께 비교해야 합니다.
 
 ### PagedAttention을 켜면 처리량이 언제나 10배 늘어나나요?
 
-보고된 수치는 특정 환경의 결과이며 model·prompt 길이·batch와 GPU에 따라 달라져 실제 traffic replay로 p95와 OOM을 측정해야 합니다.
+보고된 수치는 특정 환경의 결과이며 model, prompt 길이, batch와 GPU에 따라 달라져 실제 traffic replay로 p95와 OOM을 측정해야 합니다.
 
 ### 민감 요청만 local model로 보내는 routing은 안전한가요?
 
-분류가 틀릴 수 있으므로 불확실할 때 local 또는 차단을 기본값으로 두고 route 이유·model·전송 범위를 감사해야 합니다.
+분류가 틀릴 수 있으므로 불확실할 때 local 또는 차단을 기본값으로 두고 route 이유, model, 전송 범위를 감사해야 합니다.
 
 참고 자료:
 

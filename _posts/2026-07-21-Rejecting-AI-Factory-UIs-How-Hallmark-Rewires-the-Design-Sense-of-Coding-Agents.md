@@ -12,7 +12,7 @@ tags:
 summary: Hallmark는 Claude Code나 Cursor 같은 AI 에이전트가 흔하고 뻔한 공장형 UI(AI Slop)를 생성하지 않도록
   강제하는 디자인 규칙 셋입니다. 20개의 테마와 57개의 엄격한 품질 검증 게이트를 통해, AI가 매번 완전히 새로운 구조와 감각적인 디자인을
   설계하도록 만듭니다.
-description: 'Hallmark가 테마와 품질 게이트로 AI 생성 UI의 반복 패턴을 줄이는 방식과 실제 브랜드 적합성·키보드 접근성·반응형 기능성·사람 검수 비용을 정리합니다.'
+description: 'Hallmark가 테마와 품질 게이트로 AI 생성 UI의 반복 패턴을 줄이는 방식과 실제 브랜드 적합성, 키보드 접근성, 반응형 기능성, 사람 검수 비용을 정리합니다.'
 github_url: https://github.com/Nutlope/hallmark
 image:
   path: https://opengraph.githubassets.com/1/Nutlope/hallmark
@@ -353,8 +353,8 @@ Nutlope의 Hallmark는 이 흐름에 제동을 거는 신선한 시도입니다.
 ## 함께 읽으면 이해가 이어지는 글
 
 - [addyosmani/agent-skills: AI 코딩 에이전트에게 시니어 개발자의 업무 방식을 가르치다]({% post_url 2026-07-16-addyosmaniagent-skills-Teaching-AI-Coding-Agents-the-Workflows-of-Senior-Developers %}) — 구글 크롬팀 리더 애디 오스마니가 공개한 agent-skills는 AI 에이전트가 단편적으로 코드를 짜고 끝내지 않도록, 요구사항 명세부터 테스트와 리뷰까지 시니어 개발자의 엄격한 품질 기준을 마크다운 지침으로 강제하는 오픈소스…
-- [Destructive Command Guard: AI 코딩 에이전트의 터미널 명령어 실행을 통제하는 안전 계층 설계]({% post_url 2026-07-12-Destructive-Command-Guard-Designing-a-Safety-Layer-to-Control-Terminal-Command-Execution-by-AI-Agents %}) — AI 에이전트(Claude Code, Cursor 등)가 실행하는 파괴적인 셸 명령어를 서브 밀리초 단위로 사전 차단하고, 텍스트 피드백을 통해 AI가 스스로 안전한 명령어로 우회할 수 있도록 돕는 오픈소스 가드레일…
 - [ayghri/i-have-adhd: AI 코딩 에이전트의 불필요한 수다를 멈추고 즉각적인 행동을 끌어내는 법]({% post_url 2026-07-22-ayghrii-have-adhd-How-to-Stop-AI-Coding-Agents-from-Burying-the-Answer-and-Focus-on-Actions %}) — 인공지능 코딩 에이전트가 생성하는 장황한 설명과 불필요한 인사말을 억제하고, 오직 즉시 실행 가능한 명령과 번호가 매겨진 핵심 단계만을 출력하도록 강제하는 프롬프트 기반 스킬(Skill)의 원리와 활용법을 심층적으로 분석합니다.
+- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — career-ops는 14개의 AI 스킬 모드를 통해 채용 공고를 분석하고, 10개 차원의 A-F 스코어링으로 적합도를 평가하며, ATS 최적화 이력서를 자동 생성하는 로컬 기반 오픈소스 구직 파이프라인 시스템입니다.
 <!-- internal-links:end -->
 
 ## FAQ (자주 묻는 질문)

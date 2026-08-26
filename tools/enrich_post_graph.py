@@ -269,7 +269,7 @@ TOPIC_PATTERNS = {
     "edge-accelerator": r"coral\s*usb|edge\s*tpu|neural\s*compute\s*stick|(?<![a-z])ncs2(?![a-z])|raspberry\s*pi|라즈베리파이|openvino.{0,18}(?:device|추론)",
     "hardware-compute": r"accelerator|(?<![a-z])cpu(?![a-z])|(?<![a-z])gpu(?![a-z])|(?<![a-z])fpga(?![a-z])|(?<![a-z])h100(?![a-z])|(?<![a-z])fp8(?![a-z])|(?<![a-z])gemm(?![a-z])|cuda|데이터\s*센터|데이터센터|전력\s*(?:병목|아키텍처)|병렬처리|멀티코어|가속기|반도체",
     "human-motion-sensing": r"wifi.{0,20}(?:csi|densepose|sensing|센싱|자세)|densepose|(?<![a-z])pose(?![a-z])|자세|인체\s*키포인트|(?:human|사람|인체).{0,20}(?:motion|movement|움직임)|(?:motion|movement|움직임).{0,20}(?:human|사람|인체)",
-    "image-generation": r"image\s*(?:generation|editing)|이미지\s*(?:생성|편집)|사진\s*(?:생성|편집)|이미지.{0,12}스타일|스타일.{0,12}이미지|inpainting|whisk",
+    "image-generation": r"image\s*(?:generation|editing)|이미지.{0,18}(?:생성|편집|변환|변화|스타일)|(?:전후|참조)\s*이미지|사진\s*(?:생성|편집)|스타일.{0,12}이미지|inpainting|whisk",
     "llm-serving": r"(?<![a-z])vllm(?![a-z])|inference\s*server|serving|llm\s*(?:서빙|배포)|추론\s*서버|로컬\s*llm|양자화",
     "mcp": r"(?<![a-z])mcp(?![a-z])|model\s*context\s*protocol",
     "llm-application": r"llm\s*(?:app|application)|langchain|lobe\s*chat|chatbot\s*ui|챗봇\s*(?:ui|기반)|llm\s*앱|언어\s*모델\s*앱|structured\s*output|구조화\s*출력",

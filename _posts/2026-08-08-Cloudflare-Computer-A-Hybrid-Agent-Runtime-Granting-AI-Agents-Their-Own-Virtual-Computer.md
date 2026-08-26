@@ -12,7 +12,7 @@ tags:
 summary: Cloudflare Computer는 AI 에이전트에게 가상 파일시스템과 하이브리드 실행 환경을 제공하는 오픈소스 런타임입니다. V8
   아이솔레이트 기반의 빠른 실행과 풀 스택 리눅스 컨테이너 샌드박스를 유기적으로 결합하고, Durable Object 내 SQLite 기반 파일시스템(DOFS)으로
   상태를 지속 가능하게 관리합니다.
-description: 'Cloudflare Computer의 V8 아이솔레이트·컨테이너·Durable Object 파일시스템 구조와 격리·상태 일관성·비용·종속성을 설명합니다.'
+description: 'Cloudflare Computer의 V8 아이솔레이트, 컨테이너, Durable Object 파일시스템 구조와 격리, 상태 일관성, 비용, 종속성을 설명합니다.'
 automation: oss_trend
 github_url: https://github.com/cloudflare/computer
 image:
@@ -56,7 +56,7 @@ faq:
     변경될 수 있으므로, 프로덕션 상용 서비스보다는 기술 검증, 실험, 프로토타입 개발 용도로 활용하는 것을 권장합니다.
 ---
 
-Cloudflare Computer는 빠른 V8 아이솔레이트, 필요할 때의 리눅스 컨테이너와 지속 파일시스템을 조합해 에이전트 작업 상태를 유지하려는 런타임입니다. 하이브리드 구조는 속도와 기능 범위를 나눌 수 있지만 두 실행 계층의 권한·파일 일관성·과금 경계를 함께 관리해야 합니다. 간단한 명령과 패키지 실행을 분리해 콜드 스타트, 상태 복구, 네트워크와 비용을 측정하세요.
+Cloudflare Computer는 빠른 V8 아이솔레이트, 필요할 때의 리눅스 컨테이너와 지속 파일시스템을 조합해 에이전트 작업 상태를 유지하려는 런타임입니다. 하이브리드 구조는 속도와 기능 범위를 나눌 수 있지만 두 실행 계층의 권한, 파일 일관성, 과금 경계를 함께 관리해야 합니다. 간단한 명령과 패키지 실행을 분리해 콜드 스타트, 상태 복구, 네트워크와 비용을 측정하세요.
 
 ## 하이브리드 실행 계층이 필요한 작업은 무엇인가
 
@@ -383,9 +383,9 @@ Cloudflare Computer는 가벼운 파일 작업과 리눅스 실행을 서로 다
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조·격리·도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한·업데이트 검증 기준을 정리합니다.
-- [Open SWE가 PR을 대신 만들게 할 때: 샌드박스·자체 리뷰의 경계]({% post_url 2026-03-21-Review-Is-the-Copilot-Era-Over-The-True-Face-of-Asynchronous-Agents-Revealed-by-LangChains-Open-SWE %}) — Open SWE의 Manager·Planner·Programmer·Reviewer 상태 흐름, 일회성 클라우드 샌드박스와 중간 개입 구조를 바탕으로 맡길 작업과 최종 책임을 구분합니다.
-- [Andrej Karpathy Skills는 AI 코딩 범위를 줄일까: 지침·검증·질문 한계]({% post_url 2026-04-13-Shattering-the-AI-Coding-Illusion-How-Andrej-Karpathy-Skills-Rewrites-the-Rules-of-Production %}) — Andrej Karpathy Skills의 Think Before Coding·Surgical Changes·Goal-Driven 지침이 수정 범위와 검증을 돕는 방식, prompt만으로 보장할 수 없는 한계를 분석합니다.
+- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조, 격리, 도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한, 업데이트 검증 기준을 정리합니다.
+- [Open SWE가 PR을 대신 만들게 할 때: 샌드박스, 자체 리뷰의 경계]({% post_url 2026-03-21-Review-Is-the-Copilot-Era-Over-The-True-Face-of-Asynchronous-Agents-Revealed-by-LangChains-Open-SWE %}) — Open SWE의 Manager, Planner, Programmer, Reviewer 상태 흐름, 일회성 클라우드 샌드박스와 중간 개입 구조를 바탕으로 맡길 작업과 최종 책임을 구분합니다.
+- [Andrej Karpathy Skills는 AI 코딩 범위를 줄일까: 지침, 검증, 질문 한계]({% post_url 2026-04-13-Shattering-the-AI-Coding-Illusion-How-Andrej-Karpathy-Skills-Rewrites-the-Rules-of-Production %}) — Andrej Karpathy Skills의 Think Before Coding, Surgical Changes, Goal-Driven 지침이 수정 범위와 검증을 돕는 방식, prompt만으로 보장할 수 없는 한계를 분석합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)

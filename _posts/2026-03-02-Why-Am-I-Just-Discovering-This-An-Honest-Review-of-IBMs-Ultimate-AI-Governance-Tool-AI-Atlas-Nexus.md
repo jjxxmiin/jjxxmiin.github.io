@@ -9,22 +9,22 @@ tags:
   - LLM
   - AI보안
   - MLOps
-summary: AI Atlas Nexus가 NIST·MIT·EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
-description: "AI Atlas Nexus가 NIST·MIT·EU AI Act risk를 ontology·knowledge graph로 연결하는 원리와 LLM mapping의 누락·version provenance·expert approval 경계를 설명합니다."
+summary: AI Atlas Nexus가 NIST, MIT, EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
+description: "AI Atlas Nexus가 NIST, MIT, EU AI Act risk를 ontology, knowledge graph로 연결하는 원리와 LLM mapping의 누락, version provenance, expert approval 경계를 설명합니다."
 faq:
   - question: "AI Atlas Nexus가 규제 준수를 자동 승인하나요?"
-    answer: "아닙니다. Risk·evaluation·mitigation 후보를 연결하는 조사 도구이며 적용 법령 해석, 실제 control 효과와 최종 risk acceptance는 전문가가 승인해야 합니다."
+    answer: "아닙니다. Risk, evaluation, mitigation 후보를 연결하는 조사 도구이며 적용 법령 해석, 실제 control 효과와 최종 risk acceptance는 전문가가 승인해야 합니다."
   - question: "여러 framework를 graph로 연결하면 같은 risk 의미가 되나요?"
-    answer: "Framework마다 scope·정의·의무가 달라 crosswalk relation과 근거를 검토하고 exact match·broader·related를 구분해야 합니다."
+    answer: "Framework마다 scope, 정의, 의무가 달라 crosswalk relation과 근거를 검토하고 exact match, broader, related를 구분해야 합니다."
   - question: "Local LLM을 쓰면 governance mapping이 더 정확한가요?"
-    answer: "Data 전송 선택지는 달라지지만 accuracy는 model·prompt와 domain에 따라 별도 문제이므로 labeled use case에서 risk recall·false positive를 측정해야 합니다."
+    answer: "Data 전송 선택지는 달라지지만 accuracy는 model, prompt와 domain에 따라 별도 문제이므로 labeled use case에서 risk recall, false positive를 측정해야 합니다."
 github_url: https://github.com/IBM/ai-atlas-nexus
 image:
   path: https://opengraph.githubassets.com/1/IBM/ai-atlas-nexus
   alt: "IBM/ai-atlas-nexus GitHub 저장소 대표 이미지"
 ---
 
-AI Atlas Nexus는 NIST, MIT Risk Repository, EU AI Act처럼 형식이 다른 risk 자료를 공통 ontology와 knowledge graph로 연결할 수 있지만, 프로젝트의 규제 적합성을 자동 승인해 주는 도구는 아닙니다. 핵심 가치는 검토 후보와 provenance를 좁히는 데 있으며, LLM mapping의 누락·오탐과 framework version을 전문가가 확인해야 합니다.
+AI Atlas Nexus는 NIST, MIT Risk Repository, EU AI Act처럼 형식이 다른 risk 자료를 공통 ontology와 knowledge graph로 연결할 수 있지만, 프로젝트의 규제 적합성을 자동 승인해 주는 도구는 아닙니다. 핵심 가치는 검토 후보와 provenance를 좁히는 데 있으며, LLM mapping의 누락, 오탐과 framework version을 전문가가 확인해야 합니다.
 
 [저장소](https://github.com/IBM/ai-atlas-nexus)는 위험, AI 작업, 평가 데이터, 완화 조치 사이의 관계를 기계가 질의할 수 있게 만드는 IBM Research의 오픈소스 툴킷입니다. PDF와 표를 사람이 번갈아 읽는 대신 “이 사용 사례에 어떤 위험이 연결되고 무엇으로 시험할 수 있는가”를 탐색하는 출발점으로 쓸 수 있습니다.
 
@@ -62,15 +62,15 @@ AI Atlas Nexus는 여러 표준을 오가는 초기 조사와 리스크-평가 �
 
 ## Crosswalk Relation은 왜 단순 등호가 아닌가
 
-서로 다른 framework가 비슷한 단어를 써도 법적 scope와 요구 action은 다를 수 있습니다. Graph edge에 `equivalent` 하나만 쓰기보다 exact·broader·narrower·related와 mapping rationale을 남깁니다.
+서로 다른 framework가 비슷한 단어를 써도 법적 scope와 요구 action은 다를 수 있습니다. Graph edge에 `equivalent` 하나만 쓰기보다 exact, broader, narrower, related와 mapping rationale을 남깁니다.
 
 | Relation | 의미 | 검토 질문 |
 |---|---|---|
-| Exact | scope와 의도가 실질적으로 같음 | 의무·대상까지 같은가 |
+| Exact | scope와 의도가 실질적으로 같음 | 의무, 대상까지 같은가 |
 | Broader/Narrower | 한 개념이 다른 개념을 포함 | 빠지는 하위 위험은 무엇인가 |
 | Related | 연관은 있지만 대체 불가 | 왜 연결했는가 |
-| Evaluation link | 위험을 시험할 후보 | 조직 data·failure를 대표하는가 |
-| Mitigation link | control 후보 | 실제 효과·owner·evidence가 있는가 |
+| Evaluation link | 위험을 시험할 후보 | 조직 data, failure를 대표하는가 |
+| Mitigation link | control 후보 | 실제 효과, owner, evidence가 있는가 |
 
 LLM이 relation을 제안해도 source paragraph와 reviewer를 edge metadata에 둡니다. 근거가 없는 edge는 final compliance report에 사용하지 않습니다.
 
@@ -78,23 +78,23 @@ LLM이 relation을 제안해도 source paragraph와 reviewer를 edge metadata에
 
 전문가가 risk를 label한 소수 use case를 gold set으로 만들고 model이 제시한 top-k risk의 recall과 precision을 봅니다. Governance에서는 irrelevant risk가 많아 review가 느려지는 false positive와 중요한 risk를 놓치는 false negative의 비용이 다릅니다.
 
-Use case 설명을 조금 바꾸거나 model을 교체해 mapping 안정성을 확인합니다. 같은 system인데 wording에 따라 high-risk 후보가 사라지면 prompt·ontology grounding이 약한 것입니다. Oracle domain·AI task label을 넣은 조건과 natural language만 쓴 조건을 비교해 classification 병목을 찾습니다.
+Use case 설명을 조금 바꾸거나 model을 교체해 mapping 안정성을 확인합니다. 같은 system인데 wording에 따라 high-risk 후보가 사라지면 prompt, ontology grounding이 약한 것입니다. Oracle domain, AI task label을 넣은 조건과 natural language만 쓴 조건을 비교해 classification 병목을 찾습니다.
 
 ## Version Provenance를 어디까지 남길까
 
-Risk node와 regulatory edge에 source URL·문서 version·effective date·ingestion date를 둡니다. LLM model·prompt, graph release와 reviewer decision도 저장합니다. 규정이 바뀌면 영향을 받는 use case·evaluation·accepted risk를 graph query로 찾아 재검토합니다.
+Risk node와 regulatory edge에 source URL, 문서 version, effective date, ingestion date를 둡니다. LLM model, prompt, graph release와 reviewer decision도 저장합니다. 규정이 바뀌면 영향을 받는 use case, evaluation, accepted risk를 graph query로 찾아 재검토합니다.
 
 “현재 compliant” 같은 상태를 영구 truth로 저장하지 않고 assessed-at와 next-review date를 둡니다. Source가 철회되거나 benchmark가 deprecated되면 derived conclusion도 stale로 표시합니다.
 
 ## Evaluation Link가 Control Evidence가 되려면 무엇이 필요한가
 
-Graph에 benchmark가 연결됐다는 사실과 조직 model이 해당 test를 통과했다는 사실은 다릅니다. Versioned test data, threshold, execution log와 result owner가 있어야 evidence가 됩니다. Generic benchmark가 실제 language·user·impact를 다루는지도 gap analysis를 합니다.
+Graph에 benchmark가 연결됐다는 사실과 조직 model이 해당 test를 통과했다는 사실은 다릅니다. Versioned test data, threshold, execution log와 result owner가 있어야 evidence가 됩니다. Generic benchmark가 실제 language, user, impact를 다루는지도 gap analysis를 합니다.
 
-Mitigation은 document에 적힌 계획, 구현된 control, effectiveness-tested control로 상태를 나눕니다. Owner·deadline·residual risk가 없으면 graph가 풍부해도 governance workflow는 완료되지 않습니다.
+Mitigation은 document에 적힌 계획, 구현된 control, effectiveness-tested control로 상태를 나눕니다. Owner, deadline, residual risk가 없으면 graph가 풍부해도 governance workflow는 완료되지 않습니다.
 
 ## 도입 PoC는 어떻게 설계할까
 
-서로 다른 risk profile의 use case 세 개 정도를 골라 manual process와 비교합니다. Relevant risk recall, expert review time, mapping 수정 수, stale source와 graph 운영비를 기록합니다. Local·cloud model도 같은 gold set으로 비교하고 민감 use case text의 전송 범위를 확인합니다.
+서로 다른 risk profile의 use case 세 개 정도를 골라 manual process와 비교합니다. Relevant risk recall, expert review time, mapping 수정 수, stale source와 graph 운영비를 기록합니다. Local, cloud model도 같은 gold set으로 비교하고 민감 use case text의 전송 범위를 확인합니다.
 
 PoC 합격은 많은 node를 찾는 것이 아니라 중요한 risk를 놓치지 않고 근거와 version을 따라갈 수 있으며, 사람이 final decision을 기록할 수 있는 경우입니다.
 
@@ -107,21 +107,21 @@ PoC 합격은 많은 node를 찾는 것이 아니라 중요한 risk를 놓치지
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [InternVL-U 4B가 14B를 이길까: 이해·생성 분리와 실제 VRAM 조건]({% post_url 2026-03-12-InternVL-U--Democratizing-Unified-Multimodal-Models-for-Understanding--Reasoning--Generation-and-Editing %}) — 4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM·지식·서빙 한계를 점검합니다.
 - [OpenAI 미공개 Astra 모델: '치명적' 사이버 위험 가능성과 내부 작업 중단 범위]({% post_url 2026-08-08-openai-discloses-unreleased-astra-model-nears-critical-cyber-risk-threshold %}) — OpenAI는 미공개 프론티어 모델 Astra가 자체 Preparedness Framework의 '치명적(Critical)' 사이버보안 위험 임계값에 도달할 가능성을 배제할 수 없다고 공개했습니다. 이에 따라 강화된 보안 제어 요건을…
 - [긴 영상 배경음악이 장면 감정을 놓칠 때: NarraScore의 이중 제어]({% post_url 2026-02-14-NarraScore--Bridging-Visual-Narrative-and-Musical-Dynamics-via-Hierarchical-Affective-Control %}) — NarraScore가 영상의 전역 분위기와 시점별 Valence-Arousal 곡선을 나눠 음악 생성에 주입하는 방식, 평가 기준과 감정 단순화 한계를 다룹니다.
+- [InternVL-U 4B가 14B를 이길까: 이해, 생성 분리와 실제 VRAM 조건]({% post_url 2026-03-12-InternVL-U--Democratizing-Unified-Multimodal-Models-for-Understanding--Reasoning--Generation-and-Editing %}) — 4B InternVL-U가 MLLM 이해와 MMDiT 생성을 분리하고 Text Reasoning으로 연결하는 방식, 14B 비교 범위와 VRAM, 지식, 서빙 한계를 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### AI Atlas Nexus가 규제 준수를 자동 승인하나요?
 
-아닙니다. Risk·evaluation·mitigation 후보를 연결하는 조사 도구이며 적용 법령 해석, 실제 control 효과와 최종 risk acceptance는 전문가가 승인해야 합니다.
+아닙니다. Risk, evaluation, mitigation 후보를 연결하는 조사 도구이며 적용 법령 해석, 실제 control 효과와 최종 risk acceptance는 전문가가 승인해야 합니다.
 
 ### 여러 framework를 graph로 연결하면 같은 risk 의미가 되나요?
 
-Framework마다 scope·정의·의무가 달라 crosswalk relation과 근거를 검토하고 exact match·broader·related를 구분해야 합니다.
+Framework마다 scope, 정의, 의무가 달라 crosswalk relation과 근거를 검토하고 exact match, broader, related를 구분해야 합니다.
 
 ### Local LLM을 쓰면 governance mapping이 더 정확한가요?
 
-Data 전송 선택지는 달라지지만 accuracy는 model·prompt와 domain에 따라 별도 문제이므로 labeled use case에서 risk recall·false positive를 측정해야 합니다.
+Data 전송 선택지는 달라지지만 accuracy는 model, prompt와 domain에 따라 별도 문제이므로 labeled use case에서 risk recall, false positive를 측정해야 합니다.

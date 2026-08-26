@@ -5,7 +5,7 @@ source_citations:
 layout: post
 title:  "Darknet col2im에서 픽셀값을 덮어쓰지 않고 +=로 더하는 이유"
 summary: "Darknet col2im_cpu가 column buffer의 값을 원본 feature map 위치로 되돌릴 때 겹치는 kernel 기여를 누적하는 이유를 index 계산과 padding 경계 처리로 설명합니다."
-description: "Darknet col2im의 겹친 kernel gradient 누적, flattened channel offset, padding·stride 좌표와 im2col round-trip 검증 조건을 설명합니다."
+description: "Darknet col2im의 겹친 kernel gradient 누적, flattened channel offset, padding, stride 좌표와 im2col round-trip 검증 조건을 설명합니다."
 date:   2022-02-10 16:00 -0400
 categories: DarkNet
 image:
@@ -59,7 +59,7 @@ $$
 height_{col}=\frac{height+2\,pad-ksize}{stride}+1
 $$
 
-폭도 같은 방식입니다. Column의 channel 수는 `channels×ksize×ksize`이고, loop의 `c`에는 입력 channel과 kernel 내부 row·column 위치가 함께 접혀 있습니다.
+폭도 같은 방식입니다. Column의 channel 수는 `channels×ksize×ksize`이고, loop의 `c`에는 입력 channel과 kernel 내부 row, column 위치가 함께 접혀 있습니다.
 
 ```c
 int w_offset = c % ksize;
@@ -91,7 +91,7 @@ for (h = 0; h < height_col; ++h) {
 
 입력과 같은 shape의 1 배열을 im2col로 펼친 뒤 column도 모두 1인 상태로 col2im하면 각 pixel이 몇 개 patch에 참여했는지 나타나는 count map을 얻을 수 있습니다. Stride 1, padding 0의 3×3 kernel에서는 중앙이 모서리보다 큰 값이 됩니다. 실제 `col2im(im2col(x))` 결과를 이 count로 나누면 count가 0이 아닌 위치에서 원본을 복원할 수 있습니다.
 
-이 검사는 index가 맞는지를 값 하나보다 더 잘 보여 줍니다. Count map이 좌우 비대칭이면 width·height 또는 row·column이 바뀌었고, channel마다 다른 모양이면 flattened `c` 복원이 틀렸을 가능성이 있습니다. Stride가 kernel보다 커 일부 pixel이 어떤 patch에도 포함되지 않으면 count가 0일 수 있으므로 무조건 나누면 NaN이 생깁니다.
+이 검사는 index가 맞는지를 값 하나보다 더 잘 보여 줍니다. Count map이 좌우 비대칭이면 width, height 또는 row, column이 바뀌었고, channel마다 다른 모양이면 flattened `c` 복원이 틀렸을 가능성이 있습니다. Stride가 kernel보다 커 일부 pixel이 어떤 patch에도 포함되지 않으면 count가 0일 수 있으므로 무조건 나누면 NaN이 생깁니다.
 
 ## Output Shape의 정수 나눗셈은 어떤 실패를 숨기나요?
 
@@ -141,6 +141,6 @@ CPU loop를 병렬화할 때 여러 column 항목이 같은 image index에 동�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [DarkNet im2col 배열 모양 계산: 픽셀은 data\_col 어디에 놓이나]({% post_url 2022-02-24-DarkNetIm2col %}) — DarkNet im2col이 채널×커널 위치를 행으로, 출력 공간 위치를 열로 펼치는 인덱스를 계산하고 padding 바깥을 0으로 채우는 과정을 설명합니다.
-- [DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward]({% post_url 2022-02-23-DarkNetGRULayer %}) — DarkNet GRU 순전파의 update·reset·candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다.
-- [Darknet utils.c 이름만 믿으면 틀리는 7곳: mse\_array는 MSE가 아니다]({% post_url 2022-03-22-DarkNetUtils %}) — Darknet utils.c의 CLI 파서·문자열·파일·CSV·난수·배열 helper를 기능별로 정리하고, 함수 이름과 실제 동작이 다른 부분과 범위·0 나눗셈·입력 변경 위험을 짚습니다.
+- [DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward]({% post_url 2022-02-23-DarkNetGRULayer %}) — DarkNet GRU 순전파의 update, reset, candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다.
+- [DarkNet image와 OpenCV Mat 변환: 채널 순서, 스트림 설정 주의점]({% post_url 2022-02-25-DarkNetImageOpencv %}) — DarkNet의 CHW float image와 OpenCV의 HWC 8비트 Mat를 오갈 때 생기는 RGB, BGR 변환, VideoCapture 속성 설정 오류와 이미지 로드 실패 처리를 점검합니다.
 <!-- internal-links:end -->

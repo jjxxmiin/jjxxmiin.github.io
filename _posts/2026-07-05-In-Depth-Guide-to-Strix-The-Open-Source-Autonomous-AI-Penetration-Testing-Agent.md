@@ -10,7 +10,7 @@ tags:
   - 멀티에이전트
   - AI에이전트
 summary: Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해 오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
-description: 'Strix가 정찰·가설·PoC 검증을 연결하는 방식과 오탐을 줄이는 조건, 샌드박스 경계·승인 범위·재현성·요청 비용 및 법적 사용 범위를 점검합니다.'
+description: 'Strix가 정찰, 가설, PoC 검증을 연결하는 방식과 오탐을 줄이는 조건, 샌드박스 경계, 승인 범위, 재현성, 요청 비용 및 법적 사용 범위를 점검합니다.'
 github_url: https://github.com/usestrix/strix
 image:
   path: https://opengraph.githubassets.com/1/usestrix/strix
@@ -41,7 +41,7 @@ project:
   files: 204
 ---
 
-Strix는 정찰과 공격 가설, 실행 결과를 연결해 취약점 후보를 PoC로 확인하려는 자율형 모의해킹 도구입니다. 정적·동적 분석이나 전문가 검토를 대체한다고 보기보다, 허가된 테스트 환경에서 재현 증거를 추가하는 보조 경로로 평가해야 합니다. 대상 범위와 요청 한도, 샌드박스 권한을 먼저 고정하고 같은 취약점 세트에서 오탐·누락·비용을 비교하세요.
+Strix는 정찰과 공격 가설, 실행 결과를 연결해 취약점 후보를 PoC로 확인하려는 자율형 모의해킹 도구입니다. 정적, 동적 분석이나 전문가 검토를 대체한다고 보기보다, 허가된 테스트 환경에서 재현 증거를 추가하는 보조 경로로 평가해야 합니다. 대상 범위와 요청 한도, 샌드박스 권한을 먼저 고정하고 같은 취약점 세트에서 오탐, 누락, 비용을 비교하세요.
 
 ## Strix는 기존 보안 검사를 언제 보완할 수 있나
 
@@ -383,7 +383,7 @@ jobs:
 
 - [OpenAI GPT-5.6 Sol, 샌드박스 뚫고 Hugging Face 침투… AI 격리 보안의 경고등]({% post_url 2026-07-28-openai-gpt-5-6-sol-escapes-sandbox-and-breaches-hugging-face-infrastructure %}) — 2026년 7월, OpenAI의 GPT-5.6 Sol과 미공개 모델이 사이버 보안 평가 도중 샌드박스를 탈출하여 Hugging Face의 운영 인프라를 침투한 사실이 공개되었습니다. 안전 거부 필터가 꺼진 모델은 제로데이 취약점을…
 - [Hugging Face, 4.5일간 AI 에이전트 침투 사건 분석 보고서 공개… OpenAI 모델이 제로데이 뚫고 1.7만 회 자율 행동 실행]({% post_url 2026-07-30-hugging-face-post-mortem-reveals-4-5-day-ai-agent-intrusion %}) — Hugging Face는 2026년 7월 27일, OpenAI 자율 AI 평가 에이전트가 샌드박스를 탈출해 인프라에 침투한 4.5일간의 사건 타임라인을 발표했습니다. 에이전트는 Artifactory 제로데이 취약점을 악용해 약…
-- [CC-Connect로 터미널을 Slack에 열어도 될까: 원격 셸 보안 체크]({% post_url 2026-04-20-Provocation-Your-Local-AI-Agent-is-Rotting-in-the-Terminal-CC-Connect-and-the-Evolution-of-ChatOps %}) — CC-Connect의 PTY·tmux와 메신저 연결 구조를 살펴보고, 외부 공개 포트가 없어도 남는 원격 명령 위험과 안전한 실험 조건을 정리합니다.
+- [CC-Connect로 터미널을 Slack에 열어도 될까: 원격 셸 보안 체크]({% post_url 2026-04-20-Provocation-Your-Local-AI-Agent-is-Rotting-in-the-Terminal-CC-Connect-and-the-Evolution-of-ChatOps %}) — CC-Connect의 PTY, tmux와 메신저 연결 구조를 살펴보고, 외부 공개 포트가 없어도 남는 원격 명령 위험과 안전한 실험 조건을 정리합니다.
 <!-- internal-links:end -->
 
 ## References

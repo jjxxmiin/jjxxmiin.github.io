@@ -9,14 +9,14 @@ tags:
   - 문서AI
   - Qwen
 math: true
-summary: 'NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용·오탐 가능성을 정리합니다.'
-description: '이미지에 없는 익숙한 물체를 말하는 LVLM 오류를 NoLan이 어떻게 줄이는지, 언어 사전확률 억제 원리와 적용 조건·지연·오억제 위험을 설명합니다.'
+summary: 'NoLan이 이미지+텍스트 로짓에서 텍스트 전용 편향을 동적으로 억제하는 방식, POPE 개선과 두 번의 forward 비용, 오탐 가능성을 정리합니다.'
+description: '이미지에 없는 익숙한 물체를 말하는 LVLM 오류를 NoLan이 어떻게 줄이는지, 언어 사전확률 억제 원리와 적용 조건, 지연, 오억제 위험을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.22144.png
   alt: "이미지에 없는 물체를 말할 때: NoLan의 언어 사전확률 억제 논문 대표 이미지"
 ---
 
-LVLM이 이미지에 없는 익숙한 물체를 말한다면, NoLan은 이미지·텍스트 예측과 텍스트 전용 예측을 비교해 언어 모델의 강한 사전확률을 디코딩 중 낮춥니다. 다만 비전 인코더가 애초에 대상을 보지 못한 오류까지 고치는 방법은 아닙니다. 도입 여부는 객체 환각 감소 폭뿐 아니라 추가 forward 지연과 실제 객체를 누락시키는 오억제 비율을 함께 보고 결정해야 합니다.
+LVLM이 이미지에 없는 익숙한 물체를 말한다면, NoLan은 이미지, 텍스트 예측과 텍스트 전용 예측을 비교해 언어 모델의 강한 사전확률을 디코딩 중 낮춥니다. 다만 비전 인코더가 애초에 대상을 보지 못한 오류까지 고치는 방법은 아닙니다. 도입 여부는 객체 환각 감소 폭뿐 아니라 추가 forward 지연과 실제 객체를 누락시키는 오억제 비율을 함께 보고 결정해야 합니다.
 
 ## “백설공주와 일곱 난쟁이”가 만드는 오답
 
@@ -80,20 +80,20 @@ POPE에서 좋은 계수가 제품 이미지에도 그대로 맞는다고 가정
 
 운영 로그에서는 원본 답과 억제 후 답을 표본으로 함께 보관하는 방식이 유용합니다. 어떤 명사가 사라졌고 그 명사가 실제 이미지에 있었는지 사람이 확인하면 단순 점수보다 오억제 원인을 찾기 쉽습니다. 답 전체가 달라졌다면 최초로 갈라진 토큰과 그 뒤의 연쇄 변화를 살핍니다. 초반의 작은 로짓 변화가 문장 전체를 바꿀 수 있기 때문입니다.
 
-장면 분포가 바뀌는 시점도 감시해야 합니다. 상품 사진으로 계수를 정한 뒤 만화나 문서 이미지가 많이 들어오면 언어 prior와 시각 신호의 관계가 달라질 수 있습니다. 도메인별 환각·누락 표본을 주기적으로 비교하고, 두 지표 중 하나가 기준을 넘으면 적용 범위를 줄이거나 계수를 다시 검증합니다.
+장면 분포가 바뀌는 시점도 감시해야 합니다. 상품 사진으로 계수를 정한 뒤 만화나 문서 이미지가 많이 들어오면 언어 prior와 시각 신호의 관계가 달라질 수 있습니다. 도메인별 환각, 누락 표본을 주기적으로 비교하고, 두 지표 중 하나가 기준을 넘으면 적용 범위를 줄이거나 계수를 다시 검증합니다.
 
 최종 답에는 필요하면 불확실성을 표현하는 경로도 남겨야 합니다. 이미지 증거와 언어 prior가 크게 충돌할 때 무조건 한 후보를 삭제하기보다 확인이 어렵다고 답하거나 확대 이미지를 요청하는 선택이 더 안전할 수 있습니다. NoLan을 답 강제 장치가 아니라 충돌을 드러내는 신호로 함께 활용하면 억제 실패를 숨기지 않고 운영할 수 있습니다.
 
 이 충돌 표본을 계속 모으면 어느 질문군에 억제를 유지하고 어느 질문군에서는 해제할지도 데이터로 결정할 수 있습니다.
 
-디코딩 설정이 바뀌면 억제 효과도 다시 확인해야 합니다. 온도, 답 길이, 후보 토큰 수가 달라지면 첫 명사에서 생긴 작은 로짓 차이가 뒤 문장에 퍼지는 방식도 달라집니다. 같은 이미지에 긍정형·부정형 질문과 표현만 바꾼 질문을 주고, 실제 객체의 누락과 없는 객체의 추가를 함께 셉니다. 환각만 줄고 정답 객체 누락이 늘면 계수를 낮추거나 해당 질문군에서 NoLan을 해제해야 합니다. 두 오류의 비용을 제품별로 먼저 정하는 것이 단일 평균 점수보다 중요합니다.
+디코딩 설정이 바뀌면 억제 효과도 다시 확인해야 합니다. 온도, 답 길이, 후보 토큰 수가 달라지면 첫 명사에서 생긴 작은 로짓 차이가 뒤 문장에 퍼지는 방식도 달라집니다. 같은 이미지에 긍정형, 부정형 질문과 표현만 바꾼 질문을 주고, 실제 객체의 누락과 없는 객체의 추가를 함께 셉니다. 환각만 줄고 정답 객체 누락이 늘면 계수를 낮추거나 해당 질문군에서 NoLan을 해제해야 합니다. 두 오류의 비용을 제품별로 먼저 정하는 것이 단일 평균 점수보다 중요합니다.
 
-[arXiv 논문](https://arxiv.org/abs/2602.22144) · [GitHub 저장소](https://github.com/lingfengren/NoLan) · [논문 페이지](https://huggingface.co/papers/2602.22144)
+[arXiv 논문](https://arxiv.org/abs/2602.22144), [GitHub 저장소](https://github.com/lingfengren/NoLan), [논문 페이지](https://huggingface.co/papers/2602.22144)
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [시각 토큰을 줄였더니 환각이 늘었다면: AgilePruner의 선택 기준]({% post_url 2026-03-08-AgilePruner--An-Empirical-Study-of-Attention-and-Diversity-for-Adaptive-Visual-Token-Pruning-in-Large-Vision-Language-Models %}) — AgilePruner가 어텐션·다양성 기반 가지치기를 유효 랭크와 엔트로피로 비교하고 입력별로 전환하는 이유와 적용 한계를 설명합니다.
-- [Claude for Legal이 법률 환각을 끝낼까: 출처·권한·승인 설계]({% post_url 2026-05-18-The-End-of-Paying-Settlements-for-Hallucinations-A-Developers-Deep-Dive-into-Claude-for-Legal-and-Its-True-Impact %}) — Claude for Legal의 도구 연결 구조를 법률 검색, 문서 수정, 외부 전송으로 나눠 보고 환각·권한·감사 위험을 통제하는 기준을 정리합니다.
+- [시각 토큰을 줄였더니 환각이 늘었다면: AgilePruner의 선택 기준]({% post_url 2026-03-08-AgilePruner--An-Empirical-Study-of-Attention-and-Diversity-for-Adaptive-Visual-Token-Pruning-in-Large-Vision-Language-Models %}) — AgilePruner가 어텐션, 다양성 기반 가지치기를 유효 랭크와 엔트로피로 비교하고 입력별로 전환하는 이유와 적용 한계를 설명합니다.
+- [Claude for Legal이 법률 환각을 끝낼까: 출처, 권한, 승인 설계]({% post_url 2026-05-18-The-End-of-Paying-Settlements-for-Hallucinations-A-Developers-Deep-Dive-into-Claude-for-Legal-and-Its-True-Impact %}) — Claude for Legal의 도구 연결 구조를 법률 검색, 문서 수정, 외부 전송으로 나눠 보고 환각, 권한, 감사 위험을 통제하는 기준을 정리합니다.
 - [OmniParser: GUI 자동화를 위한 순수 비전 기반 에이전트]({% post_url 2025-02-23-omniparser %}) — GUI 인터페이스를 자동화하는 강력한 AI 기술, OmniParser의 원리와 응용
 <!-- internal-links:end -->

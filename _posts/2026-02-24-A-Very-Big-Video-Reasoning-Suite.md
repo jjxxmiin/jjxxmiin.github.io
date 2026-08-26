@@ -8,7 +8,7 @@ tags:
   - Gemini
 math: true
 summary: 200개 과제와 201만여 샘플로 구성된 VBVR이 비디오 모델의 다섯 추론 능력을 어떻게 나누고 자동 생성 데이터의 함정을 어떻게 드러내는지 살펴봅니다.
-description: "VBVR의 200개 과제와 201만여 합성 샘플이 비디오 추론 능력을 나누는 방식을 설명하고, 생성 규칙 누출·분할·실영상 일반화 검증 기준을 정리합니다."
+description: "VBVR의 200개 과제와 201만여 합성 샘플이 비디오 추론 능력을 나누는 방식을 설명하고, 생성 규칙 누출, 분할, 실영상 일반화 검증 기준을 정리합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.20159.png
   alt: "비디오 추론 데이터 200만 개면 일반화할까? VBVR의 5개 능력과 함정 논문 대표 이미지"
@@ -48,7 +48,7 @@ VBVR은 비디오 추론을 하나의 정확도로 뭉치지 않고 다섯 영�
 
 ![VBVR 데이터 생성 파이프라인](/assets/img/papers/2602.20159/x2.png)
 
-이 방식은 규모와 통제를 얻는 대신 생성기의 편향을 만듭니다. 배경, 움직임, 질문 문구에 반복 패턴이 있으면 모델이 실제 추론 대신 지름길을 배울 수 있습니다. 따라서 생성 규칙을 공유하는 학습·평가 분할뿐 아니라, 보지 못한 규칙과 다른 렌더링을 이용한 평가가 중요합니다.
+이 방식은 규모와 통제를 얻는 대신 생성기의 편향을 만듭니다. 배경, 움직임, 질문 문구에 반복 패턴이 있으면 모델이 실제 추론 대신 지름길을 배울 수 있습니다. 따라서 생성 규칙을 공유하는 학습, 평가 분할뿐 아니라, 보지 못한 규칙과 다른 렌더링을 이용한 평가가 중요합니다.
 
 자동 정답의 신뢰도는 생성 코드가 의도한 상태와 렌더링된 영상이 실제로 일치하는지에 달려 있습니다. 객체가 가려지거나 프레임 밖으로 나갔는데 메타데이터상 존재한다고 기록되면 규칙 정답은 정확해도 시각적으로 답할 수 없는 샘플이 됩니다. 각 과제에서 무작위 표본을 사람이 보고 질문의 답이 영상만으로 결정되는지 확인해야 합니다.
 
@@ -95,12 +95,12 @@ VBVR은 대규모로 능력을 분해해 실험하기 좋은 자료지만 실제
 
 모델이 틀린 경우에는 답만 기록하지 말고 어느 프레임을 봤는지, 시간 순서를 뒤집으면 답이 변하는지, 질문 표현을 바꿔도 같은 판단을 하는지 확인합니다. 이 오류 기록이 있어야 합성 학습 데이터를 더 넣을지, 프레임 샘플링을 바꿀지, 실제 영상 데이터를 보강할지 결정할 수 있습니다. 규모가 큰 벤치마크는 출발점을 넓히지만 제품의 정답 정의와 실패 조건까지 대신 정해 주지는 않습니다.
 
-학습과 평가의 생성 규칙이 겹치는지 감시하는 것도 중요합니다. 객체 색·배경·카메라 경로만 바뀌고 사건 규칙이 같다면 모델은 추론보다 렌더링 흔적을 이용할 수 있습니다. 템플릿 계열 전체를 평가에서 분리하고, 다른 생성기나 실제 촬영 영상으로 같은 능력을 다시 묻는 대조 세트를 둬야 합니다. 데이터 수가 많아도 규칙 누출이 있으면 높은 점수는 새로운 상황의 일반화를 설명하지 못합니다.
+학습과 평가의 생성 규칙이 겹치는지 감시하는 것도 중요합니다. 객체 색, 배경, 카메라 경로만 바뀌고 사건 규칙이 같다면 모델은 추론보다 렌더링 흔적을 이용할 수 있습니다. 템플릿 계열 전체를 평가에서 분리하고, 다른 생성기나 실제 촬영 영상으로 같은 능력을 다시 묻는 대조 세트를 둬야 합니다. 데이터 수가 많아도 규칙 누출이 있으면 높은 점수는 새로운 상황의 일반화를 설명하지 못합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [긴 영상 요약이 대화·카메라·효과음을 놓친다면: TimeChat-Captioner]({% post_url 2026-02-12-TimeChat-Captioner--Scripting-Multi-Scene-Videos-with-Time-Aware-and-Structural-Audio-Visual-Captions %}) — TimeChat-Captioner가 다중 장면 영상을 여섯 정보 축과 타임스탬프로 기록하는 방식, 학습 데이터와 평가 비용·한계를 정리합니다.
-- [InternVideo는 생성·판별 학습을 어떻게 합치나: MVM·VLC·CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
-- [인간 1인칭 영상이 로봇 학습에 바로 쓰이지 못하는 이유: PhysBrain E2E]({% post_url 2025-12-23-PhysBrain--Human-Egocentric-Data-as-a-Bridge-from-Vision-Language-Models-to-Physical-Intelligence %}) — PhysBrain이 인간 egocentric video를 perception·intention/action·state change가 연결된 E2E 데이터로 바꾸는 과정과, 사람 손에서 robot gripper로 옮길 때 남는 간극을…
+- [긴 영상 요약이 대화, 카메라, 효과음을 놓친다면: TimeChat-Captioner]({% post_url 2026-02-12-TimeChat-Captioner--Scripting-Multi-Scene-Videos-with-Time-Aware-and-Structural-Audio-Visual-Captions %}) — TimeChat-Captioner가 다중 장면 영상을 여섯 정보 축과 타임스탬프로 기록하는 방식, 학습 데이터와 평가 비용, 한계를 정리합니다.
+- [InternVideo는 생성, 판별 학습을 어떻게 합치나: MVM, VLC, CMA]({% post_url 2025-02-16-InternVideo %}) — InternVideo가 마스크 복원으로 시공간 표현을, 비디오-언어 대조 학습으로 의미 정렬을 익힌 뒤 Cross-Model Attention으로 결합하는 구조를 설명합니다.
+- [인간 1인칭 영상이 로봇 학습에 바로 쓰이지 못하는 이유: PhysBrain E2E]({% post_url 2025-12-23-PhysBrain--Human-Egocentric-Data-as-a-Bridge-from-Vision-Language-Models-to-Physical-Intelligence %}) — PhysBrain이 인간 egocentric video를 perception, intention/action, state change가 연결된 E2E 데이터로 바꾸는 과정과, 사람 손에서 robot gripper로 옮길 때 남는…
 <!-- internal-links:end -->

@@ -8,8 +8,8 @@ tags:
   - AI코딩
   - ClaudeCode
   - AI에이전트
-summary: "macOS Seatbelt·sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크·홈 설정·IPC 예외 및 완전 격리가 아닌 한계를 정리합니다."
-description: 'Agent Safehouse가 macOS Seatbelt 정책으로 AI 에이전트 권한을 줄이는 방식과 예외 경로, 네트워크·IPC·차단 실패를 검증하는 기준을 설명합니다.'
+summary: "macOS Seatbelt, sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크, 홈 설정, IPC 예외 및 완전 격리가 아닌 한계를 정리합니다."
+description: 'Agent Safehouse가 macOS Seatbelt 정책으로 AI 에이전트 권한을 줄이는 방식과 예외 경로, 네트워크, IPC, 차단 실패를 검증하는 기준을 설명합니다.'
 github_url: https://github.com/eugene1g/agent-safehouse
 image:
   path: https://opengraph.githubassets.com/1/eugene1g/agent-safehouse
@@ -18,18 +18,18 @@ faq:
   - question: 'Agent Safehouse만 쓰면 AI 에이전트를 완전히 격리할 수 있나요?'
     answer: '아닙니다. 허용한 프로젝트와 네트워크 안의 오작동, 샌드박스 탈출과 허용 프로그램의 취약점까지 막는 완전한 VM 경계는 아니므로 다른 통제와 함께 써야 합니다.'
   - question: '정상 빌드가 막히면 홈 디렉터리를 통째로 열어도 되나요?'
-    answer: '권장하기 어렵습니다. 실패 로그로 필요한 설정·캐시·도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.'
+    answer: '권장하기 어렵습니다. 실패 로그로 필요한 설정, 캐시, 도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.'
   - question: 'Safehouse 정책이 실제로 작동하는지 어떻게 확인하나요?'
     answer: '테스트 저장소에서 프로젝트 밖 쓰기, SSH 키 읽기, 허용되지 않은 네트워크, 다른 프로세스 종료를 시도해 OS 수준에서 차단되는지 로그와 반환 오류로 확인해야 합니다.'
 ---
 
-Agent Safehouse는 macOS 에이전트의 파일·네트워크 접근 범위를 줄일 수 있지만, 완전한 보안 경계나 악성 코드 분석용 VM을 대신하지는 않습니다.
+Agent Safehouse는 macOS 에이전트의 파일, 네트워크 접근 범위를 줄일 수 있지만, 완전한 보안 경계나 악성 코드 분석용 VM을 대신하지는 않습니다.
 
 로컬 코딩 에이전트는 사용자의 Shell 권한으로 파일을 읽고 명령을 실행합니다. 승인 프롬프트만으로는 잘못된 명령, Prompt Injection, 공급망 Script가 건드릴 수 있는 범위를 충분히 줄이지 못할 수 있습니다. [Agent Safehouse](https://github.com/eugene1g/agent-safehouse)는 macOS의 Seatbelt 정책과 `sandbox-exec`를 이용해 OS가 System Call 단계에서 접근을 거부하게 합니다.
 
 ## Deny-first는 승인 UI와 무엇이 다른가
 
-애플리케이션의 Allowlist는 에이전트가 명령을 제안하거나 실행하기 전에 판단합니다. Safehouse는 별도의 Sandbox Policy로 File·Network·Process 접근을 기본 차단하고 필요한 항목만 허용합니다. 금지된 File을 열려 하면 에이전트의 의도와 무관하게 `EPERM`이 반환되는 구조입니다.
+애플리케이션의 Allowlist는 에이전트가 명령을 제안하거나 실행하기 전에 판단합니다. Safehouse는 별도의 Sandbox Policy로 File, Network, Process 접근을 기본 차단하고 필요한 항목만 허용합니다. 금지된 File을 열려 하면 에이전트의 의도와 무관하게 `EPERM`이 반환되는 구조입니다.
 
 이 차이는 폭발 반경을 줄이는 데 중요합니다. 에이전트가 잘못된 Shell Command를 실행하더라도 현재 프로젝트 밖에 쓰지 못하게 할 수 있습니다. 다만 허용한 프로젝트 안의 File은 여전히 삭제하거나 오염시킬 수 있고, 허용한 API Endpoint로 전송되는 Prompt 내용도 정책 밖의 문제입니다.
 
@@ -39,7 +39,7 @@ Agent Safehouse는 macOS 에이전트의 파일·네트워크 접근 범위를 �
 
 예외를 추가할 때는 편의를 위해 Home 전체를 열기보다 필요한 경로와 동작을 좁힙니다.
 
-- Project Root에는 Read·Write
+- Project Root에는 Read, Write
 - Compiler와 Runtime에는 가능한 Read-only
 - 꼭 필요한 설정 File만 Read
 - Registry와 Model API Host만 Network
@@ -61,13 +61,13 @@ Agent Safehouse는 macOS 에이전트의 파일·네트워크 접근 범위를 �
   -- npx claude-code
 ```
 
-이 블록은 완전한 설치·보안 절차가 아닙니다. Script 획득과 Version 고정, Policy Option의 현재 지원 여부, `PWD` 경로 검증, Agent 설치, 비밀 값, 차단 Log와 복구가 빠져 있습니다. 실제 사용 전 저장소의 Script와 생성되는 Sandbox Policy를 읽고, 중요하지 않은 Test Repository에서 차단 동작을 확인해야 합니다.
+이 블록은 완전한 설치, 보안 절차가 아닙니다. Script 획득과 Version 고정, Policy Option의 현재 지원 여부, `PWD` 경로 검증, Agent 설치, 비밀 값, 차단 Log와 복구가 빠져 있습니다. 실제 사용 전 저장소의 Script와 생성되는 Sandbox Policy를 읽고, 중요하지 않은 Test Repository에서 차단 동작을 확인해야 합니다.
 
 원문의 Profile Alias 예시도 반복 사용을 줄이는 아이디어를 보여 주지만, `~/.safehouse/frontend-dev.sb`에 어떤 권한이 있는지는 별도 검토해야 합니다. 이름이 “safe”인 Profile이라고 안전성이 보장되는 것은 아닙니다.
 
 ## 커널 차단도 허용 범위 안의 공격은 못 막는다
 
-Safehouse는 Agent 실수와 File 접근 범위를 줄이는 Hardening Layer입니다. Kernel Zero-day, Sandbox Escape, 이미 허용된 Program의 취약점까지 막는 완벽한 감옥은 아닙니다. macOS 전용이므로 Windows·Linux 팀에는 동일 Policy가 그대로 적용되지도 않습니다.
+Safehouse는 Agent 실수와 File 접근 범위를 줄이는 Hardening Layer입니다. Kernel Zero-day, Sandbox Escape, 이미 허용된 Program의 취약점까지 막는 완벽한 감옥은 아닙니다. macOS 전용이므로 Windows, Linux 팀에는 동일 Policy가 그대로 적용되지도 않습니다.
 
 Network를 Model API에 허용하면 Project 내용이 정상 요청으로 전송될 수 있습니다. File Read를 허용한 Dependency가 Build 중 악성 동작을 하면 Project 내부 자료를 훼손할 수도 있습니다. 따라서 Sandbox와 별개로 Test Account, 최소 Credential, Git Diff, Backup과 사람 승인이 필요합니다.
 
@@ -111,8 +111,8 @@ Safehouse가 잘 맞는 환경은 macOS에서 Local Toolchain을 그대로 쓰�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [stablyai/orca: 멀티 AI 에이전트를 격리된 환경에서 병렬 실행하는 ADE 개발 플랫폼]({% post_url 2026-08-06-stablyaiorca-An-Agent-Development-Environment-ADE-for-Orchestrating-Parallel-AI-Coding-Agents %}) — stablyai/orca는 Claude Code, OpenAI Codex, Cursor CLI 등 여러 AI 코딩 에이전트를 단일 프로젝트 내에서 충돌 없이 병렬로 제어하는 오픈소스 ADE(Agent Development…
-- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조·격리·도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한·업데이트 검증 기준을 정리합니다.
-- [ml-intern에 H100 300회 루프를 맡겨도 될까: 170K Compaction과 비용 상한]({% post_url 2026-04-25-Stop-Debugging-CUDA-How-Hugging-Faces-ml-intern-is-Disrupting-the-ML-Engineering-Workflow %}) — ml-intern의 논문 탐색·학습 Job·Trackio 평가 루프와 170K 자동 압축을 살펴보고, 최대 300회 자율 실행 전에 걸어야 할 GPU·API·평가 상한을 정리합니다.
+- [Nanoclaw는 가벼운 개인 AI 에이전트인가: 구조, 격리, 도입 가이드]({% post_url 2026-02-23-Nanoclaw-The-Lightweight-AI-Agent %}) — Nanoclaw가 작은 코드베이스와 컨테이너 격리로 개인용 에이전트를 구성하는 방식, 설치 흐름과 권한, 업데이트 검증 기준을 정리합니다.
+- [Compozy로 AI 개발을 병렬화해도 될까: 스펙, 비용, 리뷰 루프]({% post_url 2026-05-18-AI-Coding-From-Toy-to-Production-Pipeline-Deep-Dive-into-Compozy-Multi-Agent-Orchestration-with-a-Single-Binary %}) — Compozy의 선언적 워크플로와 마크다운 상태를 살펴보고, 병렬 에이전트가 잘못된 스펙을 증폭하지 않도록 승인, 예산, 종료 조건을 설계합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
@@ -123,7 +123,7 @@ Safehouse가 잘 맞는 환경은 macOS에서 Local Toolchain을 그대로 쓰�
 
 ### 정상 빌드가 막히면 홈 디렉터리를 통째로 열어도 되나요?
 
-권장하기 어렵습니다. 실패 로그로 필요한 설정·캐시·도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.
+권장하기 어렵습니다. 실패 로그로 필요한 설정, 캐시, 도구 경로를 확인하고 읽기와 쓰기를 구분해 가장 좁은 예외만 추가해야 합니다.
 
 ### Safehouse 정책이 실제로 작동하는지 어떻게 확인하나요?
 

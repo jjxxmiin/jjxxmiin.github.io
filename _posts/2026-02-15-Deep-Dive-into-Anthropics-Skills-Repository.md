@@ -9,14 +9,14 @@ tags:
   - ClaudeCode
   - 오픈소스
   - AI에이전트
-summary: 'anthropics/skills를 도구 자체가 아닌 재사용 가능한 작업 지침으로 읽고, 점진적 로딩 구조·저장소 예시·안전한 시험 순서를 정리합니다.'
-description: 'Anthropic Skills의 SKILL.md가 도구 사용 절차를 재사용하는 방식, MCP와의 차이와 점진적 로딩 구조, 설치·권한 검증 기준을 설명합니다.'
+summary: 'anthropics/skills를 도구 자체가 아닌 재사용 가능한 작업 지침으로 읽고, 점진적 로딩 구조, 저장소 예시, 안전한 시험 순서를 정리합니다.'
+description: 'Anthropic Skills의 SKILL.md가 도구 사용 절차를 재사용하는 방식, MCP와의 차이와 점진적 로딩 구조, 설치, 권한 검증 기준을 설명합니다.'
 image:
   path: https://opengraph.githubassets.com/1/anthropics/skills
   alt: "anthropics/skills GitHub 저장소 대표 이미지"
 ---
 
-Anthropic Skills는 모델에 새 도구를 제공하는 MCP 서버가 아니라, 이미 가진 도구를 언제 어떤 순서로 쓸지 SKILL.md에 적은 재사용 가능한 작업 지침입니다. 메타데이터로 필요한 스킬을 찾고, 발동한 뒤 본문과 추가 리소스를 단계적으로 읽는 구조가 핵심입니다. 설치 전에 지침·스크립트·권한을 검토하고 결과를 실제 파일과 로그로 확인해야 합니다.
+Anthropic Skills는 모델에 새 도구를 제공하는 MCP 서버가 아니라, 이미 가진 도구를 언제 어떤 순서로 쓸지 SKILL.md에 적은 재사용 가능한 작업 지침입니다. 메타데이터로 필요한 스킬을 찾고, 발동한 뒤 본문과 추가 리소스를 단계적으로 읽는 구조가 핵심입니다. 설치 전에 지침, 스크립트, 권한을 검토하고 결과를 실제 파일과 로그로 확인해야 합니다.
 
 ## MCP와 Skills는 무엇이 다를까?
 
@@ -40,7 +40,7 @@ Anthropic Skills는 모델에 새 도구를 제공하는 MCP 서버가 아니라
 
 ## 저장소를 복제한 뒤 무엇부터 확인해야 할까?
 
-원문은 docx, pdf, pptx, xlsx 같은 문서 스킬과 MCP 서버 생성, Playwright, Git, algorithmic-art 관련 예를 소개합니다. 이름만 보고 완성된 기능으로 가정하지 말고 각 폴더의 SKILL.md와 필요한 스크립트·도구를 함께 확인해야 합니다.
+원문은 docx, pdf, pptx, xlsx 같은 문서 스킬과 MCP 서버 생성, Playwright, Git, algorithmic-art 관련 예를 소개합니다. 이름만 보고 완성된 기능으로 가정하지 말고 각 폴더의 SKILL.md와 필요한 스크립트, 도구를 함께 확인해야 합니다.
 
 원문에 제시된 저장소 복제 명령은 다음과 같습니다.
 
@@ -50,7 +50,7 @@ git clone https://github.com/anthropics/skills.git
 
 이 명령은 저장소를 내려받을 뿐 Claude Code나 Claude.ai에 자동 설치하지 않습니다. 설정 경로와 업로드 방식은 제품 버전에 따라 달라질 수 있으므로, 이 글은 현재 설치법을 보증하지 않습니다. 사용 시점에는 [저장소](https://github.com/anthropics/skills), [Anthropic 문서](https://docs.anthropic.com/en/docs/agents-and-tools/skills), [저장소 README](https://github.com/anthropics/skills/blob/main/README.md)를 직접 대조해야 합니다.
 
-복제 후에는 관심 폴더의 SKILL.md 전체와 그 파일이 직접 가리키는 스크립트·템플릿을 읽습니다. 파일 확장자만 보고 안전한 예제라고 가정하거나, 다른 환경의 경로를 현재 설정에 그대로 적용해서는 안 됩니다. 실행 명령, 외부 통신, 파일 덮어쓰기, 삭제 가능성이 있는 단계를 먼저 표시하는 편이 좋습니다.
+복제 후에는 관심 폴더의 SKILL.md 전체와 그 파일이 직접 가리키는 스크립트, 템플릿을 읽습니다. 파일 확장자만 보고 안전한 예제라고 가정하거나, 다른 환경의 경로를 현재 설정에 그대로 적용해서는 안 됩니다. 실행 명령, 외부 통신, 파일 덮어쓰기, 삭제 가능성이 있는 단계를 먼저 표시하는 편이 좋습니다.
 
 버전도 기록해야 합니다. 저장소가 바뀌면 같은 이름의 스킬이 다른 절차를 실행할 수 있으므로, 팀에서 검토한 커밋과 실제 사용한 커밋을 맞춰야 재현이 가능합니다. 저장소 전체 라이선스 안내와 개별 리소스의 조건이 다른지도 확인해야 합니다.
 
@@ -58,7 +58,7 @@ git clone https://github.com/anthropics/skills.git
 
 반복 업무 하나를 골라 예상 입력과 정답 조건을 만듭니다. 스킬 없이 수행한 결과와 적용 결과를 비교하고, 발동하지 말아야 할 요청에서도 스킬이 켜지지 않는지 시험합니다. 문서 스킬이라면 내용뿐 아니라 파일이 열리는지, 표와 서식이 보존되는지 확인해야 합니다.
 
-스킬은 실행 절차를 담을 수 있으므로 출처를 모르는 파일을 곧바로 신뢰해서는 안 됩니다. 지침과 스크립트를 검토하고 제한된 작업 공간에서 실행하며, 네트워크·파일 삭제·외부 전송 같은 권한은 필요한 범위로 줄여야 합니다. 원문이 언급한 Apache 2.0 라이선스도 개별 리소스의 사용 조건과 동일하다고 가정하지 말고 실제 파일을 확인하는 편이 안전합니다.
+스킬은 실행 절차를 담을 수 있으므로 출처를 모르는 파일을 곧바로 신뢰해서는 안 됩니다. 지침과 스크립트를 검토하고 제한된 작업 공간에서 실행하며, 네트워크, 파일 삭제, 외부 전송 같은 권한은 필요한 범위로 줄여야 합니다. 원문이 언급한 Apache 2.0 라이선스도 개별 리소스의 사용 조건과 동일하다고 가정하지 말고 실제 파일을 확인하는 편이 안전합니다.
 
 작은 시험에서는 발동 정확도, 단계 누락, 결과 품질을 따로 봅니다. 스킬이 필요한 요청에서 켜지지 않거나 불필요한 요청에서 켜지면 description을 손봐야 하고, 실행은 됐지만 파일이 열리지 않거나 형식이 깨지면 검증 단계가 부족한 것입니다. 같은 입력을 반복했을 때 핵심 절차와 산출물 기준이 유지되는지도 확인할 수 있습니다.
 
@@ -66,7 +66,7 @@ git clone https://github.com/anthropics/skills.git
 
 ## 새 SKILL.md를 작성할 때 어떤 순서로 좁혀야 할까?
 
-먼저 하나의 반복 업무와 성공 조건을 문장으로 정합니다. “문서 작업을 돕는다”보다 “주어진 DOCX의 표와 서식을 보존하며 지정 문단을 수정하고 결과 파일이 열리는지 확인한다”처럼 입력·변경·검증 범위가 드러나야 합니다. 서로 다른 산출물을 한 스킬에 모두 넣으면 발동 조건과 실패 처리가 모호해집니다.
+먼저 하나의 반복 업무와 성공 조건을 문장으로 정합니다. “문서 작업을 돕는다”보다 “주어진 DOCX의 표와 서식을 보존하며 지정 문단을 수정하고 결과 파일이 열리는지 확인한다”처럼 입력, 변경, 검증 범위가 드러나야 합니다. 서로 다른 산출물을 한 스킬에 모두 넣으면 발동 조건과 실패 처리가 모호해집니다.
 
 description에는 사용해야 할 요청과 사용하지 말아야 할 요청을 구분할 단서를 넣습니다. 본문은 선행 조건, 작업 순서, 위험한 단계의 승인, 검증, 실패 시 중단을 배열합니다. 사용자가 선택해야 결과가 달라지는 지점은 에이전트가 임의로 가정하지 않도록 질문 조건으로 남겨야 합니다.
 
@@ -87,7 +87,7 @@ description에는 사용해야 할 요청과 사용하지 말아야 할 요청�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DeepSeek-TUI 16K Star·V4 주장은 확인됐나: 저장소 정체와 Shell 권한 감사]({% post_url 2026-05-11-Deep-Dive-into-DeepSeek-TUI-You-Can-Delete-Claude-Code-Now--The-Shocking-Impact-of-the-16K-Star-Open-Source-Terminal-Agent %}) — DeepSeek-TUI 글에 섞인 official repository·16K star·V4·1M context 주장의 출처를 분리하고, dispatcher·TUI·MCP·shell 권한을 검증하는 방법을 정리합니다.
+- [DeepSeek-TUI 16K Star, V4 주장은 확인됐나: 저장소 정체와 Shell 권한 감사]({% post_url 2026-05-11-Deep-Dive-into-DeepSeek-TUI-You-Can-Delete-Claude-Code-Now--The-Shocking-Impact-of-the-16K-Star-Open-Source-Terminal-Agent %}) — DeepSeek-TUI 글에 섞인 official repository, 16K star, V4, 1M context 주장의 출처를 분리하고, dispatcher, TUI, MCP, shell 권한을 검증하는 방법을 정리합니다.
 - [xai-org/grok-build: 100만 줄의 Rust 코드로 구현된 터미널 AI 에이전트의 모든 것]({% post_url 2026-07-20-xai-orggrok-build-Everything-About-the-Terminal-AI-Agent-Built-with-1-Million-Lines-of-Rust %}) — 과도한 원격 데이터 수집 논란 이후 전면 오픈소스화된 SpaceXAI의 터미널 기반 AI 코딩 에이전트, Grok Build의 내부 아키텍처와 작동 원리를 깊이 있게 살펴봅니다.
-- [Ruflo로 멀티 에이전트를 조율할까: 토폴로지·기억·드리프트 검증]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-Honest-Review-and-Deep-Dive-into-Ruflo-the-Ultimate-Claude-Multi-Agent-Orchestrator %}) — Ruflo가 특화 에이전트·토폴로지·AgentDB·MCP로 작업을 분담하는 방식과, 병렬 비용·권한·드리프트·검증 책임을 정리합니다.
+- [Ruflo로 멀티 에이전트를 조율할까: 토폴로지, 기억, 드리프트 검증]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-Honest-Review-and-Deep-Dive-into-Ruflo-the-Ultimate-Claude-Multi-Agent-Orchestrator %}) — Ruflo가 특화 에이전트, 토폴로지, AgentDB, MCP로 작업을 분담하는 방식과, 병렬 비용, 권한, 드리프트, 검증 책임을 정리합니다.
 <!-- internal-links:end -->

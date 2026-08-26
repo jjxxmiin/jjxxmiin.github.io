@@ -13,7 +13,7 @@ tags:
   - DarkNet
   - 컴퓨터비전
 summary: "Darknet region_layer의 출력 인덱스와 박스 좌표, 학습 delta 할당 순서를 따라가며 비어 있는 backward, truth 경계, 마스크 scale 형 변환, 추론 출력 변경을 점검합니다."
-description: "Darknet Region Layer의 plane output·anchor decode·delta overwrite를 따라 빈 CPU backward, truth sentinel·mask scale·in-place flip 실패를 설명합니다."
+description: "Darknet Region Layer의 plane output, anchor decode, delta overwrite를 따라 빈 CPU backward, truth sentinel, mask scale, in-place flip 실패를 설명합니다."
 math: true
 faq:
   - question: "제시된 CPU Region Layer는 forward delta를 이전 layer로 보내나요?"
@@ -26,7 +26,7 @@ faq:
 
 이 소스의 Region Layer는 `forward`에서 손실용 `delta`를 만들지만 `backward_region_layer`가 전부 주석 처리되어 있어, 보이는 CPU 코드만으로는 그 기울기가 이전 레이어에 전달되지 않습니다. 학습이 진행되지 않는다면 수식보다 이 연결부터 확인해야 합니다.
 
-## 출력 배열은 box·objectness·class가 평면별로 놓인다
+## 출력 배열은 box, objectness, class가 평면별로 놓인다
 
 레이어 하나의 채널 수는 anchor마다 `coords + classes + 1`이고 전체 원소 수는 다음과 같습니다.
 
@@ -75,7 +75,7 @@ t_w = \\log\\frac{truth_w w}{bias_w},\\quad
 t_h = \\log\\frac{truth_h h}{bias_h}
 $$
 
-`delta_region_box`는 이 목표와 원시 출력의 차이를 `delta`에 기록하고, 디코딩한 박스와 truth의 IoU를 반환합니다. 따라서 truth의 너비·높이와 bias가 양수라는 전제가 필요합니다. 0이나 음수가 들어오면 로그 계산부터 유효하지 않습니다.
+`delta_region_box`는 이 목표와 원시 출력의 차이를 `delta`에 기록하고, 디코딩한 박스와 truth의 IoU를 반환합니다. 따라서 truth의 너비, 높이와 bias가 양수라는 전제가 필요합니다. 0이나 음수가 들어오면 로그 계산부터 유효하지 않습니다.
 
 ## forward는 추론과 학습에서 하는 일이 크게 다르다
 
@@ -214,7 +214,7 @@ void resize_region_layer(layer *l, int w, int h)
 
 ## 검출 변환은 l.output을 직접 바꿀 수 있다
 
-`get_region_detections`는 각 셀·anchor의 박스를 디코딩하고, objectness가 임계값을 넘을 때 클래스 확률을 채운 뒤 letterbox 보정을 적용합니다. `relative == 0`이면 마지막에 원본 이미지 픽셀 단위로 바꿉니다.
+`get_region_detections`는 각 셀, anchor의 박스를 디코딩하고, objectness가 임계값을 넘을 때 클래스 확률을 채운 뒤 letterbox 보정을 적용합니다. `relative == 0`이면 마지막에 원본 이미지 픽셀 단위로 바꿉니다.
 
 배치가 정확히 2이면 두 번째 출력을 수평으로 뒤집고 첫 번째 출력과 평균냅니다.
 
@@ -245,17 +245,17 @@ if(map){
 
 따라서 `map`과 `prob`가 최소 200개이며 각 `map[j]`가 클래스 범위 안이라는 전제가 필요합니다. `zero_objectness` 역시 batch 인덱스를 항상 0으로 계산하므로 첫 배치의 objectness만 0으로 만듭니다.
 
-Region Layer를 점검할 때는 출력 모양만 맞추는 것으로 충분하지 않습니다. `entry_index`의 배치·anchor·entry 순서, truth의 종료 규약, 여러 옵션이 같은 delta를 덮어쓰는 순서, 그리고 최종 delta가 실제 이전 레이어로 누적되는지를 함께 확인해야 합니다.
+Region Layer를 점검할 때는 출력 모양만 맞추는 것으로 충분하지 않습니다. `entry_index`의 배치, anchor, entry 순서, truth의 종료 규약, 여러 옵션이 같은 delta를 덮어쓰는 순서, 그리고 최종 delta가 실제 이전 레이어로 누적되는지를 함께 확인해야 합니다.
 
 ## Synthetic Truth로 어떤 Delta를 확인하나요?
 
-빈 truth에서는 모든 anchor objectness 음성 delta와 0인 class·coordinate delta를 확인합니다. Box 하나를 중앙 cell에 두고 모양이 다른 anchor를 만들면 best anchor 하나만 coordinate와 positive objectness를 받아야 합니다. Rescore와 background를 하나씩 켜 최종 대입 순서가 예상 target을 만드는지 봅니다.
+빈 truth에서는 모든 anchor objectness 음성 delta와 0인 class, coordinate delta를 확인합니다. Box 하나를 중앙 cell에 두고 모양이 다른 anchor를 만들면 best anchor 하나만 coordinate와 positive objectness를 받아야 합니다. Rescore와 background를 하나씩 켜 최종 대입 순서가 예상 target을 만드는지 봅니다.
 
-Width·height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부합니다. Empty batch의 metric 분모와 mask scale 0.5가 int conversion으로 0이 되는지도 별도 시험합니다.
+Width, height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부합니다. Empty batch의 metric 분모와 mask scale 0.5가 int conversion으로 0이 되는지도 별도 시험합니다.
 
 ## entry_index는 작은 숫자로 손계산합니다
 
-### batch·anchor·entry·공간 위치를 따로 고정합니다
+### batch, anchor, entry, 공간 위치를 따로 고정합니다
 
 `w=2`, `h=2`, `n=2`, `coords=4`, `classes=2`인 예를 만들면 anchor 하나의 entry 수는 7이고 각 entry 평면은 원소 4개입니다. batch 0의 anchor 0, x entry는 처음 네 원소이고 y entry는 그 다음 네 원소입니다. anchor 1의 시작은 anchor 0이 사용하는 `7×4`개 뒤입니다. batch 1은 `l.outputs`만큼 더 이동해야 합니다.
 
@@ -269,13 +269,13 @@ Width·height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부�
 
 ### 첫 순회는 모든 anchor의 음성 상태를 만듭니다
 
-빈 truth 배치에서 objectness delta만 채워지고 box·class delta는 0인지 확인합니다. 실제 truth와 IoU가 `thresh`보다 큰 후보는 no-object delta가 0으로 지워지는지 봅니다. 이 단계의 목적은 정답 anchor를 확정하는 것이 아니라 명확한 음성을 만들고 truth와 충분히 겹친 예측을 무시하는 데 있으므로 두 역할을 로그에서 구분합니다.
+빈 truth 배치에서 objectness delta만 채워지고 box, class delta는 0인지 확인합니다. 실제 truth와 IoU가 `thresh`보다 큰 후보는 no-object delta가 0으로 지워지는지 봅니다. 이 단계의 목적은 정답 anchor를 확정하는 것이 아니라 명확한 음성을 만들고 truth와 충분히 겹친 예측을 무시하는 데 있으므로 두 역할을 로그에서 구분합니다.
 
-각 셀·anchor마다 obj index, 원래 output, best IoU와 첫 순회 뒤 delta를 남기면 `entry_index` 오류와 threshold 분기를 함께 찾을 수 있습니다. 평균 no-object 값만 보면 특정 anchor의 잘못된 index가 다른 값에 묻힐 수 있습니다.
+각 셀, anchor마다 obj index, 원래 output, best IoU와 첫 순회 뒤 delta를 남기면 `entry_index` 오류와 threshold 분기를 함께 찾을 수 있습니다. 평균 no-object 값만 보면 특정 anchor의 잘못된 index가 다른 값에 묻힐 수 있습니다.
 
 ### 둘째 순회는 truth별 best anchor를 양성으로 덮습니다
 
-하나의 truth와 모양이 다른 두 bias를 두어 어떤 anchor가 선택될지 먼저 계산합니다. 선택된 anchor에만 좌표·class와 양성 objectness delta가 들어가고, 같은 셀의 나머지 anchor는 첫 순회 결과를 유지해야 합니다. truth 두 개가 같은 셀과 anchor를 선택하는 경우에는 마지막 대입이 앞 delta를 덮는지 또는 누적하는지 원문 코드 순서로 확인합니다.
+하나의 truth와 모양이 다른 두 bias를 두어 어떤 anchor가 선택될지 먼저 계산합니다. 선택된 anchor에만 좌표, class와 양성 objectness delta가 들어가고, 같은 셀의 나머지 anchor는 첫 순회 결과를 유지해야 합니다. truth 두 개가 같은 셀과 anchor를 선택하는 경우에는 마지막 대입이 앞 delta를 덮는지 또는 누적하는지 원문 코드 순서로 확인합니다.
 
 `rescore`와 `background`가 독립된 `if`로 이어지므로 둘 다 켜면 마지막 `background` 할당이 최종 objectness 목표가 됩니다. 설정 이름을 조합해 의도를 추측하지 말고 각 옵션을 하나씩 켠 결과와 동시 조건을 표로 남깁니다. class-only 분기의 무조건 0 대입도 같은 방식으로 마지막 쓰기 위치를 추적해야 합니다.
 
@@ -289,7 +289,7 @@ Width·height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부�
 
 ### 다른 build와 GPU 경로는 별도 근거가 필요합니다
 
-다른 Darknet fork나 GPU 구현이 역전파를 제공할 수 있지만, 이 코드 조각만으로 그 경로가 존재하거나 같은 delta 규칙을 쓴다고 단정할 수 없습니다. 빌드 플래그, layer 생성 시 등록한 함수 포인터와 실제 링크된 소스를 확인해야 합니다. CPU와 GPU 결과를 비교할 때는 같은 입력·truth·bias·옵션에서 entry별 delta와 이전 layer delta를 각각 대조합니다.
+다른 Darknet fork나 GPU 구현이 역전파를 제공할 수 있지만, 이 코드 조각만으로 그 경로가 존재하거나 같은 delta 규칙을 쓴다고 단정할 수 없습니다. 빌드 플래그, layer 생성 시 등록한 함수 포인터와 실제 링크된 소스를 확인해야 합니다. CPU와 GPU 결과를 비교할 때는 같은 입력, truth, bias, 옵션에서 entry별 delta와 이전 layer delta를 각각 대조합니다.
 
 구현을 보완한다면 주석 속 코드를 무조건 활성화하기보다 logistic gradient가 forward 표현과 맞는지, `axpy_cpu` 길이와 batch stride가 현재 layout에 맞는지 검증합니다. 수정 뒤에는 손실 감소만 보지 말고 수치 미분과 작은 overfit 테스트로 gradient 방향을 확인합니다.
 
@@ -297,7 +297,7 @@ Width·height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부�
 
 ### 재할당 성공만으로 shape 전파가 끝나지 않습니다
 
-`resize_region_layer`는 `w`, `h`, `inputs`, `outputs`, `output`과 `delta`를 바꾸지만 보이는 코드에서는 `out_w`·`out_h`를 갱신하지 않습니다. 다음 layer나 detection API가 어느 필드를 읽는지에 따라 실제 buffer 크기와 metadata가 달라질 수 있습니다. resize 전후에 모든 shape 필드와 할당 byte 수를 한 줄로 출력해 비교합니다.
+`resize_region_layer`는 `w`, `h`, `inputs`, `outputs`, `output`과 `delta`를 바꾸지만 보이는 코드에서는 `out_w`, `out_h`를 갱신하지 않습니다. 다음 layer나 detection API가 어느 필드를 읽는지에 따라 실제 buffer 크기와 metadata가 달라질 수 있습니다. resize 전후에 모든 shape 필드와 할당 byte 수를 한 줄로 출력해 비교합니다.
 
 `realloc`은 실패 시 원래 포인터를 잃지 않도록 임시 변수로 처리하는 편이 안전합니다. 커진 영역은 자동으로 0이 되지 않으므로 forward가 전 범위를 덮는지 확인합니다. resize 뒤 오래된 `l.output` view를 외부가 보관하고 있다면 재할당으로 use-after-free가 생길 수 있어 pointer 수명도 함께 점검합니다.
 
@@ -307,7 +307,7 @@ Width·height 0, x 경계 0과 1, class 범위 밖 label을 loader에서 거부�
 
 ## 추론 함수의 in-place 변경을 어떻게 통제할까
 
-batch 2 flip 경로는 두 번째 출력의 좌우를 제자리에서 바꾸고 첫 배치 출력에 평균을 다시 씁니다. 따라서 같은 `l.output`으로 검출 함수를 두 번 호출하는 API는 순수 함수가 아닙니다. 호출 전 output 사본을 만들고 첫 호출·두 번째 호출의 byte 차이를 비교하면 반복성 문제를 확인할 수 있습니다.
+batch 2 flip 경로는 두 번째 출력의 좌우를 제자리에서 바꾸고 첫 배치 출력에 평균을 다시 씁니다. 따라서 같은 `l.output`으로 검출 함수를 두 번 호출하는 API는 순수 함수가 아닙니다. 호출 전 output 사본을 만들고 첫 호출, 두 번째 호출의 byte 차이를 비교하면 반복성 문제를 확인할 수 있습니다.
 
 NMS나 임계값만 바꿔 같은 raw output을 여러 번 디코딩하려면 변환 함수가 입력을 변경하지 않도록 별도 작업 buffer를 쓰거나 호출마다 원본을 복원해야 합니다. `zero_objectness`처럼 batch 0만 대상으로 계산하는 보조 함수도 다중 batch에서 의도한 범위를 확인합니다. 속도 최적화를 위해 in-place를 유지한다면 API 문서에 한 번만 호출할 수 있다는 수명 계약을 명시합니다.
 
@@ -315,9 +315,9 @@ letterbox 보정과 `relative` 변환도 단계별 출력으로 나눕니다. ra
 
 ## 입력 경계와 로그를 어떤 순서로 디버깅할까
 
-먼저 loader에서 truth의 x·y가 열린 구간 안인지, w·h와 bias가 양수인지, class가 범위 안인지 검사합니다. x가 0인 유효 박스는 sentinel과 충돌하므로 데이터 정책으로 이동하거나 다른 종료 표현을 써야 합니다. x가 1이면 셀 index가 w가 될 수 있어 배열 접근 전에 거부합니다.
+먼저 loader에서 truth의 x, y가 열린 구간 안인지, w, h와 bias가 양수인지, class가 범위 안인지 검사합니다. x가 0인 유효 박스는 sentinel과 충돌하므로 데이터 정책으로 이동하거나 다른 종료 표현을 써야 합니다. x가 1이면 셀 index가 w가 될 수 있어 배열 접근 전에 거부합니다.
 
-다음으로 NaN이 처음 생기는 위치를 분리합니다. `log(truth_w*w/bias_w)` 입력, `exp`가 큰 raw width·height, 빈 batch 통계의 0 나눗셈과 실제 delta의 NaN을 각각 봅니다. 통계 출력만 NaN인데 delta와 cost가 유한한 경우와 gradient 자체가 오염된 경우는 대응이 다릅니다.
+다음으로 NaN이 처음 생기는 위치를 분리합니다. `log(truth_w*w/bias_w)` 입력, `exp`가 큰 raw width, height, 빈 batch 통계의 0 나눗셈과 실제 delta의 NaN을 각각 봅니다. 통계 출력만 NaN인데 delta와 cost가 유한한 경우와 gradient 자체가 오염된 경우는 대응이 다릅니다.
 
 마지막으로 sanitizer와 synthetic tensor를 함께 사용합니다. AddressSanitizer는 map 범위와 cell index 같은 메모리 오류를 찾지만 유효한 다른 anchor를 선택한 논리 오류는 찾지 못합니다. 손으로 계산한 index, IoU, best anchor와 delta 배열을 기준으로 둬야 두 종류의 실패를 모두 다룰 수 있습니다.
 
@@ -325,7 +325,7 @@ letterbox 보정과 `relative` 변환도 단계별 출력으로 나눕니다. ra
 
 이 설명은 제시된 CPU Region Layer 코드의 배열과 대입 순서를 분석한 것입니다. 다른 시점의 Darknet, fork와 GPU 소스에서는 backward, resize, truth 형식과 detection 후처리가 달라졌을 수 있습니다. 동일한 `REGION` 이름만 보고 여기의 빈 backward나 200 class 전제를 모든 버전에 적용하면 안 됩니다.
 
-포팅 대상 저장소의 커밋에서 layer 생성 함수, parser, CPU·GPU 함수 포인터, network backward 호출과 detection API를 한 묶음으로 읽습니다. 이 글은 “어디를 확인할지”에 대한 디버깅 기준선이며 완성된 최신 학습 절차나 정확도 보장을 제공하지 않습니다. 소스 차이가 발견되면 그 버전의 실제 실행 순서를 우선합니다.
+포팅 대상 저장소의 커밋에서 layer 생성 함수, parser, CPU, GPU 함수 포인터, network backward 호출과 detection API를 한 묶음으로 읽습니다. 이 글은 “어디를 확인할지”에 대한 디버깅 기준선이며 완성된 최신 학습 절차나 정확도 보장을 제공하지 않습니다. 소스 차이가 발견되면 그 버전의 실제 실행 순서를 우선합니다.
 
 ## 자주 남는 질문
 
@@ -350,7 +350,7 @@ Batch 2 flip 평균 경로가 l.output을 직접 바꾸므로 두 번째 호출�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward]({% post_url 2022-02-23-DarkNetGRULayer %}) — DarkNet GRU 순전파의 update·reset·candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다.
+- [DarkNet GRU Layer는 학습 가능한가: 6개 Connected와 빈 backward]({% post_url 2022-02-23-DarkNetGRULayer %}) — DarkNet GRU 순전파의 update, reset, candidate 계산을 여섯 완전연결층으로 추적하고, 비어 있는 역전파 때문에 이 소스만으로 학습할 수 없는 한계를 짚습니다.
 - [Darknet Maxpool 역전파가 index -1로 깨지는 경우: padding과 argmax 추적]({% post_url 2022-03-09-DarkNetMaxpool %}) — Darknet maxpool layer의 출력 크기, padding offset, 최댓값 인덱스 저장과 backward scatter 과정을 따라가며 경계 오류를 점검합니다.
 - [Darknet Normalize Layer 역전파가 정확하지 않은 이유: 채널 정규화와 delta 덮어쓰기]({% post_url 2022-03-11-DarkNetNormalizeLayer %}) — Darknet normalization_layer의 채널별 순방향 계산을 코드로 추적하고, 원본 주석이 밝힌 근사 역전파와 net.delta 덮어쓰기 문제를 점검합니다.
 <!-- internal-links:end -->

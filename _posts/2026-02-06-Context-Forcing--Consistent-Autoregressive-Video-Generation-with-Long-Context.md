@@ -9,15 +9,15 @@ tags:
   - 디퓨전모델
   - 영상생성
 math: true
-summary: "Context Forcing이 짧은 context teacher로 긴 rollout student를 가르칠 때 생기는 mismatch를 long-context teacher와 sink·slow·fast KV memory로 고치는 과정을 정리합니다."
-description: "Context Forcing이 long-context teacher와 sink·slow·fast KV memory로 긴 rollout student의 supervision mismatch를 줄이는 원리, ECL 20초와 1분 생성의 차이·비용·drift 검증법을 설명합니다."
+summary: "Context Forcing이 짧은 context teacher로 긴 rollout student를 가르칠 때 생기는 mismatch를 long-context teacher와 sink, slow, fast KV memory로 고치는 과정을 정리합니다."
+description: "Context Forcing이 long-context teacher와 sink, slow, fast KV memory로 긴 rollout student의 supervision mismatch를 줄이는 원리, ECL 20초와 1분 생성의 차이, 비용, drift 검증법을 설명합니다."
 faq:
   - question: "1분 영상을 만들면 1분 전 정보를 모두 기억하나요?"
-    answer: "아닙니다. Output duration과 effective context length는 다르며 보고된 ECL 20초 이상도 identity·작은 object·causal event별 recall을 각각 보장하지 않습니다."
+    answer: "아닙니다. Output duration과 effective context length는 다르며 보고된 ECL 20초 이상도 identity, 작은 object, causal event별 recall을 각각 보장하지 않습니다."
   - question: "Long-context teacher는 왜 필요한가요?"
-    answer: "Student의 현재 chunk가 초기 character·scene과 달라졌는지를 판단하려면 teacher도 같은 장기 history를 봐야 짧은 5초 teacher의 supervision mismatch를 줄일 수 있습니다."
-  - question: "Sink·slow·fast memory가 모든 detail을 보존하나요?"
-    answer: "아닙니다. Sink는 초기 anchor, fast는 최근 motion, slow는 먼 과거의 압축 정보를 맡으므로 작은 accessory·짧은 사건이 slow memory에서 사라질 수 있습니다."
+    answer: "Student의 현재 chunk가 초기 character, scene과 달라졌는지를 판단하려면 teacher도 같은 장기 history를 봐야 짧은 5초 teacher의 supervision mismatch를 줄일 수 있습니다."
+  - question: "Sink, slow, fast memory가 모든 detail을 보존하나요?"
+    answer: "아닙니다. Sink는 초기 anchor, fast는 최근 motion, slow는 먼 과거의 압축 정보를 맡으므로 작은 accessory, 짧은 사건이 slow memory에서 사라질 수 있습니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.06028.png
   alt: "1분 AI 영상의 Character Drift, Teacher도 5초만 보면 왜 못 고칠까? 논문 대표 이미지"
@@ -33,7 +33,7 @@ Teacher가 초기 scene을 기억하지 못하면 student의 identity drift를 �
 
 ![짧은 teacher와 long-context teacher의 차이](/assets/img/papers/2602.06028/x2.png)
 
-## Sink·Slow·Fast Memory가 KV Cache를 나눈다
+## Sink, Slow, Fast Memory가 KV Cache를 나눈다
 
 모든 frame의 KV cache를 그대로 보존하면 memory가 감당하기 어렵습니다. Context management는 세 영역으로 history를 나눕니다.
 
@@ -51,7 +51,7 @@ Teacher가 초기 scene을 기억하지 못하면 student의 identity drift를 �
 
 보고된 ECL은 20초 이상이며 기존 방식의 2~5초와 비교됩니다. 1분 이상 output이 가능하다는 사실과 1분 전의 모든 detail을 직접 참조한다는 사실은 다릅니다. Qualitative result에서 subject와 background가 유지돼도 작은 object, causal event, prompt story가 같은지는 별도 평가해야 합니다.
 
-![1분 video에서 subject·background 일관성 비교](/assets/img/papers/2602.06028/x4.png)
+![1분 video에서 subject, background 일관성 비교](/assets/img/papers/2602.06028/x4.png)
 
 ## 긴 Memory의 학습 비용과 손실을 함께 잰다
 
@@ -61,16 +61,16 @@ Long-context teacher를 training에 유지하는 비용은 큽니다. Slow memor
 
 ## Teacher와 Memory의 기여를 어떻게 분리할까
 
-Long-context teacher와 계층 memory가 동시에 바뀌면 어느 요소가 drift를 줄였는지 알기 어렵습니다. Teacher context와 student memory를 교차한 네 조건을 같은 checkpoint·data budget에서 비교합니다.
+Long-context teacher와 계층 memory가 동시에 바뀌면 어느 요소가 drift를 줄였는지 알기 어렵습니다. Teacher context와 student memory를 교차한 네 조건을 같은 checkpoint, data budget에서 비교합니다.
 
 | Teacher | Student memory | 확인할 질문 |
 |---|---|---|
 | Short | Short | 기존 local supervision 기준선 |
 | Long | Short | Teacher만 오래 봐도 student가 활용할 수 있는가 |
-| Short | Sink·slow·fast | Memory는 있지만 잘못 채점되는가 |
-| Long | Sink·slow·fast | Context match의 추가 이득은 얼마인가 |
+| Short | Sink, slow, fast | Memory는 있지만 잘못 채점되는가 |
+| Long | Sink, slow, fast | Context match의 추가 이득은 얼마인가 |
 
-동일한 initial frame에서 10초·20초·60초 rollout의 identity, motion과 작은 object를 측정합니다. Long teacher가 전체 품질을 높였지만 training compute가 크게 늘었다면 효과와 비용을 함께 공개해야 합니다. Student만 긴 memory를 갖는 조건에서 drift가 남는다면 supervision mismatch라는 설명을 지지합니다.
+동일한 initial frame에서 10초, 20초, 60초 rollout의 identity, motion과 작은 object를 측정합니다. Long teacher가 전체 품질을 높였지만 training compute가 크게 늘었다면 효과와 비용을 함께 공개해야 합니다. Student만 긴 memory를 갖는 조건에서 drift가 남는다면 supervision mismatch라는 설명을 지지합니다.
 
 ## ECL 20초는 어떤 질문으로 확인할까
 
@@ -80,8 +80,8 @@ ECL은 단순히 20초짜리 video를 생성했다는 뜻이 아니라 현재 ou
 
 | 기억 항목 | 필요한 구간 | 대표 failure |
 |---|---|---|
-| Initial face·costume | Sink·slow | identity·accessory drift |
-| 최근 pose·velocity | Fast | motion jump·flicker |
+| Initial face, costume | Sink, slow | identity, accessory drift |
+| 최근 pose, velocity | Fast | motion jump, flicker |
 | 잠깐 등장한 object | Slow selection | rare event 삭제 |
 | 앞 사건의 결과 | Slow와 story condition | causal reset |
 
@@ -93,28 +93,28 @@ Slow memory sampling interval과 token budget을 바꾸고 작은 object recall,
 
 Scene change가 의도된 prompt에서는 첫 배경을 끝까지 유지하는 것이 오히려 실패입니다. Identity는 유지하되 location은 바뀌어야 하는 case를 넣어 memory가 모든 과거 pixel을 복사하는지 narrative state를 선택하는지 확인합니다. Long-context consistency와 변화 가능성 사이의 균형입니다.
 
-운영 비용에는 long teacher의 training token·GPU memory와 student의 generation FPS·peak KV를 나눠 기록합니다. Teacher는 deployment에 없더라도 학습비를 늘리고, sink·slow·fast cache는 inference memory와 selection overhead를 청구합니다. 1분 output이 필요하지 않은 service라면 이 비용이 short-context baseline의 단순성보다 큰지 먼저 판단해야 합니다.
+운영 비용에는 long teacher의 training token, GPU memory와 student의 generation FPS, peak KV를 나눠 기록합니다. Teacher는 deployment에 없더라도 학습비를 늘리고, sink, slow, fast cache는 inference memory와 selection overhead를 청구합니다. 1분 output이 필요하지 않은 service라면 이 비용이 short-context baseline의 단순성보다 큰지 먼저 판단해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [카메라가 돌아오면 배경이 바뀌는 AI 영상, Spatia는 3D Memory로 어떻게 막나]({% post_url 2025-12-28-Spatia--Video-Generation-with-Updatable-Spatial-Memory %}) — Spatia가 정적 장면을 3D point cloud memory에 저장하고 새 clip에서 얻은 정보를 Visual SLAM으로 갱신해 loop-back 일관성을 유지하려는 구조와 한계를 정리합니다.
 - [화면 밖 자동차를 비디오 모델이 잊는다면? HyDRA의 Top-K 기억]({% post_url 2026-03-30-Out-of-Sight-but-Not-Out-of-Mind--Hybrid-Memory-for-Dynamic-Video-World-Models %}) — 과거 프레임을 모두 쌓지 않고 압축 메모리에서 관련 토큰만 찾는 HyDRA의 객체 영속성 설계, HM-World 범위와 검색 병목을 살펴봅니다.
-- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone·Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능·실시간 주장과 1~2-step 한계를 점검합니다.
+- [TMD는 50-step 비디오 생성을 정말 4-step으로 줄일까: Backbone, Flow Head 구조]({% post_url 2026-01-19-Transition-Matching-Distillation-for-Fast-Video-Generation %}) — TMD가 teacher의 긴 sampling trajectory를 네 transition으로 증류하고 무거운 backbone과 반복 flow head를 분리하는 방식, 95% 성능, 실시간 주장과 1~2-step 한계를 점검합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 1분 영상을 만들면 1분 전 정보를 모두 기억하나요?
 
-아닙니다. Output duration과 effective context length는 다르며 보고된 ECL 20초 이상도 identity·작은 object·causal event별 recall을 각각 보장하지 않습니다.
+아닙니다. Output duration과 effective context length는 다르며 보고된 ECL 20초 이상도 identity, 작은 object, causal event별 recall을 각각 보장하지 않습니다.
 
 ### Long-context teacher는 왜 필요한가요?
 
-Student의 현재 chunk가 초기 character·scene과 달라졌는지를 판단하려면 teacher도 같은 장기 history를 봐야 짧은 5초 teacher의 supervision mismatch를 줄일 수 있습니다.
+Student의 현재 chunk가 초기 character, scene과 달라졌는지를 판단하려면 teacher도 같은 장기 history를 봐야 짧은 5초 teacher의 supervision mismatch를 줄일 수 있습니다.
 
-### Sink·slow·fast memory가 모든 detail을 보존하나요?
+### Sink, slow, fast memory가 모든 detail을 보존하나요?
 
-아닙니다. Sink는 초기 anchor, fast는 최근 motion, slow는 먼 과거의 압축 정보를 맡으므로 작은 accessory·짧은 사건이 slow memory에서 사라질 수 있습니다.
+아닙니다. Sink는 초기 anchor, fast는 최근 motion, slow는 먼 과거의 압축 정보를 맡으므로 작은 accessory, 짧은 사건이 slow memory에서 사라질 수 있습니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.06028)

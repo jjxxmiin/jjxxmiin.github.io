@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "MMDetection 구조 읽는 법: Backbone·Neck·Head와 테스트 명령 연결"
-summary: "MMDetection 설정을 backbone·neck·dense/RoI head로 분해하고 2019년 config, checkpoint, dataset, 테스트 명령의 대응 관계를 안전하게 읽는 방법입니다."
-description: "MMDetection의 backbone·neck·head 구조와 config·checkpoint·dataset·테스트 명령의 연결을 설명하고 오래된 예제의 mismatch를 진단합니다."
+title:  "MMDetection 구조 읽는 법: Backbone, Neck, Head와 테스트 명령 연결"
+summary: "MMDetection 설정을 backbone, neck, dense/RoI head로 분해하고 2019년 config, checkpoint, dataset, 테스트 명령의 대응 관계를 안전하게 읽는 방법입니다."
+description: "MMDetection의 backbone, neck, head 구조와 config, checkpoint, dataset, 테스트 명령의 연결을 설명하고 오래된 예제의 mismatch를 진단합니다."
 image:
   path: /assets/img/thumb/mmdetection.jpg
   alt: MMDetection 톺아보기 대표 이미지
@@ -13,14 +13,14 @@ tags:
   - 컴퓨터비전
 faq:
   - question: "MMDetection에서 config와 checkpoint 이름이 왜 같아야 하나요?"
-    answer: "Checkpoint의 가중치는 config가 정의한 backbone·neck·head 구조와 class 수를 전제로 합니다. 비슷한 모델명이라도 구조가 다르면 key나 tensor shape가 맞지 않을 수 있습니다."
+    answer: "Checkpoint의 가중치는 config가 정의한 backbone, neck, head 구조와 class 수를 전제로 합니다. 비슷한 모델명이라도 구조가 다르면 key나 tensor shape가 맞지 않을 수 있습니다."
   - question: "Backbone과 neck과 head는 각각 무엇을 하나요?"
     answer: "Backbone은 기본 feature를 추출하고, neck은 여러 stage의 feature를 재구성하며, head는 그 feature에서 class와 box 또는 mask를 예측합니다."
   - question: "오래된 MMDetection 명령을 그대로 실행해도 되나요?"
     answer: "현재 범용 명령으로 보면 안 됩니다. 이 글은 2019년 저장소 구조의 기록이므로 인자의 역할을 참고하고, 실제 파일명과 CLI는 사용하는 revision에서 확인해야 합니다."
 ---
 
-MMDetection 설정을 읽을 때는 모델 이름부터 외우기보다 **Backbone → Neck → DenseHead 또는 RoIHead가 어떤 순서로 특징을 만들고 예측하는지** 먼저 연결하면 됩니다. Config는 모델 구조뿐 아니라 dataset과 학습·테스트 pipeline을 묶고, checkpoint는 그 구조에 맞춰 학습된 가중치입니다. 실행 오류를 줄이려면 config·checkpoint·data를 같은 실험 묶음으로 확인해야 합니다.
+MMDetection 설정을 읽을 때는 모델 이름부터 외우기보다 **Backbone → Neck → DenseHead 또는 RoIHead가 어떤 순서로 특징을 만들고 예측하는지** 먼저 연결하면 됩니다. Config는 모델 구조뿐 아니라 dataset과 학습, 테스트 pipeline을 묶고, checkpoint는 그 구조에 맞춰 학습된 가중치입니다. 실행 오류를 줄이려면 config, checkpoint, data를 같은 실험 묶음으로 확인해야 합니다.
 
 ## 모델 이름을 부품으로 해체하기
 
@@ -30,7 +30,7 @@ MMDetection은 여러 object detector와 공통 모듈을 한 도구 상자에�
 - Neck: backbone의 feature map을 수정하거나 다시 구성하는 부분, 예시는 FPN
 - DenseHead: feature map의 촘촘한 위치에서 작동하는 head
 - RoIExtractor: RoI Pooling 같은 연산으로 영역별 feature를 추출하는 부분
-- RoIHead: bounding box 분류·회귀와 mask를 예측하는 부분
+- RoIHead: bounding box 분류, 회귀와 mask를 예측하는 부분
 
 ![MMDetection model representation](/assets/img/post_img/mmdetection/figure1.PNG)
 
@@ -38,8 +38,8 @@ MMDetection은 여러 object detector와 공통 모듈을 한 도구 상자에�
 
 | 유형 | 처리 흐름 | 기존 글의 예 |
 |---|---|---|
-| Single-stage | feature extraction → localization·classification 동시 처리 | SSD, RetinaNet, GHM, FCOS, FSAF |
-| Two-stage | region proposal → 분류·box 회귀 | Fast/Faster R-CNN, R-FCN, Mask R-CNN, Grid R-CNN |
+| Single-stage | feature extraction → localization, classification 동시 처리 | SSD, RetinaNet, GHM, FCOS, FSAF |
+| Two-stage | region proposal → 분류, box 회귀 | Fast/Faster R-CNN, R-FCN, Mask R-CNN, Grid R-CNN |
 | Multi-stage | 여러 stage 또는 branch를 연속 사용 | Cascade R-CNN, Hybrid Task Cascade |
 
 모델을 고를 때 표의 연도나 이름보다 “DenseHead에서 바로 예측하는가, proposal과 RoI 처리를 거치는가”를 먼저 보면 설정 파일의 역할을 놓치지 않습니다.
@@ -54,7 +54,7 @@ MMDetection은 여러 object detector와 공통 모듈을 한 도구 상자에�
 
 - Mixed Precision Training의 FP16
 - Soft NMS와 OHEM
-- DCN·DCNv2의 deformable 연산
+- DCN, DCNv2의 deformable 연산
 - Group Normalization과 Weight Standardization
 - HRNet backbone
 - Guided Anchoring
@@ -62,7 +62,7 @@ MMDetection은 여러 object detector와 공통 모듈을 한 도구 상자에�
 
 이 목록은 모든 모델이 이 기능을 동시에 쓴다는 뜻이 아닙니다. 어떤 설정이 backbone, neck, head 또는 학습 보조 모듈을 바꾸는지 찾기 위한 색인에 가깝습니다.
 
-![VOC·COCO benchmark](/assets/img/post_img/mmdetection/figure3.PNG)
+![VOC, COCO benchmark](/assets/img/post_img/mmdetection/figure3.PNG)
 
 ## 데이터와 테스트 명령의 연결 관계
 
@@ -130,8 +130,8 @@ python demo/webcam_demo.py configs/faster_rcnn_r50_fpn_1x.py \
 
 1. config가 기대하는 모델 구조와 checkpoint가 같은 모델인지 확인합니다.
 2. config가 가리키는 dataset type과 실제 data 폴더 구조를 맞춥니다.
-3. 단순 화면 표시, bbox·segm 평가, 웹캠 입력 중 필요한 작업 하나만 선택합니다.
-4. config·checkpoint 이름이 저장소에 없으면 비슷한 이름으로 추측해 실행하지 않습니다.
+3. 단순 화면 표시, bbox, segm 평가, 웹캠 입력 중 필요한 작업 하나만 선택합니다.
+4. config, checkpoint 이름이 저장소에 없으면 비슷한 이름으로 추측해 실행하지 않습니다.
 
 원문이 연결한 기준 자료는 [MMDetection 논문](https://arxiv.org/abs/1906.07155)과 [공식 저장소](https://github.com/open-mmlab/mmdetection)입니다.
 
@@ -143,15 +143,15 @@ Backbone을 바꾸면 출력 stage 수와 channel이 neck의 입력과 맞는지
 
 Class 수를 바꾸면 head 출력뿐 아니라 dataset의 category mapping과 checkpoint 로드 범위를 봐야 합니다. 기존 checkpoint의 backbone 가중치는 쓸 수 있어도 class head shape는 맞지 않을 수 있습니다. 경고를 무시하기 전에 의도적으로 재학습할 layer인지, 잘못된 config 조합인지 구분합니다.
 
-테스트 단계에서는 한 작업만 고릅니다. 한 장 시각화가 목적이면 평가 annotation과 분산 실행 옵션이 모두 필요하지 않을 수 있고, bbox·segm 지표가 목적이면 dataset과 평가 종류가 맞아야 합니다. 실행 명령을 짧게 만든 뒤 산출물 하나를 확인하고 옵션을 추가하면 오래된 CLI 차이도 찾기 쉽습니다.
+테스트 단계에서는 한 작업만 고릅니다. 한 장 시각화가 목적이면 평가 annotation과 분산 실행 옵션이 모두 필요하지 않을 수 있고, bbox, segm 지표가 목적이면 dataset과 평가 종류가 맞아야 합니다. 실행 명령을 짧게 만든 뒤 산출물 하나를 확인하고 옵션을 추가하면 오래된 CLI 차이도 찾기 쉽습니다.
 
-Config와 checkpoint에는 사용한 MMDetection·MMCV·PyTorch version을 함께 기록합니다. 같은 이름의 설정도 release 사이에 registry와 default preprocessing이 달라질 수 있어, 실행 성공만으로 이전 실험과 동일하다고 볼 수 없습니다.
+Config와 checkpoint에는 사용한 MMDetection, MMCV, PyTorch version을 함께 기록합니다. 같은 이름의 설정도 release 사이에 registry와 default preprocessing이 달라질 수 있어, 실행 성공만으로 이전 실험과 동일하다고 볼 수 없습니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Detectron2 데모가 CUDA ROI 오류로 멈출 때: 설정·가중치·빌드 점검법]({% post_url 2020-04-04-Detectron %}) — Detectron2 객체 탐지 데모의 구성 요소를 분리해 이해하고, CUDA 환경 불일치와 모델 경로를 순서대로 점검합니다.
-- [RailSem19 데이터셋으로 철도 객체 탐지를 바로 학습해도 될까: 라벨 2종과 클래스 불균형]({% post_url 2025-02-28-RailSem19 %}) — RailSem19의 8,500장 철도·트램 영상, dense segmentation과 geometric annotation의 차이, 주요 클래스 빈도와 학습 과제를 선택할 때의 한계를 정리합니다.
+- [Detectron2 데모가 CUDA ROI 오류로 멈출 때: 설정, 가중치, 빌드 점검법]({% post_url 2020-04-04-Detectron %}) — Detectron2 객체 탐지 데모의 구성 요소를 분리해 이해하고, CUDA 환경 불일치와 모델 경로를 순서대로 점검합니다.
+- [RailSem19 데이터셋으로 철도 객체 탐지를 바로 학습해도 될까: 라벨 2종과 클래스 불균형]({% post_url 2025-02-28-RailSem19 %}) — RailSem19의 8,500장 철도, 트램 영상, dense segmentation과 geometric annotation의 차이, 주요 클래스 빈도와 학습 과제를 선택할 때의 한계를 정리합니다.
 - [Youtu-VL은 객체 검출 헤드를 없앨 수 있을까: Vision-as-Target과 NTP-M 구조]({% post_url 2026-01-29-Youtu-VL--Unleashing-Visual-Potential-via-Unified-Vision-Language-Supervision %}) — 시각을 예측 대상으로 삼는 VLUAS와 별도 디코더 없이 dense prediction을 수행하는 NTP-M의 이득과 비용을 분석합니다.
 <!-- internal-links:end -->
 
@@ -159,7 +159,7 @@ Config와 checkpoint에는 사용한 MMDetection·MMCV·PyTorch version을 함�
 
 ### MMDetection에서 config와 checkpoint 이름이 왜 같아야 하나요?
 
-Checkpoint의 가중치는 config가 정의한 backbone·neck·head 구조와 class 수를 전제로 합니다. 비슷한 모델명이라도 구조가 다르면 key나 tensor shape가 맞지 않을 수 있습니다.
+Checkpoint의 가중치는 config가 정의한 backbone, neck, head 구조와 class 수를 전제로 합니다. 비슷한 모델명이라도 구조가 다르면 key나 tensor shape가 맞지 않을 수 있습니다.
 
 ### Backbone과 neck과 head는 각각 무엇을 하나요?
 

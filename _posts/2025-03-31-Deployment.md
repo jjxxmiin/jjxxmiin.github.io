@@ -6,11 +6,11 @@ source_citations:
     url: "https://onnxruntime.ai/docs/how-to/quantization.html"
 layout: post
 title: "AI 모델 API가 뜬다고 배포가 끝난 게 아니다: 프로덕션 전 5개 Gate"
-summary: "학습된 모델을 ONNX·FastAPI·Docker·Kubernetes로 옮길 때 정확도, 상태 확인, 롤백, 관측성, 비밀값과 드리프트를 어떤 순서로 검증해야 하는지 기존 예제의 위험까지 짚습니다."
-description: "AI 모델 API를 프로덕션에 배포하기 전 예측 동등성·상태 검사·롤백·관측성·비밀값을 다섯 개 Gate로 나눠 검증하는 실무 체크리스트입니다."
+summary: "학습된 모델을 ONNX, FastAPI, Docker, Kubernetes로 옮길 때 정확도, 상태 확인, 롤백, 관측성, 비밀값과 드리프트를 어떤 순서로 검증해야 하는지 기존 예제의 위험까지 짚습니다."
+description: "AI 모델 API를 프로덕션에 배포하기 전 예측 동등성, 상태 검사, 롤백, 관측성, 비밀값을 다섯 개 Gate로 나눠 검증하는 실무 체크리스트입니다."
 faq:
   - question: "ONNX 변환 검사가 통과하면 예측도 같은가요?"
-    answer: "아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본·ONNX·양자화 모델의 출력과 정확도를 비교해야 합니다."
+    answer: "아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본, ONNX, 양자화 모델의 출력과 정확도를 비교해야 합니다."
   - question: "liveness와 readiness는 왜 나눠야 하나요?"
     answer: "프로세스가 살아 있어도 모델 로딩이나 대표 추론이 실패할 수 있습니다. 재시작 판단과 트래픽 수신 가능 상태를 서로 다른 검사로 다뤄야 합니다."
   - question: "배포 실패 때 latest 태그로 돌아가면 되나요?"
@@ -45,7 +45,7 @@ AI 모델 배포는 **API가 응답하는 순간이 아니라, 같은 입력의 
 
 기존 FastAPI 예제는 ONNX session을 전역으로 읽고 `/health`와 `/predict`를 제공하며 요청 수, 클래스별 예측 수, 처리 시간을 Prometheus 지표로 기록합니다. 여기서 단순한 health 응답은 웹 프로세스가 살아 있다는 사실만 보여줄 수 있습니다. 모델 파일을 읽을 수 있는지, 대표 입력에 정상 출력을 내는지까지 확인하려면 readiness 성격의 검사가 따로 필요합니다.
 
-Kubernetes 예제의 두 replica, CPU·memory request와 limit, liveness/readiness probe, Service, Ingress, CPU 70% 기준의 2~10 replica HPA는 출발점입니다. 실제 값은 모델의 초기 로딩 시간과 요청량으로 다시 정해야 합니다. CORS wildcard도 편리한 개발 기본값이지 공개 서비스의 최종 정책이 아닙니다.
+Kubernetes 예제의 두 replica, CPU, memory request와 limit, liveness/readiness probe, Service, Ingress, CPU 70% 기준의 2~10 replica HPA는 출발점입니다. 실제 값은 모델의 초기 로딩 시간과 요청량으로 다시 정해야 합니다. CORS wildcard도 편리한 개발 기본값이지 공개 서비스의 최종 정책이 아닙니다.
 
 검수할 때는 정상 요청만 보내지 않습니다. pod 재시작 중 요청, 느린 추론, 메모리 압박, 잘못된 파일 업로드를 각각 재현하고 상태 코드와 지표가 운영자가 이해할 수 있게 남는지 봅니다.
 
@@ -64,17 +64,17 @@ GitHub Actions 예제는 이미지에 `latest`와 commit SHA를 붙이고, regis
 
 ## Gate 4: 대시보드보다 먼저 관측할 실패를 정한다
 
-기존 구성은 Prometheus와 Grafana, Elasticsearch·Logstash·Kibana, Fluentd 예시를 담고 있습니다. 하지만 dashboard를 띄웠다고 관측성이 생기지는 않습니다. 요청량, 지연 시간, 오류율, 자원 사용량에 더해 모델 특유의 신호인 클래스 분포와 입력 분포 변화를 함께 봐야 합니다.
+기존 구성은 Prometheus와 Grafana, Elasticsearch, Logstash, Kibana, Fluentd 예시를 담고 있습니다. 하지만 dashboard를 띄웠다고 관측성이 생기지는 않습니다. 요청량, 지연 시간, 오류율, 자원 사용량에 더해 모델 특유의 신호인 클래스 분포와 입력 분포 변화를 함께 봐야 합니다.
 
 개발 예제의 `admin/admin123`, 보안 기능을 끈 단일 Elasticsearch node, `emptyDir` 저장소는 프로덕션 기본값이 될 수 없습니다. 재시작 뒤 데이터가 사라지는지, 로그에 개인정보가 들어가는지, 경보가 실제 담당자에게 도달하는지를 먼저 시험합니다. 저장 기간과 접근 권한도 모델 코드와 같은 배포 변경 사항으로 관리해야 합니다.
 
 ## Gate 5: 비밀값과 드리프트 예제를 실행 코드로 착각하지 않는다
 
-MLflow·PostgreSQL·MinIO 예제에는 `minioadmin`과 `mlflow` 같은 하드코딩된 자격 증명이 있고, Vault 예제는 root token을 쓰는 개발 모드입니다. 이 값들은 구조를 설명하는 표식이지 운영용 비밀값이 아닙니다. Kubernetes Secret이나 Vault를 도입하더라도 최소 권한, 회전, 감사 로그가 없으면 이름만 바뀐 하드코딩에 불과합니다. NetworkPolicy 역시 실제 namespace와 통신 방향을 검증해야 합니다.
+MLflow, PostgreSQL, MinIO 예제에는 `minioadmin`과 `mlflow` 같은 하드코딩된 자격 증명이 있고, Vault 예제는 root token을 쓰는 개발 모드입니다. 이 값들은 구조를 설명하는 표식이지 운영용 비밀값이 아닙니다. Kubernetes Secret이나 Vault를 도입하더라도 최소 권한, 회전, 감사 로그가 없으면 이름만 바뀐 하드코딩에 불과합니다. NetworkPolicy 역시 실제 namespace와 통신 방향을 검증해야 합니다.
 
 드리프트 감지 조각은 통계 검정의 p-value 0.05, 한 시간 간격 반복, webhook placeholder를 보여주지만 `fetch_recent_data`가 정의되지 않았습니다. 별도의 CronJob 예제와도 실행 방식이 겹칩니다. 그러므로 이 코드는 핵심 아이디어를 설명하는 불완전한 조각입니다. 기준 데이터 보관, 최근 데이터 수집, 다중 feature 검정, 경보 중복 억제, 재학습 승인 절차를 채우기 전에는 자동 운영으로 부르면 안 됩니다.
 
-최종 승인표는 다섯 줄이면 충분합니다. **예측 동등성**, **실패를 반영하는 health**, **SHA 기반 rollback**, **행동 가능한 metric·log**, **회전 가능한 secret과 검증된 drift 절차**입니다. Argo CD와 통합 배포 script도 placeholder 저장소와 여러 선행 manifest를 가정하므로, 이 다섯 Gate를 대신하지 못합니다.
+최종 승인표는 다섯 줄이면 충분합니다. **예측 동등성**, **실패를 반영하는 health**, **SHA 기반 rollback**, **행동 가능한 metric, log**, **회전 가능한 secret과 검증된 drift 절차**입니다. Argo CD와 통합 배포 script도 placeholder 저장소와 여러 선행 manifest를 가정하므로, 이 다섯 Gate를 대신하지 못합니다.
 
 ## Gate는 문서 항목이 아니라 배포를 멈추는 조건이다
 
@@ -84,11 +84,11 @@ MLflow·PostgreSQL·MinIO 예제에는 `minioadmin`과 `mlflow` 같은 하드코
 
 | Gate | 남길 증거 | 실패 때 행동 |
 |---|---|---|
-| 예측 | 고정 입력별 원본·변환 출력 차이 | export·quantization 보류 |
+| 예측 | 고정 입력별 원본, 변환 출력 차이 | export, quantization 보류 |
 | 상태 | cold start와 대표 추론 결과 | traffic 차단, 원인 로그 확인 |
-| 복구 | 현재·이전 image SHA | 이전 정상 SHA로 rollback |
-| 관측 | latency·error·모델 분포 경보 | 배포 중단 또는 담당자 호출 |
-| 보안 | secret 출처·권한·회전 기록 | 노출 값 폐기와 재발급 |
+| 복구 | 현재, 이전 image SHA | 이전 정상 SHA로 rollback |
+| 관측 | latency, error, 모델 분포 경보 | 배포 중단 또는 담당자 호출 |
+| 보안 | secret 출처, 권한, 회전 기록 | 노출 값 폐기와 재발급 |
 
 ## 장애 연습은 정상 요청과 다른 정보를 보여 준다
 
@@ -108,16 +108,16 @@ MLflow·PostgreSQL·MinIO 예제에는 `minioadmin`과 `mlflow` 같은 하드코
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도·비용·프라이버시 판단
-- [오픈소스 LLM이 GPT API보다 싸질까: vLLM·PagedAttention·TCO 계산]({% post_url 2026-04-22-Tired-of-GPT-API-Bills-The-Real-Face-and-Serving-Optimization-Strategy-of-Open-Generative-AI-in-Production %}) — 오픈소스 LLM의 무료 가중치와 실제 서빙 비용을 구분하고, KV Cache·Continuous Batching·양자화와 GPU 이용률로 손익을 계산하는 방법을 정리합니다.
-- [Supertonic 99M TTS가 정말 167배 빠를까: RTF·404MB·음질의 교환]({% post_url 2026-05-21-The-Era-of-API-Hustling-is-Over-Implementing-167x-Faster-On-Device-TTS-with-99M-Ultra-Light-Architecture-Supertonic-Deep-Dive %}) — Supertonic의 99M 파라미터·404MB ONNX 자산과 RTF 0.001~0.006 수치를 해석하고, 오프라인 TTS의 지연·음질·기기 호환성·커스텀 음성 비용을 판단합니다.
+- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도, 비용, 프라이버시 판단
+- [Supertonic 99M TTS가 정말 167배 빠를까: RTF, 404MB, 음질의 교환]({% post_url 2026-05-21-The-Era-of-API-Hustling-is-Over-Implementing-167x-Faster-On-Device-TTS-with-99M-Ultra-Light-Architecture-Supertonic-Deep-Dive %}) — Supertonic의 99M 파라미터, 404MB ONNX 자산과 RTF 0.001~0.006 수치를 해석하고, 오프라인 TTS의 지연, 음질, 기기 호환성, 커스텀 음성 비용을 판단합니다.
+- [vLLM과 FSDP를 함께 쓰면 LLM RL의 OOM이 사라질까? veRL의 조건]({% post_url 2026-05-03-Escaping-the-LLM-RL-Hell-A-Deep-Dive-into-ByteDances-Hidden-RL-Weapon-veRL %}) — veRL이 rollout과 학습 엔진을 HybridFlow로 연결하는 방식, resharing, Ray 구조의 이점과 버전, VRAM 튜닝 난도를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### ONNX 변환 검사가 통과하면 예측도 같은가요?
 
-아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본·ONNX·양자화 모델의 출력과 정확도를 비교해야 합니다.
+아닙니다. 그래프 형식 검증과 예측 동등성은 별개이므로 대표 입력에서 원본, ONNX, 양자화 모델의 출력과 정확도를 비교해야 합니다.
 
 ### liveness와 readiness는 왜 나눠야 하나요?
 

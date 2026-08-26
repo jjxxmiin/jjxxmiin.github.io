@@ -10,15 +10,15 @@ tags:
   - 영상생성
   - 트랜스포머
 math: true
-summary: "LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연·환각·안전 한계를 정리합니다."
-description: "LingBot-VA가 video·action token을 causal sequence로 학습하고 미래 visual state에서 action을 복원하는 원리, counterfactual 검증·prediction drift·latency와 안전 경계를 설명합니다."
+summary: "LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연, 환각, 안전 한계를 정리합니다."
+description: "LingBot-VA가 video, action token을 causal sequence로 학습하고 미래 visual state에서 action을 복원하는 원리, counterfactual 검증, prediction drift, latency와 안전 경계를 설명합니다."
 faq:
   - question: "미래 frame이 선명하면 robot action도 정확한가요?"
-    answer: "아닙니다. 시각적 품질과 action-conditioned state transition의 정확도는 다르며 inverse dynamics, contact·torque와 closed-loop 성공을 따로 검증해야 합니다."
+    answer: "아닙니다. 시각적 품질과 action-conditioned state transition의 정확도는 다르며 inverse dynamics, contact, torque와 closed-loop 성공을 따로 검증해야 합니다."
   - question: "Causal mask를 쓰면 물리적 인과를 학습한 건가요?"
-    answer: "미래 token 누출은 막지만 관측되지 않은 힘·마찰·명령 같은 confounder까지 식별하지는 못하므로 action intervention과 실제 rollout 비교가 필요합니다."
+    answer: "미래 token 누출은 막지만 관측되지 않은 힘, 마찰, 명령 같은 confounder까지 식별하지는 못하므로 action intervention과 실제 rollout 비교가 필요합니다."
   - question: "예측한 미래와 실제 camera가 다르면 어떻게 해야 하나요?"
-    answer: "오차가 threshold를 넘으면 남은 action chunk를 폐기하고 새 관측으로 다시 계획하며 torque·collision sensor와 독립 safety controller가 실행을 제한해야 합니다."
+    answer: "오차가 threshold를 넘으면 남은 action chunk를 폐기하고 새 관측으로 다시 계획하며 torque, collision sensor와 독립 safety controller가 실행을 제한해야 합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2601.21998.png
   alt: "로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model 논문 대표 이미지"
@@ -64,12 +64,12 @@ World model hallucination은 video artifact로 끝나지 않고 물리적 사고
 
 | 입력 변화 | 기대되는 예측 | 실패 신호 |
 |---|---|---|
-| Gripper를 열기·닫기로 변경 | 접촉과 object 상태가 달라짐 | 두 미래가 거의 같음 |
+| Gripper를 열기, 닫기로 변경 | 접촉과 object 상태가 달라짐 | 두 미래가 거의 같음 |
 | 이동 방향만 반대로 변경 | end-effector 경로가 반대로 바뀜 | background까지 불필요하게 변경 |
-| 실행 불가능한 action | 제한·실패 state를 표현 | 항상 성공 장면 생성 |
+| 실행 불가능한 action | 제한, 실패 state를 표현 | 항상 성공 장면 생성 |
 | Action 없이 같은 관측 반복 | 가능한 자연 변화만 발생 | 학습된 조작을 자동 재생 |
 
-예측 video와 실제 rollout을 pixel 단위로만 비교하면 조명 변화가 큰 오차를 만들고 작은 contact 오류를 가릴 수 있습니다. Object pose, gripper state, collision, task progress처럼 control에 필요한 state를 추출해 별도 측정하는 편이 낫습니다. Deformable object는 단일 pose로 충분하지 않으므로 shape·contact와 최종 task success까지 봅니다.
+예측 video와 실제 rollout을 pixel 단위로만 비교하면 조명 변화가 큰 오차를 만들고 작은 contact 오류를 가릴 수 있습니다. Object pose, gripper state, collision, task progress처럼 control에 필요한 state를 추출해 별도 측정하는 편이 낫습니다. Deformable object는 단일 pose로 충분하지 않으므로 shape, contact와 최종 task success까지 봅니다.
 
 ## 오류가 어느 모듈에서 Action으로 전달됐는지 나눈다
 
@@ -81,15 +81,15 @@ Asynchronous pipeline에는 observation timestamp, predicted horizon, action gen
 
 ## 현장 안전 기준은 visual error보다 앞선다
 
-Predicted·observed state 차이를 하나의 평균 threshold로 두면 background 변화에 과민하거나 작은 위험 object에 둔감할 수 있습니다. Gripper 주변, 사람, obstacle처럼 safety-critical region에 더 높은 가중치를 주고 torque·force·joint limit은 video model과 독립적으로 검사합니다.
+Predicted, observed state 차이를 하나의 평균 threshold로 두면 background 변화에 과민하거나 작은 위험 object에 둔감할 수 있습니다. Gripper 주변, 사람, obstacle처럼 safety-critical region에 더 높은 가중치를 주고 torque, force, joint limit은 video model과 독립적으로 검사합니다.
 
-PoC의 합격 기준은 선명한 rollout video가 아닙니다. Candidate action 변화에 미래가 올바르게 반응하고, oracle ablation으로 두 branch의 오류가 허용 범위이며, drift가 생겼을 때 deadline 안에 중단·재계획하는지를 확인해야 합니다. 이 조건을 만족할 때 world prediction이 실제 control의 유용한 중간 표현이 됩니다.
+PoC의 합격 기준은 선명한 rollout video가 아닙니다. Candidate action 변화에 미래가 올바르게 반응하고, oracle ablation으로 두 branch의 오류가 허용 범위이며, drift가 생겼을 때 deadline 안에 중단, 재계획하는지를 확인해야 합니다. 이 조건을 만족할 때 world prediction이 실제 control의 유용한 중간 표현이 됩니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
 - [로봇은 미래 픽셀까지 그려야 할까? FRAPPE의 다중 VFM 정렬]({% post_url 2026-02-22-FRAPPE--Infusing-World-Modeling-into-Generalist-Policies-via-Multiple-Future-Representation-Alignment %}) — FRAPPE가 다음 화면의 픽셀 대신 여러 시각 기초 모델의 미래 표현을 맞추는 이유와 장기 조작에서 얻는 이점, 계산 비용을 정리합니다.
-- [로봇 비디오가 물체를 뚫고 지나간다면? Kinema4D의 URDF·Pointmap 제어]({% post_url 2026-03-18-Kinema4D--Kinematic-4D-World-Modeling-for-Spatiotemporal-Embodied-Simulation %}) — 로봇 기구학에서 만든 3D 궤적과 pointmap을 비디오 생성에 넣는 Kinema4D의 구조, Robo4D-200K 학습 범위와 물리 한계를 살펴봅니다.
+- [로봇 비디오가 물체를 뚫고 지나간다면? Kinema4D의 URDF, Pointmap 제어]({% post_url 2026-03-18-Kinema4D--Kinematic-4D-World-Modeling-for-Spatiotemporal-Embodied-Simulation %}) — 로봇 기구학에서 만든 3D 궤적과 pointmap을 비디오 생성에 넣는 Kinema4D의 구조, Robo4D-200K 학습 범위와 물리 한계를 살펴봅니다.
 - [로봇이 목표까지의 중간 장면을 상상하면 왜 나아질까? Act2Goal의 MSTH]({% post_url 2025-12-31-Act2Goal--From-World-Model-To-General-Goal-conditioned-Policy %}) — Act2Goal이 현재 image와 goal image 사이의 중간 상태를 visual world model로 만들고, 가까운 미래는 촘촘하게 먼 미래는 성기게 읽는 MSTH로 control에 연결하는 방식을 설명합니다.
 <!-- internal-links:end -->
 
@@ -97,14 +97,14 @@ PoC의 합격 기준은 선명한 rollout video가 아닙니다. Candidate actio
 
 ### 미래 frame이 선명하면 robot action도 정확한가요?
 
-아닙니다. 시각적 품질과 action-conditioned state transition의 정확도는 다르며 inverse dynamics, contact·torque와 closed-loop 성공을 따로 검증해야 합니다.
+아닙니다. 시각적 품질과 action-conditioned state transition의 정확도는 다르며 inverse dynamics, contact, torque와 closed-loop 성공을 따로 검증해야 합니다.
 
 ### Causal mask를 쓰면 물리적 인과를 학습한 건가요?
 
-미래 token 누출은 막지만 관측되지 않은 힘·마찰·명령 같은 confounder까지 식별하지는 못하므로 action intervention과 실제 rollout 비교가 필요합니다.
+미래 token 누출은 막지만 관측되지 않은 힘, 마찰, 명령 같은 confounder까지 식별하지는 못하므로 action intervention과 실제 rollout 비교가 필요합니다.
 
 ### 예측한 미래와 실제 camera가 다르면 어떻게 해야 하나요?
 
-오차가 threshold를 넘으면 남은 action chunk를 폐기하고 새 관측으로 다시 계획하며 torque·collision sensor와 독립 safety controller가 실행을 제한해야 합니다.
+오차가 threshold를 넘으면 남은 action chunk를 폐기하고 새 관측으로 다시 계획하며 torque, collision sensor와 독립 safety controller가 실행을 제한해야 합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2601.21998)

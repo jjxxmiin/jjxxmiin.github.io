@@ -8,21 +8,21 @@ tags:
   - 멀티모달
   - 파인튜닝
 math: true
-summary: "Green-VLA가 L0·L1·R0·R1·R2 단계로 vision-language grounding, multi-embodiment pretraining, robot adaptation과 RL alignment를 나누는 구조를 검토합니다."
-description: "Green-VLA의 L0~R2 staged training, flow-matching action expert와 OOD·episode guidance를 설명하고 15~20% 주장, RL 비용·latency·안전 검증 조건을 점검합니다."
+summary: "Green-VLA가 L0, L1, R0, R1, R2 단계로 vision-language grounding, multi-embodiment pretraining, robot adaptation과 RL alignment를 나누는 구조를 검토합니다."
+description: "Green-VLA의 L0~R2 staged training, flow-matching action expert와 OOD, episode guidance를 설명하고 15~20% 주장, RL 비용, latency, 안전 검증 조건을 점검합니다."
 faq:
   - question: "5단계를 모두 거쳐야 Green-VLA의 효과를 얻나요?"
-    answer: "단계별 기여는 L1·R0·R1·R2를 하나씩 뺀 ablation으로 확인해야 하며 data·hardware가 다른 환경에서 다섯 단계가 항상 최적이라고 단정할 수 없습니다."
+    answer: "단계별 기여는 L1, R0, R1, R2를 하나씩 뺀 ablation으로 확인해야 하며 data, hardware가 다른 환경에서 다섯 단계가 항상 최적이라고 단정할 수 없습니다."
   - question: "R2 RL alignment가 robot 안전을 보장하나요?"
-    answer: "아닙니다. Reward 설계와 simulation gap에 따라 unsafe shortcut이 생길 수 있어 collision·joint limit·safety stop과 실제 hardware rollout을 독립적으로 검증해야 합니다."
+    answer: "아닙니다. Reward 설계와 simulation gap에 따라 unsafe shortcut이 생길 수 있어 collision, joint limit, safety stop과 실제 hardware rollout을 독립적으로 검증해야 합니다."
   - question: "OOD 감지가 동작하면 새 환경에 배포해도 되나요?"
-    answer: "OOD score의 calibration, false negative·false positive와 중단 뒤 recovery가 확인돼야 하며 낮은 confidence일 때 실행을 차단하는 별도 safety controller가 필요합니다."
+    answer: "OOD score의 calibration, false negative, false positive와 중단 뒤 recovery가 확인돼야 하며 낮은 confidence일 때 실행을 차단하는 별도 safety controller가 필요합니다."
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.00919.png
   alt: "Green-VLA의 5단계 Curriculum은 무엇을 더하나? R2 RL과 OOD 검증 논문 대표 이미지"
 ---
 
-Green-VLA의 핵심은 하나의 VLA를 한 번에 학습하지 않고, **vision-language grounding에서 multi-embodiment pretraining, 특정 robot adaptation과 RL policy alignment까지 다섯 단계로 나눈 것**입니다. 이 curriculum은 오류 지점을 분리하는 장점이 있지만, 15~20% 향상 주장만으로 모든 robot의 범용성·실시간성·안전이 입증되지는 않습니다.
+Green-VLA의 핵심은 하나의 VLA를 한 번에 학습하지 않고, **vision-language grounding에서 multi-embodiment pretraining, 특정 robot adaptation과 RL policy alignment까지 다섯 단계로 나눈 것**입니다. 이 curriculum은 오류 지점을 분리하는 장점이 있지만, 15~20% 향상 주장만으로 모든 robot의 범용성, 실시간성, 안전이 입증되지는 않습니다.
 
 ## Green-VLA가 제안한 핵심은 무엇인가
 
@@ -56,7 +56,7 @@ Green-VLA는 휴머노이드와 서로 다른 robot 형태를 함께 다루기 �
 2.  **L1 (Multimodal Grounding):** 로봇이 시각적 세계와 자신의 행동 공간을 연결하는 단계입니다. 시각적 질문 답변(VQA), 공간 추론, 특정 좌표 지칭(Pointing) 등을 학습합니다.
 3.  **R0 (Multi-embodiment Pretraining):** 다양한 robot data를 통합해 hardware 사이에 공유되는 visual-action pattern을 학습합니다. 새로운 embodiment에 그대로 전이되는지는 별도 시험이 필요합니다.
 4.  **R1 (Embodiment-specific Adaptation):** 특정 로봇(예: Green 휴머노이드)의 고유한 하드웨어 특성에 맞춰 모델을 미세 조정(Fine-tuning)합니다.
-5.  **R2 (RL Policy Alignment):** imitation policy에 reward를 적용해 task objective에 맞춥니다. 속도·정확도·안전이 모두 좋아지는지는 reward 항목과 evaluation을 나눠 봐야 합니다.
+5.  **R2 (RL Policy Alignment):** imitation policy에 reward를 적용해 task objective에 맞춥니다. 속도, 정확도, 안전이 모두 좋아지는지는 reward 항목과 evaluation을 나눠 봐야 합니다.
 
 ![그림 2: Green-VLA의 로봇별 학습 단계는 VQA 및 로봇 데이터를 사용하여 새로운 하드웨어에 대한 적응, 공간 추론, 태스크 일반화 및 고난도 조작 능력을 배양합니다.](/assets/img/papers/2602.00919/x2.png)
 *그림 2: Green-VLA의 로봇별 학습 단계는 VQA 및 로봇 데이터를 사용하여 새로운 하드웨어에 대한 적응, 공간 추론, 태스크 일반화 및 고난도 조작 능력을 배양합니다.*
@@ -66,7 +66,7 @@ Green-VLA는 휴머노이드와 서로 다른 robot 형태를 함께 다루기 �
 Green-VLA의 내부 구조는 크게 **High-level Task Planner**와 **Low-level Action Expert**로 나뉩니다.
 
 *   **Task Planner:** 복잡한 사용자의 명령(예: "부엌을 청소해줘")을 하위 작업(Sub-tasks)으로 분해합니다.
-*   **Flow-Matching Action Expert:** 연속 action trajectory를 생성합니다. Flow matching이라는 선택만으로 정밀도와 real-time latency가 보장되지는 않으며 sampling·action chunk 조건을 확인해야 합니다.
+*   **Flow-Matching Action Expert:** 연속 action trajectory를 생성합니다. Flow matching이라는 선택만으로 정밀도와 real-time latency가 보장되지는 않으며 sampling, action chunk 조건을 확인해야 합니다.
 
 ![그림 1: Green-VLA 아키텍처 개요. 멀티모달 VLM이 지시사항과 카메라 뷰를 인코딩하고, 고수준 플래너와 Flow-matching 전문가가 협력하여 정밀한 제어를 수행합니다.](/assets/img/papers/2602.00919/x1.png)
 *그림 1: Green-VLA 아키텍처 개요. 멀티모달 VLM이 지시사항과 카메라 뷰를 인코딩하고, 고수준 플래너와 Flow-matching 전문가가 협력하여 정밀한 제어를 수행합니다.*
@@ -98,8 +98,8 @@ Green-VLA는 web 기반 일반 data와 robot data를 혼합합니다.
 
 Green-VLA는 Simpler BRIDGE(WidowX)와 CALVIN과 같은 표준 벤치마크는 물론, 실제 휴머노이드 로봇 환경에서도 테스트되었습니다.
 
-*   **Success result:** 원문은 OpenVLA 대비 약 15~20% 향상을 설명하고 long-horizon task에서 R2가 유리한 결과를 제시합니다. 이 글에는 task별 절대 성공률과 percent·percentage point 구분이 모두 없으므로 범위를 확대하지 않습니다.
-*   **OOD signal:** 새로운 object나 environment에서 불확실성을 감지하고 중단·도움을 요청하는 기능을 설명합니다. 실제 배포에는 OOD 종류별 recall, 정상 장면을 잘못 막는 false positive와 중단 뒤 recovery가 필요합니다.
+*   **Success result:** 원문은 OpenVLA 대비 약 15~20% 향상을 설명하고 long-horizon task에서 R2가 유리한 결과를 제시합니다. 이 글에는 task별 절대 성공률과 percent, percentage point 구분이 모두 없으므로 범위를 확대하지 않습니다.
+*   **OOD signal:** 새로운 object나 environment에서 불확실성을 감지하고 중단, 도움을 요청하는 기능을 설명합니다. 실제 배포에는 OOD 종류별 recall, 정상 장면을 잘못 막는 false positive와 중단 뒤 recovery가 필요합니다.
 
 ---
 
@@ -109,10 +109,10 @@ Green-VLA는 Simpler BRIDGE(WidowX)와 CALVIN과 같은 표준 벤치마크는 �
 
 | 단계 | 우선 지표 | 함께 볼 회귀 |
 |---|---|---|
-| L1 | pointing·spatial VQA | 일반 VQA·language instruction |
-| R0 | seen·unseen robot transfer | 특정 robot의 action precision |
+| L1 | pointing, spatial VQA | 일반 VQA, language instruction |
+| R0 | seen, unseen robot transfer | 특정 robot의 action precision |
 | R1 | target hardware success | 다른 embodiment 성능 |
-| R2 | closed-loop success·recovery | collision·latency·reward shortcut |
+| R2 | closed-loop success, recovery | collision, latency, reward shortcut |
 
 R2가 성공률을 올려도 action이 과도하게 느려지거나 safety filter가 더 자주 개입하면 안정성이 개선됐다고 말하기 어렵습니다. R1 data가 많은 robot에서만 성능이 오르면 R0의 일반화보다 adaptation 효과일 수 있습니다. Stage를 하나씩 생략한 ablation과 data budget을 맞춘 end-to-end baseline이 필요한 이유입니다.
 
@@ -120,9 +120,9 @@ R2가 성공률을 올려도 action이 과도하게 느려지거나 safety filte
 
 ## 실제 배포에서 무엇이 실패할 수 있나
 
-*   **RL 비용과 gap:** R2는 simulation reward를 잘 따르면서 실제 friction·sensor noise에서 실패할 수 있습니다. Hardware wear와 unsafe exploration도 training budget에 포함해야 합니다.
+*   **RL 비용과 gap:** R2는 simulation reward를 잘 따르면서 실제 friction, sensor noise에서 실패할 수 있습니다. Hardware wear와 unsafe exploration도 training budget에 포함해야 합니다.
 *   **Inference latency:** VLM, planner와 flow action expert의 sensor-to-action 지연이 target control cycle 안에 들어오는지 이 글의 수치만으로 확인할 수 없습니다.
-*   **Data bias:** Web grounding이 robot joint·workspace 제약을 포함하지 않으면 불가능한 target을 계획할 수 있습니다. Low-level controller가 joint limit와 collision을 별도로 막아야 합니다.
+*   **Data bias:** Web grounding이 robot joint, workspace 제약을 포함하지 않으면 불가능한 target을 계획할 수 있습니다. Low-level controller가 joint limit와 collision을 별도로 막아야 합니다.
 *   **OOD calibration:** 낯선 위험을 정상으로 보는 false negative는 사고로 이어지고, 정상 input을 계속 OOD로 보는 false positive는 task completion을 막습니다.
 
 ---
@@ -131,30 +131,30 @@ R2가 성공률을 올려도 action이 과도하게 느려지거나 safety filte
 
 여러 robot을 운영하고 신규 embodiment마다 처음부터 학습하는 비용이 큰 팀이라면 staged training의 checkpoint와 data 재사용 가능성을 검토할 가치가 있습니다. 단일 반복 공정에서는 다섯 단계와 대형 VLM 운영비가 더 작은 specialized policy보다 클 수 있습니다.
 
-PoC는 같은 data로 end-to-end fine-tuning과 staged training을 비교하고, unseen object·camera·robot을 분리합니다. 최종 표에는 task success, new robot에 필요한 episode, sensor-to-action p95, peak memory, collision·safety stop, OOD recall과 false positive를 함께 둡니다. 15~20% 결과가 이 지표의 허용 범위 안에서 재현될 때 curriculum의 운영 가치를 판단할 수 있습니다.
+PoC는 같은 data로 end-to-end fine-tuning과 staged training을 비교하고, unseen object, camera, robot을 분리합니다. 최종 표에는 task success, new robot에 필요한 episode, sensor-to-action p95, peak memory, collision, safety stop, OOD recall과 false positive를 함께 둡니다. 15~20% 결과가 이 지표의 허용 범위 안에서 재현될 때 curriculum의 운영 가치를 판단할 수 있습니다.
 
-Green-VLA가 제시한 것은 범용 robot의 완성이 아니라 **vision-language 지식과 hardware-specific action, RL objective를 어느 순서로 연결할지에 대한 학습 설계**입니다. 각 단계가 이전 능력을 잃지 않으면서 실제 robot의 data·통합 비용을 줄이는지는 stage별 회귀와 closed-loop 평가로 확인해야 합니다.
+Green-VLA가 제시한 것은 범용 robot의 완성이 아니라 **vision-language 지식과 hardware-specific action, RL objective를 어느 순서로 연결할지에 대한 학습 설계**입니다. 각 단계가 이전 능력을 잃지 않으면서 실제 robot의 data, 통합 비용을 줄이는지는 stage별 회귀와 closed-loop 평가로 확인해야 합니다.
 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p]({% post_url 2026-01-24-BayesianVLA--Bayesian-Decomposition-of-Vision-Language-Action-Models-via-Latent-Action-Queries %}) — Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior·posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD…
 - [로봇 진행률을 말로 묻지 않고 잴 수 있을까? TOPReward의 토큰 확률]({% post_url 2026-02-24-TOPReward--Token-Probabilities-as-Hidden-Zero-Shot-Rewards-for-Robotics %}) — TOPReward가 비디오 VLM의 생성 문장 대신 내부 토큰 확률로 작업 진행률을 추정하는 이유와 VOC 지표가 놓치는 실패를 살펴봅니다.
 - [VLANeXt의 12가지 VLA 설계 레시피는 어떻게 검증해야 할까]({% post_url 2026-02-24-VLANeXt--Recipes-for-Building-Strong-VLA-Models %}) — VLANeXt가 VLA 설계 요소를 같은 틀에서 비교해 2.5B 모델을 구성하는 과정과 LIBERO 결과, 실제 로봇 이전에 확인할 조건을 정리합니다.
+- [VLM은 텍스트 모델부터 학습해야 할까? Transfusion 공동 사전학습의 대안]({% post_url 2026-03-05-Beyond-Language-Modeling--An-Exploration-of-Multimodal-Pretraining %}) — 텍스트 next-token loss와 이미지 diffusion loss를 처음부터 한 Transformer에서 학습하는 Transfusion 구조, RAE와 MoE의 역할 및 데이터 비용을 설명합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
 
 ### 5단계를 모두 거쳐야 Green-VLA의 효과를 얻나요?
 
-단계별 기여는 L1·R0·R1·R2를 하나씩 뺀 ablation으로 확인해야 하며 data·hardware가 다른 환경에서 다섯 단계가 항상 최적이라고 단정할 수 없습니다.
+단계별 기여는 L1, R0, R1, R2를 하나씩 뺀 ablation으로 확인해야 하며 data, hardware가 다른 환경에서 다섯 단계가 항상 최적이라고 단정할 수 없습니다.
 
 ### R2 RL alignment가 robot 안전을 보장하나요?
 
-아닙니다. Reward 설계와 simulation gap에 따라 unsafe shortcut이 생길 수 있어 collision·joint limit·safety stop과 실제 hardware rollout을 독립적으로 검증해야 합니다.
+아닙니다. Reward 설계와 simulation gap에 따라 unsafe shortcut이 생길 수 있어 collision, joint limit, safety stop과 실제 hardware rollout을 독립적으로 검증해야 합니다.
 
 ### OOD 감지가 동작하면 새 환경에 배포해도 되나요?
 
-OOD score의 calibration, false negative·false positive와 중단 뒤 recovery가 확인돼야 하며 낮은 confidence일 때 실행을 차단하는 별도 safety controller가 필요합니다.
+OOD score의 calibration, false negative, false positive와 중단 뒤 recovery가 확인돼야 하며 낮은 confidence일 때 실행을 차단하는 별도 safety controller가 필요합니다.
 
 [Original Paper Link](https://huggingface.co/papers/2602.00919)

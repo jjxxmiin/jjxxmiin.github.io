@@ -12,7 +12,7 @@ tags:
 summary: LangChain이 공개한 OpenWiki는 AI 코딩 에이전트가 코드베이스를 정확히 이해하도록 돕는 마크다운 위키 자동 생성 도구입니다.
   이 글에서는 프롬프트 비대화와 RAG의 한계를 극복하는 'LLM 위키' 패턴의 핵심 원리와 도입 방법, 그리고 실전 활용 시나리오를 매우 깊이
   있게 분석합니다.
-description: 'OpenWiki가 코드 변경을 AI용 마크다운 위키로 요약하는 방식과 컨텍스트 절감 가능성, 문서 드리프트·고정된 환각·검토 비용 및 갱신 기준을 설명합니다.'
+description: 'OpenWiki가 코드 변경을 AI용 마크다운 위키로 요약하는 방식과 컨텍스트 절감 가능성, 문서 드리프트, 고정된 환각, 검토 비용 및 갱신 기준을 설명합니다.'
 github_url: https://github.com/langchain-ai/openwiki
 image:
   path: https://opengraph.githubassets.com/1/langchain-ai/openwiki

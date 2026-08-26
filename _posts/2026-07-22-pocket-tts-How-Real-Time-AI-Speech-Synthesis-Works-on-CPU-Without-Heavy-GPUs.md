@@ -11,7 +11,7 @@ tags:
   - 디퓨전모델
 summary: Kyutai Labs가 공개한 Pocket TTS는 단 1억 개의 매개변수와 신경망 오디오 코덱을 활용해 최신 CPU 환경에서 실시간
   음성 합성과 목소리 복제를 수행하는 초경량 모델입니다. 이 글에서는 기술적 배경부터 세부 아키텍처, 실전 연동 방법까지 깊이 파헤칩니다.
-description: 'Pocket TTS가 소형 모델과 오디오 코덱으로 CPU 스트리밍 음성을 만드는 원리와 지연 수치 조건, 복제 동의·품질·자원 한계를 설명합니다.'
+description: 'Pocket TTS가 소형 모델과 오디오 코덱으로 CPU 스트리밍 음성을 만드는 원리와 지연 수치 조건, 복제 동의, 품질, 자원 한계를 설명합니다.'
 github_url: https://github.com/kyutai-labs/pocket-tts
 image:
   path: https://opengraph.githubassets.com/1/kyutai-labs/pocket-tts
@@ -35,7 +35,7 @@ mermaid: true
 chart: true
 ---
 
-Pocket TTS는 소형 음성 모델과 신경 오디오 코덱을 결합해 CPU에서도 스트리밍 합성과 짧은 음성 참조 기반 화자 조건화를 시도합니다. 낮은 지연은 하드웨어·문장 길이·버퍼 설정에 따라 달라지며, 목소리 복제에는 당사자 동의와 오용 방지 절차가 필요합니다. 첫 음성까지의 시간, 실시간 배수, 발음·화자 유사도와 메모리를 같은 기기에서 측정하세요.
+Pocket TTS는 소형 음성 모델과 신경 오디오 코덱을 결합해 CPU에서도 스트리밍 합성과 짧은 음성 참조 기반 화자 조건화를 시도합니다. 낮은 지연은 하드웨어, 문장 길이, 버퍼 설정에 따라 달라지며, 목소리 복제에는 당사자 동의와 오용 방지 절차가 필요합니다. 첫 음성까지의 시간, 실시간 배수, 발음, 화자 유사도와 메모리를 같은 기기에서 측정하세요.
 
 [상단 참조 링크]
 - [Pocket TTS GitHub 저장소](https://github.com/kyutai-labs/pocket-tts)
@@ -343,8 +343,8 @@ Kyutai Labs가 세상에 내놓은 Pocket TTS는 '실시간 고음질 오디오 
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Voicebox는 ElevenLabs를 로컬로 대체할까: Qwen3-TTS 설치·GPU·동의 체크]({% post_url 2026-02-18-Voicebox-The-Local-ElevenLabs-Killer %}) — Qwen3-TTS와 Whisper를 로컬 UI로 묶은 Voicebox의 기능, 설치 스냅샷, 하드웨어 비용과 음성 복제 동의 조건을 점검합니다.
-- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M·25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng·영어 중심·감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
+- [Voicebox는 ElevenLabs를 로컬로 대체할까: Qwen3-TTS 설치, GPU, 동의 체크]({% post_url 2026-02-18-Voicebox-The-Local-ElevenLabs-Killer %}) — Qwen3-TTS와 Whisper를 로컬 UI로 묶은 Voicebox의 기능, 설치 스냅샷, 하드웨어 비용과 음성 복제 동의 조건을 점검합니다.
+- [GPU 없는 로컬 TTS에 25MB면 충분할까? KittenTTS v0.8의 조건]({% post_url 2026-03-29-Human-like-Voice-in-25MB-without-GPU-A-Deep-Dive-into-KittenTTS-Architecture %}) — 15M, 25MB Nano 모델이 CPU에서 음성을 만드는 구조와 eSpeak-ng, 영어 중심, 감정 표현 한계를 구분해, KittenTTS가 맞는 작업을 정리합니다.
 - [LiveKit Agents: 초저지연 실시간 음성 AI 에이전트를 위한 오픈소스 프레임워크]({% post_url 2026-08-04-LiveKit-Agents-Open-Source-Framework-for-Building-Realtime-Voice-AI-Agents %}) — LiveKit Agents는 WebRTC 기반의 초저지연 오디오 스트리밍을 활용해 실시간 대화형 음성 AI를 개발할 수 있는 오픈소스 프레임워크입니다. STT-LLM-TTS 조합 파이프라인부터 OpenAI Realtime API 같은…
 <!-- internal-links:end -->
 

@@ -7,8 +7,8 @@ tags:
   - 경량화
   - AI트렌드
 math: true
-summary: 'TokenTrim이 프레임 간 잠재 드리프트로 불안정 토큰을 찾고 KV 캐시에서 제거·재생성하는 방법과 속도·임계값 한계를 설명합니다.'
-description: 'TokenTrim이 장기 영상의 잠재 드리프트를 감지해 불안정 토큰을 KV 캐시에서 제거하는 원리와 임계값·재생성 비용 판단 기준을 설명합니다.'
+summary: 'TokenTrim이 프레임 간 잠재 드리프트로 불안정 토큰을 찾고 KV 캐시에서 제거, 재생성하는 방법과 속도, 임계값 한계를 설명합니다.'
+description: 'TokenTrim이 장기 영상의 잠재 드리프트를 감지해 불안정 토큰을 KV 캐시에서 제거하는 원리와 임계값, 재생성 비용 판단 기준을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.00268.png
   alt: "긴 AI 영상이 뒤로 갈수록 무너질 때: TokenTrim의 추론 토큰 가지치기 논문 대표 이미지"
@@ -93,7 +93,7 @@ $\lambda$를 바꿀 때는 발동 빈도와 첫 발동 시점을 함께 봅니�
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [손은 움직였는데 AI 영상 속 물체가 안 따라오면? Generated Reality의 2D·3D 제어]({% post_url 2026-02-23-Generated-Reality--Human-centric-World-Simulation-using-Interactive-Video-Generation-with-Hand-and-Camera-Control %}) — Generated Reality가 손의 2D 골격과 3D 관절, 머리 움직임을 함께 조건으로 써 상호작용 영상을 제어하는 방법과 실시간 적용의 한계를 살펴봅니다.
 - [비디오 편집에서 대상만 바꾸고 움직임은 지키려면: SAMA의 분리 학습]({% post_url 2026-03-21-SAMA--Factorized-Semantic-Anchoring-and-Motion-Alignment-for-Instruction-Guided-Video-Editing %}) — SAMA가 희소 프레임 시맨틱 앵커링과 세 가지 모션 사전 과제로 의미 편집과 시간 일관성을 나누는 방식, 미공개 코드와 학습 비용 한계를 정리합니다.
-- [예쁜 영상이 물리까지 맞는지 어떻게 알까: Omni-WorldBench 평가법]({% post_url 2026-03-24-Omni-WorldBench--Towards-a-Comprehensive-Interaction-Centric-Evaluation-for-World-Models %}) — Omni-WorldBench의 상호작용 중심 Suite와 MLLM 기반 AgenticScore가 인과·상태 변화·카메라 제어를 평가하는 방식과 비용·평가자 편향을 정리합니다.
+- [화질 좋은 AI 영상이 물리 법칙은 틀리는 이유: RISE-Video 467개 Test]({% post_url 2026-02-07-RISE-Video--Can-Video-Generators-Decode-Implicit-World-Rules %}) — RISE-Video가 467개 human-annotated prompt로 영상 생성기의 상식, 공간 변화, 물리, 시간 인과를 평가하고, visual quality와 reasoning score가 갈리는 지점을 보여줍니다.
+- [예쁜 영상이 물리까지 맞는지 어떻게 알까: Omni-WorldBench 평가법]({% post_url 2026-03-24-Omni-WorldBench--Towards-a-Comprehensive-Interaction-Centric-Evaluation-for-World-Models %}) — Omni-WorldBench의 상호작용 중심 Suite와 MLLM 기반 AgenticScore가 인과, 상태 변화, 카메라 제어를 평가하는 방식과 비용, 평가자 편향을 정리합니다.
 <!-- internal-links:end -->

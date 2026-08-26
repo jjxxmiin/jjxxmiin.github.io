@@ -11,7 +11,7 @@ tags:
   - 이미지생성
 math: true
 summary: 256비트 토큰과 Binary Diffusion Head가 거대한 Softmax를 피하는 방법, FID 1.24와 30.2배 수치의 적용 범위를 설명합니다.
-description: 'BitDance가 256비트 토큰과 Binary Diffusion Head로 거대한 Softmax를 피하는 원리, FID·속도 수치와 실제 배포 검증 기준을 설명합니다.'
+description: 'BitDance가 256비트 토큰과 Binary Diffusion Head로 거대한 Softmax를 피하는 원리, FID, 속도 수치와 실제 배포 검증 기준을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.14041.png
   alt: "2^256 바이너리 토큰이 코드북을 없앨까: BitDance FID 1.24와 30.2배 속도의 조건 논문 대표 이미지"
@@ -48,7 +48,7 @@ BitDance가 빠른 이유를 binary token 하나로만 설명할 수 없는 이�
 
 일반 AR은 $x_i$가 나와야 $x_{i+1}$을 생성합니다. Next-patch Diffusion은 Transformer가 여러 미래 patch의 context를 제공하고 diffusion head가 binary token 묶음을 병렬로 denoise합니다. 완전 병렬 생성은 아니지만 한 patch씩 기다리는 횟수를 줄입니다.
 
-원문은 260M 모델이 1.4B 모델보다 품질이 높으면서 8.7배 빠른 비교와, 1024×1024 생성에서 최대 30.2배 속도 향상·1~2초 생성을 제시합니다. 이 세 숫자는 같은 비교라고 가정하면 안 됩니다.
+원문은 260M 모델이 1.4B 모델보다 품질이 높으면서 8.7배 빠른 비교와, 1024×1024 생성에서 최대 30.2배 속도 향상, 1~2초 생성을 제시합니다. 이 세 숫자는 같은 비교라고 가정하면 안 됩니다.
 
 | 수치 | 확인해야 할 조건 |
 |---|---|
@@ -61,7 +61,7 @@ BitDance가 빠른 이유를 binary token 하나로만 설명할 수 없는 이�
 
 ## FID 1.24가 보여주는 범위와 남는 손실
 
-학습은 먼저 8×8 또는 16×16 downsampling 비율의 binary tokenizer를 만든 뒤 이를 고정하고, Transformer와 diffusion head를 학습하는 두 단계로 설명됩니다. ImageNet 256×256에서 FID 1.24를 기록하고 VAR·LlamaGen보다 낫다는 결과가 핵심입니다. CFG로 품질과 조건 준수의 균형도 조절합니다.
+학습은 먼저 8×8 또는 16×16 downsampling 비율의 binary tokenizer를 만든 뒤 이를 고정하고, Transformer와 diffusion head를 학습하는 두 단계로 설명됩니다. ImageNet 256×256에서 FID 1.24를 기록하고 VAR, LlamaGen보다 낫다는 결과가 핵심입니다. CFG로 품질과 조건 준수의 균형도 조절합니다.
 
 FID는 생성 분포의 유사도를 요약하지만 다음을 직접 보장하지 않습니다.
 
@@ -96,7 +96,7 @@ Next-patch 묶음 크기도 품질과 속도의 교환점입니다. 더 많은 p
 
 같은 GPU, batch, 정밀도, 해상도, CFG와 샘플 수를 사용하고 tokenizer 시간을 포함합니다. 첫 실행의 compile과 warm-up을 분리하고 평균뿐 아니라 P95 지연과 최대 메모리를 남깁니다. 1~2초 수치가 한 장 latency인지 batch throughput에서 환산한 값인지도 구분해야 합니다.
 
-비교 모델의 품질을 같은 수준으로 맞추는 것도 필요합니다. BitDance의 diffusion step을 줄여 빨라졌지만 FID와 사람 평가가 나빠졌다면 “같은 품질에서 빠른가”와 “더 빠른 설정이 있는가”는 다른 주장입니다. step과 묶음 크기를 바꾼 품질·속도 곡선을 그려야 실제 서비스의 허용점을 찾을 수 있습니다.
+비교 모델의 품질을 같은 수준으로 맞추는 것도 필요합니다. BitDance의 diffusion step을 줄여 빨라졌지만 FID와 사람 평가가 나빠졌다면 “같은 품질에서 빠른가”와 “더 빠른 설정이 있는가”는 다른 주장입니다. step과 묶음 크기를 바꾼 품질, 속도 곡선을 그려야 실제 서비스의 허용점을 찾을 수 있습니다.
 
 배포 환경에서 지원되지 않는 binary 연산이나 diffusion kernel이 있으면 작은 모델의 이점이 사라질 수 있습니다. 목표 하드웨어에서 end-to-end 프로파일을 보고 병목이 AR backbone, head, tokenizer 중 어디인지 확인합니다. 논문의 최대 속도 향상을 그대로 가져오기보다 현재 스택이 같은 연산 경로를 효율적으로 실행하는지가 최종 기준입니다.
 
@@ -105,7 +105,7 @@ Next-patch 묶음 크기도 품질과 속도의 교환점입니다. 더 많은 p
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Diffusion 학습 코드는 왜 원본 이미지 대신 Noise를 맞출까?]({% post_url 2023-03-06-StableDiffusion %}) — DDPM 코드의 perturb_x·get_losses·sample 흐름을 따라 정답 noise를 예측하는 학습과 역순 denoising 추론을 연결하고, Stable Diffusion·conditioning의 위치를 설명합니다.
-- [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime·realistic preset, input image와 advanced 기능을 정리합니다.
-- [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해·생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
+- [Diffusion 학습 코드는 왜 원본 이미지 대신 Noise를 맞출까?]({% post_url 2023-03-06-StableDiffusion %}) — DDPM 코드의 perturb_x, get_losses, sample 흐름을 따라 정답 noise를 예측하는 학습과 역순 denoising 추론을 연결하고, Stable Diffusion, conditioning의 위치를 설명합니다.
+- [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime, realistic preset, input image와 advanced 기능을 정리합니다.
+- [이미지 생성 모델이 너무 많다면? Diffusion-GPT 라우터의 선택 기준]({% post_url 2026-03-02-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-and-Honest-Review-of-Diffusion-GPT %}) — Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연, 오선택, 모델 로딩 비용을 짚습니다.
 <!-- internal-links:end -->

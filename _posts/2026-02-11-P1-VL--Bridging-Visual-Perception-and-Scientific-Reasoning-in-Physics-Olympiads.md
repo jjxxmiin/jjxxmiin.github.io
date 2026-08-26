@@ -1,6 +1,6 @@
 ---
 layout: post
-title: '물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각·논리 학습'
+title: '물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각, 논리 학습'
 date: '2026-02-11'
 categories: Tech
 tags:
@@ -10,13 +10,13 @@ tags:
   - AI에이전트
 math: true
 summary: 'P1-VL이 올림피아드 물리의 도식 정보를 추론과 연결하는 커리큘럼 RL, PhysicsMinions 검증 구조와 벤치마크 해석법을 설명합니다.'
-description: 'P1-VL이 물리 도식의 방향·연결 관계를 풀이에 반영하는 커리큘럼 강화학습과 PhysicsMinions 검증 구조, 벤치마크 판단법을 설명합니다.'
+description: 'P1-VL이 물리 도식의 방향, 연결 관계를 풀이에 반영하는 커리큘럼 강화학습과 PhysicsMinions 검증 구조, 벤치마크 판단법을 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.09443.png
-  alt: "물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각·논리 학습 논문 대표 이미지"
+  alt: "물리 문제에서 그림 한 줄을 놓치면? P1-VL의 시각, 논리 학습 논문 대표 이미지"
 ---
 
-올림피아드 물리 문제에서는 식을 잘 풀어도 그림의 방향, 길이, 연결 관계를 하나 놓치면 틀리며, P1-VL은 이 시각·논리 간극을 학습 과정과 검증 에이전트로 줄이려는 모델입니다. 커리큘럼 강화학습으로 쉬운 관계부터 복합 조건까지 학습하고, PhysicsMinions가 풀이를 여러 역할로 점검합니다. 다만 벤치마크의 금메달 수는 특정 평가 결과이므로 개별 풀이의 도식 해석과 중간 계산을 다시 검증해야 합니다.
+올림피아드 물리 문제에서는 식을 잘 풀어도 그림의 방향, 길이, 연결 관계를 하나 놓치면 틀리며, P1-VL은 이 시각, 논리 간극을 학습 과정과 검증 에이전트로 줄이려는 모델입니다. 커리큘럼 강화학습으로 쉬운 관계부터 복합 조건까지 학습하고, PhysicsMinions가 풀이를 여러 역할로 점검합니다. 다만 벤치마크의 금메달 수는 특정 평가 결과이므로 개별 풀이의 도식 해석과 중간 계산을 다시 검증해야 합니다.
 
 ## 물리 도식의 어려움은 왜 OCR 다음에 시작될까?
 
@@ -50,7 +50,7 @@ PhysicsMinions는 한 번의 답에 의존하지 않고 역할을 나눠 풀이�
 
 ![여러 에이전트가 풀이를 생성하고 점검하는 흐름](/assets/img/papers/2602.09443/x2.png)
 
-하지만 여러 에이전트가 같은 잘못된 그림 해석을 공유하면 합의도 틀릴 수 있습니다. 에이전트 수를 늘리는 것보다 독립적인 도식 판독과 단위·경계조건 검사를 분리하는 것이 중요합니다.
+하지만 여러 에이전트가 같은 잘못된 그림 해석을 공유하면 합의도 틀릴 수 있습니다. 에이전트 수를 늘리는 것보다 독립적인 도식 판독과 단위, 경계조건 검사를 분리하는 것이 중요합니다.
 
 역할 분담이 유효하려면 각 에이전트가 같은 문장을 반복하는 데 그치지 않아야 합니다. 한 역할은 도식에서 조건을 목록화하고, 다른 역할은 그 조건으로 식을 세우며, 또 다른 역할은 단위와 극한 상황을 확인하는 식으로 실패 원인을 나눌 수 있습니다. 여러 답의 다수결보다 서로 다른 검증 근거가 있는지가 중요합니다.
 
@@ -91,7 +91,7 @@ P1-VL을 채점 보조나 학습 도구로 검토할 수는 있지만, 학생의
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도·비용·프라이버시 판단
-- [7B AdaReasoner가 GPT-5를 이겼다는 말은 맞을까: Tool-GRPO +24.9% 읽는 법]({% post_url 2026-01-28-AdaReasoner--Dynamic-Tool-Orchestration-for-Iterative-Visual-Reasoning %}) — AdaReasoner의 적응형 도구 선택 구조와 +24.9% 성능 주장을 재현성·지연 시간·안전성 관점에서 해석합니다.
-- [MoAI는 왜 외부 CV 모델 4개를 붙이나: Compressor와 Mixer]({% post_url 2025-02-12-MoAI %}) — MoAI가 분할·탐지·관계·OCR 결과를 압축하고 시각·보조·언어 정보를 상황별로 섞어 세밀한 장면 이해를 보완하는 구조를 설명합니다.
+- [사진 위치 500m 정확도가 8.0%에서 22.1%로 오른 이유: Thinking with Map]({% post_url 2026-01-12-Thinking-with-Map--Reinforced-Parallel-Map-Augmented-Agent-for-Geolocalization %}) — 사진 단서로 지도 후보를 병렬 탐색하고 강화학습으로 검색 행동을 다듬는 구조, 정확도, 비용, 프라이버시 판단
+- [7B AdaReasoner가 GPT-5를 이겼다는 말은 맞을까: Tool-GRPO +24.9% 읽는 법]({% post_url 2026-01-28-AdaReasoner--Dynamic-Tool-Orchestration-for-Iterative-Visual-Reasoning %}) — AdaReasoner의 적응형 도구 선택 구조와 +24.9% 성능 주장을 재현성, 지연 시간, 안전성 관점에서 해석합니다.
+- [시각 토큰을 줄였더니 환각이 늘었다면: AgilePruner의 선택 기준]({% post_url 2026-03-08-AgilePruner--An-Empirical-Study-of-Attention-and-Diversity-for-Adaptive-Visual-Token-Pruning-in-Large-Vision-Language-Models %}) — AgilePruner가 어텐션, 다양성 기반 가지치기를 유효 랭크와 엔트로피로 비교하고 입력별로 전환하는 이유와 적용 한계를 설명합니다.
 <!-- internal-links:end -->

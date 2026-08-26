@@ -10,14 +10,14 @@ tags:
   - 영상생성
   - 온디바이스AI
 math: true
-summary: 'DreamZero가 미래 비디오와 로봇 행동을 공동 예측하는 World Action Model 구조, 일반화·전이 결과와 실시간 제어 한계를 분석합니다.'
-description: 'DreamZero가 미래 비디오와 로봇 행동을 공동 예측하는 14B World Action Model의 구조, 보고된 일반화·전이와 제어 안전 한계를 설명합니다.'
+summary: 'DreamZero가 미래 비디오와 로봇 행동을 공동 예측하는 World Action Model 구조, 일반화, 전이 결과와 실시간 제어 한계를 분석합니다.'
+description: 'DreamZero가 미래 비디오와 로봇 행동을 공동 예측하는 14B World Action Model의 구조, 보고된 일반화, 전이와 제어 안전 한계를 설명합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.15922.png
   alt: "DreamZero는 비디오와 행동을 함께 예측해 제로샷 정책이 될 수 있나 논문 대표 이미지"
 ---
 
-**DreamZero**는 14B 규모의 비디오 디퓨전 백본에서 미래 영상과 로봇 행동을 함께 예측하는 World Action Model입니다. 원문은 새로운 작업·환경에서의 일반화 개선, DreamZero-Flash의 7Hz 제어와 짧은 비디오를 이용한 전이 결과를 보고합니다. 이 수치는 특정 로봇·과제·하드웨어의 결과이며, “제로샷”이라는 이름만으로 미학습 환경의 안전한 실행이나 저가 로봇 배치를 보장하지는 않습니다.
+**DreamZero**는 14B 규모의 비디오 디퓨전 백본에서 미래 영상과 로봇 행동을 함께 예측하는 World Action Model입니다. 원문은 새로운 작업, 환경에서의 일반화 개선, DreamZero-Flash의 7Hz 제어와 짧은 비디오를 이용한 전이 결과를 보고합니다. 이 수치는 특정 로봇, 과제, 하드웨어의 결과이며, “제로샷”이라는 이름만으로 미학습 환경의 안전한 실행이나 저가 로봇 배치를 보장하지는 않습니다.
 
 ## DreamZero는 무엇을 공동으로 학습할까?
 
@@ -31,7 +31,7 @@ image:
 ## 기존 VLA는 왜 미학습 동작에 취약할 수 있을까?
 
 ### 직접 행동 예측의 한계
-OpenVLA, RT-2 같은 VLA 모델은 시각·언어 사전학습을 활용하지만 정적인 표현만으로 물체 변화와 행동의 인과를 충분히 학습하기 어려울 수 있습니다.
+OpenVLA, RT-2 같은 VLA 모델은 시각, 언어 사전학습을 활용하지만 정적인 표현만으로 물체 변화와 행동의 인과를 충분히 학습하기 어려울 수 있습니다.
 
 1.  **물리적 인과관계의 결여**: 정적인 이미지 기반 학습은 물체가 움직이는 방식, 즉 '물리적 연속성'에 대한 깊은 이해를 제공하지 못합니다.
 2.  **데이터 효율성 저하**: 새로운 동작을 가르치기 위해 수천 번의 반복적인 데모(Demonstration)가 필요합니다.
@@ -108,7 +108,7 @@ DreamZero는 이질적인(Heterogeneous) 로봇 데이터셋을 사용하여 학
 
 논문의 실험 범위를 바탕으로 다음 응용을 연구 후보로 볼 수 있습니다.
 
-1.  **물류·제조 연구**: 기존 행동 데이터에 video-only 사전학습을 더해 새로운 배치의 적응성을 시험할 수 있습니다.
+1.  **물류, 제조 연구**: 기존 행동 데이터에 video-only 사전학습을 더해 새로운 배치의 적응성을 시험할 수 있습니다.
 2.  **서비스 로봇 연구**: 정형화되지 않은 배경에서 제한된 조작 과제를 평가할 수 있습니다.
 3.  **교차 로봇 데이터 활용**: 다른 embodiment의 영상이 목표 로봇에 주는 이득을 과제별로 측정할 수 있습니다.
 
@@ -128,7 +128,7 @@ DreamZero는 이질적인(Heterogeneous) 로봇 데이터셋을 사용하여 학
 
 ## 결론: WAM을 로봇 정책으로 선택할 기준은 무엇인가?
 
-DreamZero의 기여는 미래 비디오와 행동을 함께 예측해 video-only 데이터의 시간 정보를 정책 학습에 연결한 데 있습니다. 실제 선택에서는 직접 행동 정책과 같은 과제·데이터 예산으로 비교하고 새로운 물체·배경·로봇별 성공률, 첫 실패 시점, 7Hz 종단 지연과 복구를 측정해야 합니다.
+DreamZero의 기여는 미래 비디오와 행동을 함께 예측해 video-only 데이터의 시간 정보를 정책 학습에 연결한 데 있습니다. 실제 선택에서는 직접 행동 정책과 같은 과제, 데이터 예산으로 비교하고 새로운 물체, 배경, 로봇별 성공률, 첫 실패 시점, 7Hz 종단 지연과 복구를 측정해야 합니다.
 
 생성 영상과 실제 관측이 어긋났을 때 독립된 안전 제어기가 행동을 중단하고, 짧은 적응 데이터의 범위와 효과를 재현할 수 있을 때 제한된 과제로 확장할 수 있습니다. 장기 계획에서 오류가 누적되거나 계산 지연이 제어 주기를 넘거나 비디오의 상관관계를 인과로 오인한다면 보고된 평균 개선과 관계없이 적용을 보류해야 합니다.
 
@@ -137,7 +137,7 @@ DreamZero의 기여는 미래 비디오와 행동을 함께 예측해 video-only
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model]({% post_url 2026-02-02-Causal-World-Modeling-for-Robot-Control %}) — LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연·환각·안전 한계를…
+- [로봇이 미래 Frame을 맞히면 Action도 나아질까? LingBot-VA의 World Model]({% post_url 2026-02-02-Causal-World-Modeling-for-Robot-Control %}) — LingBot-VA가 video와 action token을 교차 배치하고 미래 visual state를 flow matching으로 예측한 뒤 inverse dynamics로 action을 내는 구조, 지연, 환각, 안전 한계를…
+- [로봇은 미래 픽셀까지 그려야 할까? FRAPPE의 다중 VFM 정렬]({% post_url 2026-02-22-FRAPPE--Infusing-World-Modeling-into-Generalist-Policies-via-Multiple-Future-Representation-Alignment %}) — FRAPPE가 다음 화면의 픽셀 대신 여러 시각 기초 모델의 미래 표현을 맞추는 이유와 장기 조작에서 얻는 이점, 계산 비용을 정리합니다.
 - [RoboVIP은 로봇 영상을 왜 텍스트 대신 참조 이미지로 바꾸나]({% post_url 2026-01-09-RoboVIP--Multi-View-Video-Generation-with-Visual-Identity-Prompting-Augments-Robot-Manipulation %}) — 객체와 배경의 시각적 정체성을 유지한 다중 뷰 비디오로 로봇 정책 데이터를 늘리는 방법과 물리 오류 검수
-- [로봇 진행률을 말로 묻지 않고 잴 수 있을까? TOPReward의 토큰 확률]({% post_url 2026-02-24-TOPReward--Token-Probabilities-as-Hidden-Zero-Shot-Rewards-for-Robotics %}) — TOPReward가 비디오 VLM의 생성 문장 대신 내부 토큰 확률로 작업 진행률을 추정하는 이유와 VOC 지표가 놓치는 실패를 살펴봅니다.
 <!-- internal-links:end -->

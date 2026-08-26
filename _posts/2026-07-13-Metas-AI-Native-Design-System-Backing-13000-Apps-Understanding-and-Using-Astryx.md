@@ -12,7 +12,7 @@ tags:
 summary: 메타(Meta)가 8년간 내부에서 사용해 온 코어 디자인 시스템 Astryx의 구조와 활용법을 심층적으로 정리합니다. AI 에이전트와
   인간이 동일한 기준으로 UI를 구축할 수 있도록 설계된 아키텍처와 MCP 통신 원리, 그리고 스위즐(Swizzle) 기능을 통한 제어권 확보 방법을
   구체적으로 다룹니다.
-description: 'Astryx의 React·StyleX 컴포넌트와 MCP·매니페스트·스위즐 구조를 살피고, 버전 추적·접근성·디자인 일관성 검증 기준을 정리합니다.'
+description: 'Astryx의 React, StyleX 컴포넌트와 MCP, 매니페스트, 스위즐 구조를 살피고, 버전 추적, 접근성, 디자인 일관성 검증 기준을 정리합니다.'
 github_url: https://github.com/facebook/astryx
 image:
   path: https://opengraph.githubassets.com/1/facebook/astryx
@@ -36,7 +36,7 @@ mermaid: true
 chart: true
 ---
 
-Astryx는 React·StyleX 기반 컴포넌트와 메타데이터를 사람과 코딩 에이전트가 함께 사용할 수 있게 구성한 디자인 시스템입니다. 내부 사용 규모나 컴포넌트 수가 자신의 제품에서의 접근성·일관성을 자동 보장하지는 않습니다. 기존 토큰과 프레임워크 호환성, 스위즐 뒤 업데이트 책임, MCP가 선택한 컴포넌트의 시각 회귀를 확인한 뒤 도입하세요.
+Astryx는 React, StyleX 기반 컴포넌트와 메타데이터를 사람과 코딩 에이전트가 함께 사용할 수 있게 구성한 디자인 시스템입니다. 내부 사용 규모나 컴포넌트 수가 자신의 제품에서의 접근성, 일관성을 자동 보장하지는 않습니다. 기존 토큰과 프레임워크 호환성, 스위즐 뒤 업데이트 책임, MCP가 선택한 컴포넌트의 시각 회귀를 확인한 뒤 도입하세요.
 
 ## Astryx가 기존 디자인 시스템과 다른 지점은 무엇인가
 
@@ -330,8 +330,8 @@ npx astryx swizzle table
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [Cline Auto Approve를 켜도 될까: ReAct 루프·MCP·API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve·MCP 권한·무한 루프·API 비용과 Diff 검토 기준을 정리합니다.
-- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md·MCP·검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md·컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태·성능·검증 문제를 짚습니다.
+- [Cline Auto Approve를 켜도 될까: ReAct 루프, MCP, API 비용 통제]({% post_url 2026-03-13-No-More-Copy-Paste-A-10-Year-Devs-Deep-Dive-into-the-Autonomous-Agent-Cline %}) — Cline이 파일 수정과 터미널 실행을 반복하는 ReAct 구조를 살펴보고, Auto Approve, MCP 권한, 무한 루프, API 비용과 Diff 검토 기준을 정리합니다.
+- [Stitch Skills가 디자인-코드 핑퐁을 끝낼까: DESIGN.md, MCP, 검증 공백]({% post_url 2026-04-25-The-Endless-Ping-Pong-is-Over-A-Deep-Dive-into-Google-Stitch-Skills-Architecture %}) — Stitch의 시각 정보가 MCP와 Agent Skill을 거쳐 DESIGN.md, 컴포넌트 코드로 이어지는 흐름을 살펴보고, 픽셀 일치 뒤에 남는 상태, 성능, 검증 문제를 짚습니다.
 - [OpenOSINT: AI와 결합된 차세대 오픈소스 정보 수집 에이전트의 작동 원리와 실전 활용법]({% post_url 2026-07-09-OpenOSINT-Under-the-Hood-of-the-Next-Generation-AI-Powered-OSINT-Agent %}) — 복잡한 명령어와 수동 데이터 연결의 피로도를 덜어주는 오픈소스 프로젝트 OpenOSINT의 내부 구조와 연동 기법을 깊이 있게 다룹니다.
 <!-- internal-links:end -->
 

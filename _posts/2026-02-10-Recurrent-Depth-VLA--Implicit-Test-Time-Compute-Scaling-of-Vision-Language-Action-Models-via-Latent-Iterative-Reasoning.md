@@ -11,7 +11,7 @@ tags:
   - AI에이전트
 math: true
 summary: 고정된 연산량을 깨고 상황에 맞춰 사고하는 RD-VLA의 잠재적 반복 추론 기술 분석
-description: 'RD-VLA가 가중치를 공유하는 순환 코어로 액션 잠재 상태를 반복 정제하는 원리와 속도·메모리 이점, 실제 로봇에서 필요한 안전한 정지 조건의 한계를 분석합니다.'
+description: 'RD-VLA가 가중치를 공유하는 순환 코어로 액션 잠재 상태를 반복 정제하는 원리와 속도, 메모리 이점, 실제 로봇에서 필요한 안전한 정지 조건의 한계를 분석합니다.'
 image:
   path: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2602.07845.png
   alt: "RD-VLA는 로봇의 추론 깊이를 어떻게 조절하나: 잠재 반복과 정지 조건 논문 대표 이미지"
@@ -123,7 +123,7 @@ RD-VLA는 더 큰 모델을 만드는 문제와 별도로 **연산 자원을 과
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
-- [RynnBrain 30B-A3B는 로봇에 충분히 가벼울까: 3B 활성 파라미터와 제어 지연]({% post_url 2026-02-19-RynnBrain--Open-Embodied-Foundation-Models %}) — 30B 중 3B만 활성화하는 RynnBrain MoE의 계산 이득과 전체 가중치 메모리·라우팅·실시간 제어의 남은 비용을 구분합니다.
-- [로봇은 언제 되물어야 하나: VL-LN Bench의 질문 비용과 성공률]({% post_url 2026-01-04-VL-LN-Bench--Towards-Long-horizon-Goal-oriented-Navigation-with-Active-Dialogs %}) — 모호한 물체 탐색에서 질문 행동을 추가한 IION, 4만 1천 궤적, SR·SPL과 질문 횟수를 함께 읽는 법
-- [로봇 메모리는 무엇을 기억해야 하나: RoboMME 16개 과제의 답]({% post_url 2026-03-09-RoboMME--Benchmarking-and-Understanding-Memory-for-Robotic-Generalist-Policies %}) — RoboMME가 π0.5에서 14개 메모리 변형을 시간·공간·객체·절차 기억 16개 과제로 비교한 이유와 배포 선택 기준을 정리합니다.
+- [RynnBrain 30B-A3B는 로봇에 충분히 가벼울까: 3B 활성 파라미터와 제어 지연]({% post_url 2026-02-19-RynnBrain--Open-Embodied-Foundation-Models %}) — 30B 중 3B만 활성화하는 RynnBrain MoE의 계산 이득과 전체 가중치 메모리, 라우팅, 실시간 제어의 남은 비용을 구분합니다.
+- [MA-EgoQA는 로봇 6대의 영상을 함께 이해할까: 7일 기억과 EgoMAS 검색]({% post_url 2026-03-12-MA-EgoQA--Question-Answering-over-Egocentric-Videos-from-Multiple-Embodied-Agents %}) — 여섯 에이전트의 7일치 1인칭 영상에서 질문에 답하는 MA-EgoQA와, Agent별 검색, 공유 Memory를 쓰는 EgoMAS의 정확도, 연산 한계를 정리합니다.
+- [로봇은 언제 되물어야 하나: VL-LN Bench의 질문 비용과 성공률]({% post_url 2026-01-04-VL-LN-Bench--Towards-Long-horizon-Goal-oriented-Navigation-with-Active-Dialogs %}) — 모호한 물체 탐색에서 질문 행동을 추가한 IION, 4만 1천 궤적, SR, SPL과 질문 횟수를 함께 읽는 법
 <!-- internal-links:end -->
