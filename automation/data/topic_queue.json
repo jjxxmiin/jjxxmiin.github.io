@@ -107,7 +107,8 @@
       "variants": 57,
       "both_engine": 2,
       "priority": 46,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-08-25-claude-code-pricing-and-plan-comparison-guide-2026"
     },
     {
       "id": "클로드-사용법",
