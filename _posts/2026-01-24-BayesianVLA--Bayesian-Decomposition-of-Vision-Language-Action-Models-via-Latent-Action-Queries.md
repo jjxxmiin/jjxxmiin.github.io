@@ -151,8 +151,8 @@ BayesianVLA의 핵심은 language를 무조건 vision보다 우선하는 것이 
 ## 함께 읽으면 이해가 이어지는 글
 
 - [TwinBrainVLA는 지능을 보존하며 20Hz 제어할까: Frozen VLM과 Action Expert의 대가]({% post_url 2026-01-26-TwinBrainVLA--Unleashing-the-Potential-of-Generalist-VLMs-for-Embodied-Tasks-via-Asymmetric-Mixture-of-Transformers %}) — 범용 VLM을 동결하고 제어 전문가만 학습하는 TwinBrainVLA의 성능 이득과 실시간 제어 비용을 구분해 봅니다.
-- [로봇 진행률을 말로 묻지 않고 잴 수 있을까? TOPReward의 토큰 확률]({% post_url 2026-02-24-TOPReward--Token-Probabilities-as-Hidden-Zero-Shot-Rewards-for-Robotics %}) — TOPReward가 비디오 VLM의 생성 문장 대신 내부 토큰 확률로 작업 진행률을 추정하는 이유와 VOC 지표가 놓치는 실패를 살펴봅니다.
 - [VLANeXt의 12가지 VLA 설계 레시피는 어떻게 검증해야 할까]({% post_url 2026-02-24-VLANeXt--Recipes-for-Building-Strong-VLA-Models %}) — VLANeXt가 VLA 설계 요소를 같은 틀에서 비교해 2.5B 모델을 구성하는 과정과 LIBERO 결과, 실제 로봇 이전에 확인할 조건을 정리합니다.
+- [Anthropic, Claude와 실물 로봇 연결하는 Model Hardware Standard 리서치 프리뷰 공개]({% post_url 2026-08-29-anthropic-previews-model-hardware-standard-for-physical-ai-and-robotics-integration %}) — 2026년 8월 27일 Anthropic은 AI가 로봇과 실험 장비를 제어하도록 돕는 Model Hardware Standard(MHS) 리서치 프리뷰를 발표했습니다. HHMI Janelia 연구소와 협력해 개발한 이 표준은 이동…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
