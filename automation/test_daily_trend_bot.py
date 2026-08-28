@@ -112,6 +112,14 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             kwargs["http_options"].timeout,
             bot.GEMINI_HTTP_TIMEOUT_MS,
         )
+        self.assertGreaterEqual(bot.MAX_CANDIDATES_PER_SEARCH, 1)
+        self.assertLessEqual(bot.MAX_CANDIDATES_PER_SEARCH, 8)
+
+    def test_each_search_pass_has_a_bounded_candidate_budget(self):
+        candidates = [{"trend_score": score} for score in range(10, 0, -1)]
+        with mock.patch.object(bot, "MAX_CANDIDATES_PER_SEARCH", 3):
+            limited = bot._limit_trending_candidates(candidates)
+        self.assertEqual([item["trend_score"] for item in limited], [10, 9, 8])
 
     def test_canonical_url_removes_tracking_parameters(self):
         url = bot.canonical_url(

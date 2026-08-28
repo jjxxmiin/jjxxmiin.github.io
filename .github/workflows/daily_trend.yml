@@ -2,9 +2,8 @@ name: Daily AI Trend Post
 
 on:
   schedule:
-    # 22:00~02:00 UTC = 07:00~11:00 KST. 매시 깨어나 자기 차례인지 확인한다.
-    # 발행 시각은 날짜 해시로 정해져 매일 달라진다. 같은 시각에 기계처럼
-    # 올라오는 것보다 자연스럽고, 오후 가이드 글과 시간대가 겹치지 않는다.
+    # 22:00~02:00 UTC = 07:00~11:00 KST. GitHub 예약 실행이 늦거나 한 번
+    # 누락돼도 다음 슬롯이 재시도한다. 실제 도착 시각으로 다시 차단하지 않는다.
     - cron: '0 22,23,0,1,2 * * *'
   workflow_dispatch:
     inputs:
@@ -21,13 +20,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     permissions:
       contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # 오래 대기한 예약 실행도 시작 시점의 최신 발행 상태를 봐야 한다.
+          # 이벤트가 만들어질 때의 오래된 SHA를 받으면 같은 날짜 글을 중복 생성한다.
+          ref: main
 
       - name: Check today's post
         id: today
@@ -40,26 +43,14 @@ jobs:
           fi
 
           today="$(TZ=Asia/Seoul date +%Y-%m-%d)"
-          hour="$(TZ=Asia/Seoul date +%-H)"
-
           if grep -l -E '^automation: daily_ai_news$|^news_headline:' "_posts/${today}-"*.md >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "오늘의 자동 글이 이미 있어 API 호출 없이 종료합니다."
             exit 0
           fi
 
-          # 날짜 해시로 07~11시 중 목표 시각을 정한다. 매일 달라지지만 같은 날
-          # 여러 번 깨어나도 값은 일정하다. 오후 가이드 봇과는 다른 상수를 섞어
-          # 두 글이 같은 시각으로 몰리지 않게 한다.
-          target=$(( 7 + $(printf 'news-%s' "$today" | cksum | cut -d' ' -f1) % 5 ))
-          echo "오늘 목표 시각: ${target}시 (현재 ${hour}시, KST)"
-
-          if [ "$hour" -ge "$target" ] && [ "$hour" -lt 12 ]; then
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "아직 목표 시각 전이거나 오전 창을 벗어났습니다."
-          fi
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+          echo "오늘 글이 없어 실행합니다. 지연된 예약 실행도 버리지 않습니다."
 
       - name: Set up Python
         if: steps.today.outputs.exists != 'true'
@@ -99,18 +90,10 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           AI_NEWS_FORCE_PUBLISH: ${{ inputs.force || 'false' }}
+          AI_NEWS_MAX_CANDIDATES: '3'
         run: |
           cd automation
-          for attempt in 1 2 3; do
-            echo "발행 시도 ${attempt}/3"
-            if python daily_trend_bot.py; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              sleep 30
-            fi
-          done
-          exit 1
+          python daily_trend_bot.py
 
       - name: Enrich and validate the new post
         if: steps.today.outputs.exists != 'true'

@@ -277,6 +277,12 @@ GEMINI_HTTP_TIMEOUT_MS = max(
     60_000,
     min(600_000, int(os.environ.get("GEMINI_HTTP_TIMEOUT_MS", "180000"))),
 )
+# 후보 하나마다 검색 기반 재검증과 번역, 장문 작성 호출이 이어진다. 발견된
+# 10~15건을 모두 순차 처리하면 Actions 시간 제한을 쉽게 넘기므로 점수 상위만 쓴다.
+MAX_CANDIDATES_PER_SEARCH = max(
+    1,
+    min(8, int(os.environ.get("AI_NEWS_MAX_CANDIDATES", "3"))),
+)
 USER_AGENT = "Mozilla/5.0 (compatible; OPSOAI-NewsBot/2.0; +https://www.opsoai.com/)"
 TRACKING_QUERY_KEYS = {
     "fbclid", "gclid", "mc_cid", "mc_eid", "ref", "ref_src", "source",
@@ -294,6 +300,11 @@ GENERIC_SOURCE_PATHS = {
 FALLBACK_MODELS = [
     "gemini-3.6-flash",
 ]
+
+
+def _limit_trending_candidates(candidates):
+    """Keep one search pass inside its bounded verification/write budget."""
+    return list(candidates)[:MAX_CANDIDATES_PER_SEARCH]
 
 
 def kst_now():
@@ -594,7 +605,12 @@ actually announced, released, published, filed, or reported in the last
                 seen_urls.add(source_url)
                 cleaned.append(item)
             cleaned.sort(key=lambda item: item["trend_score"], reverse=True)
-            print(f"검증 가능한 최신 후보 {len(cleaned)}건을 찾았습니다.")
+            discovered_count = len(cleaned)
+            cleaned = _limit_trending_candidates(cleaned)
+            print(
+                f"검증 가능한 최신 후보 {discovered_count}건 중 "
+                f"상위 {len(cleaned)}건을 처리합니다."
+            )
             for item in cleaned:
                 print(f"- [{item['trend_score']:02d}] {item['headline']} ({item['source_name']})")
             return cleaned
