@@ -121,6 +121,18 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             limited = bot._limit_trending_candidates(candidates)
         self.assertEqual([item["trend_score"] for item in limited], [10, 9, 8])
 
+    def test_generation_helper_forwards_long_output_budget(self):
+        client = mock.Mock()
+        client.models.generate_content.return_value.text = "완료"
+        result = bot.generate_content_with_fallback(
+            client,
+            "긴 글을 작성하세요.",
+            max_output_tokens=24_576,
+        )
+        self.assertEqual(result, "완료")
+        config = client.models.generate_content.call_args.kwargs["config"]
+        self.assertEqual(config.max_output_tokens, 24_576)
+
     def test_canonical_url_removes_tracking_parameters(self):
         url = bot.canonical_url(
             "HTTP://Example.COM/ai/launch/?utm_source=x&keep=1&fbclid=abc#top"
@@ -306,6 +318,21 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertEqual(len(evidence["facts"]), 1)
         self.assertIn("직접 원문 2개 미만", evidence["quality_warnings"])
 
+    @mock.patch.object(bot, "generate_blog_post")
+    @mock.patch.object(bot, "verify_news_candidate", return_value=None)
+    def test_publish_never_revives_a_fact_check_rejected_headline(
+        self,
+        _verify,
+        generate_post,
+    ):
+        candidate = {
+            "headline": "Unconfirmed company acquisition rumor",
+            "source_url": "https://example.com/unconfirmed-rumor",
+        }
+        published = bot._publish_from_candidates(mock.Mock(), [candidate], [])
+        self.assertIsNone(published)
+        generate_post.assert_not_called()
+
     def test_daily_post_exists_recognizes_legacy_news_and_new_marker(self):
         with tempfile.TemporaryDirectory() as directory, \
                 mock.patch.object(bot, "POSTS_DIR", directory):
@@ -354,7 +381,6 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         fallback = bot._fallback_post_data(candidate, evidence)
         errors = bot._post_data_errors(fallback, evidence)
         self.assertIn("실제 설명 본문이 너무 짧음", errors)
-        self.assertIn("Mermaid 다이어그램은 3~5개 필요", errors)
 
     def test_first_valid_mermaid_is_promoted_to_article_start(self):
         content = """
@@ -384,13 +410,58 @@ flowchart LR
             "## 무슨 일이 벌어진 걸까? 사실 "
             "## 왜 지금 다들 이 이야기를 할까? 이유 "
             "## 그래서 우리에게 뭐가 달라질까? 영향 "
-            "## 직접 써보거나 지켜볼 포인트 확인 "
+            "## 그래서 내 업무에는 뭐가 달라지나 확인 "
             "## 아직은 선을 그어야 할 부분 한계"
         )
         fixed = bot._normalize_news_markdown(raw)
         self.assertNotIn("![", fixed)
         for heading in bot.NEWS_HEADINGS:
             self.assertIn(f"\n{heading}\n", fixed)
+
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_writer_repairs_heading_variants_and_keeps_one_grounded_diagram(
+        self,
+        generate,
+    ):
+        post = self._valid_post()
+        content = re.sub(r"```mermaid\n.*?\n```", "", post["content"], flags=re.S)
+        for heading in bot.NEWS_HEADINGS:
+            variant = "### " + heading.removeprefix("## ").rstrip("?")
+            content = content.replace(heading, variant)
+        post["content"] = (
+            '```mermaid\nflowchart LR\n  A["Example 공식 발표"] '
+            '--> B["도입 조건 확인"]\n```\n\n'
+            + content
+        )
+        generate.return_value = json.dumps(post, ensure_ascii=False)
+        candidate = {
+            "headline": "Example releases a new model",
+            "entities": ["Example AI"],
+        }
+        evidence = self._valid_evidence()
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            return_value=[{"ok": True, "error": ""}],
+        ):
+            repaired = bot.generate_blog_post(
+                mock.Mock(),
+                candidate,
+                evidence,
+            )
+
+        self.assertIsNotNone(repaired)
+        self.assertEqual(bot._post_data_errors(repaired, evidence), [])
+        self.assertEqual(len(bot._fenced_blocks(repaired["content"], "mermaid")), 1)
+        for heading in bot.NEWS_HEADINGS:
+            self.assertIn(heading, repaired["content"])
+        generated_prompt = generate.call_args.args[1]
+        self.assertIn("4. 그래서 내 업무에는 뭐가 달라지나", generated_prompt)
+        self.assertNotIn("직접 써보거나 지켜볼 포인트", generated_prompt)
+        self.assertEqual(generate.call_args.kwargs["thinking_level"], "MEDIUM")
+        self.assertEqual(generate.call_args.kwargs["max_output_tokens"], 16_384)
+        schema = generate.call_args.kwargs["response_schema"]
+        self.assertEqual(schema["properties"]["content"]["minLength"], 4_200)
 
     def test_insert_source_images_uses_verified_credit(self):
         content = "\n\n".join([
@@ -551,6 +622,26 @@ flowchart LR
         self.assertEqual(sanitized.count("```mermaid"), 1)
         self.assertNotIn("999", sanitized)
 
+    def test_mermaid_numeric_grounding_accepts_verified_dates_only(self):
+        evidence = {
+            "published_at": "2026-08-29",
+            "sources": [{"published_at": "2026-08-29"}],
+            "facts": [{"text": "Verified revenue was 96.2 billion dollars."}],
+            "unknowns": ["The 40 billion dollar forecast is not a booked sale."],
+        }
+        grounded = (
+            'flowchart LR\n  A["8월 29일 발표"] --> B["매출 96.2"] '
+            '--> C["전망 40"]'
+        )
+        self.assertEqual(bot._mermaid_grounding_error(grounded, evidence), "")
+        self.assertIn(
+            "999",
+            bot._mermaid_grounding_error(
+                'flowchart LR\n  A["임의 수치 999"] --> B["과장"]',
+                evidence,
+            ),
+        )
+
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
         post = self._valid_post()
         candidate = {
@@ -686,7 +777,6 @@ flowchart LR
         message = str(raised.exception)
         self.assertIn("최종 변환 후 글 품질 검증 실패", message)
         self.assertIn("글 첫 부분에 전체 흐름 Mermaid가 없음", message)
-        self.assertIn("Mermaid 다이어그램은 3~5개 필요", message)
 
     def test_visible_prose_keeps_plain_less_than_comparison(self):
         text = "이 모델의 지연은 < 5 ms라는 조건을 비교합니다.\n\n다음 판단을 이어갑니다."

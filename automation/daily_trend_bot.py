@@ -214,7 +214,7 @@ def insert_source_images(content, images):
     targets = (
         "## 왜 지금 다들 이 이야기를 할까?",
         "## 그래서 우리에게 뭐가 달라질까?",
-        "## 직접 써보거나 지켜볼 포인트",
+        "## 그래서 내 업무에는 뭐가 달라지나",
     )
     for target, image in zip(targets, images or []):
         content = content.replace(target, f"{_source_figure(image)}\n\n{target}", 1)
@@ -442,7 +442,14 @@ def get_thinking_config(thinking_level="HIGH"):
         # Fallback for older versions or validation issues
         return types.ThinkingConfig(include_thoughts=True)
 
-def generate_content_with_fallback(client, contents, response_schema=None, tools=None, thinking_level=None):
+def generate_content_with_fallback(
+    client,
+    contents,
+    response_schema=None,
+    tools=None,
+    thinking_level=None,
+    max_output_tokens=None,
+):
     """
     Unified helper to generate content with fallback logic and optional thinking.
     """
@@ -460,6 +467,8 @@ def generate_content_with_fallback(client, contents, response_schema=None, tools
                 gen_config["tools"] = tools
             if thinking_level:
                 gen_config["thinking_config"] = get_thinking_config(thinking_level)
+            if max_output_tokens:
+                gen_config["max_output_tokens"] = int(max_output_tokens)
 
             response = client.models.generate_content(
                 model=model_id, 
@@ -918,51 +927,6 @@ Use Google Search to independently verify this candidate:
     }
 
 
-def candidate_fallback_evidence(candidate):
-    """Build a last-resort fact pack from the discovery result and its direct URL."""
-    url = canonical_url(candidate.get("source_url"))
-    if direct_source_rejection_reason(url):
-        return None
-    published = str(candidate.get("published_at") or "")[:10]
-    if not parse_iso_date(published):
-        published = kst_now().date().isoformat()
-    probe = probe_source(url)
-    source_url = probe["url"] or url
-    facts = []
-    for value in (
-        candidate.get("headline"),
-        candidate.get("summary"),
-        candidate.get("why_it_matters"),
-    ):
-        text = str(value or "").strip()
-        if text and text not in {item["text"] for item in facts}:
-            facts.append({"text": text, "source_urls": [source_url]})
-    if not facts:
-        return None
-    tier = str(candidate.get("source_tier") or "trusted").strip().lower()
-    if tier not in {"official", "trusted"}:
-        tier = "trusted"
-    return {
-        "verified": False,
-        "reason": "검색 단계의 직접 원문을 사용한 일일 발행 폴백",
-        "event_status": str(candidate.get("event_status") or "reported").strip(),
-        "published_at": published,
-        "sources": [{
-            "url": source_url,
-            "title": str(candidate.get("headline") or candidate.get("topic_name") or "").strip(),
-            "publisher": str(candidate.get("source_name") or "원문").strip(),
-            "published_at": published,
-            "tier": tier,
-            "reachable": bool(probe["reachable"]),
-            "http_status": probe["status"],
-        }],
-        "facts": facts,
-        "unknowns": [
-            "독립된 추가 원문과 세부 제공 조건은 발행 시점에 모두 확인되지 않았습니다."
-        ],
-        "quality_warnings": ["엄격한 재검증 대신 검색 단계의 직접 원문 1개를 사용함"],
-    }
-
 _HANGUL = re.compile(r"[가-힣]")
 
 
@@ -1177,7 +1141,7 @@ NEWS_HEADINGS = (
     "## 무슨 일이 벌어진 걸까?",
     "## 왜 지금 다들 이 이야기를 할까?",
     "## 그래서 우리에게 뭐가 달라질까?",
-    "## 직접 써보거나 지켜볼 포인트",
+    "## 그래서 내 업무에는 뭐가 달라지나",
     "## 아직은 선을 그어야 할 부분",
 )
 
@@ -1201,14 +1165,29 @@ def _normalize_news_markdown(content):
     # Remove any model-invented image before heading normalization; consuming the
     # whitespace afterwards at a later stage can glue the first H2 to the intro.
     text = re.sub(r"!\[[^\]]*\]\([^)]+\)", "", text)
-    for heading in NEWS_HEADINGS:
-        text = re.sub(
-            rf"\s*{re.escape(heading)}\s*",
-            f"\n\n{heading}\n\n",
-            text,
-            count=1,
-        )
-    text = re.sub(r"(?m)^#(?!#)\s+.*(?:\n|$)", "", text)
+    parts = re.split(r"(```.*?```|~~~.*?~~~)", text, flags=re.S)
+    for index in range(0, len(parts), 2):
+        prose = parts[index]
+        for heading in NEWS_HEADINGS:
+            title = heading.removeprefix("## ").rstrip("?")
+            # Structured generation still varies heading depth, numbering, and the
+            # final question mark. Canonicalize those harmless Markdown differences
+            # before applying the exact publication contract.
+            prose = re.sub(
+                rf"(?m)^[ \t]*#{{1,6}}[ \t]*(?:\d+[.)][ \t]*)?"
+                rf"{re.escape(title)}[?？]?[ \t]*$",
+                heading,
+                prose,
+                count=1,
+            )
+            prose = re.sub(
+                rf"\s*{re.escape(heading)}\s*",
+                f"\n\n{heading}\n\n",
+                prose,
+                count=1,
+            )
+        parts[index] = re.sub(r"(?m)^#(?!#)\s+.*(?:\n|$)", "", prose)
+    text = "".join(parts)
     text = strip_fake_images(strip_emojis(text))
     text = linkify_bare_urls(text)
     return fix_table_spacing(re.sub(r"\n{3,}", "\n\n", text).strip())
@@ -1290,8 +1269,14 @@ _FACT_NUMBER = re.compile(
 def _verified_numeric_values(evidence):
     """Extract raw numeric values from fact-checked statements, without deriving any."""
     values = set()
+    grounded_text = [str(evidence.get("published_at") or "")]
+    for source in evidence.get("sources") or []:
+        grounded_text.append(str(source.get("published_at") or ""))
     for fact in evidence.get("facts") or []:
-        for token in _FACT_NUMBER.findall(str(fact.get("text") or "")):
+        grounded_text.append(str(fact.get("text") or ""))
+    grounded_text.extend(str(value or "") for value in evidence.get("unknowns") or [])
+    for text in grounded_text:
+        for token in _FACT_NUMBER.findall(text):
             try:
                 value = float(token.replace(",", ""))
                 if math.isfinite(value):
@@ -1453,8 +1438,8 @@ def _article_errors(post, evidence):
     unsupported = sorted(url for url in linked if url and url not in allowed)
     if unsupported:
         errors.append("검증 원문 밖 링크 포함: " + ", ".join(unsupported[:3]))
-    if len(_fenced_blocks(content, "mermaid")) not in {3, 4, 5}:
-        errors.append("Mermaid 다이어그램은 3~5개 필요")
+    if len(_fenced_blocks(content, "mermaid")) not in {1, 2, 3, 4, 5}:
+        errors.append("검증된 Mermaid 다이어그램은 1~5개 필요")
     if len(_fenced_blocks(content, "chartjs")) > 1:
         errors.append("Chart.js 차트 1개 초과")
     other_fences = [
@@ -1725,7 +1710,7 @@ def _relax_post_data(post, topic_data, evidence):
         any(position < 0 for position in positions)
         or positions != sorted(positions)
         or not content.lstrip().lower().startswith("```mermaid")
-        or len(_fenced_blocks(content, "mermaid")) not in {3, 4, 5}
+        or len(_fenced_blocks(content, "mermaid")) not in {1, 2, 3, 4, 5}
     ):
         content = fallback["content"]
     post["content"] = content
@@ -1757,6 +1742,10 @@ def _validated_relaxed_post(post, topic_data, evidence):
 def generate_blog_post(client, topic_data, evidence, *, strict=True):
     """Write one fact-locked Korean AI news feature in a lively blogger voice."""
     print(f"뉴스 글 작성: {topic_data['headline']}")
+    required_sections = "\n".join(
+        f"  {index}. {heading.removeprefix('## ')}"
+        for index, heading in enumerate(NEWS_HEADINGS, 1)
+    )
     prompt_text = f"""
 {_load_news_prompt()}
 
@@ -1786,11 +1775,7 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
   summary는 독립적으로 인용해도 의미가 통하는 2~3문장이다.
 - 본문은 H1 없이 4,200~6,000자의 실제 설명문으로 쓴다. Mermaid와 Chart.js 코드,
   표의 문법 문자는 이 분량에 포함하지 않는다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
-  1. 무슨 일이 벌어진 걸까?
-  2. 왜 지금 다들 이 이야기를 할까?
-  3. 그래서 우리에게 뭐가 달라질까?
-  4. 직접 써보거나 지켜볼 포인트
-  5. 아직은 선을 그어야 할 부분
+{required_sections}
 - 각 섹션 첫 1~2문장은 검색과 답변 엔진이 그대로 인용해도 이해되도록 주어와 제품명을
   생략하지 않은 직접 답변으로 쓴다. 그 뒤에 이유와 예시를 붙인다.
 - 회사, 제품, 모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어, 약칭, 핵심 검색어를
@@ -1804,12 +1789,12 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
   좋은 예: "8월 20일 OpenRouter 공개" -> "컨텍스트 100만 토큰" -> "프리뷰 무료"
   -> "DeepSWE 80퍼센트" -> "개발사 미확인".
   노드는 4~7개로 하고, 각 노드는 20자 이내로 쓴다.
-- Mermaid는 첫 전체 흐름도를 포함해 3~5개 넣는다. 최소한 ① 글 전체 요약,
-  ② 사건 또는 제품 작동 흐름, ③ 독자의 도입 판단과 주의점 다이어그램을 각각 하나씩
-  만든다. 셋 모두 노드 이름에 이 글의 구체적인 사실을 담는다. 일반론만 담긴 그림은
-  넣지 말고, 그럴 바에는 그 그림을 빼라. flowchart, sequenceDiagram, timeline 등 내용에 맞는 형식을 섞고, 같은
-  결론을 모양만 바꿔 반복하지 않는다. 노드와 라벨에도 facts와 unknowns에 있는
-  내용만 쓰며 가짜 수치를 만들지 않는다.
+- Mermaid는 첫 전체 흐름도를 반드시 포함하고, 내용상 유용할 때만 최대 4개를 더한다.
+  사건 또는 제품 작동 흐름, 독자의 도입 판단과 주의점처럼 말로 설명하면 길어지는
+  관계를 우선한다. 모든 노드 이름에 이 글의 구체적인 사실을 담는다. 일반론만 담긴
+  그림은 넣지 말고, 같은 결론을 모양만 바꿔 반복하지 않는다. flowchart,
+  sequenceDiagram, timeline 등 내용에 맞는 형식을 쓴다. 노드와 라벨에도 facts와
+  unknowns에 있는 내용만 쓰며 가짜 수치를 만들지 않는다.
 - 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
   chartjs 코드 블록 안에는 주석 없는 순수 JSON만 쓰고 type, data.labels,
   data.datasets를 포함한다. 모든 dataset에는 label을 붙이고 options.plugins.title에는
@@ -1829,7 +1814,7 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
             "title_english": {"type": "STRING"},
             "description": {"type": "STRING"},
             "summary": {"type": "STRING"},
-            "content": {"type": "STRING"},
+            "content": {"type": "STRING", "minLength": 4_200},
             "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
             "entities": {"type": "ARRAY", "items": {"type": "STRING"}},
             "faq": {
@@ -1854,7 +1839,8 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
         prompt_text,
         response_schema=response_schema,
         tools=None,
-        thinking_level="HIGH",
+        thinking_level="MEDIUM",
+        max_output_tokens=16_384,
     )
     if not response_text:
         return None if strict else _validated_relaxed_post(None, topic_data, evidence)
@@ -2134,8 +2120,9 @@ def _publish_from_candidates(client, candidates, history):
             max_age_days=14,
         )
         if not evidence:
-            evidence = candidate_fallback_evidence(topic_data)
-        if not evidence:
+            # Discovery headlines are leads, not facts. Never turn a rejected
+            # rumor into publishable evidence merely because its URL responds.
+            print("  직접 원문 재검증 실패, 다음 후보로 넘어갑니다.")
             continue
 
         # 사실 문장은 영어로 검증된다. 독자에게 나가기 전에 한국어본을 확보한다.
