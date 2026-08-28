@@ -1438,6 +1438,12 @@ def _article_errors(post, evidence):
     unsupported = sorted(url for url in linked if url and url not in allowed)
     if unsupported:
         errors.append("검증 원문 밖 링크 포함: " + ", ".join(unsupported[:3]))
+    unsupported_numbers = _unsupported_prose_numbers(content, evidence)
+    if unsupported_numbers:
+        errors.append(
+            "근거 없는 본문 수치: "
+            + ", ".join(f"{value:g}" for value in unsupported_numbers[:5])
+        )
     if len(_fenced_blocks(content, "mermaid")) not in {1, 2, 3, 4, 5}:
         errors.append("검증된 Mermaid 다이어그램은 1~5개 필요")
     if len(_fenced_blocks(content, "chartjs")) > 1:
@@ -1484,6 +1490,14 @@ _PROSE_FENCE = re.compile(r"```.*?```|~~~.*?~~~", re.S)
 _PROSE_IMAGE = re.compile(r"!\[[^]\n]*\]\([^)\n]+\)")
 _PROSE_LINK = re.compile(r"\[([^]\n]*)\]\([^)\n]+\)")
 _PROSE_COMMENT = re.compile(r"<!--.*?-->", re.S)
+_PROSE_SOURCE_CITATION = re.compile(
+    r'<sup\b[^>]*class=["\'][^"\']*\bsource-citation\b[^"\']*["\'][^>]*>'
+    r".*?</sup>",
+    re.I | re.S,
+)
+_PROSE_NUMERIC_LINK = re.compile(
+    r"\[\s*(?:출처\s*)?\d+\s*\]\([^)\n]+\)", re.I
+)
 # A comparison such as ``latency < 5 ms`` is prose, not an HTML tag.  Keep the
 # matcher deliberately conservative and never let it consume another line.
 _PROSE_HTML_TAG = re.compile(
@@ -1507,6 +1521,30 @@ def _visible_prose(content):
 
 def _visible_prose_length(content):
     return len(re.sub(r"\s", "", _visible_prose(content)))
+
+
+def _unsupported_prose_numbers(content, evidence):
+    """Find numeric prose claims that are absent from the verified fact pack.
+
+    Numbered-list markers and source citations are formatting, not claims. Diagrams
+    and charts have their own stricter validators and are excluded by
+    ``_visible_prose``.
+    """
+    claim_text = _PROSE_SOURCE_CITATION.sub(" ", str(content or ""))
+    claim_text = _PROSE_NUMERIC_LINK.sub(" ", claim_text)
+    verified = _verified_numeric_values(evidence)
+    unsupported = set()
+    for token in _FACT_NUMBER.findall(_visible_prose(claim_text)):
+        try:
+            value = float(token.replace(",", ""))
+        except ValueError:
+            continue
+        if not any(
+            math.isclose(value, allowed, rel_tol=1e-9, abs_tol=1e-9)
+            for allowed in verified
+        ):
+            unsupported.add(value)
+    return sorted(unsupported)
 
 
 def _post_data_errors(post, evidence, *, visual_errors=()):

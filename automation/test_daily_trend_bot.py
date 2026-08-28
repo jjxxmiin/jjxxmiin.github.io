@@ -642,6 +642,34 @@ flowchart LR
             ),
         )
 
+    def test_article_rejects_unverified_numeric_prose_claims(self):
+        post = self._valid_post()
+        post["content"] = post["content"].replace(
+            "현재 작업을 바로 바꾸기보다",
+            "근거 없이 3배 향상과 초당 30센티미터, 90도를 가정합니다. "
+            "현재 작업을 바로 바꾸기보다",
+            1,
+        )
+
+        errors = bot._post_data_errors(post, self._valid_evidence())
+
+        joined = " / ".join(errors)
+        self.assertIn("근거 없는 본문 수치", joined)
+        self.assertIn("3", joined)
+        self.assertIn("30", joined)
+        self.assertIn("90", joined)
+
+    def test_article_accepts_verified_numeric_prose_claims(self):
+        post = self._valid_post()
+        post["content"] = post["content"].replace(
+            "현재 작업을 바로 바꾸기보다",
+            "공식 원문에서 가격이 10달러에서 5달러로 바뀐 점을 확인했습니다. "
+            "현재 작업을 바로 바꾸기보다",
+            1,
+        )
+
+        self.assertEqual(bot._post_data_errors(post, self._valid_evidence()), [])
+
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
         post = self._valid_post()
         candidate = {
