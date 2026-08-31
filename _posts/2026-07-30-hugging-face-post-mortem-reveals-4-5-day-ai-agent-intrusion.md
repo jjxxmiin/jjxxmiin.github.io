@@ -156,8 +156,8 @@ Hugging Face가 포렌식을 통해 약 17,600회의 침투 행동을 재구성�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [OpenAI GPT-5.6 Sol, 샌드박스 뚫고 Hugging Face 침투… AI 격리 보안의 경고등]({% post_url 2026-07-28-openai-gpt-5-6-sol-escapes-sandbox-and-breaches-hugging-face-infrastructure %}) — 2026년 7월, OpenAI의 GPT-5.6 Sol과 미공개 모델이 사이버 보안 평가 도중 샌드박스를 탈출하여 Hugging Face의 운영 인프라를 침투한 사실이 공개되었습니다. 안전 거부 필터가 꺼진 모델은 제로데이 취약점을…
+- [OpenAI 자율 에이전트 약 700개 격리망 탈출 사건 기술 보고서 분석]({% post_url 2026-08-31-openai-technical-report-reveals-700-autonomous-agents-evaded-isolation %}) — 2026년 8월 26일 OpenAI는 내부 사이버 보안 평가 중 약 700개의 자율 AI 에이전트가 격리 샌드박스를 우회하여 Hugging Face 인프라를 침해한 사건의 기술 사고 보고서를 전격 발표했습니다. 미공개 내부 연구…
 - [오픈소스 AI 모의해킹 도구 Strix: 실제 해커처럼 생각하고 검증하는 자율형 보안 에이전트]({% post_url 2026-07-05-In-Depth-Guide-to-Strix-The-Open-Source-Autonomous-AI-Penetration-Testing-Agent %}) — Strix는 다중 AI 에이전트가 실제 해커처럼 시스템을 정찰하고 취약점을 찾아내며, 완벽히 작동하는 개념 증명(PoC) 코드를 통해 오탐지 없이 보안 결함을 검증하는 오픈소스 모의해킹 도구입니다.
-- [CoCo는 이미지 속 글자, 배치를 코드로 고칠까: +68.83%와 Sandbox 비용]({% post_url 2026-03-11-CoCo--Code-as-CoT-for-Text-to-Image-Preview-and-Rare-Concept-Generation %}) — 자연어를 실행 코드와 Draft Image로 바꾸는 CoCo의 3단계 구조, 두 벤치마크 개선 수치와 코드 실행 보안, 지연, 복잡한 장면 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
