@@ -48,10 +48,17 @@ def client():
     return build("searchconsole", "v1", credentials=creds, cache_discovery=False)
 
 
+def date_window(days: int, *, today: datetime.date | None = None):
+    """Return an inclusive window containing exactly ``days`` calendar dates."""
+    if days < 1:
+        raise ValueError("days는 1 이상이어야 합니다.")
+    end = today or datetime.date.today()
+    return end - datetime.timedelta(days=days - 1), end
+
+
 def query(svc, days: int, dimensions: list[str], limit: int = 500,
           site: str = SITE) -> list[dict]:
-    end = datetime.date.today()
-    start = end - datetime.timedelta(days=days)
+    start, end = date_window(days)
     body = {
         "startDate": start.isoformat(),
         "endDate": end.isoformat(),
@@ -90,6 +97,8 @@ def main() -> int:
     ap.add_argument("--site", default=SITE,
                     help="속성 URL. 도메인 속성이면 sc-domain:opsoai.com 형식")
     args = ap.parse_args()
+    if args.days < 1:
+        ap.error("--days는 1 이상이어야 합니다.")
 
     try:
         svc = client()

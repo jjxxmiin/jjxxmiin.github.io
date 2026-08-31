@@ -56,6 +56,27 @@ FORMAT_RULES = [
     (("방법", "사용법", "만들기", "구축", "설치", "설정"), "실전 사용법"),
 ]
 
+# CPC나 제휴 수익을 아는 척하지 않는다. 아래 점수는 실제 수익이 아니라 검색어가
+# '무엇을 살지/구독할지/도입할지'에 얼마나 가까운지를 나타내는 편집용 대체 지표다.
+PURCHASE_WORDS = (
+    "추천", "비교", "가격", "요금", "비용", "유료", "무료", "차이",
+    "후기", "순위", "할인", "결제", "환불", "해지", "사양", "그래픽 카드",
+)
+IMPLEMENT_WORDS = (
+    "오류", "안됨", "에러", "해결", "설치", "구축", "만들기", "설정", "사용법",
+)
+
+
+def commercial_value(keyword: str) -> tuple[int, str]:
+    """Return purchase-intent proxy score and a human-readable intent label."""
+    if any(word in keyword for word in PURCHASE_WORDS):
+        return 5, "구매·구독 판단"
+    if any(word in keyword for word in IMPLEMENT_WORDS):
+        return 3, "도입·문제 해결"
+    if "프롬프트" in keyword or "예시" in keyword or "템플릿" in keyword:
+        return 2, "저장·재방문"
+    return 1, "정보 탐색"
+
 
 def tier_of(keyword: str) -> str | None:
     owned = any(o in keyword for o in OWNED)
@@ -134,19 +155,36 @@ def build() -> list[dict]:
         # 주제 등급은 소속 키워드 중 가장 높은 것을 따른다.
         tier = min((m["tier"] for m in members), key=lambda t: ("T1", "T2", "T3").index(t))
         kws = [m["keyword"] for m in members]
+        value_score, value_intent = max(
+            (commercial_value(keyword) for keyword in kws),
+            key=lambda pair: pair[0],
+        )
+        topic_format = format_of(members[0]["keyword"])
+        # 추천·순위 글은 직접 같은 조건으로 써 보지 않으면 얕은 제휴 목록이 된다.
+        # 자동화는 사실 기반 가격/사용법까지만 발행하고, 비교·추천은 실험 대기열로 둔다.
+        publication_mode = (
+            "manual_test" if topic_format == "비교와 추천" else "auto_research"
+        )
         topics.append({
             # 한글을 지우면 안 된다. [^a-z0-9] 로 치환하면 한글 머리말이 전부
             # 빈 문자열이 되어 모든 주제가 같은 id를 갖는다.
             "id": re.sub(r"\s+", "-", head).strip("-"),
             "head": head,
             "tier": tier,
-            "format": format_of(members[0]["keyword"]),
+            "format": topic_format,
             "primary": members[0]["keyword"],
             "keywords": kws[:14],
             "variants": len(members),
             "both_engine": both_n,
-            # 정렬 점수: 양엔진 검증 수 > 변형 수 > 최고 점수
-            "priority": both_n * 10 + min(len(members), 20) + members[0]["score"],
+            "commercial_value": value_score,
+            "reader_intent": value_intent,
+            "publication_mode": publication_mode,
+            # 정렬 점수: 양엔진 검증 수 > 구매/도입 근접도 > 변형 수 > 최고 점수.
+            # 실제 RPM이나 전환율이 생기면 이 대체 점수 대신 그 데이터를 쓴다.
+            "priority": (
+                both_n * 10 + value_score * 5
+                + min(len(members), 20) + members[0]["score"]
+            ),
             "status": "pending",
         })
 
@@ -174,10 +212,13 @@ def main() -> int:
     print(f"주제 {len(topics)}개 (대기 {len(pending)}, 작성됨 {len(done)})\n")
     by_tier = collections.Counter(t["tier"] for t in topics)
     print("등급별:", dict(by_tier), "\n")
-    print(f"{'등급':<5}{'포맷':<12}{'변형':>4}{'양엔진':>6}  대표 키워드")
+    print(f"{'등급':<5}{'포맷':<12}{'가치':>4}{'변형':>4}{'양엔진':>6}  대표 키워드")
     for t in topics[: args.show]:
         mark = "  " if t["status"] == "pending" else "✓ "
-        print(f"{mark}{t['tier']:<4}{t['format']:<12}{t['variants']:>4}{t['both_engine']:>6}  {t['primary'][:40]}")
+        print(
+            f"{mark}{t['tier']:<4}{t['format']:<12}{t['commercial_value']:>4}"
+            f"{t['variants']:>4}{t['both_engine']:>6}  {t['primary'][:40]}"
+        )
     if done:
         print(f"\n작성됨으로 표시된 주제: {', '.join(t['head'] for t in done)}")
 

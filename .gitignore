@@ -32,6 +32,9 @@ __pycache__
 
 .env
 
+# 447개 리라이트 체크포인트·검증 원고 (로컬 지속 상태)
+.rewrite-state/
+
 # 서비스 계정 키 — 공개 저장소이므로 절대 커밋되면 안 된다.
 GA4_CREDENTIALS_JSON.json
 teachingflow-*.json

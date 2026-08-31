@@ -1,4 +1,7 @@
 requests
 google-genai
+google-analytics-data
 PyYAML
 beautifulsoup4
+markdown-it-py>=2.2,<4
+tldextract>=3,<6
