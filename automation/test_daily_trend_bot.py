@@ -132,6 +132,15 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertEqual(result, "완료")
         config = client.models.generate_content.call_args.kwargs["config"]
         self.assertEqual(config.max_output_tokens, 24_576)
+        self.assertTrue(config.automatic_function_calling.disable)
+
+    def test_preflight_disables_automatic_function_calling(self):
+        client = mock.Mock()
+
+        bot.preflight_check(client)
+
+        config = client.models.generate_content.call_args.kwargs["config"]
+        self.assertTrue(config.automatic_function_calling.disable)
 
     def test_canonical_url_removes_tracking_parameters(self):
         url = bot.canonical_url(
@@ -333,6 +342,73 @@ class DailyTrendNewsBotTests(unittest.TestCase):
         self.assertIsNone(published)
         generate_post.assert_not_called()
 
+    def test_relaxed_evidence_requires_reachable_direct_source_linked_fact(self):
+        source = "https://example.com/announcements/new-model"
+        evidence = {
+            "verified": True,
+            "published_at": "2026-07-25",
+            "sources": [{"url": source, "reachable": True}],
+            "facts": [{"text": "Example released a model.", "source_urls": [source]}],
+        }
+        self.assertTrue(bot._relaxed_evidence_is_publishable(evidence))
+
+        unreachable = dict(evidence, sources=[{"url": source, "reachable": False}])
+        self.assertFalse(bot._relaxed_evidence_is_publishable(unreachable))
+
+        unlinked = dict(evidence, facts=[{
+            "text": "Example released a model.",
+            "source_urls": ["https://trusted.example.net/reports/other-model"],
+        }])
+        self.assertFalse(bot._relaxed_evidence_is_publishable(unlinked))
+
+        homepage = dict(evidence, sources=[{
+            "url": "https://example.com/",
+            "reachable": True,
+        }])
+        self.assertFalse(bot._relaxed_evidence_is_publishable(homepage))
+
+    @mock.patch.object(bot, "save_post", return_value="published.md")
+    @mock.patch.object(bot, "ensure_korean_evidence")
+    @mock.patch.object(bot, "check_duplication", return_value=False)
+    @mock.patch.object(bot, "generate_blog_post")
+    @mock.patch.object(bot, "verify_news_candidate")
+    def test_publish_researches_and_invokes_targeted_writer_once_per_evidence(
+        self,
+        verify,
+        generate_post,
+        _duplicate,
+        _translate,
+        save,
+    ):
+        source = "https://example.com/announcements/new-model"
+        evidence = {
+            "verified": True,
+            "published_at": "2026-07-25",
+            "sources": [{"url": source, "reachable": True}],
+            "facts": [{"text": "Example released a model.", "source_urls": [source]}],
+            "quality_warnings": [],
+        }
+        verify.return_value = evidence
+        valid_post = self._valid_post()
+        generate_post.return_value = valid_post
+        candidate = {
+            "headline": "Example releases a model",
+            "source_url": source,
+        }
+        client = mock.Mock()
+
+        published = bot._publish_from_candidates(client, [candidate], [])
+
+        self.assertEqual(published, "published.md")
+        verify.assert_called_once_with(
+            client,
+            candidate,
+            strict=False,
+            max_age_days=14,
+        )
+        generate_post.assert_called_once_with(client, candidate, evidence)
+        save.assert_called_once_with(valid_post, candidate, evidence)
+
     def test_daily_post_exists_recognizes_legacy_news_and_new_marker(self):
         with tempfile.TemporaryDirectory() as directory, \
                 mock.patch.object(bot, "POSTS_DIR", directory):
@@ -343,7 +419,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             self.assertTrue(bot.daily_post_exists(now=self.now))
 
     @mock.patch.object(bot, "generate_content_with_fallback", return_value=None)
-    def test_relaxed_writer_rejects_short_fallback_when_models_fail(self, _generate):
+    def test_empty_drafts_retry_three_times_then_fail_closed(self, generate):
         source = "https://example.com/news/new-model"
         candidate = {
             "topic_name": "Example AI",
@@ -375,12 +451,124 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             mock.Mock(),
             candidate,
             evidence,
-            strict=False,
         )
         self.assertIsNone(post)
+        self.assertEqual(generate.call_count, bot.MAX_NEWS_DRAFT_ATTEMPTS)
         fallback = bot._fallback_post_data(candidate, evidence)
         errors = bot._post_data_errors(fallback, evidence)
         self.assertIn("실제 설명 본문이 너무 짧음", errors)
+
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_draft_retry_receives_exact_errors_and_previous_draft(self, generate):
+        candidate = {
+            "headline": "Example releases a new model",
+            "entities": ["Example AI"],
+        }
+        evidence = self._valid_evidence()
+        evidence["quality_warnings"] = ["직접 원문 2개 미만"]
+        first = self._valid_post()
+        first["description"] = "짧음"
+        first["faq"] = first["faq"][:2]
+        second = self._valid_post()
+        generate.side_effect = [
+            json.dumps(first, ensure_ascii=False),
+            json.dumps(second, ensure_ascii=False),
+        ]
+
+        def valid_mermaid(codes):
+            return [{"ok": True, "error": ""} for _ in codes]
+
+        with mock.patch.object(bot, "_validate_mermaid_codes", side_effect=valid_mermaid):
+            expected_draft, expected_errors, _ = bot._prepare_generated_post(
+                json.loads(json.dumps(first, ensure_ascii=False)),
+                candidate,
+                evidence,
+            )
+            result = bot.generate_blog_post(mock.Mock(), candidate, evidence)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(generate.call_count, 2)
+        retry_prompt = generate.call_args_list[1].args[1]
+        self.assertIn(
+            json.dumps(expected_draft, ensure_ascii=False),
+            retry_prompt,
+        )
+        self.assertIn(
+            json.dumps(expected_errors, ensure_ascii=False),
+            retry_prompt,
+        )
+        self.assertEqual(
+            expected_errors,
+            ["메타 설명 길이 부적합: 2자", "FAQ는 3~5개 필요"],
+        )
+        self.assertEqual(evidence["quality_warnings"], ["직접 원문 2개 미만"])
+        self.assertEqual(result["_publication_mode"], "repaired")
+
+    @mock.patch.object(bot, "_fallback_post_data")
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_all_invalid_draft_attempts_fail_without_generic_fallback(
+        self,
+        generate,
+        fallback,
+    ):
+        candidate = {
+            "headline": "Example releases a new model",
+            "entities": ["Example AI"],
+        }
+        evidence = self._valid_evidence()
+        invalid = self._valid_post()
+        invalid["description"] = "짧음"
+        generate.return_value = json.dumps(invalid, ensure_ascii=False)
+
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            side_effect=lambda codes: [
+                {"ok": True, "error": ""} for _ in codes
+            ],
+        ):
+            result = bot.generate_blog_post(mock.Mock(), candidate, evidence)
+
+        self.assertIsNone(result)
+        self.assertEqual(generate.call_count, bot.MAX_NEWS_DRAFT_ATTEMPTS)
+        fallback.assert_not_called()
+        for retry_call in generate.call_args_list[1:]:
+            self.assertIn("메타 설명 길이 부적합: 2자", retry_call.args[1])
+
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_writer_synthesizes_and_validates_missing_lead_diagram(self, generate):
+        candidate = {
+            "headline": "Example releases a new model",
+            "entities": ["Example AI"],
+        }
+        evidence = self._valid_evidence()
+        evidence["summary_flow"] = [
+            "Example 모델 공개",
+            "가격 10달러",
+            "가격 5달러",
+        ]
+        post = self._valid_post()
+        post["content"] = re.sub(
+            r"```mermaid\n.*?\n```\n*",
+            "",
+            post["content"],
+            flags=re.S,
+        )
+        generate.return_value = json.dumps(post, ensure_ascii=False)
+
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            return_value=[{"ok": True, "error": ""}],
+        ) as validate:
+            repaired = bot.generate_blog_post(mock.Mock(), candidate, evidence)
+
+        self.assertIsNotNone(repaired)
+        self.assertTrue(repaired["content"].startswith("```mermaid"))
+        self.assertIn("Example 모델 공개", repaired["content"])
+        self.assertEqual(repaired["_publication_mode"], "repaired")
+        self.assertTrue(any("summary_flow" in note for note in repaired["_publication_notes"]))
+        validate.assert_called_once()
 
     def test_first_valid_mermaid_is_promoted_to_article_start(self):
         content = """
@@ -622,6 +810,46 @@ flowchart LR
         self.assertEqual(sanitized.count("```mermaid"), 1)
         self.assertNotIn("999", sanitized)
 
+    def test_visual_sanitizer_replaces_invalid_only_mermaid_from_summary_flow(self):
+        content = """
+```mermaid
+flowchart LR
+  A["임의 수치 999"] --> B["과장"]
+```
+
+검증된 설명 본문입니다.
+""".strip()
+        evidence = {
+            "published_at": "2026-08-29",
+            "facts": [{"text": "공식 가격은 10달러에서 5달러로 바뀌었습니다."}],
+            "summary_flow": [
+                "Example 모델 공개",
+                "가격 10달러",
+                "가격 5달러",
+            ],
+        }
+        notes = []
+        with mock.patch.object(
+            bot,
+            "_validate_mermaid_codes",
+            side_effect=[
+                [{"ok": True, "error": ""}],
+                [{"ok": True, "error": ""}],
+            ],
+        ) as validate:
+            sanitized, errors = bot._sanitize_news_visuals(
+                content,
+                evidence,
+                repair_notes=notes,
+            )
+
+        self.assertEqual(errors, [])
+        self.assertTrue(sanitized.startswith("```mermaid"))
+        self.assertNotIn("999", sanitized)
+        self.assertIn("Example 모델 공개", sanitized)
+        self.assertEqual(validate.call_count, 2)
+        self.assertTrue(any("summary_flow" in note for note in notes))
+
     def test_mermaid_numeric_grounding_accepts_verified_dates_only(self):
         evidence = {
             "published_at": "2026-08-29",
@@ -731,6 +959,34 @@ flowchart LR
         self.assertIn('id="source-1"', raw)
         self.assertNotIn("[Example](", raw)
         self.assertIn("## 직접 확인한 원문", raw)
+
+    def test_draft_repair_mode_does_not_create_source_quality_warning(self):
+        post = self._valid_post()
+        post["_publication_mode"] = "repaired"
+        post["_publication_notes"] = ["1회 전체 검증 실패 후 새 원고로 보정함"]
+        candidate = {
+            "headline": "Example releases a new model",
+            "published_at": "2026-07-25",
+        }
+        evidence = self._valid_evidence()
+        evidence["quality_warnings"] = []
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "collect_source_images", return_value=[]), \
+                mock.patch.object(
+                    bot,
+                    "generate_card",
+                    return_value="/assets/img/thumb/repaired.jpg",
+                ):
+            path = bot.save_post(post, candidate, evidence, now=self.now)
+            with open(path, encoding="utf-8") as handle:
+                raw = handle.read()
+
+        front_matter = yaml.safe_load(raw.split("---", 2)[1])
+        self.assertEqual(front_matter["publication_mode"], "repaired")
+        self.assertIn("위 원문을 직접 확인해 작성했습니다", raw)
+        self.assertNotIn("독립 출처나 일부 세부 조건이 부족", raw)
+        self.assertEqual(evidence["quality_warnings"], [])
 
     def test_save_post_without_source_images_generates_card_before_using_content(self):
         post = self._valid_post()

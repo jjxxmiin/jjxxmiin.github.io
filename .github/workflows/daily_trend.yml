@@ -73,6 +73,10 @@ jobs:
           pip install -r requirements.txt
           npm ci --no-audit --no-fund
 
+      - name: Run automation resilience tests
+        if: steps.today.outputs.exists != 'true'
+        run: PYTHONPATH=.:automation python -m unittest automation.test_automation_resilience -v
+
       - name: Prepare thumbnail rendering
         if: steps.today.outputs.exists != 'true'
         # GitHub 러너에는 google-chrome 이 이미 깔려 있다. chromium-browser 를
@@ -91,6 +95,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           AI_NEWS_FORCE_PUBLISH: ${{ inputs.force || 'false' }}
           AI_NEWS_MAX_CANDIDATES: '3'
+          PYTHONUNBUFFERED: '1'
         run: |
           cd automation
           python daily_trend_bot.py

@@ -85,6 +85,10 @@ jobs:
           pip install -r requirements.txt
           npm ci --no-audit --no-fund
 
+      - name: Run automation resilience tests
+        if: steps.gate.outputs.run == 'true'
+        run: PYTHONPATH=.:automation python -m unittest automation.test_automation_resilience -v
+
       - name: Prepare thumbnail rendering
         if: steps.gate.outputs.run == 'true'
         # GitHub 러너에는 google-chrome 이 이미 깔려 있다. chromium-browser 를
@@ -105,22 +109,14 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PYTHONUNBUFFERED: '1'
         run: |
           cd automation
           ARGS=""
           if [ -n "${{ inputs.topic_id }}" ]; then
             ARGS="--topic-id ${{ inputs.topic_id }}"
           fi
-          for attempt in 1 2 3; do
-            echo "발행 시도 ${attempt}/3"
-            if python guide_bot.py $ARGS; then
-              exit 0
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              sleep 30
-            fi
-          done
-          exit 1
+          python guide_bot.py $ARGS
 
       - name: Enrich and validate the new post
         if: steps.gate.outputs.run == 'true'

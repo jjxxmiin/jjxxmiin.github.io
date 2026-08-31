@@ -184,6 +184,201 @@ class GuideBotPublishingTests(unittest.TestCase):
         self.assertIn("요약 누락", message)
         self.assertIn("근거 없는 1인칭 경험", message)
 
+    def test_description_schema_has_margin_and_repairs_79_chars_without_retry(self):
+        self.assertEqual(bot.POST_SCHEMA["properties"]["description"]["minLength"], 90)
+        self.assertEqual(bot.POST_SCHEMA["properties"]["description"]["maxLength"], 150)
+        post = self.valid_post()
+        post["description"] = "가" * 79
+        topic = {
+            **self.topic,
+            "format": "실전 사용법",
+            "keywords": ["AI 요금제 비교"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            return_value=json.dumps(post, ensure_ascii=False),
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            result = bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(generate.call_count, 1)
+        self.assertGreaterEqual(len(result["description"]), bot.DESCRIPTION_MIN_CHARS)
+        self.assertLessEqual(len(result["description"]), bot.DESCRIPTION_MAX_CHARS)
+
+    def test_short_code_padded_draft_retries_with_exact_visible_prose_feedback(self):
+        short = self.valid_post()
+        short["content"] = (
+            "검색 질문에 바로 답하는 짧은 설명입니다. " * 30
+            + "\n\n## 템플릿\n\n```text\n"
+            + ("분량으로 세면 안 되는 프롬프트 예시 " * 300)
+            + "\n```\n\n## 주의점\n\n짧은 설명입니다."
+            + "\n\n## 확인 순서\n\n짧은 설명입니다."
+        )
+        repaired = self.valid_post()
+        topic = {
+            **self.topic,
+            "format": "프롬프트와 템플릿",
+            "keywords": ["AI 요금제 비교", "AI 요금제 프롬프트"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        expected = next(
+            error
+            for error in bot._generated_post_errors(
+                bot._normalize_generated_post(dict(short))
+            )
+            if "실제 설명문이 너무 짧음" in error
+        )
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            side_effect=[
+                json.dumps(short, ensure_ascii=False),
+                json.dumps(repaired, ensure_ascii=False),
+            ],
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            result = bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(result["title_korean"], repaired["title_korean"])
+        self.assertEqual(generate.call_count, 2)
+        first_prompt = generate.call_args_list[0].args[1]
+        repair_prompt = generate.call_args_list[1].args[1]
+        self.assertIn("https://example.com/pricing", first_prompt)
+        self.assertIn("https://example.com/pricing", repair_prompt)
+        self.assertIn(expected, repair_prompt)
+        self.assertIn("코드 예시와 마크다운 제외", repair_prompt)
+        self.assertIn("분량으로 세면 안 되는 프롬프트 예시", repair_prompt)
+
+    def test_long_draft_with_too_few_h2_is_repaired_inside_write_post(self):
+        structurally_invalid = self.valid_post()
+        paragraph = (
+            "공식 안내에서 확인한 조건을 같은 기준으로 나누고, 사용 목적과 "
+            "필요한 기능을 먼저 기록한 뒤 가격과 제한 사항을 비교합니다. "
+            "결정 전에는 변경 가능성과 적용 범위를 다시 확인합니다. "
+        )
+        structurally_invalid["content"] = (
+            "AI 요금제를 고를 때는 가격뿐 아니라 사용량과 기능 제한을 함께 "
+            "확인해야 합니다. 먼저 필요한 조건을 적으면 선택 범위를 빠르게 "
+            "줄일 수 있습니다.\n\n"
+            "## 하나뿐인 소제목\n\n"
+            + paragraph * 55
+        )
+        self.assertGreater(
+            bot._visible_prose_length(structurally_invalid["content"]),
+            bot.MIN_VISIBLE_PROSE_CHARS,
+        )
+        repaired = self.valid_post()
+        topic = {
+            **self.topic,
+            "format": "실전 사용법",
+            "keywords": ["AI 요금제 비교"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            side_effect=[
+                json.dumps(structurally_invalid, ensure_ascii=False),
+                json.dumps(repaired, ensure_ascii=False),
+            ],
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            result = bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(result["title_korean"], repaired["title_korean"])
+        self.assertEqual(generate.call_count, 2)
+        repair_prompt = generate.call_args_list[1].args[1]
+        self.assertIn("H2 소제목 부족: 1개", repair_prompt)
+
+    def test_writer_exhausts_only_bounded_draft_repairs(self):
+        short = self.valid_post()
+        short["content"] = "짧은 답입니다.\n\n## 하나\n\n내용입니다."
+        topic = {
+            **self.topic,
+            "format": "실전 사용법",
+            "keywords": ["AI 요금제 비교"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            side_effect=[json.dumps(short, ensure_ascii=False)]
+            * bot.WRITE_POST_ATTEMPTS,
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            with self.assertRaisesRegex(ValueError, "보정 횟수 소진"):
+                bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(generate.call_count, bot.WRITE_POST_ATTEMPTS)
+
+    def test_save_validates_normalized_metadata_and_h1_free_body(self):
+        post = self.valid_post()
+        post["description"] = ("가" * 79) + "🙂"
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "insert_glossary_box", side_effect=lambda value: value), \
+                mock.patch.object(bot, "tags_for", return_value=["AI", "생성형 AI"]), \
+                mock.patch.object(bot, "generate_card", return_value="/assets/card.jpg"):
+            filename = bot.save(self.topic, post, self.evidence, self.now)
+            with open(os.path.join(directory, filename), encoding="utf-8") as handle:
+                front_matter = yaml.safe_load(handle.read().split("---", 2)[1])
+
+        self.assertNotIn("🙂", front_matter["description"])
+        self.assertGreaterEqual(
+            len(front_matter["description"]), bot.DESCRIPTION_MIN_CHARS
+        )
+
+        padded_h1 = self.valid_post()
+        padded_h1["content"] = (
+            "# " + ("본문이 아닌 긴 제목 " * 500)
+            + "\n\n## 첫째\n\n실제 설명은 짧습니다."
+        )
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(bot, "POSTS_DIR", directory), \
+                mock.patch.object(bot, "generate_card") as generate_card:
+            with self.assertRaisesRegex(ValueError, "실제 설명문이 너무 짧음"):
+                bot.save(self.topic, padded_h1, self.evidence, self.now)
+            generate_card.assert_not_called()
+            self.assertEqual(os.listdir(directory), [])
+
     def test_generated_guide_rejects_middle_dot_before_save(self):
         post = self.valid_post()
         post["title_korean"] = "가격·기능 비교 가이드"
@@ -403,6 +598,34 @@ class GuideTopicDiversityTests(unittest.TestCase):
         ]
         selected = self._pick(topics, {"price-done": "one"}, "price-next")
         self.assertEqual(selected["id"], "price-next")
+
+    def test_manual_test_topic_is_rejected_and_skipped_without_losing_rotation(self):
+        topics = [
+            {"id": "price-done", "format": "가격과 요금제", "status": "done"},
+            {
+                "id": "comparison-manual",
+                "format": "비교와 추천",
+                "status": "pending",
+                "publication_mode": "manual_test",
+            },
+            {
+                "id": "usage-auto",
+                "format": "실전 사용법",
+                "status": "pending",
+                "publication_mode": "auto_research",
+            },
+            {
+                "id": "prompt-auto",
+                "format": "프롬프트와 템플릿",
+                "status": "pending",
+                "publication_mode": "auto_research",
+            },
+        ]
+        written = {"price-done": "one"}
+
+        self.assertEqual(self._pick(topics, written)["id"], "usage-auto")
+        with self.assertRaisesRegex(SystemExit, "직접 실험"):
+            self._pick(topics, written, "comparison-manual")
 
     def test_only_remaining_capped_format_does_not_stall_queue(self):
         topics = [

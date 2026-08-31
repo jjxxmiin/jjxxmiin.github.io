@@ -44,6 +44,12 @@ LEDGER = os.path.join(ROOT, "automation", "data", "written_topics.json")
 POSTS_DIR = os.path.join(ROOT, "_posts")
 AUTOMATION_TAG = "keyword_guide"
 
+DESCRIPTION_MIN_CHARS = 80
+DESCRIPTION_MAX_CHARS = 160
+DESCRIPTION_SOFT_MIN_CHARS = 60
+MIN_VISIBLE_PROSE_CHARS = 3_500
+WRITE_POST_ATTEMPTS = 3
+
 FORMAT_WINDOW = 6
 FORMAT_ORDER = (
     "실전 사용법",
@@ -89,7 +95,13 @@ POST_SCHEMA = {
     "properties": {
         "title_korean": {"type": "STRING"},
         "title_english": {"type": "STRING"},
-        "description": {"type": "STRING"},
+        # Leave a margin inside the 80-160 character publication gate.  Models
+        # otherwise tend to land at 79 characters after emoji/space cleanup.
+        "description": {
+            "type": "STRING",
+            "minLength": 90,
+            "maxLength": 150,
+        },
         "summary": {"type": "STRING"},
         "content": {"type": "STRING"},
         "faq": {
@@ -308,6 +320,11 @@ def _visible_text(markdown: str) -> str:
     return _SPACE.sub(" ", text).strip()
 
 
+def _visible_prose_length(markdown: str) -> int:
+    """Count only non-whitespace prose a reader can actually see."""
+    return len(re.sub(r"\s", "", _visible_text(markdown)))
+
+
 def _heading_entries(markdown: str) -> tuple[list[tuple[int, int, str, str]], bool]:
     """ATX, Setext, raw HTML 제목을 문서 순서와 문법 종류까지 읽는다."""
     text, balanced = _structural_text(markdown)
@@ -330,6 +347,35 @@ def _intro_text(markdown: str) -> str:
     return _visible_text(intro)
 
 
+def _fit_description(post: dict) -> None:
+    """Repair harmless near-boundary metadata before spending another model call."""
+    description = _SPACE.sub(
+        " ", base.strip_emojis(str(post.get("description") or ""))
+    ).strip()
+    if DESCRIPTION_SOFT_MIN_CHARS <= len(description) < DESCRIPTION_MIN_CHARS:
+        description = (
+            description.rstrip(" .!?。")
+            + ". 적용 조건과 선택할 때 주의할 점도 함께 확인합니다."
+        )
+    if len(description) > DESCRIPTION_MAX_CHARS:
+        limit = DESCRIPTION_MAX_CHARS - 1
+        cut = description[:limit].rstrip(" ,.;:!?。")
+        last_space = cut.rfind(" ")
+        if last_space >= 120:
+            cut = cut[:last_space].rstrip(" ,.;:!?。")
+        description = cut + "…"
+    post["description"] = description
+
+
+def _normalize_generated_post(post: dict) -> dict:
+    """Normalize the exact model fields later used for metadata and article body."""
+    for key in ("title_korean", "title_english", "summary"):
+        post[key] = base.strip_emojis(str(post.get(key) or "")).strip()
+    post["content"] = base.strip_emojis(str(post.get("content") or "")).strip()
+    _fit_description(post)
+    return post
+
+
 def _metadata_and_style_errors(front_matter: dict, body: str) -> list[str]:
     """Mirror repository-wide metadata and honesty checks before publication."""
     errors: list[str] = []
@@ -347,7 +393,7 @@ def _metadata_and_style_errors(front_matter: dict, body: str) -> list[str]:
         errors.append(f"낚시성 또는 허위 경험 제목 표현: {reason}")
     if not summary:
         errors.append("요약 누락")
-    if not 80 <= len(description) <= 160:
+    if not DESCRIPTION_MIN_CHARS <= len(description) <= DESCRIPTION_MAX_CHARS:
         errors.append(f"메타 설명 길이 부적합: {len(description)}자")
 
     plain = _visible_text(body)
@@ -373,7 +419,7 @@ def _metadata_and_style_errors(front_matter: dict, body: str) -> list[str]:
 
 
 def _generated_post_errors(post: object) -> list[str]:
-    """Validate model fields immediately so the workflow can regenerate them."""
+    """Validate model fields while the same research evidence can be reused."""
     if not isinstance(post, dict):
         return ["생성 결과가 객체가 아님"]
     title_english = _SPACE.sub(
@@ -391,6 +437,18 @@ def _generated_post_errors(post: object) -> list[str]:
     )
     if not title_english:
         errors.append("파일명용 영문 제목 누락")
+    content = base.strip_emojis(str(post.get("content") or ""))
+    visible_length = _visible_prose_length(content)
+    if visible_length < MIN_VISIBLE_PROSE_CHARS:
+        shortage = MIN_VISIBLE_PROSE_CHARS - visible_length
+        errors.append(
+            "실제 설명문이 너무 짧음: "
+            f"{visible_length}자 (코드 예시와 마크다운 제외, 최소 "
+            f"{MIN_VISIBLE_PROSE_CHARS}자까지 {shortage}자 부족)"
+        )
+    _, fences_balanced = _strip_fenced_blocks(content)
+    if not fences_balanced:
+        errors.append("닫히지 않은 코드 펜스가 있음")
     return list(dict.fromkeys(errors))
 
 
@@ -398,6 +456,31 @@ def _validate_generated_post(post: object) -> None:
     errors = _generated_post_errors(post)
     if errors:
         raise ValueError("생성 글 메타/문체 검증 실패: " + "; ".join(errors))
+
+
+def _repair_prompt(original_prompt: str, draft: object, errors: list[str]) -> str:
+    """Request a complete corrected draft with the validator's exact feedback."""
+    if isinstance(draft, dict):
+        previous = json.dumps(draft, ensure_ascii=False)
+    else:
+        previous = str(draft or "(파싱 가능한 초안 없음)")
+    feedback = "\n".join(f"- {error}" for error in errors)
+    return f"""{original_prompt}
+
+[이전 초안 검증 실패]
+{feedback}
+
+[이전 초안]
+{previous}
+
+[보정 지시]
+- 위 오류를 모두 고친 전체 JSON 객체를 다시 반환하세요. 일부 문단만 반환하면 안 됩니다.
+- 위에 제공된 확인 사실만 사용하고 새로운 수치, 경험, 출처를 만들지 마세요.
+- 실제 설명문 길이는 코드 예시와 다이어그램 등 모든 코드 펜스, 마크다운 문법,
+  공백을 제외하고 계산합니다. 표시된 부족 글자 수보다 넉넉하게 설명을 보강하세요.
+- 같은 결론을 반복하지 말고 선택 조건, 실행 단계, 실패 조건과 맞지 않는 경우를
+  확인된 사실 범위에서 구체적으로 설명하세요.
+"""
 
 
 def _guide_quality_errors(
@@ -415,10 +498,14 @@ def _guide_quality_errors(
     errors: list[str] = []
     errors.extend(_metadata_and_style_errors(front_matter, full_body))
 
-    plain = _visible_text(article_content)
-    visible_length = len(re.sub(r"\s", "", plain))
-    if visible_length < 3_500:
-        errors.append(f"실제 설명문이 너무 짧음: {visible_length}자")
+    visible_length = _visible_prose_length(article_content)
+    if visible_length < MIN_VISIBLE_PROSE_CHARS:
+        shortage = MIN_VISIBLE_PROSE_CHARS - visible_length
+        errors.append(
+            "실제 설명문이 너무 짧음: "
+            f"{visible_length}자 (코드 예시와 마크다운 제외, 최소 "
+            f"{MIN_VISIBLE_PROSE_CHARS}자까지 {shortage}자 부족)"
+        )
 
     headings, fences_balanced = _heading_entries(article_content)
     if not fences_balanced:
@@ -547,11 +634,25 @@ def pick_topic(topic_id: str | None) -> dict:
     if topic_id:
         for t in topics:
             if t["id"] == topic_id:
+                if t.get("publication_mode") == "manual_test":
+                    raise SystemExit(
+                        f"{topic_id} 는 동일 조건 직접 실험이 필요한 비교·추천 "
+                        "주제입니다. 자동 발행하지 말고 테스트 로그와 화면을 "
+                        "먼저 준비하세요."
+                    )
                 return t
         raise SystemExit(f"주제를 찾지 못했습니다: {topic_id}")
-    pending = [topic for topic in topics if topic["status"] == "pending"]
+    pending = [
+        topic
+        for topic in topics
+        if topic["status"] == "pending"
+        and topic.get("publication_mode") != "manual_test"
+    ]
     if not pending:
-        raise SystemExit("대기 중인 주제가 없습니다. build_topic_queue.py 를 다시 돌리세요.")
+        raise SystemExit(
+            "자동 발행 가능한 대기 주제가 없습니다. 비교·추천 주제는 직접 "
+            "실험 후 작성하거나 build_topic_queue.py 를 다시 돌리세요."
+        )
 
     recent = _recent_written_formats(topics)
     counts = {value: recent.count(value) for value in set(recent)}
@@ -704,6 +805,98 @@ def research(client, topic: dict, today: str) -> dict:
     return _validate_research_payload(payload)
 
 
+def _prepare_guide_draft(post: dict, evidence: dict, today: str) -> dict:
+    """Build the normalized, side-effect-free article representation used by save."""
+    normalized = _normalize_generated_post(dict(post))
+    article_content = re.sub(
+        r"^#\s+.*\n+", "", normalized["content"]
+    ).strip()
+    normalized["content"] = article_content
+    content = insert_glossary_box(article_content)
+
+    raw_faq = normalized.get("faq") or []
+    if isinstance(raw_faq, list):
+        faq: object = [
+            {
+                "question": base.strip_emojis(
+                    str(item.get("question") or "")
+                ).strip(),
+                "answer": base.strip_emojis(
+                    str(item.get("answer") or "")
+                ).strip(),
+            }
+            if isinstance(item, dict)
+            else item
+            for item in raw_faq
+        ]
+    else:
+        faq = raw_faq
+    normalized["faq"] = faq
+
+    title = base.strip_emojis(normalized["title_korean"]).strip()
+    front_matter = {
+        "title": title,
+        "description": normalized["description"],
+        "summary": normalized["summary"],
+    }
+    if faq:
+        front_matter["faq"] = faq
+
+    body_faq = (
+        [
+            item
+            for item in faq
+            if isinstance(item, dict)
+            and item.get("question")
+            and item.get("answer")
+        ]
+        if isinstance(faq, list)
+        else []
+    )
+    body = [content, ""]
+    if body_faq:
+        body += ["## 자주 묻는 질문", ""]
+        for item in body_faq:
+            body += [f"### {item['question']}", "", item["answer"], ""]
+    body += ["## 직접 확인한 원문", "", source_block(evidence, today)]
+    if evidence.get("volatile"):
+        body += [
+            "",
+            "위 수치는 확인 시점 기준이며 예고 없이 바뀔 수 있습니다. "
+            "결정 전에 공식 페이지를 한 번 더 확인하시기 바랍니다.",
+        ]
+
+    return {
+        "post": normalized,
+        "article_content": article_content,
+        "content": content,
+        "faq": faq,
+        "title": title,
+        "front_matter": front_matter,
+        "full_body": "\n".join(body).rstrip() + "\n",
+    }
+
+
+def _prepared_guide_errors(prepared: dict) -> list[str]:
+    """Apply every deterministic, pre-thumbnail publication gate."""
+    errors = _generated_post_errors(prepared["post"])
+    errors.extend(
+        _guide_quality_errors(
+            prepared["front_matter"],
+            prepared["article_content"],
+            prepared["full_body"],
+            require_hero=False,
+        )
+    )
+    return list(dict.fromkeys(errors))
+
+
+def _validate_prepared_guide(prepared: dict) -> None:
+    errors = _prepared_guide_errors(prepared)
+    if errors:
+        raise ValueError("가이드 품질 검증 실패: " + "; ".join(errors))
+
+
 def write_post(client, topic: dict, evidence: dict, today: str) -> dict:
     facts = "\n".join(
         f"- {f['text']}  (출처: {f['source_name']} {f['source_url']})"
@@ -733,18 +926,54 @@ def write_post(client, topic: dict, evidence: dict, today: str) -> dict:
 {unknowns}
 
 [출력]
+description은 검색 결과만 읽어도 주제, 핵심 답과 주의점을 이해할 수 있는
+100~140자의 완결된 설명문으로 쓰세요.
 content 는 마크다운 본문입니다. 제목(H1)은 넣지 마세요. 검색 질문에 대한 직접 답변
-2~4문장을 먼저 쓴 뒤 '## ' 소제목을 시작하세요. 실제 설명문은 4200자에서 6200자
-사이로 쓰고 Mermaid, Chart.js 코드와 표 문법은 이 분량에 포함하지 마세요."""
-    raw = base.generate_content_with_fallback(client, prompt, response_schema=POST_SCHEMA)
-    if not raw:
-        raise ValueError("가이드 글 생성 결과가 비어 있음")
-    try:
-        post = json.loads(raw)
-    except (TypeError, ValueError) as exc:
-        raise ValueError(f"가이드 글 JSON 파싱 실패: {exc}") from exc
-    _validate_generated_post(post)
-    return post
+2~4문장을 먼저 쓴 뒤 '## ' 소제목을 시작하세요. 코드 펜스, 프롬프트 예시,
+Mermaid, Chart.js, 마크다운 문법과 공백을 제외한 실제 설명문만 4200자에서
+6200자 사이로 쓰세요. 코드 예시를 길게 써서 본문 분량을 채우면 안 됩니다."""
+
+    previous_draft: object = None
+    errors: list[str] = []
+    for attempt in range(1, WRITE_POST_ATTEMPTS + 1):
+        request_prompt = (
+            prompt
+            if attempt == 1
+            else _repair_prompt(prompt, previous_draft, errors)
+        )
+        raw = base.generate_content_with_fallback(
+            client,
+            request_prompt,
+            response_schema=POST_SCHEMA,
+        )
+        if not raw:
+            previous_draft = None
+            errors = ["가이드 글 생성 결과가 비어 있음"]
+        else:
+            try:
+                previous_draft = json.loads(raw)
+            except (TypeError, ValueError) as exc:
+                previous_draft = raw
+                errors = [f"가이드 글 JSON 파싱 실패: {exc}"]
+            else:
+                if isinstance(previous_draft, dict):
+                    prepared = _prepare_guide_draft(
+                        previous_draft, evidence, today
+                    )
+                    previous_draft = prepared["post"]
+                    errors = _prepared_guide_errors(prepared)
+                else:
+                    errors = _generated_post_errors(previous_draft)
+                if not errors:
+                    return previous_draft
+
+        if attempt < WRITE_POST_ATTEMPTS:
+            print(
+                f"원고 보정 {attempt}/{WRITE_POST_ATTEMPTS - 1}: "
+                + "; ".join(errors)
+            )
+
+    raise ValueError("가이드 원고 보정 횟수 소진: " + "; ".join(errors))
 
 
 def source_block(evidence: dict, today: str) -> str:
@@ -759,8 +988,20 @@ def source_block(evidence: dict, today: str) -> str:
 
 
 def save(topic: dict, post: dict, evidence: dict, now) -> str:
-    _validate_generated_post(post)
+    if not isinstance(post, dict):
+        _validate_generated_post(post)
+        raise AssertionError("unreachable")
+
     today = now.strftime("%Y-%m-%d")
+    prepared = _prepare_guide_draft(post, evidence, today)
+    _validate_prepared_guide(prepared)
+    post = prepared["post"]
+    article_content = prepared["article_content"]
+    content = prepared["content"]
+    faq = prepared["faq"]
+    title = prepared["title"]
+    full_body = prepared["full_body"]
+
     slug = base._safe_slug(post["title_english"])
     filename = f"{today}-{slug}.md"
     os.makedirs(POSTS_DIR, exist_ok=True)
@@ -771,18 +1012,6 @@ def save(topic: dict, post: dict, evidence: dict, now) -> str:
     if os.path.exists(path):
         raise RuntimeError(f"같은 파일이 이미 있습니다: {filename}")
 
-    article_content = base.strip_emojis(post["content"]).strip()
-    article_content = re.sub(r"^#\s+.*\n+", "", article_content)  # 혹시 들어온 H1 제거
-    content = insert_glossary_box(article_content)  # 처음 보는 독자용 용어 풀이
-
-    faq = [
-        {"question": base.strip_emojis(str(i.get("question", ""))).strip(),
-         "answer": base.strip_emojis(str(i.get("answer", ""))).strip()}
-        for i in post.get("faq") or []
-        if i.get("question") and i.get("answer")
-    ]
-
-    title = base.strip_emojis(post["title_korean"]).strip()
     tags = tags_for(title, content, "Tech")
 
     fm = {
@@ -809,20 +1038,6 @@ def save(topic: dict, post: dict, evidence: dict, now) -> str:
     if base._fenced_blocks(content, "chartjs"):
         fm["chart"] = True
 
-    body = [content, ""]
-    if faq:
-        body += ["## 자주 묻는 질문", ""]
-        for i in faq:
-            body += [f"### {i['question']}", "", i["answer"], ""]
-    body += ["## 직접 확인한 원문", "", source_block(evidence, today)]
-    if evidence.get("volatile"):
-        body += ["", "위 수치는 확인 시점 기준이며 예고 없이 바뀔 수 있습니다. "
-                     "결정 전에 공식 페이지를 한 번 더 확인하시기 바랍니다."]
-
-    full_body = "\n".join(body).rstrip() + "\n"
-    # 본문 품질 실패라면 카드 파일조차 만들지 않는다. 이 예외는 main까지 전파되어
-    # Actions의 기존 3회 재시도 루프가 다음 생성 시도를 수행한다.
-    _validate_guide(fm, article_content, full_body, require_hero=False)
     try:
         image_path = generate_card(slug, title, "Tech", tags, today)
     except Exception as exc:

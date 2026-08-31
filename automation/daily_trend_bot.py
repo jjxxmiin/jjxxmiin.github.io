@@ -283,6 +283,9 @@ MAX_CANDIDATES_PER_SEARCH = max(
     1,
     min(8, int(os.environ.get("AI_NEWS_MAX_CANDIDATES", "3"))),
 )
+# A draft retry reuses the already verified evidence pack. Keep this fixed and
+# small so a bad writing response cannot multiply search/research cost.
+MAX_NEWS_DRAFT_ATTEMPTS = 3
 USER_AGENT = "Mozilla/5.0 (compatible; OPSOAI-NewsBot/2.0; +https://www.opsoai.com/)"
 TRACKING_QUERY_KEYS = {
     "fbclid", "gclid", "mc_cid", "mc_eid", "ref", "ref_src", "source",
@@ -460,6 +463,13 @@ def generate_content_with_fallback(
             # Prepare config
             gen_config = {
                 "response_mime_type": "application/json" if response_schema else "text/plain",
+                # This bot only uses server-side tools such as Google Search. It
+                # never supplies Python callables for the SDK to execute, so keep
+                # AFC disabled explicitly instead of emitting the direct-model
+                # AFC warning on every request.
+                "automatic_function_calling": types.AutomaticFunctionCallingConfig(
+                    disable=True
+                ),
             }
             if response_schema:
                 gen_config["response_schema"] = response_schema
@@ -1383,14 +1393,11 @@ def _mermaid_grounding_error(code, evidence):
     return ""
 
 
-def _sanitize_news_visuals(content, evidence):
-    """Keep up to five safe Mermaid blocks and one evidence-backed chart."""
+def _sanitize_news_visuals(content, evidence, *, repair_notes=None):
+    """Keep safe visuals, synthesizing one verified lead diagram when possible."""
     text = str(content or "")
     mermaid_codes = _fenced_blocks(text, "mermaid")
-    if not mermaid_codes:
-        return text, ["검증 가능한 Mermaid 다이어그램 없음"]
-
-    mermaid_results = _validate_mermaid_codes(mermaid_codes)
+    mermaid_results = _validate_mermaid_codes(mermaid_codes) if mermaid_codes else []
     kept_mermaid = 0
     for code, result in zip(mermaid_codes, mermaid_results):
         grounding_error = _mermaid_grounding_error(code, evidence)
@@ -1401,7 +1408,26 @@ def _sanitize_news_visuals(content, evidence):
         text = _remove_fenced_block(text, "mermaid", code)
         print(f"  Mermaid 제외: {reason}")
     if kept_mermaid == 0:
-        return text, ["문법과 근거 검증을 통과한 Mermaid 다이어그램 없음"]
+        synthesized = build_flow_diagram(evidence)
+        synthesized_codes = _fenced_blocks(synthesized, "mermaid")
+        if synthesized_codes:
+            result = _validate_mermaid_codes(synthesized_codes)[0]
+            grounding_error = _mermaid_grounding_error(
+                synthesized_codes[0], evidence
+            )
+            if result["ok"] and not grounding_error:
+                text = f"{synthesized}\n\n{text.strip()}".strip()
+                kept_mermaid = 1
+                if repair_notes is not None:
+                    repair_notes.append(
+                        "검증된 summary_flow로 글머리 Mermaid를 합성함"
+                    )
+                print("  검증된 summary_flow로 글머리 Mermaid를 합성했습니다.")
+            else:
+                reason = grounding_error or result["error"]
+                print(f"  합성 Mermaid 제외: {reason}")
+        if kept_mermaid == 0:
+            return text, ["문법과 근거 검증을 통과한 Mermaid 다이어그램 없음"]
 
     chart_codes = _fenced_blocks(text, "chartjs")
     kept_chart = 0
@@ -1599,7 +1625,7 @@ def _remove_unverified_links(content, evidence):
 
 
 def _fallback_post_data(topic_data, evidence):
-    """Create a small, source-linked post when every model-writing attempt fails."""
+    """Build a conservative repair seed; it is not publishable until fully validated."""
     topic = str(
         topic_data.get("topic_name")
         or (topic_data.get("entities") or ["AI"])[0]
@@ -1735,7 +1761,7 @@ def _fallback_post_data(topic_data, evidence):
 
 
 def _relax_post_data(post, topic_data, evidence):
-    """Repair a model draft enough to publish without introducing new claims."""
+    """Apply conservative draft repairs without treating the result as publishable."""
     fallback = _fallback_post_data(topic_data, evidence)
     if not isinstance(post, dict):
         return fallback
@@ -1777,7 +1803,64 @@ def _validated_relaxed_post(post, topic_data, evidence):
     return relaxed
 
 
-def generate_blog_post(client, topic_data, evidence, *, strict=True):
+def _draft_retry_prompt(base_prompt, previous_draft, validation_errors):
+    """Attach the exact failed draft and its complete validator output."""
+    return f"""{base_prompt}
+
+[직전 원고 전체 JSON]
+{json.dumps(previous_draft, ensure_ascii=False)}
+
+[직전 원고 전체 검증 오류 JSON]
+{json.dumps(validation_errors, ensure_ascii=False)}
+
+[보정 지시]
+- 위 오류를 하나도 생략하지 말고 모두 고친 새 JSON 원고를 반환한다.
+- 직전 원고에서 검증을 통과한 내용은 유지하고, 오류가 난 필드와 문장만 보정한다.
+- 조사나 새로운 사실 추가는 금지한다. 위의 동일한 evidence만 사용한다.
+"""
+
+
+def _prepare_generated_post(post, topic_data, evidence):
+    """Normalize one model draft and apply the complete publication validator."""
+    for key in ("title_korean", "title_english", "description", "summary"):
+        post[key] = strip_emojis(str(post.get(key) or "")).strip()
+    post["content"] = _normalize_news_markdown(post.get("content"))
+    repair_notes = []
+    post["content"], visual_errors = _sanitize_news_visuals(
+        post["content"],
+        evidence,
+        repair_notes=repair_notes,
+    )
+    post["tags"] = list(dict.fromkeys(
+        strip_emojis(str(value)).strip()
+        for value in (post.get("tags") or [])
+        if strip_emojis(str(value)).strip()
+    ))[:10]
+    post["entities"] = list(dict.fromkeys(
+        [
+            strip_emojis(str(value)).strip()
+            for value in (post.get("entities") or [])
+            if strip_emojis(str(value)).strip()
+        ]
+        + [
+            str(value).strip()
+            for value in (topic_data.get("entities") or [])
+            if str(value).strip()
+        ]
+    ))[:12]
+    post["faq"] = [
+        {
+            "question": strip_emojis(str(item.get("question") or "")).strip(),
+            "answer": strip_emojis(str(item.get("answer") or "")).strip(),
+        }
+        for item in (post.get("faq") or [])
+        if isinstance(item, dict) and item.get("question") and item.get("answer")
+    ][:4]
+    errors = _post_data_errors(post, evidence, visual_errors=visual_errors)
+    return post, errors, repair_notes
+
+
+def generate_blog_post(client, topic_data, evidence):
     """Write one fact-locked Korean AI news feature in a lively blogger voice."""
     print(f"뉴스 글 작성: {topic_data['headline']}")
     required_sections = "\n".join(
@@ -1872,61 +1955,69 @@ def generate_blog_post(client, topic_data, evidence, *, strict=True):
             "content", "tags", "entities", "faq"
         ],
     }
-    response_text = generate_content_with_fallback(
-        client,
-        prompt_text,
-        response_schema=response_schema,
-        tools=None,
-        thinking_level="MEDIUM",
-        max_output_tokens=16_384,
-    )
-    if not response_text:
-        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
-    try:
-        post = json.loads(response_text)
-    except (TypeError, ValueError) as exc:
-        print(f"글 JSON 파싱 실패: {exc}")
-        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
-    if not isinstance(post, dict):
-        return None if strict else _validated_relaxed_post(None, topic_data, evidence)
+    previous_draft = None
+    previous_errors = []
+    failed_attempts = []
+    for attempt in range(1, MAX_NEWS_DRAFT_ATTEMPTS + 1):
+        attempt_prompt = prompt_text
+        if previous_errors:
+            attempt_prompt = _draft_retry_prompt(
+                prompt_text,
+                previous_draft,
+                previous_errors,
+            )
+        response_text = generate_content_with_fallback(
+            client,
+            attempt_prompt,
+            response_schema=response_schema,
+            tools=None,
+            thinking_level="MEDIUM",
+            max_output_tokens=16_384,
+        )
+        if not response_text:
+            previous_draft = ""
+            previous_errors = ["모델 원고 응답 없음"]
+        else:
+            try:
+                post = json.loads(response_text)
+            except (TypeError, ValueError) as exc:
+                previous_draft = response_text
+                previous_errors = [f"글 JSON 파싱 실패: {exc}"]
+            else:
+                if not isinstance(post, dict):
+                    previous_draft = post
+                    previous_errors = ["글 JSON 최상위 값이 객체가 아님"]
+                else:
+                    post, errors, repair_notes = _prepare_generated_post(
+                        post,
+                        topic_data,
+                        evidence,
+                    )
+                    if not errors:
+                        publication_notes = list(repair_notes)
+                        if failed_attempts:
+                            publication_notes.insert(
+                                0,
+                                f"{len(failed_attempts)}회 전체 검증 실패 후 새 원고로 보정함",
+                            )
+                        if publication_notes:
+                            post["_publication_mode"] = "repaired"
+                            post["_publication_notes"] = publication_notes
+                        return post
+                    previous_draft = post
+                    previous_errors = errors
 
-    for key in ("title_korean", "title_english", "description", "summary"):
-        post[key] = strip_emojis(str(post.get(key) or "")).strip()
-    post["content"] = _normalize_news_markdown(post.get("content"))
-    post["content"], visual_errors = _sanitize_news_visuals(post["content"], evidence)
-    post["tags"] = list(dict.fromkeys(
-        strip_emojis(str(value)).strip()
-        for value in (post.get("tags") or [])
-        if strip_emojis(str(value)).strip()
-    ))[:10]
-    post["entities"] = list(dict.fromkeys(
-        [
-            strip_emojis(str(value)).strip()
-            for value in (post.get("entities") or [])
-            if strip_emojis(str(value)).strip()
-        ]
-        + [
-            str(value).strip()
-            for value in (topic_data.get("entities") or [])
-            if str(value).strip()
-        ]
-    ))[:12]
-    post["faq"] = [
-        {
-            "question": strip_emojis(str(item.get("question") or "")).strip(),
-            "answer": strip_emojis(str(item.get("answer") or "")).strip(),
-        }
-        for item in (post.get("faq") or [])
-        if item.get("question") and item.get("answer")
-    ][:4]
+        failed_attempts.append({
+            "attempt": attempt,
+            "errors": list(previous_errors),
+        })
+        print(
+            f"글 출고 기준 미달 ({attempt}/{MAX_NEWS_DRAFT_ATTEMPTS}): "
+            + " / ".join(previous_errors)
+        )
 
-    errors = _post_data_errors(post, evidence, visual_errors=visual_errors)
-    if errors:
-        print("글 출고 기준 미달: " + " / ".join(errors))
-        if strict:
-            return None
-        return _validated_relaxed_post(post, topic_data, evidence)
-    return post
+    print("원고 보정 횟수를 모두 소진해 이 후보를 발행하지 않습니다.")
+    return None
 
 def replace_empty_lead_diagram(content, evidence):
     """글머리 그림이 이 글과 무관한 빈 말이면 사실로 만든 그림으로 바꾼다.
@@ -2044,12 +2135,20 @@ def save_post(post_data, topic_data, evidence, *, now=None):
         for item in post_data.get("faq") or []
         if item.get("question") and item.get("answer")
     ]
+    draft_repaired = post_data.get("_publication_mode") == "repaired"
+    source_limited = bool(evidence.get("quality_warnings"))
+    if draft_repaired and source_limited:
+        publication_mode = "repaired_fallback"
+    elif draft_repaired:
+        publication_mode = "repaired"
+    elif source_limited:
+        publication_mode = "fallback"
+    else:
+        publication_mode = "verified"
     front_matter = {
         "layout": "post",
         "automation": "daily_ai_news",
-        "publication_mode": (
-            "fallback" if evidence.get("quality_warnings") else "verified"
-        ),
+        "publication_mode": publication_mode,
         "title": post_data["title_korean"],
         "date": now.strftime("%Y-%m-%d %H:%M:%S %z"),
         "last_modified_at": now.strftime("%Y-%m-%d %H:%M:%S %z"),
@@ -2123,8 +2222,10 @@ def save_post(post_data, topic_data, evidence, *, now=None):
             os.unlink(temporary)
     print(f"게시물 저장 완료: {filepath}")
     print(f"직접 원문 {len(evidence['sources'])}개 / 검증 사실 {len(evidence['facts'])}개")
+    if post_data.get("_publication_notes"):
+        print("원고 보정: " + " / ".join(post_data["_publication_notes"]))
     if evidence.get("quality_warnings"):
-        print("완화 발행: " + " / ".join(evidence["quality_warnings"]))
+        print("원문 품질 경고: " + " / ".join(evidence["quality_warnings"]))
     return filepath
 
 def preflight_check(client):
@@ -2135,7 +2236,15 @@ def preflight_check(client):
     red run and no alert email. This turns that into a visible failure.
     """
     try:
-        client.models.generate_content(model=FALLBACK_MODELS[-1], contents="ping")
+        client.models.generate_content(
+            model=FALLBACK_MODELS[-1],
+            contents="ping",
+            config=types.GenerateContentConfig(
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                    disable=True
+                )
+            ),
+        )
     except Exception as e:
         msg = str(e)
         if any(k in msg for k in ("API_KEY_INVALID", "API key not valid",
@@ -2146,9 +2255,39 @@ def preflight_check(client):
         print(f"Preflight warning (non-fatal): {e}")
 
 
+def _relaxed_evidence_is_publishable(evidence):
+    """Keep source grounding mandatory when editorial checks are relaxed."""
+    if (
+        not isinstance(evidence, dict)
+        or not parse_iso_date(evidence.get("published_at"))
+    ):
+        return False
+
+    reachable_urls = set()
+    for source in evidence.get("sources") or []:
+        if not isinstance(source, dict) or not source.get("reachable"):
+            continue
+        url = canonical_url(source.get("url"))
+        if url and direct_source_rejection_reason(url) is None:
+            reachable_urls.add(url)
+    if not reachable_urls:
+        return False
+
+    for fact in evidence.get("facts") or []:
+        if not isinstance(fact, dict) or not str(fact.get("text") or "").strip():
+            continue
+        fact_urls = {
+            canonical_url(url)
+            for url in fact.get("source_urls") or []
+            if canonical_url(url)
+        }
+        if reachable_urls.intersection(fact_urls):
+            return True
+    return False
+
+
 def _publish_from_candidates(client, candidates, history):
-    """Try strict publishing first, then force one grounded fallback from the list."""
-    fallback_options = []
+    """Verify each candidate once and let its writer own all targeted retries."""
     for index, topic_data in enumerate(candidates, 1):
         print(f"\n후보 {index}/{len(candidates)} 재검증: {topic_data['headline']}")
         evidence = verify_news_candidate(
@@ -2157,10 +2296,10 @@ def _publish_from_candidates(client, candidates, history):
             strict=False,
             max_age_days=14,
         )
-        if not evidence:
+        if not _relaxed_evidence_is_publishable(evidence):
             # Discovery headlines are leads, not facts. Never turn a rejected
             # rumor into publishable evidence merely because its URL responds.
-            print("  직접 원문 재검증 실패, 다음 후보로 넘어갑니다.")
+            print("  도달 가능한 직접 원문과 연결된 사실이 없어 건너뜁니다.")
             continue
 
         # 사실 문장은 영어로 검증된다. 독자에게 나가기 전에 한국어본을 확보한다.
@@ -2172,26 +2311,10 @@ def _publish_from_candidates(client, candidates, history):
             print("  이미 다룬 사건이라 다음 후보로 넘어갑니다.")
             continue
 
-        if evidence.get("quality_warnings"):
-            fallback_options.append((topic_data, evidence))
-            continue
-
         post_data = generate_blog_post(client, topic_data, evidence)
         if post_data:
             return save_post(post_data, topic_data, evidence)
-        print("  엄격한 글 출고 기준 미달, 완화 발행 후보로 보관합니다.")
-        fallback_options.append((topic_data, evidence))
-
-    for topic_data, evidence in fallback_options:
-        print(f"\n일일 발행 폴백 적용: {topic_data['headline']}")
-        post_data = generate_blog_post(
-            client,
-            topic_data,
-            evidence,
-            strict=False,
-        )
-        if post_data:
-            return save_post(post_data, topic_data, evidence)
+        print("  원고 보정 3회 모두 실패해 다음 후보로 넘어갑니다.")
     return None
 
 

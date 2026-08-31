@@ -219,7 +219,7 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
         config = client.models.generate_content.call_args.kwargs["config"]
         self.assertTrue(config.automatic_function_calling.disable)
 
-    def test_daily_writer_falls_back_after_strict_draft_failure(self):
+    def test_daily_publication_does_not_call_writer_twice_for_same_evidence(self):
         candidate = {
             "headline": "Example releases a new AI model",
             "source_url": "https://example.com/news/model",
@@ -239,10 +239,10 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
             "unknowns": [],
             "quality_warnings": [],
         }
-        relaxed_post = {"title_korean": "검증 근거 기반 완화 원고"}
-
-        def generate(_client, _candidate, _evidence, *, strict=True):
-            return None if strict else relaxed_post
+        repaired_post = {
+            "title_korean": "검증 근거 기반 보정 원고",
+            "_publication_mode": "repaired",
+        }
 
         with mock.patch.object(
             news_bot, "verify_news_candidate", return_value=evidence
@@ -251,7 +251,7 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
         ), mock.patch.object(
             news_bot, "check_duplication", return_value=False
         ), mock.patch.object(
-            news_bot, "generate_blog_post", side_effect=generate
+            news_bot, "generate_blog_post", return_value=repaired_post
         ) as generate_post, mock.patch.object(
             news_bot, "save_post", return_value="/tmp/daily-post.md"
         ) as save_post:
@@ -260,10 +260,10 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
             )
 
         self.assertEqual(published, "/tmp/daily-post.md")
-        self.assertEqual(generate_post.call_count, 2)
-        self.assertNotIn("strict", generate_post.call_args_list[0].kwargs)
-        self.assertFalse(generate_post.call_args_list[1].kwargs["strict"])
-        save_post.assert_called_once_with(relaxed_post, candidate, evidence)
+        self.assertEqual(generate_post.call_count, 1)
+        self.assertNotIn("strict", generate_post.call_args.kwargs)
+        save_post.assert_called_once_with(repaired_post, candidate, evidence)
+        self.assertEqual(evidence["quality_warnings"], [])
 
     def test_daily_fallback_rejects_unreachable_or_unlinked_sources(self):
         candidate = {
@@ -297,7 +297,7 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
         generate_post.assert_not_called()
         save_post.assert_not_called()
 
-    def test_relaxed_writer_discards_known_invalid_draft_for_grounded_fallback(self):
+    def test_deterministic_short_repair_cannot_bypass_full_validator(self):
         url = "https://example.com/news/model"
         candidate = {
             "topic_name": "Example AI",
@@ -339,10 +339,15 @@ class GeminiAndNewsFallbackTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         self.assertNotIn("```python", result["content"])
-        self.assertTrue(evidence["quality_warnings"])
-        self.assertEqual(
-            news_bot._post_data_errors(result, evidence),
-            ["본문이 너무 짧음"],
+        self.assertEqual(evidence["quality_warnings"], [])
+        self.assertTrue(
+            any(
+                "너무 짧음" in error
+                for error in news_bot._post_data_errors(result, evidence)
+            )
+        )
+        self.assertIsNone(
+            news_bot._validated_relaxed_post(invalid, candidate, evidence)
         )
 
 

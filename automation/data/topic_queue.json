@@ -24,7 +24,10 @@
       ],
       "variants": 35,
       "both_engine": 9,
-      "priority": 119,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 144,
       "status": "done",
       "post": "2026-08-23-claude-pricing-guide-free-pro-max-team-comparison"
     },
@@ -50,7 +53,10 @@
       ],
       "variants": 12,
       "both_engine": 6,
-      "priority": 81,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 106,
       "status": "done",
       "post": "2026-08-23-chatgpt-pricing-plans-recommendation-and-comparison-guide"
     },
@@ -78,7 +84,10 @@
       ],
       "variants": 19,
       "both_engine": 3,
-      "priority": 55,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 80,
       "status": "done",
       "post": "2026-08-24-2026-local-llm-model-comparison-and-gpu-specification-guide"
     },
@@ -106,27 +115,12 @@
       ],
       "variants": 57,
       "both_engine": 2,
-      "priority": 46,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 71,
       "status": "done",
       "post": "2026-08-25-claude-code-pricing-and-plan-comparison-guide-2026"
-    },
-    {
-      "id": "클로드-사용법",
-      "head": "클로드 사용법",
-      "tier": "T1",
-      "format": "실전 사용법",
-      "primary": "클로드 사용법",
-      "keywords": [
-        "클로드 사용법",
-        "클로드 사용법 책",
-        "클로드 사용법 pdf",
-        "클로드 사용법 디시",
-        "클로드 사용법 정리"
-      ],
-      "variants": 5,
-      "both_engine": 2,
-      "priority": 30,
-      "status": "pending"
     },
     {
       "id": "ai-ppt",
@@ -150,7 +144,10 @@
       ],
       "variants": 12,
       "both_engine": 1,
-      "priority": 27,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 52,
       "status": "pending"
     },
     {
@@ -169,7 +166,10 @@
       ],
       "variants": 6,
       "both_engine": 1,
-      "priority": 23,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 48,
       "status": "pending"
     },
     {
@@ -190,7 +190,10 @@
       ],
       "variants": 8,
       "both_engine": 1,
-      "priority": 23,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 48,
       "status": "pending"
     },
     {
@@ -207,7 +210,10 @@
       ],
       "variants": 4,
       "both_engine": 1,
-      "priority": 21,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 46,
       "status": "pending"
     },
     {
@@ -234,8 +240,33 @@
       ],
       "variants": 18,
       "both_engine": 0,
-      "priority": 21,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 46,
       "status": "pending"
+    },
+    {
+      "id": "클로드-사용법",
+      "head": "클로드 사용법",
+      "tier": "T1",
+      "format": "실전 사용법",
+      "primary": "클로드 사용법",
+      "keywords": [
+        "클로드 사용법",
+        "클로드 사용법 책",
+        "클로드 사용법 pdf",
+        "클로드 사용법 디시",
+        "클로드 사용법 정리"
+      ],
+      "variants": 5,
+      "both_engine": 2,
+      "commercial_value": 3,
+      "reader_intent": "도입·문제 해결",
+      "publication_mode": "auto_research",
+      "priority": 45,
+      "status": "done",
+      "post": "2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows"
     },
     {
       "id": "클로드-ai",
@@ -257,7 +288,10 @@
       ],
       "variants": 10,
       "both_engine": 0,
-      "priority": 16,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 41,
       "status": "pending"
     },
     {
@@ -278,7 +312,10 @@
       ],
       "variants": 8,
       "both_engine": 0,
-      "priority": 14,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 39,
       "status": "pending"
     },
     {
@@ -298,7 +335,10 @@
       ],
       "variants": 7,
       "both_engine": 0,
-      "priority": 12,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 37,
       "status": "pending"
     },
     {
@@ -314,7 +354,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 9,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 34,
       "status": "pending"
     },
     {
@@ -330,7 +373,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 9,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 34,
       "status": "pending"
     },
     {
@@ -348,7 +394,10 @@
       ],
       "variants": 5,
       "both_engine": 0,
-      "priority": 8,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 33,
       "status": "pending"
     },
     {
@@ -365,7 +414,10 @@
       ],
       "variants": 4,
       "both_engine": 0,
-      "priority": 7,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 32,
       "status": "pending"
     },
     {
@@ -381,7 +433,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -400,7 +455,10 @@
       ],
       "variants": 6,
       "both_engine": 3,
-      "priority": 43,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 68,
       "status": "pending"
     },
     {
@@ -418,7 +476,10 @@
       ],
       "variants": 5,
       "both_engine": 3,
-      "priority": 41,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 66,
       "status": "pending"
     },
     {
@@ -443,7 +504,10 @@
       ],
       "variants": 12,
       "both_engine": 2,
-      "priority": 38,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 63,
       "status": "pending"
     },
     {
@@ -463,7 +527,10 @@
       ],
       "variants": 7,
       "both_engine": 1,
-      "priority": 23,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 48,
       "status": "pending"
     },
     {
@@ -483,7 +550,10 @@
       ],
       "variants": 7,
       "both_engine": 1,
-      "priority": 22,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 47,
       "status": "pending"
     },
     {
@@ -501,7 +571,10 @@
       ],
       "variants": 5,
       "both_engine": 1,
-      "priority": 21,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 46,
       "status": "pending"
     },
     {
@@ -520,25 +593,10 @@
       ],
       "variants": 6,
       "both_engine": 1,
-      "priority": 21,
-      "status": "pending"
-    },
-    {
-      "id": "제미나이-사용법",
-      "head": "제미나이 사용법",
-      "tier": "T3",
-      "format": "실전 사용법",
-      "primary": "제미나이 사용법",
-      "keywords": [
-        "제미나이 사용법",
-        "제미나이 사용법 pdf",
-        "제미나이 사용법 갤럭시",
-        "제미나이 사용법 디시",
-        "제미나이 사용법 책"
-      ],
-      "variants": 5,
-      "both_engine": 1,
-      "priority": 20,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 46,
       "status": "pending"
     },
     {
@@ -560,7 +618,10 @@
       ],
       "variants": 9,
       "both_engine": 0,
-      "priority": 12,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 37,
       "status": "pending"
     },
     {
@@ -576,7 +637,31 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 10,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 35,
+      "status": "pending"
+    },
+    {
+      "id": "제미나이-사용법",
+      "head": "제미나이 사용법",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "제미나이 사용법",
+      "keywords": [
+        "제미나이 사용법",
+        "제미나이 사용법 pdf",
+        "제미나이 사용법 갤럭시",
+        "제미나이 사용법 디시",
+        "제미나이 사용법 책"
+      ],
+      "variants": 5,
+      "both_engine": 1,
+      "commercial_value": 3,
+      "reader_intent": "도입·문제 해결",
+      "publication_mode": "auto_research",
+      "priority": 35,
       "status": "pending"
     },
     {
@@ -592,7 +677,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 9,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 34,
       "status": "pending"
     },
     {
@@ -611,7 +699,10 @@
       ],
       "variants": 6,
       "both_engine": 0,
-      "priority": 9,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 34,
       "status": "pending"
     },
     {
@@ -628,7 +719,10 @@
       ],
       "variants": 4,
       "both_engine": 0,
-      "priority": 8,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 33,
       "status": "pending"
     },
     {
@@ -645,7 +739,10 @@
       ],
       "variants": 4,
       "both_engine": 0,
-      "priority": 8,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 33,
       "status": "pending"
     },
     {
@@ -663,7 +760,10 @@
       ],
       "variants": 5,
       "both_engine": 0,
-      "priority": 8,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 33,
       "status": "pending"
     },
     {
@@ -680,7 +780,10 @@
       ],
       "variants": 4,
       "both_engine": 0,
-      "priority": 7,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 32,
       "status": "pending"
     },
     {
@@ -696,7 +799,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -712,7 +818,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -728,7 +837,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -744,7 +856,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -760,7 +875,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -776,7 +894,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 6,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "manual_test",
+      "priority": 31,
       "status": "pending"
     },
     {
@@ -792,7 +913,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 5,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 30,
       "status": "pending"
     },
     {
@@ -808,23 +932,10 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 5,
-      "status": "pending"
-    },
-    {
-      "id": "제미나이-나노바나나",
-      "head": "제미나이 나노바나나",
-      "tier": "T3",
-      "format": "실전 사용법",
-      "primary": "제미나이 나노바나나 사용법",
-      "keywords": [
-        "제미나이 나노바나나 사용법",
-        "제미나이 나노바나나 사용법 디시",
-        "제미나이 나노바나나 프로 사용법"
-      ],
-      "variants": 3,
-      "both_engine": 0,
-      "priority": 5,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 30,
       "status": "pending"
     },
     {
@@ -840,7 +951,29 @@
       ],
       "variants": 3,
       "both_engine": 0,
-      "priority": 5,
+      "commercial_value": 5,
+      "reader_intent": "구매·구독 판단",
+      "publication_mode": "auto_research",
+      "priority": 30,
+      "status": "pending"
+    },
+    {
+      "id": "제미나이-나노바나나",
+      "head": "제미나이 나노바나나",
+      "tier": "T3",
+      "format": "실전 사용법",
+      "primary": "제미나이 나노바나나 사용법",
+      "keywords": [
+        "제미나이 나노바나나 사용법",
+        "제미나이 나노바나나 사용법 디시",
+        "제미나이 나노바나나 프로 사용법"
+      ],
+      "variants": 3,
+      "both_engine": 0,
+      "commercial_value": 3,
+      "reader_intent": "도입·문제 해결",
+      "publication_mode": "auto_research",
+      "priority": 20,
       "status": "pending"
     }
   ]
