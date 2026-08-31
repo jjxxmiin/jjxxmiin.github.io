@@ -62,7 +62,6 @@ from daily_trend_bot import (
     generate_content_with_fallback,
     get_gemini_client,
     linkify_bare_urls,
-    POPULARITY_SIGNAL_HOSTS,
     preflight_check,
     strip_emojis,
 )
@@ -73,7 +72,7 @@ ROOT = Path(__file__).resolve().parent.parent
 POSTS_DIR = (ROOT / "_posts").resolve()
 OFFICIAL_SOURCE_ROOTS_PATH = ROOT / "automation" / "data" / "official_source_roots.json"
 PIPELINE_VERSION = 6
-PRODUCTION_MANIFEST_SHA256 = "cdd6ad4edba6f504def36b15e763230102c8052277993ba9f9c751f7e173db2a"
+PRODUCTION_MANIFEST_SHA256 = "4716bddaf37aa7a314363cf95a2bf93c2d09cb58f39b4dd3e6c497d2a4c538ef"
 SCRIPT_SHA256 = hashlib.sha256(b"\0".join(
     path.read_bytes()
     for path in (
@@ -121,6 +120,42 @@ FROZEN_APPLY_TTL_HOURS = 168
 MAX_FINAL_UNITS = 180
 MIN_COMPACT_CONTENT_CHARS = 1000
 MIN_COMPACT_SUMMARY_CHARS = 90
+
+# This rewrite pipeline owns this evidence policy. Keep the editorial-source
+# allowlist here so news discovery can evolve without breaking the rewrite job.
+POPULARITY_SIGNAL_HOSTS = {
+    "news.ycombinator.com",
+    "news.hada.io",
+    "dev.to",
+    "techmeme.com",
+    "www.techmeme.com",
+    "techcrunch.com",
+    "arstechnica.com",
+    "theverge.com",
+    "www.theverge.com",
+    "tomsguide.com",
+    "www.tomsguide.com",
+    "technologyreview.com",
+    "www.technologyreview.com",
+    "wired.com",
+    "www.wired.com",
+    "venturebeat.com",
+    "www.venturebeat.com",
+    "infoq.com",
+    "www.infoq.com",
+    "producthunt.com",
+    "www.producthunt.com",
+    "toss.tech",
+    "techblog.woowahan.com",
+    "yozm.wishket.com",
+    "d2.naver.com",
+    "axios.com",
+    "www.axios.com",
+    "ft.com",
+    "www.ft.com",
+    "bloomberg.com",
+    "www.bloomberg.com",
+}
 
 
 def is_forbidden_invisible_character(character: str) -> bool:
