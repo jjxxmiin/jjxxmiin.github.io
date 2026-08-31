@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import tempfile
 import unittest
 from unittest import mock
@@ -58,6 +59,59 @@ class GuideBotPublishingTests(unittest.TestCase):
                 "question": "AI 요금제는 가격만 비교하면 되나요?",
                 "answer": "가격과 함께 사용량 한도, 필요한 기능, 변경 조건을 확인해야 합니다.",
             }],
+        }
+
+    @staticmethod
+    def compliant_first_pass_post() -> dict:
+        intro = (
+            "AI 요금제를 고를 때는 가격과 사용량 한도뿐 아니라 필요한 기능과 "
+            "변경 조건을 함께 확인해야 합니다. 먼저 자신의 사용 목적과 한 달 "
+            "요청량을 적으면 불필요한 비용을 줄일 수 있습니다. 이 글은 공식 "
+            "안내에서 확인한 조건만 사용해 비교 순서와 결정 전 점검 항목을 바로 "
+            "적용할 수 있게 설명합니다. 무료 범위로 충분한 경우와 유료 기능이 "
+            "필요한 경우를 먼저 나누면 선택 시간을 더 줄일 수 있습니다."
+        )
+        paragraph = (
+            "먼저 실제 사용 목적과 한 달 동안 필요한 요청 횟수를 적습니다. "
+            "그다음 각 요금제가 제공하는 기능과 제한 조건을 같은 기준으로 "
+            "비교합니다. 표시된 가격만 보고 결정하면 필요한 기능이 빠져 다시 "
+            "바꾸게 될 수 있으므로 공식 안내의 적용 범위와 변경 가능성까지 "
+            "확인하는 과정이 중요합니다. "
+        )
+        sections = []
+        for index, heading in enumerate(
+            ("선택 기준", "같은 기준으로 비교", "맞지 않는 경우", "결정 전 점검"),
+            1,
+        ):
+            sections.append(
+                f"## {heading}\n\n"
+                + paragraph * 8
+                + f"마지막으로 섹션 {index}의 조건을 자신의 상황에 맞춰 기록합니다."
+            )
+        return {
+            "title_korean": "AI 요금제 비교와 선택 기준 가이드",
+            "title_english": "AI Pricing Plan Comparison Guide",
+            "description": (
+                "AI 요금제의 가격, 사용량 한도, 지원 기능과 변경 조건을 공식 안내 "
+                "기준으로 비교하고 자신의 사용 목적에 맞는 플랜을 고르는 순서를 "
+                "정리합니다."
+            ),
+            "summary": "가격과 사용량, 기능 제한을 같은 기준으로 비교하는 방법을 설명합니다.",
+            "content": intro + "\n\n" + "\n\n".join(sections),
+            "faq": [
+                {
+                    "question": "AI 요금제는 가격만 비교하면 되나요?",
+                    "answer": "가격과 함께 사용량 한도, 필요한 기능, 변경 조건을 확인해야 합니다.",
+                },
+                {
+                    "question": "사용량은 어떻게 예상하나요?",
+                    "answer": "최근 업무를 기준으로 일일 요청 횟수와 사용 인원을 먼저 기록합니다.",
+                },
+                {
+                    "question": "확인되지 않은 조건은 어떻게 다루나요?",
+                    "answer": "추측하지 않고 공식 안내에서 추가 확인이 필요하다고 명확히 표시합니다.",
+                },
+            ],
         }
 
     def test_valid_guide_is_validated_before_save(self):
@@ -215,6 +269,128 @@ class GuideBotPublishingTests(unittest.TestCase):
         self.assertEqual(generate.call_count, 1)
         self.assertGreaterEqual(len(result["description"]), bot.DESCRIPTION_MIN_CHARS)
         self.assertLessEqual(len(result["description"]), bot.DESCRIPTION_MAX_CHARS)
+
+    def test_first_pass_prompt_schema_and_token_budget_produce_one_call(self):
+        post = self.compliant_first_pass_post()
+        content_schema = bot.POST_SCHEMA["properties"]["content"]
+        self.assertEqual(
+            content_schema["minLength"], bot.CONTENT_SCHEMA_MIN_CHARS
+        )
+        self.assertEqual(
+            content_schema["maxLength"], bot.CONTENT_SCHEMA_MAX_CHARS
+        )
+        self.assertEqual(bot.CONTENT_SCHEMA_MIN_CHARS, 5_000)
+        self.assertEqual(bot.CONTENT_SCHEMA_MAX_CHARS, 8_500)
+        faq_schema = bot.POST_SCHEMA["properties"]["faq"]
+        self.assertEqual(faq_schema["minItems"], 3)
+        self.assertEqual(faq_schema["maxItems"], 5)
+        self.assertGreaterEqual(len(post["faq"]), faq_schema["minItems"])
+        self.assertLessEqual(len(post["faq"]), faq_schema["maxItems"])
+        self.assertGreaterEqual(len(post["content"]), content_schema["minLength"])
+        self.assertLessEqual(len(post["content"]), content_schema["maxLength"])
+        self.assertNotIn("```", post["content"])
+        self.assertGreaterEqual(
+            bot._visible_prose_length(post["content"]),
+            bot.FIRST_PASS_VISIBLE_MIN_CHARS,
+        )
+        self.assertLessEqual(
+            bot._visible_prose_length(post["content"]),
+            bot.FIRST_PASS_VISIBLE_MAX_CHARS,
+        )
+        headings = re.findall(r"(?m)^## ", post["content"])
+        self.assertEqual(len(headings), bot.FIRST_PASS_H2_COUNT)
+        intro = post["content"].split("\n## ", 1)[0]
+        self.assertGreaterEqual(
+            bot._visible_prose_length(intro), bot.FIRST_PASS_INTRO_MIN_CHARS
+        )
+        self.assertLessEqual(
+            bot._visible_prose_length(intro), bot.FIRST_PASS_INTRO_MAX_CHARS
+        )
+        sections = re.split(r"(?m)^## [^\n]+\n+", post["content"])[1:]
+        self.assertEqual(len(sections), bot.FIRST_PASS_H2_COUNT)
+        for section in sections:
+            self.assertGreaterEqual(
+                bot._visible_prose_length(section),
+                bot.FIRST_PASS_SECTION_MIN_CHARS,
+            )
+            self.assertLessEqual(
+                bot._visible_prose_length(section),
+                bot.FIRST_PASS_SECTION_MAX_CHARS,
+            )
+
+        topic = {
+            **self.topic,
+            "format": "실전 사용법",
+            "keywords": ["AI 요금제 비교"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            return_value=json.dumps(post, ensure_ascii=False),
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            result = bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(generate.call_count, 1)
+        self.assertEqual(result["title_korean"], post["title_korean"])
+        call = generate.call_args
+        prompt = call.args[1]
+        self.assertIs(call.kwargs["response_schema"], bot.POST_SCHEMA)
+        self.assertEqual(
+            call.kwargs["max_output_tokens"], bot.WRITE_MAX_OUTPUT_TOKENS
+        )
+        self.assertEqual(bot.WRITE_MAX_OUTPUT_TOKENS, 12_288)
+        self.assertIn(
+            f"H2(`## `)를 정확히 {bot.FIRST_PASS_H2_COUNT}개", prompt
+        )
+        self.assertIn(
+            f"{bot.FIRST_PASS_SECTION_MIN_CHARS}~"
+            f"{bot.FIRST_PASS_SECTION_MAX_CHARS}자로 배분", prompt
+        )
+        self.assertIn(
+            f"{bot.FIRST_PASS_VISIBLE_MIN_CHARS}~"
+            f"{bot.FIRST_PASS_VISIBLE_MAX_CHARS}자로 맞춥니다", prompt
+        )
+        self.assertIn("[출력 전 자가 점검]", prompt)
+        self.assertIn("코드 펜스와 모든 마크다운 문법 및 공백을 제거", prompt)
+        self.assertIn("서로 중복되지 않는 질문과 답변을 3~5개", prompt)
+
+    def test_empty_writer_result_stops_without_quality_retries(self):
+        topic = {
+            **self.topic,
+            "format": "실전 사용법",
+            "keywords": ["AI 요금제 비교"],
+        }
+        evidence = {
+            "facts": [{
+                "text": "공식 페이지에 요금 조건이 공개되어 있습니다.",
+                "source_name": "Example",
+                "source_url": "https://example.com/pricing",
+                "source_tier": "official",
+            }],
+            "unknowns": [],
+        }
+        with mock.patch.object(
+            bot.base,
+            "generate_content_with_fallback",
+            return_value=None,
+        ) as generate, mock.patch.object(
+            bot, "load_prompt", return_value="가이드 프롬프트"
+        ):
+            with self.assertRaisesRegex(ValueError, "생성 결과가 비어 있음"):
+                bot.write_post(mock.Mock(), topic, evidence, "2026-08-30")
+
+        self.assertEqual(generate.call_count, 1)
 
     def test_short_code_padded_draft_retries_with_exact_visible_prose_feedback(self):
         short = self.valid_post()

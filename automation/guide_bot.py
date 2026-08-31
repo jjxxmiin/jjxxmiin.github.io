@@ -49,6 +49,16 @@ DESCRIPTION_MAX_CHARS = 160
 DESCRIPTION_SOFT_MIN_CHARS = 60
 MIN_VISIBLE_PROSE_CHARS = 3_500
 WRITE_POST_ATTEMPTS = 3
+CONTENT_SCHEMA_MIN_CHARS = 5_000
+CONTENT_SCHEMA_MAX_CHARS = 8_500
+FIRST_PASS_H2_COUNT = 4
+FIRST_PASS_INTRO_MIN_CHARS = 150
+FIRST_PASS_INTRO_MAX_CHARS = 250
+FIRST_PASS_SECTION_MIN_CHARS = 900
+FIRST_PASS_SECTION_MAX_CHARS = 1_050
+FIRST_PASS_VISIBLE_MIN_CHARS = 3_900
+FIRST_PASS_VISIBLE_MAX_CHARS = 4_500
+WRITE_MAX_OUTPUT_TOKENS = 12_288
 
 FORMAT_WINDOW = 6
 FORMAT_ORDER = (
@@ -103,9 +113,18 @@ POST_SCHEMA = {
             "maxLength": 150,
         },
         "summary": {"type": "STRING"},
-        "content": {"type": "STRING"},
+        # This raw bound catches clearly truncated responses without forcing
+        # prose-heavy guides to add code or Markdown padding.  The separate
+        # visible-prose gate remains authoritative for publication quality.
+        "content": {
+            "type": "STRING",
+            "minLength": CONTENT_SCHEMA_MIN_CHARS,
+            "maxLength": CONTENT_SCHEMA_MAX_CHARS,
+        },
         "faq": {
             "type": "ARRAY",
+            "minItems": 3,
+            "maxItems": 5,
             "items": {
                 "type": "OBJECT",
                 "properties": {"question": {"type": "STRING"}, "answer": {"type": "STRING"}},
@@ -928,10 +947,25 @@ def write_post(client, topic: dict, evidence: dict, today: str) -> dict:
 [출력]
 description은 검색 결과만 읽어도 주제, 핵심 답과 주의점을 이해할 수 있는
 100~140자의 완결된 설명문으로 쓰세요.
-content 는 마크다운 본문입니다. 제목(H1)은 넣지 마세요. 검색 질문에 대한 직접 답변
-2~4문장을 먼저 쓴 뒤 '## ' 소제목을 시작하세요. 코드 펜스, 프롬프트 예시,
-Mermaid, Chart.js, 마크다운 문법과 공백을 제외한 실제 설명문만 4200자에서
-6200자 사이로 쓰세요. 코드 예시를 길게 써서 본문 분량을 채우면 안 됩니다."""
+content는 마크다운 본문이며 다음 예산을 지키세요.
+- 제목(H1)은 넣지 않습니다. 첫 H2 전에 검색 질문에 바로 답하는 도입부를
+  공백 제외 {FIRST_PASS_INTRO_MIN_CHARS}~{FIRST_PASS_INTRO_MAX_CHARS}자의 실제 설명문으로 씁니다.
+- ATX 문법의 H2(`## `)를 정확히 {FIRST_PASS_H2_COUNT}개 쓰고, Setext나 HTML 제목은 쓰지 않습니다.
+- 각 H2 섹션의 실제 설명문은 공백 제외
+  {FIRST_PASS_SECTION_MIN_CHARS}~{FIRST_PASS_SECTION_MAX_CHARS}자로 배분합니다.
+- 전체 실제 설명문은 공백 제외
+  {FIRST_PASS_VISIBLE_MIN_CHARS}~{FIRST_PASS_VISIBLE_MAX_CHARS}자로 맞춥니다.
+- 코드 펜스, 프롬프트 예시, Mermaid, Chart.js, 이미지, 링크 URL, HTML/Liquid,
+  표 구분 문자와 마크다운 기호는 실제 설명문 글자 수에 포함하지 않습니다.
+  코드나 표를 길게 만들어 분량을 채우지 마세요.
+- faq는 본문의 내용을 바탕으로 서로 중복되지 않는 질문과 답변을 3~5개 씁니다.
+
+[출력 전 자가 점검]
+1. 도입부 뒤에 H2가 정확히 {FIRST_PASS_H2_COUNT}개이고 H1과 제목 계층 점프가 없는지 확인합니다.
+2. 코드 펜스와 모든 마크다운 문법 및 공백을 제거한 뒤 남는 실제 설명문을 다시 세어
+   {FIRST_PASS_VISIBLE_MIN_CHARS}~{FIRST_PASS_VISIBLE_MAX_CHARS}자인지 확인합니다.
+3. FAQ가 3~5개이고 각 질문과 답변이 비어 있지 않으며 서로 중복되지 않는지 확인합니다.
+4. 조건을 못 맞췄다면 JSON을 반환하기 전에 내용을 줄이거나 보강합니다."""
 
     previous_draft: object = None
     errors: list[str] = []
@@ -945,10 +979,12 @@ Mermaid, Chart.js, 마크다운 문법과 공백을 제외한 실제 설명문�
             client,
             request_prompt,
             response_schema=POST_SCHEMA,
+            max_output_tokens=WRITE_MAX_OUTPUT_TOKENS,
         )
         if not raw:
-            previous_draft = None
-            errors = ["가이드 글 생성 결과가 비어 있음"]
+            # The shared helper already exhausted its model fallback.  With no
+            # draft to repair, repeating the same full request only adds cost.
+            raise ValueError("가이드 글 생성 결과가 비어 있음")
         else:
             try:
                 previous_draft = json.loads(raw)

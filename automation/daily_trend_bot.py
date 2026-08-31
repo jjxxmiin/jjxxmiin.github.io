@@ -1393,29 +1393,52 @@ def _mermaid_grounding_error(code, evidence):
     return ""
 
 
-def _sanitize_news_visuals(content, evidence, *, repair_notes=None):
-    """Keep safe visuals, synthesizing one verified lead diagram when possible."""
+def _validated_summary_flow_diagram(evidence):
+    """Build and validate the deterministic lead diagram owned by the pipeline."""
+    diagram = build_flow_diagram(evidence)
+    codes = _fenced_blocks(diagram, "mermaid")
+    if len(codes) != 1:
+        return "", "summary_flow에서 글머리 Mermaid를 만들 수 없음"
+    result = _validate_mermaid_codes(codes)[0]
+    grounding_error = _mermaid_grounding_error(codes[0], evidence)
+    error = grounding_error or result["error"]
+    if not result["ok"] or error:
+        return "", error or "합성 Mermaid 검증 실패"
+    return diagram, ""
+
+
+def _sanitize_news_visuals(
+    content,
+    evidence,
+    *,
+    repair_notes=None,
+    code_owned_lead=None,
+):
+    """Keep safe visuals and prepend the pipeline-owned verified lead diagram."""
     text = str(content or "")
     mermaid_codes = _fenced_blocks(text, "mermaid")
-    mermaid_results = _validate_mermaid_codes(mermaid_codes) if mermaid_codes else []
-    kept_mermaid = 0
-    for code, result in zip(mermaid_codes, mermaid_results):
-        grounding_error = _mermaid_grounding_error(code, evidence)
-        if result["ok"] and not grounding_error and kept_mermaid < 5:
-            kept_mermaid += 1
-            continue
-        reason = grounding_error or result["error"] or "허용 개수 초과"
-        text = _remove_fenced_block(text, "mermaid", code)
-        print(f"  Mermaid 제외: {reason}")
-    if kept_mermaid == 0:
-        synthesized = build_flow_diagram(evidence)
-        synthesized_codes = _fenced_blocks(synthesized, "mermaid")
-        if synthesized_codes:
-            result = _validate_mermaid_codes(synthesized_codes)[0]
-            grounding_error = _mermaid_grounding_error(
-                synthesized_codes[0], evidence
-            )
-            if result["ok"] and not grounding_error:
+    if code_owned_lead is not None:
+        # The writer is deliberately not asked to create Mermaid. Drop any block it
+        # nevertheless returned and attach the already validated deterministic lead.
+        for code in mermaid_codes:
+            text = _remove_fenced_block(text, "mermaid", code)
+        text = f"{code_owned_lead}\n\n{text.strip()}".strip()
+    else:
+        # Legacy callers can still provide a model diagram. This path validates it
+        # and synthesizes a grounded replacement before the full post contract runs.
+        mermaid_results = _validate_mermaid_codes(mermaid_codes) if mermaid_codes else []
+        kept_mermaid = 0
+        for code, result in zip(mermaid_codes, mermaid_results):
+            grounding_error = _mermaid_grounding_error(code, evidence)
+            if result["ok"] and not grounding_error and kept_mermaid < 5:
+                kept_mermaid += 1
+                continue
+            reason = grounding_error or result["error"] or "허용 개수 초과"
+            text = _remove_fenced_block(text, "mermaid", code)
+            print(f"  Mermaid 제외: {reason}")
+        if kept_mermaid == 0:
+            synthesized, error = _validated_summary_flow_diagram(evidence)
+            if synthesized:
                 text = f"{synthesized}\n\n{text.strip()}".strip()
                 kept_mermaid = 1
                 if repair_notes is not None:
@@ -1423,11 +1446,10 @@ def _sanitize_news_visuals(content, evidence, *, repair_notes=None):
                         "검증된 summary_flow로 글머리 Mermaid를 합성함"
                     )
                 print("  검증된 summary_flow로 글머리 Mermaid를 합성했습니다.")
-            else:
-                reason = grounding_error or result["error"]
-                print(f"  합성 Mermaid 제외: {reason}")
-        if kept_mermaid == 0:
-            return text, ["문법과 근거 검증을 통과한 Mermaid 다이어그램 없음"]
+            elif error:
+                print(f"  합성 Mermaid 제외: {error}")
+            if kept_mermaid == 0:
+                return text, ["문법과 근거 검증을 통과한 Mermaid 다이어그램 없음"]
 
     chart_codes = _fenced_blocks(text, "chartjs")
     kept_chart = 0
@@ -1490,6 +1512,8 @@ def _article_errors(post, evidence):
     required_h2 = [heading.removeprefix("## ") for heading in NEWS_HEADINGS]
     if any(heading not in h2_text for heading in required_h2):
         errors.append("필수 뉴스 H2 소제목이 실제 제목으로 존재하지 않음")
+    elif h2_text != required_h2:
+        errors.append("H2 소제목은 지정된 5개만 정확한 순서로 필요")
     previous_level = 1
     for level, heading in headings:
         current_level = len(level)
@@ -1820,7 +1844,7 @@ def _draft_retry_prompt(base_prompt, previous_draft, validation_errors):
 """
 
 
-def _prepare_generated_post(post, topic_data, evidence):
+def _prepare_generated_post(post, topic_data, evidence, *, code_owned_lead=None):
     """Normalize one model draft and apply the complete publication validator."""
     for key in ("title_korean", "title_english", "description", "summary"):
         post[key] = strip_emojis(str(post.get(key) or "")).strip()
@@ -1830,6 +1854,7 @@ def _prepare_generated_post(post, topic_data, evidence):
         post["content"],
         evidence,
         repair_notes=repair_notes,
+        code_owned_lead=code_owned_lead,
     )
     post["tags"] = list(dict.fromkeys(
         strip_emojis(str(value)).strip()
@@ -1863,10 +1888,15 @@ def _prepare_generated_post(post, topic_data, evidence):
 def generate_blog_post(client, topic_data, evidence):
     """Write one fact-locked Korean AI news feature in a lively blogger voice."""
     print(f"뉴스 글 작성: {topic_data['headline']}")
+    code_owned_lead, lead_error = _validated_summary_flow_diagram(evidence)
+    if not code_owned_lead:
+        print(f"글 출고 기준 미달: 검증된 글머리 Mermaid 준비 실패: {lead_error}")
+        return None
     required_sections = "\n".join(
-        f"  {index}. {heading.removeprefix('## ')}"
-        for index, heading in enumerate(NEWS_HEADINGS, 1)
+        f"  - {heading}"
+        for heading in NEWS_HEADINGS
     )
+    verified_numbers = sorted(_verified_numeric_values(evidence))
     prompt_text = f"""
 {_load_news_prompt()}
 
@@ -1875,6 +1905,12 @@ def generate_blog_post(client, topic_data, evidence):
 
 [재검증된 직접 원문과 사실 — 이것만 사실 근거로 사용]
 {json.dumps(evidence, ensure_ascii=False)}
+
+[코드가 자동으로 맨 앞에 붙일 검증된 Mermaid — content에 복사하지 말 것]
+{code_owned_lead}
+
+[evidence에서 허용된 아라비아 숫자 값]
+{json.dumps(verified_numbers, ensure_ascii=False)}
 
 [출고 규칙]
 - 모든 독자용 필드는 자연스러운 한국어로 쓴다. 회사명, 제품명, 모델명은
@@ -1892,38 +1928,37 @@ def generate_blog_post(client, topic_data, evidence):
 - 제목은 검색할 회사/제품명과 실제 변화를 앞쪽에 넣고, 사람이 누르고 싶을 만큼
   구체적으로 쓴다. 낚시성 표현, 이모지, 느낌표 도배는 금지한다.
 - 제목은 핵심 검색어를 한 번만 자연스럽게 사용하고 같은 표현을 반복하지 않는다.
-  description은 검색 결과만 읽어도 사건, 변화, 독자 영향을 이해할 수 있는 80~160자,
-  summary는 독립적으로 인용해도 의미가 통하는 2~3문장이다.
-- 본문은 H1 없이 4,200~6,000자의 실제 설명문으로 쓴다. Mermaid와 Chart.js 코드,
-  표의 문법 문자는 이 분량에 포함하지 않는다. 아래 H2 다섯 개만 정확히 이 순서로 쓴다.
+  description은 검색 결과만 읽어도 사건, 변화, 독자 영향을 이해할 수 있는 100~140자,
+  summary는 독립적으로 인용해도 의미가 통하는 2~3문장, 140~260자로 쓴다.
+- content에는 H1을 쓰지 않는다. 공백, Markdown 문법, 링크 URL, 표 문법, Chart.js를 뺀
+  독자에게 실제로 보이는 설명문을 아래 분량으로 쓴다. 최소 합계는 4,250자다.
+  - 첫 H2 전 직접 답변 도입: 300~400자
+  - "무슨 일이 벌어진 걸까?": 850~1,050자
+  - "왜 지금 다들 이 이야기를 할까?": 800~1,000자
+  - "그래서 우리에게 뭐가 달라질까?": 800~1,000자
+  - "그래서 내 업무에는 뭐가 달라지나": 800~1,000자
+  - "아직은 선을 그어야 할 부분": 700~900자
+- 아래 H2 다섯 개만 정확히 한 번씩, 정확히 이 순서로 쓴다. 다른 H2는 만들지 않는다.
 {required_sections}
 - 각 섹션 첫 1~2문장은 검색과 답변 엔진이 그대로 인용해도 이해되도록 주어와 제품명을
   생략하지 않은 직접 답변으로 쓴다. 그 뒤에 이유와 예시를 붙인다.
 - 회사, 제품, 모델의 정식 이름은 첫 등장에 명확히 쓰고, 동의어, 약칭, 핵심 검색어를
   억지로 반복하지 않는다. 표는 비교가 정말 쉬워질 때 한 개만 허용한다.
 - 검증한 원문 이미지는 코드가 자동 배치하므로 Markdown 이미지는 만들지 않는다.
-- content의 첫 요소는 반드시 전체 글을 한눈에 요약하는 Mermaid 다이어그램이어야 한다.
-  도입 문단이나 설명 문장보다 먼저 ```mermaid 코드 블록을 배치한다.
-  노드 이름에는 이 글에만 해당하는 말을 넣는다. 제품명, 숫자, 날짜, 가격, 회사 이름이다.
-  나쁜 예(절대 금지): "오늘의 AI 변화" -> "직접 원문 확인" -> "사용자와 개발자 영향"
-  -> "도입 조건과 한계". 어느 글에 붙여도 말이 되는 그림은 독자에게 아무것도 주지 않는다.
-  좋은 예: "8월 20일 OpenRouter 공개" -> "컨텍스트 100만 토큰" -> "프리뷰 무료"
-  -> "DeepSWE 80퍼센트" -> "개발사 미확인".
-  노드는 4~7개로 하고, 각 노드는 20자 이내로 쓴다.
-- Mermaid는 첫 전체 흐름도를 반드시 포함하고, 내용상 유용할 때만 최대 4개를 더한다.
-  사건 또는 제품 작동 흐름, 독자의 도입 판단과 주의점처럼 말로 설명하면 길어지는
-  관계를 우선한다. 모든 노드 이름에 이 글의 구체적인 사실을 담는다. 일반론만 담긴
-  그림은 넣지 말고, 같은 결론을 모양만 바꿔 반복하지 않는다. flowchart,
-  sequenceDiagram, timeline 등 내용에 맞는 형식을 쓴다. 노드와 라벨에도 facts와
-  unknowns에 있는 내용만 쓰며 가짜 수치를 만들지 않는다.
+- Mermaid는 코드가 위의 검증된 글머리 흐름도 하나를 자동으로 붙인다. content에는
+  Mermaid 코드 블록을 하나도 쓰지 말고, 흐름도 앞이나 뒤에 붙일 안내 문장도 쓰지 않는다.
 - 비교 가능한 검증 수치가 2개 이상 있을 때만 Chart.js 차트를 최대 1개 넣는다.
   chartjs 코드 블록 안에는 주석 없는 순수 JSON만 쓰고 type, data.labels,
   data.datasets를 포함한다. 모든 dataset에는 label을 붙이고 options.plugins.title에는
   display: true와 명확한 text를 넣는다. data의 모든 숫자는 facts에 원문 그대로
   있어야 하며 계산값, 추정치, 임의 점수는 금지한다. 수치 비교가 부적절하면 차트는 생략한다.
-- Mermaid와 Chart.js 외의 코드 블록은 넣지 않는다. 그림 앞뒤에는 독자가 무엇을
+- Chart.js 외의 코드 블록은 넣지 않는다. 차트가 있다면 앞뒤에 독자가 무엇을
   봐야 하는지 한두 문장으로 설명하되, 똑같은 내용을 장황하게 반복하지 않는다.
-- faq는 독자가 실제 검색창이나 AI 답변창에 물을 법한 서로 다른 질문 3~4개로 만든다.
+- title_korean, title_english, description, summary, content, faq의 질문과 답변에는
+  evidence에 실제로 있는 값 외의 아라비아 숫자(0~9)를 절대 쓰지 않는다. 단계 수,
+  항목 수, 임의 점수, 예시 수치도 새로 만들지 않는다. 번호 목록은 쓰지 말고 불릿이나
+  "먼저", "다음", "마지막"처럼 숫자 없는 연결어를 쓴다.
+- faq는 독자가 실제 검색창이나 AI 답변창에 물을 법한 서로 다른 질문 정확히 4개로 만든다.
   답변 첫 문장만 읽어도 결론이 나오게 하고, 뒤 문장에 조건, 가격, 제한을 덧붙인다.
 - tags는 5~10개, entities는 원문 표기 3~10개다.
 - title_english는 파일명에 쓸 간결한 영문 제목이며 사실을 과장하지 않는다.
@@ -1933,13 +1968,29 @@ def generate_blog_post(client, topic_data, evidence):
         "properties": {
             "title_korean": {"type": "STRING"},
             "title_english": {"type": "STRING"},
-            "description": {"type": "STRING"},
-            "summary": {"type": "STRING"},
-            "content": {"type": "STRING", "minLength": 4_200},
+            "description": {
+                "type": "STRING",
+                "minLength": 100,
+                "maxLength": 140,
+            },
+            "summary": {
+                "type": "STRING",
+                "minLength": 140,
+                "maxLength": 260,
+            },
+            # Raw Markdown is slightly longer than the 4,250+ visible-prose
+            # target. Bound it tightly enough to avoid needlessly large output.
+            "content": {
+                "type": "STRING",
+                "minLength": 4_700,
+                "maxLength": 7_200,
+            },
             "tags": {"type": "ARRAY", "items": {"type": "STRING"}},
             "entities": {"type": "ARRAY", "items": {"type": "STRING"}},
             "faq": {
                 "type": "ARRAY",
+                "minItems": 4,
+                "maxItems": 4,
                 "items": {
                     "type": "OBJECT",
                     "properties": {
@@ -1971,12 +2022,16 @@ def generate_blog_post(client, topic_data, evidence):
             attempt_prompt,
             response_schema=response_schema,
             tools=None,
-            thinking_level="MEDIUM",
-            max_output_tokens=16_384,
+            # The evidence is already researched and fact-locked. Low thinking
+            # leaves more of the response budget for Korean prose and is cheaper.
+            thinking_level="LOW",
+            max_output_tokens=12_288,
         )
         if not response_text:
-            previous_draft = ""
-            previous_errors = ["모델 원고 응답 없음"]
+            # An empty response is an API/model availability failure, not a draft
+            # quality problem. Repeating the same expensive call cannot repair it.
+            print("모델 원고 응답이 없어 이 후보를 즉시 건너뜁니다.")
+            return None
         else:
             try:
                 post = json.loads(response_text)
@@ -1992,6 +2047,7 @@ def generate_blog_post(client, topic_data, evidence):
                         post,
                         topic_data,
                         evidence,
+                        code_owned_lead=code_owned_lead,
                     )
                     if not errors:
                         publication_notes = list(repair_notes)

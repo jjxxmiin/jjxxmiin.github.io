@@ -43,6 +43,11 @@ class DailyTrendNewsBotTests(unittest.TestCase):
                 {"text": "검증 가격은 10달러에서 5달러로 바뀌었습니다."},
                 *[{"text": f"Fact {index}"} for index in range(1, 4)],
             ],
+            "summary_flow": [
+                "Example 모델 공개",
+                "검증 가격 10달러",
+                "검증 가격 5달러",
+            ],
         }
 
     def _valid_post(self):
@@ -97,7 +102,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             "entities": ["Example AI", "Example Model"],
             "faq": [
                 {"question": f"질문 {index}?", "answer": f"검증된 답변 {index}입니다."}
-                for index in range(1, 4)
+                for index in range(1, 5)
             ],
         }
 
@@ -419,7 +424,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             self.assertTrue(bot.daily_post_exists(now=self.now))
 
     @mock.patch.object(bot, "generate_content_with_fallback", return_value=None)
-    def test_empty_drafts_retry_three_times_then_fail_closed(self, generate):
+    def test_empty_writer_response_stops_candidate_after_one_call(self, generate):
         source = "https://example.com/news/new-model"
         candidate = {
             "topic_name": "Example AI",
@@ -453,7 +458,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             evidence,
         )
         self.assertIsNone(post)
-        self.assertEqual(generate.call_count, bot.MAX_NEWS_DRAFT_ATTEMPTS)
+        self.assertEqual(generate.call_count, 1)
         fallback = bot._fallback_post_data(candidate, evidence)
         errors = bot._post_data_errors(fallback, evidence)
         self.assertIn("실제 설명 본문이 너무 짧음", errors)
@@ -479,10 +484,13 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             return [{"ok": True, "error": ""} for _ in codes]
 
         with mock.patch.object(bot, "_validate_mermaid_codes", side_effect=valid_mermaid):
+            code_owned_lead, lead_error = bot._validated_summary_flow_diagram(evidence)
+            self.assertEqual(lead_error, "")
             expected_draft, expected_errors, _ = bot._prepare_generated_post(
                 json.loads(json.dumps(first, ensure_ascii=False)),
                 candidate,
                 evidence,
+                code_owned_lead=code_owned_lead,
             )
             result = bot.generate_blog_post(mock.Mock(), candidate, evidence)
 
@@ -536,7 +544,7 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             self.assertIn("메타 설명 길이 부적합: 2자", retry_call.args[1])
 
     @mock.patch.object(bot, "generate_content_with_fallback")
-    def test_writer_synthesizes_and_validates_missing_lead_diagram(self, generate):
+    def test_writer_prepends_code_owned_lead_in_one_call_without_repair(self, generate):
         candidate = {
             "headline": "Example releases a new model",
             "entities": ["Example AI"],
@@ -564,11 +572,29 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             repaired = bot.generate_blog_post(mock.Mock(), candidate, evidence)
 
         self.assertIsNotNone(repaired)
+        self.assertEqual(generate.call_count, 1)
         self.assertTrue(repaired["content"].startswith("```mermaid"))
         self.assertIn("Example 모델 공개", repaired["content"])
-        self.assertEqual(repaired["_publication_mode"], "repaired")
-        self.assertTrue(any("summary_flow" in note for note in repaired["_publication_notes"]))
+        self.assertNotIn("_publication_mode", repaired)
+        self.assertNotIn("_publication_notes", repaired)
         validate.assert_called_once()
+
+    @mock.patch.object(bot, "generate_content_with_fallback")
+    def test_writer_does_not_spend_model_calls_without_verified_lead(self, generate):
+        evidence = self._valid_evidence()
+        evidence["summary_flow"] = ["사건", "영향", "한계"]
+
+        result = bot.generate_blog_post(
+            mock.Mock(),
+            {
+                "headline": "Example releases a new model",
+                "entities": ["Example AI"],
+            },
+            evidence,
+        )
+
+        self.assertIsNone(result)
+        generate.assert_not_called()
 
     def test_first_valid_mermaid_is_promoted_to_article_start(self):
         content = """
@@ -641,15 +667,32 @@ flowchart LR
         self.assertIsNotNone(repaired)
         self.assertEqual(bot._post_data_errors(repaired, evidence), [])
         self.assertEqual(len(bot._fenced_blocks(repaired["content"], "mermaid")), 1)
+        self.assertIn("Example 모델 공개", repaired["content"])
+        self.assertNotIn("도입 조건 확인", repaired["content"])
         for heading in bot.NEWS_HEADINGS:
             self.assertIn(heading, repaired["content"])
         generated_prompt = generate.call_args.args[1]
-        self.assertIn("4. 그래서 내 업무에는 뭐가 달라지나", generated_prompt)
+        self.assertIn("- ## 그래서 내 업무에는 뭐가 달라지나", generated_prompt)
         self.assertNotIn("직접 써보거나 지켜볼 포인트", generated_prompt)
-        self.assertEqual(generate.call_args.kwargs["thinking_level"], "MEDIUM")
-        self.assertEqual(generate.call_args.kwargs["max_output_tokens"], 16_384)
+        self.assertIn("최소 합계는 4,250자", generated_prompt)
+        self.assertIn("첫 H2 전 직접 답변 도입: 300~400자", generated_prompt)
+        self.assertIn("아래 H2 다섯 개만 정확히 한 번씩", generated_prompt)
+        self.assertIn("content에는\n  Mermaid 코드 블록을 하나도 쓰지 말고", generated_prompt)
+        self.assertIn("[evidence에서 허용된 아라비아 숫자 값]", generated_prompt)
+        self.assertIn("단계 수,\n  항목 수, 임의 점수", generated_prompt)
+        self.assertIn("번호 목록은 쓰지 말고", generated_prompt)
+        self.assertIn("서로 다른 질문 정확히 4개", generated_prompt)
+        self.assertEqual(generate.call_args.kwargs["thinking_level"], "LOW")
+        self.assertEqual(generate.call_args.kwargs["max_output_tokens"], 12_288)
         schema = generate.call_args.kwargs["response_schema"]
-        self.assertEqual(schema["properties"]["content"]["minLength"], 4_200)
+        self.assertEqual(
+            schema["properties"]["content"],
+            {"type": "STRING", "minLength": 4_700, "maxLength": 7_200},
+        )
+        self.assertEqual(schema["properties"]["description"]["minLength"], 100)
+        self.assertEqual(schema["properties"]["description"]["maxLength"], 140)
+        self.assertEqual(schema["properties"]["faq"]["minItems"], 4)
+        self.assertEqual(schema["properties"]["faq"]["maxItems"], 4)
 
     def test_insert_source_images_uses_verified_credit(self):
         content = "\n\n".join([
@@ -897,6 +940,14 @@ flowchart LR
         )
 
         self.assertEqual(bot._post_data_errors(post, self._valid_evidence()), [])
+
+    def test_article_rejects_any_extra_h2_section(self):
+        post = self._valid_post()
+        post["content"] += "\n\n## 모델이 임의로 추가한 결론\n\n추가 요약입니다."
+
+        errors = bot._post_data_errors(post, self._valid_evidence())
+
+        self.assertIn("H2 소제목은 지정된 5개만 정확한 순서로 필요", errors)
 
     def test_save_post_keeps_existing_layout_and_writes_news_metadata(self):
         post = self._valid_post()
