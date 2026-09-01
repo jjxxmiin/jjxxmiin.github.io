@@ -123,7 +123,7 @@ Latency는 warm-up 이후 반복 추론과 첫 실행을 나누고, decode와 NM
 
 - [EfficientDet 전에 보는 EfficientNet Compound Scaling: 세 축을 함께 키우는 이유]({% post_url 2019-11-23-EfficientDet %}) — EfficientNet이 depth, width, input resolution을 하나씩 키우는 대신 compound coefficient φ와 고정 비율로 함께 확장하는 원리와 적용 순서를 설명합니다.
 - [Saliency Map은 무엇을 설명하나: 입력 gradient 시각화와 해석의 한계]({% post_url 2019-12-28-Saliency_Maps %}) — 분류 점수를 입력 픽셀로 미분해 중요한 영역을 찾는 Saliency Map과 class model visualization의 차이를 수식과 코드로 설명합니다.
-- [BayesianVLA는 왜 로봇이 언어를 무시하는 문제를 줄이나: PMI 수식과 11.3%p]({% post_url 2026-01-24-BayesianVLA--Bayesian-Decomposition-of-Vision-Language-Action-Models-via-Latent-Action-Queries %}) — Vision만으로 action을 예측해 language를 무시하는 information collapse를 prior, posterior branch와 latent action query로 분리하는 방식, PMI 목적 함수와 OOD…
+- [AI PPT 만들기 완벽 비교 가이드 감마 코파일럿 제미나이 캔바 클로드 총정리]({% post_url 2026-09-01-comprehensive-comparison-guide-for-ai-powerpoint-creation-gamma-copilot-gemini-canva-claude %}) — AI PPT 생성 도구별 핵심 사양과 실전 프롬프트 활용법, 무료 활용 방안 및 파일 변환 기능을 종합 비교한 실용 가이드입니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

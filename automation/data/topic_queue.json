@@ -214,7 +214,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 46,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-08-31-the-complete-guide-to-creating-chatgpt-prompts-best-practices-and-plan-comparison"
     },
     {
       "id": "ai-코딩",
