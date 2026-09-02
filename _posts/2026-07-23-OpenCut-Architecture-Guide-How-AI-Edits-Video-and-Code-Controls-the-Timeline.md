@@ -430,7 +430,7 @@ stateDiagram-v2
 
 - [Claude Code로 영상을 대화하듯 편집하는 Video Use의 원리와 실전 활용법]({% post_url 2026-08-01-Video-Use-How-AI-Coding-Agents-Edit-Raw-Footage-Through-Text-and-FFmpeg %}) — Video Use는 Claude Code, Codex 등 AI 코딩 에이전트와 자연어로 대화하며 타임라인 편집 없이 영상을 완성하는 오픈소스 파이프라인입니다. 영상 프레임을 직접 LLM에 전달하는 대신 단어 단위 음성 스크립트를…
 - [OpenMontage로 AI 영상을 만들 때: 에이전트 파이프라인, 비용, 검수 기준]({% post_url 2026-07-04-The-End-of-Prompt-Engineering-The-True-Value-of-OpenMontages-Agent-First-Video-Pipeline %}) — OpenMontage가 YAML 파이프라인, Markdown 스킬, Python 도구, Remotion과 FFmpeg를 연결해 영상 제작 단계를 조율하는 방식을 설명합니다. 설치 비용, 사람 승인, 재현성과 보안까지 포함한 파일럿…
-- [OpenFang은 Python 에이전트를 대체할까: 32MB, 180ms와 16개 보안층 검증]({% post_url 2026-03-01-Is-Python-Agent-Dead-Honest-Review-of-OpenFang-the-Rust-Based-AI-Agent-OS %}) — Rust 단일 바이너리의 시작 속도와 Hands, MCP 구조, 16개 보안 기능이 실제 운영에서 보장하지 않는 범위를 점검합니다.
+- [MCP 서버 만들기 가이드: Python과 Java로 구현하는 연동 환경]({% post_url 2026-09-02-how-to-build-an-mcp-server-python-and-java-implementation-guide %}) — MCP 서버와 클라이언트의 차이점을 명확히 파악하고 Python 3.10 이상 및 Java 환경에서 MCP 서버를 만드는 기준과 절차를 체계적으로 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문 (FAQ)
