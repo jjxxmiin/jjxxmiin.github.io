@@ -131,7 +131,7 @@ APRIL의 실용적 기여는 model이 논리적 완결성을 스스로 획득했
 
 - [DOM이 바뀌어도 웹 자동화가 살아남을까? MolmoWeb의 화면 기반 접근]({% post_url 2026-03-30-Deep-Dive-into-MolmoWeb-The-End-of-DOM-Parsing-AI2s-8B-Visual-Web-Agent-is-a-Game-Changer %}) — 스크린샷만 보고 클릭하는 8B MolmoWeb이 DOM 자동화의 취약점을 줄이는 방식과 Pass@4 수치, OCR, 지연, 권한 한계 및 검증 순서를 짚습니다.
 - [PicoClaw는 저사양 보드에서 무엇을 실행하나: 설치와 비용, 권한 기준]({% post_url 2026-02-16-PicoClaw-The-Ultra-Lightweight-AI-Agent %}) — PicoClaw가 Go 단일 바이너리와 외부 LLM API로 저사양 보드에서 동작하는 구조, 저장소의 자원 수치와 설치, 보안 판단 기준을 정리합니다.
-- [OpenAI GPT-5.6-Cyber 출시: 해킹과 보안 특화 모델과 Daybreak Red 프로그램 분석]({% post_url 2026-08-12-openai-launches-gpt-5-6-cyber-model-for-cybersecurity-research %}) — OpenAI가 GPT-5.6 Sol을 기반으로 개발한 사이버 보안 특화 모델 'GPT-5.6-Cyber'를 2026년 8월 10일 발표했습니다. 거부율을 줄여 제로데이 연구와 익스플로잇 체인 개발을 지원하며, 엄격히 검증된 보안…
+- [미 국방부 GenAI.mil 플랫폼 ChatGPT Mil 및 Grok for Government 공식 도입]({% post_url 2026-09-02-us-department-of-defense-expands-genai-mil-platform-with-chatgpt-mil-and-grok-for-government %}) — 미국 국방부는 2026년 8월 31일 자의 내부 플랫폼인 GenAI.mil에 OpenAI의 ChatGPT Mil과 Starshield AI의 Grok for Government를 새롭게 탑재했습니다 [U.S. Department of…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
