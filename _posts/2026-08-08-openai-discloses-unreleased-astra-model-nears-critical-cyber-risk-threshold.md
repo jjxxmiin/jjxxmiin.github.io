@@ -150,8 +150,8 @@ OpenAI Astra 모델의 공개 출시 날짜나 사용자 대상 배포 일정은
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [OpenAI 차세대 AI 모델 Astra 출시 준비와 사이버 위험 Critical 등급 지정]({% post_url 2026-09-03-openai-designates-upcoming-astra-model-at-critical-cyber-risk-level %}) — 2026년 9월 1일 OpenAI는 차세대 프론티어 모델 Astra의 보안 평가 결과를 담은 문서를 공개했습니다. Astra는 OpenAI 모델 가운데 최초로 준비태스크 체계 기준 사이버보안 역량 최고 위험 수준인 Critical…
 - [Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개 Model 2와 정렬 위험 등급 상향]({% post_url 2026-08-16-anthropic-details-unreleased-model-2-and-upgrades-ai-risk-assessment-level %}) — Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해…
-- [공개된 AI 시스템 프롬프트를 그대로 복사해도 될까? 저장소 활용 기준]({% post_url 2026-02-24-System-Prompts-And-Models-Collection %}) — 여러 AI 도구의 시스템 프롬프트를 모은 저장소에서 역할, 제약, 출력 형식을 분석하는 법과 진위, 버전, 저작권을 확인해야 하는 이유를 정리합니다.
 - [AI 규제 문서가 흩어져 있다면? AI Atlas Nexus로 리스크 연결하는 법]({% post_url 2026-03-02-Why-Am-I-Just-Discovering-This-An-Honest-Review-of-IBMs-Ultimate-AI-Governance-Tool-AI-Atlas-Nexus %}) — AI Atlas Nexus가 NIST, MIT, EU AI Act의 리스크를 공통 지식 그래프로 연결하는 방식과 LLM 매핑을 사람의 검토 없이 확정하면 안 되는 이유를 정리합니다.
 <!-- internal-links:end -->
 
