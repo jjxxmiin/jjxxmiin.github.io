@@ -195,7 +195,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 48,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-02-how-to-build-an-mcp-server-python-and-java-implementation-guide"
     },
     {
       "id": "챗gpt-프롬프트",
