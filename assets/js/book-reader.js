@@ -391,81 +391,6 @@
     });
   }
 
-  function topicIcon(page) {
-    var subject = [
-      page.getAttribute('data-book-label') || '',
-      reader.getAttribute('data-book-title') || '',
-      reader.getAttribute('data-book-category') || ''
-    ].join(' ').toLowerCase();
-    var profiles = [
-      { pattern: /보안|위협|공격|취약|딥페이크|프라이버시|security|cyber|threat|attack|privacy/, icon: 'fa-solid fa-shield-halved' },
-      { pattern: /가격|요금|비용|플랜|비교|선택|pricing|price|comparison|\bcosts?\b|\bplans?\b/, icon: 'fa-solid fa-scale-balanced' },
-      { pattern: /일자리|직업|취업|커리어|업무|생산성|\bjobs?\b|\bcareer\b|\bwork\b|productiv/, icon: 'fa-solid fa-briefcase' },
-      { pattern: /수학|방정식|확률|통계|계산|math|formula|equation|probability|statistic/, icon: 'fa-solid fa-square-root-variable' },
-      { pattern: /설치|사용법|방법|가이드|튜토리얼|시작|guide|tutorial|how to|setup|install/, icon: 'fa-solid fa-compass' },
-      { pattern: /디자인|시각|사용자 경험|\bui\b|\bux\b|design|visual/, icon: 'fa-solid fa-palette' },
-      { pattern: /금융|투자|주식|시장|finance|invest|stock|market/, icon: 'fa-solid fa-chart-line' },
-      { pattern: /의료|건강|임상|health|medical|clinical/, icon: 'fa-solid fa-heart-pulse' },
-      { pattern: /코드|코딩|개발|프로그래밍|\bapi\b|developer|coding|programming/, icon: 'fa-solid fa-code' },
-      { pattern: /인공지능|에이전트|모델|\bai\b|agent|model|llm/, icon: 'fa-solid fa-microchip' }
-    ];
-
-    for (var index = 0; index < profiles.length; index += 1) {
-      if (profiles[index].pattern.test(subject)) return profiles[index].icon;
-    }
-    return 'fa-solid fa-book-open';
-  }
-
-  function decoratePages() {
-    pages.forEach(function (page) {
-      var content = page.querySelector('.book-page-content');
-      var folio = page.querySelector('.book-page-folio');
-      var heading = content && content.querySelector(':scope > h2');
-      if (!content || !folio) return;
-
-      var visual = { icon: topicIcon(page), label: 'READ' };
-      if (content.querySelector('.chartjs-wrap, .language-chartjs')) {
-        visual = { icon: 'fa-solid fa-chart-column', label: 'DATA' };
-      } else if (content.querySelector('.proj')) {
-        visual = {
-          icon: content.querySelector('.proj.is-github') ? 'fa-brands fa-github' : 'fa-solid fa-cube',
-          label: 'PROJECT'
-        };
-      } else if (content.querySelector('.mermaid, .language-mermaid, .language-book-mermaid, [data-book-mermaid-index]')) {
-        visual = { icon: 'fa-solid fa-diagram-project', label: 'FLOW' };
-      } else if (content.querySelector('figure, img, .book-prologue-art')) {
-        visual = { icon: 'fa-regular fa-image', label: 'VISUAL' };
-      } else if (content.querySelector('table')) {
-        visual = { icon: 'fa-solid fa-table-cells-large', label: 'COMPARE' };
-      } else if (content.querySelector('pre, .highlight')) {
-        visual = { icon: 'fa-solid fa-code', label: 'CODE' };
-      }
-
-      page.setAttribute('data-book-visual', visual.label.toLowerCase());
-
-      if (heading) {
-        var badge = document.createElement('span');
-        var badgeIcon = document.createElement('i');
-        badge.className = 'book-chapter-icon';
-        badge.setAttribute('aria-hidden', 'true');
-        badgeIcon.className = visual.icon;
-        badge.appendChild(badgeIcon);
-        heading.insertBefore(badge, heading.firstChild);
-      }
-
-      if (visual.label === 'READ') {
-        var emblem = document.createElement('span');
-        var emblemIcon = document.createElement('i');
-        emblem.className = 'book-page-emblem';
-        emblem.setAttribute('aria-hidden', 'true');
-        emblemIcon.className = visual.icon;
-        emblem.appendChild(emblemIcon);
-        page.appendChild(emblem);
-      }
-
-    });
-  }
-
   function linkBrand(href) {
     var hostname = '';
     try {
@@ -1432,7 +1357,6 @@
     buildSourceButtons();
     paginateContent();
     labelPages();
-    decoratePages();
     wireFaqs();
     buildToc();
     wireEvents();

@@ -697,38 +697,6 @@ html:not(.book-js) .book-page-scroll {
   letter-spacing: 0.14em;
 }
 
-.book-chapter-icon {
-  width: 2.55rem;
-  height: 2.55rem;
-  margin: 0 0 0.65rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--book-accent) 34%, var(--book-line));
-  border-radius: 0.72rem;
-  color: var(--book-accent-strong);
-  background: color-mix(in srgb, var(--book-accent) 6%, var(--book-paper));
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--book-accent) 9%, transparent);
-  font-size: 0.9rem;
-}
-
-/* Text-only leaves get one quiet, code-native subject emblem. It is inserted
-   after pagination and sits behind the reading layer, so it never changes a
-   page's measured height or competes with charts, diagrams and images. */
-.book-page-emblem {
-  position: absolute;
-  top: clamp(5rem, 12vh, 7.5rem);
-  right: clamp(0.9rem, 3vw, 3rem);
-  z-index: 0;
-  display: grid;
-  place-items: center;
-  color: var(--book-accent-strong);
-  font-size: clamp(3.5rem, 7vw, 6rem);
-  line-height: 1;
-  opacity: 0.035;
-  pointer-events: none;
-  user-select: none;
-}
-
 .book-page-content {
   width: min(940px, 100%);
   max-width: 940px;
@@ -764,23 +732,8 @@ html:not(.book-js) .book-page-scroll {
   display: none;
 }
 
-.book-page.is-active .book-chapter-icon {
-  animation: book-icon-in 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
-}
-
 .book-page.is-active .book-page-content > :where(figure, .chartjs-wrap, .mermaid, .table-wrapper, .book-prologue-art) {
   animation: book-visual-in 520ms 90ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
-}
-
-@keyframes book-icon-in {
-  from {
-    opacity: 0;
-    transform: rotate(-18deg) scale(0.72);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 @keyframes book-visual-in {
@@ -1131,12 +1084,6 @@ html:not(.book-js) .book-page-scroll {
 .book-page.book-density-tight .book-page-content > h2 {
   margin-bottom: 0.62rem;
   font-size: clamp(1.14rem, 1.8vw, 1.55rem);
-}
-
-.book-page.book-density-tight .book-chapter-icon {
-  width: 1.7rem;
-  height: 1.7rem;
-  margin-bottom: 0.4rem;
 }
 
 .book-page.book-density-tight .book-page-content .chartjs-wrap {
@@ -2447,18 +2394,6 @@ html:not(.book-js) .book-page-scroll {
     margin: 0;
   }
 
-  .book-page-emblem {
-    top: 4.5rem;
-    right: 0.75rem;
-    font-size: 2.8rem;
-    opacity: 0.025;
-  }
-
-  .book-chapter-icon {
-    width: 2.35rem;
-    height: 2.35rem;
-  }
-
   .book-page:not(.book-cover) .book-page-scroll:not(:has(.mermaid)) {
     padding-right: 3rem;
     padding-left: 3rem;
@@ -2537,10 +2472,6 @@ html:not(.book-js) .book-page-scroll {
 }
 
 @media (max-width: 420px) {
-  .book-page-emblem {
-    display: none;
-  }
-
   .book-page:not(.book-cover) .book-page-scroll:not(:has(.mermaid)) {
     padding-right: 2.25rem;
     padding-left: 2.25rem;
@@ -2560,8 +2491,6 @@ html:not(.book-js) .book-page-scroll {
 
 @media (prefers-reduced-motion: reduce) {
   .book-page,
-  .book-chapter-icon,
-  .book-page-emblem,
   .book-page-content > :where(figure, .chartjs-wrap, .mermaid, .table-wrapper, .book-prologue-art),
   .book-progress > span,
   .book-tool-button,
@@ -2593,7 +2522,6 @@ html:not(.book-js) .book-page-scroll {
   .book-toc-dialog,
   .book-cover-orbit,
   .book-cover-photo,
-  .book-page-emblem,
   .book-scroll-ad,
   .book-afterword-panel > .google-ad,
   .visual-book > .google-ad,

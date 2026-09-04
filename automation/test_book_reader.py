@@ -72,6 +72,17 @@ def test_reader_has_accessible_fallbacks_and_navigation():
     assert ":where(p, li, blockquote, figcaption) strong" in styles
 
 
+def test_reader_does_not_add_decorative_icon_badges():
+    script = _read("assets/js/book-reader.js")
+    styles = _read("_sass/_book-reader.scss")
+
+    assert "book-chapter-icon" not in script
+    assert "book-page-emblem" not in script
+    assert "topicIcon" not in script
+    assert "book-chapter-icon" not in styles
+    assert "book-page-emblem" not in styles
+
+
 def test_reader_is_exactly_one_dynamic_viewport_and_opens_desktop_spreads():
     script = _read("assets/js/book-reader.js")
     styles = _read("_sass/_book-reader.scss")
