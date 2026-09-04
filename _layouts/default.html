@@ -16,8 +16,7 @@ layout: compress
 <html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" {{ prefer_mode }}>
   {% include head.html %}
 
-  <body>
-    {% include font-pretendard.html %}
+  <body{% if page.layout == 'post' %} class="book-page"{% endif %}>
     {% include sidebar.html lang=lang %}
 
     <div id="main-wrapper" class="d-flex justify-content-center">
@@ -25,7 +24,10 @@ layout: compress
         {% include topbar.html lang=lang %}
 
         <div class="row flex-grow-1">
-          <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
+          <main
+            aria-label="Main Content"
+            class="{% if page.layout == 'post' %}book-main col-12 px-0{% else %}col-12 col-lg-11 col-xl-9 px-md-4{% endif %}"
+          >
             {% if layout.refactor or layout.layout == 'default' %}
               {% include refactor-content.html content=content lang=lang %}
             {% else %}
@@ -33,8 +35,9 @@ layout: compress
             {% endif %}
           </main>
 
-          <!-- panel -->
-          <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+          <!-- The visual-book reader owns its navigation, so regular pages alone use the side panel. -->
+          {% unless page.layout == 'post' %}
+            <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
             {%- comment -%}
               목차와 광고를 한 덩어리로 묶어 스크롤에 붙여 둔다.
               테마는 .access 가 유일한 자식일 때만 sticky 를 거는데, 광고를
@@ -56,12 +59,16 @@ layout: compress
               {% endfor %}
 
             </div>
-          </aside>
+            </aside>
+          {% endunless %}
         </div>
 
         <div class="row">
           <!-- tail -->
-          <div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4">
+          <div
+            id="tail-wrapper"
+            class="{% if page.layout == 'post' %}book-tail col-12 px-md-4{% else %}col-12 col-lg-11 col-xl-9 px-md-4{% endif %}"
+          >
             {% for _include in layout.tail_includes %}
               {% assign _include_path = _include | append: '.html' %}
               {% include {{ _include_path }} lang=lang %}

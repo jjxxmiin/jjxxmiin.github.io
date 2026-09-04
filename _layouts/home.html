@@ -36,15 +36,6 @@ layout: default
   {% endfor %}
 {% endif %}
 
-{% if paginator.page == 1 %}
-  <header class="mb-4 px-1">
-    <h1>AI 논문과 오픈소스를 근거로 읽는 OPSOAI</h1>
-    <p class="text-muted mb-0">
-      최신 소식을 나열하는 데 그치지 않고 작동 원리, 선택 기준, 실제 적용 조건과 한계를 원자료와 함께 설명합니다.
-    </p>
-  </header>
-{% endif %}
-
 {% assign compact_posts = '' | split: '' %}
 {% if paginator.page == 1 %}
   {% for post in posts %}
@@ -55,39 +46,23 @@ layout: default
 {% endif %}
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
+  {% if paginator.page == 1 %}
+    <h1 class="visually-hidden">OPSOAI, AI를 짧은 책과 데이터 시각화로 이해하다</h1>
+  {% endif %}
+  {% assign visible_post_index = 0 %}
   {% for post in posts %}
     {% if paginator.page == 1 and post.home_presentation == 'compact' %}
       {% continue %}
     {% endif %}
+    {% assign visible_post_index = visible_post_index | plus: 1 %}
     <article class="card-wrapper card">
-      <a href="{{ post.url | relative_url }}" class="post-preview row g-0 flex-md-row-reverse">
-        {% assign card_body_col = '12' %}
-        {% if post.image %}
-          {% assign lqip_attr = '' %}
-          {% assign src = post.image.path | default: post.image %}
-          {% if post.media_subpath %}
-            {% unless src contains '://' %}
-              {% assign src = post.media_subpath | append: '/' | append: src | replace: '///', '/' | replace: '//', '/' %}
-            {% endunless %}
-          {% endif %}
-          {% if post.image.lqip %}
-            {% assign lqip = post.image.lqip %}
-            {% if post.media_subpath %}
-              {% unless lqip contains 'data:' %}
-                {% assign lqip = post.media_subpath | append: '/' | append: lqip | replace: '///', '/' | replace: '//', '/' %}
-              {% endunless %}
-            {% endif %}
-            {% assign lqip_attr = 'lqip="' | append: lqip | append: '"' %}
-          {% endif %}
-          {% assign alt = post.image.alt | default: post.title | xml_escape %}
-          <div class="col-md-5">
-            <img src="{{ src }}" alt="{{ alt }}" {{ lqip_attr }} loading="lazy" decoding="async">
-          </div>
-          {% assign card_body_col = '7' %}
-        {% endif %}
-
-        <div class="col-md-{{ card_body_col }}">
+      <a href="{{ post.url | relative_url }}" class="post-preview row g-0">
+        <div class="col-12">
           <div class="card-body d-flex flex-column">
+            <span class="post-format-label">
+              <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+              페이지로 읽기
+            </span>
             <h2 class="card-title my-2 mt-md-0">{{ post.title }}</h2>
             <div class="card-text content mt-0 mb-3">
               <p>{% include post-summary.html %}</p>
@@ -116,6 +91,11 @@ layout: default
         </div>
       </a>
     </article>
+    {% if visible_post_index == 4 %}
+      <aside class="home-feed-ad" aria-label="광고">
+        {% include google-ad-post-inline.html %}
+      </aside>
+    {% endif %}
   {% endfor %}
 </div>
 

@@ -17,11 +17,11 @@ timezone: Asia/Seoul
 
 title: OPSOAI # the main title
 
-tagline: AI 논문, 오픈소스, 실전 선택 가이드 # it will display as the sub-title
+tagline: AI를 짧은 책처럼, 그림으로 이해하다 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  AI 논문, 오픈소스, 모델, 도구 업데이트를 원자료로 검증하고 작동 원리, 선택 기준, 적용 방법과 한계를 한국어로 깊이 있게 설명합니다. 연구자, 개발자, 실무자가 바로 판단할 수 있는 근거 중심 가이드입니다.
-keywords: [인공지능, AI, 논문, 딥러닝, 머신러닝, 무료 논문, OPSOAI, 논문 리뷰, 최신 기술, 연구 동향]
+  AI가 일, 공부, 돈, 관계와 창작을 어떻게 바꾸는지 짧은 책과 데이터 시각화로 설명합니다. 어려운 기술보다 지금 내 삶에 필요한 판단을 원자료에 근거해 쉽게 전합니다.
+keywords: [인공지능, AI, AI 일자리, AI 공부, 딥페이크, AI 활용, 시각 해설, OPSOAI]
 logo: /assets/img/logo.png
 author:
   name: OPSOAI 편집팀
@@ -42,9 +42,9 @@ social:
   links:
     # The first element serves as the copyright owner's link
     - https://www.opsoai.com # change to your twitter homepage
-    # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.instagram.com/opsoai
+    - https://www.threads.net/@opsoai
+    - https://github.com/jjxxmiin
     
 # Site Verification Settings
 webmaster_verifications:
@@ -98,7 +98,9 @@ theme_mode: # 비워두면 방문자 시스템 설정(라이트/다크)을 따�
 # will be added to all image (site avatar & posts' images) paths starting with '/'
 #
 # e.g. 'https://cdn.com'
-cdn: "https://www.opsoai.com"
+# Serve first-party assets from the current origin. Keeping the origin itself as
+# a CDN rewrites preview images to the production domain and breaks local books.
+cdn:
 
 # the avatar on sidebar, support local or CORS resources
 avatar: /assets/img/logo.png

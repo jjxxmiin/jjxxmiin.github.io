@@ -1,10 +1,7 @@
 name: Daily AI Trend Post
 
 on:
-  schedule:
-    # 22:00~02:00 UTC = 07:00~11:00 KST. GitHub 예약 실행이 늦거나 한 번
-    # 누락돼도 다음 슬롯이 재시도한다. 실제 도착 시각으로 다시 차단하지 않는다.
-    - cron: '0 22,23,0,1,2 * * *'
+  # Gemini 비용이 발생하는 예약 발행은 중단했다. 명시적으로 필요할 때만 실행한다.
   workflow_dispatch:
     inputs:
       force:
@@ -19,6 +16,8 @@ concurrency:
 
 jobs:
   build:
+    # Gemini 자동 생성은 사용하지 않는다. 워크플로 기록만 보존한다.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:

@@ -1,10 +1,11 @@
-<div class="google-ad">
+<div class="google-ad book-afterword-ad" data-book-ad data-book-ad-placement="afterword">
+  <span class="google-ad-label">광고</span>
   <ins class="adsbygoogle"
        style="display:block"
        data-ad-format="autorelaxed"
        data-ad-client="ca-pub-2217162208301474"
        data-ad-slot="4435927275"></ins>
-  <script>
-       (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
+  {% if jekyll.environment != 'production' %}
+    <span class="google-ad-preview">운영 환경에서 관련 콘텐츠 광고가 표시됩니다</span>
+  {% endif %}
 </div>

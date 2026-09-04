@@ -36,9 +36,10 @@ DEV의 실제 점수·댓글, GeekNews·요즘IT·Toss Tech·Tom's Guide·Ars·T
 
 1. **요청 → 사이트맵 제출**: `https://www.opsoai.com/sitemap.xml`
    (749개 URL, 107KB. 네이버 상한은 5만 URL / 10MB이므로 여유 있음)
-2. **요청 → RSS 제출**: `https://www.opsoai.com/feed.xml`
-   피드 항목 수를 테마 기본 5개에서 **20개로 올려 뒀다**(`assets/feed.xml`).
-   하루 2편 발행 체제에서 5개면 수집 주기가 조금만 밀려도 글이 통째로 누락된다.
+2. **요청 → RSS 제출**: `https://www.opsoai.com/rss.xml`
+   `/feed.xml`은 Atom이라 네이버가 RSS 형식으로 받아들이지 않는다. 네이버 전용
+   RSS 2.0 피드는 최근 **50개** 글을 제공한다(`rss.xml`). 하루 2편 발행 체제에서
+   수집 주기가 조금 밀려도 새 글이 피드에서 빠지지 않게 한 수치다.
 3. **검증 → robots.txt**: `Yeti` 허용은 이미 들어가 있다. 확인만.
 4. **웹 페이지 수집**: 주요 글 몇 개를 수동 수집 요청해 색인 속도를 당긴다.
 

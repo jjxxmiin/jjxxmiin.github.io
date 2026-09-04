@@ -1,0 +1,91 @@
+<!--
+  OPSOAI type system
+  - Paperlogy: display / brand voice
+  - SUIT: long-form reading / interface
+  Both are listed by Noonnu for web and BI/CI use under the SIL OFL.
+-->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+  @font-face {
+    font-family: "Paperlogy";
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "SUIT";
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "SUIT";
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Medium.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "SUIT";
+    src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+  }
+
+  :root {
+    --opsoai-font-body: "SUIT", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --opsoai-font-display: "Paperlogy", "SUIT", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --opsoai-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  html,
+  body,
+  p,
+  span,
+  div,
+  a,
+  li,
+  ul,
+  ol,
+  blockquote,
+  input,
+  button,
+  textarea,
+  select,
+  .post-content,
+  .markdown-body {
+    font-family: var(--opsoai-font-body) !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .site-title,
+  .book-brand-name,
+  .book-kicker,
+  .book-page-folio,
+  .book-page-label,
+  .book-page-numbers,
+  .post-format-label {
+    font-family: var(--opsoai-font-display) !important;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre,
+  pre *,
+  .highlight,
+  .highlight * {
+    font-family: var(--opsoai-font-mono) !important;
+  }
+</style>

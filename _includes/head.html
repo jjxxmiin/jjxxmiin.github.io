@@ -9,9 +9,27 @@
     content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
   >
 
+  {% include font-opsoai.html %}
+
+  {% if page.layout == 'post' %}
+    <!-- Enables the paged reader before first paint while preserving a full no-JS article. -->
+    <script>document.documentElement.classList.add('book-js');</script>
+  {% endif %}
+
   {%- capture seo_tags -%}
     {% seo title=false %}
   {%- endcapture -%}
+
+  {%- comment -%}
+    Generated topic archives otherwise inherit the same site-wide sentence.
+    Give every indexable hub a descriptive, query-specific summary without
+    changing the canonical URL or adding artificial keyword tags.
+  {%- endcomment -%}
+  {% if page.layout == 'category' or page.layout == 'tag' %}
+    {% capture topic_description %}{{ page.title }} 관련 핵심 개념, 최신 원자료, 실제 적용 조건과 한계를 짧은 시각 책으로 정리한 OPSOAI 글 {{ page.posts.size }}편을 한곳에서 확인하세요.{% endcapture %}
+    {% assign default_description = site.description | strip_newlines | strip %}
+    {% assign seo_tags = seo_tags | replace: default_description, topic_description %}
+  {% endif %}
 
   <!-- Setup Open Graph image -->
 
@@ -36,17 +54,35 @@
 
     {%- capture og_image -%}
       <meta property="og:image" content="{{ img_url }}" />
+      <meta property="og:image:alt" content="OPSOAI 로고" />
+      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:width" content="1024" />
+      <meta property="og:image:height" content="1024" />
     {%- endcapture -%}
 
     {%- capture twitter_image -%}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta property="twitter:image" content="{{ img_url }}" />
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:image" content="{{ img_url }}" />
+      <meta name="twitter:image:alt" content="OPSOAI 로고" />
     {%- endcapture -%}
 
     {% assign old_meta_clip = '<meta name="twitter:card" content="summary" />' %}
     {% assign new_meta_clip = og_image | append: twitter_image %}
     {% assign seo_tags = seo_tags | replace: old_meta_clip, new_meta_clip %}
   {% endif %}
+
+  {%- comment -%}
+    jekyll-seo-tag 2.9 emits the non-canonical `imageObject` spelling.
+    Schema.org types are case-sensitive in validators, so normalize it while
+    retaining the plugin's complete BlogPosting graph.
+  {%- endcomment -%}
+  {% assign seo_tags = seo_tags | replace: '"@type":"imageObject"', '"@type":"ImageObject"' %}
+  {%- capture legacy_author -%}"author":{"@type":"Organization","name":"{{ site.author.name }}","url":"{{ site.author.url }}"}{%- endcapture -%}
+  {%- capture entity_author -%}"author":{"@type":"Organization","@id":"{{ '/about/' | absolute_url }}#editorial-team","name":"{{ site.author.name }}","url":"{{ site.author.url }}"}{%- endcapture -%}
+  {% assign seo_tags = seo_tags | replace: legacy_author, entity_author %}
+  {%- capture legacy_publisher -%}"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"{{ site.logo | absolute_url }}"},"name":"{{ site.author.name }}"}{%- endcapture -%}
+  {%- capture entity_publisher -%}"publisher":{"@type":"Organization","@id":"{{ '/' | absolute_url }}#organization","name":"{{ site.title }}","url":"{{ '/' | absolute_url }}","logo":{"@type":"ImageObject","url":"{{ site.logo | absolute_url }}"}}{%- endcapture -%}
+  {% assign seo_tags = seo_tags | replace: legacy_publisher, entity_publisher %}
 
   <!-- Let search and answer engines use full text and large article-image previews.
        단, 페이지네이션(/page2/ 이후)과 archives 는 색인에서 뺀다. Search Console 실측에서
@@ -69,6 +105,30 @@
   {% endif %}
 
   {{ seo_tags }}
+
+  <!-- Explicit discovery endpoints for search crawlers, answer engines and feed readers. -->
+  <link
+    rel="alternate"
+    type="application/atom+xml"
+    title="{{ site.title | escape }} Atom Feed"
+    href="{{ '/feed.xml' | absolute_url }}"
+  >
+  <link
+    rel="alternate"
+    type="application/rss+xml"
+    title="{{ site.title | escape }} RSS Feed"
+    href="{{ '/rss.xml' | absolute_url }}"
+  >
+
+  {% if page.layout == 'post' %}
+    {% assign primary_topic = page.categories | first %}
+    {% if primary_topic %}
+      <meta property="article:section" content="{{ primary_topic | escape }}">
+    {% endif %}
+    {% for tag in page.tags %}
+      <meta property="article:tag" content="{{ tag | escape }}">
+    {% endfor %}
+  {% endif %}
 
   <!-- FAQPage structured data. It mirrors visible FAQ content for semantic parsers;
        Google no longer offers FAQ rich results for ordinary sites. -->
@@ -98,6 +158,7 @@
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
+      "@id": {{ page.url | absolute_url | append: '#breadcrumb' | jsonify }},
       "itemListElement": [
         {
           "@type": "ListItem",
@@ -126,14 +187,79 @@
       ]
     }
     </script>
+
+    {%- assign machine_description = page.description | default: page.summary | default: page.excerpt | strip_html | strip_newlines | strip -%}
+    {%- assign primary_visual = page.cover_photo.path | default: page.cover_photo -%}
+    {%- if primary_visual -%}
+      {%- unless primary_visual contains '://' -%}
+        {%- assign primary_visual = primary_visual | absolute_url -%}
+      {%- endunless -%}
+    {%- endif -%}
+    {%- assign primary_visual_alt = page.cover_photo.alt | default: page.image.alt | default: page.title | strip_html -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": {{ page.url | absolute_url | jsonify }},
+      "url": {{ page.url | absolute_url | jsonify }},
+      "name": {{ page.title | strip_html | jsonify }},
+      "description": {{ machine_description | jsonify }},
+      "inLanguage": {{ site.lang | default: 'ko-KR' | jsonify }},
+      "isAccessibleForFree": true,
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": {{ site.title | jsonify }},
+        "url": {{ '/' | absolute_url | jsonify }}
+      },
+      "author": {
+        "@type": "Organization",
+        "@id": {{ '/about/' | absolute_url | append: '#editorial-team' | jsonify }},
+        "name": {{ site.author.name | default: 'OPSOAI 편집팀' | jsonify }},
+        "url": {{ '/about/' | absolute_url | jsonify }}
+      },
+      "publisher": { "@id": {{ '/' | absolute_url | append: '#organization' | jsonify }} },
+      "breadcrumb": { "@id": {{ page.url | absolute_url | append: '#breadcrumb' | jsonify }} },
+      "keywords": {{ page.tags | join: ', ' | jsonify }}{% if primary_visual %},
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "@id": {{ primary_visual | append: '#primaryimage' | jsonify }},
+        "url": {{ primary_visual | jsonify }},
+        "contentUrl": {{ primary_visual | jsonify }},
+        "caption": {{ primary_visual_alt | jsonify }}
+      }{% endif %}
+    }
+    </script>
+  {% endif %}
+
+  {% if page.layout == 'home' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": {{ '/' | absolute_url | append: '#organization' | jsonify }},
+      "name": {{ site.title | jsonify }},
+      "url": {{ '/' | absolute_url | jsonify }},
+      "logo": {
+        "@type": "ImageObject",
+        "url": {{ site.logo | absolute_url | jsonify }}
+      },
+      "email": {{ site.social.email | jsonify }},
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "CAMORIX",
+        "url": "https://www.camorix.com/"
+      },
+      "sameAs": {{ site.social.links | jsonify }}
+    }
+    </script>
   {% endif %}
 
   <title>
     {%- if page.layout == 'home' -%}
-      {{ site.title | append: ' | ' | append: site.tagline }}
+      {{ site.title | append: ' | ' | append: site.tagline | escape }}
     {%- else -%}
-      {{ page.title | append: ' | ' }}
-      {{- site.title -}}
+      {{ page.title | append: ' | ' | append: site.title | escape }}
     {%- endif -%}
   </title>
 
@@ -200,5 +326,7 @@
   {% endif %}
 
   {% include metadata-hook.html %}
-  {% include google-ad-script.html %}
+  {% if jekyll.environment == 'production' %}
+    {% include google-ad-script.html %}
+  {% endif %}
 </head>

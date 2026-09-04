@@ -12,6 +12,8 @@
 {%- endif -%}
 ';
 
+@use 'book-reader';
+
 /* ───────────────────────── 커스텀 스타일 ─────────────────────────
    테마 원본(assets/css/jekyll-theme-chirpy.scss)을 그대로 복사하고
    아래만 덧붙였다. 테마 업그레이드 시 위쪽이 바뀌었는지 확인할 것.
@@ -62,6 +64,39 @@
   ins {
     display: block;
   }
+}
+
+.google-ad-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--text-muted-color);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.google-ad-preview {
+  min-height: 5rem;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted-color);
+  background: color-mix(in srgb, var(--main-bg) 80%, var(--card-bg));
+  font-size: 0.76rem;
+}
+
+.home-feed-ad {
+  margin: 1.25rem 0 2rem;
+  padding: 0 clamp(0.4rem, 2vw, 1.25rem);
+  overflow: hidden;
+  border: 1px solid var(--main-border-color);
+  border-radius: 0.48rem;
+  background: var(--card-bg);
+}
+
+.home-feed-ad .google-ad-inline {
+  margin: 0;
+  border: 0;
 }
 
 /* 사이드바 광고도 같은 이유로 높이를 예약한다. */

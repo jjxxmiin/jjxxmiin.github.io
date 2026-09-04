@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">사진과 목소리가 증거가 아닌 시대</title>
+  <desc id="desc">REAL 물음표, 분리된 얼굴과 음성 파형, 끊고 다시 확인하는 세 단계로 딥페이크 대응을 표현한 모던 미니멀 그래픽</desc>
+  <defs>
+    <linearGradient id="signal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2457ff"/>
+      <stop offset="1" stop-color="#20ad91"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#f5f5f2"/>
+  <path d="M0 0h26v630H0z" fill="#2457ff"/>
+  <path d="M64 72h1072" stroke="#111318" stroke-width="2"/>
+  <circle cx="1122" cy="58" r="14" fill="#20ad91"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#111318">
+    <text x="72" y="142" font-size="20" font-weight="700" letter-spacing="4">TRUST IS A PROCESS</text>
+    <text x="64" y="356" font-size="158" font-weight="800">REAL?</text>
+    <text x="76" y="418" font-size="24" font-weight="700" letter-spacing="3">FACE / VOICE / VIDEO</text>
+    <text x="78" y="457" font-size="18" font-weight="600" letter-spacing="3" fill="#565b64">LOOK ALIKE ≠ IDENTITY</text>
+  </g>
+
+  <g transform="translate(748 116)">
+    <circle cx="154" cy="146" r="125" fill="none" stroke="#111318" stroke-width="8"/>
+    <path d="M154 21v250" stroke="#2457ff" stroke-width="3" stroke-dasharray="10 11"/>
+    <circle cx="108" cy="112" r="9" fill="#111318"/>
+    <circle cx="200" cy="112" r="9" fill="#111318"/>
+    <path d="M91 183c39 29 82 29 126 0" fill="none" stroke="#111318" stroke-width="7" stroke-linecap="round"/>
+    <path d="M27 148c42-38 83-38 125 0s84 38 129 0" fill="none" stroke="url(#signal)" stroke-width="12" stroke-linecap="square"/>
+    <path d="M72 253v56h164v-56" fill="none" stroke="#111318" stroke-width="8"/>
+    <text x="154" y="345" text-anchor="middle" fill="#565b64" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="3">VERIFY DIFFERENTLY</text>
+  </g>
+
+  <g transform="translate(610 468)" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">
+    <rect width="140" height="48" fill="#2457ff"/>
+    <text x="70" y="30" fill="#fff" text-anchor="middle">HANG UP</text>
+    <path d="M157 24h43" stroke="#565b64" stroke-width="2"/>
+    <path d="m192 17 9 7-9 7" fill="none" stroke="#565b64" stroke-width="2"/>
+    <rect x="218" width="140" height="48" fill="#111318"/>
+    <text x="288" y="30" fill="#fff" text-anchor="middle">CALL BACK</text>
+    <path d="M375 24h43" stroke="#565b64" stroke-width="2"/>
+    <path d="m410 17 9 7-9 7" fill="none" stroke="#565b64" stroke-width="2"/>
+    <rect x="436" width="140" height="48" fill="#20ad91"/>
+    <text x="506" y="30" fill="#07120f" text-anchor="middle">CONFIRM</text>
+  </g>
+
+  <path d="M64 574h1072" stroke="#111318" stroke-width="2"/>
+  <text x="72" y="608" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#111318">OPSOAI / VISUAL BOOK 003</text>
+  <text x="884" y="608" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#20ad91">STOP → VERIFY</text>
+</svg>

@@ -1,0 +1,5 @@
+.venv/
+.conda/
+media/
+__pycache__/
+*.pyc

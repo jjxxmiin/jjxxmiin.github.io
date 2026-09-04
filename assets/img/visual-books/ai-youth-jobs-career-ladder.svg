@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">청년 일자리 28만 5천 개 감소와 끊어진 경력 사다리</title>
+  <desc id="desc">왼쪽의 285K 숫자와 오른쪽의 끊어진 사다리, 이를 다시 잇는 초록색 경로로 청년 고용 감소와 경력 사다리 재설계를 표현한 모던 미니멀 그래픽</desc>
+  <rect width="1200" height="630" fill="#f5f5f2"/>
+  <path d="M0 0h26v630H0z" fill="#2457ff"/>
+  <path d="M64 72h1072" stroke="#111318" stroke-width="2"/>
+  <circle cx="1122" cy="58" r="14" fill="#20ad91"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#111318">
+    <text x="72" y="142" font-size="20" font-weight="700" letter-spacing="4">THE MISSING FIRST RUNG</text>
+    <text x="68" y="363" font-size="176" font-weight="800">285</text>
+    <text x="385" y="363" font-size="78" font-weight="800">K</text>
+    <text x="78" y="420" font-size="25" font-weight="700" letter-spacing="3">AGE 15—29</text>
+    <text x="78" y="458" font-size="18" font-weight="600" letter-spacing="3" fill="#565b64">22.06 — 26.06</text>
+  </g>
+
+  <g fill="none" stroke="#111318" stroke-width="14" stroke-linecap="square">
+    <path d="M772 135v330"/>
+    <path d="M1002 135v330"/>
+    <path d="M772 168h230"/>
+    <path d="M772 229h230"/>
+    <path d="M772 290h230"/>
+    <path d="M772 351h88"/>
+    <path d="M930 351h72"/>
+  </g>
+
+  <g fill="none" stroke="#2457ff" stroke-width="14" stroke-linecap="square">
+    <path d="M772 412h67"/>
+    <path d="M954 412h48"/>
+    <path d="M772 465h42"/>
+    <path d="M972 465h30"/>
+  </g>
+
+  <g fill="#2457ff">
+    <path d="m859 334 43 20-6 13-43-20z"/>
+    <path d="m848 424 66-38 7 13-66 38z"/>
+    <path d="m820 463 87 58-8 12-87-58z"/>
+    <circle cx="885" cy="526" r="8"/>
+    <circle cx="943" cy="492" r="5"/>
+  </g>
+
+  <path d="M710 522C790 522 805 570 884 570c88 0 92-85 177-85h75" fill="none" stroke="#20ad91" stroke-width="11"/>
+  <path d="m1114 467 22 18-22 18" fill="none" stroke="#20ad91" stroke-width="11"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">
+    <text x="703" y="561" fill="#565b64">ENTRY</text>
+    <text x="1012" y="449" fill="#20ad91">REBUILD</text>
+  </g>
+
+  <path d="M64 574h1072" stroke="#111318" stroke-width="2"/>
+  <text x="72" y="608" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#111318">OPSOAI / VISUAL BOOK 001</text>
+</svg>

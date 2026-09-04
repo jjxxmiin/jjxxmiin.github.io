@@ -1,0 +1,5 @@
+# ManimGL (3b1b/manim), not Manim Community Edition.
+manimgl==1.7.2
+
+# ManimGL 1.7.2 imports pkg_resources at runtime.
+setuptools<81

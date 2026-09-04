@@ -69,7 +69,7 @@
     var dark = isDark();
     Chart.defaults.color = dark ? '#c3c2b7' : '#2b2926';
     Chart.defaults.borderColor = dark ? 'rgba(240,238,233,.12)' : 'rgba(43,41,38,.12)';
-    if (Chart.defaults.font) { Chart.defaults.font.family = 'Pretendard, sans-serif'; }
+    if (Chart.defaults.font) { Chart.defaults.font.family = 'SUIT, sans-serif'; }
     var top = rows.slice().sort(function (a, b) { return b.count - a.count; });
     var us = dark ? '#3987e5' : '#2a78d6';
     var kr = dark ? '#199e70' : '#1baf7a';

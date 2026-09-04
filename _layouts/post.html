@@ -1,8 +1,6 @@
 ---
 layout: default
 refactor: true
-panel_includes:
-  - toc
 tail_includes:
   - related-posts
   - post-nav
@@ -12,303 +10,396 @@ script_includes:
 
 {% include lang.html %}
 
-{% include toc-status.html %}
+{% assign post_description = page.description | default: page.summary %}
+{% assign primary_category = page.categories | first | default: 'AI' %}
+{% assign book_sections = content | split: '<h2' %}
+{% assign intro_content = book_sections | first | strip %}
+{% assign chapter_count = book_sections | size | minus: 1 %}
+{% assign book_chapter_count = chapter_count %}
+{% if page.faq and page.faq.size > 0 %}
+  {% assign book_chapter_count = book_chapter_count | plus: 1 %}
+{% endif %}
+{% assign post_author_name = page.author.name | default: page.author | default: site.author.name | default: 'OPSOAI 편집팀' %}
+{% assign published_day = page.date | date: '%Y.%m.%d' %}
+{% assign modified_day = page.last_modified_at | date: '%Y.%m.%d' %}
+{% assign cover_photo = page.cover_photo.path | default: page.cover_photo %}
+{% assign cover_photo_position = page.cover_photo.position | default: 'center center' %}
+{% assign cover_photo_alt = page.cover_photo.alt | default: '' %}
+{% assign cover_photo_width = page.cover_photo.width | default: 1600 %}
+{% assign cover_photo_height = page.cover_photo.height | default: 900 %}
+{% assign cover_photo_src = cover_photo %}
+{% if cover_photo %}
+  {% unless cover_photo contains '://' %}
+    {% assign cover_photo_src = cover_photo | relative_url %}
+  {% endunless %}
+{% endif %}
+{% assign book_visual = page.book_visual %}
+{% assign book_visual_path = book_visual.path | default: book_visual %}
+{% assign book_visual_alt = book_visual.alt %}
+{% if book_visual_alt == empty %}
+  {% capture book_visual_alt %}{{ page.title | strip_html }} 관련 시각 자료{% endcapture %}
+{% endif %}
+{% assign book_visual_src = book_visual_path %}
+{% if book_visual_path %}
+  {% unless book_visual_path contains '://' %}
+    {% assign book_visual_src = book_visual_path | relative_url %}
+  {% endunless %}
+{% endif %}
+{% assign project_url = page.github_url | default: page.project.url %}
+{% assign project_is_github = false %}
+{% if project_url contains '://github.com/' %}
+  {% assign project_is_github = true %}
+{% endif %}
 
-<article class="px-1" data-toc="{{ enable_toc }}">
-  <header>
-    <h1 data-toc-skip>{{ page.title }}</h1>
-    {% assign post_description = page.description | default: page.summary %}
-    {% if post_description %}
-      <p class="post-desc fw-light mb-4">{{ post_description }}</p>
-    {% endif %}
+<article
+  class="visual-book"
+  data-book-reader
+  data-book-path="{{ page.url | relative_url }}"
+  data-book-title="{{ page.title | strip_html | escape }}"
+  data-book-category="{{ primary_category | strip_html | escape }}"
+  data-book-chapters="{{ book_chapter_count }}"
+  data-book-collection="{% if page.collection %}true{% else %}false{% endif %}"
+>
+  <div class="book-reader-shell">
+    <nav class="book-toolbar" aria-label="책 읽기 도구">
+      <a class="book-brand" href="{{ '/' | relative_url }}" aria-label="OPSOAI 책장으로 돌아가기">
+        <span class="book-brand-mark" aria-hidden="true"></span>
+        <span class="book-brand-name">OPSOAI <b>BOOKS</b></span>
+      </a>
 
-    <div class="post-meta text-muted">
-      <!-- published date -->
-      <span>
-        {{ site.data.locales[lang].post.posted }}
-        {% include datetime.html date=page.date tooltip=true lang=lang %}
-      </span>
+      <div class="book-toolbar-actions">
+        <button class="book-tool-button" type="button" data-book-toc-open aria-haspopup="dialog">
+          <i class="fa-solid fa-list-ul" aria-hidden="true"></i>
+          <span>목차</span>
+        </button>
+        <button class="book-tool-button" type="button" data-book-view-toggle aria-pressed="false">
+          <i class="fa-solid fa-align-left" aria-hidden="true"></i>
+          <span>스크롤 보기</span>
+        </button>
+        <button class="book-tool-button book-theme-button" id="mode-toggle" type="button" data-book-theme aria-label="화면 색상 전환">
+          <i class="fa-regular fa-moon" aria-hidden="true"></i>
+          <span class="visually-hidden">화면 색상 전환</span>
+        </button>
+        <div class="dropdown-menu book-theme-compat" hidden aria-hidden="true"></div>
+      </div>
+    </nav>
 
-      <!-- lastmod date -->
-      {% if page.last_modified_at and page.last_modified_at != page.date %}
-        <span>
-          {{ site.data.locales[lang].post.updated }}
-          {% include datetime.html date=page.last_modified_at tooltip=true lang=lang %}
-        </span>
-      {% endif %}
+    <div class="book-progress" aria-hidden="true">
+      <span data-book-progress></span>
+    </div>
 
-      {% if page.image %}
-        {% capture src %}src="{{ page.image.path | default: page.image }}"{% endcapture %}
-        {% capture class %}class="preview-img{% if page.image.no_bg %}{{ ' no-bg' }}{% endif %}"{% endcapture %}
-        {% capture alt %}alt="{{ page.image.alt | xml_escape | default: "Preview Image" }}"{% endcapture %}
+    <div class="book-stage" data-book-stage>
+      <div class="book-pages" data-book-pages>
+        <section
+          class="book-page book-cover is-active{% if cover_photo %} has-cover-photo{% endif %}"
+          data-book-page
+          data-book-kind="cover"
+          data-book-label="표지"
+          tabindex="-1"
+        >
+          {% if cover_photo %}
+            <img
+              class="book-cover-photo"
+              src="{{ cover_photo_src | escape }}"
+              width="{{ cover_photo_width }}"
+              height="{{ cover_photo_height }}"
+              alt="{{ cover_photo_alt | escape }}"
+              {% if cover_photo_alt == empty %}aria-hidden="true"{% endif %}
+              decoding="async"
+              fetchpriority="high"
+              style="--book-cover-position: {{ cover_photo_position | escape }};"
+            >
+          {% endif %}
+          <div class="book-cover-copy">
+            <h1 data-toc-skip>{{ page.title | replace: '·', ', ' }}</h1>
+          </div>
+        </section>
 
-        {% if page.image.lqip %}
-          {%- capture lqip -%}lqip="{{ page.image.lqip }}"{%- endcapture -%}
+        {% if intro_content != empty or page.project or book_visual_path %}
+          <section
+            class="book-page book-content-page"
+            data-book-page
+            data-book-kind="chapter"
+            data-book-label="들어가며"
+            data-book-chapter="0"
+            tabindex="-1"
+          >
+            <div class="book-page-scroll">
+              <div class="book-page-folio" aria-hidden="true">
+                <span>PROLOGUE</span>
+                <span data-book-folio></span>
+              </div>
+
+              {% if page.project %}
+                {% assign pj = page.project %}
+                <div class="proj{% if project_is_github %} is-github{% endif %}">
+                  <div class="proj-h">
+                    <i class="{% if project_is_github %}fa-brands fa-github{% else %}fas fa-cube{% endif %}" aria-hidden="true"></i>
+                    프로젝트 한눈에 보기
+                    <span class="sep"></span>
+                  </div>
+                  <div class="proj-grid">
+                    {% if pj.stars %}<div class="proj-t"><i class="fas fa-star"></i><span class="n">{% if pj.stars >= 1000 %}{{ pj.stars | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.stars }}{% endif %}</span><span class="l">스타</span></div>{% endif %}
+                    {% if pj.forks %}<div class="proj-t"><i class="fas fa-code-branch"></i><span class="n">{% if pj.forks >= 1000 %}{{ pj.forks | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.forks }}{% endif %}</span><span class="l">포크</span></div>{% endif %}
+                    {% if pj.language %}<div class="proj-t"><i class="fas fa-code"></i><span class="n">{{ pj.language }}</span><span class="l">주 언어</span></div>{% endif %}
+                    {% if pj.files %}<div class="proj-t"><i class="fas fa-file-lines"></i><span class="n">{% if pj.files >= 1000 %}{{ pj.files | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.files }}{% endif %}</span><span class="l">파일 수</span></div>{% endif %}
+                    {% if pj.loc %}<div class="proj-t"><i class="fas fa-align-left"></i><span class="n">{% if pj.loc >= 1000 %}{{ pj.loc | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.loc }}{% endif %}</span><span class="l">코드 줄</span></div>{% endif %}
+                    {% if pj.license %}<div class="proj-t"><i class="fas fa-scale-balanced"></i><span class="n">{{ pj.license }}</span><span class="l">라이선스</span></div>{% endif %}
+                    {% if pj.updated %}<div class="proj-t"><i class="fas fa-clock-rotate-left"></i><span class="n sm">{{ pj.updated }}</span><span class="l">업데이트</span></div>{% endif %}
+                  </div>
+                  {% if pj.languages %}
+                    <div class="proj-langs">
+                      {% for language in pj.languages %}
+                        <span class="lg{% if language == pj.language %} top{% endif %}">{{ language }}</span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="book-page-content content">
+                {{ book_sections | first }}
+                {% if book_visual_path %}
+                  <figure class="book-lead-visual">
+                    <img
+                      class="book-lead-visual-image"
+                      src="{{ book_visual_src | escape }}"
+                      width="{{ book_visual.width | default: 1600 }}"
+                      height="{{ book_visual.height | default: 900 }}"
+                      alt="{{ book_visual_alt | strip | escape }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    {% if book_visual.caption or book_visual.credit_url %}
+                      <figcaption>
+                        {% if book_visual.caption %}<span>{{ book_visual.caption | escape }}</span>{% endif %}
+                        {% if book_visual.credit_url %}
+                          <a href="{{ book_visual.credit_url | escape }}" target="_blank" rel="noopener noreferrer">
+                            {{ book_visual.credit_label | default: '이미지 출처' | escape }}<span class="visually-hidden">, 새 창</span>
+                          </a>
+                        {% endif %}
+                      </figcaption>
+                    {% endif %}
+                  </figure>
+                {% endif %}
+              </div>
+            </div>
+          </section>
         {% endif %}
 
-        <div class="mt-3 mb-3">
-          <img {{ src }} {{ class }} {{ alt }} width="1200" height="630" loading="eager" fetchpriority="high" decoding="async" {{ lqip }}>
-          {%- if page.image.alt -%}
-            <figcaption class="text-center pt-2 pb-2">{{ page.image.alt }}</figcaption>
-          {%- endif -%}
-        </div>
-      {% endif %}
+        {% for section in book_sections offset: 1 %}
+          <section
+            class="book-page book-content-page"
+            data-book-page
+            data-book-kind="chapter"
+            data-book-chapter="{{ forloop.index }}"
+            tabindex="-1"
+          >
+            <div class="book-page-scroll">
+              <div class="book-page-folio" aria-hidden="true">
+                <span>CHAPTER {{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                <span data-book-folio></span>
+              </div>
+              <div class="book-page-content content">
+                <h2{{ section }}
+              </div>
+            </div>
+          </section>
+        {% endfor %}
 
-      <div class="d-flex justify-content-between">
-        <!-- author(s) -->
-        <span>
-          {% if page.author %}
-            {% assign authors = page.author %}
-          {% elsif page.authors %}
-            {% assign authors = page.authors %}
-          {% endif %}
+        {% if page.faq and page.faq.size > 0 %}
+          {% assign faq_chapter = chapter_count | plus: 1 %}
+          <section
+            class="book-page book-content-page book-faq-page"
+            data-book-page
+            data-book-kind="chapter"
+            data-book-label="자주 묻는 질문"
+            data-book-chapter="{{ faq_chapter }}"
+            tabindex="-1"
+          >
+            <div class="book-page-scroll">
+              <div class="book-page-folio" aria-hidden="true">
+                <span>QUESTIONS</span>
+                <span data-book-folio></span>
+              </div>
+              <div class="book-page-content content">
+                <h2>자주 묻는 질문</h2>
+                {% for item in page.faq %}
+                  <details class="book-faq-item">
+                    <summary>
+                      <span class="book-faq-letter" aria-hidden="true">Q</span>
+                      <span>{{ item.question | strip_html | escape }}</span>
+                    </summary>
+                    <div class="book-faq-answer">
+                      <span class="book-faq-letter" aria-hidden="true">A</span>
+                      <div>{{ item.answer | markdownify }}</div>
+                    </div>
+                  </details>
+                {% endfor %}
+              </div>
+            </div>
+          </section>
+        {% endif %}
 
-          {{ site.data.locales[lang].post.written_by }}
-
-          <em>
-            {% if authors %}
-              {% for author in authors %}
-                {% if site.data.authors[author].url -%}
-                  <a href="{{ site.data.authors[author].url }}">{{ site.data.authors[author].name }}</a>
-                {%- else -%}
-                  {{ site.data.authors[author].name }}
-                {%- endif %}
-                {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
-              {% endfor %}
+        <section
+          class="book-page book-finish"
+          data-book-page
+          data-book-kind="finish"
+          data-book-label="완독"
+          tabindex="-1"
+        >
+          <div class="book-finish-inner">
+            <div class="book-finish-mark" aria-hidden="true">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="book-kicker">THE END / OPSOAI</p>
+            <h2>여기까지 읽었습니다</h2>
+            {% if page.book_takeaway %}
+              <p>{{ page.book_takeaway }}</p>
             {% else %}
-              <a href="{{ '/about/' | relative_url }}">OPSOAI 편집팀</a>
+              <p>핵심 장면을 한 번 더 떠올려 보세요. 이해가 남았다면 이 책은 제 역할을 다했습니다.</p>
             {% endif %}
-          </em>
-        </span>
-
-        <div>
-          <!-- pageviews -->
-          {% if site.pageviews.provider and site.analytics[site.pageviews.provider].id %}
-            <span>
-              <em id="pageviews">
-                <i class="fas fa-spinner fa-spin small"></i>
-              </em>
-              {{ site.data.locales[lang].post.pageview_measure }}
-            </span>
-          {% endif %}
-
-          <!-- read time -->
-          {% include read-time.html content=content prompt=true lang=lang %}
-        </div>
+            <div class="book-publication-meta" aria-label="글 발행 정보">
+              <a href="{{ '/about/' | relative_url }}" rel="author">
+                <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                {{ post_author_name }}
+              </a>
+              <time datetime="{{ page.date | date_to_xmlschema }}">
+                <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                발행 {{ published_day }}
+              </time>
+              {% if page.last_modified_at and modified_day != published_day %}
+                <time datetime="{{ page.last_modified_at | date_to_xmlschema }}">
+                  <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                  수정 {{ modified_day }}
+                </time>
+              {% endif %}
+            </div>
+            <div class="book-finish-actions">
+              <button type="button" class="book-primary-action" data-book-share>
+                <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+                공유하기
+              </button>
+              <button type="button" class="book-secondary-action" data-book-restart>
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                다시 읽기
+              </button>
+              <a class="book-secondary-action" href="{{ '/' | relative_url }}">
+                <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+                다른 책 고르기
+              </a>
+            </div>
+            <button
+              type="button"
+              class="book-afterword-link"
+              data-book-afterword
+              aria-controls="book-afterword"
+              aria-expanded="false"
+            >
+              출처, 태그, 댓글 이어보기
+              <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+            </button>
+          </div>
+        </section>
       </div>
     </div>
-  </header>
 
-  {% if enable_toc %}
-    <div id="toc-bar" class="d-flex align-items-center justify-content-between invisible">
-      <span class="label text-truncate">{{ page.title }}</span>
-      <button type="button" class="toc-trigger btn me-1">
-        <i class="fa-solid fa-list-ul fa-fw"></i>
+    <template data-book-scroll-ad-template>
+      <section class="book-scroll-ad" aria-label="광고">
+        {% include google-ad-post-inline.html lazy=true %}
+      </section>
+    </template>
+
+    <div class="book-controls" aria-label="페이지 이동">
+      <button type="button" class="book-page-button book-page-button-prev" data-book-prev disabled>
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        <span>이전</span>
+      </button>
+
+      <div class="book-page-status" aria-live="off">
+        <span class="book-page-label" data-book-current-label>표지</span>
+        <span class="book-page-numbers">
+          <b data-book-current>1</b>
+          <span aria-hidden="true">/</span>
+          <span data-book-total>—</span>
+        </span>
+      </div>
+
+      <button type="button" class="book-page-button book-page-button-next" data-book-next>
+        <span>다음</span>
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
       </button>
     </div>
 
-    <button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm">
-      <span class="label ps-2 pe-1">{{- site.data.locales[lang].panel.toc -}}</span>
-      <i class="fa-solid fa-angle-right fa-fw"></i>
-    </button>
-
-    <dialog id="toc-popup" class="p-0">
-      <div class="header d-flex flex-row align-items-center justify-content-between">
-        <div class="label text-truncate py-2 ms-4">{{- page.title -}}</div>
-        <button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75">
-          <i class="fas fa-close"></i>
-        </button>
-      </div>
-      <div id="toc-popup-content" class="px-4 py-3 pb-4"></div>
-    </dialog>
-  {% endif %}
-
-  {% if page.project %}
-    {% assign pj = page.project %}
-    <style>
-      .proj { border:1px solid var(--main-border-color); background:var(--card-bg); border-radius:14px; padding:1.05rem 1.15rem 1.2rem; margin:0 0 1.6rem; }
-      .proj-h { display:flex; align-items:center; gap:.5rem; font-size:.86rem; font-weight:800; color:var(--text-color); margin-bottom:.9rem; }
-      .proj-h > i { color:#2a78d6; font-size:.95rem; }
-      .proj-h .sep { flex:1; height:1px; background:var(--main-border-color); }
-      .proj-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(84px,1fr)); gap:.55rem; }
-      .proj-t { text-align:center; padding:.7rem .3rem .75rem; border-radius:11px; background:rgba(42,120,214,.055); border:1px solid var(--main-border-color); }
-      .proj-t > i { font-size:.88rem; color:#2a78d6; }
-      .proj-t .n { display:block; font-size:1.12rem; font-weight:800; color:var(--text-color); line-height:1.15; margin-top:.28rem; font-variant-numeric:tabular-nums; word-break:break-word; }
-      .proj-t .n.sm { font-size:.9rem; letter-spacing:-.01em; }
-      .proj-t .l { display:block; font-size:.67rem; color:var(--text-muted-color); margin-top:.22rem; }
-      .proj-langs { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.95rem; }
-      .proj-langs .lg { font-size:.72rem; padding:.16rem .58rem; border-radius:999px; background:rgba(128,128,128,.12); color:var(--text-color); }
-      .proj-langs .lg.top { background:rgba(42,120,214,.13); color:#2a78d6; font-weight:700; }
-    </style>
-    <div class="proj">
-      <div class="proj-h"><i class="fas fa-cube"></i>프로젝트 한눈에 보기<span class="sep"></span></div>
-      <div class="proj-grid">
-        {% if pj.stars %}<div class="proj-t"><i class="fas fa-star"></i><span class="n">{% if pj.stars >= 1000 %}{{ pj.stars | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.stars }}{% endif %}</span><span class="l">스타</span></div>{% endif %}
-        {% if pj.forks %}<div class="proj-t"><i class="fas fa-code-branch"></i><span class="n">{% if pj.forks >= 1000 %}{{ pj.forks | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.forks }}{% endif %}</span><span class="l">포크</span></div>{% endif %}
-        {% if pj.language %}<div class="proj-t"><i class="fas fa-code"></i><span class="n">{{ pj.language }}</span><span class="l">주 언어</span></div>{% endif %}
-        {% if pj.files %}<div class="proj-t"><i class="fas fa-file-lines"></i><span class="n">{% if pj.files >= 1000 %}{{ pj.files | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.files }}{% endif %}</span><span class="l">파일 수</span></div>{% endif %}
-        {% if pj.loc %}<div class="proj-t"><i class="fas fa-align-left"></i><span class="n">{% if pj.loc >= 1000 %}{{ pj.loc | divided_by: 1000.0 | round: 1 }}k{% else %}{{ pj.loc }}{% endif %}</span><span class="l">코드 줄</span></div>{% endif %}
-        {% if pj.license %}<div class="proj-t"><i class="fas fa-scale-balanced"></i><span class="n">{{ pj.license }}</span><span class="l">라이선스</span></div>{% endif %}
-        {% if pj.updated %}<div class="proj-t"><i class="fas fa-clock-rotate-left"></i><span class="n sm">{{ pj.updated }}</span><span class="l">업데이트</span></div>{% endif %}
-      </div>
-      {% if pj.languages %}<div class="proj-langs">{% for l in pj.languages %}<span class="lg{% if l == pj.language %} top{% endif %}">{{ l }}</span>{% endfor %}</div>{% endif %}
-    </div>
-  {% endif %}
-
-  <div class="content">
-    {%- capture inline_ad -%}{% include google-ad-post-inline.html %}{%- endcapture -%}
-    {%- comment -%}
-      광고를 H2 섹션 경계에 넣는다. 문단 중간에 끼우면 읽던 흐름이 끊기지만
-      소제목 직전은 어차피 독자가 한 번 쉬어 가는 자리라 방해가 가장 적다.
-
-      개수는 글 길이에 비례시킨다. 섹션이 4개 미만인 짧은 글에는 넣지 않고,
-      그 이상이면 두 섹션마다 하나씩, 최대 2개까지만 넣는다.
-      첫 섹션 앞에는 넣지 않는다. 도입을 읽기도 전에 광고가 나오면 이탈한다.
-    {%- endcomment -%}
-    {%- assign sections = content | split: '<h2' -%}
-    {%- assign sec_count = sections | size | minus: 1 -%}
-    {%- assign ads_used = 0 -%}
-    {%- for sec in sections -%}
-      {%- if forloop.first -%}
-        {{ sec }}
-      {%- else -%}
-        {%- comment -%} 두 번째 섹션부터, 두 개 걸러 하나씩 {%- endcomment -%}
-        {%- assign idx = forloop.index0 -%}
-        {%- assign rem = idx | modulo: 2 -%}
-        {%- if sec_count >= 4 and idx >= 2 and rem == 0 and ads_used < 2 -%}
-          {{ inline_ad }}
-          {%- assign ads_used = ads_used | plus: 1 -%}
-        {%- endif -%}
-        <h2{{ sec }}
-      {%- endif -%}
-    {%- endfor -%}
+    <p class="book-reader-hint">
+      <kbd>←</kbd><kbd>→</kbd> 키와 좌우 스와이프를 지원합니다.
+      읽던 페이지는 이 기기에 저장됩니다.
+    </p>
   </div>
+
+  <dialog class="book-toc-dialog" data-book-toc aria-labelledby="book-toc-title">
+    <div class="book-toc-head">
+      <div>
+        <p>CONTENTS</p>
+        <h2 id="book-toc-title">이 책의 목차</h2>
+      </div>
+      <button type="button" data-book-toc-close aria-label="목차 닫기">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    <ol class="book-toc-list" data-book-toc-list></ol>
+    <div class="book-toc-foot">
+      <span>{{ book_chapter_count }}개 장</span>
+      <span>{% include read-time.html content=content prompt=true lang=lang %}</span>
+    </div>
+  </dialog>
 
   {% if page.chart %}{% include chartjs.html %}{% endif %}
 
-  {% include google-ad-post-bottom.html %}
+  <div class="book-afterword-panel" id="book-afterword" hidden tabindex="-1" aria-label="출처, 태그와 댓글">
+    {% include google-ad-post-bottom.html %}
 
-  <div class="post-tail-wrapper text-muted">
-    <!-- categories -->
-    {% if page.categories.size > 0 %}
-      <div class="post-meta mb-3">
-        <i class="far fa-folder-open fa-fw me-1"></i>
-        {% for category in page.categories %}
-          <a href="{{ site.baseurl }}/categories/{{ category | slugify | url_encode }}/">{{ category }}</a>
-          {%- unless forloop.last -%},{%- endunless -%}
-        {% endfor %}
+    <div class="post-tail-wrapper text-muted">
+      {% if page.categories.size > 0 %}
+        <div class="post-meta mb-3">
+          <i class="far fa-folder-open fa-fw me-1"></i>
+          {% for category in page.categories %}
+            <a href="{{ site.baseurl }}/categories/{{ category | slugify | url_encode }}/">{{ category }}</a>
+            {%- unless forloop.last -%},{%- endunless -%}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if page.tags.size > 0 %}
+        <div class="post-tags">
+          <i class="fa fa-tags fa-fw me-1"></i>
+          {% for tag in page.tags %}
+            <a
+              href="{{ site.baseurl }}/tags/{{ tag | slugify | url_encode }}/"
+              class="post-tag no-text-decoration"
+            >
+              {{- tag -}}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2">
+        <div class="license-wrapper">
+          {% if site.data.locales[lang].copyright.license.template %}
+            {% capture _replacement %}
+              <a href="{{ site.data.locales[lang].copyright.license.link }}">
+                {{ site.data.locales[lang].copyright.license.name }}
+              </a>
+            {% endcapture %}
+            {{ site.data.locales[lang].copyright.license.template | replace: ':LICENSE_NAME', _replacement }}
+          {% endif %}
+        </div>
+
+        {% include post-sharing.html lang=lang %}
       </div>
-    {% endif %}
-
-    <!-- tags -->
-    {% if page.tags.size > 0 %}
-      <div class="post-tags">
-        <i class="fa fa-tags fa-fw me-1"></i>
-        {% for tag in page.tags %}
-          <a
-            href="{{ site.baseurl }}/tags/{{ tag | slugify | url_encode }}/"
-            class="post-tag no-text-decoration"
-          >
-            {{- tag -}}
-          </a>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <div
-      class="
-        post-tail-bottom
-        d-flex justify-content-between align-items-center mt-5 pb-2
-      "
-    >
-      <div class="license-wrapper">
-        {% if site.data.locales[lang].copyright.license.template %}
-          {% capture _replacement %}
-        <a href="{{ site.data.locales[lang].copyright.license.link }}">
-          {{ site.data.locales[lang].copyright.license.name }}
-        </a>
-        {% endcapture %}
-
-          {{ site.data.locales[lang].copyright.license.template | replace: ':LICENSE_NAME', _replacement }}
-        {% endif %}
-      </div>
-
-      {% include post-sharing.html lang=lang %}
     </div>
-    <!-- .post-tail-bottom -->
   </div>
-  <!-- div.post-tail-wrapper -->
 </article>
 
-<!-- 본문 상단의 "[GitHub 저장소] | [공식 웹사이트] | [...]" 링크 줄을 버튼형으로 업그레이드 -->
-<style>
-  .content .post-links { display:flex; flex-wrap:wrap; gap:.5rem; margin:.2rem 0 1.7rem; }
-  .content .post-links a.post-link {
-    display:inline-flex; align-items:center; gap:.45rem;
-    font-size:.85rem; font-weight:700; text-decoration:none;
-    color:var(--text-color); background:var(--card-bg);
-    border:1px solid var(--main-border-color); border-radius:10px; padding:.5rem .9rem;
-    transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;
-  }
-  .content .post-links a.post-link:hover { border-color:rgba(42,120,214,.5); transform:translateY(-1px); box-shadow:var(--card-shadow); text-decoration:none; }
-  .content .post-links a.post-link i { color:#2a78d6; font-size:.9rem; }
-</style>
-<script>
-  (function () {
-    function buildBox(links) {
-      var box = document.createElement('div');
-      box.className = 'post-links';
-      links.forEach(function (a) {
-        var href = a.getAttribute('href') || '';
-        var t = (a.textContent || '').toLowerCase();
-        var icon = (/github\.com/.test(href) || /github|저장소|repo/.test(t)) ? 'fa-brands fa-github'
-          : (/웹사이트|website|homepage|공식|docs|문서|사이트|페이지/.test(t)) ? 'fa-solid fa-globe'
-          : 'fa-solid fa-arrow-up-right-from-square';
-        var na = document.createElement('a');
-        na.href = href; na.className = 'post-link';
-        if (/^https?:/.test(href)) { na.target = '_blank'; na.rel = 'noopener noreferrer'; }
-        var i = document.createElement('i'); i.className = icon;
-        var s = document.createElement('span'); s.textContent = a.textContent;
-        na.appendChild(i); na.appendChild(s);
-        box.appendChild(na);
-      });
-      return box;
-    }
-    function upgrade() {
-      var content = document.querySelector('.content');
-      if (!content) return;
-
-      /* 1) 파이프 링크 줄이 문단으로 렌더된 경우 */
-      Array.prototype.slice.call(content.children).forEach(function (p) {
-        if (p.tagName !== 'P') return;
-        var links = p.querySelectorAll('a');
-        if (links.length < 2) return;
-        var ok = true;
-        Array.prototype.slice.call(p.childNodes).forEach(function (n) {
-          if (n.nodeType === 1 && n.tagName !== 'A') ok = false;
-          if (n.nodeType === 3 && /[^\s|]/.test(n.textContent)) ok = false;
-        });
-        if (!ok) return;
-        p.replaceWith(buildBox(Array.prototype.slice.call(links)));
-      });
-
-      /* 2) kramdown이 파이프 링크 줄을 1행 표로 만든 경우: 각 셀에 링크 하나인 단일 행 표 */
-      Array.prototype.slice.call(content.querySelectorAll('.table-wrapper')).forEach(function (wrap) {
-        var table = wrap.querySelector('table');
-        if (!table) return;
-        if (table.querySelectorAll('tr').length !== 1) return; /* 진짜 표는 헤더+구분행 2행 이상 */
-        var cells = table.querySelectorAll('td, th');
-        if (cells.length < 2) return;
-        var links = [], ok = true;
-        Array.prototype.slice.call(cells).forEach(function (td) {
-          var as = td.querySelectorAll('a');
-          if (as.length !== 1 || td.textContent.trim() !== as[0].textContent.trim()) { ok = false; return; }
-          links.push(as[0]);
-        });
-        if (!ok) return;
-        wrap.replaceWith(buildBox(links));
-      });
-    }
-    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', upgrade); } else { upgrade(); }
-  })();
-</script>
+<script defer src="{{ '/assets/js/book-reader.js' | relative_url }}"></script>

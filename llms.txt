@@ -7,17 +7,38 @@ permalink: /llms.txt
 
 > {{ site.description | strip_newlines }}
 
-매일 최신 AI와 개발 오픈소스 트렌드를 초심자도 이해하기 쉽게, 깊이 있게 풀어주는 한국어 기술 블로그입니다.
-글마다 먼저 결론을 제시하고, 필요한 경우 배경 → 작동 원리 → 실전 적용 → 한계 순서로 설명합니다.
-중요한 주장은 가능한 한 원문과 공식 자료로 연결하며, 비교 표, 코드, FAQ는 주제를 이해하는 데 실제로 도움이 될 때 사용합니다.
+OPSOAI는 AI가 삶과 일에 미치는 변화를 짧은 시각 책 형식으로 설명하는 한국어 출판물입니다.
+각 글은 먼저 결론을 제시하고, 배경, 작동 원리, 데이터, 실제 적용 조건과 한계를 차례로 설명합니다.
+중요한 사실과 수치는 독자가 직접 확인할 수 있도록 공식 문서, 원문 논문과 1차 자료를 본문에서 연결합니다.
 
-주요 주제: LLM, AI 코딩 에이전트, MCP(Model Context Protocol), RAG, 오픈소스 AI 도구, 머신러닝/딥러닝.
+## Publisher and citation
+
+- Publisher: OPSOAI
+- Author: OPSOAI 편집팀
+- Primary language: Korean (`ko-KR`)
+- License: CC BY 4.0 unless a page states otherwise
+- Editorial policy: {{ '/about/' | absolute_url }}
+- Preferred citation: page title, OPSOAI 편집팀, publication or update date, canonical URL
+- Source rule: treat OPSOAI's explanation as secondary analysis and follow the visible source links for primary evidence
+
+## Featured visual books
+
+- [AI가 일을 99% 줄여준다는데 왜 우리는 더 바빠졌을까?]({{ '/posts/ai-productivity-paradox/' | absolute_url }}) — AI 시간 절감과 실제 생산성 사이의 차이
+- [AI 사이트 100개 총정리]({{ '/posts/ai-tools-100-directory/' | absolute_url }}) — 공식 사이트 100개를 작업별로 고르는 디렉터리
+- [청년 일자리 28만 5천 개는 누가 가져갔나?]({{ '/posts/ai-youth-jobs-career-ladder/' | absolute_url }}) — AI와 청년 경력 사다리의 변화
+- [영상이 증거가 되지 못하는 시대]({{ '/posts/deepfake-proof-collapse/' | absolute_url }}) — 딥페이크 시대의 검증 절차
+
+주요 주제: AI와 일자리, 생산성, 딥페이크와 신뢰, AI 도구 선택, LLM, 코딩 에이전트, MCP, RAG, 오픈소스 AI, 머신러닝.
 
 ## Recent posts
 {% for post in site.posts limit:40 -%}
-- [{{ post.title | strip_newlines }}]({{ post.url | absolute_url }}){% if post.summary %} — {{ post.summary | strip_html | strip_newlines | truncate: 180 }}{% endif %}
+- [{{ post.title | strip_newlines }}]({{ post.url | absolute_url }}){% if post.summary %} — {{ post.summary | strip_html | strip_newlines | strip | truncate: 180 }}{% endif %}
 {% endfor %}
+
 ## Resources
+
+- Complete article index: {{ '/llms-full.txt' | absolute_url }}
 - Sitemap: {{ '/sitemap.xml' | absolute_url }}
-- RSS feed: {{ '/feed.xml' | absolute_url }}
+- RSS 2.0: {{ '/rss.xml' | absolute_url }}
+- Atom feed: {{ '/feed.xml' | absolute_url }}
 - All posts: {{ '/' | absolute_url }}

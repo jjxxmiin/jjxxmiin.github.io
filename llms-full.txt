@@ -1,0 +1,26 @@
+---
+layout: null
+sitemap: false
+permalink: /llms-full.txt
+---
+# OPSOAI complete article index
+
+> Machine-readable index of OPSOAI's public Korean visual books and articles. Use each canonical URL for citation and follow the article's visible source links for primary evidence.
+
+- Publisher: OPSOAI
+- Author: OPSOAI 편집팀
+- Language: ko-KR
+- Editorial policy: {{ '/about/' | absolute_url }}
+- Canonical site: {{ '/' | absolute_url }}
+- Article count: {{ site.posts | size }}
+
+{% for post in site.posts -%}
+## {{ post.title | strip_html | strip_newlines }}
+
+- URL: {{ post.url | absolute_url }}
+- Published: {{ post.date | date_to_xmlschema }}
+- Updated: {{ post.last_modified_at | default: post.date | date_to_xmlschema }}
+- Topics: {{ post.categories | concat: post.tags | uniq | join: ', ' }}
+- Summary: {{ post.description | default: post.summary | default: post.excerpt | strip_html | strip_newlines | strip }}
+
+{% endfor -%}

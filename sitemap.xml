@@ -13,21 +13,37 @@ sitemap: false
   제외 대상: 페이지네이션, sitemap:false 를 명시한 페이지(리다이렉트 등), 404.
 {%- endcomment -%}
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
 {%- for post in site.posts %}
   {%- unless post.sitemap == false %}
   <url>
     <loc>{{ post.url | absolute_url | xml_escape }}</loc>
     <lastmod>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</lastmod>
+    {%- assign cover_visual = post.cover_photo.path | default: post.cover_photo %}
+    {%- if cover_visual %}
+      {%- unless cover_visual contains '://' %}{% assign cover_visual = cover_visual | absolute_url %}{% endunless %}
+    <image:image>
+      <image:loc>{{ cover_visual | xml_escape }}</image:loc>
+    </image:image>
+    {%- endif %}
+    {%- assign lead_visual = post.book_visual.path | default: post.book_visual %}
+    {%- if lead_visual %}
+      {%- unless lead_visual contains '://' %}{% assign lead_visual = lead_visual | absolute_url %}{% endunless %}
+    <image:image>
+      <image:loc>{{ lead_visual | xml_escape }}</image:loc>
+    </image:image>
+    {%- endif %}
   </url>
   {%- endunless %}
 {%- endfor %}
-{%- for page in site.pages %}
+{%- for page in site.html_pages %}
   {%- assign is_paginated = page.url | slice: 0, 5 %}
   {%- assign is_thin_tag = false %}
   {%- if page.layout == 'tag' and page.posts.size < 3 %}{% assign is_thin_tag = true %}{% endif %}
   {%- unless page.sitemap == false or is_thin_tag or is_paginated == '/page' or page.url contains '404' %}
-  {%- if page.url contains '.html' or page.url contains '.xml' or page.url contains '.txt' %}{% continue %}{% endif %}
   <url>
     <loc>{{ page.url | absolute_url | xml_escape }}</loc>
     {%- if page.last_modified_at %}

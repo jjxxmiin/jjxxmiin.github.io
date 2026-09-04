@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">AI 사이트 100개 카테고리별 총정리</title>
+  <desc id="desc">왼쪽의 숫자 100과 오른쪽의 10행 10열 카드 격자로 100개 AI 사이트 디렉터리를 표현한 오프화이트, 검정, 코발트, 민트색 모던 미니멀 그래픽</desc>
+  <defs>
+    <pattern id="card-grid" width="38" height="38" patternUnits="userSpaceOnUse">
+      <rect width="28" height="28" fill="#f5f5f2" stroke="#111318" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="#f5f5f2"/>
+  <path d="M0 0h26v630H0z" fill="#2457ff"/>
+  <path d="M64 72h1072" stroke="#111318" stroke-width="2"/>
+  <circle cx="1122" cy="58" r="14" fill="#20ad91"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#111318">
+    <text x="72" y="142" font-size="21" font-weight="700" letter-spacing="5">AI / 100</text>
+    <text x="62" y="371" font-size="190" font-weight="800">100</text>
+    <text x="76" y="426" font-size="24" font-weight="700" letter-spacing="3">10 CATEGORIES</text>
+    <text x="76" y="464" font-size="18" font-weight="600" letter-spacing="3" fill="#565b64">ONE USEFUL INDEX</text>
+  </g>
+
+  <g transform="translate(708 132)">
+    <rect width="380" height="380" fill="url(#card-grid)"/>
+    <rect x="0" y="0" width="28" height="28" fill="#2457ff"/>
+    <rect x="76" y="38" width="28" height="28" fill="#20ad91"/>
+    <rect x="152" y="76" width="28" height="28" fill="#2457ff"/>
+    <rect x="228" y="114" width="28" height="28" fill="#20ad91"/>
+    <rect x="304" y="152" width="28" height="28" fill="#2457ff"/>
+    <rect x="38" y="228" width="28" height="28" fill="#20ad91"/>
+    <rect x="114" y="266" width="28" height="28" fill="#2457ff"/>
+    <rect x="190" y="304" width="28" height="28" fill="#20ad91"/>
+    <rect x="342" y="342" width="28" height="28" fill="#2457ff"/>
+    <path d="M-30 190h425" stroke="#111318" stroke-width="3"/>
+    <circle cx="395" cy="190" r="10" fill="#20ad91"/>
+  </g>
+
+  <path d="M64 574h1072" stroke="#111318" stroke-width="2"/>
+  <text x="72" y="608" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="3" fill="#111318">OPSOAI / VISUAL BOOK 004</text>
+  <text x="790" y="608" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="1.5" fill="#20ad91">100 LINKS / 10 CATEGORIES</text>
+</svg>
