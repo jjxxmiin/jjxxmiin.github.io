@@ -72,7 +72,7 @@ ROOT = Path(__file__).resolve().parent.parent
 POSTS_DIR = (ROOT / "_posts").resolve()
 OFFICIAL_SOURCE_ROOTS_PATH = ROOT / "automation" / "data" / "official_source_roots.json"
 PIPELINE_VERSION = 6
-PRODUCTION_MANIFEST_SHA256 = "4716bddaf37aa7a314363cf95a2bf93c2d09cb58f39b4dd3e6c497d2a4c538ef"
+PRODUCTION_MANIFEST_SHA256 = "520dd02e945239718f2446c3575c310eedf12005194d7912aad20b61078522dd"
 SCRIPT_SHA256 = hashlib.sha256(b"\0".join(
     path.read_bytes()
     for path in (

@@ -3,6 +3,7 @@
 
   var reader = document.querySelector('[data-book-reader]');
   if (!reader) return;
+  if (document.documentElement.classList.contains('book-js-failed')) return;
 
   var pages = Array.prototype.slice.call(reader.querySelectorAll('[data-book-page]'));
   var pageContainer = reader.querySelector('[data-book-pages]');
@@ -41,6 +42,18 @@
   var mermaidRenderSequence = 0;
   var mermaidConfigured = false;
   var scrollAd = null;
+
+  function clearFallbackTimer() {
+    if (!window.__opsoaiBookFallback) return;
+    window.clearTimeout(window.__opsoaiBookFallback);
+    window.__opsoaiBookFallback = null;
+  }
+
+  function failOpen() {
+    clearFallbackTimer();
+    document.documentElement.classList.remove('book-js');
+    document.documentElement.classList.add('book-js-failed');
+  }
 
   /*
    * Chirpy normally renders every Mermaid block on DOMContentLoaded. Book pages
@@ -1419,7 +1432,14 @@
   }
 
   function init() {
-    if (reader.classList.contains('is-ready') || pages.length < 2) return;
+    if (reader.classList.contains('is-ready')) {
+      clearFallbackTimer();
+      return;
+    }
+    if (pages.length < 2) {
+      failOpen();
+      return;
+    }
 
     buildSourceButtons();
     paginateContent();
@@ -1438,6 +1458,7 @@
     }
 
     reader.classList.add('is-ready');
+    clearFallbackTimer();
     fitCoverTitle();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCoverTitle);
     var requestedScrollView = new URL(window.location.href).searchParams.get('view') === 'scroll';

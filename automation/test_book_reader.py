@@ -63,6 +63,11 @@ def test_reader_has_accessible_fallbacks_and_navigation():
     assert "@media print" in styles
     assert "@media (max-width: 767.98px)" in styles
     assert "book-js" in head
+    assert "__opsoaiBookFallback" in head
+    assert "root.classList.remove('book-js')" in head
+    assert "clearFallbackTimer" in script and "failOpen" in script
+    assert "classList.contains('book-js-failed')" in script
+    assert "html.book-js body.book-page" in styles
     assert "--book-marker" in styles
     assert ":where(p, li, blockquote, figcaption) strong" in styles
 
@@ -157,8 +162,14 @@ def test_ads_stay_out_of_paged_reading_and_lazy_load_after_completion():
 
 def test_collection_directory_has_exactly_one_hundred_unique_official_links():
     post = _read("_posts/2026-09-03-ai-tools-100-directory.md")
+    layout = _read("_layouts/post.html")
+    styles = _read("_sass/_book-reader.scss")
 
-    assert "collection: true" in post
+    assert "book_directory: true" in post
+    assert "page.book_directory" in layout
+    assert "page.collection" not in layout
+    assert "data-book-directory='true'" in styles
+    assert "data-book-collection" not in styles
     assert len(re.findall(r"^## ", post, flags=re.MULTILINE)) == 11  # quick picker plus ten categories
     assert post.count("**추천:**") == 100
 
@@ -174,10 +185,25 @@ def test_faq_and_publication_details_are_visible_in_the_book():
     assert 'class="book-publication-meta"' in layout
     assert 'rel="author"' in layout
     assert "book_chapter_count" in layout
+    assert "render_frontmatter_faq" in layout
+    assert "content_has_faq_heading" in layout
+    assert "section_heading contains '자주 묻는 질문'" in layout
+    assert "unless content_has_faq_heading" in layout
     assert "wireFaqs" in script
     assert "details.book-faq-item[open]" in script
     assert ".book-faq-item" in styles
     assert ".book-publication-meta" in styles
+
+
+def test_posts_do_not_repeat_faq_chapters():
+    for post_path in (ROOT / "_posts").glob("*.md"):
+        raw = post_path.read_text(encoding="utf-8")
+        faq_headings = re.findall(
+            r"^##\s+.*(?:자주\s+묻는\s+질문|\bFAQ\b).*$",
+            raw,
+            flags=re.MULTILINE | re.IGNORECASE,
+        )
+        assert len(faq_headings) <= 1, f"duplicate FAQ chapters in {post_path.name}: {faq_headings}"
 
 
 def test_manim_math_visual_has_video_and_static_fallback():

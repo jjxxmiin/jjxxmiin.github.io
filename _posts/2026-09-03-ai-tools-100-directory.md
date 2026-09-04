@@ -1,7 +1,7 @@
 ---
 layout: post
 publication_mode: manual_editorial
-collection: true
+book_directory: true
 title: 'AI 사이트 100개 총정리 — 글쓰기, 검색, 디자인, 영상, 음악, 코딩, 업무 자동화'
 date: 2026-09-03 16:00:00 +0900
 last_modified_at: 2026-09-03 16:00:00 +0900

@@ -15,8 +15,21 @@ script_includes:
 {% assign book_sections = content | split: '<h2' %}
 {% assign intro_content = book_sections | first | strip %}
 {% assign chapter_count = book_sections | size | minus: 1 %}
-{% assign book_chapter_count = chapter_count %}
+{% assign content_has_faq_heading = false %}
+{% for section in book_sections offset: 1 %}
+  {% assign section_heading = section | split: '</h2>' | first %}
+  {% if section_heading contains '자주 묻는 질문' or section_heading contains 'FAQ' %}
+    {% assign content_has_faq_heading = true %}
+  {% endif %}
+{% endfor %}
+{% assign render_frontmatter_faq = false %}
 {% if page.faq and page.faq.size > 0 %}
+  {% unless content_has_faq_heading %}
+    {% assign render_frontmatter_faq = true %}
+  {% endunless %}
+{% endif %}
+{% assign book_chapter_count = chapter_count %}
+{% if render_frontmatter_faq %}
   {% assign book_chapter_count = book_chapter_count | plus: 1 %}
 {% endif %}
 {% assign post_author_name = page.author.name | default: page.author | default: site.author.name | default: 'OPSOAI 편집팀' %}
@@ -58,7 +71,7 @@ script_includes:
   data-book-title="{{ page.title | strip_html | escape }}"
   data-book-category="{{ primary_category | strip_html | escape }}"
   data-book-chapters="{{ book_chapter_count }}"
-  data-book-collection="{% if page.collection %}true{% else %}false{% endif %}"
+  data-book-directory="{% if page.book_directory %}true{% else %}false{% endif %}"
 >
   <div class="book-reader-shell">
     <nav class="book-toolbar" aria-label="책 읽기 도구">
@@ -207,7 +220,7 @@ script_includes:
           </section>
         {% endfor %}
 
-        {% if page.faq and page.faq.size > 0 %}
+        {% if render_frontmatter_faq %}
           {% assign faq_chapter = chapter_count | plus: 1 %}
           <section
             class="book-page book-content-page book-faq-page"

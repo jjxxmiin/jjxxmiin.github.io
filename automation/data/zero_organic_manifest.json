@@ -247,7 +247,7 @@
       "title": "EfficientDet은 왜 빠른가: BiFPN 가중치 융합과 복합 스케일링 핵심",
       "date": "2019-11-23",
       "path": "/posts/EfficientDet2/",
-      "original_sha256": "5412c6ed1a56a05c092e1ae22205a3d21060aa83a6e9513f9e37f462e6c8fbb8"
+      "original_sha256": "ebeeea2c001796ed37429f6ad268261bf59761c8212427799b0beb7d7f3c212a"
     },
     {
       "source": "_posts/2019-12-03-CAM.md",
@@ -905,7 +905,7 @@
       "title": "유튜브 조회수가 안 나올 때 무엇부터 바꿀까: CTR, 시청 지속 시간 진단표",
       "date": "2025-03-01",
       "path": "/posts/Youtube/",
-      "original_sha256": "c458a241cf269cbc7f6fd32c7902bb652b7306542138cdf74554fa08cd8f6d67"
+      "original_sha256": "fb89b640b719e301f38b0ced96ba365a2393f56cf2c2e68382cb6bb91f3078ac"
     },
     {
       "source": "_posts/2025-03-03-PhotoDoodle.md",

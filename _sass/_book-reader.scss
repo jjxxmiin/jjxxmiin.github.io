@@ -24,7 +24,7 @@ body.book-page {
    their intrinsic height up by a few pixels after rendering; clipping that
    harmless remainder prevents a stray document scrollbar. Scroll view and
    the afterword deliberately opt out so the complete article can flow. */
-body.book-page:not(.book-scroll-view-open):not(.book-afterword-open):not(.book-afterword-ready) {
+html.book-js body.book-page:not(.book-scroll-view-open):not(.book-afterword-open):not(.book-afterword-ready) {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -85,7 +85,7 @@ body.book-page #tail-wrapper.book-tail {
   padding-bottom: 4rem;
 }
 
-body.book-page:not(.book-afterword-open):not(.book-afterword-ready) #tail-wrapper.book-tail {
+html.book-js body.book-page:not(.book-afterword-open):not(.book-afterword-ready) #tail-wrapper.book-tail {
   display: none !important;
 }
 
@@ -891,16 +891,16 @@ html:not(.book-js) .book-page-scroll {
   margin-block: 0.38rem;
 }
 
-/* Collection posts turn each three-item chunk into a compact card page.
+/* Directory posts turn each three-item chunk into a compact card page.
  * A desktop spread therefore carries six useful references at a glance. */
-.visual-book[data-book-collection='true'] .book-page-content > ol {
+.visual-book[data-book-directory='true'] .book-page-content > ol {
   display: grid;
   gap: 0.68rem;
   padding: 0;
   list-style-position: inside;
 }
 
-.visual-book[data-book-collection='true'] .book-page-content > ol > li {
+.visual-book[data-book-directory='true'] .book-page-content > ol > li {
   margin: 0;
   padding: 0.82rem 0.9rem;
   border: 1px solid color-mix(in srgb, var(--book-accent) 18%, var(--book-line));
@@ -910,13 +910,13 @@ html:not(.book-js) .book-page-scroll {
   line-height: 1.58;
 }
 
-.visual-book[data-book-collection='true'] .book-page-content > ol > li::marker {
+.visual-book[data-book-directory='true'] .book-page-content > ol > li::marker {
   color: var(--book-accent-strong);
   font-family: var(--opsoai-font-display);
   font-weight: 800;
 }
 
-.visual-book[data-book-collection='true'] .book-page-content > ol > li strong:first-child a {
+.visual-book[data-book-directory='true'] .book-page-content > ol > li strong:first-child a {
   color: var(--book-ink);
   font-family: var(--opsoai-font-display);
   font-weight: 800;
@@ -2342,7 +2342,7 @@ html:not(.book-js) .book-page-scroll {
     display: none;
   }
 
-  .visual-book[data-book-collection='true'] .book-page-content > ol > li {
+  .visual-book[data-book-directory='true'] .book-page-content > ol > li {
     padding: 0.58rem 0.65rem;
     font-size: 0.8rem;
     line-height: 1.46;

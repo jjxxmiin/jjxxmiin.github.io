@@ -12,8 +12,20 @@
   {% include font-opsoai.html %}
 
   {% if page.layout == 'post' %}
-    <!-- Enables the paged reader before first paint while preserving a full no-JS article. -->
-    <script>document.documentElement.classList.add('book-js');</script>
+    <!-- Enables the paged reader before first paint, then fails open to the full article. -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        root.classList.add('book-js');
+        window.__opsoaiBookFallback = window.setTimeout(function () {
+          var reader = document.querySelector('[data-book-reader]');
+          if (!reader || !reader.classList.contains('is-ready')) {
+            root.classList.remove('book-js');
+            root.classList.add('book-js-failed');
+          }
+        }, 4000);
+      })();
+    </script>
   {% endif %}
 
   {%- capture seo_tags -%}
