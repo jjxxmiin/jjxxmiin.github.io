@@ -8,6 +8,18 @@ from unittest import mock
 from automation import ping_indexnow as indexnow
 
 
+class EndpointTests(unittest.TestCase):
+    def test_uses_official_indexnow_endpoints(self):
+        self.assertEqual(
+            indexnow.ENDPOINTS["naver"],
+            "https://searchadvisor.naver.com/indexnow",
+        )
+        self.assertEqual(
+            indexnow.ENDPOINTS["bing"],
+            "https://www.bing.com/indexnow",
+        )
+
+
 class _Response:
     def __init__(self, body):
         self.body = body

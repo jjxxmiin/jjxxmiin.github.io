@@ -52,7 +52,7 @@ GLOBAL_SEO_PREFIXES = ("_layouts/",)
 
 # 네이버와 Bing 각각의 수집 서버. 같은 프로토콜이라 본문(payload)은 동일하다.
 ENDPOINTS = {
-    "naver": "https://api.searchadvisor.naver.com/indexnow",
+    "naver": "https://searchadvisor.naver.com/indexnow",
     "bing": "https://www.bing.com/indexnow",
 }
 
