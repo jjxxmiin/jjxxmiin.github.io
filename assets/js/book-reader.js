@@ -463,18 +463,6 @@
         page.appendChild(emblem);
       }
 
-      var marker = document.createElement('span');
-      var markerIconWrap = document.createElement('b');
-      var markerIcon = document.createElement('i');
-      var markerLabel = document.createElement('span');
-      marker.className = 'book-page-kind';
-      marker.setAttribute('aria-hidden', 'true');
-      markerIcon.className = visual.icon;
-      markerLabel.textContent = visual.label;
-      markerIconWrap.appendChild(markerIcon);
-      marker.appendChild(markerIconWrap);
-      marker.appendChild(markerLabel);
-      folio.insertBefore(marker, folio.lastElementChild);
     });
   }
 

@@ -697,29 +697,6 @@ html:not(.book-js) .book-page-scroll {
   letter-spacing: 0.14em;
 }
 
-.book-page-kind {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--book-accent-strong);
-  letter-spacing: 0.12em;
-}
-
-.book-page-kind b {
-  width: 1.35rem;
-  height: 1.35rem;
-  flex: 0 0 1.35rem;
-  display: grid;
-  place-items: center;
-  border-radius: 0.38rem;
-  color: var(--book-accent-strong);
-  background: color-mix(in srgb, var(--book-accent) 9%, var(--book-paper-soft));
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-align: center;
-}
-
 .book-chapter-icon {
   width: 2.55rem;
   height: 2.55rem;
@@ -1590,11 +1567,11 @@ html:not(.book-js) .book-page-scroll {
 }
 
 .book-page-button-prev {
-  left: max(0.35rem, calc((100% - 1280px) / 2));
+  left: max(0.25rem, calc((100% - 1320px) / 2 - 3.6rem));
 }
 
 .book-page-button-next {
-  right: max(0.35rem, calc((100% - 1280px) / 2));
+  right: max(0.25rem, calc((100% - 1320px) / 2 - 3.6rem));
 }
 
 .book-page-button:hover:not(:disabled),
@@ -1776,6 +1753,14 @@ html:not(.book-js) .book-page-scroll {
 }
 
 /* Desktop opens like a real book: two independently scrollable 100dvh pages. */
+
+@media (min-width: 768px) {
+  /* Reserve real side gutters so both page arrows sit beside the paper,
+     rather than covering its text or artwork. */
+  .book-stage {
+    width: min(1320px, calc(100% - 4rem));
+  }
+}
 
 @media (min-width: 1024px) {
   .visual-book.is-spread:not(.is-scroll-view) .book-page.is-spread-left,
@@ -1980,26 +1965,6 @@ html:not(.book-js) .book-page-scroll {
   border-bottom-color: var(--main-border-color);
 }
 
-.post-format-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border: 0;
-  border-left: 2px solid var(--link-color);
-  border-radius: 0;
-  color: var(--link-color);
-  background: transparent;
-  font-size: 0.65rem;
-  font-weight: 800;
-}
-
-.post-format-label {
-  width: fit-content;
-  margin-bottom: 0.5rem;
-  padding: 0.12rem 0.5rem;
-  letter-spacing: 0.06em;
-}
-
 /* The shelf follows the same restrained, logo-led visual language. */
 
 #post-list .card-wrapper {
@@ -2057,7 +2022,7 @@ html:not(.book-js) .book-page-scroll {
     min-height: 100vh;
     min-height: 100dvh;
     padding: 0.35rem 0.45rem 0;
-    grid-template-rows: 2.75rem 2px minmax(0, 1fr);
+    grid-template-rows: 2.75rem 2px minmax(0, 1fr) 3rem;
     row-gap: 0.35rem;
     overflow: hidden;
   }
@@ -2194,17 +2159,22 @@ html:not(.book-js) .book-page-scroll {
   }
 
   .book-controls {
-    position: absolute;
-    inset: 0;
+    height: 3rem;
+    position: relative;
+    inset: auto;
     z-index: 20;
-    padding: 0;
+    padding: 0 0.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background: transparent;
   }
 
   .book-page-button {
     width: 2.75rem;
     height: 2.75rem;
-    top: calc(50% + 1.25rem);
+    position: relative;
+    top: auto;
     border-color: transparent;
     border-radius: 0;
     color: var(--book-accent-strong);
@@ -2212,14 +2182,15 @@ html:not(.book-js) .book-page-scroll {
     box-shadow: none;
     backdrop-filter: none;
     opacity: 0.72;
+    transform: none;
   }
 
   .book-page-button-prev {
-    left: 0;
+    left: auto;
   }
 
   .book-page-button-next {
-    right: 0;
+    right: auto;
   }
 
   .visual-book:not(.is-cover-open) .book-page-button:hover:not(:disabled),
@@ -2229,7 +2200,7 @@ html:not(.book-js) .book-page-scroll {
     color: var(--book-accent-strong);
     background: transparent;
     box-shadow: none;
-    transform: translateY(-50%);
+    transform: none;
   }
 
   .visual-book.is-cover-open .book-page-button:not(:disabled) {
@@ -2268,13 +2239,13 @@ html:not(.book-js) .book-page-scroll {
   }
 
   .book-page:not(.book-cover) .book-page-scroll:not(:has(.mermaid)) {
-    padding-right: 2.75rem;
-    padding-left: 2.75rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .book-page[data-book-chunk-kind='table'] .book-page-scroll {
-    padding-right: 2.75rem;
-    padding-left: 2.75rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
   }
 
   .book-page[data-book-chunk-kind='project'] .book-page-scroll {

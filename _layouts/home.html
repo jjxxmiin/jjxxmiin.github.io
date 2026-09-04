@@ -46,9 +46,6 @@ layout: default
 {% endif %}
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
-  {% if paginator.page == 1 %}
-    <h1 class="visually-hidden">OPSOAI, AI를 짧은 책과 데이터 시각화로 이해하다</h1>
-  {% endif %}
   {% assign visible_post_index = 0 %}
   {% for post in posts %}
     {% if paginator.page == 1 and post.home_presentation == 'compact' %}
@@ -59,10 +56,6 @@ layout: default
       <a href="{{ post.url | relative_url }}" class="post-preview row g-0">
         <div class="col-12">
           <div class="card-body d-flex flex-column">
-            <span class="post-format-label">
-              <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
-              페이지로 읽기
-            </span>
             <h2 class="card-title my-2 mt-md-0">{{ post.title }}</h2>
             <div class="card-text content mt-0 mb-3">
               <p>{% include post-summary.html %}</p>

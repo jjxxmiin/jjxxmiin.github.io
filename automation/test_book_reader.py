@@ -90,6 +90,24 @@ def test_reader_is_exactly_one_dynamic_viewport_and_opens_desktop_spreads():
     assert "02–03" not in script  # the range is calculated, never hard-coded
 
 
+def test_home_omits_redundant_marketing_heading_and_book_arrows_stay_outside():
+    home = _read("_layouts/home.html")
+    script = _read("assets/js/book-reader.js")
+    styles = _read("_sass/_book-reader.scss")
+    fonts = _read("_includes/font-opsoai.html")
+
+    assert "OPSOAI, AI를 짧은 책과 데이터 시각화로 이해하다" not in home
+    assert "페이지로 읽기" not in home
+    assert "post-format-label" not in home
+    assert "post-format-label" not in styles
+    assert "post-format-label" not in fonts
+    assert "book-page-kind" not in script
+    assert "book-page-kind" not in styles
+    assert "width: min(1320px, calc(100% - 4rem))" in styles
+    assert "calc((100% - 1320px) / 2 - 3.6rem)" in styles
+    assert "grid-template-rows: 2.75rem 2px minmax(0, 1fr) 3rem" in styles
+
+
 def test_post_pages_use_immersive_main_without_the_legacy_toc_panel():
     default = _read("_layouts/default.html")
     styles_entry = _read("assets/css/jekyll-theme-chirpy.scss")
