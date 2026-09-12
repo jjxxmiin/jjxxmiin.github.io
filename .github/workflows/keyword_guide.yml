@@ -1,10 +1,11 @@
 name: Daily Keyword Guide Post
 
-# 과거 검색 수요 기반 가이드 생성기. Gemini 비용 방지를 위해 예약 실행은
-# 중단했으며, 보존된 수동 실행도 명시적인 검증 작업에만 사용한다.
+# 검색 수요 기반 실용 가이드를 Gemini 3.8 Flash로 하루 한 편 발행한다.
 
 on:
-  # Gemini 비용이 발생하는 예약 발행은 중단했다. 명시적으로 필요할 때만 실행한다.
+  schedule:
+    # 지연 또는 실패 시 다음 슬롯에서 재시도하며, 당일 발행된 글은 중복 생성하지 않는다.
+    - cron: '0 5,6,7,8,9,10 * * *'
   workflow_dispatch:
     inputs:
       force:
@@ -23,8 +24,6 @@ concurrency:
 
 jobs:
   build:
-    # Gemini 자동 생성은 사용하지 않는다. 워크플로 기록만 보존한다.
-    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:

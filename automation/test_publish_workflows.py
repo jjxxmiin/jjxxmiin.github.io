@@ -8,12 +8,12 @@ def _workflow(name: str) -> str:
     return (ROOT / ".github" / "workflows" / name).read_text(encoding="utf-8")
 
 
-def test_daily_gemini_workflow_is_manual_and_disabled():
+def test_daily_schedule_tolerates_delays():
     workflow = _workflow("daily_trend.yml")
 
-    assert "schedule:" not in workflow
+    assert "schedule:" in workflow
     assert "workflow_dispatch:" in workflow
-    assert "if: ${{ false }}" in workflow
+    assert "if: ${{ false }}" not in workflow
     assert "date +%-H" not in workflow
     assert "target=$((" not in workflow
     assert "timeout-minutes: 90" in workflow
@@ -26,12 +26,12 @@ def test_daily_gemini_workflow_is_manual_and_disabled():
     assert "Enrich and validate the new post" in workflow
 
 
-def test_keyword_gemini_workflow_is_manual_and_disabled():
+def test_keyword_schedule_tolerates_delays():
     workflow = _workflow("keyword_guide.yml")
 
-    assert "schedule:" not in workflow
+    assert "schedule:" in workflow
     assert "workflow_dispatch:" in workflow
-    assert "if: ${{ false }}" in workflow
+    assert "if: ${{ false }}" not in workflow
     assert "date +%-H" not in workflow
     assert "target=$((" not in workflow
     assert "ref: main" in workflow

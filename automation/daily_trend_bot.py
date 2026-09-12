@@ -301,7 +301,7 @@ GENERIC_SOURCE_PATHS = {
 }
 # Use one stable production model for discovery, fact-checking, writing, and preflight.
 FALLBACK_MODELS = [
-    "gemini-3.6-flash",
+    "gemini-3.8-flash",
 ]
 
 

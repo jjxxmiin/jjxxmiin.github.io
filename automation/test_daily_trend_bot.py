@@ -106,8 +106,8 @@ class DailyTrendNewsBotTests(unittest.TestCase):
             ],
         }
 
-    def test_pipeline_uses_only_gemini_3_6_flash_with_request_timeout(self):
-        self.assertEqual(bot.FALLBACK_MODELS, ["gemini-3.6-flash"])
+    def test_pipeline_uses_only_gemini_3_8_flash_with_request_timeout(self):
+        self.assertEqual(bot.FALLBACK_MODELS, ["gemini-3.8-flash"])
         with mock.patch.object(bot.genai, "Client") as client, \
                 mock.patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}):
             bot.get_gemini_client()
