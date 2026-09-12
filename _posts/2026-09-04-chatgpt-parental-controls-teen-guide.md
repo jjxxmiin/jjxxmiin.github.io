@@ -177,10 +177,11 @@ ChatGPT 보호자 통제는 유용하다. 민감한 콘텐츠, 데이터 사용,
 오늘 할 일은 세 가지다. **목적을 말하고 계정을 연결한다. 개인정보와 시간 설정을 함께 정한다. 위험할 때 연락할 실제 사람을 적는다.** 일주일 뒤 새 대화에서 설정을 확인하고, 한 달 뒤 다섯 질문으로 조정한다. 안전의 마지막 단계는 언제나 더 많은 감시가 아니라 도움을 줄 수 있는 사람과의 연결이다.
 
 <!-- internal-links:start -->
-### 이어 읽기
+## 함께 읽으면 이해가 이어지는 글
 
-- [챗GPT 프롬프트 만들기 완벽 가이드: 모범 사례부터 요금제 선택까지]({% post_url 2026-08-31-the-complete-guide-to-creating-chatgpt-prompts-best-practices-and-plan-comparison %}) — 질문을 구체화하면서도 개인정보와 검증 책임을 놓치지 않는 기본 사용법을 함께 볼 수 있다.
-- [영상통화 속 가족도 가짜일 수 있다: 사진과 목소리가 증거가 아닌 시대]({% post_url 2026-09-03-deepfake-proof-collapse %}) — 청소년과 가족이 AI 사칭 연락을 받았을 때 별도 채널로 확인하는 절차를 이어서 정할 수 있다.
+- [AI 동반자는 외로움을 줄일까: 위로를 관계로 착각하지 않는 경계 설정법]({% post_url 2026-09-04-ai-companion-loneliness-boundaries %}) — AI의 즉각적인 공감이 실제 상호 관계와 다른 이유를 연구 한계와 함께 살펴보고, 사용 시간을 넘어 수면과 사람 관계가 밀려나는지 점검하는 실전 안내서입니다.
+- [Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개 Model 2와 정렬 위험 등급 상향]({% post_url 2026-08-16-anthropic-details-unreleased-model-2-and-upgrades-ai-risk-assessment-level %}) — Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해…
+- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU, WASM, 기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AIRI가 WebGPU, WASM, Live2D/VRM과 모듈식 음성, 기억 계층을 조합하는 방식, 브라우저 호환성, 자원, 개인정보, 업데이트 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

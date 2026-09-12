@@ -199,10 +199,11 @@ AI 동반자는 외로운 밤에 빈 화면보다 쉽게 말을 받아 줄 수 �
 경계는 단순하다. **수면과 약속을 먼저 지키고, 중요한 결정은 사람과 확인하고, 위기에서는 즉시 실제 지원으로 이동한다.** AI가 사람에게 가는 다리라면 보조 도구로 남을 수 있다. AI가 모든 사람을 대신하기 시작하면 대화의 품질을 조정하기 전에 사용 환경과 지원망을 바꿔야 한다.
 
 <!-- internal-links:start -->
-### 이어 읽기
+## 함께 읽으면 이해가 이어지는 글
 
-- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU, WASM, 기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AI 컴패니언이 브라우저에서 기억을 다루는 구조와 개인정보 경계를 기술 관점에서 이어서 확인할 수 있다.
-- [AI가 일을 99% 줄여준다는데 왜 우리는 더 바빠졌을까?]({% post_url 2026-09-03-ai-productivity-paradox %}) — 도구가 절약한 시간이 어떻게 다시 더 많은 사용과 업무로 채워지는지 살펴보고 시간 경계를 설계할 수 있다.
+- [ChatGPT 보호자 통제 설정법: 청소년 대화를 보지 않고 안전선을 만드는 법]({% post_url 2026-09-04-chatgpt-parental-controls-teen-guide %}) — 보호자와 청소년이 계정을 연결하는 순서부터 시간대, 개인정보, 안전 알림을 함께 정하는 대화법까지 공식 안내를 바탕으로 정리한 가족용 실전 가이드입니다.
+- [Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개 Model 2와 정렬 위험 등급 상향]({% post_url 2026-08-16-anthropic-details-unreleased-model-2-and-upgrades-ai-risk-assessment-level %}) — Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해…
+- [OpenAI와 Anthropic 등 AI 연구자 1,100명 속도 조절 공개 서한 'Pacing the Frontier' 발표]({% post_url 2026-07-31-over-1-100-ai-researchers-sign-pacing-the-frontier-petition-for-governance %}) — 2026년 7월 28일, OpenAI, Anthropic, Google DeepMind, Meta 등 주요 AI 기업 연구자 1,100여 명이 AI 개발 속도를 제어하기 위한 정부 지원을 요청하는 공개 서한 'Pacing the…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

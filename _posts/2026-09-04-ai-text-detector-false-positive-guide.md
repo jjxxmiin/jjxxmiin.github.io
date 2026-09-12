@@ -234,11 +234,11 @@ AI를 일부 허용 범위에서 사용했다면 숨기지 말고 정확히 구�
 오탐 대응의 목표는 “내가 더 사람 같은 문장을 쓴다”가 아닙니다. **누가 어떤 규칙 아래 어떤 과정을 거쳐 문서를 만들었는지 검토 가능한 기록으로 보여 주는 것**입니다.
 
 <!-- internal-links:start -->
-## 함께 읽기
+## 함께 읽으면 이해가 이어지는 글
 
-- [AI 자소서 쓰는 법, 채용공고에서 경험까지]({% post_url 2026-09-04-ai-resume-cover-letter-job-description-guide %}) — AI 초안을 쓰더라도 실제 경험, 숫자와 수정 이력을 남겨 제출 책임을 지는 방법을 안내합니다.
-- [ChatGPT 프롬프트 작성 완전 가이드]({% post_url 2026-08-31-the-complete-guide-to-creating-chatgpt-prompts-best-practices-and-plan-comparison %}) — 생성 요청을 분석과 검수 단계로 나누고 결과의 범위를 통제하는 기본법을 정리합니다.
-- [딥페이크 시대, 증거가 무너지는 방식]({% post_url 2026-09-03-deepfake-proof-collapse %}) — 겉모습의 진짜다움이나 탐지 점수 대신 출처와 생성 과정을 증거로 남겨야 하는 이유를 설명합니다.
+- [영상통화 속 가족도 가짜일 수 있다: 사진과 목소리가 증거가 아닌 시대]({% post_url 2026-09-03-deepfake-proof-collapse %}) — 합성 여부를 눈과 귀로 맞히려 하지 말고 연락 채널과 송금 절차를 검증해야 합니다. 딥보이스 사기의 구조부터 30초 확인법, 가족 암구호와 신고 번호까지 한 권으로 정리했습니다.
+- [Anthropic과 OpenAI 및 Musk 연대, 프론티어 AI 개발 속도 의도적 감속 제안]({% post_url 2026-09-13-anthropic-openai-and-musk-call-to-deliberately-slow-frontier-ai-advancement %}) — Anthropic 대표 Dario Amodei가 2026년 9월 12일 최고 성능 AI 개발 속도를 의도적으로 늦추자고 제안했습니다. OpenAI의 Sam Altman과 Elon Musk도 즉각 지지 의사를 밝혔습니다. 이들은 안전…
+- [AI 자소서 쓰는 법, 채용공고에서 경험까지]({% post_url 2026-09-04-ai-resume-cover-letter-job-description-guide %}) — AI에게 자소서 전체를 맡기지 않고 채용공고 분석, 경험 증거화, 초안, 사실 검수, 최종 압축을 나누어 수행하는 취업 문서 작성법입니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문

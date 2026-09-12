@@ -263,8 +263,9 @@ flowchart TB
 <!-- primary-sources:end -->
 
 <!-- internal-links:start -->
-### 이어 읽기
+## 함께 읽으면 이해가 이어지는 글
 
-- [career-ops: AI 코딩 에이전트가 내 취업을 대신해 주는 법]({% post_url 2026-07-26-career-ops-How-AI-Coding-Agents-Automate-Your-Job-Search %}) — 지원 자동화가 시간을 줄이는 범위와 사람이 직접 판단해야 할 경계를 함께 볼 수 있다.
-- [World Bank WDR 2026 발표: 거대 데이터센터 없이 개도국 일자리 16.2% 생산성 높인다]({% post_url 2026-08-05-world-bank-wdr-2026-highlights-small-ai-models-for-developing-economies %}) — AI가 일자리를 없애는 경로와 생산성을 높이는 경로가 왜 동시에 존재하는지 비교할 수 있다.
+- [OpenAI와 Anthropic 등 AI 연구자 1,100명 속도 조절 공개 서한 'Pacing the Frontier' 발표]({% post_url 2026-07-31-over-1-100-ai-researchers-sign-pacing-the-frontier-petition-for-governance %}) — 2026년 7월 28일, OpenAI, Anthropic, Google DeepMind, Meta 등 주요 AI 기업 연구자 1,100여 명이 AI 개발 속도를 제어하기 위한 정부 지원을 요청하는 공개 서한 'Pacing the…
+- [AI 동반자는 외로움을 줄일까: 위로를 관계로 착각하지 않는 경계 설정법]({% post_url 2026-09-04-ai-companion-loneliness-boundaries %}) — AI의 즉각적인 공감이 실제 상호 관계와 다른 이유를 연구 한계와 함께 살펴보고, 사용 시간을 넘어 수면과 사람 관계가 밀려나는지 점검하는 실전 안내서입니다.
+- [AI 생성물 상업적 이용과 저작권 확인법]({% post_url 2026-09-04-ai-generated-content-copyright-commercial-use %}) — AI 생성물을 돈 버는 콘텐츠에 쓸 때 서로 다른 네 가지 권리 관문과 기록 방법을 한국저작권위원회 안내서와 최신 서비스 약관으로 정리합니다.
 <!-- internal-links:end -->

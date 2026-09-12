@@ -189,12 +189,6 @@ flowchart TB
 
 **끊기 → 기존 번호로 다시 걸기 → 다른 사람과 교차확인 → 확인 전 송금 금지.** 이 네 칸을 가족 모두가 기억하면 합성 기술이 더 좋아져도 방어 규칙은 낡지 않습니다. 탐지 앱은 켜 두되 마지막 결정은 화면의 자연스러움이 아니라 독립된 채널에서 내리세요.
 
-<!-- internal-links:start -->
-### 이어 읽기
-
-- [AI 음원의 워터마크는 무엇을 증명할 수 있을까?]({% post_url 2026-08-09-suno-introduces-audio-watermarking-and-download-limits %}) — 합성물을 표시하는 출처 기술이 어디까지 작동하고 무엇까지는 보장하지 못하는지 이어서 볼 수 있습니다.
-- [영상 생성에서 한 인물의 정체성을 유지하는 방법]({% post_url 2026-03-09-WildActor--Unconstrained-Identity-Preserving-Video-Generation %}) — 얼굴과 전신을 여러 장면에서 같은 사람처럼 보이게 만드는 기술의 구조와 실패 조건을 설명합니다.
-<!-- internal-links:end -->
 
 ## 직접 확인한 원문
 
@@ -210,3 +204,11 @@ flowchart TB
 
 > 통계는 각 기관에 접수된 신고를 집계한 값이며 전체 피해나 딥페이크 단독 피해를 뜻하지 않습니다. 서비스 지원 범위와 신고 절차는 바뀔 수 있으므로 실제 상황에서는 은행과 정부 기관의 최신 공식 안내를 확인하세요.
 {: .prompt-info }
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [OpenMontage로 AI 영상을 만들 때: 에이전트 파이프라인, 비용, 검수 기준]({% post_url 2026-07-04-The-End-of-Prompt-Engineering-The-True-Value-of-OpenMontages-Agent-First-Video-Pipeline %}) — OpenMontage가 YAML 파이프라인, Markdown 스킬, Python 도구, Remotion과 FFmpeg를 연결해 영상 제작 단계를 조율하는 방식을 설명합니다. 설치 비용, 사람 승인, 재현성과 보안까지 포함한 파일럿…
+- [여러 사람의 얼굴과 목소리가 섞인다면? DreamID-Omni의 이중 결속]({% post_url 2026-02-26-DreamID-Omni--Unified-Framework-for-Controllable-Human-Centric-Audio-Video-Generation %}) — DreamID-Omni가 생성, 편집, 오디오 애니메이션을 한 DiT에 통합하고 Syn-RoPE와 구조화 캡션으로 인물과 음성을 결속하는 방법을 살펴봅니다.
+- [긴 영상 배경음악이 장면 감정을 놓칠 때: NarraScore의 이중 제어]({% post_url 2026-02-14-NarraScore--Bridging-Visual-Narrative-and-Musical-Dynamics-via-Hierarchical-Affective-Control %}) — NarraScore가 영상의 전역 분위기와 시점별 Valence-Arousal 곡선을 나눠 음악 생성에 주입하는 방식, 평가 기준과 감정 단순화 한계를 다룹니다.
+<!-- internal-links:end -->

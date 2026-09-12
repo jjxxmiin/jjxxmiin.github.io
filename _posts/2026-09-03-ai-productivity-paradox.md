@@ -233,12 +233,6 @@ AI를 기존 절차 위에 한 단계 더 얹으면 프롬프트 작성과 검�
 
 최종 질문은 “AI가 얼마나 많은 글을 써줬나?”가 아닙니다. **같은 가치의 결과를 더 적은 총비용으로 만들었고, 그 절약을 내가 실제로 되찾았나?** 여기에 예라고 답할 때만 AI의 속도가 삶의 속도를 늦춰줍니다.
 
-<!-- internal-links:start -->
-### 이어 읽기
-
-- [청년 일자리 28만 5천 개는 누가 가져갔나?]({% post_url 2026-09-03-ai-youth-jobs-career-ladder %}) — AI가 초급 과업을 줄일 때 신입이 숙련자로 성장하는 경로까지 왜 함께 설계해야 하는지 이어서 살펴봅니다.
-- [World Bank WDR 2026: 소형 AI와 일자리 생산성]({% post_url 2026-08-05-world-bank-wdr-2026-highlights-small-ai-models-for-developing-economies %}) — 자동화 가능성과 실제 생산성 향상이 다른 지표라는 점을 국가 소득과 인프라 관점에서 비교합니다.
-<!-- internal-links:end -->
 
 ## 직접 확인한 원문
 
@@ -256,3 +250,11 @@ AI를 기존 절차 위에 한 단계 더 얹으면 프롬프트 작성과 검�
 12. <span id="source-12"></span>[Microsoft WorkLab — Breaking down the infinite workday](https://www.microsoft.com/en-us/worklab/work-trend-index/breaking-down-infinite-workday) (2025, 방법론 포함)
 
 > 이 글의 수치는 서로 다른 시점, 직업, 모델, 성과 기준에서 측정되었습니다. 연구 간 퍼센트를 직접 성능 순위처럼 비교하지 않았으며, 관찰 연구, 설문, 기업 후원 연구, 미심사 워킹페이퍼의 한계를 본문에 함께 표시했습니다. 게시일 이후 모델 성능과 연구 개정본은 달라질 수 있습니다.
+
+<!-- internal-links:start -->
+## 함께 읽으면 이해가 이어지는 글
+
+- [AI 사이트 100개 총정리 — 글쓰기, 검색, 디자인, 영상, 음악, 코딩, 업무 자동화]({% post_url 2026-09-03-ai-tools-100-directory %}) — 유행순 목록이 아니라 지금 하려는 일에서 바로 고를 수 있도록 100개 AI 사이트의 용도, 추천 대상, 공식 링크를 짧은 카드로 정리한 북마크용 디렉터리입니다.
+- [OfficeCLI: AI 에이전트가 마이크로소프트 오피스 문서를 직접 읽고 쓰는 원리와 구조]({% post_url 2026-07-08-OfficeCLI-How-AI-Agents-Read-and-Write-Microsoft-Office-Documents-Natively %}) — AI 코딩 에이전트가 Microsoft Office 없이도 Word, Excel, PowerPoint를 완벽하게 제어할 수 있게 해주는 C# 기반의 단일 바이너리 도구, OfficeCLI의 아키텍처와 작동 원리를 깊이 있게…
+- [AI 코딩 규칙 파일은 실제로 효과가 있을까: 범위, 검증, 드리프트 관리]({% post_url 2026-05-20-The-Truth-Behind-126k-Stars-How-Andrej-Karpathy-Skills-Exposes-and-Constrains-AI-Coding-Agents %}) — andrej-karpathy-skills의 짧은 코딩 규칙을 사례로, 계획, 최소 변경, 검증 지침이 에이전트의 diff를 통제하는 범위와 실패 조건을 살펴봅니다.
+<!-- internal-links:end -->
