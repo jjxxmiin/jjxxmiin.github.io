@@ -829,11 +829,11 @@ def build_incremental_related_map(
     base_map: RelatedMap | None = None,
     count: int = RELATED_COUNT,
 ) -> tuple[RelatedMap, set[str], dict[str, int]]:
-    """Update selected posts and only the minimum coverage donors.
+    """Update selected posts, invalid blocks and minimum coverage donors.
 
     Existing valid blocks are preserved byte-for-byte at the map level. A new
     public post necessarily needs one old public source to point to it; that
-    donor is the only unselected source this mode permits itself to change.
+    Invalid old blocks also need repair before validating the complete graph.
     """
     public_posts = [post for post in posts if post.is_public]
     by_id = {post.post_id: post for post in posts}
@@ -852,7 +852,7 @@ def build_incremental_related_map(
     # A valid selected block is stable on repeated --only runs. Missing or
     # invalid blocks (the normal new-post case) are created using current load
     # only as the last tie-breaker after topical relevance.
-    for source_id in sorted(selected_ids):
+    for source_id in sorted(selected_ids | invalid):
         if source_id in related_map and source_id not in invalid:
             continue
         source = by_id[source_id]
@@ -883,7 +883,7 @@ def build_incremental_related_map(
         must_cover,
         preferred_sources=selected_ids,
     )
-    touched = set(selected_ids) | donors
+    touched = set(selected_ids) | invalid | donors
     sort_related_map(related_map, posts, signals, sources=touched)
     validate_related_map(posts, related_map, require_coverage=False)
     stats = {
