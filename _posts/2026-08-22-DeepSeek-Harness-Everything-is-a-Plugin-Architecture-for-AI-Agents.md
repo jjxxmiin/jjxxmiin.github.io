@@ -417,7 +417,7 @@ DeepSeek Harness의 공개는 AI 경쟁의 축이 단순한 '모델 추론 성�
 ## 함께 읽으면 이해가 이어지는 글
 
 - [AstrBot: 단일 코드베이스로 모든 메신저에 똑똑한 AI 에이전트를 배포하는 방법]({% post_url 2026-07-20-AstrBot-How-to-Deploy-Smart-AI-Agents-Across-All-Messengers-with-a-Single-Codebase %}) — 파편화된 메신저 플랫폼과 다수의 대형 언어 모델(LLM)을 하나로 통합하여, 샌드박스 기반의 안전한 코드 실행과 웹 시각화 도구를 제공하는 오픈소스 에이전트 프레임워크 AstrBot의 내부 아키텍처와 활용법을 깊이 있게 분석합니다.
-- [Deer-Flow 2.0은 딥 리서치를 어떻게 나눠 실행할까: 도입 검증 가이드]({% post_url 2026-02-27-Why-Did-I-Just-Find-Out-About-This-An-Honest-Review-of-ByteDances-Insane-Research-AI-Deer-Flow-20 %}) — Deer-Flow 2.0이 계획, 검색, 코드 실행, 보고서 생성을 여러 역할과 샌드박스로 연결하는 구조, 설치 스냅샷과 비용, 검증 기준을 정리합니다.
+- [OpenAI Agents API 퍼블릭 베타 출시, 복잡한 AI 에이전트 개발이 쉬워집니다]({% post_url 2026-09-13-openai-launches-agents-api-in-public-beta-with-managed-codex-harness %}) — OpenAI가 2026년 9월 10일 Agents API를 퍼블릭 베타로 공개했습니다. 복잡한 에이전트 세션 관리와 코드 실행 격리 환경을 클라우드에서 대신 처리해 주며 별도의 하네스 플랫폼 비용 없이 토큰과 연산 비용만 청구합니다.
 - [DeepSeek-TUI 16K Star, V4 주장은 확인됐나: 저장소 정체와 Shell 권한 감사]({% post_url 2026-05-11-Deep-Dive-into-DeepSeek-TUI-You-Can-Delete-Claude-Code-Now--The-Shocking-Impact-of-the-16K-Star-Open-Source-Terminal-Agent %}) — DeepSeek-TUI 글에 섞인 official repository, 16K star, V4, 1M context 주장의 출처를 분리하고, dispatcher, TUI, MCP, shell 권한을 검증하는 방법을 정리합니다.
 <!-- internal-links:end -->
 
