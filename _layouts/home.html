@@ -45,6 +45,10 @@ layout: default
   {% endfor %}
 {% endif %}
 
+{% if paginator.page == 1 %}
+  {% include home-start-here.html %}
+{% endif %}
+
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {% assign visible_post_index = 0 %}
   {% for post in posts %}

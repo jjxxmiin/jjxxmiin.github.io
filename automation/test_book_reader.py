@@ -199,7 +199,8 @@ def test_collection_directory_has_exactly_one_hundred_unique_official_links():
     assert "page.collection" not in layout
     assert "data-book-directory='true'" in styles
     assert "data-book-collection" not in styles
-    assert len(re.findall(r"^## ", post, flags=re.MULTILINE)) == 11  # quick picker plus ten categories
+    directory = post.split("<!-- internal-links:start -->", 1)[0]
+    assert len(re.findall(r"^## ", directory, flags=re.MULTILINE)) == 11  # quick picker plus ten categories
     assert post.count("**추천:**") == 100
 
 

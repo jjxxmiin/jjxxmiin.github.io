@@ -1,0 +1,22 @@
+<section class="home-start-here" aria-labelledby="start-here-heading">
+  <h2 id="start-here-heading">AI, 지금 궁금한 것부터</h2>
+  <p class="home-start-intro">도구는 쉽게 고르고, 뉴스는 맥락까지 이해하세요.</p>
+  <div class="home-start-grid">
+    {% for entry in site.data.start_here %}
+      {% assign guide = site.posts | where: 'slug', entry.post_slug | first %}
+      {% if guide and guide.hidden != true and guide.published != false %}
+        {% assign guide_image = guide.cover_photo.path | default: guide.image.path %}
+        <a class="home-start-card" href="{{ guide.url | relative_url }}">
+          {% if guide_image %}
+            <img src="{{ guide_image | relative_url }}" alt="" width="480" height="270" decoding="async">
+          {% endif %}
+          <div class="home-start-copy">
+            <span class="home-start-label">{{ entry.label | escape }}</span>
+            <h3>{{ entry.title | escape }}</h3>
+            <p>{{ entry.description | escape }}</p>
+          </div>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>

@@ -1,0 +1,12 @@
+- post_slug: ai-tools-100-directory
+  title: 내 일에 맞는 AI는 뭘까?
+  description: 글쓰기부터 영상·코딩까지, 하려는 일로 도구를 찾아보세요.
+  label: AI 도구 찾기
+- post_slug: chatgpt-study-mode-learning-guide
+  title: ChatGPT로 공부해도 실력이 늘까?
+  description: 힌트 요청부터 회상 퀴즈까지, 직접 따라 하는 학습 루틴.
+  label: 공부에 활용하기
+- post_slug: chatgpt-privacy-input-checklist
+  title: 이 문서, AI에 넣어도 될까?
+  description: 개인정보와 회사 자료를 올리기 전에 확인할 체크리스트.
+  label: 개인정보 확인하기

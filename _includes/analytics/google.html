@@ -1,0 +1,10 @@
+<!-- Make the analytics queue available to the reader before deferred scripts run. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () {
+    window.dataLayer.push(arguments);
+  };
+  window.gtag('js', new Date());
+  window.gtag('config', '{{ site.analytics.google.id }}');
+</script>
+<script defer src="https://www.googletagmanager.com/gtag/js?id={{ site.analytics.google.id }}"></script>
