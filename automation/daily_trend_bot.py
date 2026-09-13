@@ -594,7 +594,19 @@ actually announced, released, published, filed, or reported in the last
 - source_tier is official or trusted.
 - event_status is announced, released, available, research, policy, or incident.
 - Write headline, summary, why_it_matters, and search_query in English.
-- trend_score is an integer from 0 to 100.
+- trend_score is an integer from 0 to 100. Use this editorial rubric:
+  freshness (0-25), practical impact on everyday users (0-25), source strength
+  (0-25), and a concrete surprising change worth explaining (0-25).
+- For equally well-supported stories, prefer a clear change readers can relate
+  to in work, study, creative tools, cost, or access over an incremental benchmark.
+- Search across consumer tools, workplace/creator uses, and policy/security as
+  well as model releases. Do not repeatedly select the same company or angle
+  when a comparably strong, fresh story adds useful variety.
+- In why_it_matters, identify the affected reader, what changed now, and one
+  plain-language question the story answers. A hypothetical use case must be
+  labeled as such, not reported as an observed user reaction.
+- Do not equate a high editorial score with measured popularity. Never invent
+  search volumes, viral reactions, or Korean availability to justify a trend.
 
 [RECENTLY PUBLISHED BY OPSOAI — do not repeat the same event]
 {json.dumps(history[:50], ensure_ascii=False)}
