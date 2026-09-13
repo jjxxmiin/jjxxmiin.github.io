@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'DreamZero는 비디오와 행동을 함께 예측해 제로샷 정책이 될 수 있나'
+title: 'World Action Model(WAM)이란? DreamZero의 영상과 로봇 행동 예측'
 date: '2026-02-20'
 categories: Tech
 tags:

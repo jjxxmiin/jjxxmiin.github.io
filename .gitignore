@@ -49,3 +49,6 @@ automation/thumb_tmp/
 *이력서*
 *resume*.pdf
 *_CV.pdf
+
+# Private growth analytics and unpublished distribution drafts
+.growth-state/

@@ -135,3 +135,23 @@ jobs:
             || echo "No changes to commit"
           git pull --rebase
           git push
+
+      # Promotion preparation must never prevent a valid post from deploying.
+      - name: Prepare distribution drafts
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          while IFS= read -r -d '' post; do
+            python tools/build_distribution_pack.py --post "$post" --output "$RUNNER_TEMP/distribution"
+          done < <(git diff --name-only --diff-filter=A -z HEAD^ HEAD -- _posts/)
+
+      - name: Save distribution drafts
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: distribution-drafts
+          path: ${{ runner.temp }}/distribution/
+          retention-days: 14
+          if-no-files-found: warn

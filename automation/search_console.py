@@ -65,6 +65,12 @@ def query(svc, days: int, dimensions: list[str], limit: int = 500,
         "dimensions": dimensions,
         "rowLimit": limit,
     }
+    # Diagnostic site: searches are not audience demand. Exclude them on the
+    # server before rowLimit is applied; page-only totals stay unfiltered.
+    if "query" in dimensions:
+        body["dimensionFilterGroups"] = [{"filters": [{
+            "dimension": "query", "operator": "notContains", "expression": "site:"
+        }]}]
     resp = svc.searchanalytics().query(siteUrl=site, body=body).execute()
     rows = []
     for r in resp.get("rows", []):

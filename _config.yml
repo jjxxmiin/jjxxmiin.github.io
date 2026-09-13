@@ -220,6 +220,7 @@ compress_html:
     envs: [development]
 
 exclude:
+  - .growth-state
   - "*.gem"
   - "*.gemspec"
   - docs
