@@ -142,24 +142,48 @@ def _article_image_candidates(source):
             if value:
                 candidates.append((urljoin(response.url, value), node.get("alt") or ""))
 
-    for node in soup.select("article img, main img")[:8]:
-        value = node.get("src") or node.get("data-src") or node.get("data-lazy-src")
+    for node in soup.select("article img, main img, [itemprop='articleBody'] img")[:24]:
+        # Prefer the real lazy-loaded asset over a placeholder src. Responsive
+        # pages often expose the full-sized image only through srcset/picture.
+        value = node.get("data-src") or node.get("data-lazy-src")
+        srcset = node.get("data-srcset") or node.get("srcset")
+        picture = node.find_parent("picture")
+        if not srcset and picture:
+            source_node = picture.find("source", srcset=True)
+            if source_node:
+                srcset = source_node.get("srcset")
+        if not value and srcset:
+            variants = []
+            for entry in srcset.split(","):
+                parts = entry.strip().split()
+                if not parts:
+                    continue
+                size = re.fullmatch(r"([0-9.]+)[wx]", parts[-1])
+                variants.append((float(size.group(1)) if size else 0, parts[0]))
+            if variants:
+                value = max(variants, key=lambda item: item[0])[1]
+        value = value or node.get("src")
         if value:
-            candidates.append((urljoin(response.url, value), node.get("alt") or ""))
+            figure = node.find_parent("figure")
+            caption_node = figure.find("figcaption") if figure else None
+            caption = caption_node.get_text(" ", strip=True) if caption_node else ""
+            candidates.append((urljoin(response.url, value), node.get("alt") or "", caption))
 
     output = []
-    for url, alt in candidates:
+    for candidate in candidates:
+        url, alt = candidate[:2]
         normalized = canonical_url(url)
         if not normalized or any(item["url"] == normalized for item in output):
             continue
         output.append({
             "url": normalized,
             "alt": strip_emojis(str(alt or "")).strip(),
+            "caption": strip_emojis(candidate[2]).strip() if len(candidate) > 2 else "",
         })
     return output
 
 
-def collect_source_images(sources, limit=4):
+def collect_source_images(sources, limit=6):
     """Collect real images declared by verified source pages. No image generation."""
     images = []
     seen = set()
@@ -169,7 +193,7 @@ def collect_source_images(sources, limit=4):
     )
     for source in ordered:
         per_source = 0
-        per_source_limit = 2 if source.get("tier") == "official" else 1
+        per_source_limit = 4 if source.get("tier") == "official" else 2
         for candidate in _article_image_candidates(source):
             if len(images) >= limit:
                 return images
@@ -181,7 +205,7 @@ def collect_source_images(sources, limit=4):
             images.append({
                 "path": image_url,
                 "alt": candidate["alt"] or f"{publisher} 원문에 게시된 AI 뉴스 이미지",
-                "caption": f"{publisher}가 원문과 함께 공개한 이미지입니다.",
+                "caption": candidate.get("caption") or f"{publisher}가 원문과 함께 공개한 이미지입니다.",
                 "credit": publisher,
                 "source_url": canonical_url(source.get("url")),
             })
@@ -211,13 +235,38 @@ def _source_figure(image):
 
 def insert_source_images(content, images):
     """Spread collected visuals through useful sections instead of making a gallery."""
-    targets = (
-        "## 왜 지금 다들 이 이야기를 할까?",
-        "## 그래서 우리에게 뭐가 달라질까?",
-        "## 그래서 내 업무에는 뭐가 달라지나",
-    )
-    for target, image in zip(targets, images or []):
-        content = content.replace(target, f"{_source_figure(image)}\n\n{target}", 1)
+    offsets = []
+    offset = 0
+    fence = None
+    for line in content.splitlines(keepends=True):
+        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+        elif fence is None and re.match(r"^##\s+", line):
+            if re.match(r"^##\s+(?:자주 묻는 질문|FAQ|직접 확인한 원문|참고|출처|함께 읽)", line):
+                break
+            offsets.append(offset)
+        offset += len(line)
+    # Keep the introduction first; distribute figures across actual sections,
+    # regardless of their wording. Never insert into fenced examples.
+    slots = offsets[1:] or offsets
+    unique = []
+    seen = set()
+    for item in images or []:
+        if item.get("path") and item["path"] not in seen:
+            unique.append(item)
+            seen.add(item["path"])
+    count = min(len(slots), len(unique))
+    insertions = []
+    for index in range(count):
+        slot = slots[index * len(slots) // count]
+        insertions.append((slot, _source_figure(unique[index]) + "\n\n"))
+    for offset, figure in reversed(insertions):
+        content = content[:offset] + figure + content[offset:]
     return content
 
 
@@ -2134,7 +2183,7 @@ def save_post(post_data, topic_data, evidence, *, now=None):
             "최종 변환 후 글 품질 검증 실패: " + " / ".join(transformed_errors)
         )
 
-    images = collect_source_images(evidence.get("sources") or [], limit=4)
+    images = collect_source_images(evidence.get("sources") or [], limit=6)
     if images:
         print(f"원문 이미지 {len(images)}장을 수집했습니다.")
         collected_hero = images[0]
