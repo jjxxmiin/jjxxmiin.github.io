@@ -108,7 +108,7 @@ Feedback loop에서 router가 고른 model만 노출하면 다른 candidate data
 
 - [모바일에서 이미지 이해와 생성을 한 모델로 돌릴 수 있을까? Mobile-O의 조건]({% post_url 2026-02-24-Mobile-O--Unified-Multimodal-Understanding-and-Generation-on-Mobile-Device %}) — Mobile-O가 경량 VLM과 DiT를 MCP로 연결해 모바일에서 이해, 생성을 함께 처리하는 방법과 3초 데모를 해석할 때 필요한 조건을 짚습니다.
 - [Fooocus가 Stable Diffusion WebUI보다 쉬운 이유: Linux 설치부터 Preset 선택까지]({% post_url 2024-02-13-Fooocus %}) — 복잡한 확장 설정보다 prompt와 image 선택에 집중하려는 사용자를 위해 Fooocus의 Linux 설치 흐름, anime, realistic preset, input image와 advanced 기능을 정리합니다.
-- [2^256 바이너리 토큰이 코드북을 없앨까: BitDance FID 1.24와 30.2배 속도의 조건]({% post_url 2026-02-18-BitDance--Scaling-Autoregressive-Generative-Models-with-Binary-Tokens %}) — 256비트 토큰과 Binary Diffusion Head가 거대한 Softmax를 피하는 방법, FID 1.24와 30.2배 수치의 적용 범위를 설명합니다.
+- [챗GPT 유료 무료 차이와 플랜별 가격 비교 가이드]({% post_url 2026-09-14-chatgpt-free-vs-paid-tier-differences-and-pricing-guide %}) — 챗GPT 무료 플랜은 단순 대화가 무제한이지만 파일 분석과 이미지 생성 등 부가 도구에 엄격한 제한이 있습니다. 본 가이드는 Go(8달러), Plus(20달러), Pro(200달러), Business 플랜의 핵심 사양과 가격 차이를…
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
