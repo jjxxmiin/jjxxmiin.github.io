@@ -171,7 +171,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 48,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-14-chatgpt-free-vs-paid-tier-differences-and-pricing-guide"
     },
     {
       "id": "mcp-서버",
