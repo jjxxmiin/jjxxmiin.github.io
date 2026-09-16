@@ -112,8 +112,8 @@ D -- 회사 팀 단위 협업 --> G[ChatGPT Business 인당 월 20달러부터]
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [피그마 AI PPT 만들기부터 상세페이지 기획까지 완벽 가이드]({% post_url 2026-09-16-figma-ai-presentation-and-landing-page-design-practical-guide %}) — Figma Slides의 AI 기능을 활용해 개요 작성, 이미지 편집, 발표자 노트 생성부터 PPTX 내보내기까지 프레젠테이션 제작 과정을 단축할 수 있습니다. 무료 Starter 플랜과 유료 Professional 플랜의 AI 지원…
 - [이미지 생성 모델이 너무 많다면? Diffusion-GPT 라우터의 선택 기준]({% post_url 2026-03-02-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-and-Honest-Review-of-Diffusion-GPT %}) — Diffusion-GPT가 프롬프트를 분석해 여러 전문 디퓨전 모델 중 하나를 고르는 네 단계와 라우팅 지연, 오선택, 모델 로딩 비용을 짚습니다.
-- [짝지은 이미지 없이 스타일을 바꾸려면: CycleGAN 손실함수와 구현 핵심]({% post_url 2019-02-28-cycleGAN %}) — 서로 대응하지 않는 두 이미지 집합을 변환하는 CycleGAN이 왜 cycle consistency와 identity loss를 함께 쓰는지 설명합니다. 네트워크 구성, 손실 가중치, 데이터와 의존성까지 구현 전에 확인할 항목을 코드…
 - [PhotoDoodle은 30~50쌍으로 스타일을 배울까: 배경 보존 구조와 실행 코드 함정]({% post_url 2025-03-03-PhotoDoodle %}) — PhotoDoodle의 OmniEditor 사전학습과 EditLoRA 미세조정, positional encoding cloning이 배경을 보존하는 방식, 비교, ablation 결과와 예제 코드의 해상도 주의점을 정리합니다.
 <!-- internal-links:end -->
 

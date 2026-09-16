@@ -668,7 +668,8 @@
       "reader_intent": "도입·문제 해결",
       "publication_mode": "auto_research",
       "priority": 35,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-15-google-gemini-practical-guide-from-pdf-analysis-to-galaxy-integration-and-plans"
     },
     {
       "id": "코딩-ai",
