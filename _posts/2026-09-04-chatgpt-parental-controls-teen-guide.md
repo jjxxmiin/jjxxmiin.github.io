@@ -180,8 +180,8 @@ ChatGPT 보호자 통제는 유용하다. 민감한 콘텐츠, 데이터 사용,
 ## 함께 읽으면 이해가 이어지는 글
 
 - [AI 동반자는 외로움을 줄일까: 위로를 관계로 착각하지 않는 경계 설정법]({% post_url 2026-09-04-ai-companion-loneliness-boundaries %}) — AI의 즉각적인 공감이 실제 상호 관계와 다른 이유를 연구 한계와 함께 살펴보고, 사용 시간을 넘어 수면과 사람 관계가 밀려나는지 점검하는 실전 안내서입니다.
+- [OpenAI의 Project Lily 유출, 내 ChatGPT 대화를 사람이 직접 읽고 평가했다]({% post_url 2026-09-17-openai-project-lily-leaked-contractors-review-real-chatgpt-conversations %}) — 2026년 9월 14일 IT 매체 404 Media 보도로 OpenAI의 내부 프로그램인 Project Lily가 공개되었습니다. 외부 중개 업체를 통해 고용된 인력들이 실제 ChatGPT 대화 내역과 사용자 기억 요약을 열람하며…
 - [Anthropic 위험 보고서 공개, Claude Mythos 5 넘어서는 미공개 Model 2와 정렬 위험 등급 상향]({% post_url 2026-08-16-anthropic-details-unreleased-model-2-and-upgrades-ai-risk-assessment-level %}) — Anthropic이 2026년 8월 14일 발표한 186페이지 위험 보고서에서 Claude Mythos 5를 넘어서는 미공개 모델 'Model 2'의 존재를 밝혔습니다. 자율 에이전트 기능의 고도화와 사이버 보안 평가 사례를 반영해…
-- [AIRI를 브라우저 AI 컴패니언으로 쓸까: WebGPU, WASM, 기억의 경계]({% post_url 2026-03-01-Why-Did-I-Just-Find-Out-About-This-A-Deep-Dive-into-AIRI-the-Browser-Based-Open-Source-AI-Companion %}) — AIRI가 WebGPU, WASM, Live2D/VRM과 모듈식 음성, 기억 계층을 조합하는 방식, 브라우저 호환성, 자원, 개인정보, 업데이트 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
