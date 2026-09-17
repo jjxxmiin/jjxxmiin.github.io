@@ -124,8 +124,8 @@ flowchart TD
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [젠스 파크 AI PPT 만들기 사용법과 회의록 변환 가이드]({% post_url 2026-09-17-how-to-create-presentations-with-genspark-ai-slides %}) — Genspark의 AI Slides 및 Text to PPT 기능은 대화형 입력이나 문서 업로드로 발표 자료를 자동 생성합니다. 내장 환경에서 코드를 실행해 정확한 차트를 그리며, PPTX와 Google Slides로 내보낼 수…
 - [AI 사이트 100개 총정리 — 글쓰기, 검색, 디자인, 영상, 음악, 코딩, 업무 자동화]({% post_url 2026-09-03-ai-tools-100-directory %}) — 유행순 목록이 아니라 지금 하려는 일에서 바로 고를 수 있도록 100개 AI 사이트의 용도, 추천 대상, 공식 링크를 짧은 카드로 정리한 북마크용 디렉터리입니다.
-- [긴 영상 배경음악이 장면 감정을 놓칠 때: NarraScore의 이중 제어]({% post_url 2026-02-14-NarraScore--Bridging-Visual-Narrative-and-Musical-Dynamics-via-Hierarchical-Affective-Control %}) — NarraScore가 영상의 전역 분위기와 시점별 Valence-Arousal 곡선을 나눠 음악 생성에 주입하는 방식, 평가 기준과 감정 단순화 한계를 다룹니다.
 - [민감한 문서를 NotebookLM에 올리기 어렵다면? Open Notebook 점검표]({% post_url 2026-03-02-Why-Did-I-Only-Find-Out-About-This-Now-An-Honest-Review-of-Open-Notebook-the-Open-Source-Alternative-Threatening-Googles-NotebookLM %}) — Open Notebook의 문서 Q&A, 요약, 다중 화자 오디오 기능을 살펴보고 로컬 LLM을 써도 외부 전송이 남을 수 있는 지점과 설치 전 확인 사항을 정리합니다.
 <!-- internal-links:end -->
 

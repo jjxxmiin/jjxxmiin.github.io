@@ -924,7 +924,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 30,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-16-figma-ai-presentation-and-landing-page-design-practical-guide"
     },
     {
       "id": "라이너-ai",
