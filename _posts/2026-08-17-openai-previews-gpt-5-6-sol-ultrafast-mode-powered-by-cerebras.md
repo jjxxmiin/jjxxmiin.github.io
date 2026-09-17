@@ -183,9 +183,9 @@ flowchart LR
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [Google Gemini 3.8 Live 출시, 말 끊김 없는 실시간 음성 추론 지원]({% post_url 2026-09-18-google-releases-gemini-3-8-live-and-extended-thinking %}) — Google과 Google DeepMind는 2026년 9월 15일 Gemini 3.8 Live와 Gemini 3.8 Live Extended Thinking을 공개했습니다. 대화를 멈추지 않고 백그라운드에서 복잡한 추론과 도구…
 - [FluidVoice: 구독료 없이 Mac에서 작동하는 온디바이스 AI 음성 받아쓰기 구축기]({% post_url 2026-08-14-FluidVoice-On-Device-AI-Dictation-for-macOS-with-Zero-Latency-and-Total-Privacy %}) — FluidVoice는 Apple Silicon 환경에서 완전 오프라인으로 동작하는 무료 오픈소스 음성 인식 및 AI 문맥 교정 애플리케이션입니다. 외부 서버 전송 없이 로컬에서 음성-텍스트 변환(STT)과 Fluid-1 모델 후처리를…
 - [OpenAI 프론티어 API 제로 데이터 보존 발표, Private Safety Processing으로 기업 보안 강화]({% post_url 2026-08-21-openai-announces-zero-data-retention-and-previews-private-safety-processing-for-frontier-api-models %}) — OpenAI가 2026년 8월 19일 프론티어 모델 API 사용자를 대상으로 제로 데이터 보존(ZDR) 옵션을 발표하고 Private Safety Processing을 미리보기로 공개했습니다. ZDR을 적용하면 프롬프트와 모델 출력…
-- [금융 API를 MCP로 감싸면 규제, 권한 문제가 끝날까? 현실적인 경계]({% post_url 2026-05-08-Stop-Baking-API-Spaghetti-A-Deep-Dive-into-Financial-Services-MCP-Saving-Financial-Legacy-Systems %}) — MCP가 금융 시스템의 도구 발견과 호출 형식을 표준화하는 범위, 그리고 권한, 감사, 상태, 고빈도 처리까지 자동 해결하지는 못하는 이유를 구분합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
