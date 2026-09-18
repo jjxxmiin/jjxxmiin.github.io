@@ -963,7 +963,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 30,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-17-how-to-create-presentations-with-genspark-ai-slides"
     },
     {
       "id": "제미나이-나노바나나",

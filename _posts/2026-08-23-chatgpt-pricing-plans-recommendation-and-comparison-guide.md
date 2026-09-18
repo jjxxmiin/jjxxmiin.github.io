@@ -139,7 +139,7 @@ chatgpt.com 웹사이트에서 가입한 구독을 해지하려면 로그인 후
 ## 함께 읽으면 이해가 이어지는 글
 
 - [GPT-4o 이미지 생성, 실무에 바로 써도 될까? 한글, 작은 글자, 부분 편집 한계]({% post_url 2025-03-26-GPT4oIG %}) — GPT-4o 네이티브 이미지 생성의 텍스트 표현, 다중 객체, 대화형 수정 장점과 잘림, 비라틴 문자, 작은 글자, 의도하지 않은 변경 문제를 실무 검수 순서로 정리합니다.
-- [클로드(Claude) 사용법: 프로젝트, PDF, Artifacts, Skills 실전 가이드]({% post_url 2026-08-26-complete-claude-usage-guide-pricing-free-projects-and-pdf-workflows %}) — 무료 계정으로 프로젝트와 PDF 분석을 시험하고 Artifacts, Skills, 메모리, 공유 기능을 안전하게 활용하는 순서와 Pro 전환 기준을 정리합니다.
+- [제미나이 나노바나나 사용법과 모델별 엔진 선택 가이드]({% post_url 2026-09-18-how-to-use-gemini-nano-banana-complete-guide-and-engine-selection %}) — 제미나이 메뉴에서 '이미지'를 선택하면 나노바나나 엔진으로 그림을 생성하거나 수정할 수 있습니다. 기본 Flash 선택 시 Nano Banana 2가, Thinking이나 Pro 선택 시 최대 4K와 정밀 연출을 지원하는 Nano…
 - [유휴 노트북을 GPU 클러스터처럼 쓸 수 있을까? HyperspaceAI의 현실]({% post_url 2026-03-29-The-Prelude-to-the-Counterattack-for-the-GPU-Poor-A-Deep-Dive-into-HyperspaceAI-Architecture %}) — libp2p 가십과 연산 검증으로 이기종 노드를 묶는 HyperspaceAI의 구상, 잘 맞는 비동기 작업과 대역폭, 결정론, 신뢰 비용을 구분합니다.
 <!-- internal-links:end -->
 
