@@ -983,7 +983,8 @@
       "reader_intent": "도입·문제 해결",
       "publication_mode": "auto_research",
       "priority": 20,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-18-how-to-use-gemini-nano-banana-complete-guide-and-engine-selection"
     }
   ]
 }
