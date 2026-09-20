@@ -84,5 +84,5 @@ multiagent-patterns와 evaluation 같은 추가 주제도 원문에 소개되지
 
 - [everything-claude-code를 팀에 도입할까: 역할 분리, 스킬, 훅의 비용]({% post_url 2026-03-22-Review-The-Naked-Truth-of-AI-Coding-Uncovered-by-everything-claude-code-and-True-Agent-Orchestration %}) — everything-claude-code의 역할별 에이전트, 필요할 때 불러오는 스킬, 훅 기반 기록 구조를 살펴보고 컨텍스트, 권한, 비용, 팀 설정의 도입 기준을 정리합니다.
 - [Claude-HUD는 무엇을 보여 주나? Statusline, Transcript 구조와 도입 기준]({% post_url 2026-04-01-Anatomy-of-Claude-HUD-Shattering-the-Black-Box-in-the-Terminal-An-Architectural-Approach-to-Overcoming-Context-Blindness %}) — Claude Code의 공식 statusline 입력과 transcript를 이용해 컨텍스트, 도구, 에이전트 상태를 표시하는 Claude-HUD의 구조, 보안 경계와 성능, 운영 검증법을 설명합니다.
-- [유출 코드 기반 AI 에이전트를 써도 될까? Claw Code의 출처, 법적 리스크]({% post_url 2026-04-02-Deep-Dive-A-Monster-Born-on-the-Border-of-Legal-and-Illegal-Dissecting-the-Architecture-of-Claw-Code %}) — Claude Code 유출, 클린룸 재작성 주장이 얽힌 Claw Code에서 검증된 사실과 서사를 구분하고, 유용한 설계 패턴만 안전하게 읽는 기준을 제시합니다.
+- [클로드 팀 요금제 가격과 기능 비교 및 실무 도입 가이드]({% post_url 2026-09-20-claude-team-plan-pricing-features-and-implementation-guide %}) — 클로드 팀 요금제는 스탠다드 좌석 기준 연간 결제 시 월 20달러, 월간 결제 시 월 25달러에 제공됩니다. 최대 150석까지 지원하며 좌석별 독립 사용량 한도, 200k 토큰 문맥, 업무 도구 연동 및 통합 검색, 데이터 학습…
 <!-- internal-links:end -->
