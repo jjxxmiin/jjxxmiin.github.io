@@ -321,7 +321,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 39,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-20-claude-team-plan-pricing-features-and-implementation-guide"
     },
     {
       "id": "클로드-무료",
