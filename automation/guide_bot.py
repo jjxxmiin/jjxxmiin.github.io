@@ -77,6 +77,13 @@ FORMAT_WEIGHTS = {
     "가격과 요금제": 1,
 }
 
+# 큐에 자동 발행 가능한 포맷이 하나만 남으면 FORMAT_CAPS 는 폴백으로 무력화된다.
+# 그때 브랜드까지 같으면 '클로드 요금제' 계열이 며칠 내리 나가 독자에게는 같은
+# 글로 보인다. 포맷을 포기하는 경우에도 브랜드만은 돌린다.
+BRAND_WINDOW = 3
+# 'ai 로고', 'ai 유료'처럼 총칭으로 시작하는 머리말은 브랜드가 아니다.
+GENERIC_BRAND_TOKENS = {"ai", "인공지능"}
+
 # 사실을 모아 오는 단계. 근거 없이 쓰면 가격 같은 건 바로 틀린다.
 RESEARCH_SCHEMA = {
     "type": "OBJECT",
@@ -628,16 +635,20 @@ def load_prompt() -> str:
     return shared
 
 
-def _recent_written_formats(topics: list[dict]) -> list[str]:
-    """Return formats in publication order using the append-only topic ledger."""
+def _written_ledger() -> dict:
+    """Return the append-only topic ledger, empty when it is missing or broken."""
     if not os.path.exists(LEDGER):
-        return []
+        return {}
     try:
         written = json.load(open(LEDGER, encoding="utf-8")).get("written", {})
     except (OSError, json.JSONDecodeError, AttributeError):
-        return []
-    if not isinstance(written, dict):
-        return []
+        return {}
+    return written if isinstance(written, dict) else {}
+
+
+def _recent_written_formats(topics: list[dict]) -> list[str]:
+    """Return formats in publication order using the append-only topic ledger."""
+    written = _written_ledger()
     by_id = {str(topic.get("id")): topic for topic in topics}
     formats = [
         str(by_id[topic_id].get("format") or "")
@@ -645,6 +656,25 @@ def _recent_written_formats(topics: list[dict]) -> list[str]:
         if topic_id in by_id
     ]
     return [value for value in formats if value][-FORMAT_WINDOW:]
+
+
+def _brand_of(topic: dict) -> str:
+    """머리말 첫 토큰. '클로드 무료'와 '클로드 프로'는 같은 브랜드로 본다."""
+    head = str(topic.get("head") or topic.get("id") or "").strip()
+    if not head:
+        return ""
+    token = re.split(r"[\s-]+", head)[0].casefold()
+    return "" if token in GENERIC_BRAND_TOKENS else token
+
+
+def _recent_written_brands(topics: list[dict]) -> list[str]:
+    """Return brands in publication order using the append-only topic ledger."""
+    written = _written_ledger()
+    by_id = {str(topic.get("id")): topic for topic in topics}
+    brands = [
+        _brand_of(by_id[topic_id]) for topic_id in written if topic_id in by_id
+    ]
+    return [value for value in brands if value][-BRAND_WINDOW:]
 
 
 def pick_topic(topic_id: str | None) -> dict:
@@ -661,11 +691,15 @@ def pick_topic(topic_id: str | None) -> dict:
                     )
                 return t
         raise SystemExit(f"주제를 찾지 못했습니다: {topic_id}")
+    written_ids = _written_ledger()
     pending = [
         topic
         for topic in topics
         if topic["status"] == "pending"
         and topic.get("publication_mode") != "manual_test"
+        # 큐의 status 는 다음 실행의 build_topic_queue.py 가 원장을 보고 갱신하므로
+        # 늘 한 편 늦다. 원장을 함께 보지 않으면 어제 쓴 주제를 오늘 다시 고른다.
+        and str(topic.get("id")) not in written_ids
     ]
     if not pending:
         raise SystemExit(
@@ -683,6 +717,15 @@ def pick_topic(topic_id: str | None) -> dict:
     ]
     if not allowed:
         allowed = pending
+
+    # 포맷 캡을 포기한 경우에도 브랜드는 돌린다. 남은 주제가 전부 같은 브랜드면
+    # 그때만 연속 발행을 허용한다.
+    recent_brands = _recent_written_brands(topics)
+    diversified = [
+        topic for topic in allowed if _brand_of(topic) not in recent_brands
+    ]
+    if diversified:
+        allowed = diversified
 
     for format_name in FORMAT_ORDER:
         if counts.get(format_name, 0) == 0:

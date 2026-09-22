@@ -913,6 +913,53 @@ flowchart LR
             ),
         )
 
+    def test_korean_unit_rendering_of_a_verified_figure_is_grounded(self):
+        # 영어 사실은 "875 million"이고 한국어본은 "8억 7500만"이다. 영어 쪽만 읽으면
+        # 8도 7500도 근거 밖 숫자가 되어, 파이프라인이 자기 증거로 만든 글머리
+        # 다이어그램이 자기 검증에 걸린다. 실제로 후보가 전부 탈락한 원인이다.
+        evidence = {
+            "published_at": "2026-09-22",
+            "sources": [{"published_at": "2026-09-22"}],
+            "facts": [
+                {
+                    "text": "The FAA deployed an 875 million dollar system.",
+                    "text_ko": "FAA가 8억 7500만 달러 규모 시스템을 배치했다.",
+                }
+            ],
+            "unknowns": [],
+            "summary_flow": ["3개 공항 적용", "8억 7500만 달러 투입"],
+        }
+        self.assertEqual(
+            bot._mermaid_grounding_error(
+                'flowchart TD\n  N0["3개 공항 적용"] --> N1["8억 7500만 달러 투입"]',
+                evidence,
+            ),
+            "",
+        )
+        self.assertIn(
+            "999",
+            bot._mermaid_grounding_error(
+                'flowchart TD\n  N0["근거 없는 999"] --> N1["과장"]', evidence
+            ),
+        )
+
+    def test_pipeline_owned_lead_diagram_passes_its_own_grounding_check(self):
+        evidence = {
+            "published_at": "2026-09-22",
+            "sources": [{"published_at": "2026-09-22"}],
+            "facts": [
+                {
+                    "text": "Twenty-two leaders signed the call on September 22.",
+                    "text_ko": "22개국 정상이 9월 22일 성명에 서명했다.",
+                }
+            ],
+            "unknowns": [],
+            "summary_flow": ["22개국 정상 서명", "감독 기구 설치 요구", "9월 22일 발표"],
+        }
+        diagram, error = bot._validated_summary_flow_diagram(evidence)
+        self.assertEqual(error, "")
+        self.assertTrue(diagram.startswith("```mermaid"))
+
     def test_article_rejects_unverified_numeric_prose_claims(self):
         post = self._valid_post()
         post["content"] = post["content"].replace(

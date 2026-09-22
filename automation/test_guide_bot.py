@@ -812,6 +812,55 @@ class GuideTopicDiversityTests(unittest.TestCase):
             self._pick(topics, {"price-done": "one"})["id"], "price-next"
         )
 
+    def test_topic_in_ledger_is_not_picked_again_while_queue_status_lags(self):
+        # build_topic_queue.py 가 다음 실행에서야 status 를 고치므로, 방금 발행한
+        # 주제는 큐에 pending 으로 남아 있다. 원장이 그 중복을 막아야 한다.
+        topics = [
+            {"id": "클로드-무료", "head": "클로드 무료", "format": "가격과 요금제",
+             "status": "pending"},
+            {"id": "커서-ai", "head": "커서 ai", "format": "가격과 요금제",
+             "status": "pending"},
+        ]
+        written = {"클로드-무료": "2026-09-21-claude-free-plan-guide"}
+        self.assertEqual(self._pick(topics, written)["id"], "커서-ai")
+
+    def test_same_brand_is_not_published_again_when_only_one_format_remains(self):
+        # 남은 자동 발행 주제가 전부 '가격과 요금제'라 포맷 캡은 폴백으로 풀린다.
+        # 그래도 직전 브랜드와 다른 주제를 골라야 한다.
+        topics = [
+            {"id": "클로드-ai", "head": "클로드 ai", "format": "가격과 요금제",
+             "status": "done"},
+            {"id": "클로드-팀", "head": "클로드 팀", "format": "가격과 요금제",
+             "status": "done"},
+            {"id": "클로드-프로", "head": "클로드 프로", "format": "가격과 요금제",
+             "status": "pending"},
+            {"id": "커서-ai", "head": "커서 ai", "format": "가격과 요금제",
+             "status": "pending"},
+        ]
+        written = {"클로드-ai": "one", "클로드-팀": "two"}
+        self.assertEqual(self._pick(topics, written)["id"], "커서-ai")
+
+    def test_generic_ai_prefix_is_not_treated_as_a_brand(self):
+        # 'ai 로고'와 'ai 유료'는 브랜드가 같은 게 아니라 총칭이 같을 뿐이다.
+        topics = [
+            {"id": "ai-로고", "head": "ai 로고", "format": "가격과 요금제",
+             "status": "done"},
+            {"id": "ai-유료", "head": "ai 유료", "format": "가격과 요금제",
+             "status": "pending"},
+        ]
+        self.assertEqual(self._pick(topics, {"ai-로고": "one"})["id"], "ai-유료")
+
+    def test_last_same_brand_topic_still_publishes_rather_than_stalling(self):
+        topics = [
+            {"id": "클로드-팀", "head": "클로드 팀", "format": "가격과 요금제",
+             "status": "done"},
+            {"id": "클로드-프로", "head": "클로드 프로", "format": "가격과 요금제",
+             "status": "pending"},
+        ]
+        self.assertEqual(
+            self._pick(topics, {"클로드-팀": "one"})["id"], "클로드-프로"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -527,25 +527,31 @@ def select_related(
     signals: SignalCache | None = None,
     inbound: collections.Counter[str] | None = None,
 ) -> list[Post]:
-    candidates = [
+    pool = [
         candidate
         for candidate in posts
-        if (
-            candidate.post_id != source.post_id
-            and candidate.is_public
-            and (
-                signals[(source.post_id, candidate.post_id)][0]
-                if signals is not None
-                else related_signals(source, candidate)[0]
-            )
-            > 0
-        )
+        if candidate.post_id != source.post_id and candidate.is_public
     ]
-    if len(candidates) < count:
+
+    def tier_of(candidate: Post) -> int:
+        return (
+            signals[(source.post_id, candidate.post_id)][0]
+            if signals is not None
+            else related_signals(source, candidate)[0]
+        )
+
+    related = [candidate for candidate in pool if tier_of(candidate) > 0]
+    if len(pool) < count:
         raise ValueError(
             f"{source.path}: needs {count} distinct public related targets, "
-            f"found {len(candidates)}"
+            f"found {len(pool)}"
         )
+    # 관련 신호가 없는 글은 원래 후보에서 뺀다. 다만 브랜드 태그 대부분이
+    # BROAD_RELATED_TAGS 라서, 거버넌스 뉴스처럼 브랜드 태그만 붙은 글은 특정 태그가
+    # 0개가 되어 어느 글과도 tier 0 이 된다. 그때 3편을 못 채웠다고 예외를 던지면
+    # 이미 다 쓴 글이 발행되지 못하고 통째로 버려진다. 모자랄 때만 후보를 넓히고,
+    # 정렬 기준의 첫 항목이 -tier 이므로 강한 짝은 언제나 앞에 남는다.
+    candidates = related if len(related) >= count else pool
     candidates.sort(
         key=lambda candidate: candidate_sort_key(
             source, candidate, signals=signals, inbound=inbound

@@ -1338,14 +1338,31 @@ _FACT_NUMBER = re.compile(
 
 
 def _verified_numeric_values(evidence):
-    """Extract raw numeric values from fact-checked statements, without deriving any."""
+    """Extract raw numeric values from fact-checked statements, without deriving any.
+
+    The Korean side of the same verified payload counts too.  Facts are written in
+    English so they can be compared with the source word for word, but Korean writes
+    large numbers in 억/만 units: "$875 million" becomes "8억 7500만 달러", whose
+    digits are 8 and 7500 and can never match 875.  Reading only the English text
+    made the gate reject the pipeline's own translated evidence, which is what
+    emptied the candidate list and failed the workflow.  ``summary_flow`` is included
+    for the same reason: the lead diagram is built from it verbatim, so numbers it is
+    not allowed to contain are numbers it must not have been given.
+    """
     values = set()
     grounded_text = [str(evidence.get("published_at") or "")]
     for source in evidence.get("sources") or []:
         grounded_text.append(str(source.get("published_at") or ""))
     for fact in evidence.get("facts") or []:
         grounded_text.append(str(fact.get("text") or ""))
+        grounded_text.append(str(fact.get("text_ko") or ""))
     grounded_text.extend(str(value or "") for value in evidence.get("unknowns") or [])
+    grounded_text.extend(
+        str(value or "") for value in evidence.get("unknowns_ko") or []
+    )
+    grounded_text.extend(
+        str(value or "") for value in evidence.get("summary_flow") or []
+    )
     for text in grounded_text:
         for token in _FACT_NUMBER.findall(text):
             try:
