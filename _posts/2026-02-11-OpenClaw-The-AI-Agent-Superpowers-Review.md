@@ -94,7 +94,7 @@ Superpowers는 에이전트에게 파일 권한이나 실행 도구를 새로 �
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [커서 AI 무료 유료 차이와 요금제 완전 정리]({% post_url 2026-09-23-cursor-ai-free-vs-paid-plans-and-pricing-guide %}) — 커서 AI의 무료 플랜(Hobby)과 유료 요금제(Pro, Pro+, Ultra, Teams) 간의 핵심 기능 차이, 토큰 기반 과금 체계, 상황별 최적의 플랜 선택 기준을 상세히 정리했습니다.
 - [Agent Safehouse로 macOS AI 에이전트를 가둘 수 있을까: Deny-first와 예외 권한]({% post_url 2026-03-11-Agent-Safehouse-Deep-Dive-Leashing-Your-AI-Agents-at-the-Kernel-Level-on-macOS %}) — macOS Seatbelt, sandbox-exec로 프로젝트 밖 접근을 차단하는 Agent Safehouse의 구조와, 네트워크, 홈 설정, IPC 예외 및 완전 격리가 아닌 한계를 정리합니다.
 - [ml-intern에 H100 300회 루프를 맡겨도 될까: 170K Compaction과 비용 상한]({% post_url 2026-04-25-Stop-Debugging-CUDA-How-Hugging-Faces-ml-intern-is-Disrupting-the-ML-Engineering-Workflow %}) — ml-intern의 논문 탐색, 학습 Job, Trackio 평가 루프와 170K 자동 압축을 살펴보고, 최대 300회 자율 실행 전에 걸어야 할 GPU, API, 평가 상한을 정리합니다.
-- [Compozy로 AI 개발을 병렬화해도 될까: 스펙, 비용, 리뷰 루프]({% post_url 2026-05-18-AI-Coding-From-Toy-to-Production-Pipeline-Deep-Dive-into-Compozy-Multi-Agent-Orchestration-with-a-Single-Binary %}) — Compozy의 선언적 워크플로와 마크다운 상태를 살펴보고, 병렬 에이전트가 잘못된 스펙을 증폭하지 않도록 승인, 예산, 종료 조건을 설계합니다.
 <!-- internal-links:end -->

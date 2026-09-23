@@ -345,7 +345,8 @@
       "reader_intent": "구매·구독 판단",
       "publication_mode": "auto_research",
       "priority": 37,
-      "status": "pending"
+      "status": "done",
+      "post": "2026-09-21-claude-free-plan-usage-limit-and-token-reset-guide"
     },
     {
       "id": "커서-ai",
