@@ -173,9 +173,9 @@ flowchart TD
 <!-- internal-links:start -->
 ## 함께 읽으면 이해가 이어지는 글
 
+- [Anthropic Claude Opus 5.5 공식 출시, 플래그십급 성능에 비용은 40% 절감]({% post_url 2026-09-23-anthropic-launches-claude-opus-5-5-with-flagship-reasoning-at-lower-cost %}) — Anthropic은 2026년 9월 22일 새로운 세대의 첫 모델인 Claude Opus 5.5를 공개했습니다. 이 모델은 Claude Fable 5.1과 대등한 추론 성능을 제공하면서도 입력 백만 토큰당 4달러, 출력 백만 토큰당…
 - [Liquid AI, 스마트폰과 CPU에서 작동하는 로컬 에이전트 모델 LFM2.5-2.6B 공개]({% post_url 2026-08-07-liquid-ai-releases-lfm2-5-2-6b-open-weight-local-agent-model %}) — Liquid AI가 스마트폰 및 소비자용 CPU에서 로컬로 구동되는 26억 매개변수 온디바이스 에이전트 모델 LFM2.5-2.6B를 공개했습니다. 2.5GB 미만의 RAM 메모리로 128K 컨텍스트와 네이티브 툴 콜링을 지원하며…
 - [OpenRouter에 등장한 스텔스 AI 모델 OX Alpha 무료 공개, 100만 토큰과 DeepSWE 80% 성능 분석]({% post_url 2026-08-23-ox-alpha-stealth-model-launches-on-openrouter-with-1m-token-context-window %}) — 2026년 8월 20일 OpenRouter에 100만 토큰 컨텍스트 창과 다중 모달 입력을 지원하는 스텔스 모델 OX Alpha가 등장했습니다. 프리뷰 기간 무료로 제공되는 이 모델은 DeepSWE 코딩 벤치마크 하위 집합에서 80%…
-- [Athena-Public은 모델을 바꿔도 기억할까: 10K 부팅, 278개 프로토콜 검증]({% post_url 2026-03-01-Why-Didnt-I-Know-This-Sooner-An-Honest-Review-of-Athena-Public-Curing-LLM-Amnesia %}) — Athena-Public이 로컬 마크다운으로 상태를 보존하는 방식과 10K 부팅, 278개 프로토콜 주장을 살펴보고, 검색, 충돌, 클라우드 전송 한계를 정리합니다.
 <!-- internal-links:end -->
 
 ## 자주 묻는 질문
