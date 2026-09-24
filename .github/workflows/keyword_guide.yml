@@ -3,9 +3,10 @@ name: Daily Keyword Guide Post
 # 검색 수요 기반 실용 가이드를 Gemini 3.8 Flash로 하루 한 편 발행한다.
 
 on:
-  schedule:
-    # 지연 또는 실패 시 다음 슬롯에서 재시도하며, 당일 발행된 글은 중복 생성하지 않는다.
-    - cron: '0 5,6,7,8,9,10 * * *'
+  # 자동 발행 중단 (2026-09-24). 다시 켜려면 schedule 과 cron 줄 주석을 푼다.
+  # schedule:
+  # # 지연 또는 실패 시 다음 슬롯에서 재시도하며, 당일 발행된 글은 중복 생성하지 않는다.
+  #   - cron: '0 5,6,7,8,9,10 * * *'
   workflow_dispatch:
     inputs:
       force:

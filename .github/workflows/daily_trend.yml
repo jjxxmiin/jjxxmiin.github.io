@@ -1,9 +1,10 @@
 name: Daily AI Trend Post
 
 on:
-  schedule:
-    # 지연 또는 실패 시 다음 슬롯에서 재시도하며, 당일 발행된 글은 중복 생성하지 않는다.
-    - cron: '0 22,23,0,1,2 * * *'
+  # 자동 발행 중단 (2026-09-24). 다시 켜려면 schedule 과 cron 줄 주석을 푼다.
+  # schedule:
+  # # 지연 또는 실패 시 다음 슬롯에서 재시도하며, 당일 발행된 글은 중복 생성하지 않는다.
+  #   - cron: '0 22,23,0,1,2 * * *'
   workflow_dispatch:
     inputs:
       force:
